@@ -24,6 +24,7 @@ export interface Settings {
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
+	onboardingComplete: boolean;
 	hollamaMetadata: HollamaNextMetadata;
 	profileFirstName: string;
 	profileLastName: string;
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	themeStyle: 'classic',
 	userLanguage: null,
 	sidebarExpanded: true,
+	onboardingComplete: false,
 	hollamaMetadata: {
 		currentVersion: version,
 		isDocker: env.PUBLIC_ADAPTER === 'docker-node'

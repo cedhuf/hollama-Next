@@ -109,7 +109,16 @@ const pt_br = {
 		'Nomeia automaticamente novas sessões após a primeira resposta, usando o modelo selecionado',
 	theme: 'Tema',
 	themeStyle: 'Estilo do tema',
-	infomaniakUrlHelp: 'Substitua o productId na URL pelo seu ID de produto da Infomaniak'
+	infomaniakUrlHelp: 'Substitua o productId na URL pelo seu ID de produto da Infomaniak',
+	firstName: 'Nome',
+	lastName: 'Sobrenome',
+	role: 'Função',
+	avatarUrl: 'URL do avatar',
+	avatarColor: 'Cor do avatar',
+	resetEverything: 'Redefinir tudo',
+	resetEverythingDescription: 'Excluir permanentemente todos os dados e redefinir o app',
+	resetEverythingConfirm:
+		'Isto excluirá permanentemente TODOS os seus dados — sessões, conhecimento, servidores e preferências. Não pode ser desfeito. Tenha certeza de ter um backup. Continuar?'
 } satisfies BaseTranslation;
 
 export default pt_br;

@@ -1,14 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { serversStore } from '$lib/localStorage';
-	import { settingsModalOpen } from '$lib/stores/modal';
 
+	// First-run onboarding is handled globally in the layout; just land on sessions.
 	$effect.pre(() => {
-		if ($serversStore.some((server) => server.isVerified !== null)) {
-			goto('/sessions');
-		} else {
-			settingsModalOpen.set(true);
-			goto('/sessions');
-		}
+		goto('/sessions');
 	});
 </script>

@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { Archive, ArchiveRestore, Download, FolderUp, Trash2 } from '@lucide/svelte';
+	import {
+		Archive,
+		ArchiveRestore,
+		Download,
+		FolderUp,
+		Trash2,
+		TriangleAlert
+	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -186,6 +193,15 @@
 			toast.info($LL.deleteSuccess());
 		}
 	}
+
+	// Wipes every data source and reloads into a fresh app (re-triggers onboarding).
+	function resetEverything() {
+		if (!confirm($LL.resetEverythingConfirm())) return;
+		for (const storageKey of Object.values(StorageKey)) {
+			localStorage.removeItem(storageKey);
+		}
+		window.location.href = '/';
+	}
 </script>
 
 <Fieldset>
@@ -283,4 +299,21 @@
 			</div>
 		</div>
 	{/each}
+
+	<div
+		class="mt-2 flex flex-col justify-between gap-2 text-balance rounded-md border border-negative/40 bg-shade-1 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+		data-testid="data-management-reset"
+	>
+		<div class="flex flex-col">
+			<P><strong class="text-negative">{$LL.dangerZone()}</strong></P>
+			<span class="text-xs text-muted">{$LL.resetEverythingDescription()}</span>
+		</div>
+
+		<nav class="mt-4 flex sm:mt-0">
+			<Button variant="icon" onclick={resetEverything}>
+				<TriangleAlert class="base-icon text-negative" />
+				{$LL.resetEverything()}
+			</Button>
+		</nav>
+	</div>
 </Fieldset>

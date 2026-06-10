@@ -135,7 +135,16 @@ const zh_cn = {
 	generateTitlesWithAIHelp: '在首次回复后用所选模型自动命名新会话',
 	theme: '主题',
 	themeStyle: '主题样式',
-	infomaniakUrlHelp: '将 URL 中的 productId 占位符替换为你的 Infomaniak 产品 ID'
+	infomaniakUrlHelp: '将 URL 中的 productId 占位符替换为你的 Infomaniak 产品 ID',
+	firstName: '名字',
+	lastName: '姓氏',
+	role: '角色',
+	avatarUrl: '头像 URL',
+	avatarColor: '头像颜色',
+	resetEverything: '重置全部',
+	resetEverythingDescription: '永久删除所有数据并重置应用',
+	resetEverythingConfirm:
+		'这将永久删除您的所有数据——会话、知识、服务器和偏好设置。此操作无法撤销。请确保您已备份。是否继续？'
 } satisfies BaseTranslation;
 
 export default zh_cn;
