@@ -5,7 +5,7 @@ WORKDIR /app
 
 ENV PUBLIC_ADAPTER='docker-node'
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
