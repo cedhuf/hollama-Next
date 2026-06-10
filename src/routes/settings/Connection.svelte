@@ -13,12 +13,7 @@
 	import FieldInput from '$lib/components/FieldInput.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
-	import {
-		ConnectionType,
-		getProvider,
-		infomaniakBaseUrl,
-		isOpenAiCompatible
-	} from '$lib/connections';
+	import { ConnectionType, getProvider, isOpenAiCompatible } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';
@@ -46,21 +41,12 @@
 				: undefined
 	);
 
-	$effect(() => {
-		serversStore.update((servers) => {
-			servers.splice(index, 1, server);
-			return servers;
-		});
-	});
-
-	// Infomaniak's endpoint is fully determined by the product ID (API v2).
-	// Guard the write so the effect doesn't read and write the same state in a loop.
-	$effect(() => {
-		if (isInfomaniak) {
-			const url = infomaniakBaseUrl(server.productId ?? '');
-			if (server.baseUrl !== url) server.baseUrl = url;
-		}
-	});
+	// `server` is a plain object inside the store, so mutating its fields (via
+	// bindings or verifyServer) doesn't notify the store and localStorage is
+	// never rewritten. Force a fresh array reference on every change to persist.
+	function persist() {
+		serversStore.update((servers) => [...servers]);
+	}
 
 	async function verifyServer() {
 		isLoading = true;
@@ -75,6 +61,7 @@
 		} else {
 			toast.error($LL.connectionFailedToVerify(), { id: toastId });
 		}
+		persist();
 		isLoading = false;
 	}
 
@@ -94,7 +81,11 @@
 
 		<Fieldset>
 			<nav class="flex items-stretch gap-x-2">
-				<FieldCheckbox label={$LL.useModelsFromThisServer()} bind:checked={server.isEnabled} />
+				<FieldCheckbox
+					label={$LL.useModelsFromThisServer()}
+					bind:checked={server.isEnabled}
+					on:change={persist}
+				/>
 
 				<Button
 					class="max-h-full"
@@ -121,21 +112,13 @@
 			<div class="flex flex-col gap-2 sm:grid sm:grid-cols-2">
 				<!-- Primary credential fields -->
 				<div class="col-span-2 grid gap-2 sm:grid-cols-2">
-					{#if isInfomaniak}
-						<FieldInput
-							name={`productId-${server.id}`}
-							label={$LL.productId()}
-							placeholder="1234"
-							bind:value={server.productId}
-						/>
-					{/if}
-
 					{#if isOpenAiFamily}
 						<FieldInput
 							type="password"
 							name={`apiKey-${server.id}`}
 							label={$LL.apiKey()}
 							bind:value={server.apiKey}
+							on:input={persist}
 						>
 							<svelte:fragment slot="help">
 								{#if provider.apiKeyHelpUrl}
@@ -158,10 +141,15 @@
 							label={$LL.baseUrl()}
 							placeholder={server.baseUrl}
 							bind:value={server.baseUrl}
+							on:input={persist}
 						>
 							<svelte:fragment slot="help">
 								{#if isOllamaFamily}
 									<OllamaBaseURLHelp {server} />
+								{:else if isInfomaniak}
+									<FieldHelp>
+										<P>{$LL.infomaniakUrlHelp()}</P>
+									</FieldHelp>
 								{/if}
 							</svelte:fragment>
 						</FieldInput>
@@ -173,6 +161,7 @@
 					label={$LL.modelsFilter()}
 					placeholder="gpt"
 					bind:value={server.modelFilter}
+					on:input={persist}
 				>
 					<svelte:fragment slot="help">
 						<FieldHelp>
@@ -188,6 +177,7 @@
 					label={$LL.label()}
 					bind:value={server.label}
 					placeholder="my-llama-server"
+					on:input={persist}
 				>
 					<svelte:fragment slot="help">
 						<FieldHelp>
@@ -216,9 +206,9 @@
 					<FieldInput
 						name={`server-${server.id}`}
 						label={$LL.baseUrl()}
-						disabled={isInfomaniak}
 						placeholder={server.baseUrl}
 						bind:value={server.baseUrl}
+						on:input={persist}
 					/>
 				{/if}
 			{/if}

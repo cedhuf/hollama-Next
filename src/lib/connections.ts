@@ -17,7 +17,6 @@ export interface Server {
 	label?: string;
 	modelFilter?: string;
 	apiKey?: string;
-	productId?: string;
 }
 
 /**
@@ -38,7 +37,6 @@ export interface ProviderInfo {
 	baseUrl: string;
 	modelFilter?: string;
 	requiresApiKey: boolean;
-	requiresProductId?: boolean;
 	apiKeyHelpUrl?: string;
 }
 
@@ -72,13 +70,15 @@ export const PROVIDERS: ProviderInfo[] = [
 		apiKeyHelpUrl: 'https://console.anthropic.com/settings/keys'
 	},
 	{
+		// Infomaniak embeds the product ID directly in the endpoint path, so we
+		// treat it as a plain OpenAI-compatible server: the user pastes the URL
+		// (replacing the {productId} placeholder) and their API key.
 		type: ConnectionType.Infomaniak,
 		name: 'Infomaniak',
 		family: 'openai',
-		identified: true,
-		baseUrl: '',
+		identified: false,
+		baseUrl: 'https://api.infomaniak.com/2/ai/{productId}/openai/v1',
 		requiresApiKey: true,
-		requiresProductId: true,
 		apiKeyHelpUrl: 'https://manager.infomaniak.com/v3/infomaniak-api'
 	},
 	{
@@ -98,11 +98,6 @@ export function getProvider(connectionType: ConnectionType): ProviderInfo {
 /** Whether a connection talks to an OpenAI-compatible endpoint. */
 export function isOpenAiCompatible(connectionType: ConnectionType): boolean {
 	return getProvider(connectionType).family === 'openai';
-}
-
-/** Infomaniak's endpoint is fully determined by the product ID (API v2). */
-export function infomaniakBaseUrl(productId: string): string {
-	return `https://api.infomaniak.com/2/ai/${productId}/openai/v1`;
 }
 
 export function getDefaultServer(connectionType: ConnectionType): Server {

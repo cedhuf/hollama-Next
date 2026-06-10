@@ -134,7 +134,8 @@ const zh_cn = {
 	generateTitlesWithAI: '用 AI 生成标题',
 	generateTitlesWithAIHelp: '在首次回复后用所选模型自动命名新会话',
 	theme: '主题',
-	themeStyle: '主题样式'
+	themeStyle: '主题样式',
+	infomaniakUrlHelp: '将 URL 中的 productId 占位符替换为你的 Infomaniak 产品 ID'
 } satisfies BaseTranslation;
 
 export default zh_cn;

@@ -107,7 +107,8 @@ const tr = {
 	generateTitlesWithAIHelp:
 		'Yeni oturumları ilk yanıttan sonra seçili modelle otomatik olarak adlandırır',
 	theme: 'Tema',
-	themeStyle: 'Tema stili'
+	themeStyle: 'Tema stili',
+	infomaniakUrlHelp: "URL'deki productId yer tutucusunu Infomaniak ürün kimliğinizle değiştirin"
 } satisfies BaseTranslation;
 
 export default tr;

@@ -170,7 +170,8 @@ const fr = {
 	generateTitlesWithAIHelp:
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	theme: 'Thème',
-	themeStyle: 'Style du thème'
+	themeStyle: 'Style du thème',
+	infomaniakUrlHelp: "Remplacez le segment productId dans l'URL par votre ID de produit Infomaniak"
 } satisfies BaseTranslation;
 
 export default fr;

@@ -108,7 +108,8 @@ const pt_br = {
 	generateTitlesWithAIHelp:
 		'Nomeia automaticamente novas sessões após a primeira resposta, usando o modelo selecionado',
 	theme: 'Tema',
-	themeStyle: 'Estilo do tema'
+	themeStyle: 'Estilo do tema',
+	infomaniakUrlHelp: 'Substitua o productId na URL pelo seu ID de produto da Infomaniak'
 } satisfies BaseTranslation;
 
 export default pt_br;

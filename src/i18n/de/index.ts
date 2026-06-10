@@ -170,7 +170,9 @@ const de = {
 	generateTitlesWithAIHelp:
 		'Benennt neue Sitzungen nach der ersten Antwort automatisch mit dem gewählten Modell',
 	theme: 'Design',
-	themeStyle: 'Design-Stil'
+	themeStyle: 'Design-Stil',
+	infomaniakUrlHelp:
+		'Ersetzen Sie den productId-Platzhalter in der URL durch Ihre Infomaniak-Produkt-ID'
 } satisfies BaseTranslation;
 
 export default de;

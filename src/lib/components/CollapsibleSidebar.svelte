@@ -97,7 +97,7 @@
 				</button>
 			</div>
 		{:else}
-			<a href="/" class="flex items-center gap-2">
+			<a href="/sessions" class="flex items-center gap-2">
 				<img class="h-8 w-8 shrink-0" src="/favicon.png" alt="Hollama Next logo" />
 				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">Hollama Next</span>
 			</a>
