@@ -19,18 +19,20 @@
 	<Dialog.Portal>
 		<Dialog.Overlay class="fixed inset-0 z-40 bg-black/50" />
 		<Dialog.Content
-			class="fixed inset-0 z-50 m-auto flex max-h-[85vh] w-[90vw] max-w-4xl overflow-hidden rounded-xl bg-shade-1 shadow-xl"
+			class="fixed inset-0 z-50 m-auto flex h-[600px] max-h-[85vh] w-[90vw] max-w-3xl overflow-hidden rounded-xl bg-shade-1 shadow-xl"
 		>
+			<Dialog.Close
+				class="absolute right-3 top-3 z-10 rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+				aria-label="Close"
+			>
+				<X class="h-4 w-4" />
+			</Dialog.Close>
+
 			<div class="flex w-full">
 				<nav class="flex w-48 shrink-0 flex-col gap-1 border-r border-shade-2 bg-shade-0 p-3">
-					<div class="mb-3 flex items-center justify-between px-2">
-						<div class="flex items-center gap-2 text-xs font-semibold text-muted">
-							<Settings2 class="h-4 w-4" />
-							{$LL.settings()}
-						</div>
-						<Dialog.Close class="rounded p-1 hover:bg-shade-2">
-							<X class="h-4 w-4" />
-						</Dialog.Close>
+					<div class="mb-3 flex items-center gap-2 px-2 text-xs font-semibold text-muted">
+						<Settings2 class="h-4 w-4" />
+						{$LL.settings()}
 					</div>
 
 					<button

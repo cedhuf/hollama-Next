@@ -189,7 +189,8 @@ const en = {
 	generateTitlesWithAIHelp:
 		'Automatically name new sessions after the first reply, using the selected model',
 	theme: 'Theme',
-	themeStyle: 'Theme style'
+	themeStyle: 'Theme style',
+	infomaniakUrlHelp: 'Replace the productId placeholder in the URL with your Infomaniak product ID'
 } satisfies BaseTranslation;
 
 export default en;

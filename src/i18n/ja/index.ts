@@ -112,7 +112,8 @@ const ja = {
 	generateTitlesWithAI: 'AIでタイトルを生成',
 	generateTitlesWithAIHelp: '選択したモデルで、最初の応答後に新しいセッションを自動的に名付けます',
 	theme: 'テーマ',
-	themeStyle: 'テーマスタイル'
+	themeStyle: 'テーマスタイル',
+	infomaniakUrlHelp: 'URL内のproductIdプレースホルダーをInfomaniakの製品IDに置き換えてください'
 } satisfies BaseTranslation;
 
 export default ja;

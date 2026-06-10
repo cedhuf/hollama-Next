@@ -13,3 +13,6 @@ vite.config.ts.timestamp-*
 /test-results
 /ai/models
 /sessions/*.json
+
+# Local-only, kept out of the repo (editor configs, personal infra, wrangler cache)
+/_local

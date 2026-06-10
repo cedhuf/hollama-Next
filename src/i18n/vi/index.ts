@@ -120,7 +120,8 @@ const vi = {
 	generateTitlesWithAIHelp:
 		'Tự động đặt tên cho phiên mới sau phản hồi đầu tiên bằng mô hình đã chọn',
 	theme: 'Giao diện',
-	themeStyle: 'Kiểu giao diện'
+	themeStyle: 'Kiểu giao diện',
+	infomaniakUrlHelp: 'Thay thế phần productId trong URL bằng ID sản phẩm Infomaniak của bạn'
 } satisfies BaseTranslation;
 
 export default vi;

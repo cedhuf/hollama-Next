@@ -757,6 +757,10 @@ type RootTranslation = {
 	 * T​h​e​m​e​ ​s​t​y​l​e
 	 */
 	themeStyle: string
+	/**
+	 * R​e​p​l​a​c​e​ ​t​h​e​ ​p​r​o​d​u​c​t​I​d​ ​p​l​a​c​e​h​o​l​d​e​r​ ​i​n​ ​t​h​e​ ​U​R​L​ ​w​i​t​h​ ​y​o​u​r​ ​I​n​f​o​m​a​n​i​a​k​ ​p​r​o​d​u​c​t​ ​I​D
+	 */
+	infomaniakUrlHelp: string
 }
 
 export type TranslationFunctions = {
@@ -1493,6 +1497,10 @@ The completion in progress will stop
 	 * Theme style
 	 */
 	themeStyle: () => LocalizedString
+	/**
+	 * Replace the productId placeholder in the URL with your Infomaniak product ID
+	 */
+	infomaniakUrlHelp: () => LocalizedString
 }
 
 export type Formatters = {}
