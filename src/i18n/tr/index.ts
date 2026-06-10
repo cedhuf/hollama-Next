@@ -92,7 +92,12 @@ const tr = {
 		'{hostname:string} veya {ip:string} konumlarında bulunmayan bir Ollama sunucuna bağlanmak istiyorsanız şunu deneyin:',
 	version: 'Sürüm',
 	writePromptToStart: 'Bir komut yazarak yeni bir oturum başlat',
-	you: 'Sen'
+	you: 'Sen',
+	goodMorning: 'Günaydın',
+	goodAfternoon: 'İyi günler',
+	goodEvening: 'İyi akşamlar',
+	howCanIHelp: 'Size nasıl yardımcı olabilirim?',
+	recentSessions: 'Son oturumlar'
 } satisfies BaseTranslation;
 
 export default tr;

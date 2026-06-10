@@ -1,34 +1,70 @@
 <script lang="ts">
-	import { ArrowRight, ArrowUp, MessageSquareText, Sparkles } from '@lucide/svelte';
+	import { ArrowRight, ArrowUp, Code, GraduationCap, Lightbulb, MessageSquareText, PenLine, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
-	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
 	import Head from '$lib/components/Head.svelte';
+	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
 	import { getSessionTitle } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
 
 	let prompt = $state('');
 	let selectedModel = $state($settingsStore.defaultModel || undefined);
+	let openCategory = $state<string | null>(null);
 
 	const greeting = $derived.by(() => {
 		const hour = new Date().getHours();
-		if (hour < 12) return 'Good morning';
-		if (hour < 18) return 'Good afternoon';
-		return 'Good evening';
+		if (hour < 12) return $LL.goodMorning();
+		if (hour < 18) return $LL.goodAfternoon();
+		return $LL.goodEvening();
 	});
 
-	const suggestions = [
-		'Write a professional email to my team about our upcoming project deadline',
-		'Explain machine learning in simple terms with a real-world example',
-		'Help me write a SQL query to analyze monthly sales trends',
-		'Create a balanced weekly workout plan for beginners',
-		'Draft a social media post for a new product launch',
-		'Help me debug: my React component is not re-rendering after state change'
+	const categories = [
+		{ id: 'code', label: 'Code', icon: Code },
+		{ id: 'write', label: 'Write', icon: PenLine },
+		{ id: 'learn', label: 'Learn', icon: GraduationCap },
+		{ id: 'life', label: 'Life', icon: Lightbulb }
 	];
 
+	const suggestionsByCategory: Record<string, string[]> = {
+		code: [
+			'Help me debug a React component that is not re-rendering',
+			'Write a SQL query to analyze monthly sales trends',
+			'Generate API documentation from my endpoint descriptions',
+			'Design feature flags for a multi-tenant SaaS app',
+			'Create a Docker compose file for a microservices setup'
+		],
+		write: [
+			'Draft a professional email about an upcoming project deadline',
+			'Create a social media post for a new product launch',
+			'Develop editorial guidelines for a tech blog',
+			'Write interview questions for a senior developer role',
+			'Draft a newsletter for my team'
+		],
+		learn: [
+			'Explain machine learning in simple terms with a real-world example',
+			'Design a personal learning roadmap for web development',
+			'Help me prepare for a technical interview',
+			'Design a game that teaches coding concepts through storytelling',
+			'Find credible sources for my research on climate change'
+		],
+		life: [
+			'Create a balanced weekly workout plan for beginners',
+			'Help me build a personal development plan',
+			'Suggest strategies for managing work-life balance',
+			'Create a cleaning and organizing routine for my apartment',
+			'Help me weigh the pros and cons of a big decision'
+		]
+	};
+
+	const activeSuggestions = $derived(openCategory ? suggestionsByCategory[openCategory] || [] : []);
+
 	const recentSessions = $derived(($sessionsStore ?? []).slice(0, 5));
+
+	function toggleCategory(id: string) {
+		openCategory = openCategory === id ? null : id;
+	}
 
 	function submit(text: string) {
 		if (!text.trim()) return;
@@ -37,10 +73,6 @@
 		params.set('q', text.trim());
 		if (selectedModel) params.set('model', selectedModel);
 		goto(`/sessions/${id}?${params.toString()}`);
-	}
-
-	function handleSuggestion(text: string) {
-		submit(text);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -56,33 +88,32 @@
 <div class="flex h-full flex-col">
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
-			<div class="mb-10 text-center">
-				<img src="/favicon.png" alt="Hollama Next" class="mx-auto mb-6 h-12 w-12" />
+			<div class="mb-8 text-center">
 				<h1 class="text-2xl font-semibold tracking-tight text-active">
 					{greeting}
 				</h1>
-				<p class="mt-1.5 text-muted">How can I help you today?</p>
+				<p class="mt-1.5 text-muted">{$LL.howCanIHelp()}</p>
 			</div>
 
-			<div class="mb-10 w-full">
+			<div class="mb-8 w-full">
+				<div class="flex items-center justify-center gap-2 mb-3">
+					<ModelPicker bind:value={selectedModel} variant="hero" />
+				</div>
 				<div
 					class="rounded-2xl border border-shade-3 bg-shade-0 shadow-sm transition-all hover:border-shade-4 focus-within:border-shade-5 focus-within:shadow-md"
 				>
 					<textarea
-						placeholder="How can I help you today?"
+						placeholder={$LL.howCanIHelp()}
 						class="w-full resize-none bg-transparent px-5 pb-1 pt-4 text-sm text-base outline-none"
 						style="field-sizing: content; min-height: 56px; max-height: 200px;"
 						bind:value={prompt}
 						onkeydown={handleKeyDown}
 					></textarea>
-					<div class="flex items-center justify-between px-4 pb-3 pt-1">
-						<div class="max-w-[200px]">
-							<FieldSelectModel isLabelVisible={false} bind:value={selectedModel} />
-						</div>
+					<div class="flex items-center justify-end px-4 pb-3 pt-1">
 						<button
 							onclick={() => submit(prompt)}
 							disabled={!prompt.trim()}
-							class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-neutral-50 transition-opacity disabled:opacity-30"
+							class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity disabled:opacity-30"
 						>
 							<ArrowUp class="h-4 w-4" />
 						</button>
@@ -90,25 +121,59 @@
 				</div>
 			</div>
 
-			<div class="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-				{#each suggestions as suggestion}
-					<button
-						onclick={() => handleSuggestion(suggestion)}
-						class="group flex items-start gap-3 rounded-xl border border-shade-3 bg-shade-0 p-4 text-left text-sm text-base transition-all hover:border-shade-5 hover:shadow-sm"
-					>
-						<Sparkles class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted" />
-						<span class="flex-1 leading-snug">{suggestion}</span>
-						<ArrowRight
-							class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
-						/>
-					</button>
-				{/each}
+			<div class="w-full">
+				<div class="flex flex-wrap justify-center gap-2">
+					{#each categories as category (category.id)}
+						<button
+							type="button"
+							onclick={() => toggleCategory(category.id)}
+							class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {openCategory === category.id
+								? 'bg-accent/10 text-active font-medium'
+								: 'text-muted hover:text-active hover:bg-shade-2'}"
+						>
+							<category.icon class="h-3.5 w-3.5" />
+							{category.label}
+						</button>
+					{/each}
+				</div>
+
+				{#if openCategory && activeSuggestions.length > 0}
+					{@const currentCategory = categories.find((c) => c.id === openCategory)}
+					<div class="mt-3 rounded-xl border border-shade-3 bg-shade-0 overflow-hidden">
+						<div class="flex items-center gap-2 px-3 py-2 border-b border-shade-3">
+							{#if currentCategory}
+								<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
+							{/if}
+							<span class="text-xs font-medium text-muted flex-1">{openCategory}</span>
+							<button
+								type="button"
+								onclick={() => (openCategory = null)}
+								class="text-muted hover:text-active transition-colors"
+								aria-label="Close suggestions"
+							>
+								<X class="h-3.5 w-3.5" />
+							</button>
+						</div>
+						<div class="divide-y divide-shade-3">
+							{#each activeSuggestions as suggestion}
+								<button
+									type="button"
+									onclick={() => submit(suggestion)}
+									class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
+								>
+									<span class="flex-1">{suggestion}</span>
+									<ArrowRight class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			</div>
 
 			{#if recentSessions.length > 0}
-				<div class="mt-12 w-full">
+				<div class="mt-10 w-full">
 					<h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-						Recent sessions
+						{$LL.recentSessions()}
 					</h2>
 					<div class="divide-y divide-shade-3 rounded-xl border border-shade-3 bg-shade-0">
 						{#each recentSessions as session}
@@ -117,7 +182,7 @@
 								class="flex items-center gap-3 px-4 py-3 text-sm text-base transition-colors hover:bg-shade-1 first:rounded-t-xl last:rounded-b-xl"
 							>
 								<MessageSquareText class="h-4 w-4 flex-shrink-0 text-muted" />
-								<span class="flex-1 truncate">{getSessionTitle(session) || 'New session'}</span>
+								<span class="flex-1 truncate">{getSessionTitle(session) || $LL.newSession()}</span>
 								<span class="flex-shrink-0 text-xs text-muted">
 									{session.updatedAt
 										? new Date(session.updatedAt).toLocaleDateString(undefined, {

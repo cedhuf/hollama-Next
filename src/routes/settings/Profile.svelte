@@ -145,7 +145,7 @@
 						class="avatar-image h-10 w-10 rounded-full object-cover"
 					/>
 				{:else}
-					<span class="avatar-initials text-sm font-bold text-white"
+					<span class="avatar-initials text-sm font-bold text-shade-0"
 						>{getInitials(firstNameValue, lastNameValue)}</span
 					>
 				{/if}

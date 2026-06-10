@@ -174,7 +174,12 @@ const en = {
 	knowledgeDescription: 'Entire knowledge base',
 	expandSidebar: 'Expand sidebar',
 	collapseSidebar: 'Collapse sidebar',
-	profile: 'Profile'
+	profile: 'Profile',
+	goodMorning: 'Good morning',
+	goodAfternoon: 'Good afternoon',
+	goodEvening: 'Good evening',
+	howCanIHelp: 'How can I help you today?',
+	recentSessions: 'Recent sessions'
 } satisfies BaseTranslation;
 
 export default en;

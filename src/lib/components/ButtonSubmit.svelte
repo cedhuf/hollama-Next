@@ -13,7 +13,7 @@
 	{#if browser}
 		<span
 			class="tag ml-2.5 inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {!disabled
-				? 'border-neutral-50/40'
+				? 'border-shade-0/40'
 				: ''}"
 		>
 			{hasMetaKey ? (navigator.userAgent.indexOf('Mac') !== -1 ? '⌘' : 'Ctrl') : ''} ↵

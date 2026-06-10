@@ -15,5 +15,5 @@
 		class="h-8 w-8 rounded-sm object-cover"
 		data-testid="attachment-image-preview"
 	/>
-	<span class="text-xs text-neutral-500" data-testid="attachment-image-name">{name}</span>
+	<span class="text-xs text-muted" data-testid="attachment-image-name">{name}</span>
 </div>

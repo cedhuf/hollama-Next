@@ -14,11 +14,11 @@
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import Metadata from '$lib/components/Metadata.svelte';
+	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { formatTimestampToNow } from '$lib/utils';
 	import {
-		formatSessionMetadata,
 		getSessionTitle,
 		loadSession,
 		saveSession,
@@ -327,9 +327,11 @@
 				{$LL.session()}
 				<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>
 			</p>
-			<Metadata dataTestid="session-metadata">
-				{editor.isNewSession ? $LL.newSession() : formatSessionMetadata(session)}
-			</Metadata>
+			<div class="flex items-center gap-1.5 text-xs text-muted">
+				{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
+				<span class="text-shade-5">•</span>
+				<ModelPicker bind:value={modelName} />
+			</div>
 		{/snippet}
 
 		{#snippet nav()}
@@ -359,7 +361,6 @@
 	<Prompt
 		bind:session
 		bind:editor
-		bind:modelName
 		{handleSubmit}
 		{stopCompletion}
 		{scrollToBottom}

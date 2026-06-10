@@ -19,7 +19,7 @@
 			{variant === 'default' || variant === 'outline'
 			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
 			: ''}
-			{variant === 'default' ? 'border-accent bg-accent text-neutral-50' : ''}
+			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
 			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
@@ -39,7 +39,7 @@
 			{variant === 'default' || variant === 'outline'
 			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
 			: ''}
-			{variant === 'default' ? 'border-accent bg-accent text-neutral-50' : ''}
+			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
 			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}

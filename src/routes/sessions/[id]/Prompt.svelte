@@ -7,10 +7,8 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
-	import Field from '$lib/components/Field.svelte';
-	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
-	import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
+import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
+import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { loadKnowledge, type Knowledge } from '$lib/knowledge';
 	import { knowledgeStore, serversStore } from '$lib/localStorage';
@@ -38,7 +36,6 @@
 	interface Props {
 		editor: Editor;
 		session: Session;
-		modelName: string | undefined;
 		handleSubmit: (images?: { data: string; filename: string }[]) => void;
 		stopCompletion: () => void;
 		scrollToBottom: (shouldForceScroll: boolean) => void;
@@ -47,7 +44,6 @@
 	let {
 		editor = $bindable(),
 		session = $bindable(),
-		modelName = $bindable(),
 		handleSubmit,
 		stopCompletion,
 		scrollToBottom
@@ -269,15 +265,11 @@
 		: ''}"
 >
 	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
-		<div
-			class="prompt-editor__project grid grid-cols-[auto,max-content,max-content] items-end gap-x-2"
-		>
-			<FieldSelectModel isLabelVisible={false} bind:value={modelName} />
-
-			<nav class="segmented-nav flex h-full items-center rounded bg-shade-2 p-0.5">
+		<div class="flex items-center justify-end gap-x-2">
+			<nav class="segmented-nav flex items-center rounded bg-shade-2 p-0.5">
 				<div
 					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'messages'
-						? 'segmented-nav__button--active bg-shade-0 text-neutral-50 shadow'
+						? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
 						: ''}"
 				>
 					<Button
@@ -292,7 +284,7 @@
 				</div>
 				<div
 					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'controls'
-						? 'segmented-nav__button--active bg-shade-0 text-neutral-50 shadow'
+						? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
 						: ''}"
 				>
 					<Button
@@ -319,129 +311,126 @@
 		{#if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
-			<Field name="prompt">
+			<div class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 transition-colors focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2">
 				<textarea
 					name="prompt"
-					class="prompt-editor__textarea base-input max-h-48 min-h-14 resize-none scroll-p-2 px-3 py-2"
+					class="prompt-editor__textarea base-input min-h-14 max-h-48 resize-none px-3 pt-3"
 					placeholder={$LL.promptPlaceholder()}
 					bind:this={editor.promptTextarea}
 					bind:value={editor.prompt}
 					onkeydown={handleKeyDown}
 					onpaste={handlePaste}
 				></textarea>
-			</Field>
-		{/if}
 
-		{#if attachments.length}
-			<div class="attachments overflow-scrollbar flex max-h-48 flex-col gap-y-1">
-				{#each attachments as attachment (attachment.type === 'knowledge' ? attachment.fieldId : attachment.id)}
-					<div class="attachment flex w-full justify-between">
-						{#if attachment.type === 'knowledge'}
-							<div class="attachment__knowledge w-full">
-								<KnowledgeSelect
-									value={attachment.knowledge?.id}
-									options={$knowledgeStore?.filter(
-										(k) =>
-											// Only filter out knowledge that's selected in OTHER attachments
-											!attachments.find((a) => {
-												if (a.type !== 'knowledge' || attachment.type !== 'knowledge') return false;
-												return a.fieldId !== attachment.fieldId && a.knowledge?.id === k.id;
-											})
-									)}
-									showLabel={false}
-									fieldId={`attachment-${attachment.fieldId}`}
-									onChange={(knowledgeId) =>
-										knowledgeId && handleSelectKnowledge(attachment.fieldId, knowledgeId)}
-									allowClear={false}
-								/>
+				{#if attachments.length}
+					<div class="attachments overflow-scrollbar flex max-h-48 flex-col gap-y-1 px-3 pb-1">
+						{#each attachments as attachment (attachment.type === 'knowledge' ? attachment.fieldId : attachment.id)}
+							<div class="attachment flex w-full justify-between">
+								{#if attachment.type === 'knowledge'}
+									<div class="attachment__knowledge w-full">
+										<KnowledgeSelect
+											value={attachment.knowledge?.id}
+											options={$knowledgeStore?.filter(
+												(k) =>
+													!attachments.find((a) => {
+														if (a.type !== 'knowledge' || attachment.type !== 'knowledge') return false;
+														return a.fieldId !== attachment.fieldId && a.knowledge?.id === k.id;
+													})
+											)}
+											showLabel={false}
+											fieldId={`attachment-${attachment.fieldId}`}
+											onChange={(knowledgeId) =>
+												knowledgeId && handleSelectKnowledge(attachment.fieldId, knowledgeId)}
+											allowClear={false}
+										/>
+									</div>
+								{:else if attachment.type === 'image'}
+									<AttachmentImage dataUrl={attachment.dataUrl} name={attachment.name} />
+								{/if}
+								<Button
+									variant="outline"
+									onclick={() =>
+										handleDeleteAttachment(
+											attachment.type === 'knowledge' ? attachment.fieldId : attachment.id
+										)}
+									data-testid="attachment-delete"
+								>
+									<Trash_2 class="base-icon" />
+								</Button>
 							</div>
-						{:else if attachment.type === 'image'}
-							<AttachmentImage dataUrl={attachment.dataUrl} name={attachment.name} />
-						{/if}
+						{/each}
+					</div>
+				{/if}
+
+				<div class="flex items-center justify-between px-2 pb-2 pt-0.5">
+					<div class="flex gap-x-0.5">
 						<Button
-							variant="outline"
-							onclick={() =>
-								handleDeleteAttachment(
-									attachment.type === 'knowledge' ? attachment.fieldId : attachment.id
-								)}
-							data-testid="attachment-delete"
+							variant="icon"
+							onclick={() => {
+								attachments = [...attachments, { type: 'knowledge', fieldId: generateRandomId() }];
+							}}
+							data-testid="knowledge-attachment"
 						>
-							<Trash_2 class="base-icon" />
+							<Brain class="base-icon" />
+						</Button>
+						<Button
+							variant="icon"
+							onclick={handleImageUploadClick}
+							data-testid="image-attachment"
+							title={$LL.attachImage()}
+						>
+							<Image class="base-icon" />
 						</Button>
 					</div>
-				{/each}
+
+					<div class="flex items-center gap-x-1">
+						{#if editor.messageIndexToEdit !== null}
+							<Button
+								variant="outline"
+								onclick={() => {
+									editor.prompt = '';
+									editor.messageIndexToEdit = null;
+									editor.isCodeEditor = false;
+								}}
+							>
+								{$LL.cancel()}
+							</Button>
+						{/if}
+
+						{#if editor.isCompletionInProgress}
+							<Button
+								title={$LL.stopCompletion()}
+								variant="outline"
+								onclick={stopCompletion}
+							>
+								<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
+									<span
+										class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
+									>
+										<CircleStop class="base-icon" />
+									</span>
+									<span
+										class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
+									>
+										<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
+									</span>
+								</div>
+							</Button>
+						{:else}
+							<ButtonSubmit
+								handleSubmit={submit}
+								hasMetaKey={editor.isCodeEditor}
+								disabled={(!editor.prompt && !attachments.filter((a) => a.type === 'image').length) ||
+									!session.model ||
+									editor.isCompletionInProgress}
+							>
+								{$LL.run()}
+							</ButtonSubmit>
+						{/if}
+					</div>
+				</div>
 			</div>
 		{/if}
-
-		<nav class="prompt-editor__toolbar flex items-center justify-between gap-x-2">
-			<div class="attachments-toolbar flex h-full gap-x-1">
-				<Button
-					variant="outline"
-					onclick={() => {
-						attachments = [...attachments, { type: 'knowledge', fieldId: generateRandomId() }];
-					}}
-					data-testid="knowledge-attachment"
-				>
-					<Brain class="base-icon" />
-				</Button>
-				<Button
-					variant="outline"
-					onclick={handleImageUploadClick}
-					data-testid="image-attachment"
-					title={$LL.attachImage()}
-				>
-					<Image class="base-icon" />
-				</Button>
-			</div>
-
-			<div class="prompt-editor__submit flex h-full items-center gap-x-2">
-				{#if editor.messageIndexToEdit !== null}
-					<Button
-						class="h-full"
-						variant="outline"
-						onclick={() => {
-							editor.prompt = '';
-							editor.messageIndexToEdit = null;
-							editor.isCodeEditor = false;
-						}}
-					>
-						{$LL.cancel()}
-					</Button>
-				{/if}
-
-				<ButtonSubmit
-					handleSubmit={submit}
-					hasMetaKey={editor.isCodeEditor}
-					disabled={(!editor.prompt && !attachments.filter((a) => a.type === 'image').length) ||
-						!session.model ||
-						editor.isCompletionInProgress}
-				>
-					{$LL.run()}
-				</ButtonSubmit>
-
-				{#if editor.isCompletionInProgress}
-					<Button
-						class="h-full"
-						title={$LL.stopCompletion()}
-						variant="outline"
-						onclick={stopCompletion}
-					>
-						<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
-							<span
-								class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
-							>
-								<CircleStop class=" base-icon" />
-							</span>
-							<span
-								class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
-							>
-								<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
-							</span>
-						</div>
-					</Button>
-				{/if}
-			</div>
-		</nav>
 	</div>
 </div>
 
