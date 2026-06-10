@@ -173,7 +173,8 @@ const en = {
 	sessionsDescription: 'Entire session history, attachments and custom model settings',
 	knowledgeDescription: 'Entire knowledge base',
 	expandSidebar: 'Expand sidebar',
-	collapseSidebar: 'Collapse sidebar'
+	collapseSidebar: 'Collapse sidebar',
+	profile: 'Profile'
 } satisfies BaseTranslation;
 
 export default en;

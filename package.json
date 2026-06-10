@@ -1,6 +1,6 @@
 {
 	"name": "hollama",
-	"version": "0.35.4",
+	"version": "0.1.0-dev",
 	"private": true,
 	"homepage": "https://hollama.fernando.is",
 	"description": "A minimal LLM chat app that runs entirely in your browser",
@@ -13,8 +13,6 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"electron": "electron .",
-		"electron:build": "cross-env PUBLIC_ADAPTER=electron-node vite build && electron-builder",
 		"typesafe-i18n": "typesafe-i18n"
 	},
 	"devDependencies": {
@@ -42,8 +40,6 @@
 		"cross-env": "^7.0.3",
 		"date-fns": "^3.6.0",
 		"dotenv": "^16.4.5",
-		"electron": "^31.3.1",
-		"electron-builder": "^25.0.3",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
@@ -90,7 +86,6 @@
 		"email": "hello@fernando.is",
 		"url": "https://fernando.is"
 	},
-	"main": "./electron/main.js",
 	"dependencies": {
 		"esbuild": "^0.25.1",
 		"wrangler": "^4.6.0"

@@ -23,22 +23,22 @@
 
 	const dataSources: DataSource[] = [
 		{
-			storageKey: StorageKey.HollamaServers,
+			storageKey: StorageKey.HollamaNextServers,
 			fileName: `hollama-servers.json`,
 			defaultValue: '[]'
 		},
 		{
-			storageKey: StorageKey.HollamaPreferences,
+			storageKey: StorageKey.HollamaNextPreferences,
 			fileName: `hollama-preferences.json`,
 			defaultValue: '{}'
 		},
 		{
-			storageKey: StorageKey.HollamaSessions,
+			storageKey: StorageKey.HollamaNextSessions,
 			fileName: `hollama-sessions.json`,
 			defaultValue: '[]'
 		},
 		{
-			storageKey: StorageKey.HollamaKnowledge,
+			storageKey: StorageKey.HollamaNextKnowledge,
 			fileName: `hollama-knowledge.json`,
 			defaultValue: '[]'
 		}
@@ -73,16 +73,16 @@
 				const data = JSON.parse(e.target?.result as string);
 				localStorage.setItem(storageKey, JSON.stringify(data));
 				switch (storageKey) {
-					case StorageKey.HollamaPreferences:
+					case StorageKey.HollamaNextPreferences:
 						$settingsStore = data;
 						break;
-					case StorageKey.HollamaServers:
+					case StorageKey.HollamaNextServers:
 						$serversStore = data;
 						break;
-					case StorageKey.HollamaSessions:
+					case StorageKey.HollamaNextSessions:
 						$sessionsStore = data;
 						break;
-					case StorageKey.HollamaKnowledge:
+					case StorageKey.HollamaNextKnowledge:
 						$knowledgeStore = data;
 						break;
 				}
@@ -101,16 +101,16 @@
 		let confirmDelete = '';
 
 		switch (storageKey) {
-			case StorageKey.HollamaPreferences:
+			case StorageKey.HollamaNextPreferences:
 				confirmDelete = $LL.areYouSureYouWantToDeleteAllPreferences();
 				break;
-			case StorageKey.HollamaServers:
+			case StorageKey.HollamaNextServers:
 				confirmDelete = $LL.areYouSureYouWantToDeleteAllServers();
 				break;
-			case StorageKey.HollamaSessions:
+			case StorageKey.HollamaNextSessions:
 				confirmDelete = $LL.areYouSureYouWantToDeleteAllSessions();
 				break;
-			case StorageKey.HollamaKnowledge:
+			case StorageKey.HollamaNextKnowledge:
 				confirmDelete = $LL.areYouSureYouWantToDeleteAllKnowledge();
 				break;
 		}
@@ -118,16 +118,16 @@
 		if (confirm(confirmDelete)) {
 			localStorage.removeItem(storageKey);
 			switch (storageKey) {
-				case StorageKey.HollamaPreferences:
+				case StorageKey.HollamaNextPreferences:
 					$settingsStore = DEFAULT_SETTINGS;
 					break;
-				case StorageKey.HollamaServers:
+				case StorageKey.HollamaNextServers:
 					$serversStore = [];
 					break;
-				case StorageKey.HollamaSessions:
+				case StorageKey.HollamaNextSessions:
 					$sessionsStore = [];
 					break;
-				case StorageKey.HollamaKnowledge:
+				case StorageKey.HollamaNextKnowledge:
 					$knowledgeStore = [];
 					break;
 			}
@@ -155,16 +155,16 @@
 			>
 				<div class="flex flex-col">
 					<!-- HACK: because the labels are reactive we need to define them here -->
-					{#if dataSource.storageKey === StorageKey.HollamaServers}
+					{#if dataSource.storageKey === StorageKey.HollamaNextServers}
 						<P><strong>{$LL.servers()}</strong></P>
 						<span class="text-xs text-muted">{$LL.serversDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaPreferences}
+					{:else if dataSource.storageKey === StorageKey.HollamaNextPreferences}
 						<P><strong>{$LL.preferences()}</strong></P>
 						<span class="text-xs text-muted">{$LL.preferencesDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaSessions}
+					{:else if dataSource.storageKey === StorageKey.HollamaNextSessions}
 						<P><strong>{$LL.sessions()}</strong></P>
 						<span class="text-xs text-muted">{$LL.sessionsDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaKnowledge}
+					{:else if dataSource.storageKey === StorageKey.HollamaNextKnowledge}
 						<P><strong>{$LL.knowledge()}</strong></P>
 						<span class="text-xs text-muted">{$LL.knowledgeDescription()}</span>
 					{/if}

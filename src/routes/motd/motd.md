@@ -2,13 +2,13 @@
 
 ### Message of the day
 
-# Welcome to Hollama: a simple web interface for [Ollama](https://ollama.ai)
+# Welcome to Hollama Next: a simple web interface for [Ollama](https://ollama.ai)
 
 #### What's new?
 
 - **Can submit images as prompts** without entering text.
 
-#### Previously, in Hollama
+#### Previously, in Hollama Next
 
 - **Redesigned sidebar navigation** with improved accessibility and mobile experience.
 - **Copy & paste images** directly into the prompt field for quick image attachments.

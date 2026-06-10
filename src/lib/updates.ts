@@ -5,7 +5,7 @@ import { get, writable } from 'svelte/store';
 import { version } from '$app/environment';
 import { settingsStore } from '$lib/localStorage';
 
-import type { HollamaMetadata } from '../routes/api/metadata/+server';
+import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
 import { GITHUB_RELEASES_API } from './github';
 
 const HOLLAMA_DEV_VERSION_SUFFIX = '-dev';
@@ -61,10 +61,10 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 
 	try {
 		hollamaMetadata = await fetch(HOLLAMA_METADATA_ENDPOINT);
-		const metadata = (await hollamaMetadata.json()) as HollamaMetadata;
+		const metadata = (await hollamaMetadata.json()) as HollamaNextMetadata;
 		settings.hollamaMetadata = metadata;
 	} catch {
-		console.error('Failed to fetch Hollama server metadata');
+		console.error('Failed to fetch Hollama Next server metadata');
 		updateStatus.couldntCheckForUpdates = true;
 	}
 

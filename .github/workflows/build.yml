@@ -34,39 +34,6 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: pages publish .svelte-kit/cloudflare --project-name hollama
 
-  electron:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Desktop app (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    permissions: # Added based on your reference for electron-builder
-      contents: write
-    strategy:
-      matrix:
-        os: [macos-13, macos-latest, ubuntu-latest, windows-latest]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main # Ensure we checkout the commit made by semantic-release
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      # The update-package-json.cjs script is removed, semantic-release handles this.
-
-      - name: Install Electron & SvelteKit's dependencies
-        run: npm ci
-
-      - name: Build & release Electron app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }} # Kept as per original, reference uses GITHUB_TOKEN
-          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        run: npm run electron:build
-
   docker:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Docker image

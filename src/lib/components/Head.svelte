@@ -4,8 +4,8 @@
 	export let title: LocalizedString | LocalizedString[] | string | string[] | undefined = undefined;
 	const SEPARATOR = ' • ';
 	$: formattedTitle = title
-		? (Array.isArray(title) ? title.join(SEPARATOR) : title) + SEPARATOR + 'Hollama'
-		: 'Hollama';
+		? (Array.isArray(title) ? title.join(SEPARATOR) : title) + SEPARATOR + 'Hollama Next'
+		: 'Hollama Next';
 </script>
 
 <svelte:head>
