@@ -5,9 +5,12 @@ WORKDIR /app
 
 ENV PUBLIC_ADAPTER='docker-node'
 
-RUN npm install -g pnpm
+# Install the exact pnpm version pinned in package.json (packageManager field)
+RUN npm install -g pnpm@11.5.2
 
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yaml holds the allowBuilds config (esbuild/sharp/workerd),
+# so it must be present before install or build scripts get blocked.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
