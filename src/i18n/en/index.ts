@@ -179,7 +179,17 @@ const en = {
 	goodAfternoon: 'Good afternoon',
 	goodEvening: 'Good evening',
 	howCanIHelp: 'How can I help you today?',
-	recentSessions: 'Recent sessions'
+	recentSessions: 'Recent sessions',
+	productId: 'Product ID',
+	howToObtainApiKey: 'How to obtain an API key?',
+	advancedSettings: 'Advanced',
+	defaultModel: 'Default model',
+	titleModel: 'Title model',
+	generateTitlesWithAI: 'Generate titles with AI',
+	generateTitlesWithAIHelp:
+		'Automatically name new sessions after the first reply, using the selected model',
+	theme: 'Theme',
+	themeStyle: 'Theme style'
 } satisfies BaseTranslation;
 
 export default en;

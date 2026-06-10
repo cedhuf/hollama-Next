@@ -44,15 +44,9 @@
 
 	let open = $state(false);
 	let searchText = $state('');
-	let localValue = $state(value ?? '');
-
-	$effect(() => {
-		localValue = value ?? '';
-	});
-
-	$effect(() => {
-		value = localValue || undefined;
-	});
+	// Mirror of the bindable `value` prop for the Combobox. Writes flow back to
+	// `value` through the change handlers below, so no syncing effect is needed.
+	let localValue = $derived(value ?? '');
 
 	let isDisabled = $derived(disabled || options.length === 0);
 
@@ -88,8 +82,8 @@
 	}
 
 	function handleValueChange(newValue: string) {
+		value = newValue || undefined;
 		if (newValue) {
-			localValue = newValue;
 			const option = options
 				.flatMap((o) => ('options' in o ? o.options : o))
 				.find((o) => o.value === newValue);
@@ -101,7 +95,7 @@
 
 	function handleClear(e: MouseEvent) {
 		e.stopPropagation();
-		localValue = '';
+		value = undefined;
 		onChange(noSelection);
 	}
 </script>
@@ -132,9 +126,7 @@
 				}}
 			/>
 
-			<nav
-				class="field-select-nav absolute bottom-0 right-0 m-1 flex items-center"
-			>
+			<nav class="field-select-nav absolute bottom-0 right-0 m-1 flex items-center">
 				{#if allowClear && localValue}
 					<Button
 						variant="icon"

@@ -160,7 +160,17 @@ const de = {
 	goodAfternoon: 'Guten Tag',
 	goodEvening: 'Guten Abend',
 	howCanIHelp: 'Wie kann ich Ihnen helfen?',
-	recentSessions: 'Letzte Sitzungen'
+	recentSessions: 'Letzte Sitzungen',
+	productId: 'Produkt-ID',
+	howToObtainApiKey: 'Wie erhalte ich einen API-Schlüssel?',
+	advancedSettings: 'Erweitert',
+	defaultModel: 'Standardmodell',
+	titleModel: 'Titel-Modell',
+	generateTitlesWithAI: 'Titel mit KI generieren',
+	generateTitlesWithAIHelp:
+		'Benennt neue Sitzungen nach der ersten Antwort automatisch mit dem gewählten Modell',
+	theme: 'Design',
+	themeStyle: 'Design-Stil'
 } satisfies BaseTranslation;
 
 export default de;

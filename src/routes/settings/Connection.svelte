@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LoaderCircle } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp, LoaderCircle } from '@lucide/svelte';
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
@@ -13,7 +13,12 @@
 	import FieldInput from '$lib/components/FieldInput.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, type Server } from '$lib/connections';
+	import {
+		ConnectionType,
+		getProvider,
+		infomaniakBaseUrl,
+		isOpenAiCompatible
+	} from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';
@@ -27,17 +32,34 @@
 	let server = $derived($serversStore[index]);
 	let strategy: OllamaStrategy | OpenAIStrategy;
 	let isLoading = $state(false);
+	let showAdvanced = $state(false);
 
-	const isOpenAiFamily = $derived(
-		[ConnectionType.OpenAI, ConnectionType.OpenAICompatible].includes(server.connectionType)
+	const provider = $derived(getProvider(server.connectionType));
+	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
+	const isOllamaFamily = $derived(server.connectionType === ConnectionType.Ollama);
+	const isInfomaniak = $derived(server.connectionType === ConnectionType.Infomaniak);
+	const badgeVariant = $derived(
+		server.connectionType === ConnectionType.OpenAI
+			? ConnectionType.OpenAI
+			: server.connectionType === ConnectionType.Ollama
+				? ConnectionType.Ollama
+				: undefined
 	);
-	const isOllamaFamily = $derived([ConnectionType.Ollama].includes(server.connectionType));
 
 	$effect(() => {
 		serversStore.update((servers) => {
 			servers.splice(index, 1, server);
 			return servers;
 		});
+	});
+
+	// Infomaniak's endpoint is fully determined by the product ID (API v2).
+	// Guard the write so the effect doesn't read and write the same state in a loop.
+	$effect(() => {
+		if (isInfomaniak) {
+			const url = infomaniakBaseUrl(server.productId ?? '');
+			if (server.baseUrl !== url) server.baseUrl = url;
+		}
 	});
 
 	async function verifyServer() {
@@ -64,14 +86,10 @@
 <div data-testid="server">
 	<Fieldset>
 		{#snippet legend()}
-			{#if [ConnectionType.OpenAI, ConnectionType.Ollama].includes(server.connectionType)}
-				<Badge
-					variant={server.connectionType === ConnectionType.OpenAI
-						? ConnectionType.OpenAI
-						: ConnectionType.Ollama}
-				/>
+			{#if badgeVariant}
+				<Badge variant={badgeVariant} />
 			{/if}
-			<Badge>{server.label ? server.label : server.connectionType?.toUpperCase()}</Badge>
+			<Badge>{server.label ? server.label : provider.name}</Badge>
 		{/snippet}
 
 		<Fieldset>
@@ -101,19 +119,16 @@
 			</nav>
 
 			<div class="flex flex-col gap-2 sm:grid sm:grid-cols-2">
-				<div class="col-span-2 grid gap-2 {isOpenAiFamily ? 'sm:grid sm:grid-cols-2' : ''}">
-					<FieldInput
-						name={`server-${server.id}`}
-						label={$LL.baseUrl()}
-						placeholder={server.baseUrl}
-						bind:value={server.baseUrl}
-					>
-						<svelte:fragment slot="help">
-							{#if isOllamaFamily}
-								<OllamaBaseURLHelp {server} />
-							{/if}
-						</svelte:fragment>
-					</FieldInput>
+				<!-- Primary credential fields -->
+				<div class="col-span-2 grid gap-2 sm:grid-cols-2">
+					{#if isInfomaniak}
+						<FieldInput
+							name={`productId-${server.id}`}
+							label={$LL.productId()}
+							placeholder="1234"
+							bind:value={server.productId}
+						/>
+					{/if}
 
 					{#if isOpenAiFamily}
 						<FieldInput
@@ -123,15 +138,11 @@
 							bind:value={server.apiKey}
 						>
 							<svelte:fragment slot="help">
-								{#if server.connectionType === 'openai'}
+								{#if provider.apiKeyHelpUrl}
 									<FieldHelp>
 										<P>
-											<Button
-												variant="link"
-												href="https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key"
-												target="_blank"
-											>
-												{$LL.howToObtainOpenAIKey()}
+											<Button variant="link" href={provider.apiKeyHelpUrl} target="_blank">
+												{$LL.howToObtainApiKey()}
 											</Button>
 										</P>
 									</FieldHelp>
@@ -139,7 +150,24 @@
 							</svelte:fragment>
 						</FieldInput>
 					{/if}
+
+					<!-- User-defined endpoints expose the Base URL directly -->
+					{#if !provider.identified}
+						<FieldInput
+							name={`server-${server.id}`}
+							label={$LL.baseUrl()}
+							placeholder={server.baseUrl}
+							bind:value={server.baseUrl}
+						>
+							<svelte:fragment slot="help">
+								{#if isOllamaFamily}
+									<OllamaBaseURLHelp {server} />
+								{/if}
+							</svelte:fragment>
+						</FieldInput>
+					{/if}
 				</div>
+
 				<FieldInput
 					name={`modelsFilter-${server.id}`}
 					label={$LL.modelsFilter()}
@@ -168,6 +196,32 @@
 					</svelte:fragment>
 				</FieldInput>
 			</div>
+
+			<!-- Identified providers keep their preset endpoint tucked away -->
+			{#if provider.identified}
+				<button
+					type="button"
+					onclick={() => (showAdvanced = !showAdvanced)}
+					class="flex w-fit items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+				>
+					{#if showAdvanced}
+						<ChevronUp class="h-3.5 w-3.5" />
+					{:else}
+						<ChevronDown class="h-3.5 w-3.5" />
+					{/if}
+					{$LL.advancedSettings()}
+				</button>
+
+				{#if showAdvanced}
+					<FieldInput
+						name={`server-${server.id}`}
+						label={$LL.baseUrl()}
+						disabled={isInfomaniak}
+						placeholder={server.baseUrl}
+						bind:value={server.baseUrl}
+					/>
+				{/if}
+			{/if}
 
 			{#if isOllamaFamily}
 				<PullModel {server} />

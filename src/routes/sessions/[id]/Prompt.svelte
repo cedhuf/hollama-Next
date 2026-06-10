@@ -7,8 +7,8 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
-import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
+	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
+	import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { loadKnowledge, type Knowledge } from '$lib/knowledge';
 	import { knowledgeStore, serversStore } from '$lib/localStorage';
@@ -311,7 +311,9 @@ import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 		{#if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
-			<div class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 transition-colors focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2">
+			<div
+				class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 transition-colors focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2"
+			>
 				<textarea
 					name="prompt"
 					class="prompt-editor__textarea base-input min-h-14 max-h-48 resize-none px-3 pt-3"
@@ -333,7 +335,8 @@ import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 											options={$knowledgeStore?.filter(
 												(k) =>
 													!attachments.find((a) => {
-														if (a.type !== 'knowledge' || attachment.type !== 'knowledge') return false;
+														if (a.type !== 'knowledge' || attachment.type !== 'knowledge')
+															return false;
 														return a.fieldId !== attachment.fieldId && a.knowledge?.id === k.id;
 													})
 											)}
@@ -398,11 +401,7 @@ import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 						{/if}
 
 						{#if editor.isCompletionInProgress}
-							<Button
-								title={$LL.stopCompletion()}
-								variant="outline"
-								onclick={stopCompletion}
-							>
+							<Button title={$LL.stopCompletion()} variant="outline" onclick={stopCompletion}>
 								<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
 									<span
 										class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
@@ -420,7 +419,8 @@ import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 							<ButtonSubmit
 								handleSubmit={submit}
 								hasMetaKey={editor.isCodeEditor}
-								disabled={(!editor.prompt && !attachments.filter((a) => a.type === 'image').length) ||
+								disabled={(!editor.prompt &&
+									!attachments.filter((a) => a.type === 'image').length) ||
 									!session.model ||
 									editor.isCompletionInProgress}
 							>

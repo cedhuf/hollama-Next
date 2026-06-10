@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Download, FolderUp, Trash2 } from '@lucide/svelte';
+	import { Archive, ArchiveRestore, Download, FolderUp, Trash2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -57,6 +57,25 @@
 		URL.revokeObjectURL(url);
 	}
 
+	// Writes parsed data into both localStorage and its reactive store.
+	function applyToStore(storageKey: StorageKey, data: unknown) {
+		localStorage.setItem(storageKey, JSON.stringify(data));
+		switch (storageKey) {
+			case StorageKey.HollamaNextPreferences:
+				$settingsStore = data as typeof $settingsStore;
+				break;
+			case StorageKey.HollamaNextServers:
+				$serversStore = data as typeof $serversStore;
+				break;
+			case StorageKey.HollamaNextSessions:
+				$sessionsStore = data as typeof $sessionsStore;
+				break;
+			case StorageKey.HollamaNextKnowledge:
+				$knowledgeStore = data as typeof $knowledgeStore;
+				break;
+		}
+	}
+
 	function importData(event: Event, storageKey: StorageKey) {
 		const input = event.target as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
@@ -71,20 +90,53 @@
 		reader.onload = (e) => {
 			try {
 				const data = JSON.parse(e.target?.result as string);
-				localStorage.setItem(storageKey, JSON.stringify(data));
-				switch (storageKey) {
-					case StorageKey.HollamaNextPreferences:
-						$settingsStore = data;
-						break;
-					case StorageKey.HollamaNextServers:
-						$serversStore = data;
-						break;
-					case StorageKey.HollamaNextSessions:
-						$sessionsStore = data;
-						break;
-					case StorageKey.HollamaNextKnowledge:
-						$knowledgeStore = data;
-						break;
+				applyToStore(storageKey, data);
+				toast.success($LL.importSuccess());
+			} catch (error) {
+				console.error(error);
+				toast.error($LL.importError(), {
+					description: error instanceof Error ? error.message : 'Unknown error'
+				});
+			}
+		};
+		reader.readAsText(file);
+	}
+
+	// Exports every data source into a single backup file.
+	function exportBackup() {
+		const backup: Record<string, unknown> = {};
+		for (const { storageKey, defaultValue } of dataSources) {
+			backup[storageKey] = JSON.parse(localStorage.getItem(storageKey) || defaultValue);
+		}
+		const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `hollama-backup-${new Date().toISOString().slice(0, 10)}.json`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	// Restores every data source from a single backup file.
+	function importBackup(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (!input.files || input.files.length === 0) return;
+		const file = input.files[0];
+
+		if (!confirm($LL.areYouSureYouWantToImportData())) {
+			input.value = '';
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const backup = JSON.parse(e.target?.result as string);
+				for (const { storageKey } of dataSources) {
+					if (backup[storageKey] === undefined) continue;
+					applyToStore(storageKey, backup[storageKey]);
 				}
 				toast.success($LL.importSuccess());
 			} catch (error) {
@@ -138,6 +190,40 @@
 
 <Fieldset>
 	<P><strong>Data management</strong></P>
+
+	<input
+		id="import-backup-input"
+		type="file"
+		accept="application/json"
+		style="display: none;"
+		onchange={importBackup}
+	/>
+	<div
+		class="inline-flex w-full flex-col justify-between gap-x-2 text-balance rounded-md border border-accent/40 bg-shade-1 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+		data-testid="data-management-backup"
+	>
+		<div class="flex flex-col">
+			<P><strong>Backup &amp; restore</strong></P>
+			<span class="text-xs text-muted"
+				>Export or import everything (sessions, knowledge, servers, preferences) in a single file</span
+			>
+		</div>
+
+		<nav class="mt-4 flex justify-between gap-x-2 sm:mt-0">
+			<Button variant="icon" onclick={exportBackup}>
+				<Archive class="base-icon" />
+				Backup
+			</Button>
+			<Button
+				variant="icon"
+				onclick={() => document.getElementById('import-backup-input')?.click()}
+			>
+				<ArchiveRestore class="base-icon" />
+				Restore
+			</Button>
+		</nav>
+	</div>
+
 	{#each dataSources as dataSource (dataSource.storageKey)}
 		<div
 			class="flex flex-grow flex-col gap-2 sm:flex-row"

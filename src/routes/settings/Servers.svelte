@@ -1,22 +1,18 @@
 <script lang="ts">
+	import { Plus } from '@lucide/svelte';
+
 	import LL from '$i18n/i18n-svelte';
-	import Button from '$lib/components/Button.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
-	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, getDefaultServer } from '$lib/connections';
+	import { ConnectionType, getDefaultServer, PROVIDERS } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 
 	import Connection from './Connection.svelte';
 
-	let newConnectionType: ConnectionType | undefined = $state();
-
-	function addServer() {
-		if (!newConnectionType) return;
-		const server = getDefaultServer(newConnectionType);
+	function addServer(connectionType: ConnectionType) {
+		const server = getDefaultServer(connectionType);
 		serversStore.update((servers) => [...servers, server]);
-		newConnectionType = undefined;
 	}
 </script>
 
@@ -25,33 +21,22 @@
 		<strong>{$LL.servers()}</strong>
 	</P>
 
-	<div class="connections mb-4 flex flex-col gap-y-2">
-		<div class="connections__add grid grid-cols-[auto_max-content] gap-2">
-			{#key newConnectionType}
-				<FieldSelect
-					name="connectionType"
-					isLabelVisible={false}
-					label={$LL.connectionType()}
-					placeholder={$LL.connectionType()}
-					options={[
-						{ value: ConnectionType.Ollama, label: $LL.ollama() },
-						{ value: ConnectionType.OpenAI, label: $LL.openAIOfficialAPI() },
-						{ value: ConnectionType.OpenAICompatible, label: $LL.openAICompatible() }
-					]}
-					bind:value={newConnectionType}
-				/>
-			{/key}
-			<Button disabled={!newConnectionType} on:click={addServer}>
-				{$LL.addConnection()}
-			</Button>
-		</div>
+	<div class="provider-grid mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+		{#each PROVIDERS as provider (provider.type)}
+			<button
+				type="button"
+				onclick={() => addServer(provider.type)}
+				class="provider-card group flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2.5 text-left transition-colors hover:border-accent hover:bg-shade-1"
+			>
+				<Plus class="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" />
+				<span class="truncate text-sm font-medium">{provider.name}</span>
+			</button>
+		{/each}
 	</div>
 
 	<div class="servers flex flex-col gap-y-4">
 		{#if !$serversStore.length}
-			<div
-				class="col-span-full -mt-3 flex text-balance rounded-md border border-shade-3 text-center"
-			>
+			<div class="col-span-full flex text-balance rounded-md border border-shade-3 text-center">
 				<EmptyMessage>{$LL.noServerConnections()}</EmptyMessage>
 			</div>
 		{/if}

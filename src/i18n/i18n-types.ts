@@ -721,6 +721,42 @@ type RootTranslation = {
 	 * R​e​c​e​n​t​ ​s​e​s​s​i​o​n​s
 	 */
 	recentSessions: string
+	/**
+	 * P​r​o​d​u​c​t​ ​I​D
+	 */
+	productId: string
+	/**
+	 * H​o​w​ ​t​o​ ​o​b​t​a​i​n​ ​a​n​ ​A​P​I​ ​k​e​y​?
+	 */
+	howToObtainApiKey: string
+	/**
+	 * A​d​v​a​n​c​e​d
+	 */
+	advancedSettings: string
+	/**
+	 * D​e​f​a​u​l​t​ ​m​o​d​e​l
+	 */
+	defaultModel: string
+	/**
+	 * T​i​t​l​e​ ​m​o​d​e​l
+	 */
+	titleModel: string
+	/**
+	 * G​e​n​e​r​a​t​e​ ​t​i​t​l​e​s​ ​w​i​t​h​ ​A​I
+	 */
+	generateTitlesWithAI: string
+	/**
+	 * A​u​t​o​m​a​t​i​c​a​l​l​y​ ​n​a​m​e​ ​n​e​w​ ​s​e​s​s​i​o​n​s​ ​a​f​t​e​r​ ​t​h​e​ ​f​i​r​s​t​ ​r​e​p​l​y​,​ ​u​s​i​n​g​ ​t​h​e​ ​s​e​l​e​c​t​e​d​ ​m​o​d​e​l
+	 */
+	generateTitlesWithAIHelp: string
+	/**
+	 * T​h​e​m​e
+	 */
+	theme: string
+	/**
+	 * T​h​e​m​e​ ​s​t​y​l​e
+	 */
+	themeStyle: string
 }
 
 export type TranslationFunctions = {
@@ -1421,6 +1457,42 @@ The completion in progress will stop
 	 * Recent sessions
 	 */
 	recentSessions: () => LocalizedString
+	/**
+	 * Product ID
+	 */
+	productId: () => LocalizedString
+	/**
+	 * How to obtain an API key?
+	 */
+	howToObtainApiKey: () => LocalizedString
+	/**
+	 * Advanced
+	 */
+	advancedSettings: () => LocalizedString
+	/**
+	 * Default model
+	 */
+	defaultModel: () => LocalizedString
+	/**
+	 * Title model
+	 */
+	titleModel: () => LocalizedString
+	/**
+	 * Generate titles with AI
+	 */
+	generateTitlesWithAI: () => LocalizedString
+	/**
+	 * Automatically name new sessions after the first reply, using the selected model
+	 */
+	generateTitlesWithAIHelp: () => LocalizedString
+	/**
+	 * Theme
+	 */
+	theme: () => LocalizedString
+	/**
+	 * Theme style
+	 */
+	themeStyle: () => LocalizedString
 }
 
 export type Formatters = {}

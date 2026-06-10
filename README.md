@@ -10,8 +10,11 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 ### Features
 
-- Support for **Ollama** & **OpenAI** servers
+- Support for **Ollama**, **OpenAI**, **Claude** & **Infomaniak** servers
+- One-click provider presets — pick a provider, paste an API key
 - Multi-server support
+- AI-generated session titles (with a dedicated, cheap model)
+- Full backup & restore of all your data
 - Text & vision models
 - Large prompt fields
 - Support for reasoning models
@@ -30,18 +33,11 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 ### Roadmap
 
-- [x] Remove Electron (replaced by Tauri)
-- [x] Server-side proxy for OpenAI-compatible providers (CORS bypass)
-- [x] Settings modal (replaces `/settings` route)
-- [x] Theme system (System / Light / Dark + Classic / Dracula / Catppuccin)
-- [x] Welcome page redesign (chat input, suggestion chips, recent sessions)
-- [x] URL param auto-submit (`?q=`, `&model=`)
-- [x] Default model setting
-- [x] Profile settings (name, avatar, color)
-- [x] Avatar + name in sidebar
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
 - [ ] Auth.js & multi-user support
 - [ ] Testing & polish
+
+> For everything already done in this fork, see [CHANGES.md](CHANGES.md).
 
 ### Get started
 
@@ -82,9 +78,9 @@ OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
 
 **Configuration** — copy `.env.example` to `.env` and adjust as needed:
 
-| Variable | Default | Description |
-|---|---|---|
-| `HOST_PORT` | `4173` | Port exposed on the host |
+| Variable             | Default     | Description                                                     |
+| -------------------- | ----------- | --------------------------------------------------------------- |
+| `HOST_PORT`          | `4173`      | Port exposed on the host                                        |
 | `VITE_ALLOWED_HOSTS` | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy) |
 
 | ![session](static/screenshots/session.png)         | ![settings](static/screenshots/settings.png)   |

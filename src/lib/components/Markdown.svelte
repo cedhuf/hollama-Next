@@ -215,13 +215,13 @@
 	}
 
 	.markdown :global(code) {
-		@apply rounded-md bg-shade-2 p-1 text-xs text-accent;
+		@apply bg-shade-2 text-accent rounded-md p-1 text-xs;
 		@apply md:text-sm;
 		font-variant-ligatures: none;
 	}
 
 	.markdown :global(pre code) {
-		@apply block bg-shade-0/50 p-4 pr-12 text-xs text-base;
+		@apply bg-shade-0/50 block p-4 pr-12 text-base text-xs;
 		@apply md:text-sm;
 	}
 

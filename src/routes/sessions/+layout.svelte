@@ -24,6 +24,8 @@
 					break;
 				case ConnectionType.OpenAI:
 				case ConnectionType.OpenAICompatible:
+				case ConnectionType.Anthropic:
+				case ConnectionType.Infomaniak:
 					models.push(...(await new OpenAIStrategy(server).getModels().catch(() => [])));
 					break;
 			}
