@@ -143,7 +143,17 @@ const es = {
 		'Nombra automáticamente las sesiones nuevas tras la primera respuesta, con el modelo seleccionado',
 	theme: 'Tema',
 	themeStyle: 'Estilo del tema',
-	infomaniakUrlHelp: 'Reemplaza el marcador productId de la URL por tu ID de producto de Infomaniak'
+	infomaniakUrlHelp:
+		'Reemplaza el marcador productId de la URL por tu ID de producto de Infomaniak',
+	firstName: 'Nombre',
+	lastName: 'Apellido',
+	role: 'Rol',
+	avatarUrl: 'URL del avatar',
+	avatarColor: 'Color del avatar',
+	resetEverything: 'Restablecer todo',
+	resetEverythingDescription: 'Eliminar permanentemente todos los datos y restablecer la app',
+	resetEverythingConfirm:
+		'Esto eliminará permanentemente TODOS tus datos — sesiones, conocimiento, servidores y preferencias. No se puede deshacer. Asegúrate de tener una copia de seguridad. ¿Continuar?'
 } satisfies BaseTranslation;
 
 export default es;

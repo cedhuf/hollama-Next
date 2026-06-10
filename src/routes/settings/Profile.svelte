@@ -19,111 +19,89 @@
 		'#3b82f6'
 	];
 
-	let firstNameValue = $state($settingsStore.profileFirstName ?? '');
-	let lastNameValue = $state($settingsStore.profileLastName ?? '');
-	let roleValue = $state<'admin' | 'user'>($settingsStore.profileRole ?? 'user');
-	let avatarValue = $state($settingsStore.profileAvatar ?? '');
-	let colorValue = $state($settingsStore.profileColor ?? PRESET_COLORS[0]);
-
-	$effect(() => {
-		$settingsStore.profileFirstName = firstNameValue;
-	});
-
-	$effect(() => {
-		$settingsStore.profileLastName = lastNameValue;
-	});
-
-	$effect(() => {
-		$settingsStore.profileRole = roleValue;
-	});
-
-	$effect(() => {
-		$settingsStore.profileAvatar = avatarValue;
-	});
-
-	$effect(() => {
-		$settingsStore.profileColor = colorValue;
-	});
-
-	function getInitials(first: string, last: string): string {
-		const f = first.trim().charAt(0).toUpperCase();
-		const l = last.trim().charAt(0).toUpperCase();
-		return f + l || f || '?';
-	}
-
-	function getDisplayName(first: string, last: string): string {
-		const parts = [first.trim(), last.trim()].filter(Boolean);
-		return parts.join(' ') || 'Your Name';
-	}
-
-	const roleLabel: Record<'admin' | 'user', string> = {
+	const roleLabels: Record<'admin' | 'user', string> = {
 		admin: 'Administrator',
 		user: 'User'
 	};
+
+	const initials = $derived(
+		(
+			($settingsStore.profileFirstName.trim().charAt(0) || '') +
+			($settingsStore.profileLastName.trim().charAt(0) || '')
+		)
+			.toUpperCase()
+			.trim() || '?'
+	);
+
+	const displayName = $derived(
+		[$settingsStore.profileFirstName.trim(), $settingsStore.profileLastName.trim()]
+			.filter(Boolean)
+			.join(' ') || 'Your name'
+	);
 </script>
 
 <Fieldset>
 	<P><strong>{$LL.profile()}</strong></P>
 
-	<FieldInput
-		name="profile-first-name"
-		label={'First name' as unknown as import('typesafe-i18n').LocalizedString}
-		bind:value={firstNameValue}
-		placeholder={'First name' as unknown as import('typesafe-i18n').LocalizedString}
-	/>
+	<!-- Live avatar preview -->
+	<div class="flex flex-col items-center gap-2 py-2">
+		<div
+			class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full ring-2 ring-shade-3"
+			style="background-color: {$settingsStore.profileColor}"
+		>
+			{#if $settingsStore.profileAvatar}
+				<img src={$settingsStore.profileAvatar} alt="Avatar" class="h-full w-full object-cover" />
+			{:else}
+				<span class="text-2xl font-bold text-white">{initials}</span>
+			{/if}
+		</div>
+		<div class="flex flex-col items-center">
+			<span class="text-base font-semibold">{displayName}</span>
+			<span class="text-xs text-muted">{roleLabels[$settingsStore.profileRole ?? 'user']}</span>
+		</div>
+	</div>
 
-	<FieldInput
-		name="profile-last-name"
-		label={'Last name' as unknown as import('typesafe-i18n').LocalizedString}
-		bind:value={lastNameValue}
-		placeholder={'Last name' as unknown as import('typesafe-i18n').LocalizedString}
-	/>
+	<!-- Identity -->
+	<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+		<FieldInput
+			name="profile-first-name"
+			label={$LL.firstName()}
+			bind:value={$settingsStore.profileFirstName}
+			placeholder={$LL.firstName()}
+		/>
+		<FieldInput
+			name="profile-last-name"
+			label={$LL.lastName()}
+			bind:value={$settingsStore.profileLastName}
+			placeholder={$LL.lastName()}
+		/>
+	</div>
 
 	<FieldSelect
 		name="profile-role"
-		label={'Role' as unknown as import('typesafe-i18n').LocalizedString}
-		bind:value={roleValue}
+		label={$LL.role()}
+		value={$settingsStore.profileRole}
 		allowClear={false}
 		allowSearch={false}
+		onChange={({ value }) => ($settingsStore.profileRole = value as 'admin' | 'user')}
 		options={[
 			{ value: 'user', label: 'User' },
 			{ value: 'admin', label: 'Administrator' }
 		]}
 	/>
 
-	<div class="field-wrapper flex flex-col gap-y-1">
-		<div
-			class="field-label-root flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none"
-		>
-			Avatar URL (optional)
-		</div>
-		<div
-			class="field-container flex w-full flex-col gap-y-1 rounded-md border bg-shade-0 text-sm focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2"
-		>
-			<input
-				id="profile-avatar"
-				type="text"
-				class="field-input base-input"
-				placeholder="https://example.com/avatar.jpg"
-				bind:value={avatarValue}
-			/>
-		</div>
-	</div>
-
-	<div class="field-wrapper flex flex-col gap-y-1">
-		<div
-			class="field-label-root flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none"
-		>
-			Avatar color
-		</div>
-		<div class="color-swatches flex flex-wrap gap-2 rounded-md border bg-shade-0 px-3 py-3">
-			{#each PRESET_COLORS as presetColor}
+	<!-- Avatar color -->
+	<div class="flex flex-col gap-1.5">
+		<span class="text-sm font-medium">{$LL.avatarColor()}</span>
+		<div class="flex flex-wrap gap-2">
+			{#each PRESET_COLORS as presetColor (presetColor)}
 				<button
-					onclick={() => (colorValue = presetColor)}
-					class="color-swatch h-7 w-7 rounded-full border-2 border-transparent transition-all"
-					class:color-swatch--active={colorValue === presetColor}
-					class:border-shade-6={colorValue === presetColor}
-					class:scale-110={colorValue === presetColor}
+					type="button"
+					onclick={() => ($settingsStore.profileColor = presetColor)}
+					class="h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-shade-1 transition-all
+						{$settingsStore.profileColor === presetColor
+						? 'ring-shade-6'
+						: 'ring-transparent hover:ring-shade-4'}"
 					style="background-color: {presetColor}"
 					aria-label={presetColor}
 				></button>
@@ -131,31 +109,10 @@
 		</div>
 	</div>
 
-	<div class="preview-section flex flex-col gap-y-2">
-		<div class="field-label-root">Preview</div>
-		<div class="preview-card flex items-center gap-3 rounded-md border bg-shade-0 px-4 py-3">
-			<div
-				class="avatar-circle flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-				style="background-color: {colorValue}"
-			>
-				{#if avatarValue}
-					<img
-						src={avatarValue}
-						alt="Avatar"
-						class="avatar-image h-10 w-10 rounded-full object-cover"
-					/>
-				{:else}
-					<span class="avatar-initials text-sm font-bold text-shade-0"
-						>{getInitials(firstNameValue, lastNameValue)}</span
-					>
-				{/if}
-			</div>
-			<div class="preview-info flex flex-col">
-				<span class="preview-name text-sm font-medium"
-					>{getDisplayName(firstNameValue, lastNameValue)}</span
-				>
-				<span class="preview-role text-xs text-muted">{roleLabel[roleValue]}</span>
-			</div>
-		</div>
-	</div>
+	<FieldInput
+		name="profile-avatar"
+		label={$LL.avatarUrl()}
+		bind:value={$settingsStore.profileAvatar}
+		placeholder="https://example.com/avatar.jpg"
+	/>
 </Fieldset>

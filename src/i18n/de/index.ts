@@ -172,7 +172,16 @@ const de = {
 	theme: 'Design',
 	themeStyle: 'Design-Stil',
 	infomaniakUrlHelp:
-		'Ersetzen Sie den productId-Platzhalter in der URL durch Ihre Infomaniak-Produkt-ID'
+		'Ersetzen Sie den productId-Platzhalter in der URL durch Ihre Infomaniak-Produkt-ID',
+	firstName: 'Vorname',
+	lastName: 'Nachname',
+	role: 'Rolle',
+	avatarUrl: 'Avatar-URL',
+	avatarColor: 'Avatar-Farbe',
+	resetEverything: 'Alles zurücksetzen',
+	resetEverythingDescription: 'Alle Daten dauerhaft löschen und die App zurücksetzen',
+	resetEverythingConfirm:
+		'Dies löscht dauerhaft ALLE Ihre Daten — Sitzungen, Wissen, Server und Einstellungen. Dies kann nicht rückgängig gemacht werden. Stellen Sie sicher, dass Sie ein Backup haben. Fortfahren?'
 } satisfies BaseTranslation;
 
 export default de;

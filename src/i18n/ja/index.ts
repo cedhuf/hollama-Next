@@ -113,7 +113,16 @@ const ja = {
 	generateTitlesWithAIHelp: '選択したモデルで、最初の応答後に新しいセッションを自動的に名付けます',
 	theme: 'テーマ',
 	themeStyle: 'テーマスタイル',
-	infomaniakUrlHelp: 'URL内のproductIdプレースホルダーをInfomaniakの製品IDに置き換えてください'
+	infomaniakUrlHelp: 'URL内のproductIdプレースホルダーをInfomaniakの製品IDに置き換えてください',
+	firstName: '名',
+	lastName: '姓',
+	role: '役割',
+	avatarUrl: 'アバターURL',
+	avatarColor: 'アバターの色',
+	resetEverything: 'すべてリセット',
+	resetEverythingDescription: 'すべてのデータを完全に削除してアプリをリセットします',
+	resetEverythingConfirm:
+		'セッション、ナレッジ、サーバー、設定を含むすべてのデータが完全に削除されます。元に戻せません。バックアップがあることを確認してください。続行しますか？'
 } satisfies BaseTranslation;
 
 export default ja;

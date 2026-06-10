@@ -190,7 +190,16 @@ const en = {
 		'Automatically name new sessions after the first reply, using the selected model',
 	theme: 'Theme',
 	themeStyle: 'Theme style',
-	infomaniakUrlHelp: 'Replace the productId placeholder in the URL with your Infomaniak product ID'
+	infomaniakUrlHelp: 'Replace the productId placeholder in the URL with your Infomaniak product ID',
+	firstName: 'First name',
+	lastName: 'Last name',
+	role: 'Role',
+	avatarUrl: 'Avatar URL',
+	avatarColor: 'Avatar color',
+	resetEverything: 'Reset everything',
+	resetEverythingDescription: 'Permanently delete all data and reset the app',
+	resetEverythingConfirm:
+		'This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?'
 } satisfies BaseTranslation;
 
 export default en;

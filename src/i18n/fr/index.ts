@@ -171,7 +171,17 @@ const fr = {
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	theme: 'Thème',
 	themeStyle: 'Style du thème',
-	infomaniakUrlHelp: "Remplacez le segment productId dans l'URL par votre ID de produit Infomaniak"
+	infomaniakUrlHelp: "Remplacez le segment productId dans l'URL par votre ID de produit Infomaniak",
+	firstName: 'Prénom',
+	lastName: 'Nom',
+	role: 'Rôle',
+	avatarUrl: "URL de l'avatar",
+	avatarColor: "Couleur de l'avatar",
+	resetEverything: 'Tout réinitialiser',
+	resetEverythingDescription:
+		"Supprimer définitivement toutes les données et réinitialiser l'application",
+	resetEverythingConfirm:
+		"Cela supprimera définitivement TOUTES vos données — sessions, connaissances, serveurs et préférences. Cette action est irréversible. Assurez-vous d'avoir une sauvegarde. Continuer ?"
 } satisfies BaseTranslation;
 
 export default fr;

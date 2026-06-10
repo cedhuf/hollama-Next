@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PanelLeft } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
@@ -14,9 +15,17 @@
 	import { onNavigate } from '$app/navigation';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
-	import { serversStore, settingsStore, StorageKey } from '$lib/localStorage';
+	import {
+		knowledgeStore,
+		serversStore,
+		sessionsStore,
+		settingsStore,
+		StorageKey
+	} from '$lib/localStorage';
+	import { onboardingOpen } from '$lib/stores/modal';
 	import { checkForUpdates } from '$lib/updates';
 
+	import Onboarding from './Onboarding.svelte';
 	import SettingsModal from './settings/SettingsModal.svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -133,6 +142,18 @@
 		if (browser && !$settingsStore.themeMode) {
 			$settingsStore.themeMode = 'system';
 		}
+
+		// First-run onboarding: only when there is truly no data yet
+		if (
+			!$settingsStore.onboardingComplete &&
+			$serversStore.length === 0 &&
+			$sessionsStore.length === 0 &&
+			$knowledgeStore.length === 0 &&
+			!$settingsStore.profileFirstName &&
+			!$settingsStore.profileLastName
+		) {
+			$onboardingOpen = true;
+		}
 	});
 </script>
 
@@ -164,10 +185,22 @@
 />
 
 <SettingsModal />
+<Onboarding />
 
 <div class="relative flex h-dvh w-screen bg-shade-2 lg:p-4">
 	<CollapsibleSidebar />
 	<div class="relative flex-1">
+		<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
+		{#if !$settingsStore.sidebarExpanded}
+			<button
+				onclick={() => ($settingsStore.sidebarExpanded = true)}
+				class="absolute left-3 top-3 z-10 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
+				aria-label={$LL.expandSidebar()}
+				title={$LL.expandSidebar()}
+			>
+				<PanelLeft class="h-5 w-5" />
+			</button>
+		{/if}
 		{@render children()}
 	</div>
 </div>

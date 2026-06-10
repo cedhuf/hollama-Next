@@ -108,7 +108,16 @@ const tr = {
 		'Yeni oturumları ilk yanıttan sonra seçili modelle otomatik olarak adlandırır',
 	theme: 'Tema',
 	themeStyle: 'Tema stili',
-	infomaniakUrlHelp: "URL'deki productId yer tutucusunu Infomaniak ürün kimliğinizle değiştirin"
+	infomaniakUrlHelp: "URL'deki productId yer tutucusunu Infomaniak ürün kimliğinizle değiştirin",
+	firstName: 'Ad',
+	lastName: 'Soyad',
+	role: 'Rol',
+	avatarUrl: "Avatar URL'si",
+	avatarColor: 'Avatar rengi',
+	resetEverything: 'Her şeyi sıfırla',
+	resetEverythingDescription: 'Tüm verileri kalıcı olarak sil ve uygulamayı sıfırla',
+	resetEverythingConfirm:
+		'Bu, oturumlar, bilgi, sunucular ve tercihler dahil TÜM verilerinizi kalıcı olarak siler. Geri alınamaz. Bir yedeğinizin olduğundan emin olun. Devam edilsin mi?'
 } satisfies BaseTranslation;
 
 export default tr;

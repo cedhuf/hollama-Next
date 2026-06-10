@@ -12,7 +12,7 @@
 	import Servers from './Servers.svelte';
 	import Version from './Version.svelte';
 
-	let activeTab = $state('servers');
+	let activeTab = $state('profile');
 </script>
 
 <Dialog.Root bind:open={$settingsModalOpen}>
@@ -28,16 +28,29 @@
 				<X class="h-4 w-4" />
 			</Dialog.Close>
 
-			<div class="flex w-full">
-				<nav class="flex w-48 shrink-0 flex-col gap-1 border-r border-shade-2 bg-shade-0 p-3">
-					<div class="mb-3 flex items-center gap-2 px-2 text-xs font-semibold text-muted">
+			<div class="flex w-full flex-col sm:flex-row">
+				<nav
+					class="flex shrink-0 gap-1 overflow-x-auto border-b border-shade-2 bg-shade-0 p-2 pr-12 sm:w-48 sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-r sm:p-3 sm:pr-3"
+				>
+					<div class="mb-3 hidden items-center gap-2 px-2 text-xs font-semibold text-muted sm:flex">
 						<Settings2 class="h-4 w-4" />
 						{$LL.settings()}
 					</div>
 
 					<button
+						onclick={() => (activeTab = 'profile')}
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'profile'
+							? 'bg-shade-2 font-medium'
+							: ''}"
+					>
+						<User class="h-4 w-4" />
+						{$LL.profile()}
+					</button>
+
+					<button
 						onclick={() => (activeTab = 'servers')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
 						'servers'
 							? 'bg-shade-2 font-medium'
 							: ''}"
@@ -48,7 +61,7 @@
 
 					<button
 						onclick={() => (activeTab = 'chat')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
 						'chat'
 							? 'bg-shade-2 font-medium'
 							: ''}"
@@ -59,7 +72,7 @@
 
 					<button
 						onclick={() => (activeTab = 'interface')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
 						'interface'
 							? 'bg-shade-2 font-medium'
 							: ''}"
@@ -69,19 +82,8 @@
 					</button>
 
 					<button
-						onclick={() => (activeTab = 'profile')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-						'profile'
-							? 'bg-shade-2 font-medium'
-							: ''}"
-					>
-						<User class="h-4 w-4" />
-						{$LL.profile()}
-					</button>
-
-					<button
 						onclick={() => (activeTab = 'data')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
 						'data'
 							? 'bg-shade-2 font-medium'
 							: ''}"
@@ -92,7 +94,7 @@
 
 					<button
 						onclick={() => (activeTab = 'version')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
 						'version'
 							? 'bg-shade-2 font-medium'
 							: ''}"

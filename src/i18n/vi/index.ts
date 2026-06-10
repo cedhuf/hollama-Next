@@ -121,7 +121,16 @@ const vi = {
 		'Tự động đặt tên cho phiên mới sau phản hồi đầu tiên bằng mô hình đã chọn',
 	theme: 'Giao diện',
 	themeStyle: 'Kiểu giao diện',
-	infomaniakUrlHelp: 'Thay thế phần productId trong URL bằng ID sản phẩm Infomaniak của bạn'
+	infomaniakUrlHelp: 'Thay thế phần productId trong URL bằng ID sản phẩm Infomaniak của bạn',
+	firstName: 'Tên',
+	lastName: 'Họ',
+	role: 'Vai trò',
+	avatarUrl: 'URL ảnh đại diện',
+	avatarColor: 'Màu ảnh đại diện',
+	resetEverything: 'Đặt lại tất cả',
+	resetEverythingDescription: 'Xóa vĩnh viễn mọi dữ liệu và đặt lại ứng dụng',
+	resetEverythingConfirm:
+		'Thao tác này sẽ xóa vĩnh viễn TẤT CẢ dữ liệu của bạn — phiên, kiến thức, máy chủ và tùy chọn. Không thể hoàn tác. Hãy chắc chắn bạn đã sao lưu. Tiếp tục?'
 } satisfies BaseTranslation;
 
 export default vi;

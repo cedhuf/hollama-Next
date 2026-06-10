@@ -761,6 +761,38 @@ type RootTranslation = {
 	 * R​e​p​l​a​c​e​ ​t​h​e​ ​p​r​o​d​u​c​t​I​d​ ​p​l​a​c​e​h​o​l​d​e​r​ ​i​n​ ​t​h​e​ ​U​R​L​ ​w​i​t​h​ ​y​o​u​r​ ​I​n​f​o​m​a​n​i​a​k​ ​p​r​o​d​u​c​t​ ​I​D
 	 */
 	infomaniakUrlHelp: string
+	/**
+	 * F​i​r​s​t​ ​n​a​m​e
+	 */
+	firstName: string
+	/**
+	 * L​a​s​t​ ​n​a​m​e
+	 */
+	lastName: string
+	/**
+	 * R​o​l​e
+	 */
+	role: string
+	/**
+	 * A​v​a​t​a​r​ ​U​R​L
+	 */
+	avatarUrl: string
+	/**
+	 * A​v​a​t​a​r​ ​c​o​l​o​r
+	 */
+	avatarColor: string
+	/**
+	 * R​e​s​e​t​ ​e​v​e​r​y​t​h​i​n​g
+	 */
+	resetEverything: string
+	/**
+	 * P​e​r​m​a​n​e​n​t​l​y​ ​d​e​l​e​t​e​ ​a​l​l​ ​d​a​t​a​ ​a​n​d​ ​r​e​s​e​t​ ​t​h​e​ ​a​p​p
+	 */
+	resetEverythingDescription: string
+	/**
+	 * T​h​i​s​ ​w​i​l​l​ ​p​e​r​m​a​n​e​n​t​l​y​ ​d​e​l​e​t​e​ ​A​L​L​ ​y​o​u​r​ ​d​a​t​a​ ​—​ ​s​e​s​s​i​o​n​s​,​ ​k​n​o​w​l​e​d​g​e​,​ ​s​e​r​v​e​r​s​ ​a​n​d​ ​p​r​e​f​e​r​e​n​c​e​s​.​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.​ ​M​a​k​e​ ​s​u​r​e​ ​y​o​u​ ​h​a​v​e​ ​a​ ​b​a​c​k​u​p​.​ ​C​o​n​t​i​n​u​e​?
+	 */
+	resetEverythingConfirm: string
 }
 
 export type TranslationFunctions = {
@@ -1501,6 +1533,38 @@ The completion in progress will stop
 	 * Replace the productId placeholder in the URL with your Infomaniak product ID
 	 */
 	infomaniakUrlHelp: () => LocalizedString
+	/**
+	 * First name
+	 */
+	firstName: () => LocalizedString
+	/**
+	 * Last name
+	 */
+	lastName: () => LocalizedString
+	/**
+	 * Role
+	 */
+	role: () => LocalizedString
+	/**
+	 * Avatar URL
+	 */
+	avatarUrl: () => LocalizedString
+	/**
+	 * Avatar color
+	 */
+	avatarColor: () => LocalizedString
+	/**
+	 * Reset everything
+	 */
+	resetEverything: () => LocalizedString
+	/**
+	 * Permanently delete all data and reset the app
+	 */
+	resetEverythingDescription: () => LocalizedString
+	/**
+	 * This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?
+	 */
+	resetEverythingConfirm: () => LocalizedString
 }
 
 export type Formatters = {}
