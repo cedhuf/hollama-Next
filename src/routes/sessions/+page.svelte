@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { ArrowRight, ArrowUp, Code, GraduationCap, Lightbulb, MessageSquareText, PenLine, X } from '@lucide/svelte';
+	import {
+		ArrowRight,
+		ArrowUp,
+		Code,
+		GraduationCap,
+		Lightbulb,
+		MessageSquareText,
+		PenLine,
+		X
+	} from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
@@ -127,7 +136,8 @@
 						<button
 							type="button"
 							onclick={() => toggleCategory(category.id)}
-							class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {openCategory === category.id
+							class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {openCategory ===
+							category.id
 								? 'bg-accent/10 text-active font-medium'
 								: 'text-muted hover:text-active hover:bg-shade-2'}"
 						>
@@ -162,7 +172,9 @@
 									class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
 								>
 									<span class="flex-1">{suggestion}</span>
-									<ArrowRight class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+									<ArrowRight
+										class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
+									/>
 								</button>
 							{/each}
 						</div>

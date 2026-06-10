@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp, CodeXml, Coffee, ExternalLink, Heart } from '@lucide/svelte';
+	import {
+		ChevronDown,
+		ChevronUp,
+		CodeXml,
+		Coffee,
+		ExternalLink,
+		GitFork,
+		Heart
+	} from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { version } from '$app/environment';
@@ -14,7 +22,11 @@
 	let motdExpanded = $state(false);
 
 	$effect(() => {
-		if ($updateStatusStore) $updateStatusStore.showSidebarNotification = false;
+		// Mark the update as seen when the About tab is open. Guard against
+		// re-writing so the effect doesn't read and write the same state in a loop.
+		if ($updateStatusStore.showSidebarNotification) {
+			updateStatusStore.update((status) => ({ ...status, showSidebarNotification: false }));
+		}
 	});
 
 	const statusText = $derived(
@@ -91,6 +103,25 @@
 			<div class="about-link-body flex flex-1 flex-col">
 				<span class="about-link-title text-sm font-medium">GitHub</span>
 				<span class="about-link-desc text-xs text-muted">cedhuf/hollama-Next</span>
+			</div>
+			<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
+		</a>
+		<a
+			href="https://github.com/fmaclen/hollama"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="about-link-card flex items-center gap-3 rounded-xl border bg-shade-0 px-4 py-3 transition-colors hover:bg-shade-2"
+		>
+			<div
+				class="about-link-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-shade-2"
+			>
+				<GitFork class="h-5 w-5" />
+			</div>
+			<div class="about-link-body flex flex-1 flex-col">
+				<span class="about-link-title text-sm font-medium">Forked from fmaclen/hollama</span>
+				<span class="about-link-desc text-xs text-muted"
+					>The original project by Fernando Maclen</span
+				>
 			</div>
 			<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
 		</a>

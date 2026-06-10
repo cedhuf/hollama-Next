@@ -18,6 +18,8 @@ export interface Settings {
 	lastUpdateCheck: number | null;
 	autoCheckForUpdates: boolean;
 	defaultModel: string | null;
+	generateTitlesWithAI: boolean;
+	titleModel: string | null;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
@@ -36,6 +38,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	lastUpdateCheck: null,
 	autoCheckForUpdates: false,
 	defaultModel: null,
+	generateTitlesWithAI: false,
+	titleModel: null,
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

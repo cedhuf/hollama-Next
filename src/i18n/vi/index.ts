@@ -110,7 +110,17 @@ const vi = {
 	goodAfternoon: 'Chào buổi chiều',
 	goodEvening: 'Chào buổi tối',
 	howCanIHelp: 'Tôi có thể giúp gì cho bạn?',
-	recentSessions: 'Phiên gần đây'
+	recentSessions: 'Phiên gần đây',
+	productId: 'ID sản phẩm',
+	howToObtainApiKey: 'Cách lấy khóa API?',
+	advancedSettings: 'Nâng cao',
+	defaultModel: 'Mô hình mặc định',
+	titleModel: 'Mô hình tiêu đề',
+	generateTitlesWithAI: 'Tạo tiêu đề bằng AI',
+	generateTitlesWithAIHelp:
+		'Tự động đặt tên cho phiên mới sau phản hồi đầu tiên bằng mô hình đã chọn',
+	theme: 'Giao diện',
+	themeStyle: 'Kiểu giao diện'
 } satisfies BaseTranslation;
 
 export default vi;

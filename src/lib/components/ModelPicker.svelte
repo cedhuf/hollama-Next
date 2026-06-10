@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ChevronDown } from '@lucide/svelte';
 	import { Popover } from 'bits-ui';
+
 	import LL from '$i18n/i18n-svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import { serversStore, settingsStore } from '$lib/localStorage';
@@ -37,23 +38,27 @@
 
 <Popover.Root bind:open>
 	<Popover.Trigger>
-		{#if variant === 'hero'}
-			<button
-				class="group flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-active"
-				type="button"
-			>
-				<span class="font-medium">{value || $LL.availableModels()}</span>
-				<ChevronDown class="h-3.5 w-3.5 transition-transform group-hover:translate-y-px" />
-			</button>
-		{:else}
-			<button
-				class="flex items-center gap-0.5 text-xs text-muted transition-colors hover:text-active"
-				type="button"
-			>
-				<span>{value || $LL.availableModels()}</span>
-				<ChevronDown class="h-3 w-3" />
-			</button>
-		{/if}
+		{#snippet child({ props })}
+			{#if variant === 'hero'}
+				<button
+					{...props}
+					class="group flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-active"
+					type="button"
+				>
+					<span class="font-medium">{value || $LL.availableModels()}</span>
+					<ChevronDown class="h-3.5 w-3.5 transition-transform group-hover:translate-y-px" />
+				</button>
+			{:else}
+				<button
+					{...props}
+					class="flex items-center gap-0.5 text-xs text-muted transition-colors hover:text-active"
+					type="button"
+				>
+					<span>{value || $LL.availableModels()}</span>
+					<ChevronDown class="h-3 w-3" />
+				</button>
+			{/if}
+		{/snippet}
 	</Popover.Trigger>
 	<Popover.Portal>
 		<Popover.Content
@@ -70,7 +75,8 @@
 				</div>
 				{#each lastUsedModels as model (model.name)}
 					<button
-						class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value === model.name
+						class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value ===
+						model.name
 							? 'text-active'
 							: ''}"
 						onclick={() => selectModel(model.name)}
@@ -79,9 +85,7 @@
 						<span class="truncate">{model.name}</span>
 						<div class="flex shrink-0 gap-x-1">
 							{#each formatBadge(model) as badge (badge)}
-								<Badge
-									variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}
-								>
+								<Badge variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}>
 									{badge}
 								</Badge>
 							{/each}
@@ -97,7 +101,8 @@
 			</div>
 			{#each otherModels as model (model.name)}
 				<button
-					class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value === model.name
+					class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value ===
+					model.name
 						? 'text-active'
 						: ''}"
 					onclick={() => selectModel(model.name)}
@@ -106,9 +111,7 @@
 					<span class="truncate">{model.name}</span>
 					<div class="flex shrink-0 gap-x-1">
 						{#each formatBadge(model) as badge (badge)}
-							<Badge
-								variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}
-							>
+							<Badge variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}>
 								{badge}
 							</Badge>
 						{/each}

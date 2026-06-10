@@ -1,20 +1,13 @@
 <script lang="ts">
-	import type { LocalizedString } from 'typesafe-i18n';
-
 	import LL, { setLocale } from '$i18n/i18n-svelte';
 	import type { Locales } from '$i18n/i18n-types';
 	import { loadLocale } from '$i18n/i18n-util.sync';
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
-	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
 
-	let langValue: Locales = $state($settingsStore.userLanguage || 'en');
-
-	$effect(() => {
-		langValue = $settingsStore.userLanguage || 'en';
-	});
+	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
 	function changeLanguage({ value }: { value: string; label: string }) {
 		const locale = value as Locales;
@@ -23,35 +16,17 @@
 		$settingsStore.userLanguage = locale;
 	}
 
-	let themeModeValue: string = $state($settingsStore.themeMode || 'system');
-
-	$effect(() => {
-		themeModeValue = $settingsStore.themeMode || 'system';
-	});
+	let themeModeValue: string = $derived($settingsStore.themeMode ?? 'system');
 
 	function changeThemeMode({ value }: { value: string; label: string }) {
 		$settingsStore.themeMode = value as 'system' | 'light' | 'dark';
 	}
 
-	let themeStyleValue: string = $state($settingsStore.themeStyle || 'classic');
-
-	$effect(() => {
-		themeStyleValue = $settingsStore.themeStyle || 'classic';
-	});
+	let themeStyleValue: string = $derived($settingsStore.themeStyle ?? 'classic');
 
 	function changeThemeStyle({ value }: { value: string; label: string }) {
 		$settingsStore.themeStyle = value as 'classic' | 'dracula' | 'catppuccin';
 	}
-
-	let defaultModelValue = $state($settingsStore.defaultModel || undefined);
-
-	$effect(() => {
-		defaultModelValue = $settingsStore.defaultModel || undefined;
-	});
-
-	$effect(() => {
-		$settingsStore.defaultModel = defaultModelValue || null;
-	});
 </script>
 
 <Fieldset>
@@ -79,7 +54,7 @@
 
 	<FieldSelect
 		name="theme-mode"
-		label={'Theme' as unknown as LocalizedString}
+		label={$LL.theme()}
 		bind:value={themeModeValue}
 		allowClear={false}
 		allowSearch={false}
@@ -93,7 +68,7 @@
 
 	<FieldSelect
 		name="theme-style"
-		label={'Theme style' as unknown as LocalizedString}
+		label={$LL.themeStyle()}
 		bind:value={themeStyleValue}
 		allowClear={false}
 		allowSearch={false}
@@ -104,6 +79,4 @@
 			{ value: 'catppuccin', label: 'Catppuccin' }
 		]}
 	/>
-
-	<FieldSelectModel isLabelVisible={true} bind:value={defaultModelValue} />
 </Fieldset>

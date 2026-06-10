@@ -97,7 +97,17 @@ const tr = {
 	goodAfternoon: 'İyi günler',
 	goodEvening: 'İyi akşamlar',
 	howCanIHelp: 'Size nasıl yardımcı olabilirim?',
-	recentSessions: 'Son oturumlar'
+	recentSessions: 'Son oturumlar',
+	productId: 'Ürün Kimliği',
+	howToObtainApiKey: 'API anahtarı nasıl alınır?',
+	advancedSettings: 'Gelişmiş',
+	defaultModel: 'Varsayılan model',
+	titleModel: 'Başlık modeli',
+	generateTitlesWithAI: 'Başlıkları yapay zekayla oluştur',
+	generateTitlesWithAIHelp:
+		'Yeni oturumları ilk yanıttan sonra seçili modelle otomatik olarak adlandırır',
+	theme: 'Tema',
+	themeStyle: 'Tema stili'
 } satisfies BaseTranslation;
 
 export default tr;

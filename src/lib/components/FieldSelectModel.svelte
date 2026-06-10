@@ -1,16 +1,31 @@
 <script lang="ts">
+	import type { LocalizedString } from 'typesafe-i18n';
+
 	import LL from '$i18n/i18n-svelte';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
 	import FieldSelect from './FieldSelect.svelte';
 
+	type ModelOption = {
+		value: string;
+		label: string;
+		badge?: string | string[];
+	};
+
 	interface Props {
 		isLabelVisible?: boolean;
 		value?: string;
+		label?: LocalizedString;
+		onChange?: (value: ModelOption) => void;
 	}
 
-	let { isLabelVisible = true, value = $bindable() }: Props = $props();
+	let {
+		isLabelVisible = true,
+		value = $bindable(),
+		label = $LL.availableModels(),
+		onChange = () => {}
+	}: Props = $props();
 
 	const disabled = $derived(!$settingsStore.models?.length);
 	const models = $derived($settingsStore.models?.map(formatModelToSelectOption));
@@ -18,12 +33,6 @@
 	const otherModels = $derived(
 		models?.filter((m) => !lastUsedModels?.some((lm) => lm.value === m.value)) || []
 	);
-
-	type ModelOption = {
-		value: string;
-		label: string;
-		badge?: string | string[];
-	};
 
 	function formatModelToSelectOption(model: Model): ModelOption {
 		const badges: string[] = [];
@@ -43,7 +52,7 @@
 	name="model"
 	{disabled}
 	placeholder={isLabelVisible ? $LL.search() : $LL.availableModels()}
-	label={$LL.availableModels()}
+	{label}
 	{isLabelVisible}
 	options={[
 		// Only include lastUsedModels if they exist
@@ -51,4 +60,5 @@
 		{ label: $LL.otherModels(), options: otherModels }
 	]}
 	bind:value
+	{onChange}
 />

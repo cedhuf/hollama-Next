@@ -125,7 +125,16 @@ const zh_cn = {
 	goodAfternoon: '下午好',
 	goodEvening: '晚上好',
 	howCanIHelp: '有什么我可以帮您的吗？',
-	recentSessions: '最近的会话'
+	recentSessions: '最近的会话',
+	productId: '产品 ID',
+	howToObtainApiKey: '如何获取 API 密钥？',
+	advancedSettings: '高级',
+	defaultModel: '默认模型',
+	titleModel: '标题模型',
+	generateTitlesWithAI: '用 AI 生成标题',
+	generateTitlesWithAIHelp: '在首次回复后用所选模型自动命名新会话',
+	theme: '主题',
+	themeStyle: '主题样式'
 } satisfies BaseTranslation;
 
 export default zh_cn;

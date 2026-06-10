@@ -98,7 +98,17 @@ const pt_br = {
 	goodAfternoon: 'Boa tarde',
 	goodEvening: 'Boa noite',
 	howCanIHelp: 'Como posso ajudar?',
-	recentSessions: 'Sessões recentes'
+	recentSessions: 'Sessões recentes',
+	productId: 'ID do produto',
+	howToObtainApiKey: 'Como obter uma chave de API?',
+	advancedSettings: 'Avançado',
+	defaultModel: 'Modelo padrão',
+	titleModel: 'Modelo de título',
+	generateTitlesWithAI: 'Gerar títulos com IA',
+	generateTitlesWithAIHelp:
+		'Nomeia automaticamente novas sessões após a primeira resposta, usando o modelo selecionado',
+	theme: 'Tema',
+	themeStyle: 'Estilo do tema'
 } satisfies BaseTranslation;
 
 export default pt_br;

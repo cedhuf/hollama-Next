@@ -161,6 +161,16 @@ const fr = {
 	goodEvening: 'Bonsoir',
 	howCanIHelp: 'Comment puis-je vous aider ?',
 	recentSessions: 'Sessions récentes',
+	productId: 'ID de produit',
+	howToObtainApiKey: 'Comment obtenir une clé API ?',
+	advancedSettings: 'Avancé',
+	defaultModel: 'Modèle par défaut',
+	titleModel: 'Modèle pour les titres',
+	generateTitlesWithAI: 'Générer les titres par IA',
+	generateTitlesWithAIHelp:
+		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
+	theme: 'Thème',
+	themeStyle: 'Style du thème'
 } satisfies BaseTranslation;
 
 export default fr;

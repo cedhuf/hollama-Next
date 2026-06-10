@@ -9,6 +9,7 @@
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
+	import { generateTitle } from '$lib/chat/title';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -17,7 +18,6 @@
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
-	import { formatTimestampToNow } from '$lib/utils';
 	import {
 		getSessionTitle,
 		loadSession,
@@ -27,6 +27,7 @@
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { settingsModalOpen } from '$lib/stores/modal';
+	import { formatTimestampToNow } from '$lib/utils';
 
 	import type { PageData } from './$types';
 	import Controls from './Controls.svelte';
@@ -213,6 +214,8 @@
 					break;
 				case ConnectionType.OpenAI:
 				case ConnectionType.OpenAICompatible:
+				case ConnectionType.Anthropic:
+				case ConnectionType.Infomaniak:
 					strategy = new OpenAIStrategy(server);
 					break;
 			}
@@ -253,10 +256,30 @@
 			editor.shouldFocusTextarea = true;
 			editor.isCompletionInProgress = false;
 			await scrollToBottom();
+
+			await maybeGenerateTitle();
 		} catch (error) {
 			const typedError = error instanceof Error ? error : new Error(String(error));
 			if (typedError.name === 'AbortError') return; // User aborted the request
 			handleError(typedError);
+		}
+	}
+
+	async function maybeGenerateTitle() {
+		// Auto-name a brand new session once its first exchange completes.
+		const isFirstExchange = session.messages.filter((m) => m.role === 'assistant').length === 1;
+		if (!$settingsStore.generateTitlesWithAI || session.title || !isFirstExchange) return;
+
+		const firstUserMessage = session.messages.find(
+			(m) => m.role === 'user' && m.content && !m.knowledge
+		);
+		if (!firstUserMessage?.content) return;
+
+		const title = await generateTitle(firstUserMessage.content);
+		if (title) {
+			session.title = title;
+			session.updatedAt = new Date().toISOString();
+			saveSession(session);
 		}
 	}
 
@@ -358,11 +381,5 @@
 		</div>
 	{/if}
 
-	<Prompt
-		bind:session
-		bind:editor
-		{handleSubmit}
-		{stopCompletion}
-		{scrollToBottom}
-	/>
+	<Prompt bind:session bind:editor {handleSubmit} {stopCompletion} {scrollToBottom} />
 </div>

@@ -103,7 +103,16 @@ const ja = {
 	goodAfternoon: 'こんにちは',
 	goodEvening: 'こんばんは',
 	howCanIHelp: '何をお手伝いしましょうか？',
-	recentSessions: '最近のセッション'
+	recentSessions: '最近のセッション',
+	productId: '製品ID',
+	howToObtainApiKey: 'APIキーの取得方法は？',
+	advancedSettings: '詳細設定',
+	defaultModel: 'デフォルトモデル',
+	titleModel: 'タイトル生成モデル',
+	generateTitlesWithAI: 'AIでタイトルを生成',
+	generateTitlesWithAIHelp: '選択したモデルで、最初の応答後に新しいセッションを自動的に名付けます',
+	theme: 'テーマ',
+	themeStyle: 'テーマスタイル'
 } satisfies BaseTranslation;
 
 export default ja;
