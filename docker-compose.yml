@@ -1,0 +1,8 @@
+services:
+  hollama:
+    image: ghcr.io/cedhuf/hollama:latest
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-4173}:4173"
+    environment:
+      - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-localhost}

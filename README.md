@@ -47,8 +47,45 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 - ⚡️ Live demo — _coming soon_
 - 🖥️ Download — _coming soon_ (will be replaced by Tauri)
-- 🐳 [Self-hosting](SELF_HOSTING.md) with Docker
 - 🐞 [Contribute](CONTRIBUTING.md)
+
+### Self-hosting
+
+Docker images are published to [`ghcr.io/cedhuf/hollama`](https://ghcr.io/cedhuf/hollama) as a **rolling release** — every push to `main` automatically updates the `:latest` tag.
+
+**Quick start with Docker Compose (recommended):**
+
+```shell
+cp .env.example .env
+docker compose up -d
+```
+
+Then open [http://localhost:4173](http://localhost:4173).
+
+**Or with Docker directly:**
+
+```shell
+docker run --rm -d -p 4173:4173 --name hollama ghcr.io/cedhuf/hollama:latest
+```
+
+**Update to the latest version:**
+
+```shell
+docker compose pull && docker compose up -d
+```
+
+**Connecting to an Ollama server on a different device** — if your Ollama server is running on a separate machine, you need to allow your Hollama instance's domain in `OLLAMA_ORIGINS`. [Learn more in Ollama's docs](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server).
+
+```shell
+OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
+```
+
+**Configuration** — copy `.env.example` to `.env` and adjust as needed:
+
+| Variable | Default | Description |
+|---|---|---|
+| `HOST_PORT` | `4173` | Port exposed on the host |
+| `VITE_ALLOWED_HOSTS` | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy) |
 
 | ![session](static/screenshots/session.png)         | ![settings](static/screenshots/settings.png)   |
 | -------------------------------------------------- | ---------------------------------------------- |
