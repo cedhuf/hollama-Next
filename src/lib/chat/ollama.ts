@@ -147,7 +147,8 @@ export class OllamaStrategy implements ChatStrategy {
 		try {
 			await this.getModels();
 			return true;
-		} catch {
+		} catch (error) {
+			console.error('Ollama verification failed:', error);
 			return false;
 		}
 	}

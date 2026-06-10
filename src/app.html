@@ -6,18 +6,21 @@
 		<link rel="stylesheet" href="/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/fonts/jetbrains-mono/jetbrains-mono.css" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-		<title>Hollama</title>
+		<title>Hollama Next</title>
 		%sveltekit.head%
 	</head>
 	<script>
 		// We check and apply the color theme preference on initial load
 		// to prevent a flash of unstyled content
-		let theme = JSON.parse(localStorage.getItem('hollama-settings'))?.userTheme;
-		if (theme) document.documentElement.setAttribute('data-color-theme', theme);
-		else {
-			theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-			document.documentElement.setAttribute('data-color-theme', theme);
-		}
+		let settings = JSON.parse(localStorage.getItem('hollamanext-settings'));
+		let themeMode = settings?.themeMode;
+		let themeStyle = settings?.themeStyle;
+		let theme;
+		if (themeMode === 'dark') theme = 'dark';
+		else if (themeMode === 'light') theme = 'light';
+		else theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		if (themeStyle) document.documentElement.setAttribute('data-theme-style', themeStyle);
+		document.documentElement.setAttribute('data-color-theme', theme);
 	</script>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

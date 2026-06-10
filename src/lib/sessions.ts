@@ -69,13 +69,18 @@ export const loadSession = (id: string): Session => {
 	}
 
 	if (!session) {
-		// Use the last used model
-		const model = getLastUsedModels()[0];
+		// Use the default model, or fall back to the last used
+		const settings = get(settingsStore);
+		const defaultModelName = settings.defaultModel;
+		const model = defaultModelName
+			? settings.models?.find((m) => m.name === defaultModelName)
+			: undefined;
+		const fallbackModel = model || getLastUsedModels()[0];
 
 		// Create a new session
 		session = {
 			id,
-			model,
+			model: fallbackModel,
 			systemPrompt: defaultSystemPrompt,
 			updatedAt: new Date().toISOString(),
 			messages: [],

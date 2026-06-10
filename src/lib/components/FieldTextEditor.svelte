@@ -78,7 +78,13 @@
 				updateValue,
 				EditorView.lineWrapping,
 				Prec.highest(overrideModEnterKeymap),
-				$settingsStore.userTheme === 'dark' ? hollamaThemeDark : hollamaThemeLight
+				$settingsStore.themeMode === 'light'
+				? hollamaThemeLight
+				: $settingsStore.themeMode === 'dark'
+					? hollamaThemeDark
+					: window.matchMedia('(prefers-color-scheme: dark)').matches
+						? hollamaThemeDark
+						: hollamaThemeLight
 			],
 			parent: container
 		});

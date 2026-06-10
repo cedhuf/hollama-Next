@@ -2,7 +2,7 @@ import type { Locales } from '$i18n/i18n-types';
 import { env } from '$env/dynamic/public';
 import { version } from '$app/environment';
 
-import type { HollamaMetadata } from '../routes/api/metadata/+server';
+import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
 
 export interface Model {
 	serverId: string;
@@ -17,10 +17,17 @@ export interface Settings {
 	lastUsedModels: Model[];
 	lastUpdateCheck: number | null;
 	autoCheckForUpdates: boolean;
-	userTheme: 'light' | 'dark';
+	defaultModel: string | null;
+	themeMode: 'system' | 'light' | 'dark';
+	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
-	hollamaMetadata: HollamaMetadata;
+	hollamaMetadata: HollamaNextMetadata;
+	profileFirstName: string;
+	profileLastName: string;
+	profileRole: 'admin' | 'user';
+	profileAvatar: string;
+	profileColor: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -28,12 +35,18 @@ export const DEFAULT_SETTINGS: Settings = {
 	lastUsedModels: [],
 	lastUpdateCheck: null,
 	autoCheckForUpdates: false,
-	userTheme: 'light',
+	defaultModel: null,
+	themeMode: 'system',
+	themeStyle: 'classic',
 	userLanguage: null,
 	sidebarExpanded: true,
 	hollamaMetadata: {
 		currentVersion: version,
-		isDesktop: env.PUBLIC_ADAPTER === 'electron-node',
 		isDocker: env.PUBLIC_ADAPTER === 'docker-node'
-	}
+	},
+	profileFirstName: '',
+	profileLastName: '',
+	profileRole: 'user',
+	profileAvatar: '',
+	profileColor: '#6366f1'
 };

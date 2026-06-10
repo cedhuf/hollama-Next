@@ -13,7 +13,7 @@
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
-	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
+	import SettingsModal from './settings/SettingsModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { serversStore, settingsStore, StorageKey } from '$lib/localStorage';
 	import { checkForUpdates } from '$lib/updates';
@@ -39,9 +39,33 @@
 		setLocale($settingsStore.userLanguage);
 	});
 
-	$effect(() =>
-		document.documentElement.setAttribute('data-color-theme', $settingsStore.userTheme)
-	);
+	$effect(() => {
+		const mode = $settingsStore.themeMode || 'system';
+		const style = $settingsStore.themeStyle || 'classic';
+
+		document.documentElement.setAttribute('data-theme-style', style);
+
+		const applyTheme = (prefersDark?: boolean) => {
+			let theme: string;
+			if (mode === 'system') {
+				theme = (prefersDark ?? window.matchMedia('(prefers-color-scheme: dark)').matches)
+					? 'dark'
+					: 'light';
+			} else {
+				theme = mode;
+			}
+			document.documentElement.setAttribute('data-color-theme', theme);
+		};
+
+		applyTheme();
+
+		if (mode === 'system' && browser) {
+			const mq = window.matchMedia('(prefers-color-scheme: dark)');
+			const handler = (e: MediaQueryListEvent) => applyTheme(e.matches);
+			mq.addEventListener('change', handler);
+			return () => mq.removeEventListener('change', handler);
+		}
+	});
 
 	onMount(() => {
 		// Language
@@ -56,7 +80,7 @@
 		setLocale($settingsStore.userLanguage);
 
 		// Migrate old server settings to new format
-		const settingsLocalStorage = localStorage.getItem(StorageKey.HollamaPreferences);
+		const settingsLocalStorage = localStorage.getItem(StorageKey.HollamaNextPreferences);
 		if (settingsLocalStorage) {
 			const settings = JSON.parse(settingsLocalStorage);
 
@@ -95,7 +119,7 @@
 				}
 
 				// Reset the settings store with the removed keys
-				localStorage.removeItem(StorageKey.HollamaPreferences);
+				localStorage.removeItem(StorageKey.HollamaNextPreferences);
 				settingsStore.set(settings);
 
 				// Ask the user to re-verify the server connections
@@ -104,10 +128,8 @@
 		}
 
 		// Color theme
-		if (browser && !$settingsStore.userTheme) {
-			$settingsStore.userTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-				? 'dark'
-				: 'light';
+		if (browser && !$settingsStore.themeMode) {
+			$settingsStore.themeMode = 'system';
 		}
 	});
 </script>
@@ -139,10 +161,11 @@
 	position="top-center"
 />
 
+<SettingsModal />
+
 <div class="relative flex h-dvh w-screen bg-shade-2 lg:p-4">
 	<CollapsibleSidebar />
 	<div class="relative flex-1">
-		<SidebarToggle />
 		{@render children()}
 	</div>
 </div>

@@ -3,10 +3,12 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { page } from '$app/state';
 	import { beforeNavigate } from '$app/navigation';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
+	import { Settings2 } from 'lucide-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -14,6 +16,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Metadata from '$lib/components/Metadata.svelte';
 	import { ConnectionType } from '$lib/connections';
+	import { settingsModalOpen } from '$lib/stores/modal';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import {
 		formatSessionMetadata,
@@ -103,6 +106,22 @@
 		editor.view = 'messages';
 		editor.isNewSession = !session?.messages?.length;
 		scrollToBottom();
+
+		const promptParam = page.url.searchParams.get('q');
+		if (promptParam) {
+			editor.prompt = promptParam;
+			editor.isNewSession = false;
+
+			const modelParam = page.url.searchParams.get('model');
+			if (modelParam) {
+				modelName = modelParam;
+				const model = $settingsStore.models.find((m) => m.name === modelParam);
+				if (model) session.model = model;
+			}
+
+			await tick();
+			handleSubmit();
+		}
 	}
 
 	async function handleSubmitNewMessage(images?: { data: string; filename: string }[]) {
@@ -313,6 +332,9 @@
 		{/snippet}
 
 		{#snippet nav()}
+			<Button variant="icon" onclick={() => ($settingsModalOpen = true)}>
+				<Settings2 class="base-icon" />
+			</Button>
 			{#if !editor.isNewSession}
 				{#if !shouldConfirmDeletion}
 					<ButtonCopy content={JSON.stringify(session.messages, null, 2)} />

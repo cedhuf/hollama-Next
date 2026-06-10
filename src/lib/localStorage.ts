@@ -59,18 +59,18 @@ export function deleteStoreItem<T extends { id: string }>(store: T[], id: string
 	return store.filter((s) => s.id !== id);
 }
 
-export const LOCAL_STORAGE_PREFIX = 'hollama';
+export const LOCAL_STORAGE_PREFIX = 'hollamanext';
 export enum StorageKey {
-	HollamaPreferences = `${LOCAL_STORAGE_PREFIX}-settings`,
-	HollamaServers = `${LOCAL_STORAGE_PREFIX}-servers`,
-	HollamaSessions = `${LOCAL_STORAGE_PREFIX}-sessions`,
-	HollamaKnowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`
+	HollamaNextPreferences = `${LOCAL_STORAGE_PREFIX}-settings`,
+	HollamaNextServers = `${LOCAL_STORAGE_PREFIX}-servers`,
+	HollamaNextSessions = `${LOCAL_STORAGE_PREFIX}-sessions`,
+	HollamaNextKnowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`
 }
 
 export const settingsStore = createLocalStorageStore<Settings>(
-	StorageKey.HollamaPreferences,
+	StorageKey.HollamaNextPreferences,
 	DEFAULT_SETTINGS
 );
-export const serversStore = createLocalStorageStore<Server[]>(StorageKey.HollamaServers, []);
-export const sessionsStore = createLocalStorageStore<Session[]>(StorageKey.HollamaSessions, []);
-export const knowledgeStore = createLocalStorageStore<Knowledge[]>(StorageKey.HollamaKnowledge, []);
+export const serversStore = createLocalStorageStore<Server[]>(StorageKey.HollamaNextServers, []);
+export const sessionsStore = createLocalStorageStore<Session[]>(StorageKey.HollamaNextSessions, []);
+export const knowledgeStore = createLocalStorageStore<Knowledge[]>(StorageKey.HollamaNextKnowledge, []);

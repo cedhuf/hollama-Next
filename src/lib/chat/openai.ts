@@ -14,9 +14,12 @@ export class OpenAIStrategy implements ChatStrategy {
 
 	constructor(private server: Server) {
 		this.openai = new OpenAI({
-			baseURL: this.server.baseUrl,
+			baseURL: `${globalThis.location.origin}/api/proxy/`,
 			apiKey: this.server.apiKey || '',
-			dangerouslyAllowBrowser: true
+			dangerouslyAllowBrowser: true,
+			defaultHeaders: {
+				'X-Target-Base-Url': this.server.baseUrl
+			}
 		});
 	}
 
@@ -68,7 +71,7 @@ export class OpenAIStrategy implements ChatStrategy {
 
 		for await (const chunk of response) {
 			if (abortSignal.aborted) break;
-			onChunk(chunk.choices[0].delta.content || '');
+			onChunk(chunk.choices?.[0]?.delta?.content ?? '');
 		}
 	}
 
@@ -86,7 +89,8 @@ export class OpenAIStrategy implements ChatStrategy {
 		try {
 			await this.getModels();
 			return true;
-		} catch {
+		} catch (error) {
+			console.error('OpenAI verification failed:', error);
 			return false;
 		}
 	}
