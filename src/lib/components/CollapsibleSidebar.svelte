@@ -68,7 +68,7 @@
 {#if !isCollapsed}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
-		class="fixed inset-0 z-20 bg-neutral-900/50 lg:hidden"
+		class="fixed inset-0 z-20 bg-black/50 lg:hidden"
 		transition:fade={{ duration: 100 }}
 		onclick={toggleExpanded}
 		role="presentation"
@@ -240,7 +240,7 @@
 										class="h-9 w-9 rounded-full object-cover"
 									/>
 								{:else}
-									<span class="text-sm font-bold text-white">{getInitials()}</span>
+									<span class="text-sm font-bold text-shade-0">{getInitials()}</span>
 								{/if}
 							</div>
 						{:else}
@@ -262,7 +262,7 @@
 									class="h-9 w-9 rounded-full object-cover"
 								/>
 							{:else}
-								<span class="text-sm font-bold text-white">{getInitials()}</span>
+								<span class="text-sm font-bold text-shade-0">{getInitials()}</span>
 							{/if}
 						</div>
 						<div class="flex flex-col">

@@ -61,7 +61,7 @@
 					class:bg-accent={$settingsStore.autoCheckForUpdates}
 				>
 					<span
-						class="toggle-thumb block h-4 w-4 translate-x-0.5 translate-y-0.5 rounded-full bg-white transition-transform"
+						class="toggle-thumb block h-4 w-4 translate-x-0.5 translate-y-0.5 rounded-full bg-shade-0 transition-transform"
 						class:translate-x-4={$settingsStore.autoCheckForUpdates}
 					></span>
 				</label>
@@ -134,6 +134,6 @@
 	{/if}
 
 	<div class="about-footer flex items-center justify-center gap-1 pb-2 text-xs text-muted">
-		Made with <Heart class="inline h-3.5 w-3.5 text-red-500" /> by cedhuf
+		Made with <Heart class="inline h-3.5 w-3.5 text-negative" /> by cedhuf
 	</div>
 </div>

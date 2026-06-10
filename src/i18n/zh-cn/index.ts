@@ -120,7 +120,12 @@ const zh_cn = {
 	verify: '验证',
 	version: '版本',
 	writePromptToStart: '写一段提示词以开始新会话',
-	you: '你'
+	you: '你',
+	goodMorning: '早上好',
+	goodAfternoon: '下午好',
+	goodEvening: '晚上好',
+	howCanIHelp: '有什么我可以帮您的吗？',
+	recentSessions: '最近的会话'
 } satisfies BaseTranslation;
 
 export default zh_cn;

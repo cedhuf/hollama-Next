@@ -215,30 +215,18 @@
 	}
 
 	.markdown :global(code) {
-		@apply rounded-md bg-amber-50 p-1 text-xs text-orange-600;
+		@apply rounded-md bg-shade-2 p-1 text-xs text-accent;
 		@apply md:text-sm;
 		font-variant-ligatures: none;
 	}
 
-	/*
-		HACK: This is needed because of a bug in Svelte 5 with `dark:` selectors
-		REF: https://github.com/sveltejs/svelte/issues/14330
-	*/
-	.markdown :global(code:where([data-color-theme='dark'], [data-color-theme='dark'] *)) {
-		@apply bg-amber-950 text-orange-500;
-	}
-
 	.markdown :global(pre code) {
-		@apply block bg-neutral-50/50 p-4 pr-12 text-base text-xs text-neutral-700;
+		@apply block bg-shade-0/50 p-4 pr-12 text-xs text-base;
 		@apply md:text-sm;
 	}
 
-	/*
-		HACK: This is needed because of a bug in Svelte 5 with `dark:` selectors
-		REF: https://github.com/sveltejs/svelte/issues/14330
-	*/
 	.markdown :global(pre code:where([data-color-theme='dark'], [data-color-theme='dark'] *)) {
-		@apply invert;
+		@apply bg-shade-0/50 text-muted;
 	}
 
 	.markdown :global(a:has(code)) {

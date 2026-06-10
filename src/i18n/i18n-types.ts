@@ -701,6 +701,26 @@ type RootTranslation = {
 	 * P​r​o​f​i​l​e
 	 */
 	profile: string
+	/**
+	 * G​o​o​d​ ​m​o​r​n​i​n​g
+	 */
+	goodMorning: string
+	/**
+	 * G​o​o​d​ ​a​f​t​e​r​n​o​o​n
+	 */
+	goodAfternoon: string
+	/**
+	 * G​o​o​d​ ​e​v​e​n​i​n​g
+	 */
+	goodEvening: string
+	/**
+	 * H​o​w​ ​c​a​n​ ​I​ ​h​e​l​p​ ​y​o​u​ ​t​o​d​a​y​?
+	 */
+	howCanIHelp: string
+	/**
+	 * R​e​c​e​n​t​ ​s​e​s​s​i​o​n​s
+	 */
+	recentSessions: string
 }
 
 export type TranslationFunctions = {
@@ -1381,6 +1401,26 @@ The completion in progress will stop
 	 * Profile
 	 */
 	profile: () => LocalizedString
+	/**
+	 * Good morning
+	 */
+	goodMorning: () => LocalizedString
+	/**
+	 * Good afternoon
+	 */
+	goodAfternoon: () => LocalizedString
+	/**
+	 * Good evening
+	 */
+	goodEvening: () => LocalizedString
+	/**
+	 * How can I help you today?
+	 */
+	howCanIHelp: () => LocalizedString
+	/**
+	 * Recent sessions
+	 */
+	recentSessions: () => LocalizedString
 }
 
 export type Formatters = {}

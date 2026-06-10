@@ -127,7 +127,12 @@ const es = {
 	verify: 'Verificar',
 	version: 'Versión',
 	writePromptToStart: 'Escribe una indicación para comenzar una nueva sesión',
-	you: 'Tú'
+	you: 'Tú',
+	goodMorning: 'Buenos días',
+	goodAfternoon: 'Buenas tardes',
+	goodEvening: 'Buenas noches',
+	howCanIHelp: '¿Cómo puedo ayudarte?',
+	recentSessions: 'Sesiones recientes'
 } satisfies BaseTranslation;
 
 export default es;
