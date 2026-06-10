@@ -7,11 +7,19 @@
 
 <svelte:element
 	this={href ? 'a' : 'span'}
-	class="badge {variant ? `badge--${variant}` : ''} {className}"
+	class="badge {variant === 'positive'
+		? 'border-transparent bg-positive-muted text-positive'
+		: variant === 'warning'
+			? 'border-transparent bg-warning-muted text-warning'
+			: variant === 'openai'
+				? '-mx-0.5 bg-neutral-950'
+				: variant === 'ollama'
+					? '-mx-0.5 bg-neutral-50'
+					: ''} {className}"
 	{href}
 >
 	{#if variant === 'openai'}
-		<span class="badge--openai">
+		<span class="-mx-0.5 bg-neutral-950">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="10"
@@ -25,7 +33,7 @@
 			>
 		</span>
 	{:else if variant === 'ollama'}
-		<span class="badge--ollama">
+		<span class="-mx-0.5 bg-neutral-50">
 			<svg
 				width="12"
 				height="12"
@@ -59,32 +67,3 @@
 		<slot />
 	{/if}
 </svelte:element>
-
-<style lang="postcss">
-	.badge {
-		&--positive {
-			@apply border-transparent bg-positive-muted text-positive;
-		}
-
-		&--warning {
-			@apply border-transparent bg-warning-muted text-warning;
-		}
-
-		&--negative {
-			@apply border-transparent bg-negative-muted text-negative;
-		}
-
-		&--openai,
-		&--ollama {
-			@apply -mx-0.5;
-		}
-
-		&--openai {
-			@apply bg-neutral-950;
-		}
-
-		&--ollama {
-			@apply bg-neutral-50;
-		}
-	}
-</style>

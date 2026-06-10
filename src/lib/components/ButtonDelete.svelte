@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Trash2, X } from 'lucide-svelte';
+	import { Check, Trash2, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
@@ -38,11 +38,14 @@
 	}
 </script>
 
-<div class="delete-button" class:delete--confirm-deletion={shouldConfirmDeletion}>
+<div
+	class="delete-button flex h-full flex-row"
+	class:delete--confirm-deletion={shouldConfirmDeletion}
+>
 	{#if shouldConfirmDeletion}
 		<Button
 			variant="icon"
-			class="delete-button__confirm"
+			class="delete-button__confirm hover:text-negative"
 			on:click={deleteRecord}
 			title={$LL.confirmDeletion()}
 		>
@@ -68,13 +71,3 @@
 		</Button>
 	{/if}
 </div>
-
-<style lang="postcss">
-	.delete-button {
-		@apply flex h-full flex-row;
-	}
-
-	.delete-button :global(.delete-button__confirm) {
-		@apply hover:text-negative;
-	}
-</style>

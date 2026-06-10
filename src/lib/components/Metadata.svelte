@@ -9,12 +9,9 @@
 	let { dataTestid = undefined, children }: Props = $props();
 </script>
 
-<p class="metadata" data-testid={dataTestid}>
+<p
+	class="metadata max-w-full truncate whitespace-nowrap text-xs text-muted"
+	data-testid={dataTestid}
+>
 	{@render children?.()}
 </p>
-
-<style lang="postcss">
-	.metadata {
-		@apply max-w-full truncate whitespace-nowrap text-xs text-muted;
-	}
-</style>

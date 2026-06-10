@@ -25,7 +25,7 @@ async function proxy(request: Request, path: string | undefined) {
 	const response = await fetch(url, {
 		method: request.method,
 		headers,
-		body,
+		body
 	});
 
 	return new Response(response.body, {

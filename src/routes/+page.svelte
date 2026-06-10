@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { settingsModalOpen } from '$lib/stores/modal';
 	import { serversStore } from '$lib/localStorage';
+	import { settingsModalOpen } from '$lib/stores/modal';
 
 	$effect.pre(() => {
 		if ($serversStore.some((server) => server.isVerified !== null)) {

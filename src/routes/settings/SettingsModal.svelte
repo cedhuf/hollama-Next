@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Database, Info, Server, Settings2, User, X } from '@lucide/svelte';
 	import { Dialog } from 'bits-ui';
-	import { Database, Info, Server, Settings2, User, X } from 'lucide-svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { settingsModalOpen } from '$lib/stores/modal';
@@ -34,7 +34,8 @@
 
 					<button
 						onclick={() => (activeTab = 'servers')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab === 'servers'
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'servers'
 							? 'bg-shade-2 font-medium'
 							: ''}"
 					>
@@ -44,7 +45,8 @@
 
 					<button
 						onclick={() => (activeTab = 'interface')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab === 'interface'
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'interface'
 							? 'bg-shade-2 font-medium'
 							: ''}"
 					>
@@ -54,7 +56,8 @@
 
 					<button
 						onclick={() => (activeTab = 'profile')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab === 'profile'
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'profile'
 							? 'bg-shade-2 font-medium'
 							: ''}"
 					>
@@ -64,7 +67,8 @@
 
 					<button
 						onclick={() => (activeTab = 'data')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab === 'data'
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'data'
 							? 'bg-shade-2 font-medium'
 							: ''}"
 					>
@@ -74,7 +78,8 @@
 
 					<button
 						onclick={() => (activeTab = 'version')}
-						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab === 'version'
+						class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'version'
 							? 'bg-shade-2 font-medium'
 							: ''}"
 					>

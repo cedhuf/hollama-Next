@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Brain, CircleStop, Image, LoaderCircle, UnfoldVertical } from 'lucide-svelte';
-	import MessageSquareText from 'lucide-svelte/icons/message-square-text';
-	import Settings_2 from 'lucide-svelte/icons/settings-2';
-	import Trash_2 from 'lucide-svelte/icons/trash-2';
+	import { Brain, CircleStop, Image, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
+	import MessageSquareText from '@lucide/svelte/icons/message-square-text';
+	import Settings_2 from '@lucide/svelte/icons/settings-2';
+	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -263,15 +263,21 @@
 	}
 </script>
 
-<div class="prompt-editor {editor.isCodeEditor ? 'prompt-editor--fullscreen' : ''}">
-	<div class="prompt-editor__form">
-		<div class="prompt-editor__project">
+<div
+	class="prompt-editor sticky bottom-0 z-10 mx-auto flex w-full flex-col border-t bg-shade-1 p-3 md:p-4 lg:p-6 2xl:max-w-[80ch] 2xl:rounded-t-lg 2xl:border-l 2xl:border-r {editor.isCodeEditor
+		? 'prompt-editor--fullscreen min-h-[60dvh] md:min-h-[75dvh]'
+		: ''}"
+>
+	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
+		<div
+			class="prompt-editor__project grid grid-cols-[auto,max-content,max-content] items-end gap-x-2"
+		>
 			<FieldSelectModel isLabelVisible={false} bind:value={modelName} />
 
-			<nav class="segmented-nav">
+			<nav class="segmented-nav flex h-full items-center rounded bg-shade-2 p-0.5">
 				<div
-					class="segmented-nav__button {editor.view === 'messages'
-						? 'segmented-nav__button--active'
+					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'messages'
+						? 'segmented-nav__button--active bg-shade-0 text-neutral-50 shadow'
 						: ''}"
 				>
 					<Button
@@ -285,8 +291,8 @@
 					</Button>
 				</div>
 				<div
-					class="segmented-nav__button {editor.view === 'controls'
-						? 'segmented-nav__button--active'
+					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'controls'
+						? 'segmented-nav__button--active bg-shade-0 text-neutral-50 shadow'
 						: ''}"
 				>
 					<Button
@@ -303,7 +309,7 @@
 
 			<Button
 				variant={editor.isCodeEditor ? 'default' : 'outline'}
-				class="prompt-editor__toggle"
+				class="prompt-editor__toggle h-full"
 				onclick={toggleCodeEditor}
 			>
 				<UnfoldVertical class="base-icon" />
@@ -316,7 +322,7 @@
 			<Field name="prompt">
 				<textarea
 					name="prompt"
-					class="prompt-editor__textarea"
+					class="prompt-editor__textarea base-input max-h-48 min-h-14 resize-none scroll-p-2 px-3 py-2"
 					placeholder={$LL.promptPlaceholder()}
 					bind:this={editor.promptTextarea}
 					bind:value={editor.prompt}
@@ -327,11 +333,11 @@
 		{/if}
 
 		{#if attachments.length}
-			<div class="attachments">
+			<div class="attachments overflow-scrollbar flex max-h-48 flex-col gap-y-1">
 				{#each attachments as attachment (attachment.type === 'knowledge' ? attachment.fieldId : attachment.id)}
-					<div class="attachment">
+					<div class="attachment flex w-full justify-between">
 						{#if attachment.type === 'knowledge'}
-							<div class="attachment__knowledge">
+							<div class="attachment__knowledge w-full">
 								<KnowledgeSelect
 									value={attachment.knowledge?.id}
 									options={$knowledgeStore?.filter(
@@ -367,8 +373,8 @@
 			</div>
 		{/if}
 
-		<nav class="prompt-editor__toolbar">
-			<div class="attachments-toolbar">
+		<nav class="prompt-editor__toolbar flex items-center justify-between gap-x-2">
+			<div class="attachments-toolbar flex h-full gap-x-1">
 				<Button
 					variant="outline"
 					onclick={() => {
@@ -388,7 +394,7 @@
 				</Button>
 			</div>
 
-			<div class="prompt-editor__submit">
+			<div class="prompt-editor__submit flex h-full items-center gap-x-2">
 				{#if editor.messageIndexToEdit !== null}
 					<Button
 						class="h-full"
@@ -420,11 +426,15 @@
 						variant="outline"
 						onclick={stopCompletion}
 					>
-						<div class="prompt-editor__stop">
-							<span class="prompt-editor__stop-icon">
+						<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
+							<span
+								class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
+							>
 								<CircleStop class=" base-icon" />
 							</span>
-							<span class="prompt-editor__loading-icon">
+							<span
+								class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
+							>
 								<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
 							</span>
 						</div>
@@ -436,96 +446,8 @@
 </div>
 
 <style lang="postcss">
-	.prompt-editor {
-		@apply sticky bottom-0 z-10 mx-auto flex w-full flex-col border-t bg-shade-1 p-3;
-		@apply md:p-4;
-		@apply lg:p-6;
-		@apply 2xl:max-w-[80ch] 2xl:rounded-t-lg 2xl:border-l 2xl:border-r;
-	}
-
-	.prompt-editor__project {
-		@apply grid grid-cols-[auto,max-content,max-content] items-end gap-x-2;
-	}
-
-	:global(.prompt-editor__toggle) {
-		@apply h-full;
-	}
-
-	.prompt-editor--fullscreen {
-		@apply min-h-[60dvh];
-		@apply md:min-h-[75dvh];
-	}
-
-	.prompt-editor__form {
-		@apply flex h-full min-h-0 flex-col gap-y-2;
-	}
-
 	.prompt-editor__textarea {
-		@apply base-input max-h-48 min-h-14 resize-none scroll-p-2 px-3 py-2;
 		field-sizing: content;
 		font-variant-ligatures: none;
-	}
-
-	.prompt-editor__toolbar {
-		@apply flex items-center justify-between gap-x-2;
-	}
-
-	.prompt-editor__stop {
-		@apply relative -mx-3 -my-2 h-9 w-9;
-	}
-
-	.prompt-editor__stop:hover {
-		.prompt-editor__stop-icon {
-			@apply opacity-100;
-		}
-
-		.prompt-editor__loading-icon {
-			@apply opacity-0;
-		}
-	}
-
-	.prompt-editor__submit {
-		@apply flex h-full items-center gap-x-2;
-	}
-
-	.prompt-editor__stop-icon,
-	.prompt-editor__loading-icon {
-		@apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
-	}
-
-	.prompt-editor__stop-icon {
-		@apply opacity-0;
-	}
-
-	.prompt-editor__loading-icon {
-		@apply opacity-100;
-	}
-
-	.segmented-nav {
-		@apply flex h-full items-center rounded bg-shade-2 p-0.5;
-	}
-
-	.segmented-nav__button {
-		@apply h-full rounded-sm text-shade-6;
-
-		&--active {
-			@apply bg-shade-0 text-neutral-50 shadow;
-		}
-	}
-
-	.attachments-toolbar {
-		@apply flex h-full gap-x-1;
-	}
-
-	.attachments {
-		@apply overflow-scrollbar flex max-h-48 flex-col gap-y-1;
-	}
-
-	.attachment {
-		@apply flex w-full justify-between;
-	}
-
-	.attachment__knowledge {
-		@apply w-full;
 	}
 </style>

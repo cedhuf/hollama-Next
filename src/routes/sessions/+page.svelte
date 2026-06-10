@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { ArrowRight, ArrowUp, MessageSquareText, Sparkles } from 'lucide-svelte';
+	import { ArrowRight, ArrowUp, MessageSquareText, Sparkles } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import { goto } from '$app/navigation';
 	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
@@ -57,11 +57,7 @@
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			<div class="mb-10 text-center">
-				<img
-					src="/favicon.png"
-					alt="Hollama Next"
-					class="mx-auto mb-6 h-12 w-12"
-				/>
+				<img src="/favicon.png" alt="Hollama Next" class="mx-auto mb-6 h-12 w-12" />
 				<h1 class="text-2xl font-semibold tracking-tight text-active">
 					{greeting}
 				</h1>
@@ -102,7 +98,9 @@
 					>
 						<Sparkles class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted" />
 						<span class="flex-1 leading-snug">{suggestion}</span>
-						<ArrowRight class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+						<ArrowRight
+							class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
+						/>
 					</button>
 				{/each}
 			</div>

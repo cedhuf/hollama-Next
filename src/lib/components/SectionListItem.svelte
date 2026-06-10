@@ -18,11 +18,12 @@
 
 	let { sitemap, id, title, subtitle }: Props = $props();
 	let isEditing = $state(false);
+	// svelte-ignore state_referenced_locally
 	let editedTitle = $state(title);
 	let titleInput: HTMLInputElement | null = $state(null);
 	let isDeleting = $state(false);
 
-	const isSession = sitemap === Sitemap.SESSIONS;
+	const isSession = $derived(sitemap === Sitemap.SESSIONS);
 
 	$effect(() => {
 		if (isEditing && titleInput) titleInput.focus();
@@ -52,17 +53,17 @@
 <!-- Need to use `#key id` to re-render the delete nav after deletion -->
 {#key id}
 	<div
-		class="section-list-item"
-		class:section-list-item--active={page.url.pathname.includes(id)}
-		class:section-list-item--confirm-deletion={isDeleting}
-		class:section-list-item--editing={isEditing}
+		class="section-list-item flex flex-row items-center justify-between border-b pr-3 last:border-b-0 group"
+		class:bg-shade-0={page.url.pathname.includes(id)}
+		class:confirm-deletion={isDeleting}
+		class:confirm-editing={isEditing}
 	>
 		{#if isEditing && isSession}
-			<div class="section-list-item__content">
+			<div class="section-list-item__content flex flex-1 flex-col px-6 py-3">
 				<input
 					bind:this={titleInput}
 					bind:value={editedTitle}
-					class="section-list-item__title-input"
+					class="section-list-item__title-input w-full bg-transparent text-sm font-bold focus:outline-none focus:ring-0"
 					type="text"
 					onkeydown={handleKeydown}
 				/>
@@ -72,12 +73,12 @@
 			</div>
 		{:else}
 			<a
-				class="section-list-item__a"
+				class="section-list-item__a relative z-0 w-full overflow-hidden text-ellipsis py-3 pl-5 pr-0 hover:text-active"
 				data-testid={isSession ? 'session-item' : 'knowledge-item'}
 				aria-label={(isSession ? $LL.session() : $LL.knowledge()) + `: ${id}`}
 				href={`/${sitemap}/${id}`}
 			>
-				<p class="section-list-item__title">
+				<p class="section-list-item__title max-w-full truncate whitespace-nowrap text-sm font-bold">
 					{title}
 				</p>
 				<Metadata>
@@ -86,9 +87,9 @@
 			</a>
 		{/if}
 		<nav
-			class="section-list-item__actions"
-			class:section-list-item__actions--confirm-deletion={isDeleting}
-			class:section-list-item__actions--editing={isEditing}
+			class="section-list-item__actions invisible flex flex-row items-center opacity-0 group-hover:visible group-hover:opacity-100"
+			class:visible={isDeleting || isEditing}
+			class:opacity-100={isDeleting || isEditing}
 		>
 			{#if isSession && !isDeleting}
 				<ButtonEdit
@@ -103,53 +104,3 @@
 		</nav>
 	</div>
 {/key}
-
-<style lang="postcss">
-	.section-list-item {
-		@apply flex flex-row items-center justify-between border-b pr-3;
-		@apply last:border-b-0;
-
-		&--confirm-deletion {
-			@apply confirm-deletion;
-		}
-
-		&--editing {
-			@apply confirm-editing;
-		}
-	}
-
-	.section-list-item__content {
-		@apply flex flex-1 flex-col px-6 py-3;
-	}
-
-	.section-list-item:hover .section-list-item__actions {
-		@apply visible opacity-100;
-	}
-
-	.section-list-item__actions {
-		@apply invisible flex flex-row items-center opacity-0;
-	}
-
-	.section-list-item__actions--confirm-deletion,
-	.section-list-item__actions--editing {
-		@apply visible opacity-100;
-	}
-
-	.section-list-item--active {
-		@apply bg-shade-0;
-	}
-
-	.section-list-item__a {
-		@apply relative z-0 w-full overflow-hidden text-ellipsis py-3 pl-5 pr-0;
-		@apply hover:text-active;
-	}
-
-	.section-list-item__title {
-		@apply max-w-full truncate whitespace-nowrap text-sm font-bold;
-	}
-
-	.section-list-item__title-input {
-		@apply w-full bg-transparent text-sm font-bold;
-		@apply focus:outline-none focus:ring-0;
-	}
-</style>

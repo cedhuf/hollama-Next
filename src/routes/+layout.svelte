@@ -13,10 +13,11 @@
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
-	import SettingsModal from './settings/SettingsModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { serversStore, settingsStore, StorageKey } from '$lib/localStorage';
 	import { checkForUpdates } from '$lib/updates';
+
+	import SettingsModal from './settings/SettingsModal.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -48,9 +49,10 @@
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;
 			if (mode === 'system') {
-				theme = (prefersDark ?? window.matchMedia('(prefers-color-scheme: dark)').matches)
-					? 'dark'
-					: 'light';
+				theme =
+					(prefersDark ?? window.matchMedia('(prefers-color-scheme: dark)').matches)
+						? 'dark'
+						: 'light';
 			} else {
 				theme = mode;
 			}
@@ -172,7 +174,16 @@
 
 <style lang="postcss">
 	:global(html) {
-		@apply fixed bg-shade-0 text-base tracking-normal;
-		@apply text-base lg:bg-shade-2;
+		position: fixed;
+		background-color: var(--color-shade-0);
+		font-size: 1rem;
+		line-height: 1.5rem;
+		letter-spacing: normal;
+	}
+
+	@media (width >= 64rem) {
+		:global(html) {
+			background-color: var(--color-shade-2);
+		}
 	}
 </style>

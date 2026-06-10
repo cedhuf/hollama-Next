@@ -25,8 +25,8 @@
 		<strong>{$LL.servers()}</strong>
 	</P>
 
-	<div class="connections">
-		<div class="connections__add">
+	<div class="connections mb-4 flex flex-col gap-y-2">
+		<div class="connections__add grid grid-cols-[auto_max-content] gap-2">
 			{#key newConnectionType}
 				<FieldSelect
 					name="connectionType"
@@ -47,7 +47,7 @@
 		</div>
 	</div>
 
-	<div class="servers">
+	<div class="servers flex flex-col gap-y-4">
 		{#if !$serversStore.length}
 			<div
 				class="col-span-full -mt-3 flex text-balance rounded-md border border-shade-3 text-center"
@@ -61,17 +61,3 @@
 		{/each}
 	</div>
 </Fieldset>
-
-<style lang="postcss">
-	.connections {
-		@apply mb-4 flex flex-col gap-y-2;
-	}
-
-	.connections__add {
-		@apply grid grid-cols-[auto_max-content] gap-2;
-	}
-
-	.servers {
-		@apply flex flex-col gap-y-4;
-	}
-</style>

@@ -21,7 +21,7 @@
 		{label}
 
 		{#if $$slots.status}
-			<div class="field-label-status">
+			<div class="field-label-status -mt-2 ml-auto max-h-1">
 				<slot name="status" />
 			</div>
 		{/if}
@@ -29,7 +29,7 @@
 
 	{#if type === 'number'}
 		<input
-			class="field-input"
+			class="field-input base-input"
 			id={name}
 			{disabled}
 			{placeholder}
@@ -47,7 +47,7 @@
 			https://stackoverflow.com/questions/57392773/error-type-attribute-cannot-be-dynamic-if-input-uses-two-way-binding/75298645#75298645
 		-->
 		<input
-			class="field-input"
+			class="field-input base-input"
 			id={name}
 			{disabled}
 			{placeholder}
@@ -66,13 +66,3 @@
 		<slot name="help" />
 	</svelte:fragment>
 </Field>
-
-<style lang="postcss">
-	.field-input {
-		@apply base-input;
-	}
-
-	.field-label-status {
-		@apply -mt-2 ml-auto max-h-1;
-	}
-</style>

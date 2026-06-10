@@ -11,18 +11,12 @@
 	<slot />
 
 	{#if browser}
-		<span class="tag" class:tag--active={!disabled}>
+		<span
+			class="tag ml-2.5 inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold {!disabled
+				? 'border-neutral-50/40'
+				: ''}"
+		>
 			{hasMetaKey ? (navigator.userAgent.indexOf('Mac') !== -1 ? '⌘' : 'Ctrl') : ''} ↵
 		</span>
 	{/if}
 </Button>
-
-<style lang="postcss">
-	.tag {
-		@apply ml-2.5 inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold;
-	}
-
-	.tag--active {
-		@apply border-neutral-50/40;
-	}
-</style>

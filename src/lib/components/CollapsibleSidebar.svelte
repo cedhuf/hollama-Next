@@ -6,7 +6,7 @@
 		PanelLeftClose,
 		Plus,
 		Settings2
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
@@ -15,13 +15,13 @@
 	import { knowledgeStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { formatSessionMetadata, getSessionTitle } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
+	import { settingsModalOpen } from '$lib/stores/modal';
 	import { updateStatusStore } from '$lib/updates';
 	import { formatTimestampToNow } from '$lib/utils';
-	import { settingsModalOpen } from '$lib/stores/modal';
 
+	import { generateNewUrl } from './ButtonNew';
 	import ButtonNew from './ButtonNew.svelte';
 	import EmptyMessage from './EmptyMessage.svelte';
-	import { generateNewUrl } from './ButtonNew';
 	import SectionList from './SectionList.svelte';
 	import SectionListItem from './SectionListItem.svelte';
 
@@ -78,9 +78,8 @@
 <nav
 	class="flex h-full shrink-0 flex-col overflow-hidden bg-shade-1 transition-all duration-200 ease-in-out lg:rounded-xl lg:border
 		{isCollapsed
-			? 'hidden w-16 lg:flex lg:mr-2'
-			: 'fixed inset-y-0 left-0 z-30 w-[90vw] lg:relative lg:z-auto lg:w-96 lg:mr-4'
-		}"
+		? 'hidden w-16 lg:flex lg:mr-2'
+		: 'fixed inset-y-0 left-0 z-30 w-[90vw] lg:relative lg:z-auto lg:w-96 lg:mr-4'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
@@ -120,10 +119,10 @@
 			class="duration-25 flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:text-active
 				{isCollapsed ? 'w-full' : 'flex-1'}
 				{activeSection === 'sessions' && pathname.includes('/sessions')
-					? 'bg-shade-0 text-active shadow-sm'
-					: activeSection === 'sessions' && !pathname.includes('/sessions')
-						? 'bg-shade-1 text-muted shadow-sm'
-						: 'text-muted'}"
+				? 'bg-shade-0 text-active shadow-sm'
+				: activeSection === 'sessions' && !pathname.includes('/sessions')
+					? 'bg-shade-1 text-muted shadow-sm'
+					: 'text-muted'}"
 			role="tab"
 			aria-selected={activeSection === 'sessions'}
 			aria-controls="sessions-panel"
@@ -136,9 +135,7 @@
 			onclick={() => setActiveSection('knowledge')}
 			class="duration-25 flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:text-active
 				{isCollapsed ? 'w-full' : 'flex-1'}
-				{activeSection === 'knowledge'
-					? 'bg-shade-0 text-active shadow-sm'
-					: 'text-muted'}"
+				{activeSection === 'knowledge' ? 'bg-shade-0 text-active shadow-sm' : 'text-muted'}"
 			role="tab"
 			aria-selected={activeSection === 'knowledge'}
 			aria-controls="knowledge-panel"
@@ -227,7 +224,7 @@
 					<button
 						onclick={() => ($settingsModalOpen = true)}
 						class="duration-25 relative text-muted transition-colors hover:text-active {$updateStatusStore.showSidebarNotification
-							? "after:absolute after:-right-0.5 after:top-0 after:h-2 after:w-2 after:rounded-full after:bg-warning"
+							? 'after:absolute after:-right-0.5 after:top-0 after:h-2 after:w-2 after:rounded-full after:bg-warning'
 							: ''}"
 						title={$LL.settings()}
 					>
@@ -237,7 +234,11 @@
 								style="background-color: {$settingsStore.profileColor || '#6366f1'}"
 							>
 								{#if $settingsStore.profileAvatar}
-									<img src={$settingsStore.profileAvatar} alt="Avatar" class="h-9 w-9 rounded-full object-cover" />
+									<img
+										src={$settingsStore.profileAvatar}
+										alt="Avatar"
+										class="h-9 w-9 rounded-full object-cover"
+									/>
 								{:else}
 									<span class="text-sm font-bold text-white">{getInitials()}</span>
 								{/if}
@@ -277,10 +278,11 @@
 
 				<button
 					onclick={() => ($settingsModalOpen = true)}
-					class="duration-25 relative flex items-center rounded-md p-2 text-muted transition-colors hover:text-active {!$settingsStore.profileFirstName && !$settingsStore.profileLastName
+					class="duration-25 relative flex items-center rounded-md p-2 text-muted transition-colors hover:text-active {!$settingsStore.profileFirstName &&
+					!$settingsStore.profileLastName
 						? 'ml-auto'
 						: ''} {$updateStatusStore.showSidebarNotification
-						? "before:absolute before:right-1 before:top-1 before:h-2 before:w-2 before:rounded-full before:bg-warning"
+						? 'before:absolute before:right-1 before:top-1 before:h-2 before:w-2 before:rounded-full before:bg-warning'
 						: ''}"
 				>
 					<Settings2 class="h-5 w-5" />

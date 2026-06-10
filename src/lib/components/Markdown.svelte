@@ -87,6 +87,8 @@
 </div>
 
 <style lang="postcss">
+	@reference "../../app.pcss";
+
 	.markdown :global(> *:first-child) {
 		@apply mt-0;
 	}
@@ -153,7 +155,7 @@
 	}
 
 	.markdown :global(blockquote) {
-		@apply my-3 border-l-4 border-l-shade-3 pl-4 italic text-muted;
+		@apply border-l-shade-3 text-muted my-3 border-l-4 pl-4 italic;
 	}
 
 	.markdown :global(blockquote > p) {
@@ -174,7 +176,7 @@
 
 	.markdown :global(th),
 	.markdown :global(td) {
-		@apply border-b border-l border-shade-3 px-3 py-1 text-left text-sm;
+		@apply border-shade-3 border-b border-l px-3 py-1 text-left text-sm;
 	}
 
 	.markdown :global(th) {
@@ -208,7 +210,7 @@
 	/* Code */
 
 	.markdown :global(pre) {
-		@apply overflow-scrollbar relative my-6 rounded-md border border-shade-2;
+		@apply overflow-scrollbar border-shade-2 relative my-6 rounded-md border;
 		@apply first:mt-0;
 	}
 
@@ -248,7 +250,7 @@
 	}
 
 	.markdown :global(pre > .copy-button) {
-		@apply absolute right-2 top-2 rounded-md bg-shade-1 opacity-0;
+		@apply bg-shade-1 absolute top-2 right-2 rounded-md opacity-0;
 	}
 
 	.markdown :global(pre:hover > .copy-button) {

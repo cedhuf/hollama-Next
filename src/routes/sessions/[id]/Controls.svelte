@@ -41,7 +41,7 @@
 
 	// HACK: Stop is a `string[]` so we are hardcoding it to a single value for now
 	let stop: string = $state(session.options.stop?.[0] ?? '');
-	let knowledgeId: string | undefined = $state();
+	let knowledgeId: string = $state('');
 
 	$effect(() => {
 		if (stop) session.options.stop = [stop];
@@ -49,16 +49,13 @@
 
 	$effect(() => {
 		if (session.systemPrompt.knowledge && !knowledgeId) {
-			// Initial load: set knowledgeId if knowledge exists
 			knowledgeId = session.systemPrompt.knowledge.id;
 		} else if (knowledgeId !== session.systemPrompt.knowledge?.id) {
-			// Knowledge selection changed
 			if (knowledgeId) {
 				const knowledge = loadKnowledge(knowledgeId);
 				session.systemPrompt.knowledge = knowledge;
 				session.systemPrompt.content = knowledge.content;
 			} else {
-				// Clear knowledge if knowledgeId is undefined
 				session.systemPrompt.knowledge = undefined;
 				session.systemPrompt.content = '';
 			}
@@ -66,7 +63,9 @@
 	});
 </script>
 
-<div class="controls">
+<div
+	class="controls base-fieldset-container flex h-full flex-col gap-y-6 overflow-scroll md:gap-y-8"
+>
 	<Fieldset>
 		<P><strong>{$LL.systemPrompt()}</strong></P>
 		<KnowledgeSelect bind:value={knowledgeId} bind:options={$knowledgeStore} showNav={true} />
@@ -74,7 +73,7 @@
 
 	<Fieldset>
 		<P><strong>{$LL.modelOptions()}</strong></P>
-		<div class="control-inputs">
+		<div class="control-inputs grid grid-cols-2 gap-2">
 			<FieldInput
 				name="num_keep"
 				label={$LL.numKeep()}
@@ -227,7 +226,7 @@
 				bind:value={stop}
 			/>
 		</div>
-		<div class="control-checkboxes">
+		<div class="control-checkboxes flex w-full flex-wrap gap-2">
 			<FieldCheckbox
 				label={$LL.penalizeNewline()}
 				bind:checked={session.options.penalize_newline}
@@ -238,7 +237,7 @@
 
 	<Fieldset>
 		<P><strong>{$LL.runtimeOptions()}</strong></P>
-		<div class="control-inputs">
+		<div class="control-inputs grid grid-cols-2 gap-2">
 			<FieldInput
 				name="num_ctx"
 				label={$LL.numCtx()}
@@ -285,7 +284,7 @@
 				bind:value={session.options.num_thread}
 			/>
 		</div>
-		<div class="control-checkboxes">
+		<div class="control-checkboxes flex w-full flex-wrap gap-2">
 			<FieldCheckbox label={$LL.numa()} bind:checked={session.options.numa} name="numa" />
 			<FieldCheckbox
 				label={$LL.lowVram()}
@@ -311,18 +310,3 @@
 		</div>
 	</Fieldset>
 </div>
-
-<style lang="postcss">
-	.controls {
-		@apply base-fieldset-container flex h-full flex-col gap-y-6 overflow-scroll;
-		@apply md:gap-y-8;
-	}
-
-	.control-inputs {
-		@apply grid grid-cols-2 gap-2;
-	}
-
-	.control-checkboxes {
-		@apply flex w-full flex-wrap gap-2;
-	}
-</style>

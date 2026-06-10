@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { Settings2 } from '@lucide/svelte';
 	import { onMount, tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
-	import { page } from '$app/state';
 	import { beforeNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
-	import { Settings2 } from 'lucide-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -16,7 +16,6 @@
 	import Header from '$lib/components/Header.svelte';
 	import Metadata from '$lib/components/Metadata.svelte';
 	import { ConnectionType } from '$lib/connections';
-	import { settingsModalOpen } from '$lib/stores/modal';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import {
 		formatSessionMetadata,
@@ -27,6 +26,7 @@
 		type Message
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
+	import { settingsModalOpen } from '$lib/stores/modal';
 
 	import type { PageData } from './$types';
 	import Controls from './Controls.svelte';
@@ -40,6 +40,7 @@
 
 	let { data }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let session = $state(loadSession(data.id));
 	let editor = $state<Editor>({
 		prompt: '',
@@ -316,7 +317,7 @@
 	}
 </script>
 
-<div class="session">
+<div class="session flex h-full w-full flex-col overflow-hidden">
 	<Head
 		title={[editor.isNewSession ? $LL.newSession() : getSessionTitle(session), $LL.sessions()]}
 	/>
@@ -347,7 +348,10 @@
 	{#if editor.view === 'controls'}
 		<Controls bind:session />
 	{:else}
-		<div class="session__history" bind:this={messagesWindow}>
+		<div
+			class="session__history base-fieldset-container overflow-scrollbar flex-grow"
+			bind:this={messagesWindow}
+		>
 			<Messages bind:session bind:editor {handleRetry} />
 		</div>
 	{/if}
@@ -361,13 +365,3 @@
 		{scrollToBottom}
 	/>
 </div>
-
-<style lang="postcss">
-	.session {
-		@apply flex h-full w-full flex-col overflow-hidden;
-	}
-
-	.session__history {
-		@apply base-fieldset-container overflow-scrollbar flex-grow;
-	}
-</style>
