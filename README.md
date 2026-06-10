@@ -50,9 +50,9 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 - 🐳 [Self-hosting](SELF_HOSTING.md) with Docker
 - 🐞 [Contribute](CONTRIBUTING.md)
 
-| ![session](tests/docs.test.ts-snapshots/session.png)         | ![settings](tests/docs.test.ts-snapshots/settings.png)   |
+| ![session](static/screenshots/session.png)                   | ![settings](static/screenshots/settings.png)             |
 | ------------------------------------------------------------ | -------------------------------------------------------- |
-| ![session-new](tests/docs.test.ts-snapshots/session-new.png) | ![knowledge](tests/docs.test.ts-snapshots/knowledge.png) |
+| ![session-new](static/screenshots/session-new.png)           | ![knowledge](static/screenshots/knowledge.png)           |
 
 ### License
 
