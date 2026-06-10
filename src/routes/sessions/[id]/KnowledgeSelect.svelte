@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain } from 'lucide-svelte';
+	import { Brain } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -8,13 +8,23 @@
 	import { type Knowledge } from '$lib/knowledge';
 	import { Sitemap } from '$lib/sitemap';
 
-	export let value: string | undefined = undefined;
-	export let options: Knowledge[] = [];
-	export let showNav: boolean = false;
-	export let showLabel: boolean = true;
-	export let allowClear: boolean = true;
-	export let onChange: ((knowledgeId: string) => void) | undefined = undefined;
-	export let fieldId: string = 'knowledge';
+	let {
+		value = $bindable(''),
+		options = $bindable([] as Knowledge[]),
+		showNav = false,
+		showLabel = true,
+		allowClear = true,
+		onChange = undefined as ((knowledgeId: string) => void) | undefined,
+		fieldId = 'knowledge'
+	}: {
+		value?: string;
+		options?: Knowledge[];
+		showNav?: boolean;
+		showLabel?: boolean;
+		allowClear?: boolean;
+		onChange?: ((knowledgeId: string) => void) | undefined;
+		fieldId?: string;
+	} = $props();
 </script>
 
 <FieldSelect
@@ -28,7 +38,7 @@
 	onChange={(option) => onChange?.(option.value)}
 	{allowClear}
 >
-	<svelte:fragment slot="nav">
+	{#snippet nav()}
 		{#if showNav}
 			<Button
 				aria-label={$LL.newKnowledge()}
@@ -39,5 +49,5 @@
 				<Brain class="base-icon" />
 			</Button>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </FieldSelect>

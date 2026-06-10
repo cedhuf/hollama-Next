@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Pencil, X } from 'lucide-svelte';
+	import { Check, Pencil, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 
@@ -26,11 +26,11 @@
 	}
 </script>
 
-<div class="edit-button" class:edit--confirm-edit={shouldConfirmEdit}>
+<div class="edit-button flex h-full flex-row" class:edit--confirm-edit={shouldConfirmEdit}>
 	{#if shouldConfirmEdit}
 		<Button
 			variant="icon"
-			class="edit-button__confirm"
+			class="edit-button__confirm hover:text-positive"
 			on:click={handleConfirm}
 			title={$LL.confirmEdit()}
 		>
@@ -56,13 +56,3 @@
 		</Button>
 	{/if}
 </div>
-
-<style lang="postcss">
-	.edit-button {
-		@apply flex h-full flex-row;
-	}
-
-	.edit-button :global(.edit-button__confirm) {
-		@apply hover:text-positive;
-	}
-</style>

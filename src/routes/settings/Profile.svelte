@@ -67,21 +67,21 @@
 
 	<FieldInput
 		name="profile-first-name"
-		label={"First name" as unknown as import('typesafe-i18n').LocalizedString}
+		label={'First name' as unknown as import('typesafe-i18n').LocalizedString}
 		bind:value={firstNameValue}
-		placeholder={"First name" as unknown as import('typesafe-i18n').LocalizedString}
+		placeholder={'First name' as unknown as import('typesafe-i18n').LocalizedString}
 	/>
 
 	<FieldInput
 		name="profile-last-name"
-		label={"Last name" as unknown as import('typesafe-i18n').LocalizedString}
+		label={'Last name' as unknown as import('typesafe-i18n').LocalizedString}
 		bind:value={lastNameValue}
-		placeholder={"Last name" as unknown as import('typesafe-i18n').LocalizedString}
+		placeholder={'Last name' as unknown as import('typesafe-i18n').LocalizedString}
 	/>
 
 	<FieldSelect
 		name="profile-role"
-		label={"Role" as unknown as import('typesafe-i18n').LocalizedString}
+		label={'Role' as unknown as import('typesafe-i18n').LocalizedString}
 		bind:value={roleValue}
 		allowClear={false}
 		allowSearch={false}
@@ -91,27 +91,39 @@
 		]}
 	/>
 
-	<div class="field-wrapper">
-		<div class="field-label-root">Avatar URL (optional)</div>
-		<div class="field-container">
+	<div class="field-wrapper flex flex-col gap-y-1">
+		<div
+			class="field-label-root flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none"
+		>
+			Avatar URL (optional)
+		</div>
+		<div
+			class="field-container flex w-full flex-col gap-y-1 rounded-md border bg-shade-0 text-sm focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2"
+		>
 			<input
 				id="profile-avatar"
 				type="text"
-				class="field-input"
+				class="field-input base-input"
 				placeholder="https://example.com/avatar.jpg"
 				bind:value={avatarValue}
 			/>
 		</div>
 	</div>
 
-	<div class="field-wrapper">
-		<div class="field-label-root">Avatar color</div>
-		<div class="color-swatches">
+	<div class="field-wrapper flex flex-col gap-y-1">
+		<div
+			class="field-label-root flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none"
+		>
+			Avatar color
+		</div>
+		<div class="color-swatches flex flex-wrap gap-2 rounded-md border bg-shade-0 px-3 py-3">
 			{#each PRESET_COLORS as presetColor}
 				<button
 					onclick={() => (colorValue = presetColor)}
-					class="color-swatch"
+					class="color-swatch h-7 w-7 rounded-full border-2 border-transparent transition-all"
 					class:color-swatch--active={colorValue === presetColor}
+					class:border-shade-6={colorValue === presetColor}
+					class:scale-110={colorValue === presetColor}
 					style="background-color: {presetColor}"
 					aria-label={presetColor}
 				></button>
@@ -119,83 +131,31 @@
 		</div>
 	</div>
 
-	<div class="preview-section">
+	<div class="preview-section flex flex-col gap-y-2">
 		<div class="field-label-root">Preview</div>
-		<div class="preview-card">
-			<div class="avatar-circle" style="background-color: {colorValue}">
+		<div class="preview-card flex items-center gap-3 rounded-md border bg-shade-0 px-4 py-3">
+			<div
+				class="avatar-circle flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+				style="background-color: {colorValue}"
+			>
 				{#if avatarValue}
-					<img src={avatarValue} alt="Avatar" class="avatar-image" />
+					<img
+						src={avatarValue}
+						alt="Avatar"
+						class="avatar-image h-10 w-10 rounded-full object-cover"
+					/>
 				{:else}
-					<span class="avatar-initials">{getInitials(firstNameValue, lastNameValue)}</span>
+					<span class="avatar-initials text-sm font-bold text-white"
+						>{getInitials(firstNameValue, lastNameValue)}</span
+					>
 				{/if}
 			</div>
-			<div class="preview-info">
-				<span class="preview-name">{getDisplayName(firstNameValue, lastNameValue)}</span>
-				<span class="preview-role">{roleLabel[roleValue]}</span>
+			<div class="preview-info flex flex-col">
+				<span class="preview-name text-sm font-medium"
+					>{getDisplayName(firstNameValue, lastNameValue)}</span
+				>
+				<span class="preview-role text-xs text-muted">{roleLabel[roleValue]}</span>
 			</div>
 		</div>
 	</div>
 </Fieldset>
-
-<style lang="postcss">
-	.field-wrapper {
-		@apply flex flex-col gap-y-1;
-	}
-
-	.field-label-root {
-		@apply flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none;
-	}
-
-	.field-container {
-		@apply flex w-full flex-col gap-y-1 rounded-md border bg-shade-0 text-sm;
-		@apply focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2;
-	}
-
-	.field-input {
-		@apply base-input;
-	}
-
-	.color-swatches {
-		@apply flex flex-wrap gap-2 rounded-md border bg-shade-0 px-3 py-3;
-	}
-
-	.color-swatch {
-		@apply h-7 w-7 rounded-full border-2 border-transparent transition-all;
-	}
-
-	.color-swatch--active {
-		@apply border-shade-6 scale-110;
-	}
-
-	.preview-section {
-		@apply flex flex-col gap-y-2;
-	}
-
-	.preview-card {
-		@apply flex items-center gap-3 rounded-md border bg-shade-0 px-4 py-3;
-	}
-
-	.avatar-circle {
-		@apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full;
-	}
-
-	.avatar-initials {
-		@apply text-sm font-bold text-white;
-	}
-
-	.avatar-image {
-		@apply h-10 w-10 rounded-full object-cover;
-	}
-
-	.preview-info {
-		@apply flex flex-col;
-	}
-
-	.preview-name {
-		@apply text-sm font-medium;
-	}
-
-	.preview-role {
-		@apply text-xs text-muted;
-	}
-</style>

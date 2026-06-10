@@ -8,22 +8,14 @@
 
 <Head title={$LL.messageOfTheDay()} />
 
-<section class="motd">
-	<div class="motd-markdown">
+<section class="motd base-section base-section-fullscreen px-5">
+	<div class="motd-markdown my-auto">
 		<Markdown markdown={data.motd} />
 	</div>
 </section>
 
 <style lang="postcss">
-	.motd {
-		@apply base-section base-section-fullscreen px-5;
-	}
-
-	.motd-markdown {
-		@apply my-auto;
-
-		:global(*) {
-			@apply text-balance;
-		}
+	.motd-markdown :global(*) {
+		text-wrap: balance;
 	}
 </style>

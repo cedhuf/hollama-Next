@@ -24,6 +24,7 @@
 
 	let { data }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let knowledge: Knowledge = $state(loadKnowledge(data.id));
 	let name: string | undefined = $state();
 	let content: string = $state('');
@@ -46,7 +47,7 @@
 </script>
 
 <Head title={[knowledge.name ? knowledge.name : $LL.newKnowledge(), $LL.knowledge()]} />
-<div class="knowledge">
+<div class="knowledge flex h-full w-full flex-col">
 	<Header confirmDeletion={shouldConfirmDeletion}>
 		{#snippet headline()}
 			<p data-testid="knowledge-id" class="font-bold leading-none">
@@ -67,7 +68,7 @@
 		{/snippet}
 	</Header>
 
-	<div class="knowledge__form">
+	<div class="knowledge__form base-fieldset-container overflow-scrollbar flex h-full">
 		<Fieldset>
 			<FieldInput name="name" label={$LL.name()} bind:value={name} />
 
@@ -81,13 +82,3 @@
 		</Fieldset>
 	</div>
 </div>
-
-<style lang="postcss">
-	.knowledge {
-		@apply flex h-full w-full flex-col;
-	}
-
-	.knowledge__form {
-		@apply base-fieldset-container overflow-scrollbar flex h-full;
-	}
-</style>

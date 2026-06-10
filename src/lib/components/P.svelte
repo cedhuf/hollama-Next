@@ -8,16 +8,13 @@
 	let { children }: Props = $props();
 </script>
 
-<p class="p">
+<p class="p text-sm">
 	{@render children?.()}
 </p>
 
-<style lang="postcss">
-	.p {
-		@apply text-sm;
-
-		:global(strong) {
-			@apply font-medium leading-none;
-		}
+<style>
+	.p :global(strong) {
+		font-weight: 500;
+		line-height: 1;
 	}
 </style>

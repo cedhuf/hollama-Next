@@ -73,4 +73,7 @@ export const settingsStore = createLocalStorageStore<Settings>(
 );
 export const serversStore = createLocalStorageStore<Server[]>(StorageKey.HollamaNextServers, []);
 export const sessionsStore = createLocalStorageStore<Session[]>(StorageKey.HollamaNextSessions, []);
-export const knowledgeStore = createLocalStorageStore<Knowledge[]>(StorageKey.HollamaNextKnowledge, []);
+export const knowledgeStore = createLocalStorageStore<Knowledge[]>(
+	StorageKey.HollamaNextKnowledge,
+	[]
+);

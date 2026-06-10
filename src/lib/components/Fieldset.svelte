@@ -9,26 +9,16 @@
 	let { legend, children }: Props = $props();
 </script>
 
-<fieldset class="fieldset {legend ? 'fieldset--with-legend' : ''}">
+<fieldset
+	class="fieldset container mx-auto flex max-w-[80ch] flex-col gap-y-3 {legend
+		? 'fieldset--with-legend rounded-md border border-shade-4 p-4'
+		: ''}"
+>
 	{#if legend}
-		<legend class="fieldset__legend">
+		<legend class="fieldset__legend flex items-stretch gap-x-2">
 			{@render legend?.()}
 		</legend>
 	{/if}
 
 	{@render children?.()}
 </fieldset>
-
-<style lang="postcss">
-	.fieldset {
-		@apply container mx-auto flex max-w-[80ch] flex-col gap-y-3;
-	}
-
-	.fieldset--with-legend {
-		@apply rounded-md border border-shade-4 p-4;
-	}
-
-	.fieldset__legend {
-		@apply flex items-stretch gap-x-2;
-	}
-</style>

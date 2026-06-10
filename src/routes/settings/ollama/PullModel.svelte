@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CloudDownload } from 'lucide-svelte';
+	import { CloudDownload } from '@lucide/svelte';
 	import type { ErrorResponse, ProgressResponse, StatusResponse } from 'ollama/browser';
 	import { toast } from 'svelte-sonner';
 
@@ -19,7 +19,7 @@
 	let modelTag: string | undefined = $state();
 	let isPullInProgress = $state(false);
 
-	const strategy = new OllamaStrategy(server);
+	const strategy = $derived(new OllamaStrategy(server));
 
 	async function pullModel() {
 		if (!modelTag) return;

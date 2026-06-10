@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Combobox, type Selected } from 'bits-ui';
-	import { Check, ChevronsUpDown, X } from 'lucide-svelte';
+	import { Check, ChevronsUpDown, X } from '@lucide/svelte';
+	import { Combobox } from 'bits-ui';
 	import type { LocalizedString } from 'typesafe-i18n';
 
 	import LL from '$i18n/i18n-svelte';
@@ -8,108 +8,137 @@
 	import Button from '$lib/components/Button.svelte';
 	import Field from '$lib/components/Field.svelte';
 
-	export let name: string;
-	export let label: LocalizedString;
-	export let disabled: boolean | undefined = false;
-	export let options: OptionOrGroup[] = [];
-	export let value: string | undefined = undefined;
-	export let placeholder: string = '';
-	export let allowClear: boolean = true;
-	export let allowSearch: boolean = true;
-	export let isLabelVisible: boolean | undefined = true;
-	export let onChange: (value: Option) => void = () => {};
-
-	type Option = Selected<string> & { badge?: string | string[] };
+	type Option = { value: string; label: string; badge?: string | string[] };
 	type OptionGroup = { label: string; options: Option[] };
 	type OptionOrGroup = Option | OptionGroup;
 
 	const noSelection: Option = { value: '', label: '' };
 
-	let inputValue = '';
-	let selected: Option | undefined;
-	let touchedInput = false;
-	let open = false;
+	let {
+		name,
+		label,
+		disabled = false,
+		options = [] as OptionOrGroup[],
+		value = $bindable(),
+		placeholder = '',
+		allowClear = true,
+		allowSearch = true,
+		isLabelVisible = true,
+		onChange = (_value: Option) => {},
+		children,
+		nav
+	}: {
+		name: string;
+		label: LocalizedString;
+		disabled?: boolean;
+		options?: OptionOrGroup[];
+		value?: string;
+		placeholder?: string;
+		allowClear?: boolean;
+		allowSearch?: boolean;
+		isLabelVisible?: boolean;
+		onChange?: (value: Option) => void;
+		children?: import('svelte').Snippet;
+		nav?: import('svelte').Snippet;
+	} = $props();
 
-	$: isDisabled = disabled || options.length === 0;
-	$: selected = value
-		? options.flatMap((o) => ('options' in o ? o.options : o)).find((o) => o.value === value)
-		: undefined;
+	let open = $state(false);
+	let searchText = $state('');
+	let localValue = $state(value ?? '');
 
-	$: filteredOptions =
-		inputValue && touchedInput
+	$effect(() => {
+		localValue = value ?? '';
+	});
+
+	$effect(() => {
+		value = localValue || undefined;
+	});
+
+	let isDisabled = $derived(disabled || options.length === 0);
+
+	let selectedOption = $derived(
+		value
+			? options.flatMap((o) => ('options' in o ? o.options : o)).find((o) => o.value === value)
+			: undefined
+	);
+
+	let filteredOptions = $derived(
+		searchText
 			? options
-					.map((group) => {
-						if ('options' in group) {
+					.map((opt) => {
+						if ('options' in opt) {
 							return {
-								label: group.label,
-								options: group.options.filter((o) =>
-									o.label?.toLowerCase().includes(inputValue.toLowerCase())
+								label: opt.label,
+								options: opt.options.filter((o) =>
+									o.label?.toLowerCase().includes(searchText.toLowerCase())
 								)
 							};
 						}
-						return group.label?.toLowerCase().includes(inputValue.toLowerCase()) ? group : null;
+						return opt.label?.toLowerCase().includes(searchText.toLowerCase()) ? opt : null;
 					})
 					.filter(
-						(group): group is NonNullable<typeof group> & OptionOrGroup =>
-							group !== null && (!('options' in group) || group.options.length > 0)
+						(opt): opt is OptionOrGroup =>
+							opt !== null && (!('options' in opt) || opt.options.length > 0)
 					)
-			: options;
+			: options
+	);
 
-	function handleOnSelectedChange(e: Option | undefined) {
-		if (e) {
-			value = e.value;
-			selected = e;
-			onChange(e);
-		}
+	function handleInputClick() {
+		open = !open;
 	}
 
-	function handleOpenChange(wasMenuOpened: boolean) {
-		if (!wasMenuOpened) {
-			if (inputValue) {
-				inputValue = selected?.label ?? '';
-			} else {
-				handleClear();
+	function handleValueChange(newValue: string) {
+		if (newValue) {
+			localValue = newValue;
+			const option = options
+				.flatMap((o) => ('options' in o ? o.options : o))
+				.find((o) => o.value === newValue);
+			if (option) {
+				onChange(option);
 			}
 		}
 	}
 
-	function handleClear() {
-		value = undefined;
-		requestAnimationFrame(() => {
-			selected = noSelection;
-			onChange(noSelection);
-		});
+	function handleClear(e: MouseEvent) {
+		e.stopPropagation();
+		localValue = '';
+		onChange(noSelection);
 	}
 </script>
 
-<Field {name} disabled={isDisabled} hasNav={$$slots.nav} {isLabelVisible}>
+<Field {name} disabled={isDisabled} hasNav={!!nav} {isLabelVisible}>
 	<svelte:fragment slot="label">{label}</svelte:fragment>
 	<Combobox.Root
-		bind:touchedInput
-		bind:inputValue
+		type="single"
 		bind:open
-		{selected}
+		bind:value={localValue}
 		disabled={isDisabled}
-		items={filteredOptions.flatMap((o) => ('options' in o ? o.options : o))}
-		onSelectedChange={handleOnSelectedChange}
-		onOpenChange={handleOpenChange}
+		onValueChange={handleValueChange}
 	>
-		<div class="field-select-input">
+		<div class="field-select-input relative flex items-center">
 			<Combobox.Input
 				spellcheck="false"
-				class="field-combobox-input {isLabelVisible ? '' : 'field-combobox-input--no-label'}"
-				placeholder={selected?.value ? selected.label : placeholder}
+				class="field-combobox-input base-input pr-14 text-sm {isLabelVisible
+					? ''
+					: 'field-combobox-input--no-label py-2.5'}"
+				placeholder={selectedOption?.value ? selectedOption.label : placeholder}
 				id={name}
 				disabled={isDisabled}
-				aria-labelledby={`${name}-label`}
-				readonly={allowSearch ? null : true}
+				readonly={!allowSearch}
+				onclick={handleInputClick}
+				oninput={(e) => {
+					const target = e.currentTarget as HTMLInputElement;
+					searchText = target.value;
+				}}
 			/>
 
-			<nav class="field-select-nav">
-				{#if allowClear && selected?.value}
+			<nav
+				class="field-select-nav absolute bottom-0 right-0 m-1 flex items-center"
+			>
+				{#if allowClear && localValue}
 					<Button
 						variant="icon"
-						on:click={handleClear}
+						onclick={handleClear}
 						title={$LL.clear()}
 						class="pointer-events-auto"
 					>
@@ -117,129 +146,108 @@
 					</Button>
 				{/if}
 
-				<button class="pointer-events-none py-2 pr-1">
+				<Combobox.Trigger class="py-2 pr-1">
 					<ChevronsUpDown class="base-icon text-muted" />
-				</button>
+				</Combobox.Trigger>
 			</nav>
 		</div>
 
-		<Combobox.Content sideOffset={4} class="field-combobox-content">
+		<Combobox.Content
+			sideOffset={4}
+			class="field-combobox-content overflow-scrollbar relative z-10 max-h-64 max-w-full rounded-md bg-shade-0 shadow-md"
+		>
 			{#each filteredOptions as group (group.label)}
 				{#if 'options' in group}
-					<div class="field-combobox-group">
-						<div class="field-combobox-group-label">{group.label}</div>
+					<Combobox.Group>
+						<Combobox.GroupHeading
+							class="field-combobox-group-label sticky top-0 border-b border-shade-3 bg-shade-2 px-3 py-2 text-xs font-semibold text-muted"
+							>{group.label}</Combobox.GroupHeading
+						>
 						{#if group.options.length > 0}
 							{#each group.options as option (option.value)}
 								{#if option.label}
 									<Combobox.Item
 										value={option.value}
 										label={option.label}
-										class="field-combobox-item"
+										class="field-combobox-item grid grid-cols-[24px,auto,max-content] items-center px-3 py-1.5 text-sm data-[highlighted]:bg-shade-1"
 									>
-										<Combobox.ItemIndicator class="field-combobox-item-indicator">
-											<Check class="base-icon" />
-										</Combobox.ItemIndicator>
-										<div class="field-combobox-item-label">
-											<span class="field-combobox-item-label-option" title={option.label}>
-												{option.label}
-											</span>
-											{#if option.badge}
-												{#if Array.isArray(option.badge)}
-													<div class="field-select-badge">
-														{#each option.badge as badge (badge)}
-															<Badge
-																variant={badge === 'openai' || badge === 'ollama'
-																	? badge
-																	: undefined}
-															>
-																{badge}
-															</Badge>
-														{/each}
-													</div>
-												{:else}
-													<Badge>{option.badge}</Badge>
-												{/if}
+										{#snippet children({ selected })}
+											{#if selected}
+												<span class="field-combobox-item-indicator flex items-center">
+													<Check class="base-icon" />
+												</span>
 											{/if}
-										</div>
+											<div
+												class="field-combobox-item-label grid w-full cursor-pointer grid-cols-[auto,max-content] gap-x-1"
+											>
+												<span
+													class="field-combobox-item-label-option overflow-hidden text-ellipsis text-nowrap"
+													title={option.label}
+												>
+													{option.label}
+												</span>
+												{#if option.badge}
+													{#if Array.isArray(option.badge)}
+														<div class="field-select-badge flex gap-x-1">
+															{#each option.badge as badge (badge)}
+																<Badge
+																	variant={badge === 'openai' || badge === 'ollama'
+																		? badge
+																		: undefined}
+																>
+																	{badge}
+																</Badge>
+															{/each}
+														</div>
+													{:else}
+														<Badge>{option.badge}</Badge>
+													{/if}
+												{/if}
+											</div>
+										{/snippet}
 									</Combobox.Item>
 								{/if}
 							{/each}
 						{:else}
-							<span class="field-select-empty">{$LL.noRecentModels()}</span>
+							<span class="field-select-empty block w-full px-3 py-1 text-center text-sm text-muted"
+								>{$LL.noRecentModels()}</span
+							>
 						{/if}
-					</div>
+					</Combobox.Group>
 				{:else}
-					<Combobox.Item value={group.value} label={group.label} class="field-combobox-item">
-						<Combobox.ItemIndicator class="field-combobox-item-indicator">
-							<Check class="base-icon" />
-						</Combobox.ItemIndicator>
-						<div class="field-combobox-item-label">
-							{group.label}
-							{#if group.badge}
-								<Badge>{group.badge}</Badge>
+					<Combobox.Item
+						value={group.value}
+						label={group.label}
+						class="field-combobox-item grid grid-cols-[24px,auto,max-content] items-center px-3 py-1.5 text-sm data-[highlighted]:bg-shade-1"
+					>
+						{#snippet children({ selected })}
+							{#if selected}
+								<span class="field-combobox-item-indicator flex items-center">
+									<Check class="base-icon" />
+								</span>
 							{/if}
-						</div>
+							<div
+								class="field-combobox-item-label grid w-full cursor-pointer grid-cols-[auto,max-content] gap-x-1"
+							>
+								{group.label}
+								{#if group.badge}
+									<Badge>{group.badge}</Badge>
+								{/if}
+							</div>
+						{/snippet}
 					</Combobox.Item>
 				{/if}
 			{:else}
-				<span class="field-select-empty">{$LL.searchEmpty()}</span>
+				<span class="field-select-empty block w-full px-3 py-1 text-center text-sm text-muted"
+					>{$LL.searchEmpty()}</span
+				>
 			{/each}
 		</Combobox.Content>
 	</Combobox.Root>
 
 	<svelte:fragment slot="nav">
-		<slot name="nav" />
+		{#if nav}
+			{@render nav()}
+		{/if}
 	</svelte:fragment>
 </Field>
-
-<style lang="postcss">
-	.field-select-input {
-		@apply relative flex items-center;
-	}
-
-	.field-select-nav {
-		@apply pointer-events-none absolute bottom-0 right-0 m-1 flex items-center;
-	}
-
-	.field-select-empty {
-		@apply block w-full px-3 py-1 text-center text-sm text-muted;
-	}
-
-	.field-select-badge {
-		@apply flex gap-x-1;
-	}
-
-	/* Bits UI */
-
-	:global(.field-combobox-input) {
-		@apply base-input pr-14 text-sm;
-	}
-
-	:global(.field-combobox-input--no-label) {
-		@apply py-2.5;
-	}
-
-	:global(.field-combobox-content) {
-		@apply overflow-scrollbar relative z-10 max-h-64 max-w-full rounded-md bg-shade-0 shadow-md;
-	}
-
-	:global(.field-combobox-item) {
-		@apply grid grid-cols-[24px,auto,max-content] items-center px-3 py-1.5 text-sm;
-	}
-
-	:global(.field-combobox-item[data-highlighted]) {
-		@apply bg-shade-1;
-	}
-
-	:global(.field-combobox-item-label) {
-		@apply grid w-full cursor-pointer grid-cols-[auto,max-content] gap-x-1;
-	}
-
-	:global(.field-combobox-item-label-option) {
-		@apply overflow-hidden text-ellipsis text-nowrap;
-	}
-
-	:global(.field-combobox-group-label) {
-		@apply sticky top-0 border-b border-shade-3 bg-shade-2 px-3 py-2 text-xs font-semibold text-muted;
-	}
-</style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, ChevronDown, ChevronUp, Pencil, RefreshCw, Trash2 } from 'lucide-svelte';
+	import { Brain, ChevronDown, ChevronUp, Pencil, RefreshCw, Trash2 } from '@lucide/svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 
@@ -71,18 +71,20 @@
 </script>
 
 {#if isKnowledgeAttachment}
-	<article class="attachment">
-		<div class="attachment__content">
-			<div class="attachment__icon">
+	<article
+		class="attachment mx-auto mb-2 flex w-full max-w-[80ch] gap-2 rounded-md border border-shade-3 flex items-center justify-between px-3 py-1 md:px-4 lg:px-6"
+	>
+		<div class="attachment__content flex items-center gap-2">
+			<div class="attachment__icon text-muted">
 				<Brain class="base-icon" />
 			</div>
-			<div class="attachment__name">
+			<div class="attachment__name text-sm">
 				<Button variant="link" href={generateNewUrl(Sitemap.KNOWLEDGE, message.knowledge?.id)}>
 					{message.knowledge?.name}
 				</Button>
 			</div>
 		</div>
-		<div class="attachment__interactive">
+		<div class="attachment__interactive -mr-2 opacity-100 md:-mr-3 hover:opacity-100">
 			<Button
 				variant="icon"
 				onclick={() => handleDeleteAttachment && handleDeleteAttachment(message)}
@@ -92,9 +94,17 @@
 		</div>
 	</article>
 {:else}
-	<article class="article article--{message.role}">
-		<nav class="article__nav">
-			<div data-testid="session-role" class="article__role">
+	<article
+		class="article article--{message.role} mx-auto mb-2 flex w-full max-w-[80ch] flex-col gap-y-2 rounded-md border border-shade-3 p-3 md:mb-4 md:gap-y-4 md:p-4 lg:mb-6 lg:p-6 last:mb-0 {message.role ===
+		'assistant'
+			? 'border-transparent bg-shade-0'
+			: ''}"
+	>
+		<nav class="article__nav flex items-center justify-between text-muted -mt-1">
+			<div
+				data-testid="session-role"
+				class="article__role text-center text-xs font-bold uppercase leading-7"
+			>
 				<Badge>
 					{#if isUserRole}
 						{$LL.you()}
@@ -105,7 +115,7 @@
 					{/if}
 				</Badge>
 			</div>
-			<div class="article__interactive">
+			<div class="article__interactive -mr-2 opacity-100 md:-mr-3 hover:opacity-100">
 				{#if retryIndex}
 					<Button
 						title={$LL.retry()}
@@ -130,8 +140,14 @@
 		</nav>
 
 		{#if message.reasoning}
-			<div class="reasoning" transition:slide={{ easing: quadInOut, duration: 200 }}>
-				<button class="reasoning__button" onclick={toggleReasoningVisibility}>
+			<div
+				class="reasoning rounded bg-shade-1 text-xs"
+				transition:slide={{ easing: quadInOut, duration: 200 }}
+			>
+				<button
+					class="reasoning__button flex w-full items-center justify-between gap-2 p-2"
+					onclick={toggleReasoningVisibility}
+				>
 					{$LL.reasoning()}
 					{#if isReasoningVisible}
 						<ChevronUp class="base-icon" />
@@ -141,7 +157,7 @@
 				</button>
 				{#if isReasoningVisible}
 					<article
-						class="article article--reasoning"
+						class="article article--reasoning mx-auto mb-2 flex w-full max-w-[80ch] flex-col gap-y-2 rounded-md border border-shade-3 p-3 md:mb-4 md:gap-y-4 md:p-4 lg:mb-6 lg:p-6 last:mb-0 max-w-full border-b-0 border-l-0 border-r-0"
 						transition:slide={{ easing: quadInOut, duration: 200 }}
 					>
 						<Markdown markdown={message.reasoning} />
@@ -153,7 +169,7 @@
 			<Markdown markdown={message.content} />
 		{/if}
 		{#if message.images && message.images.length}
-			<div class="article__images">
+			<div class="article__images mt-2 flex flex-wrap gap-1">
 				{#each message.images as img (img.filename)}
 					<AttachmentImage dataUrl={`data:image/png;base64,${img.data}`} name={img.filename} />
 				{/each}
@@ -163,75 +179,10 @@
 {/if}
 
 <style lang="postcss">
-	.article {
-		@apply mx-auto mb-2 flex w-full max-w-[80ch] flex-col gap-y-2 rounded-md border border-shade-3 p-3;
-		@apply md:mb-4 md:gap-y-4 md:p-4;
-		@apply lg:mb-6 lg:p-6;
-		@apply last:mb-0;
-	}
-
-	.article--assistant {
-		@apply border-transparent bg-shade-0;
-	}
-
-	.article--reasoning {
-		@apply max-w-full border-b-0 border-l-0 border-r-0;
-	}
-
 	.article__interactive,
 	.attachment__interactive {
-		@apply -mr-2 opacity-100;
-		@apply md:-mr-3;
-
 		@media (hover: hover) {
-			/* The interactive elements should be visible by default on mobile
-			and hidden by default on desktop. */
-			@apply opacity-0;
+			opacity: 0;
 		}
-	}
-
-	.article:hover .article__interactive,
-	.attachment:hover .attachment__interactive {
-		@apply opacity-100;
-	}
-
-	.article__nav {
-		@apply flex items-center justify-between text-muted;
-		@apply -mt-1; /* Visually reduce the spacing between the top of the article and the nav */
-	}
-
-	.article__role {
-		@apply text-center text-xs font-bold uppercase leading-7;
-	}
-
-	.attachment {
-		@apply mx-auto mb-2 flex w-full max-w-[80ch] gap-2 rounded-md border border-shade-3;
-		@apply flex items-center justify-between px-3 py-1;
-		@apply md:px-4;
-		@apply lg:px-6;
-	}
-
-	.attachment__icon {
-		@apply text-muted;
-	}
-
-	.attachment__name {
-		@apply text-sm;
-	}
-
-	.attachment__content {
-		@apply flex items-center gap-2;
-	}
-
-	.reasoning {
-		@apply rounded bg-shade-1 text-xs;
-	}
-
-	.reasoning__button {
-		@apply flex w-full items-center justify-between gap-2 p-2;
-	}
-
-	.article__images {
-		@apply mt-2 flex flex-wrap gap-1;
 	}
 </style>

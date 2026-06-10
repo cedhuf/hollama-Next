@@ -79,12 +79,12 @@
 				EditorView.lineWrapping,
 				Prec.highest(overrideModEnterKeymap),
 				$settingsStore.themeMode === 'light'
-				? hollamaThemeLight
-				: $settingsStore.themeMode === 'dark'
-					? hollamaThemeDark
-					: window.matchMedia('(prefers-color-scheme: dark)').matches
+					? hollamaThemeLight
+					: $settingsStore.themeMode === 'dark'
 						? hollamaThemeDark
-						: hollamaThemeLight
+						: window.matchMedia('(prefers-color-scheme: dark)').matches
+							? hollamaThemeDark
+							: hollamaThemeLight
 			],
 			parent: container
 		});
@@ -98,16 +98,17 @@
 
 <Field name={label.toLocaleLowerCase()} isTextEditor={true}>
 	<svelte:fragment slot="label">{label}</svelte:fragment>
-	<div class="text-editor" bind:this={container}></div>
+	<div
+		class="text-editor base-input overflow-scrollbar h-full max-h-full min-h-[88px] rounded-b-md p-0"
+		bind:this={container}
+	></div>
 </Field>
 
-<style lang="postcss">
-	.text-editor {
-		@apply base-input;
-		@apply overflow-scrollbar h-full max-h-full min-h-[88px] rounded-b-md p-0;
-
-		:global(.cm-editor) {
-			@apply h-full w-full text-sm;
-		}
+<style>
+	.text-editor :global(.cm-editor) {
+		height: 100%;
+		width: 100%;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 	}
 </style>

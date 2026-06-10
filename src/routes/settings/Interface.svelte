@@ -1,7 +1,8 @@
 <script lang="ts">
+	import type { LocalizedString } from 'typesafe-i18n';
+
 	import LL, { setLocale } from '$i18n/i18n-svelte';
 	import type { Locales } from '$i18n/i18n-types';
-	import type { LocalizedString } from 'typesafe-i18n';
 	import { loadLocale } from '$i18n/i18n-util.sync';
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
@@ -15,11 +16,11 @@
 		langValue = $settingsStore.userLanguage || 'en';
 	});
 
-	function changeLanguage() {
-		if (!langValue) return;
-		loadLocale(langValue);
-		setLocale(langValue);
-		$settingsStore.userLanguage = langValue;
+	function changeLanguage({ value }: { value: string; label: string }) {
+		const locale = value as Locales;
+		loadLocale(locale);
+		setLocale(locale);
+		$settingsStore.userLanguage = locale;
 	}
 
 	let themeModeValue: string = $state($settingsStore.themeMode || 'system');
@@ -28,9 +29,8 @@
 		themeModeValue = $settingsStore.themeMode || 'system';
 	});
 
-	function changeThemeMode() {
-		if (!themeModeValue) return;
-		$settingsStore.themeMode = themeModeValue as 'system' | 'light' | 'dark';
+	function changeThemeMode({ value }: { value: string; label: string }) {
+		$settingsStore.themeMode = value as 'system' | 'light' | 'dark';
 	}
 
 	let themeStyleValue: string = $state($settingsStore.themeStyle || 'classic');
@@ -39,9 +39,8 @@
 		themeStyleValue = $settingsStore.themeStyle || 'classic';
 	});
 
-	function changeThemeStyle() {
-		if (!themeStyleValue) return;
-		$settingsStore.themeStyle = themeStyleValue as 'classic' | 'dracula' | 'catppuccin';
+	function changeThemeStyle({ value }: { value: string; label: string }) {
+		$settingsStore.themeStyle = value as 'classic' | 'dracula' | 'catppuccin';
 	}
 
 	let defaultModelValue = $state($settingsStore.defaultModel || undefined);
@@ -80,7 +79,7 @@
 
 	<FieldSelect
 		name="theme-mode"
-		label={"Theme" as unknown as LocalizedString}
+		label={'Theme' as unknown as LocalizedString}
 		bind:value={themeModeValue}
 		allowClear={false}
 		allowSearch={false}
@@ -94,7 +93,7 @@
 
 	<FieldSelect
 		name="theme-style"
-		label={"Theme style" as unknown as LocalizedString}
+		label={'Theme style' as unknown as LocalizedString}
 		bind:value={themeStyleValue}
 		allowClear={false}
 		allowSearch={false}
