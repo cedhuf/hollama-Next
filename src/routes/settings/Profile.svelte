@@ -78,16 +78,24 @@
 		/>
 	</div>
 
-	<!-- Account email (server mode) — owned by the IdP/admin, not self-editable -->
-	{#if isServerMode && $currentUser}
-		<div class="flex flex-col gap-1">
-			<span class="text-sm font-medium">Email</span>
-			<input class="field-input base-input" value={$currentUser.email} disabled />
+	<!-- Email: editable in local mode; in server mode it's the account email,
+	     owned by the IdP/admin and read-only. -->
+	<div class="flex flex-col gap-1">
+		<span class="text-sm font-medium">Email</span>
+		{#if isServerMode}
+			<input class="field-input base-input" value={$currentUser?.email ?? ''} disabled />
 			<span class="text-xs text-muted">
-				{$currentUser.oidc ? 'Managed by your identity provider.' : 'Set by your administrator.'}
+				{$currentUser?.oidc ? 'Managed by your identity provider.' : 'Set by your administrator.'}
 			</span>
-		</div>
-	{/if}
+		{:else}
+			<input
+				class="field-input base-input"
+				type="email"
+				placeholder="you@example.com"
+				bind:value={$settingsStore.profileEmail}
+			/>
+		{/if}
+	</div>
 
 	<!-- Avatar color -->
 	<div class="flex flex-col gap-1.5">

@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { ChevronDown } from '@lucide/svelte';
-	import { Popover } from 'bits-ui';
+	import { Check, ChevronDown, Search, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import Badge from '$lib/components/Badge.svelte';
+	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
@@ -15,109 +14,154 @@
 	let { value = $bindable(), variant = 'default' }: Props = $props();
 
 	let open = $state(false);
+	let query = $state('');
+	let wrapper: HTMLDivElement | undefined = $state();
+	let searchEl: HTMLInputElement | undefined = $state();
 
 	const models = $derived($settingsStore.models || []);
-	const lastUsedModels = $derived($settingsStore.lastUsedModels || []);
-	const otherModels = $derived(
-		models.filter((m: Model) => !lastUsedModels.some((lm: Model) => lm.name === m.name))
-	);
 
-	function formatBadge(model: Model): string[] {
-		const badges: string[] = [];
-		const modelServer = $serversStore.find((s) => s.id === model.serverId);
-		if (model.parameterSize) badges.push(model.parameterSize);
-		badges.push(modelServer?.label || modelServer?.connectionType || '');
-		return badges;
+	// Short, dark-mode-safe provider identity for the badge.
+	const PROVIDER: Record<string, { id: string; color: string }> = {
+		[ConnectionType.Ollama]: { id: 'ollama', color: '#1D9E75' },
+		[ConnectionType.OpenAI]: { id: 'openai', color: '#378ADD' },
+		[ConnectionType.Anthropic]: { id: 'claude', color: '#D85A30' },
+		[ConnectionType.Infomaniak]: { id: 'infomaniak', color: '#BA7517' },
+		[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
+	};
+	function provider(serverId: string) {
+		const server = $serversStore.find((s) => s.id === serverId);
+		return {
+			title: server?.label || PROVIDER[server?.connectionType ?? '']?.id || 'models',
+			badge: PROVIDER[server?.connectionType ?? ''] ?? { id: '', color: '#888780' }
+		};
 	}
 
-	function selectModel(modelName: string) {
-		value = modelName;
+	// Models filtered by the search query, grouped by server (preserving order).
+	const groups = $derived.by(() => {
+		const q = query.trim().toLowerCase();
+		const list = models.filter((m) => !q || m.name.toLowerCase().includes(q));
+		const order: string[] = [];
+		const byId: Record<string, Model[]> = {};
+		for (const model of list) {
+			if (!byId[model.serverId]) {
+				byId[model.serverId] = [];
+				order.push(model.serverId);
+			}
+			byId[model.serverId].push(model);
+		}
+		return order.map((serverId) => ({ serverId, ...provider(serverId), models: byId[serverId] }));
+	});
+
+	function selectModel(name: string) {
+		value = name;
 		open = false;
+		query = '';
 	}
+
+	function toggle() {
+		open = !open;
+		if (open) query = '';
+	}
+
+	$effect(() => {
+		if (open) searchEl?.focus();
+	});
+
+	$effect(() => {
+		if (!open) return;
+		const onClick = (e: MouseEvent) => {
+			if (wrapper && !wrapper.contains(e.target as Node)) open = false;
+		};
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') open = false;
+		};
+		window.addEventListener('click', onClick);
+		window.addEventListener('keydown', onKey);
+		return () => {
+			window.removeEventListener('click', onClick);
+			window.removeEventListener('keydown', onKey);
+		};
+	});
 </script>
 
-<Popover.Root bind:open>
-	<Popover.Trigger>
-		{#snippet child({ props })}
-			{#if variant === 'hero'}
-				<button
-					{...props}
-					class="group flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-active"
-					type="button"
-				>
-					<span class="font-medium">{value || $LL.availableModels()}</span>
-					<ChevronDown class="h-3.5 w-3.5 transition-transform group-hover:translate-y-px" />
-				</button>
-			{:else}
-				<button
-					{...props}
-					class="flex items-center gap-0.5 text-xs text-muted transition-colors hover:text-active"
-					type="button"
-				>
-					<span>{value || $LL.availableModels()}</span>
-					<ChevronDown class="h-3 w-3" />
-				</button>
-			{/if}
-		{/snippet}
-	</Popover.Trigger>
-	<Popover.Portal>
-		<Popover.Content
-			side="bottom"
-			sideOffset={4}
-			align={variant === 'hero' ? 'center' : 'start'}
-			class="z-50 max-h-72 min-w-[240px] overflow-auto rounded-md border border-shade-3 bg-shade-0 shadow-lg"
-		>
-			{#if lastUsedModels.length}
-				<div
-					class="sticky top-0 border-b border-shade-3 bg-shade-2 px-3 py-1.5 text-xs font-semibold text-muted"
-				>
-					{$LL.lastUsedModels()}
-				</div>
-				{#each lastUsedModels as model (model.name)}
-					<button
-						class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value ===
-						model.name
-							? 'text-active'
-							: ''}"
-						onclick={() => selectModel(model.name)}
-						type="button"
-					>
-						<span class="truncate">{model.name}</span>
-						<div class="flex shrink-0 gap-x-1">
-							{#each formatBadge(model) as badge (badge)}
-								<Badge variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}>
-									{badge}
-								</Badge>
-							{/each}
-						</div>
-					</button>
-				{/each}
-			{/if}
+<div class="relative" bind:this={wrapper}>
+	<!-- Trigger field -->
+	<button
+		type="button"
+		onclick={toggle}
+		class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-1 text-left transition-colors hover:border-shade-4 {variant ===
+		'hero'
+			? 'w-full max-w-sm px-3 py-2 text-sm'
+			: 'px-2.5 py-1.5 text-xs'}"
+	>
+		<span class="truncate {value ? '' : 'text-muted'}">{value || $LL.availableModels()}</span>
+		<ChevronDown class="ml-auto h-4 w-4 shrink-0 text-muted" />
+	</button>
 
-			<div
-				class="sticky top-0 border-b border-shade-3 bg-shade-2 px-3 py-1.5 text-xs font-semibold text-muted"
-			>
-				{$LL.otherModels()}
-			</div>
-			{#each otherModels as model (model.name)}
-				<button
-					class="flex w-full items-center justify-between gap-x-2 px-3 py-1.5 text-left text-sm hover:bg-shade-1 {value ===
-					model.name
-						? 'text-active'
-						: ''}"
-					onclick={() => selectModel(model.name)}
-					type="button"
-				>
-					<span class="truncate">{model.name}</span>
-					<div class="flex shrink-0 gap-x-1">
-						{#each formatBadge(model) as badge (badge)}
-							<Badge variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}>
-								{badge}
-							</Badge>
-						{/each}
-					</div>
+	{#if open}
+		<!-- The list is an extension of the field: one connected surface -->
+		<div
+			class="absolute left-0 top-0 z-50 flex w-80 max-w-[92vw] flex-col overflow-hidden rounded-lg border border-shade-3 bg-shade-0 {variant ===
+			'hero'
+				? 'sm:w-96'
+				: ''}"
+		>
+			<div class="flex items-center gap-2 px-3 py-2.5">
+				<Search class="h-4 w-4 shrink-0 text-muted" />
+				<input
+					bind:this={searchEl}
+					bind:value={query}
+					placeholder={$LL.availableModels()}
+					class="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+				/>
+				<button type="button" onclick={() => (open = false)} aria-label="Close">
+					<X class="h-4 w-4 shrink-0 text-muted transition-colors hover:text-active" />
 				</button>
-			{/each}
-		</Popover.Content>
-	</Popover.Portal>
-</Popover.Root>
+			</div>
+
+			<div class="h-px bg-shade-3"></div>
+
+			<div class="max-h-72 overflow-auto p-1.5">
+				{#each groups as group (group.serverId)}
+					<div class="px-2.5 pb-1 pt-2 text-[11px] text-muted">{group.title}</div>
+					{#each group.models as model (model.name)}
+						<button
+							type="button"
+							onclick={() => selectModel(model.name)}
+							class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-shade-1 {value ===
+							model.name
+								? 'bg-shade-1'
+								: ''}"
+						>
+							{#if value === model.name}
+								<Check class="h-4 w-4 shrink-0 text-active" />
+							{:else}
+								<span class="w-4 shrink-0"></span>
+							{/if}
+							<span class="min-w-0 flex-1 truncate text-sm">
+								{model.name}
+								{#if model.parameterSize}
+									<span class="text-xs text-muted">· {model.parameterSize}</span>
+								{/if}
+							</span>
+							{#if group.badge.id}
+								<span
+									class="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
+									style="border-color: {group.badge.color}; color: {group.badge.color}"
+								>
+									{group.badge.id}
+								</span>
+							{/if}
+						</button>
+					{/each}
+				{/each}
+
+				{#if groups.length === 0}
+					<div class="px-2.5 py-3 text-center text-sm text-muted">
+						{query ? 'No matching models' : $LL.availableModels()}
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+</div>

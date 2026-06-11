@@ -12,6 +12,15 @@ import { repository } from './data';
 export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
 
 /**
+ * Persistence is suspended until the first hydration completes. In server mode
+ * the stores load asynchronously, and any write before that finishes (a page
+ * creating a session, the model-list cache, a default theme…) would PUT
+ * empty/default values and clobber the server data — the cause of data vanishing
+ * on refresh. Local mode hydrates synchronously, so it's ready immediately.
+ */
+let persistenceReady = !!repository.hydrate;
+
+/**
  * A writable store that persists every change through the active repository.
  *
  * The very first (synchronous) emission — the seed echo — is skipped: there's
@@ -31,7 +40,8 @@ function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise
 				initialized = true;
 				return;
 			}
-			if (!suppress) void save(value);
+			if (!persistenceReady || suppress) return;
+			void save(value);
 		});
 	}
 
@@ -87,17 +97,22 @@ export const knowledgeStore = persistedStore<Knowledge[]>(seed.knowledge, [], (v
  * collection over the network and sets the stores quietly (no write-back).
  */
 export async function hydrateStores(): Promise<void> {
-	if (repository.hydrate) return;
+	if (repository.hydrate) return; // local mode: already seeded synchronously, ready
 
-	const [settings, servers, sessions, knowledge] = await Promise.all([
-		repository.loadSettings(),
-		repository.loadServers(),
-		repository.loadSessions(),
-		repository.loadKnowledge()
-	]);
+	try {
+		const [settings, servers, sessions, knowledge] = await Promise.all([
+			repository.loadSettings(),
+			repository.loadServers(),
+			repository.loadSessions(),
+			repository.loadKnowledge()
+		]);
 
-	if (settings) settingsStore.setQuiet(settings);
-	serversStore.setQuiet(servers);
-	sessionsStore.setQuiet(sessions);
-	knowledgeStore.setQuiet(knowledge);
+		if (settings) settingsStore.setQuiet(settings);
+		serversStore.setQuiet(servers);
+		sessionsStore.setQuiet(sessions);
+		knowledgeStore.setQuiet(knowledge);
+	} finally {
+		// Only now may writes reach the server — the stores hold real data.
+		persistenceReady = true;
+	}
 }
