@@ -1,5 +1,6 @@
 # Hollama Next
 
+> [!WARNING]
 > **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
 >
 > I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, you can check the original project instead or other forks, no hard feelings — just being transparent.
@@ -7,6 +8,9 @@
 A (less) minimal LLM chat app that runs _entirely_ in your browser.
 
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
+
+> [!IMPORTANT]
+> Feel free to participate ! There are no bad intervention. Just one rule to let the project easy to manage : issues are for bug only. If you want ta ask for a feature or anything else, please use the discussion. If it is community validated, then it will find a way to issue. Thanks !
 
 ### Features
 
@@ -77,6 +81,7 @@ OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
 ```
 
 **Running modes** — Hollama runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
+> [!NOTE]
 > Why ?
 > - This allow device synchronization, which was not possible before.
 > - This also allow multiple user instance.

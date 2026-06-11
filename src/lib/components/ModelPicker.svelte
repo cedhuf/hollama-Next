@@ -84,27 +84,25 @@
 	});
 </script>
 
-<div class="relative" bind:this={wrapper}>
-	<!-- Trigger field -->
+<div class="relative {variant === 'hero' ? 'w-full max-w-xl' : 'w-64'}" bind:this={wrapper}>
+	<!-- Trigger: a prominent field (hero) or a minimal textual line (default) -->
 	<button
 		type="button"
 		onclick={toggle}
-		class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-1 text-left transition-colors hover:border-shade-4 {variant ===
-		'hero'
-			? 'w-full max-w-sm px-3 py-2 text-sm'
-			: 'px-2.5 py-1.5 text-xs'}"
+		class="flex w-full items-center gap-2 text-left transition-colors {variant === 'hero'
+			? 'rounded-lg border border-shade-3 bg-shade-1 px-3 py-2 text-sm hover:border-shade-4'
+			: 'text-xs text-muted hover:text-active'}"
 	>
 		<span class="truncate {value ? '' : 'text-muted'}">{value || $LL.availableModels()}</span>
-		<ChevronDown class="ml-auto h-4 w-4 shrink-0 text-muted" />
+		<ChevronDown
+			class="ml-auto shrink-0 text-muted {variant === 'hero' ? 'h-4 w-4' : 'h-3.5 w-3.5'}"
+		/>
 	</button>
 
 	{#if open}
 		<!-- The list is an extension of the field: one connected surface -->
 		<div
-			class="absolute left-0 top-0 z-50 flex w-80 max-w-[92vw] flex-col overflow-hidden rounded-lg border border-shade-3 bg-shade-0 {variant ===
-			'hero'
-				? 'sm:w-96'
-				: ''}"
+			class="absolute left-0 top-0 z-50 flex w-full flex-col overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
 		>
 			<div class="flex items-center gap-2 px-3 py-2.5">
 				<Search class="h-4 w-4 shrink-0 text-muted" />
