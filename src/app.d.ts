@@ -15,6 +15,7 @@ declare module '@auth/sveltekit' {
 			id: string;
 			email: string;
 			role: 'admin' | 'user';
+			oidc?: boolean;
 		};
 	}
 

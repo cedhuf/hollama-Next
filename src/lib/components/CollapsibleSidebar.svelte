@@ -15,6 +15,7 @@
 	import { knowledgeStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { formatSessionMetadata, getSessionTitle } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
+	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
 	import { updateStatusStore } from '$lib/updates';
 	import { formatTimestampToNow } from '$lib/utils';
@@ -270,7 +271,7 @@
 								>{$settingsStore.profileFirstName} {$settingsStore.profileLastName}</span
 							>
 							<span class="text-xs text-muted"
-								>{$settingsStore.profileRole === 'admin' ? 'Administrator' : 'User'}</span
+								>{$currentRole === 'admin' ? 'Administrator' : 'User'}</span
 							>
 						</div>
 					</div>

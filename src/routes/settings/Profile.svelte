@@ -1,10 +1,11 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import FieldInput from '$lib/components/FieldInput.svelte';
-	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
+	import { currentRole, currentUser } from '$lib/stores/auth';
 
 	const PRESET_COLORS = [
 		'#6366f1',
@@ -57,7 +58,7 @@
 		</div>
 		<div class="flex flex-col items-center">
 			<span class="text-base font-semibold">{displayName}</span>
-			<span class="text-xs text-muted">{roleLabels[$settingsStore.profileRole ?? 'user']}</span>
+			<span class="text-xs text-muted">{roleLabels[$currentRole]}</span>
 		</div>
 	</div>
 
@@ -77,18 +78,16 @@
 		/>
 	</div>
 
-	<FieldSelect
-		name="profile-role"
-		label={$LL.role()}
-		value={$settingsStore.profileRole}
-		allowClear={false}
-		allowSearch={false}
-		onChange={({ value }) => ($settingsStore.profileRole = value as 'admin' | 'user')}
-		options={[
-			{ value: 'user', label: 'User' },
-			{ value: 'admin', label: 'Administrator' }
-		]}
-	/>
+	<!-- Account email (server mode) — owned by the IdP/admin, not self-editable -->
+	{#if isServerMode && $currentUser}
+		<div class="flex flex-col gap-1">
+			<span class="text-sm font-medium">Email</span>
+			<input class="field-input base-input" value={$currentUser.email} disabled />
+			<span class="text-xs text-muted">
+				{$currentUser.oidc ? 'Managed by your identity provider.' : 'Set by your administrator.'}
+			</span>
+		</div>
+	{/if}
 
 	<!-- Avatar color -->
 	<div class="flex flex-col gap-1.5">
