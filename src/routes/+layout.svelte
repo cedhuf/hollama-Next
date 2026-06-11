@@ -13,6 +13,7 @@
 	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
+	import { page } from '$app/stores';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import {
@@ -202,26 +203,31 @@
 	position="top-center"
 />
 
-<SettingsModal />
-<Onboarding />
+{#if $page.url.pathname === '/login'}
+	<!-- Login renders standalone, without the app shell. -->
+	{@render children()}
+{:else}
+	<SettingsModal />
+	<Onboarding />
 
-<div class="relative flex h-dvh w-screen bg-shade-2 lg:p-4">
-	<CollapsibleSidebar />
-	<div class="relative flex-1">
-		<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
-		{#if !$settingsStore.sidebarExpanded}
-			<button
-				onclick={() => ($settingsStore.sidebarExpanded = true)}
-				class="absolute left-3 top-3 z-10 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
-				aria-label={$LL.expandSidebar()}
-				title={$LL.expandSidebar()}
-			>
-				<PanelLeft class="h-5 w-5" />
-			</button>
-		{/if}
-		{@render children()}
+	<div class="relative flex h-dvh w-screen bg-shade-2 lg:p-4">
+		<CollapsibleSidebar />
+		<div class="relative flex-1">
+			<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
+			{#if !$settingsStore.sidebarExpanded}
+				<button
+					onclick={() => ($settingsStore.sidebarExpanded = true)}
+					class="absolute left-3 top-3 z-10 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
+					aria-label={$LL.expandSidebar()}
+					title={$LL.expandSidebar()}
+				>
+					<PanelLeft class="h-5 w-5" />
+				</button>
+			{/if}
+			{@render children()}
+		</div>
 	</div>
-</div>
+{/if}
 
 <style lang="postcss">
 	:global(html) {

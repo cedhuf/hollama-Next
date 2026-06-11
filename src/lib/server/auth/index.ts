@@ -112,6 +112,7 @@ function buildProviders(): Provider[] {
 const config: SvelteKitAuthConfig = {
 	trustHost: true,
 	session: { strategy: 'jwt' },
+	pages: { signIn: '/login', error: '/login' },
 	providers: buildProviders(),
 	callbacks: {
 		// Gate OIDC sign-ins when provisioning is disabled and the user is unknown.
