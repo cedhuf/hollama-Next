@@ -16,3 +16,10 @@ export async function requireUser(event: RequestEvent): Promise<{ id: string; ro
 
 	return { id: session.user.id, role: session.user.role };
 }
+
+/** Like `requireUser`, but also requires the `admin` role. */
+export async function requireAdmin(event: RequestEvent): Promise<{ id: string; role: Role }> {
+	const user = await requireUser(event);
+	if (user.role !== 'admin') throw error(403, 'Forbidden');
+	return user;
+}
