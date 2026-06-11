@@ -5,19 +5,17 @@
 
 	import Button from '$lib/components/Button.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, PROVIDERS } from '$lib/connections';
 
-	interface AdminServer {
+	// Admin = governance only. Servers are configured in the Servers tab; here the
+	// admin picks which of each system server's models to share, manages users,
+	// and toggles whether users may add their own providers.
+
+	interface SystemServer {
 		id: string;
 		connectionType: string;
-		baseUrl: string;
 		label: string | null;
-		modelFilter: string | null;
 		isEnabled: boolean;
-		hasApiKey: boolean;
 		sharedModels: string[];
-		// local UI state
-		newKey: string;
 		available: string[] | null;
 		loadingModels: boolean;
 	}
@@ -32,16 +30,8 @@
 		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
 
 	let allowUserKeys = $state(false);
-	let servers = $state<AdminServer[]>([]);
+	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
-
-	let newServer = $state({
-		connectionType: ConnectionType.Ollama as string,
-		baseUrl: '',
-		label: '',
-		modelFilter: '' as string | null,
-		apiKey: ''
-	});
 	let newUser = $state({ email: '', password: '', role: 'user' });
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
@@ -64,9 +54,12 @@
 			fetch('/api/admin/users').then((r) => r.json())
 		]);
 		allowUserKeys = config.allowUserKeys;
-		servers = (serverList as Omit<AdminServer, 'newKey' | 'available' | 'loadingModels'>[]).map(
-			(s) => ({ ...s, newKey: '', available: null, loadingModels: false })
-		);
+		servers = (
+			serverList as Pick<
+				SystemServer,
+				'id' | 'connectionType' | 'label' | 'isEnabled' | 'sharedModels'
+			>[]
+		).map((s) => ({ ...s, available: null, loadingModels: false }));
 		users = userList;
 	}
 
@@ -78,75 +71,29 @@
 		allowUserKeys = next;
 	}
 
-	function selectPreset(type: string) {
-		const provider = PROVIDERS.find((p) => p.type === type);
-		if (!provider) return;
-		newServer.connectionType = provider.type;
-		newServer.baseUrl = provider.baseUrl;
-		newServer.modelFilter = provider.modelFilter ?? '';
-		newServer.label = provider.name;
-	}
-
-	async function addServer() {
-		if (!newServer.baseUrl) return toast.error('Base URL is required');
-		await api('/api/admin/servers', 'POST', {
-			connectionType: newServer.connectionType,
-			baseUrl: newServer.baseUrl,
-			label: newServer.label || null,
-			modelFilter: newServer.modelFilter || null,
-			apiKey: newServer.apiKey || null,
-			sharedModels: [],
-			isEnabled: true
-		});
-		newServer = {
-			connectionType: ConnectionType.Ollama,
-			baseUrl: '',
-			label: '',
-			modelFilter: '',
-			apiKey: ''
-		};
-		await load();
-		toast.success('Server added — load its models to share them');
-	}
-
-	async function saveServer(server: AdminServer) {
-		await api(`/api/admin/servers/${server.id}`, 'PUT', {
-			baseUrl: server.baseUrl,
-			label: server.label,
-			modelFilter: server.modelFilter,
-			isEnabled: server.isEnabled,
-			sharedModels: server.sharedModels,
-			...(server.newKey ? { apiKey: server.newKey } : {})
-		});
-		server.newKey = '';
-		toast.success('Server saved');
-	}
-
-	async function removeServer(id: string) {
-		if (!confirm('Delete this system server?')) return;
-		await api(`/api/admin/servers/${id}`, 'DELETE');
-		await load();
-	}
-
-	async function loadModels(server: AdminServer) {
+	async function loadModels(server: SystemServer) {
 		server.loadingModels = true;
 		try {
 			const models = (await api<string[]>(`/api/admin/servers/${server.id}/models`, 'GET')) ?? [];
-			// Show live models, plus any already-shared model that's currently offline.
-			const merged = Array.from(new Set([...models, ...server.sharedModels])).sort((a, b) =>
+			server.available = Array.from(new Set([...models, ...server.sharedModels])).sort((a, b) =>
 				a.localeCompare(b, undefined, { sensitivity: 'base' })
 			);
-			server.available = merged;
-			if (models.length === 0) toast.info('No models returned (check the URL/key, then save)');
+			if (models.length === 0)
+				toast.info('No models returned (check the server in the Servers tab)');
 		} finally {
 			server.loadingModels = false;
 		}
 	}
 
-	function toggleShared(server: AdminServer, model: string) {
+	function toggleShared(server: SystemServer, model: string) {
 		server.sharedModels = server.sharedModels.includes(model)
 			? server.sharedModels.filter((m) => m !== model)
 			: [...server.sharedModels, model];
+	}
+
+	async function saveShared(server: SystemServer) {
+		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
+		toast.success('Shared models updated');
 	}
 
 	async function addUser() {
@@ -174,115 +121,73 @@
 		</label>
 	</section>
 
-	<!-- System servers -->
+	<!-- Shared models -->
 	<section class="flex flex-col gap-3">
-		<P><strong>System servers</strong></P>
+		<P><strong>Shared models</strong></P>
 		<span class="-mt-2 text-xs text-muted">
-			Configure providers shared with everyone. Load each server's models and tick the ones to
-			expose. Keys are encrypted at rest and never sent to the browser.
+			Pick which models from each system server are available to users. Configure the servers
+			themselves in the <strong>Servers</strong> tab.
 		</span>
+
+		{#if servers.length === 0}
+			<span class="text-sm text-muted">No system servers yet — add one in the Servers tab.</span>
+		{/if}
 
 		{#each servers as server (server.id)}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
 				<div class="flex items-center justify-between gap-2">
-					<span class="text-sm font-medium">{server.label || server.connectionType}</span>
-					<label class="flex items-center gap-1.5 text-xs text-muted">
-						<input type="checkbox" bind:checked={server.isEnabled} /> enabled
-					</label>
+					<span class="text-sm font-medium">
+						{server.label || server.connectionType}
+						{#if !server.isEnabled}<span class="text-xs text-muted">(disabled)</span>{/if}
+					</span>
+					<button
+						type="button"
+						onclick={() => loadModels(server)}
+						disabled={server.loadingModels}
+						class="flex items-center gap-1 text-xs text-link hover:underline disabled:opacity-50"
+					>
+						<RefreshCw class="h-3 w-3 {server.loadingModels ? 'animate-spin' : ''}" />
+						{server.available ? 'Reload models' : 'Load models'}
+					</button>
 				</div>
 
-				<input class={input} bind:value={server.label} placeholder="Label" />
-				<input class={input} bind:value={server.baseUrl} placeholder="Base URL" />
-				<input
-					class={input}
-					type="password"
-					bind:value={server.newKey}
-					placeholder={server.hasApiKey ? 'API key set — type to replace' : 'API key (optional)'}
-				/>
-
-				<!-- Shared models picker -->
-				<div class="flex flex-col gap-1.5">
-					<div class="flex items-center justify-between">
-						<span class="text-xs font-medium text-muted">
-							Shared models ({server.sharedModels.length})
-						</span>
-						<button
-							type="button"
-							onclick={() => loadModels(server)}
-							disabled={server.loadingModels}
-							class="flex items-center gap-1 text-xs text-link hover:underline disabled:opacity-50"
-						>
-							<RefreshCw class="h-3 w-3 {server.loadingModels ? 'animate-spin' : ''}" />
-							{server.available ? 'Reload models' : 'Load models'}
-						</button>
-					</div>
-
-					{#if server.available}
-						{#if server.available.length}
-							<div class="max-h-44 overflow-auto rounded-md border border-shade-3 p-1">
-								{#each server.available as model (model)}
-									<label
-										class="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-shade-2"
-									>
-										<input
-											type="checkbox"
-											checked={server.sharedModels.includes(model)}
-											onchange={() => toggleShared(server, model)}
-										/>
-										{model}
-									</label>
-								{/each}
-							</div>
-						{:else}
-							<span class="text-xs text-muted">No models found.</span>
-						{/if}
-					{:else if server.sharedModels.length}
-						<div class="flex flex-wrap gap-1">
+				{#if server.available}
+					{#if server.available.length}
+						<div class="max-h-44 overflow-auto rounded-md border border-shade-3 p-1">
+							{#each server.available as model (model)}
+								<label
+									class="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-shade-2"
+								>
+									<input
+										type="checkbox"
+										checked={server.sharedModels.includes(model)}
+										onchange={() => toggleShared(server, model)}
+									/>
+									{model}
+								</label>
+							{/each}
+						</div>
+						<div>
+							<Button on:click={() => saveShared(server)}>
+								Save ({server.sharedModels.length} shared)
+							</Button>
+						</div>
+					{:else}
+						<span class="text-xs text-muted">No models found.</span>
+					{/if}
+				{:else}
+					<div class="flex flex-wrap gap-1">
+						{#if server.sharedModels.length}
 							{#each server.sharedModels as model (model)}
 								<span class="rounded bg-shade-2 px-2 py-0.5 text-xs">{model}</span>
 							{/each}
-						</div>
-					{/if}
-				</div>
-
-				<div class="flex gap-2">
-					<Button on:click={() => saveServer(server)}>Save</Button>
-					<Button variant="outline" on:click={() => removeServer(server.id)}>
-						<Trash2 class="base-icon" /> Delete
-					</Button>
-				</div>
+						{:else}
+							<span class="text-xs text-muted">No models shared yet.</span>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		{/each}
-
-		<!-- New server -->
-		<div class="flex flex-col gap-2 rounded-md border border-dashed border-shade-4 p-3">
-			<span class="text-sm font-medium">Add a system server</span>
-			<div class="flex flex-wrap gap-1.5">
-				{#each PROVIDERS as provider (provider.type)}
-					<button
-						type="button"
-						onclick={() => selectPreset(provider.type)}
-						class="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-shade-6 {newServer.connectionType ===
-						provider.type
-							? 'border-accent text-active'
-							: 'border-shade-4 text-muted'}"
-					>
-						{provider.name}
-					</button>
-				{/each}
-			</div>
-			<input class={input} bind:value={newServer.label} placeholder="Label (optional)" />
-			<input class={input} bind:value={newServer.baseUrl} placeholder="Base URL" />
-			<input
-				class={input}
-				type="password"
-				bind:value={newServer.apiKey}
-				placeholder="API key (optional)"
-			/>
-			<div>
-				<Button on:click={addServer}><Plus class="base-icon" /> Add server</Button>
-			</div>
-		</div>
 	</section>
 
 	<!-- Users -->

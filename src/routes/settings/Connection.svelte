@@ -13,18 +13,21 @@
 	import FieldInput from '$lib/components/FieldInput.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, getProvider, isOpenAiCompatible } from '$lib/connections';
-	import { serversStore } from '$lib/localStorage';
+	import { ConnectionType, getProvider, isOpenAiCompatible, type Server } from '$lib/connections';
 
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';
 	import PullModel from './ollama/PullModel.svelte';
 
 	interface Props {
-		index: number;
+		/** The server to edit (mutated in place via bindings). */
+		server: Server;
+		/** Called after any field changes, so the parent can persist. */
+		onChange: () => void;
+		/** Called to delete this server. */
+		onDelete: () => void;
 	}
 
-	let { index }: Props = $props();
-	let server = $derived($serversStore[index]);
+	let { server, onChange, onDelete }: Props = $props();
 	let strategy: OllamaStrategy | OpenAIStrategy;
 	let isLoading = $state(false);
 	let showAdvanced = $state(false);
@@ -41,11 +44,10 @@
 				: undefined
 	);
 
-	// `server` is a plain object inside the store, so mutating its fields (via
-	// bindings or verifyServer) doesn't notify the store and localStorage is
-	// never rewritten. Force a fresh array reference on every change to persist.
+	// Bindings mutate `server` in place; let the parent persist however it wants
+	// (force a fresh store array in local mode, PUT to the API in server mode).
 	function persist() {
-		serversStore.update((servers) => [...servers]);
+		onChange();
 	}
 
 	async function verifyServer() {
@@ -66,7 +68,7 @@
 	}
 
 	function deleteServer() {
-		serversStore.update((servers) => servers.filter((s) => s.id !== server.id));
+		onDelete();
 	}
 </script>
 

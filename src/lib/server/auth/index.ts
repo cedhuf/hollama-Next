@@ -165,10 +165,12 @@ const config: SvelteKitAuthConfig = {
 					token.role = dbUser.role;
 					token.email = dbUser.email;
 				}
+				token.oidc = true;
 			} else if (user) {
 				token.userId = user.id;
 				token.role = user.role;
 				token.email = user.email ?? undefined;
+				token.oidc = false;
 			}
 			return token;
 		},
@@ -177,6 +179,7 @@ const config: SvelteKitAuthConfig = {
 			if (token.userId) {
 				session.user.id = token.userId as string;
 				session.user.role = (token.role as 'admin' | 'user') ?? 'user';
+				session.user.oidc = !!token.oidc;
 				if (token.email) session.user.email = token.email as string;
 			}
 			return session;

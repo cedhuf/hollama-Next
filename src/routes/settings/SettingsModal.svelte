@@ -64,18 +64,16 @@
 						{$LL.profile()}
 					</button>
 
-					{#if !serverMode}
-						<button
-							onclick={() => (activeTab = 'servers')}
-							class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-							'servers'
-								? 'bg-shade-2 font-medium'
-								: ''}"
-						>
-							<Server class="h-4 w-4" />
-							{$LL.servers()}
-						</button>
-					{/if}
+					<button
+						onclick={() => (activeTab = 'servers')}
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+						'servers'
+							? 'bg-shade-2 font-medium'
+							: ''}"
+					>
+						<Server class="h-4 w-4" />
+						{$LL.servers()}
+					</button>
 
 					{#if serverMode && isAdmin}
 						<button
