@@ -14,17 +14,23 @@ import { toProviderView } from '$lib/server/serverViews';
 export async function GET(event) {
 	const user = await requireUser(event);
 
+	// Only enabled servers are usable (the proxy refuses disabled ones).
 	const system = await Promise.all(
-		listSystemServers().map(async (server) => ({
-			...toProviderView(server),
-			models: user.role === 'admin' ? await listProviderModels(server) : getSharedModels(server.id)
-		}))
+		listSystemServers()
+			.filter((server) => server.is_enabled)
+			.map(async (server) => ({
+				...toProviderView(server),
+				models:
+					user.role === 'admin' ? await listProviderModels(server) : getSharedModels(server.id)
+			}))
 	);
 	const personal = await Promise.all(
-		listUserServers(user.id).map(async (server) => ({
-			...toProviderView(server),
-			models: await listProviderModels(server)
-		}))
+		listUserServers(user.id)
+			.filter((server) => server.is_enabled)
+			.map(async (server) => ({
+				...toProviderView(server),
+				models: await listProviderModels(server)
+			}))
 	);
 
 	return json({ allowUserKeys: allowUserKeys(), servers: [...system, ...personal] });

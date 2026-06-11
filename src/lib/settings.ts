@@ -28,6 +28,7 @@ export interface Settings {
 	hollamaMetadata: HollamaNextMetadata;
 	profileFirstName: string;
 	profileLastName: string;
+	profileEmail: string;
 	profileAvatar: string;
 	profileColor: string;
 }
@@ -51,6 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	},
 	profileFirstName: '',
 	profileLastName: '',
+	profileEmail: '',
 	profileAvatar: '',
 	profileColor: '#6366f1'
 };

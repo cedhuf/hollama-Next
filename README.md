@@ -2,9 +2,9 @@
 
 > **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
 >
-> I'm not a professional developer and I'm still learning. I've made heavy use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, no hard feelings — just being transparent.
+> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, you can check the original project instead or other forks, no hard feelings — just being transparent.
 
-A minimal LLM chat app that runs _entirely_ in your browser.
+A (less) minimal LLM chat app that runs _entirely_ in your browser.
 
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
 
@@ -34,7 +34,7 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 ### Roadmap
 
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
-- [ ] Auth.js & multi-user support
+- [X] Auth.js & multi-user support
 - [ ] Testing & polish
 
 > For everything already done in this fork, see [CHANGES.md](CHANGES.md).
@@ -77,6 +77,10 @@ OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
 ```
 
 **Running modes** — Hollama runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
+> Why ?
+> - This allow device synchronization, which was not possible before.
+> - This also allow multiple user instance.
+---
 
 - **`local`** (default) — single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
 - **`server`** — multi-user, self-hosted. Users sign in (email + password and/or OIDC), data is stored server-side in SQLite **per user**, and **provider API keys never leave the server** (encrypted at rest). An admin configures shared providers and which models to expose; optionally, users may add their own keys (`allowUserKeys`).
