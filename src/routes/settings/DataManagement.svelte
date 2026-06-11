@@ -8,11 +8,14 @@
 		TriangleAlert
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { get, type Writable } from 'svelte/store';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
+	import { repository } from '$lib/data';
+	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
 	import {
 		knowledgeStore,
 		serversStore,
@@ -22,37 +25,16 @@
 	} from '$lib/localStorage';
 	import { DEFAULT_SETTINGS } from '$lib/settings';
 
-	interface DataSource {
-		storageKey: StorageKey;
-		fileName: string;
-		defaultValue: string;
-	}
+	// Maps each storage key to its reactive store, for generic per-category ops.
+	const stores: Record<StorageKey, Writable<unknown>> = {
+		[StorageKey.HollamaNextPreferences]: settingsStore,
+		[StorageKey.HollamaNextServers]: serversStore,
+		[StorageKey.HollamaNextSessions]: sessionsStore,
+		[StorageKey.HollamaNextKnowledge]: knowledgeStore
+	};
 
-	const dataSources: DataSource[] = [
-		{
-			storageKey: StorageKey.HollamaNextServers,
-			fileName: `hollama-servers.json`,
-			defaultValue: '[]'
-		},
-		{
-			storageKey: StorageKey.HollamaNextPreferences,
-			fileName: `hollama-preferences.json`,
-			defaultValue: '{}'
-		},
-		{
-			storageKey: StorageKey.HollamaNextSessions,
-			fileName: `hollama-sessions.json`,
-			defaultValue: '[]'
-		},
-		{
-			storageKey: StorageKey.HollamaNextKnowledge,
-			fileName: `hollama-knowledge.json`,
-			defaultValue: '[]'
-		}
-	];
-
-	function exportData(storageKey: StorageKey, fileName: string, defaultValue: string) {
-		const data = localStorage.getItem(storageKey) || defaultValue;
+	// Triggers a browser download of `data` as a JSON file.
+	function download(data: string, fileName: string) {
 		const blob = new Blob([data], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
@@ -64,23 +46,28 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// Writes parsed data into both localStorage and its reactive store.
-	function applyToStore(storageKey: StorageKey, data: unknown) {
-		localStorage.setItem(storageKey, JSON.stringify(data));
-		switch (storageKey) {
-			case StorageKey.HollamaNextPreferences:
-				$settingsStore = data as typeof $settingsStore;
-				break;
-			case StorageKey.HollamaNextServers:
-				$serversStore = data as typeof $serversStore;
-				break;
-			case StorageKey.HollamaNextSessions:
-				$sessionsStore = data as typeof $sessionsStore;
-				break;
-			case StorageKey.HollamaNextKnowledge:
-				$knowledgeStore = data as typeof $knowledgeStore;
-				break;
-		}
+	interface DataSource {
+		storageKey: StorageKey;
+		fileName: string;
+	}
+
+	const dataSources: DataSource[] = [
+		{ storageKey: StorageKey.HollamaNextServers, fileName: `hollama-servers.json` },
+		{ storageKey: StorageKey.HollamaNextPreferences, fileName: `hollama-preferences.json` },
+		{ storageKey: StorageKey.HollamaNextSessions, fileName: `hollama-sessions.json` },
+		{ storageKey: StorageKey.HollamaNextKnowledge, fileName: `hollama-knowledge.json` }
+	];
+
+	// The value a category resets to when deleted.
+	const defaults: Record<StorageKey, unknown> = {
+		[StorageKey.HollamaNextPreferences]: DEFAULT_SETTINGS,
+		[StorageKey.HollamaNextServers]: [],
+		[StorageKey.HollamaNextSessions]: [],
+		[StorageKey.HollamaNextKnowledge]: []
+	};
+
+	function exportData(storageKey: StorageKey, fileName: string) {
+		download(JSON.stringify(get(stores[storageKey])), fileName);
 	}
 
 	function importData(event: Event, storageKey: StorageKey) {
@@ -96,8 +83,7 @@
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			try {
-				const data = JSON.parse(e.target?.result as string);
-				applyToStore(storageKey, data);
+				applyToStore(storageKey, JSON.parse(e.target?.result as string));
 				toast.success($LL.importSuccess());
 			} catch (error) {
 				console.error(error);
@@ -110,20 +96,12 @@
 	}
 
 	// Exports every data source into a single backup file.
-	function exportBackup() {
-		const backup: Record<string, unknown> = {};
-		for (const { storageKey, defaultValue } of dataSources) {
-			backup[storageKey] = JSON.parse(localStorage.getItem(storageKey) || defaultValue);
-		}
-		const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `hollama-backup-${new Date().toISOString().slice(0, 10)}.json`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
+	async function exportBackup() {
+		const backup = await repository.exportBackup();
+		download(
+			JSON.stringify(backup, null, 2),
+			`hollama-backup-${new Date().toISOString().slice(0, 10)}.json`
+		);
 	}
 
 	// Restores every data source from a single backup file.
@@ -140,11 +118,7 @@
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			try {
-				const backup = JSON.parse(e.target?.result as string);
-				for (const { storageKey } of dataSources) {
-					if (backup[storageKey] === undefined) continue;
-					applyToStore(storageKey, backup[storageKey]);
-				}
+				applyBackupToStores(JSON.parse(e.target?.result as string));
 				toast.success($LL.importSuccess());
 			} catch (error) {
 				console.error(error);
@@ -157,49 +131,23 @@
 	}
 
 	function deleteData(storageKey: StorageKey) {
-		let confirmDelete = '';
+		const confirmMessages: Record<StorageKey, string> = {
+			[StorageKey.HollamaNextPreferences]: $LL.areYouSureYouWantToDeleteAllPreferences(),
+			[StorageKey.HollamaNextServers]: $LL.areYouSureYouWantToDeleteAllServers(),
+			[StorageKey.HollamaNextSessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
+			[StorageKey.HollamaNextKnowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge()
+		};
 
-		switch (storageKey) {
-			case StorageKey.HollamaNextPreferences:
-				confirmDelete = $LL.areYouSureYouWantToDeleteAllPreferences();
-				break;
-			case StorageKey.HollamaNextServers:
-				confirmDelete = $LL.areYouSureYouWantToDeleteAllServers();
-				break;
-			case StorageKey.HollamaNextSessions:
-				confirmDelete = $LL.areYouSureYouWantToDeleteAllSessions();
-				break;
-			case StorageKey.HollamaNextKnowledge:
-				confirmDelete = $LL.areYouSureYouWantToDeleteAllKnowledge();
-				break;
-		}
-
-		if (confirm(confirmDelete)) {
-			localStorage.removeItem(storageKey);
-			switch (storageKey) {
-				case StorageKey.HollamaNextPreferences:
-					$settingsStore = DEFAULT_SETTINGS;
-					break;
-				case StorageKey.HollamaNextServers:
-					$serversStore = [];
-					break;
-				case StorageKey.HollamaNextSessions:
-					$sessionsStore = [];
-					break;
-				case StorageKey.HollamaNextKnowledge:
-					$knowledgeStore = [];
-					break;
-			}
+		if (confirm(confirmMessages[storageKey])) {
+			stores[storageKey].set(defaults[storageKey]);
 			toast.info($LL.deleteSuccess());
 		}
 	}
 
 	// Wipes every data source and reloads into a fresh app (re-triggers onboarding).
-	function resetEverything() {
+	async function resetEverything() {
 		if (!confirm($LL.resetEverythingConfirm())) return;
-		for (const storageKey of Object.values(StorageKey)) {
-			localStorage.removeItem(storageKey);
-		}
+		await repository.resetAll();
 		window.location.href = '/';
 	}
 </script>
@@ -275,8 +223,7 @@
 				<nav class="mt-4 flex justify-between sm:mt-0">
 					<Button
 						variant="icon"
-						onclick={() =>
-							exportData(dataSource.storageKey, dataSource.fileName, dataSource.defaultValue)}
+						onclick={() => exportData(dataSource.storageKey, dataSource.fileName)}
 					>
 						<Download class="base-icon" />
 						{$LL.export()}

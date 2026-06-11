@@ -5,13 +5,8 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import {
-		knowledgeStore,
-		serversStore,
-		sessionsStore,
-		settingsStore,
-		StorageKey
-	} from '$lib/localStorage';
+	import { applyBackupToStores } from '$lib/data/applyBackup';
+	import { settingsStore } from '$lib/localStorage';
 	import { onboardingOpen } from '$lib/stores/modal';
 
 	import Profile from './settings/Profile.svelte';
@@ -28,24 +23,6 @@
 		step = 0;
 	}
 
-	function applyToStore(storageKey: StorageKey, data: unknown) {
-		localStorage.setItem(storageKey, JSON.stringify(data));
-		switch (storageKey) {
-			case StorageKey.HollamaNextPreferences:
-				$settingsStore = data as typeof $settingsStore;
-				break;
-			case StorageKey.HollamaNextServers:
-				$serversStore = data as typeof $serversStore;
-				break;
-			case StorageKey.HollamaNextSessions:
-				$sessionsStore = data as typeof $sessionsStore;
-				break;
-			case StorageKey.HollamaNextKnowledge:
-				$knowledgeStore = data as typeof $knowledgeStore;
-				break;
-		}
-	}
-
 	function restoreFromBackup(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
@@ -54,10 +31,7 @@
 		reader.onload = (e) => {
 			try {
 				const backup = JSON.parse(e.target?.result as string);
-				for (const storageKey of Object.values(StorageKey)) {
-					if (backup[storageKey] === undefined) continue;
-					applyToStore(storageKey, backup[storageKey]);
-				}
+				applyBackupToStores(backup);
 				toast.success($LL.importSuccess());
 				step = TOTAL_STEPS - 1; // jump to the final screen
 			} catch (error) {
@@ -85,7 +59,7 @@
 			<!-- Step indicator -->
 			<div class="flex items-center gap-3 px-5 pb-3 pt-5">
 				<div class="flex flex-1 gap-1.5">
-					{#each Array(TOTAL_STEPS) as _, i (i)}
+					{#each Array.from({ length: TOTAL_STEPS }, (_, i) => i) as i (i)}
 						<span
 							class="h-1 flex-1 rounded-full transition-colors {i <= step
 								? 'bg-accent'

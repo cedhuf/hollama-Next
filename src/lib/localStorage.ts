@@ -1,48 +1,33 @@
-import { toast } from 'svelte-sonner';
 import { writable } from 'svelte/store';
 
 import { browser } from '$app/environment';
+import type { Server } from '$lib/connections';
+import type { Knowledge } from '$lib/knowledge';
 import type { Session } from '$lib/sessions';
+import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
-import type { Server } from './connections';
-import type { Knowledge } from './knowledge';
-import { DEFAULT_SETTINGS, type Settings } from './settings';
+import { repository } from './data';
 
-function createLocalStorageStore<T>(key: string, defaultValue: T) {
-	const initialValue: T = browser
-		? JSON.parse(localStorage.getItem(key) || 'null') || defaultValue
-		: defaultValue;
+// Re-exported so existing call sites keep importing these from `$lib/localStorage`.
+export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
 
-	const store = writable<T>(initialValue);
+/**
+ * A writable store that persists every change through the active repository.
+ * `seed` is the synchronous initial value (no-flash in local mode); `reset()`
+ * returns the store to `defaultValue`.
+ */
+function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise<void>) {
+	const store = writable<T>(seed);
 
-	store.subscribe((value) => {
-		if (browser) {
-			try {
-				localStorage.setItem(key, JSON.stringify(value));
-			} catch (error) {
-				// Handle localStorage quota exceeded error
-				if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-					toast.warning('Local storage is full', {
-						id: 'localstorage-full-toast',
-						description:
-							'You have reached the storage limit for your browser. Please delete some sessions, knowledge, or preferences to free up space.'
-					});
-				} else {
-					// Handle other errors, such as JSON serialization issues
-					toast.warning('Failed to save to localStorage', {
-						id: 'localstorage-error-toast',
-						description: (error as Error).message
-					});
-				}
-			}
-		}
-	});
+	if (browser) {
+		// Fires synchronously with `seed`, then on every subsequent change —
+		// matching the previous inline-localStorage behaviour.
+		store.subscribe((value) => void save(value));
+	}
 
 	return {
 		...store,
-		reset: () => {
-			store.set(defaultValue);
-		}
+		reset: () => store.set(defaultValue)
 	};
 }
 
@@ -59,21 +44,22 @@ export function deleteStoreItem<T extends { id: string }>(store: T[], id: string
 	return store.filter((s) => s.id !== id);
 }
 
-export const LOCAL_STORAGE_PREFIX = 'hollamanext';
-export enum StorageKey {
-	HollamaNextPreferences = `${LOCAL_STORAGE_PREFIX}-settings`,
-	HollamaNextServers = `${LOCAL_STORAGE_PREFIX}-servers`,
-	HollamaNextSessions = `${LOCAL_STORAGE_PREFIX}-sessions`,
-	HollamaNextKnowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`
-}
+const seed = repository.hydrate?.() ?? {
+	settings: DEFAULT_SETTINGS,
+	servers: [] as Server[],
+	sessions: [] as Session[],
+	knowledge: [] as Knowledge[]
+};
 
-export const settingsStore = createLocalStorageStore<Settings>(
-	StorageKey.HollamaNextPreferences,
-	DEFAULT_SETTINGS
+export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SETTINGS, (v) =>
+	repository.saveSettings(v)
 );
-export const serversStore = createLocalStorageStore<Server[]>(StorageKey.HollamaNextServers, []);
-export const sessionsStore = createLocalStorageStore<Session[]>(StorageKey.HollamaNextSessions, []);
-export const knowledgeStore = createLocalStorageStore<Knowledge[]>(
-	StorageKey.HollamaNextKnowledge,
-	[]
+export const serversStore = persistedStore<Server[]>(seed.servers, [], (v) =>
+	repository.saveServers(v)
+);
+export const sessionsStore = persistedStore<Session[]>(seed.sessions, [], (v) =>
+	repository.saveSessions(v)
+);
+export const knowledgeStore = persistedStore<Knowledge[]>(seed.knowledge, [], (v) =>
+	repository.saveKnowledge(v)
 );
