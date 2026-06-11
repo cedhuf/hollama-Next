@@ -148,9 +148,21 @@
 			$settingsStore.themeMode = 'system';
 		}
 
-		// First-run onboarding: local mode only, and only when there is truly no data yet
+		// Pre-configure an Ollama server from env on a fresh local install, for
+		// reproducible deployments (only when no server exists yet).
+		const ollamaUrl = env.PUBLIC_OLLAMA_URL;
+		if (env.PUBLIC_MODE !== 'server' && ollamaUrl && $serversStore.length === 0) {
+			serversStore.update((servers) => [
+				...servers,
+				{ ...getDefaultServer(ConnectionType.Ollama), baseUrl: ollamaUrl, isEnabled: true }
+			]);
+		}
+
+		// First-run onboarding: local mode only, can be disabled via env, and only
+		// when there is truly no data yet.
 		if (
 			env.PUBLIC_MODE !== 'server' &&
+			env.PUBLIC_DISABLE_ONBOARDING !== 'true' &&
 			!$settingsStore.onboardingComplete &&
 			$serversStore.length === 0 &&
 			$sessionsStore.length === 0 &&
