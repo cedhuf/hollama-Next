@@ -3,16 +3,27 @@
 
 	import { browser } from '$app/environment';
 	import { getLastUsedModels } from '$lib/chat';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import RobotsNoIndex from '$lib/components/RobotsNoIndex.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { fetchProviders, providerModels } from '$lib/providers';
 	import { type Model } from '$lib/settings';
 
 	let { children }: { children: Snippet } = $props();
 
 	async function listModels(): Promise<Model[]> {
+		// In server mode, models come from /api/providers (system: admin-curated
+		// shared list; personal: live fetch performed server-side).
+		if (isServerMode) {
+			const { servers } = await fetchProviders();
+			return providerModels(servers).sort((a, b) =>
+				a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+			);
+		}
+
 		const models: Model[] = [];
 
 		for (const server of $serversStore) {

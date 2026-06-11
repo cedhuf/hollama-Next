@@ -3,6 +3,7 @@ import { toast } from 'svelte-sonner';
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import { fetchProviders, providerToServer } from '$lib/providers';
 import type { Session } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
@@ -40,9 +41,9 @@ export class ApiRepository implements DataRepository {
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#get<Knowledge[]>('knowledge', []);
 	}
-	// Servers are admin/system-managed server-side; wired in step 5.
 	async loadServers(): Promise<Server[]> {
-		return [];
+		const { servers } = await fetchProviders(true);
+		return servers.map(providerToServer);
 	}
 
 	async saveSettings(value: Settings): Promise<void> {

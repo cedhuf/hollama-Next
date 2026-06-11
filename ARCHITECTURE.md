@@ -219,12 +219,20 @@ quelle** clé → _open relay / SSRF_ sur une instance publique.
   `redirect: manual` pour qu'aucune redirection ne fasse fuiter l'`Authorization`
   hors allowlist). On ne bloque **pas** les IP privées en dur, car `localhost`
   est légitime (Ollama).
-- **Mode serveur — à venir (étape 6)** : le proxy devient **authentifié**. Le
-  client envoie un `serverId` (pas une URL ni une clé). Le serveur :
+- **Mode serveur — fait (étape 6)** : `/api/llm/[serverId]/[...path]` est
+  **authentifié**. Le client envoie un `serverId` (pas une URL ni une clé). Le
+  serveur :
   1. vérifie la session,
-  2. vérifie que ce user a le droit d'utiliser ce serveur,
+  2. vérifie que ce user a le droit d'utiliser ce serveur (système, ou le sien)
+     et qu'il est activé,
   3. récupère `base_url` + déchiffre `api_key_enc` côté serveur,
-  4. forwarde. La clé n'apparaît jamais côté client.
+  4. forwarde avec l'`Authorization` injectée. La clé n'apparaît jamais côté
+     client. Les stratégies de chat ([endpoint.ts](src/lib/chat/endpoint.ts))
+     ciblent ce proxy en mode serveur.
+
+  > ⚠️ Côté serveur, viser un provider local via **`127.0.0.1`** plutôt que
+  > `localhost` : `fetch` (undici) peut résoudre `localhost` en IPv6 `::1` et
+  > échouer si le provider n'écoute qu'en IPv4 (cas d'Ollama par défaut).
 
 ## 7. Flag de mode & sélection d'implémentation
 

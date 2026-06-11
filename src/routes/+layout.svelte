@@ -24,13 +24,19 @@
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
+	import { currentUser } from '$lib/stores/auth';
 	import { onboardingOpen } from '$lib/stores/modal';
 	import { checkForUpdates } from '$lib/updates';
 
+	import type { LayoutData } from './$types';
 	import Onboarding from './Onboarding.svelte';
 	import SettingsModal from './settings/SettingsModal.svelte';
 
-	let { children }: { children: Snippet } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	$effect(() => {
+		currentUser.set(data.user);
+	});
 
 	onNavigate(async (navigation) => {
 		// Check for updates whenever the user follows a link (if auto-check is enabled)

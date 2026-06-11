@@ -1,16 +1,32 @@
 <script lang="ts">
-	import { Database, Info, MessageSquare, Server, Settings2, User, X } from '@lucide/svelte';
+	import {
+		Database,
+		Info,
+		LogOut,
+		MessageSquare,
+		Server,
+		Settings2,
+		Shield,
+		User,
+		X
+	} from '@lucide/svelte';
 	import { Dialog } from 'bits-ui';
 
 	import LL from '$i18n/i18n-svelte';
+	import { env } from '$env/dynamic/public';
+	import { currentUser } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
 
+	import Admin from './Admin.svelte';
 	import Chat from './Chat.svelte';
 	import DataManagement from './DataManagement.svelte';
 	import Interface from './Interface.svelte';
 	import Profile from './Profile.svelte';
 	import Servers from './Servers.svelte';
 	import Version from './Version.svelte';
+
+	const serverMode = env.PUBLIC_MODE === 'server';
+	const isAdmin = $derived($currentUser?.role === 'admin');
 
 	let activeTab = $state('profile');
 </script>
@@ -48,16 +64,31 @@
 						{$LL.profile()}
 					</button>
 
-					<button
-						onclick={() => (activeTab = 'servers')}
-						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-						'servers'
-							? 'bg-shade-2 font-medium'
-							: ''}"
-					>
-						<Server class="h-4 w-4" />
-						{$LL.servers()}
-					</button>
+					{#if !serverMode}
+						<button
+							onclick={() => (activeTab = 'servers')}
+							class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+							'servers'
+								? 'bg-shade-2 font-medium'
+								: ''}"
+						>
+							<Server class="h-4 w-4" />
+							{$LL.servers()}
+						</button>
+					{/if}
+
+					{#if serverMode && isAdmin}
+						<button
+							onclick={() => (activeTab = 'admin')}
+							class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
+							'admin'
+								? 'bg-shade-2 font-medium'
+								: ''}"
+						>
+							<Shield class="h-4 w-4" />
+							Admin
+						</button>
+					{/if}
 
 					<button
 						onclick={() => (activeTab = 'chat')}
@@ -102,11 +133,26 @@
 						<Info class="h-4 w-4" />
 						About
 					</button>
+
+					{#if serverMode}
+						<form method="POST" action="/auth/signout" class="shrink-0 sm:mt-auto">
+							<input type="hidden" name="callbackUrl" value="/login" />
+							<button
+								type="submit"
+								class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							>
+								<LogOut class="h-4 w-4" />
+								Sign out
+							</button>
+						</form>
+					{/if}
 				</nav>
 
 				<div class="flex-1 overflow-auto p-4">
 					{#if activeTab === 'servers'}
 						<Servers />
+					{:else if activeTab === 'admin'}
+						<Admin />
 					{:else if activeTab === 'chat'}
 						<Chat />
 					{:else if activeTab === 'interface'}
