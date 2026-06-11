@@ -9,4 +9,18 @@ declare global {
 	}
 }
 
+declare module '@auth/sveltekit' {
+	interface Session {
+		user: {
+			id: string;
+			email: string;
+			role: 'admin' | 'user';
+		};
+	}
+
+	interface User {
+		role?: 'admin' | 'user';
+	}
+}
+
 export {};

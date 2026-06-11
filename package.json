@@ -82,5 +82,8 @@
 		"name": "Fernando Maclen",
 		"email": "hello@fernando.is",
 		"url": "https://fernando.is"
+	},
+	"dependencies": {
+		"@auth/sveltekit": "^1.11.2"
 	}
 }
