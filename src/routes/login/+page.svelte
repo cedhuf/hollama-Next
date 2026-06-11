@@ -1,5 +1,13 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	let { data } = $props();
+
+	let oidcForm: HTMLFormElement | undefined = $state();
+
+	onMount(() => {
+		if (data.autoRedirect) oidcForm?.requestSubmit();
+	});
 
 	const errorMessage = $derived(
 		data.error === 'CredentialsSignin'
@@ -61,7 +69,7 @@
 		{/if}
 
 		{#if data.oidc}
-			<form method="POST" action="/auth/signin/oidc">
+			<form method="POST" action="/auth/signin/oidc" bind:this={oidcForm}>
 				<input type="hidden" name="callbackUrl" value={data.redirectTo} />
 				<button
 					type="submit"

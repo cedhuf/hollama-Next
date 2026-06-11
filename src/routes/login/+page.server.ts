@@ -13,10 +13,19 @@ export const load = async ({ url, locals }) => {
 	const session = await locals.auth();
 	if (session) throw redirect(303, redirectTo);
 
+	const credentials = privateEnv.AUTH_CREDENTIALS === 'true';
+	const oidc = privateEnv.OIDC_ISSUER?.trim()
+		? { name: privateEnv.OIDC_NAME?.trim() || 'SSO' }
+		: null;
+	const error = url.searchParams.get('error');
+
 	return {
-		credentials: privateEnv.AUTH_CREDENTIALS === 'true',
-		oidc: privateEnv.OIDC_ISSUER?.trim() ? { name: privateEnv.OIDC_NAME?.trim() || 'SSO' } : null,
-		error: url.searchParams.get('error'),
-		redirectTo
+		credentials,
+		oidc,
+		error,
+		redirectTo,
+		// Transparent SSO: when OIDC is the only method, jump straight to the IdP
+		// (unless we're showing an error, to avoid a redirect loop).
+		autoRedirect: !!oidc && !credentials && !error && privateEnv.OIDC_AUTO_REDIRECT === 'true'
 	};
 };
