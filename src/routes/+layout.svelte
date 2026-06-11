@@ -16,6 +16,7 @@
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import {
+		hydrateStores,
 		knowledgeStore,
 		serversStore,
 		sessionsStore,
@@ -78,7 +79,10 @@
 		}
 	});
 
-	onMount(() => {
+	onMount(async () => {
+		// Fill the stores from the repository (no-op in local mode, network load in server mode).
+		await hydrateStores();
+
 		// Language
 		if (!$settingsStore.userLanguage)
 			$settingsStore.userLanguage = detectLocale(
@@ -90,8 +94,9 @@
 		loadLocale($settingsStore.userLanguage);
 		setLocale($settingsStore.userLanguage);
 
-		// Migrate old server settings to new format
-		const settingsLocalStorage = localStorage.getItem(StorageKey.HollamaNextPreferences);
+		// Migrate old server settings to new format (local mode only — legacy localStorage data)
+		const settingsLocalStorage =
+			env.PUBLIC_MODE !== 'server' ? localStorage.getItem(StorageKey.HollamaNextPreferences) : null;
 		if (settingsLocalStorage) {
 			const settings = JSON.parse(settingsLocalStorage);
 
@@ -143,8 +148,9 @@
 			$settingsStore.themeMode = 'system';
 		}
 
-		// First-run onboarding: only when there is truly no data yet
+		// First-run onboarding: local mode only, and only when there is truly no data yet
 		if (
+			env.PUBLIC_MODE !== 'server' &&
 			!$settingsStore.onboardingComplete &&
 			$serversStore.length === 0 &&
 			$sessionsStore.length === 0 &&

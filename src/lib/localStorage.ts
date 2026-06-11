@@ -13,21 +13,38 @@ export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
 
 /**
  * A writable store that persists every change through the active repository.
- * `seed` is the synchronous initial value (no-flash in local mode); `reset()`
- * returns the store to `defaultValue`.
+ *
+ * The very first (synchronous) emission — the seed echo — is skipped: there's
+ * nothing new to persist, and in server mode persisting the empty seed before
+ * async hydration would clobber the user's server-side data. `setQuiet()` sets
+ * the value without persisting, used to hydrate from the repository at boot.
+ * `reset()` returns the store to `defaultValue`.
  */
 function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise<void>) {
 	const store = writable<T>(seed);
+	let initialized = false;
+	let suppress = false;
 
 	if (browser) {
-		// Fires synchronously with `seed`, then on every subsequent change —
-		// matching the previous inline-localStorage behaviour.
-		store.subscribe((value) => void save(value));
+		store.subscribe((value) => {
+			if (!initialized) {
+				initialized = true;
+				return;
+			}
+			if (!suppress) void save(value);
+		});
 	}
 
 	return {
-		...store,
-		reset: () => store.set(defaultValue)
+		subscribe: store.subscribe,
+		set: store.set,
+		update: store.update,
+		reset: () => store.set(defaultValue),
+		setQuiet: (value: T) => {
+			suppress = true;
+			store.set(value);
+			suppress = false;
+		}
 	};
 }
 
@@ -63,3 +80,24 @@ export const sessionsStore = persistedStore<Session[]>(seed.sessions, [], (v) =>
 export const knowledgeStore = persistedStore<Knowledge[]>(seed.knowledge, [], (v) =>
 	repository.saveKnowledge(v)
 );
+
+/**
+ * Fill the stores from the repository at boot. A no-op in local mode (the seed
+ * is already synchronous via `hydrate()`); in server mode it loads each
+ * collection over the network and sets the stores quietly (no write-back).
+ */
+export async function hydrateStores(): Promise<void> {
+	if (repository.hydrate) return;
+
+	const [settings, servers, sessions, knowledge] = await Promise.all([
+		repository.loadSettings(),
+		repository.loadServers(),
+		repository.loadSessions(),
+		repository.loadKnowledge()
+	]);
+
+	if (settings) settingsStore.setQuiet(settings);
+	serversStore.setQuiet(servers);
+	sessionsStore.setQuiet(sessions);
+	knowledgeStore.setQuiet(knowledge);
+}
