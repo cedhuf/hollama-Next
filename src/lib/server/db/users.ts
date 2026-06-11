@@ -52,3 +52,15 @@ export function createUser(input: {
 export function setUserRole(id: string, role: Role): void {
 	getDb().prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
 }
+
+export type UserSummary = Pick<UserRow, 'id' | 'email' | 'role' | 'created_at'>;
+
+export function listUsers(): UserSummary[] {
+	return getDb()
+		.prepare('SELECT id, email, role, created_at FROM users ORDER BY created_at')
+		.all() as unknown as UserSummary[];
+}
+
+export function deleteUser(id: string): void {
+	getDb().prepare('DELETE FROM users WHERE id = ?').run(id);
+}
