@@ -47,6 +47,7 @@
 	let verifying = $state(false);
 	let verified = $state(false);
 	let modelCount = $state(0);
+	let justAddedId = $state<string | null>(null);
 
 	function toServer(v: ApiServer): Server {
 		return {
@@ -126,7 +127,7 @@
 	}
 
 	async function saveDraft() {
-		await api(base, 'POST', {
+		const created = await api<{ id: string }>(base, 'POST', {
 			connectionType: draft.connectionType,
 			baseUrl: draft.baseUrl,
 			label: draft.label || null,
@@ -143,6 +144,7 @@
 		};
 		verified = false;
 		await load();
+		justAddedId = created?.id ?? null;
 		toast.success('Server added');
 	}
 
@@ -189,6 +191,7 @@
 		{#each servers as server (server.id)}
 			<Connection
 				{server}
+				startEditing={server.id === justAddedId}
 				onChange={() => persist(server)}
 				onDelete={() => removeServer(server.id)}
 			/>
