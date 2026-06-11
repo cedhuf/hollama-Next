@@ -1,40 +1,37 @@
 <script lang="ts">
-	import { Check, LoaderCircle, Trash2 } from '@lucide/svelte';
+	import { Check, LoaderCircle } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import Button from '$lib/components/Button.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, getDefaultServer, PROVIDERS } from '$lib/connections';
+	import { ConnectionType, getDefaultServer, PROVIDERS, type Server } from '$lib/connections';
 	import { currentUser } from '$lib/stores/auth';
 
-	// Server-mode connections. Admins manage shared SYSTEM servers; users their
-	// own PERSONAL servers (when enabled). Add flow: fill in → Verify → Save.
-	// Saved servers land in the list enabled, and can be toggled off anytime.
+	import Connection from './Connection.svelte';
 
-	interface SavedServer {
+	// Server-mode connections. Admins manage shared SYSTEM servers; users their
+	// own PERSONAL servers (when enabled). Saved servers use the full Connection
+	// UI (verify, Ollama pull, model filter, advanced, enable, delete) — same as
+	// local mode — just persisted via the API. New servers are added through a
+	// Verify → Save card.
+
+	interface ApiServer {
 		id: string;
 		connectionType: string;
-		baseUrl: string;
+		baseUrl?: string;
 		label: string | null;
 		modelFilter?: string | null;
 		isEnabled: boolean;
-		hasApiKey?: boolean;
+		scope?: string;
 	}
 
-	const BADGE: Record<string, { id: string; color: string }> = {
-		[ConnectionType.Ollama]: { id: 'ollama', color: '#1D9E75' },
-		[ConnectionType.OpenAI]: { id: 'openai', color: '#378ADD' },
-		[ConnectionType.Anthropic]: { id: 'claude', color: '#D85A30' },
-		[ConnectionType.Infomaniak]: { id: 'infomaniak', color: '#BA7517' },
-		[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
-	};
 	const input =
 		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
 
 	let allowUserKeys = $state(false);
-	let servers = $state<SavedServer[]>([]);
+	let servers = $state<Server[]>([]);
 
 	const isAdmin = $derived($currentUser?.role === 'admin');
 	const base = $derived(isAdmin ? '/api/admin/servers' : '/api/servers');
@@ -50,6 +47,19 @@
 	let verifying = $state(false);
 	let verified = $state(false);
 	let modelCount = $state(0);
+
+	function toServer(v: ApiServer): Server {
+		return {
+			id: v.id,
+			connectionType: v.connectionType as ConnectionType,
+			baseUrl: v.baseUrl ?? '',
+			label: v.label ?? undefined,
+			modelFilter: v.modelFilter ?? undefined,
+			isEnabled: v.isEnabled,
+			isVerified: null,
+			apiKey: '' // never returned; type in the field to set/replace
+		};
+	}
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
 		const response = await fetch(url, {
@@ -67,9 +77,10 @@
 	async function load() {
 		const providers = await fetch('/api/providers').then((r) => r.json());
 		allowUserKeys = providers.allowUserKeys;
-		servers = isAdmin
+		const list: ApiServer[] = isAdmin
 			? await fetch('/api/admin/servers').then((r) => r.json())
-			: providers.servers.filter((s: { scope: string }) => s.scope === 'personal');
+			: providers.servers.filter((s: ApiServer) => s.scope === 'personal');
+		servers = list.map(toServer);
 	}
 
 	onMount(load);
@@ -86,9 +97,7 @@
 		verified = false;
 	}
 
-	function touch() {
-		verified = false;
-	}
+	const touch = () => (verified = false);
 
 	async function verifyDraft() {
 		if (!draft.baseUrl) return toast.error('Base URL is required');
@@ -109,7 +118,6 @@
 				modelCount = result.models?.length ?? 0;
 				toast.success(`Connection verified — ${modelCount} model${modelCount === 1 ? '' : 's'}`);
 			} else {
-				verified = false;
 				toast.error('Connection failed', { description: result?.error });
 			}
 		} finally {
@@ -138,19 +146,29 @@
 		toast.success('Server added');
 	}
 
-	async function toggleEnabled(server: SavedServer) {
-		const next = !server.isEnabled;
-		server.isEnabled = next;
-		await api(`${base}/${server.id}`, 'PUT', { isEnabled: next });
+	// Debounced PUT per server; the key is sent only when (re)typed.
+	const timers: Record<string, ReturnType<typeof setTimeout>> = {};
+	function persist(server: Server) {
+		clearTimeout(timers[server.id]);
+		timers[server.id] = setTimeout(() => {
+			void fetch(`${base}/${server.id}`, {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					baseUrl: server.baseUrl,
+					label: server.label ?? null,
+					modelFilter: server.modelFilter ?? null,
+					isEnabled: server.isEnabled,
+					...(server.apiKey ? { apiKey: server.apiKey } : {})
+				})
+			});
+		}, 500);
 	}
 
 	async function removeServer(id: string) {
-		if (!confirm('Delete this server?')) return;
 		await api(`${base}/${id}`, 'DELETE');
-		await load();
+		servers = servers.filter((s) => s.id !== id);
 	}
-
-	const badgeOf = (type: string) => BADGE[type] ?? { id: '', color: '#888780' };
 </script>
 
 <div class="flex flex-col gap-4">
@@ -168,44 +186,15 @@
 			<EmptyMessage>Providers are managed by your administrator.</EmptyMessage>
 		</div>
 	{:else}
-		<!-- Saved servers -->
 		{#each servers as server (server.id)}
-			<div class="flex items-center gap-3 rounded-md border border-shade-3 p-3">
-				<button
-					type="button"
-					role="switch"
-					aria-checked={server.isEnabled}
-					aria-label="Enabled"
-					onclick={() => toggleEnabled(server)}
-					class="relative h-5 w-9 shrink-0 rounded-full transition-colors {server.isEnabled
-						? 'bg-accent'
-						: 'bg-shade-3'}"
-				>
-					<span
-						class="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all {server.isEnabled
-							? 'left-[18px]'
-							: 'left-0.5'}"
-					></span>
-				</button>
-				<div class="flex min-w-0 flex-1 flex-col">
-					<span class="truncate text-sm font-medium">{server.label || server.connectionType}</span>
-					<span class="truncate text-xs text-muted">{server.baseUrl}</span>
-				</div>
-				<span
-					class="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
-					style="border-color: {badgeOf(server.connectionType).color}; color: {badgeOf(
-						server.connectionType
-					).color}"
-				>
-					{badgeOf(server.connectionType).id}
-				</span>
-				<Button variant="icon" on:click={() => removeServer(server.id)} aria-label="Delete">
-					<Trash2 class="base-icon" />
-				</Button>
-			</div>
+			<Connection
+				{server}
+				onChange={() => persist(server)}
+				onDelete={() => removeServer(server.id)}
+			/>
 		{/each}
 
-		<!-- Add a server -->
+		<!-- Add a server: Verify, then Save -->
 		<div class="flex flex-col gap-2 rounded-md border border-dashed border-shade-4 p-3">
 			<span class="text-sm font-medium">Add a server</span>
 			<div class="flex flex-wrap gap-1.5">
@@ -247,9 +236,7 @@
 						{/if}
 					</Button>
 				{:else}
-					<Button on:click={saveDraft}>
-						<Check class="base-icon" /> Save
-					</Button>
+					<Button on:click={saveDraft}><Check class="base-icon" /> Save</Button>
 					<span class="text-xs text-muted">{modelCount} models found</span>
 				{/if}
 			</div>

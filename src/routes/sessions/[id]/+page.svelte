@@ -121,6 +121,13 @@
 				if (model) session.model = model;
 			}
 
+			// Strip the one-shot params so a refresh doesn't re-submit the prompt
+			// (and doesn't repopulate the input with already-sent text).
+			const cleaned = new URL(page.url);
+			cleaned.searchParams.delete('q');
+			cleaned.searchParams.delete('model');
+			history.replaceState(history.state, '', cleaned);
+
 			await tick();
 			handleSubmit();
 		}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PanelLeft } from '@lucide/svelte';
+	import { LoaderCircle, PanelLeft } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
@@ -33,6 +33,11 @@
 	import SettingsModal from './settings/SettingsModal.svelte';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	// In server mode, wait for the async hydration before rendering the app, so
+	// pages always read fully-loaded stores (otherwise a refresh can show an
+	// empty session until you navigate away and back). Local mode is ready now.
+	let booted = $state(env.PUBLIC_MODE !== 'server');
 
 	$effect(() => {
 		currentUser.set(data.user);
@@ -89,6 +94,7 @@
 	onMount(async () => {
 		// Fill the stores from the repository (no-op in local mode, network load in server mode).
 		await hydrateStores();
+		booted = true;
 
 		// Language
 		if (!$settingsStore.userLanguage)
@@ -212,6 +218,10 @@
 {#if $page.url.pathname === '/login'}
 	<!-- Login renders standalone, without the app shell. -->
 	{@render children()}
+{:else if !booted}
+	<div class="flex h-dvh w-screen items-center justify-center bg-shade-2">
+		<LoaderCircle class="h-6 w-6 animate-spin text-muted" />
+	</div>
 {:else}
 	<SettingsModal />
 	<Onboarding />
