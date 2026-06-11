@@ -6,14 +6,14 @@
 
 ## 1. Deux modes, une seule app
 
-| | **Mode `local`** (défaut) | **Mode `server`** |
-|---|---|---|
-| Public | Usage perso, frictionless | Instance partagée / self-hosted multi-utilisateurs |
-| Auth | Aucune | Auth.js (login obligatoire) |
-| Données | `localStorage` (navigateur) | SQLite côté serveur, par utilisateur |
-| Clés API | Dans le navigateur | **Côté serveur uniquement, chiffrées** |
-| Sync multi-appareils | Non | Oui (les données vivent sur le serveur) |
-| Onboarding | Wizard actuel | Login → app |
+|                      | **Mode `local`** (défaut)   | **Mode `server`**                                  |
+| -------------------- | --------------------------- | -------------------------------------------------- |
+| Public               | Usage perso, frictionless   | Instance partagée / self-hosted multi-utilisateurs |
+| Auth                 | Aucune                      | Auth.js (login obligatoire)                        |
+| Données              | `localStorage` (navigateur) | SQLite côté serveur, par utilisateur               |
+| Clés API             | Dans le navigateur          | **Côté serveur uniquement, chiffrées**             |
+| Sync multi-appareils | Non                         | Oui (les données vivent sur le serveur)            |
+| Onboarding           | Wizard actuel               | Login → app                                        |
 
 Le mode est choisi **au déploiement** par une variable d'environnement :
 
@@ -38,28 +38,36 @@ Composants ──► stores réactifs ──► DataRepository (interface, async
 ```
 
 Règle d'or : **plus aucun composant ne touche `localStorage` directement.**
-(Aujourd'hui `DataManagement.svelte` et `Onboarding.svelte` le font — à corriger.)
+(Fait : `DataManagement.svelte` et `Onboarding.svelte` passent par les stores /
+le repository. Seule exception assumée : la migration legacy de `+layout.svelte`,
+qui ne concerne que d'anciennes données purement locales.)
 
 ### Interface
 
 ```ts
 // src/lib/data/repository.ts
 export interface DataRepository {
-  load(): Promise<AppData>;                 // hydrate au démarrage
-  saveSessions(s: Session[]): Promise<void>;
-  saveKnowledge(k: Knowledge[]): Promise<void>;
-  saveServers(s: Server[]): Promise<void>;  // serveurs perso (mode server)
-  saveSettings(s: Settings): Promise<void>;
-  exportBackup(): Promise<Backup>;
-  importBackup(b: Backup): Promise<void>;
-  resetAll(): Promise<void>;
+	hydrate?(): AppData; // seed synchrone (no-flash, mode local) — absent si async-only
+	loadSettings(): Promise<Settings | null>;
+	loadServers(): Promise<Server[]>;
+	loadSessions(): Promise<Session[]>;
+	loadKnowledge(): Promise<Knowledge[]>;
+	saveSettings(value: Settings): Promise<void>;
+	saveServers(value: Server[]): Promise<void>; // serveurs perso (mode server)
+	saveSessions(value: Session[]): Promise<void>;
+	saveKnowledge(value: Knowledge[]): Promise<void>;
+	exportBackup(): Promise<Backup>;
+	importBackup(b: Backup): Promise<void>;
+	resetAll(): Promise<void>;
 }
 ```
 
-- `LocalStorageRepository` : enveloppe l'accès `localStorage` actuel dans des
-  `Promise.resolve()`. Comportement identique à aujourd'hui.
-- `ApiRepository` : appelle des endpoints SvelteKit (`/api/data/*`) gardés par
-  la session Auth.js.
+- `LocalStorageRepository` (fait) : seul point qui touche `localStorage` ; lit
+  de façon synchrone (via `hydrate()`) pour seeder les stores sans flash.
+  Comportement identique à aujourd'hui.
+- `ApiRepository` (étape 4) : appelle des endpoints SvelteKit (`/api/data/*`)
+  gardés par la session Auth.js ; pas de `hydrate()` → les stores se remplissent
+  via les `load*()` au boot.
 
 ### Stores async-ready
 
@@ -153,6 +161,7 @@ on peut en activer un, l'autre, ou les deux :
   OIDC_ROLE_CLAIM=groups                 # claim porteur des rôles
   OIDC_ADMIN_VALUE=hollama-admin         # valeur => role admin
   ```
+
 - **Bootstrap admin** : au premier démarrage en mode serveur, si aucun user
   n'existe, on crée l'admin depuis `ADMIN_EMAIL` / `ADMIN_PASSWORD` (env).
   Premier compte = `role: admin`. (En OIDC pur, `ADMIN_EMAIL` désigne aussi quel
@@ -173,18 +182,44 @@ C'est la spécificité voulue :
   un user peut créer ses propres `servers` (`owner_user_id = user.id`). Sinon,
   l'UI « ajouter un serveur » est masquée côté user.
 - **Les clés ne quittent jamais le serveur.** Le navigateur ne reçoit que des
-  *identifiants de serveur* et des *noms de modèles*.
+  _identifiants de serveur_ et des _noms de modèles_.
 
-## 6. Sécurité du proxy — à corriger dans tous les cas
+## 6. Le proxy : pourquoi il existe, et comment on le durcit
 
-Aujourd'hui [`/api/proxy/[...path]`](src/routes/api/proxy/[...path]/+server.ts)
-forwarde vers **n'importe quelle** URL avec **n'importe quelle** clé fournie par
-le client → *open relay / SSRF* sur une instance publique.
+### Pourquoi on le garde (ce n'est pas qu'un contournement de test)
 
-- **Mode local** : le proxy ne sert qu'à contourner le CORS. On le restreint au
-  minimum (et il reste acceptable car l'instance est perso).
-- **Mode serveur** : le proxy devient **authentifié**. Le client envoie un
-  `serverId` (pas une URL ni une clé). Le serveur :
+[`/api/proxy/[...path]`](src/routes/api/proxy/[...path]/+server.ts) relaie les
+appels du navigateur vers les providers LLM. Deux raisons de fond :
+
+1. **CORS, au runtime.** Un appel navigateur → API tierce est bloqué sauf
+   en-têtes CORS adéquats. Or **Ollama** refuse les origines tierces par défaut
+   (sinon `OLLAMA_ORIGINS` à configurer à la main), **Anthropic** exige un
+   en-tête spécial, et la plupart des serveurs **OpenAI-compatible/Infomaniak**
+   n'envoient aucun CORS permissif. Le proxy **uniformise** : ça marche partout
+   sans config utilisateur — c'est ce qui rend le mode local _frictionless_.
+2. **Clés côté serveur (mode serveur).** Le proxy est le seul endroit où la clé
+   peut être injectée sans jamais atteindre le navigateur — pilier du modèle
+   admin-centré (§5).
+
+Coût : **nul**. L'app tourne déjà sur un serveur Node (adapter-node, requis
+aussi pour l'auth/DB). Le proxy, c'est le même serveur. Il ne deviendrait inutile
+que pour un déploiement 100 % statique vers des providers CORS-friendly — ce qui
+contredit la direction serveur/multi-user.
+
+### Le risque, et le durcissement
+
+À l'origine le proxy forwardait vers **n'importe quelle** URL avec **n'importe
+quelle** clé → _open relay / SSRF_ sur une instance publique.
+
+- **Mode local — durci (fait, étape 2)** : validation d'URL absolue, **schémas
+  `http`/`https` uniquement** (ferme `file:`/`gopher:`/`data:`…), et **allowlist
+  d'origines optionnelle** `PROXY_ALLOWED_ORIGINS` (vide = comportement actuel,
+  pour rester frictionless ; renseignée = seules ces origines passent, avec
+  `redirect: manual` pour qu'aucune redirection ne fasse fuiter l'`Authorization`
+  hors allowlist). On ne bloque **pas** les IP privées en dur, car `localhost`
+  est légitime (Ollama).
+- **Mode serveur — à venir (étape 6)** : le proxy devient **authentifié**. Le
+  client envoie un `serverId` (pas une URL ni une clé). Le serveur :
   1. vérifie la session,
   2. vérifie que ce user a le droit d'utiliser ce serveur,
   3. récupère `base_url` + déchiffre `api_key_enc` côté serveur,
@@ -195,8 +230,9 @@ le client → *open relay / SSRF* sur une instance publique.
 ```ts
 // src/lib/data/index.ts
 import { env } from '$env/dynamic/public';
+
 export const repository: DataRepository =
-  env.PUBLIC_MODE === 'server' ? new ApiRepository() : new LocalStorageRepository();
+	env.PUBLIC_MODE === 'server' ? new ApiRepository() : new LocalStorageRepository();
 ```
 
 `ChatStrategy` reçoit, selon le mode, soit un `Server` complet (local), soit un
@@ -205,6 +241,7 @@ export const repository: DataRepository =
 ## 8. Impact fichiers (vue d'ensemble)
 
 **Nouveau**
+
 - `src/lib/data/repository.ts` — interface + types `AppData`/`Backup`
 - `src/lib/data/localStorageRepository.ts`
 - `src/lib/data/apiRepository.ts`
@@ -218,6 +255,7 @@ export const repository: DataRepository =
   partagés, `allowUserKeys`, gestion users)
 
 **Modifié**
+
 - `src/lib/localStorage.ts` — les stores passent par le Repository
 - `src/routes/+layout.svelte` — hydratation async au boot + garde d'auth
 - `src/routes/settings/DataManagement.svelte`, `Onboarding.svelte` — via Repository
@@ -228,7 +266,7 @@ export const repository: DataRepository =
 
 Pour pouvoir valider à chaque étape sans tout casser :
 
-1. **Repository + stores async** en mode local — *comportement identique*.
+1. **Repository + stores async** en mode local — _comportement identique_.
 2. **Durcissement du proxy** (indépendant).
 3. **Couche serveur** : SQLite + migrations + Auth.js + endpoints `/api/data`.
 4. **`ApiRepository`** + bascule par `PUBLIC_MODE`.
