@@ -110,6 +110,9 @@ export class ApiRepository implements DataRepository {
 				body: JSON.stringify(value),
 				keepalive
 			});
+			// 401 = not authenticated (e.g. a boot write while on /login). Benign;
+			// the route guard handles auth, so don't surface it as a save error.
+			if (response.status === 401) return;
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 		} catch (error) {
 			toast.error('Failed to save', {

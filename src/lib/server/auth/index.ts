@@ -3,6 +3,7 @@ import type { Provider } from '@auth/sveltekit/providers';
 import Credentials from '@auth/sveltekit/providers/credentials';
 
 import { env } from '$env/dynamic/private';
+import { replaceSettings } from '$lib/server/db/collections';
 import {
 	countUsers,
 	createUser,
@@ -11,11 +12,18 @@ import {
 	type Role,
 	type UserRow
 } from '$lib/server/db/users';
+import { DEFAULT_SETTINGS } from '$lib/settings';
 
 import { hashPassword, verifyPassword } from './password';
 
-/** Derive the role from an OIDC claim (group/scope), defaulting to `user`. */
-function roleFromClaim(profile: Record<string, unknown> | undefined | null): Role {
+type Claims = Record<string, unknown> | null | undefined;
+
+const adminEmail = () => env.ADMIN_EMAIL?.trim().toLowerCase();
+
+/** Derive the role: ADMIN_EMAIL always wins, otherwise an OIDC group/scope claim. */
+function resolveRole(email: string, profile: Claims): Role {
+	if (adminEmail() && email === adminEmail()) return 'admin';
+
 	const claim = env.OIDC_ROLE_CLAIM?.trim();
 	const adminValue = env.OIDC_ADMIN_VALUE?.trim();
 	if (!claim || !adminValue || !profile) return 'user';
@@ -25,31 +33,44 @@ function roleFromClaim(profile: Record<string, unknown> | undefined | null): Rol
 	return values.includes(adminValue) ? 'admin' : 'user';
 }
 
+/** Extract first/last name and avatar from standard OIDC claims. */
+function profileFromClaims(profile: Claims) {
+	const fullName = String(profile?.name ?? '').trim();
+	const [first, ...rest] = fullName.split(/\s+/);
+	return {
+		firstName: String(profile?.given_name ?? first ?? ''),
+		lastName: String(profile?.family_name ?? rest.join(' ')),
+		avatar: String(profile?.picture ?? '')
+	};
+}
+
 /**
  * Find-or-create the local user backing an OIDC login. The IdP is the gate:
  * when auto-provisioning is on (default) a new user is created on first login;
- * otherwise an unknown subject is rejected. Role follows the claim.
+ * otherwise an unknown subject is rejected. Role follows ADMIN_EMAIL / the
+ * configured claim, and the name/avatar are captured into the user's profile.
  */
-function provisionOidcUser(profile: Record<string, unknown> | null | undefined): UserRow | null {
+function provisionOidcUser(profile: Claims): UserRow | null {
 	const email = String(profile?.email ?? '')
 		.trim()
 		.toLowerCase();
 	if (!email) return null;
 
-	const role = roleFromClaim(profile);
+	const role = resolveRole(email, profile);
 	const existing = getUserByEmail(email);
 
 	if (!existing) {
 		if (env.OIDC_AUTO_PROVISION === 'false') return null;
-		return createUser({
-			email,
-			role,
-			passwordHash: null,
-			profile: {
-				firstName: profile?.given_name ?? '',
-				lastName: profile?.family_name ?? ''
-			}
+		const claims = profileFromClaims(profile);
+		const user = createUser({ email, role, passwordHash: null, profile: claims });
+		// Seed the user's settings so the UI shows their name/avatar immediately.
+		replaceSettings(user.id, {
+			...DEFAULT_SETTINGS,
+			profileFirstName: claims.firstName,
+			profileLastName: claims.lastName,
+			profileAvatar: claims.avatar
 		});
+		return user;
 	}
 
 	if (existing.role !== role) {
@@ -102,7 +123,10 @@ function buildProviders(): Provider[] {
 			type: 'oidc',
 			issuer: env.OIDC_ISSUER,
 			clientId: env.OIDC_CLIENT_ID,
-			clientSecret: env.OIDC_CLIENT_SECRET
+			clientSecret: env.OIDC_CLIENT_SECRET,
+			// Request profile + email by default; add e.g. "groups" to expose the
+			// role claim (OIDC_ROLE_CLAIM). Override fully via OIDC_SCOPE.
+			authorization: { params: { scope: env.OIDC_SCOPE?.trim() || 'openid profile email' } }
 		} as Provider);
 	}
 

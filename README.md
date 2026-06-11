@@ -76,12 +76,44 @@ docker compose pull && docker compose up -d
 OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
 ```
 
-**Configuration** — copy `.env.example` to `.env` and adjust as needed:
+**Running modes** — Hollama runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
 
-| Variable             | Default     | Description                                                     |
-| -------------------- | ----------- | --------------------------------------------------------------- |
-| `HOST_PORT`          | `4173`      | Port exposed on the host                                        |
-| `VITE_ALLOWED_HOSTS` | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy) |
+- **`local`** (default) — single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
+- **`server`** — multi-user, self-hosted. Users sign in (email + password and/or OIDC), data is stored server-side in SQLite **per user**, and **provider API keys never leave the server** (encrypted at rest). An admin configures shared providers and which models to expose; optionally, users may add their own keys (`allowUserKeys`).
+
+Set `PUBLIC_MODE=server` to enable server mode. All server-mode state lives under `DATA_DIR` — a single directory you can bind-mount to persist everything.
+
+**Configuration** — copy `.env.example` to `.env` and adjust as needed.
+
+_Common (both modes):_
+
+| Variable                    | Default     | Description                                                                                         |
+| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                            |
+| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                     |
+| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = any (lock down on public instances) |
+| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                      |
+| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                      |
+
+_Server mode (`PUBLIC_MODE=server`):_
+
+| Variable                                | Default                | Description                                                                         |
+| --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------- |
+| `PUBLIC_MODE`                           | `local`                | Set `server` for multi-user mode                                                    |
+| `DATA_DIR`                              | `./data`               | Directory for the SQLite DB and server state (bind-mount this)                      |
+| `AUTH_SECRET`                           | —                      | **Required.** Signs sessions and encrypts provider keys (`openssl rand -base64 32`) |
+| `ADMIN_EMAIL`                           | —                      | Bootstraps the first admin; also marks this email as admin for OIDC                 |
+| `ADMIN_PASSWORD`                        | —                      | Initial admin password (omit for an OIDC-only admin)                                |
+| `AUTH_CREDENTIALS`                      | —                      | `true` to enable email + password login                                             |
+| `OIDC_ISSUER`                           | —                      | OIDC provider URL (e.g. PocketID); its presence enables OIDC login                  |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | —                      | OIDC client credentials                                                             |
+| `OIDC_NAME`                             | `SSO`                  | Label for the OIDC sign-in button                                                   |
+| `OIDC_SCOPE`                            | `openid profile email` | Requested scopes (add your groups scope to expose roles)                            |
+| `OIDC_ROLE_CLAIM` / `OIDC_ADMIN_VALUE`  | —                      | Claim and value that grant the admin role                                           |
+| `OIDC_AUTO_PROVISION`                   | `true`                 | Create a user on first OIDC login (`false` requires a pre-created account)          |
+| `OIDC_AUTO_REDIRECT`                    | —                      | `true` skips the login page and goes straight to the IdP (OIDC-only)                |
+
+> OIDC redirect URI to register with your provider: `https://your-hollama-domain/auth/callback/oidc`
 
 | ![session](static/screenshots/session.png)         | ![settings](static/screenshots/settings.png)   |
 | -------------------------------------------------- | ---------------------------------------------- |
