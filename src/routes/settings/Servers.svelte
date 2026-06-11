@@ -12,9 +12,12 @@
 	import Connection from './Connection.svelte';
 	import ServerConnections from './ServerConnections.svelte';
 
+	let justAddedId = $state<string | null>(null);
+
 	function addServer(connectionType: ConnectionType) {
 		const server = getDefaultServer(connectionType);
 		serversStore.update((servers) => [...servers, server]);
+		justAddedId = server.id;
 	}
 </script>
 
@@ -49,6 +52,7 @@
 			{#each $serversStore as server (server.id)}
 				<Connection
 					{server}
+					startEditing={server.id === justAddedId}
 					onChange={() => serversStore.update((s) => [...s])}
 					onDelete={() => serversStore.update((s) => s.filter((x) => x.id !== server.id))}
 				/>

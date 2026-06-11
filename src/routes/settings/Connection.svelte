@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp, LoaderCircle } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp, LoaderCircle, Pencil } from '@lucide/svelte';
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
@@ -25,12 +25,16 @@
 		onChange: () => void;
 		/** Called to delete this server. */
 		onDelete: () => void;
+		/** Start with the endpoint details expanded (e.g. a freshly-added server). */
+		startEditing?: boolean;
 	}
 
-	let { server, onChange, onDelete }: Props = $props();
+	let { server, onChange, onDelete, startEditing = false }: Props = $props();
 	let strategy: OllamaStrategy | OpenAIStrategy;
 	let isLoading = $state(false);
 	let showAdvanced = $state(false);
+	// svelte-ignore state_referenced_locally
+	let editing = $state(startEditing);
 
 	const provider = $derived(getProvider(server.connectionType));
 	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
@@ -109,114 +113,125 @@
 						{server.isVerified ? $LL.reVerify() : $LL.verify()}
 					{/if}
 				</Button>
+
+				<Button
+					variant="outline"
+					isActive={editing}
+					on:click={() => (editing = !editing)}
+					aria-label="Edit connection"
+				>
+					<Pencil class="base-icon" />
+				</Button>
 			</nav>
 
-			<div class="flex flex-col gap-2 sm:grid sm:grid-cols-2">
-				<!-- Primary credential fields -->
-				<div class="col-span-2 grid gap-2 sm:grid-cols-2">
-					{#if isOpenAiFamily}
-						<FieldInput
-							type="password"
-							name={`apiKey-${server.id}`}
-							label={$LL.apiKey()}
-							bind:value={server.apiKey}
-							on:input={persist}
-						>
-							<svelte:fragment slot="help">
-								{#if provider.apiKeyHelpUrl}
-									<FieldHelp>
-										<P>
-											<Button variant="link" href={provider.apiKeyHelpUrl} target="_blank">
-												{$LL.howToObtainApiKey()}
-											</Button>
-										</P>
-									</FieldHelp>
-								{/if}
-							</svelte:fragment>
-						</FieldInput>
-					{/if}
+			{#if editing}
+				<div class="flex flex-col gap-2 sm:grid sm:grid-cols-2">
+					<!-- Primary credential fields -->
+					<div class="col-span-2 grid gap-2 sm:grid-cols-2">
+						{#if isOpenAiFamily}
+							<FieldInput
+								type="password"
+								name={`apiKey-${server.id}`}
+								label={$LL.apiKey()}
+								bind:value={server.apiKey}
+								on:input={persist}
+							>
+								<svelte:fragment slot="help">
+									{#if provider.apiKeyHelpUrl}
+										<FieldHelp>
+											<P>
+												<Button variant="link" href={provider.apiKeyHelpUrl} target="_blank">
+													{$LL.howToObtainApiKey()}
+												</Button>
+											</P>
+										</FieldHelp>
+									{/if}
+								</svelte:fragment>
+							</FieldInput>
+						{/if}
 
-					<!-- User-defined endpoints expose the Base URL directly -->
-					{#if !provider.identified}
+						<!-- User-defined endpoints expose the Base URL directly -->
+						{#if !provider.identified}
+							<FieldInput
+								name={`server-${server.id}`}
+								label={$LL.baseUrl()}
+								placeholder={server.baseUrl}
+								bind:value={server.baseUrl}
+								on:input={persist}
+							>
+								<svelte:fragment slot="help">
+									{#if isOllamaFamily}
+										<OllamaBaseURLHelp {server} />
+									{:else if isInfomaniak}
+										<FieldHelp>
+											<P>{$LL.infomaniakUrlHelp()}</P>
+										</FieldHelp>
+									{/if}
+								</svelte:fragment>
+							</FieldInput>
+						{/if}
+					</div>
+
+					<FieldInput
+						name={`modelsFilter-${server.id}`}
+						label={$LL.modelsFilter()}
+						placeholder="gpt"
+						bind:value={server.modelFilter}
+						on:input={persist}
+					>
+						<svelte:fragment slot="help">
+							<FieldHelp>
+								<P>
+									{$LL.modelsFilterHelp()}
+								</P>
+							</FieldHelp>
+						</svelte:fragment>
+					</FieldInput>
+
+					<FieldInput
+						name={`label-${server.id}`}
+						label={$LL.label()}
+						bind:value={server.label}
+						placeholder="my-llama-server"
+						on:input={persist}
+					>
+						<svelte:fragment slot="help">
+							<FieldHelp>
+								<P>{$LL.connectionLabelHelp()}</P>
+							</FieldHelp>
+						</svelte:fragment>
+					</FieldInput>
+				</div>
+
+				<!-- Identified providers keep their preset endpoint tucked away -->
+				{#if provider.identified}
+					<button
+						type="button"
+						onclick={() => (showAdvanced = !showAdvanced)}
+						class="flex w-fit items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+					>
+						{#if showAdvanced}
+							<ChevronUp class="h-3.5 w-3.5" />
+						{:else}
+							<ChevronDown class="h-3.5 w-3.5" />
+						{/if}
+						{$LL.advancedSettings()}
+					</button>
+
+					{#if showAdvanced}
 						<FieldInput
 							name={`server-${server.id}`}
 							label={$LL.baseUrl()}
 							placeholder={server.baseUrl}
 							bind:value={server.baseUrl}
 							on:input={persist}
-						>
-							<svelte:fragment slot="help">
-								{#if isOllamaFamily}
-									<OllamaBaseURLHelp {server} />
-								{:else if isInfomaniak}
-									<FieldHelp>
-										<P>{$LL.infomaniakUrlHelp()}</P>
-									</FieldHelp>
-								{/if}
-							</svelte:fragment>
-						</FieldInput>
+						/>
 					{/if}
-				</div>
-
-				<FieldInput
-					name={`modelsFilter-${server.id}`}
-					label={$LL.modelsFilter()}
-					placeholder="gpt"
-					bind:value={server.modelFilter}
-					on:input={persist}
-				>
-					<svelte:fragment slot="help">
-						<FieldHelp>
-							<P>
-								{$LL.modelsFilterHelp()}
-							</P>
-						</FieldHelp>
-					</svelte:fragment>
-				</FieldInput>
-
-				<FieldInput
-					name={`label-${server.id}`}
-					label={$LL.label()}
-					bind:value={server.label}
-					placeholder="my-llama-server"
-					on:input={persist}
-				>
-					<svelte:fragment slot="help">
-						<FieldHelp>
-							<P>{$LL.connectionLabelHelp()}</P>
-						</FieldHelp>
-					</svelte:fragment>
-				</FieldInput>
-			</div>
-
-			<!-- Identified providers keep their preset endpoint tucked away -->
-			{#if provider.identified}
-				<button
-					type="button"
-					onclick={() => (showAdvanced = !showAdvanced)}
-					class="flex w-fit items-center gap-1 text-xs text-muted transition-colors hover:text-active"
-				>
-					{#if showAdvanced}
-						<ChevronUp class="h-3.5 w-3.5" />
-					{:else}
-						<ChevronDown class="h-3.5 w-3.5" />
-					{/if}
-					{$LL.advancedSettings()}
-				</button>
-
-				{#if showAdvanced}
-					<FieldInput
-						name={`server-${server.id}`}
-						label={$LL.baseUrl()}
-						placeholder={server.baseUrl}
-						bind:value={server.baseUrl}
-						on:input={persist}
-					/>
 				{/if}
-			{/if}
 
-			{#if isOllamaFamily}
-				<PullModel {server} />
+				{#if isOllamaFamily}
+					<PullModel {server} />
+				{/if}
 			{/if}
 		</Fieldset>
 	</Fieldset>
