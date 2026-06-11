@@ -3,7 +3,7 @@ import type { Provider } from '@auth/sveltekit/providers';
 import Credentials from '@auth/sveltekit/providers/credentials';
 
 import { env } from '$env/dynamic/private';
-import { replaceSettings } from '$lib/server/db/collections';
+import { getSettings, replaceSettings } from '$lib/server/db/collections';
 import {
 	countUsers,
 	createUser,
@@ -57,27 +57,36 @@ function provisionOidcUser(profile: Claims): UserRow | null {
 	if (!email) return null;
 
 	const role = resolveRole(email, profile);
-	const existing = getUserByEmail(email);
+	const claims = profileFromClaims(profile);
 
-	if (!existing) {
+	let user = getUserByEmail(email);
+	if (!user) {
 		if (env.OIDC_AUTO_PROVISION === 'false') return null;
-		const claims = profileFromClaims(profile);
-		const user = createUser({ email, role, passwordHash: null, profile: claims });
-		// Seed the user's settings so the UI shows their name/avatar immediately.
+		user = createUser({ email, role, passwordHash: null, profile: claims });
+	} else if (user.role !== role) {
+		setUserRole(user.id, role);
+		user = { ...user, role };
+	}
+
+	// Seed the user's settings profile from OIDC so the UI shows their name and
+	// avatar. Covers the bootstrapped admin (created without a settings row) and
+	// doesn't clobber a profile the user has already filled in themselves.
+	const settings = getSettings(user.id);
+	const hasProfile = !!(
+		settings?.profileFirstName ||
+		settings?.profileLastName ||
+		settings?.profileAvatar
+	);
+	if (!hasProfile && (claims.firstName || claims.lastName || claims.avatar)) {
 		replaceSettings(user.id, {
-			...DEFAULT_SETTINGS,
+			...(settings ?? DEFAULT_SETTINGS),
 			profileFirstName: claims.firstName,
 			profileLastName: claims.lastName,
 			profileAvatar: claims.avatar
 		});
-		return user;
 	}
 
-	if (existing.role !== role) {
-		setUserRole(existing.id, role);
-		return { ...existing, role };
-	}
-	return existing;
+	return user;
 }
 
 /** Create the admin from env on a fresh install (no users yet). Fire-and-forget. */
