@@ -7,19 +7,19 @@ import type {
 import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
+import { openaiClientConfig } from './endpoint';
 import type { ChatRequest, ChatStrategy, Message } from './index';
 
 export class OpenAIStrategy implements ChatStrategy {
 	private openai: OpenAI;
 
 	constructor(private server: Server) {
+		const config = openaiClientConfig(this.server);
 		this.openai = new OpenAI({
-			baseURL: `${globalThis.location.origin}/api/proxy/`,
-			apiKey: this.server.apiKey || '',
+			baseURL: config.baseURL,
+			apiKey: config.apiKey,
 			dangerouslyAllowBrowser: true,
-			defaultHeaders: {
-				'X-Target-Base-Url': this.server.baseUrl
-			}
+			defaultHeaders: config.defaultHeaders
 		});
 	}
 

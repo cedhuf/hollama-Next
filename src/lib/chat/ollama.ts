@@ -11,6 +11,7 @@ import type {
 import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
+import { ollamaBaseUrl } from './endpoint';
 import type { ChatStrategy } from './index';
 
 export interface OllamaOptions {
@@ -50,14 +51,18 @@ export interface OllamaOptions {
 }
 
 export class OllamaStrategy implements ChatStrategy {
-	constructor(private server: Server) {}
+	private base: string;
+
+	constructor(private server: Server) {
+		this.base = ollamaBaseUrl(server);
+	}
 
 	async chat(
 		payload: ChatRequest,
 		abortSignal: AbortSignal,
 		onChunk: (content: string) => void
 	): Promise<void> {
-		const response = await fetch(`${this.server.baseUrl}/api/chat`, {
+		const response = await fetch(`${this.base}/api/chat`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'text/event-stream' },
 			body: JSON.stringify(payload),
@@ -90,7 +95,7 @@ export class OllamaStrategy implements ChatStrategy {
 	}
 
 	async getModels(): Promise<Model[]> {
-		const response = await fetch(`${this.server.baseUrl}/api/tags`);
+		const response = await fetch(`${this.base}/api/tags`);
 		if (!response.ok) throw new Error('Failed to fetch Ollama tags');
 
 		const data: ListResponse | undefined = await response.json();
@@ -112,7 +117,7 @@ export class OllamaStrategy implements ChatStrategy {
 		payload: PullRequest,
 		onChunk: (progress: ProgressResponse | StatusResponse | ErrorResponse) => void
 	): Promise<void> {
-		const response = await fetch(`${this.server.baseUrl}/api/pull`, {
+		const response = await fetch(`${this.base}/api/pull`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)
