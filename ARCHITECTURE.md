@@ -98,7 +98,7 @@ Pas de normalisation prématurée.
 users (
   id            TEXT PRIMARY KEY,
   email         TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,           -- argon2/bcrypt
+  password_hash TEXT,                    -- scrypt (NULL pour comptes OIDC)
   role          TEXT NOT NULL,           -- 'admin' | 'user'
   profile       TEXT NOT NULL,           -- JSON: prénom, nom, avatar, couleur
   created_at    TEXT NOT NULL
@@ -132,8 +132,9 @@ schema_migrations ( version INTEGER PRIMARY KEY, applied_at TEXT )
 **Auth.js** (SvelteKit), avec **deux providers activables par variables d'env** —
 on peut en activer un, l'autre, ou les deux :
 
-- **Credentials** : **email** + mot de passe haché **argon2**. Autonome, aucun
-  service externe.
+- **Credentials** : **email** + mot de passe haché **`scrypt`** (via
+  `node:crypto` — zéro dépendance, pas de module natif, même logique que
+  `node:sqlite`). Autonome, aucun service externe.
 - **OIDC générique** : pour un fournisseur self-hosted type **PocketID**
   (ou Authentik, Keycloak, Zitadel…). Configuré par env :
 
