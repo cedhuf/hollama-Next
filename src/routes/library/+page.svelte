@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { Cpu, Download, FolderOpen, Pencil, Plus, Upload } from '@lucide/svelte';
+	import { Cpu, Download, FolderOpen, Pencil, Plus, Upload, UserRound } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { generateNewUrl } from '$lib/components/ButtonNew.js';
 	import Head from '$lib/components/Head.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import { parseKnowledgeImport, saveKnowledge } from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import {
 		installPersona,
@@ -24,7 +26,9 @@
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
-	let fileInput = $state<HTMLInputElement | undefined>();
+	let fabOpen = $state(false);
+	let personaFileInput = $state<HTMLInputElement | undefined>();
+	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
 
 	const canCreate = $derived($personasConfig.canCreate);
 	// Admin-shared personas the user hasn't installed (or already owns) yet.
@@ -53,20 +57,13 @@
 		goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`);
 	}
 
-	function onImportFile(event: Event) {
-		const input = event.target as HTMLInputElement;
+	function readJsonFile(input: HTMLInputElement, onData: (data: unknown) => void) {
 		const file = input.files?.[0];
 		if (!file) return;
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			try {
-				const personas = parsePersonasImport(JSON.parse(e.target?.result as string));
-				if (personas.length === 0) {
-					toast.error('No personas found in this file');
-					return;
-				}
-				for (const persona of personas) savePersona(persona);
-				toast.success(`Imported ${personas.length} persona${personas.length === 1 ? '' : 's'}`);
+				onData(JSON.parse(e.target?.result as string));
 			} catch (error) {
 				toast.error('Import failed', {
 					description: error instanceof Error ? error.message : 'Invalid file'
@@ -77,6 +74,24 @@
 		};
 		reader.readAsText(file);
 	}
+
+	function onImportPersonas(event: Event) {
+		readJsonFile(event.target as HTMLInputElement, (data) => {
+			const personas = parsePersonasImport(data);
+			if (personas.length === 0) return toast.error('No personas found in this file');
+			for (const persona of personas) savePersona(persona);
+			toast.success(`Imported ${personas.length} persona${personas.length === 1 ? '' : 's'}`);
+		});
+	}
+
+	function onImportKnowledge(event: Event) {
+		readJsonFile(event.target as HTMLInputElement, (data) => {
+			const items = parseKnowledgeImport(data);
+			if (items.length === 0) return toast.error('No knowledge found in this file');
+			for (const item of items) saveKnowledge(item);
+			toast.success(`Imported ${items.length} collection${items.length === 1 ? '' : 's'}`);
+		});
+	}
 </script>
 
 <Head title="Library" />
@@ -86,24 +101,6 @@
 		<!-- Header -->
 		<div class="mb-1 flex items-center justify-between gap-3">
 			<h1 class="text-xl font-semibold tracking-tight text-active">Library</h1>
-			{#if canCreate}
-				<div class="flex items-center gap-2">
-					<input
-						bind:this={fileInput}
-						type="file"
-						accept="application/json,.json"
-						class="hidden"
-						onchange={onImportFile}
-					/>
-					<button
-						type="button"
-						onclick={() => fileInput?.click()}
-						class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-1.5 text-sm text-muted transition-colors hover:border-shade-4 hover:text-active"
-					>
-						<Upload class="h-3.5 w-3.5" /> Import
-					</button>
-				</div>
-			{/if}
 		</div>
 		<p class="mb-7 text-sm text-muted">
 			Everything you create lives here — your personas and your knowledge.
@@ -218,6 +215,71 @@
 			</a>
 		</div>
 	</div>
+</div>
+
+<!-- Import FAB — choose what to import (persona / knowledge) -->
+<input
+	bind:this={personaFileInput}
+	type="file"
+	accept="application/json,.json"
+	class="hidden"
+	onchange={onImportPersonas}
+/>
+<input
+	bind:this={knowledgeFileInput}
+	type="file"
+	accept="application/json,.json"
+	class="hidden"
+	onchange={onImportKnowledge}
+/>
+
+{#if fabOpen}
+	<button
+		class="fixed inset-0 z-10 cursor-default"
+		aria-label="Close import menu"
+		onclick={() => (fabOpen = false)}
+	></button>
+{/if}
+
+<div
+	class="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 z-20 flex flex-col items-end gap-2"
+>
+	{#if fabOpen}
+		<div class="flex flex-col gap-2" transition:fade={{ duration: 100 }}>
+			{#if canCreate}
+				<button
+					type="button"
+					onclick={() => {
+						fabOpen = false;
+						personaFileInput?.click();
+					}}
+					class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2 text-sm font-medium text-active shadow-md transition-colors hover:border-accent"
+				>
+					<UserRound class="h-4 w-4 text-muted" /> Import persona
+				</button>
+			{/if}
+			<button
+				type="button"
+				onclick={() => {
+					fabOpen = false;
+					knowledgeFileInput?.click();
+				}}
+				class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2 text-sm font-medium text-active shadow-md transition-colors hover:border-accent"
+			>
+				<FolderOpen class="h-4 w-4 text-muted" /> Import knowledge
+			</button>
+		</div>
+	{/if}
+
+	<button
+		type="button"
+		onclick={() => (fabOpen = !fabOpen)}
+		title="Import"
+		aria-label="Import"
+		class="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-shade-0 shadow-lg transition-transform hover:scale-105"
+	>
+		<Upload class="h-5 w-5" />
+	</button>
 </div>
 
 {#if editing}

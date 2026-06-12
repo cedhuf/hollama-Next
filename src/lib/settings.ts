@@ -36,6 +36,8 @@ export interface Settings {
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
+	/** Let the model offer interactive quick-choice buttons to clarify a preference. */
+	interactiveChoices: boolean;
 	systemPrompts: SystemPrompts;
 	/** Set once the built-in starter personas have been seeded (admins / local mode). */
 	defaultPersonasSeeded: boolean;
@@ -74,6 +76,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',
+	interactiveChoices: true,
 	systemPrompts: { global: '', perModel: {} },
 	defaultPersonasSeeded: false,
 	homeShowHeader: true,

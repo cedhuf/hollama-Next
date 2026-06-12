@@ -36,6 +36,12 @@
 		overscroll-behavior: none;
 	}
 
+	:root {
+		/* Single source of truth for the top-bar height, shared by the sidebar
+		   header and every chat/persona Header so they line up exactly. */
+		--app-header-h: 4rem;
+	}
+
 	body {
 		color: hsl(var(--hsl-text-shade-1));
 		/* Fill the area behind the iOS status bar / home indicator with the app shell
