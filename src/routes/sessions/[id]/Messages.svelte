@@ -9,9 +9,15 @@
 		session: Session;
 		editor: Editor;
 		handleRetry: (index: number) => void;
+		assistantLabel?: string;
 	}
 
-	let { session = $bindable(), editor = $bindable(), handleRetry }: Props = $props();
+	let {
+		session = $bindable(),
+		editor = $bindable(),
+		handleRetry,
+		assistantLabel = undefined
+	}: Props = $props();
 
 	function handleEditMessage(message: Message) {
 		editor.messageIndexToEdit = session.messages.findIndex((m) => m === message);
@@ -42,6 +48,7 @@
 			{message}
 			retryIndex={['assistant', 'system'].includes(message.role) ? i : undefined}
 			{handleRetry}
+			{assistantLabel}
 			handleEditMessage={() => handleEditMessage(message)}
 			handleDeleteAttachment={() => handleDeleteAttachment(message)}
 		/>
@@ -59,6 +66,7 @@
 		isStreamingArticle={true}
 		isSearching={editor.isSearching}
 		searchQuery={editor.searchQuery}
+		{assistantLabel}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={editor.completion}
 	/>

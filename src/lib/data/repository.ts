@@ -1,5 +1,6 @@
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
@@ -15,6 +16,7 @@ export interface AppData {
 	servers: Server[];
 	sessions: Session[];
 	knowledge: Knowledge[];
+	personas: Persona[];
 }
 
 /**
@@ -44,11 +46,13 @@ export interface DataRepository {
 	loadServers(): Promise<Server[]>;
 	loadSessions(): Promise<Session[]>;
 	loadKnowledge(): Promise<Knowledge[]>;
+	loadPersonas(): Promise<Persona[]>;
 
 	saveSettings(value: Settings): Promise<void>;
 	saveServers(value: Server[]): Promise<void>;
 	saveSessions(value: Session[]): Promise<void>;
 	saveKnowledge(value: Knowledge[]): Promise<void>;
+	savePersonas(value: Persona[]): Promise<void>;
 
 	exportBackup(): Promise<Backup>;
 	importBackup(backup: Backup): Promise<void>;

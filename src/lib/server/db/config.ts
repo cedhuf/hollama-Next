@@ -25,3 +25,12 @@ export function allowUserKeys(): boolean {
 export function setAllowUserKeys(value: boolean): void {
 	setConfig('allowUserKeys', value ? 'true' : 'false');
 }
+
+/** Whether users may create their own personas (default: true). */
+export function allowUserPersonas(): boolean {
+	return getConfig('allowUserPersonas') !== 'false';
+}
+
+export function setAllowUserPersonas(value: boolean): void {
+	setConfig('allowUserPersonas', value ? 'true' : 'false');
+}

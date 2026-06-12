@@ -4,10 +4,14 @@
 	import LL, { setLocale } from '$i18n/i18n-svelte';
 	import type { Locales } from '$i18n/i18n-types';
 	import { loadLocale } from '$i18n/i18n-util.sync';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
+
+	const numberField =
+		'w-16 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-sm text-active outline-none focus:border-accent';
 
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
@@ -98,5 +102,57 @@
 				</button>
 			{/each}
 		</div>
+	</div>
+	<!-- Home screen -->
+	<div class="flex flex-col gap-2.5 border-t border-shade-3 pt-4">
+		<span class="text-sm font-medium">Home screen</span>
+		<FieldCheckbox label="Show greeting header" bind:checked={$settingsStore.homeShowHeader} />
+		<FieldCheckbox
+			label="Show prompt suggestions"
+			bind:checked={$settingsStore.homeShowSuggestions}
+		/>
+
+		<FieldCheckbox
+			label="Show recent personas"
+			bind:checked={$settingsStore.homeShowRecentPersonas}
+		/>
+		{#if $settingsStore.homeShowRecentPersonas}
+			<label class="flex items-center justify-between gap-2 pl-11 text-sm text-muted">
+				<span>How many to show</span>
+				<input
+					type="number"
+					min="1"
+					max="5"
+					bind:value={$settingsStore.homeRecentPersonasCount}
+					class={numberField}
+				/>
+			</label>
+		{/if}
+
+		<FieldCheckbox
+			label="Show recent sessions"
+			bind:checked={$settingsStore.homeShowRecentSessions}
+		/>
+		{#if $settingsStore.homeShowRecentSessions}
+			<label class="flex items-center justify-between gap-2 pl-11 text-sm text-muted">
+				<span>How many to show</span>
+				<input
+					type="number"
+					min="1"
+					max="10"
+					bind:value={$settingsStore.homeRecentSessionsCount}
+					class={numberField}
+				/>
+			</label>
+		{/if}
+	</div>
+
+	<!-- Personas -->
+	<div class="flex flex-col gap-2.5 border-t border-shade-3 pt-4">
+		<span class="text-sm font-medium">Personas</span>
+		<FieldCheckbox
+			label="Pin personas you talk to at the top of the sidebar"
+			bind:checked={$settingsStore.showPinnedPersonas}
+		/>
 	</div>
 </Fieldset>

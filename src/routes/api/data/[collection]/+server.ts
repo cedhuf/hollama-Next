@@ -3,9 +3,11 @@ import { error, json } from '@sveltejs/kit';
 import { requireUser } from '$lib/server/api';
 import {
 	getKnowledge,
+	getPersonas,
 	getSessions,
 	getSettings,
 	replaceKnowledge,
+	replacePersonas,
 	replaceSessions,
 	replaceSettings
 } from '$lib/server/db/collections';
@@ -18,6 +20,8 @@ export async function GET(event) {
 			return json(getSessions(user.id));
 		case 'knowledge':
 			return json(getKnowledge(user.id));
+		case 'personas':
+			return json(getPersonas(user.id));
 		case 'settings':
 			return json(getSettings(user.id));
 		default:
@@ -37,6 +41,10 @@ export async function PUT(event) {
 		case 'knowledge':
 			if (!Array.isArray(body)) throw error(400, 'Expected an array');
 			replaceKnowledge(user.id, body);
+			break;
+		case 'personas':
+			if (!Array.isArray(body)) throw error(400, 'Expected an array');
+			replacePersonas(user.id, body);
 			break;
 		case 'settings':
 			if (typeof body !== 'object' || body === null) throw error(400, 'Expected an object');

@@ -9,5 +9,6 @@ export enum StorageKey {
 	HollamaNextPreferences = `${LOCAL_STORAGE_PREFIX}-settings`,
 	HollamaNextServers = `${LOCAL_STORAGE_PREFIX}-servers`,
 	HollamaNextSessions = `${LOCAL_STORAGE_PREFIX}-sessions`,
-	HollamaNextKnowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`
+	HollamaNextKnowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`,
+	HollamaNextPersonas = `${LOCAL_STORAGE_PREFIX}-personas`
 }

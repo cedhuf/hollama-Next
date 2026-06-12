@@ -4,6 +4,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { deleteStoreItem, knowledgeStore, sessionsStore } from '$lib/localStorage';
+	import { unbindPersonaSession } from '$lib/personas';
 	import { Sitemap } from '$lib/sitemap';
 
 	import Button from './Button.svelte';
@@ -26,6 +27,7 @@
 
 			case Sitemap.SESSIONS:
 				if ($sessionsStore) $sessionsStore = deleteStoreItem($sessionsStore, id);
+				unbindPersonaSession(id);
 				return goto('/sessions');
 
 			default:

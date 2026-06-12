@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		Brain,
+		Library,
 		MessageSquareText,
 		PanelLeft,
 		PanelLeftClose,
@@ -12,7 +12,8 @@
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { knowledgeStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { knowledgeStore, personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import { formatSessionMetadata, getSessionTitle } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
@@ -23,6 +24,7 @@
 	import { generateNewUrl } from './ButtonNew';
 	import ButtonNew from './ButtonNew.svelte';
 	import EmptyMessage from './EmptyMessage.svelte';
+	import PersonaAvatar from './PersonaAvatar.svelte';
 	import SectionList from './SectionList.svelte';
 	import SectionListItem from './SectionListItem.svelte';
 
@@ -32,6 +34,18 @@
 
 	const pathname = $derived(page.url.pathname);
 	const isCollapsed = $derived(!$settingsStore.sidebarExpanded);
+	// Personas you've talked to, surfaced as launchers atop the session list
+	// (unless disabled in settings). Their raw session row is hidden below to
+	// avoid duplication.
+	const personaLaunchers = $derived(
+		$settingsStore.showPinnedPersonas ? conversedPersonas($personasStore, $sessionsStore ?? []) : []
+	);
+	const launcherSessionIds = $derived(
+		personaLaunchers.map((p) => p.sessionId).filter((id): id is string => !!id)
+	);
+	const visibleSessions = $derived(
+		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
+	);
 
 	function toggleExpanded() {
 		$settingsStore.sidebarExpanded = !$settingsStore.sidebarExpanded;
@@ -40,7 +54,7 @@
 	$effect(() => {
 		if (pathname.includes('/sessions')) {
 			activeSection = 'sessions';
-		} else if (pathname.includes('/knowledge')) {
+		} else if (pathname.includes('/knowledge') || pathname.includes('/library')) {
 			activeSection = 'knowledge';
 		}
 	});
@@ -50,7 +64,7 @@
 		if (section === 'sessions') {
 			goto('/sessions');
 		} else if (section === 'knowledge') {
-			goto('/knowledge');
+			goto('/library');
 		}
 	}
 
@@ -140,10 +154,10 @@
 			role="tab"
 			aria-selected={activeSection === 'knowledge'}
 			aria-controls="knowledge-panel"
-			title={$LL.knowledge()}
+			title="Library"
 		>
-			<Brain class="h-4 w-4 shrink-0" />
-			<span class:hidden={isCollapsed}>{$LL.knowledge()}</span>
+			<Library class="h-4 w-4 shrink-0" />
+			<span class:hidden={isCollapsed}>Library</span>
 		</button>
 	</div>
 
@@ -165,6 +179,22 @@
 		{/if}
 	</div>
 
+	<!-- Collapsed: keep persona launchers reachable as avatars -->
+	{#if isCollapsed && personaLaunchers.length > 0}
+		<div class="flex flex-col items-center gap-2 border-b py-2.5">
+			{#each personaLaunchers as persona (persona.id)}
+				<button
+					type="button"
+					onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+					title={persona.name}
+					class="transition-transform hover:scale-105"
+				>
+					<PersonaAvatar {persona} size={32} />
+				</button>
+			{/each}
+		</div>
+	{/if}
+
 	<!-- Content area -->
 	<div class:hidden={isCollapsed} class="flex min-h-0 flex-1 flex-col overflow-hidden">
 		<div class="flex-1 overflow-auto">
@@ -175,9 +205,35 @@
 				hidden={activeSection !== 'sessions'}
 			>
 				{#if activeSection === 'sessions'}
+					{#if personaLaunchers.length > 0}
+						<div class="border-b bg-shade-2 px-2 py-2.5">
+							<p
+								class="mb-1.5 text-center text-[11px] font-semibold uppercase tracking-wider text-accent"
+							>
+								Personas
+							</p>
+							<div class="flex flex-col gap-0.5">
+								{#each personaLaunchers as persona (persona.id)}
+									<button
+										type="button"
+										onclick={() =>
+											goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+										class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-shade-0
+											{persona.sessionId && pathname.includes(persona.sessionId)
+											? 'bg-shade-0 font-medium text-active'
+											: 'text-base'}"
+										title={persona.tagline}
+									>
+										<PersonaAvatar {persona} size={26} />
+										<span class="truncate">{persona.name}</span>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 					<SectionList>
-						{#if $sessionsStore && $sessionsStore.length > 0}
-							{#each $sessionsStore as session (session.id)}
+						{#if visibleSessions.length > 0}
+							{#each visibleSessions as session (session.id)}
 								<SectionListItem
 									sitemap={Sitemap.SESSIONS}
 									id={session.id}
@@ -185,7 +241,7 @@
 									subtitle={formatSessionMetadata(session)}
 								/>
 							{/each}
-						{:else}
+						{:else if personaLaunchers.length === 0}
 							<EmptyMessage>{$LL.emptySessions()}</EmptyMessage>
 						{/if}
 					</SectionList>

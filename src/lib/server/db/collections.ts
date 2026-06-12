@@ -1,4 +1,5 @@
 import type { Knowledge } from '$lib/knowledge';
+import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
@@ -6,7 +7,7 @@ import { getDb } from './index';
 
 /** Replace every row of a per-user JSON collection in one transaction. */
 function replaceCollection(
-	table: 'sessions' | 'knowledge',
+	table: 'sessions' | 'knowledge' | 'personas',
 	userId: string,
 	items: { id: string; updatedAt?: string }[]
 ): void {
@@ -27,7 +28,7 @@ function replaceCollection(
 	}
 }
 
-function readCollection<T>(table: 'sessions' | 'knowledge', userId: string): T[] {
+function readCollection<T>(table: 'sessions' | 'knowledge' | 'personas', userId: string): T[] {
 	const rows = getDb()
 		.prepare(`SELECT data FROM ${table} WHERE user_id = ? ORDER BY updated_at DESC`)
 		.all(userId) as { data: string }[];
@@ -43,6 +44,11 @@ export const getKnowledge = (userId: string): Knowledge[] =>
 	readCollection<Knowledge>('knowledge', userId);
 export const replaceKnowledge = (userId: string, knowledge: Knowledge[]): void =>
 	replaceCollection('knowledge', userId, knowledge);
+
+export const getPersonas = (userId: string): Persona[] =>
+	readCollection<Persona>('personas', userId);
+export const replacePersonas = (userId: string, personas: Persona[]): void =>
+	replaceCollection('personas', userId, personas);
 
 export function getSettings(userId: string): Settings | null {
 	const row = getDb().prepare('SELECT data FROM settings WHERE user_id = ?').get(userId) as
@@ -60,13 +66,14 @@ export function replaceSettings(userId: string, settings: Settings): void {
 		.run(userId, JSON.stringify(settings));
 }
 
-/** Wipe a user's own data (sessions, knowledge, settings). */
+/** Wipe a user's own data (sessions, knowledge, personas, settings). */
 export function resetUserData(userId: string): void {
 	const db = getDb();
 	db.exec('BEGIN');
 	try {
 		db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM knowledge WHERE user_id = ?').run(userId);
+		db.prepare('DELETE FROM personas WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
 		db.exec('COMMIT');
 	} catch (error) {

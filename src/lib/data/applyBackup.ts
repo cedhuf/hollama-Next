@@ -1,4 +1,10 @@
-import { knowledgeStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
+import {
+	knowledgeStore,
+	personasStore,
+	serversStore,
+	sessionsStore,
+	settingsStore
+} from '$lib/localStorage';
 
 import { StorageKey } from './keys';
 import type { Backup } from './repository';
@@ -21,6 +27,9 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 			break;
 		case StorageKey.HollamaNextKnowledge:
 			knowledgeStore.set(data as Parameters<typeof knowledgeStore.set>[0]);
+			break;
+		case StorageKey.HollamaNextPersonas:
+			personasStore.set(data as Parameters<typeof personasStore.set>[0]);
 			break;
 	}
 }

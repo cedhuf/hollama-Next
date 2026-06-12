@@ -32,6 +32,7 @@
 		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
 
 	let allowUserKeys = $state(false);
+	let allowUserPersonas = $state(true);
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
 	let newUser = $state({ email: '', password: '', role: 'user' });
@@ -103,6 +104,7 @@
 			fetch('/api/admin/users').then((r) => r.json())
 		]);
 		allowUserKeys = config.allowUserKeys;
+		allowUserPersonas = config.allowUserPersonas ?? true;
 		searchSharing = config.searchSharing ?? 'off';
 		shareEnabled = searchSharing !== 'off';
 		sharedUrl = config.searchUrl ?? '';
@@ -168,6 +170,10 @@
 		await api('/api/admin/config', 'PUT', { allowUserKeys });
 	}
 
+	async function toggleAllowUserPersonas() {
+		await api('/api/admin/config', 'PUT', { allowUserPersonas });
+	}
+
 	async function loadModels(server: SystemServer) {
 		server.loadingModels = true;
 		try {
@@ -216,6 +222,11 @@
 			label="Allow users to add their own provider connections"
 			bind:checked={allowUserKeys}
 			on:change={toggleAllowUserKeys}
+		/>
+		<FieldCheckbox
+			label="Allow users to create their own personas"
+			bind:checked={allowUserPersonas}
+			on:change={toggleAllowUserPersonas}
 		/>
 	</section>
 

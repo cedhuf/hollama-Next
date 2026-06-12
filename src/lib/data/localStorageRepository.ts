@@ -3,6 +3,7 @@ import { toast } from 'svelte-sonner';
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
@@ -20,7 +21,8 @@ export class LocalStorageRepository implements DataRepository {
 			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.HollamaNextPreferences, {}) },
 			servers: this.#read<Server[]>(StorageKey.HollamaNextServers, []),
 			sessions: this.#read<Session[]>(StorageKey.HollamaNextSessions, []),
-			knowledge: this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, [])
+			knowledge: this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []),
+			personas: this.#read<Persona[]>(StorageKey.HollamaNextPersonas, [])
 		};
 	}
 
@@ -38,6 +40,9 @@ export class LocalStorageRepository implements DataRepository {
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []);
 	}
+	async loadPersonas(): Promise<Persona[]> {
+		return this.#read<Persona[]>(StorageKey.HollamaNextPersonas, []);
+	}
 
 	async saveSettings(value: Settings): Promise<void> {
 		this.#write(StorageKey.HollamaNextPreferences, value);
@@ -50,6 +55,9 @@ export class LocalStorageRepository implements DataRepository {
 	}
 	async saveKnowledge(value: Knowledge[]): Promise<void> {
 		this.#write(StorageKey.HollamaNextKnowledge, value);
+	}
+	async savePersonas(value: Persona[]): Promise<void> {
+		this.#write(StorageKey.HollamaNextPersonas, value);
 	}
 
 	async exportBackup(): Promise<Backup> {
