@@ -20,6 +20,10 @@ export interface Settings {
 	defaultModel: string | null;
 	generateTitlesWithAI: boolean;
 	titleModel: string | null;
+	webSearchByDefault: boolean;
+	searchUrl: string;
+	searchBackend: 'degoog' | 'searxng';
+	searchToken: string;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
@@ -41,6 +45,10 @@ export const DEFAULT_SETTINGS: Settings = {
 	defaultModel: null,
 	generateTitlesWithAI: false,
 	titleModel: null,
+	webSearchByDefault: false,
+	searchUrl: '',
+	searchBackend: 'degoog',
+	searchToken: '',
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

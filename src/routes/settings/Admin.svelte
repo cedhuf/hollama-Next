@@ -5,6 +5,7 @@
 
 	import Button from '$lib/components/Button.svelte';
 	import P from '$lib/components/P.svelte';
+	import { settingsStore } from '$lib/localStorage';
 
 	// Admin = governance only. Servers are configured in the Servers tab; here the
 	// admin picks which of each system server's models to share, manages users,
@@ -34,6 +35,9 @@
 	let users = $state<UserRow[]>([]);
 	let newUser = $state({ email: '', password: '', role: 'user' });
 
+	let searchSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let sharedUrl = $state('');
+
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
 		const response = await fetch(url, {
 			method,
@@ -54,6 +58,8 @@
 			fetch('/api/admin/users').then((r) => r.json())
 		]);
 		allowUserKeys = config.allowUserKeys;
+		searchSharing = config.searchSharing ?? 'off';
+		sharedUrl = config.searchUrl ?? '';
 		servers = (
 			serverList as Pick<
 				SystemServer,
@@ -61,6 +67,18 @@
 			>[]
 		).map((s) => ({ ...s, available: null, loadingModels: false }));
 		users = userList;
+	}
+
+	async function saveSearch() {
+		// Share the admin's own search config (configured in the Chat tab).
+		await api('/api/admin/config', 'PUT', {
+			searchSharing,
+			searchUrl: $settingsStore.searchUrl,
+			searchBackend: $settingsStore.searchBackend,
+			searchToken: $settingsStore.searchToken
+		});
+		sharedUrl = $settingsStore.searchUrl;
+		toast.success('Web search sharing saved');
 	}
 
 	onMount(load);
@@ -119,6 +137,31 @@
 			<input type="checkbox" checked={allowUserKeys} onchange={toggleAllowUserKeys} />
 			Allow users to add their own provider connections
 		</label>
+	</section>
+
+	<!-- Web search sharing -->
+	<section class="flex flex-col gap-2">
+		<P><strong>Web search sharing</strong></P>
+		<span class="-mt-1 text-xs text-muted">
+			Configure the search engine in the <strong>Chat</strong> tab; here you choose whether it's shared
+			with users.
+		</span>
+
+		{#if !$settingsStore.searchUrl}
+			<span class="text-xs text-muted">
+				No engine configured yet — set one up in the Chat tab first, then you can share it.
+			</span>
+		{:else}
+			<select class={input} bind:value={searchSharing}>
+				<option value="off">Not shared — each user configures their own</option>
+				<option value="locked">Shared and locked — users can't change it</option>
+				<option value="overridable">Shared — users may override for themselves</option>
+			</select>
+			{#if sharedUrl && searchSharing !== 'off'}
+				<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>
+			{/if}
+			<div><Button on:click={saveSearch}>Save sharing</Button></div>
+		{/if}
 	</section>
 
 	<!-- Shared models -->

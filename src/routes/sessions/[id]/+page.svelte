@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Settings2 } from '@lucide/svelte';
+	import { Globe, Settings2 } from '@lucide/svelte';
 	import { onMount, tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -18,6 +18,7 @@
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { buildSearchContext, searchConfig } from '$lib/search';
 	import {
 		getSessionTitle,
 		loadSession,
@@ -41,8 +42,11 @@
 
 	let { data }: Props = $props();
 
+	const searchAvailable = $derived($searchConfig.available);
+
 	// svelte-ignore state_referenced_locally
 	let session = $state(loadSession(data.id));
+	// svelte-ignore state_referenced_locally
 	let editor = $state<Editor>({
 		prompt: '',
 		view: 'messages',
@@ -50,7 +54,8 @@
 		isCodeEditor: false,
 		isCompletionInProgress: false,
 		shouldFocusTextarea: false,
-		isNewSession: true
+		isNewSession: true,
+		webSearch: searchAvailable && $settingsStore.webSearchByDefault
 	});
 	let messagesWindow: HTMLDivElement | undefined = $state();
 	let modelName: string | undefined = $state();
@@ -121,11 +126,14 @@
 				if (model) session.model = model;
 			}
 
+			if (page.url.searchParams.get('search') === '1') editor.webSearch = true;
+
 			// Strip the one-shot params so a refresh doesn't re-submit the prompt
 			// (and doesn't repopulate the input with already-sent text).
 			const cleaned = new URL(page.url);
 			cleaned.searchParams.delete('q');
 			cleaned.searchParams.delete('model');
+			cleaned.searchParams.delete('search');
 			history.replaceState(history.state, '', cleaned);
 
 			await tick();
@@ -196,6 +204,15 @@
 		let chatMessages = session.systemPrompt.content
 			? [session.systemPrompt, ...messages]
 			: messages;
+
+		// Web search (always mode): prepend the results as context for any model.
+		if (searchAvailable && editor.webSearch) {
+			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
+			if (lastUserMessage?.content) {
+				const context = await buildSearchContext(lastUserMessage.content);
+				if (context) chatMessages = [{ role: 'system', content: context }, ...chatMessages];
+			}
+		}
 
 		// Map messages for the chat request, converting images if necessary
 		const chatMessagesForRequest = chatMessages.map((msg) => {
@@ -365,6 +382,16 @@
 		{/snippet}
 
 		{#snippet nav()}
+			{#if searchAvailable}
+				<Button
+					variant="icon"
+					isActive={editor.webSearch}
+					onclick={() => (editor.webSearch = !editor.webSearch)}
+					aria-label="Web search"
+				>
+					<Globe class="base-icon" />
+				</Button>
+			{/if}
 			<Button variant="icon" onclick={() => ($settingsModalOpen = true)}>
 				<Settings2 class="base-icon" />
 			</Button>

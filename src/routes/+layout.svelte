@@ -24,6 +24,7 @@
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
+	import { loadServerSearch } from '$lib/search';
 	import { currentUser } from '$lib/stores/auth';
 	import { onboardingOpen } from '$lib/stores/modal';
 	import { checkForUpdates } from '$lib/updates';
@@ -94,6 +95,7 @@
 	onMount(async () => {
 		// Fill the stores from the repository (no-op in local mode, network load in server mode).
 		await hydrateStores();
+		await loadServerSearch();
 		booted = true;
 
 		// Language
