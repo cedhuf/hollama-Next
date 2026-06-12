@@ -257,10 +257,10 @@
 	<Onboarding />
 
 	<div
-		class="safe-top safe-bottom relative flex h-dvh w-screen overflow-hidden bg-shade-2 lg:p-4 lg:pt-4 lg:pb-4"
+		class="safe-top relative flex h-dvh w-full overflow-hidden bg-shade-2 lg:p-4 lg:pt-4 lg:pb-4"
 	>
 		<CollapsibleSidebar />
-		<div class="relative flex-1">
+		<div class="relative min-w-0 flex-1">
 			<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
 			{#if !$settingsStore.sidebarExpanded}
 				<button
@@ -279,16 +279,11 @@
 
 <style lang="postcss">
 	:global(html) {
-		position: fixed;
-		background-color: var(--color-shade-0);
+		/* Must match bg-shade-2 (the app shell) so the notch, home indicator, and
+		   desktop rounded-corner margins all share one seamless background. */
+		background-color: var(--color-shade-2);
 		font-size: 1rem;
 		line-height: 1.5rem;
 		letter-spacing: normal;
-	}
-
-	@media (width >= 64rem) {
-		:global(html) {
-			background-color: var(--color-shade-2);
-		}
 	}
 </style>

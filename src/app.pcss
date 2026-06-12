@@ -30,9 +30,13 @@
 
 	html,
 	body {
-		/* Keep the app pinned to the viewport on mobile: no rubber-band scroll of the
-		   whole page and no stray horizontal overflow pushing content off-screen. */
-		overflow-x: hidden;
+		/* Lock the viewport so the app never scrolls as a whole page (the inner
+		   scrollable areas handle content overflow). Using overflow: hidden instead
+		   of position: fixed on <html> avoids catastrophic iOS Safari breakage when
+		   the keyboard opens (the dynamic viewport shrinks, but a fixed html element
+		   keeps its old size, cutting off content and misplacing the prompt bar). */
+		height: 100dvh;
+		overflow: hidden;
 		overscroll-behavior: none;
 	}
 
@@ -44,9 +48,33 @@
 
 	body {
 		color: hsl(var(--hsl-text-shade-1));
+		width: 100%;
 		/* Fill the area behind the iOS status bar / home indicator with the app shell
 		   colour so the notch strip matches the rest of the interface. */
 		background-color: hsl(var(--hsl-shade-2));
+		-webkit-text-size-adjust: 100%;
+	}
+
+	/* Prevent iOS Safari from auto-zooming any input/textarea/select on focus
+	   (it does this when the computed font-size is under 16 px). This avoids the
+	   entire page "exploding" when the user taps the prompt bar on an iPhone. */
+	@media (max-width: 1023px) {
+		input,
+		textarea,
+		select {
+			font-size: 16px;
+		}
+	}
+
+	/* Remove the 300 ms tap delay on interactive elements — only touch is relevant
+	   on mobile, so there's no need to wait for a potential double-tap. */
+	a,
+	button,
+	[role='button'],
+	input,
+	textarea,
+	select {
+		touch-action: manipulation;
 	}
 }
 

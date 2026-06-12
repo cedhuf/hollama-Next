@@ -149,9 +149,14 @@
 		}
 	}
 
+	let confirmReset = $state(false);
+
 	// Wipes every data source and reloads into a fresh app (re-triggers onboarding).
 	async function resetEverything() {
-		if (!confirm($LL.resetEverythingConfirm())) return;
+		if (!confirmReset) {
+			confirmReset = true;
+			return;
+		}
 		await repository.resetAll();
 		window.location.href = '/';
 	}
@@ -253,19 +258,30 @@
 	{/each}
 
 	<div
-		class="mt-2 flex flex-col justify-between gap-2 text-balance rounded-md border border-negative/40 bg-shade-1 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+		class="mt-6 flex flex-col gap-2 rounded-md border border-negative/40 bg-shade-1 p-4 text-sm"
 		data-testid="data-management-reset"
 	>
-		<div class="flex flex-col">
-			<P><strong class="text-negative">{$LL.dangerZone()}</strong></P>
-			<span class="text-xs text-muted">{$LL.resetEverythingDescription()}</span>
-		</div>
+		<P><strong class="text-negative">{$LL.dangerZone()}</strong></P>
+		<span class="text-xs text-muted">{$LL.resetEverythingDescription()}</span>
 
-		<nav class="mt-4 flex sm:mt-0">
-			<Button variant="icon" onclick={resetEverything}>
+		{#if confirmReset}
+			<div class="flex flex-col gap-2 rounded-md border border-negative/30 bg-shade-0 p-3">
+				<span class="text-sm font-medium text-negative">Are you sure? This cannot be undone.</span>
+				<div class="flex gap-2">
+					<Button variant="default" class="!bg-negative !text-shade-0" onclick={resetEverything}>
+						<TriangleAlert class="base-icon" />
+						Yes, delete everything
+					</Button>
+					<Button variant="outline" onclick={() => (confirmReset = false)}>
+						Cancel
+					</Button>
+				</div>
+			</div>
+		{:else}
+			<Button variant="outline" onclick={() => (confirmReset = true)}>
 				<TriangleAlert class="base-icon text-negative" />
 				{$LL.resetEverything()}
 			</Button>
-		</nav>
+		{/if}
 	</div>
 </Fieldset>

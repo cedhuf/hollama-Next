@@ -197,16 +197,15 @@
 
 	<!-- Content area -->
 	<div class:hidden={isCollapsed} class="flex min-h-0 flex-1 flex-col overflow-hidden">
-		<div class="flex-1 overflow-auto">
+		<div class="flex-1 overflow-auto" style="overscroll-behavior-y: contain">
 			<section
-				class="h-full"
 				id="sessions-panel"
 				aria-labelledby="sessions-tab"
 				hidden={activeSection !== 'sessions'}
 			>
 				{#if activeSection === 'sessions'}
 					{#if personaLaunchers.length > 0}
-						<div class="border-b bg-shade-1/70 px-2 py-2.5 backdrop-blur-md">
+						<div class="sticky top-0 z-10 border-b bg-shade-1/60 px-2 py-2.5 backdrop-blur-md will-change-transform">
 							<p
 								class="mb-1.5 text-center text-[11px] font-semibold uppercase tracking-wider text-accent"
 							>
@@ -249,7 +248,6 @@
 			</section>
 			<section
 				id="knowledge-panel"
-				class="h-full"
 				aria-labelledby="knowledge-tab"
 				hidden={activeSection !== 'knowledge'}
 			>

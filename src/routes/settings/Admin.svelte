@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, RefreshCw, Trash2 } from '@lucide/svelte';
+	import { Check, Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -7,6 +7,17 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
+
+	// Track which controls just saved, to flash a subtle checkmark.
+	let savedKeys = $state<Record<string, boolean>>({});
+
+	function flashSaved(key: string) {
+		savedKeys = { ...savedKeys, [key]: true };
+		setTimeout(() => {
+			const { [key]: _, ...rest } = savedKeys;
+			savedKeys = rest;
+		}, 1500);
+	}
 
 	// Admin = governance only. Servers are configured in the Servers tab; here the
 	// admin picks which of each system server's models to share, manages users,
@@ -35,6 +46,7 @@
 	let allowUserPersonas = $state(true);
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
+	let showCreateUser = $state(false);
 	let newUser = $state({ email: '', password: '', role: 'user' });
 
 	let searchSharing = $state<'off' | 'locked' | 'overridable'>('off');
@@ -125,7 +137,7 @@
 
 	// All sharing controls autosave on change (no Save buttons). The search /
 	// prompts / title snapshots mirror the admin's own Chat config.
-	async function saveSearch() {
+async function saveSearch() {
 		await api('/api/admin/config', 'PUT', {
 			searchSharing,
 			searchUrl: $settingsStore.searchUrl,
@@ -133,6 +145,7 @@
 			searchToken: $settingsStore.searchToken
 		});
 		sharedUrl = $settingsStore.searchUrl;
+		flashSaved('search');
 	}
 
 	async function saveSystemPrompts() {
@@ -140,10 +153,12 @@
 			systemPromptsSharing,
 			systemPrompts: $settingsStore.systemPrompts
 		});
+		flashSaved('prompts');
 	}
 
 	async function saveDefaultModel() {
 		await api('/api/admin/config', 'PUT', { defaultModelSharing, defaultModel: defaultModelValue });
+		flashSaved('defaultModel');
 	}
 
 	async function saveTitle() {
@@ -154,6 +169,7 @@
 			titleModel: $settingsStore.titleModel ?? '',
 			titleServerId: model?.serverId ?? ''
 		});
+		flashSaved('title');
 	}
 
 	onMount(async () => {
@@ -168,10 +184,12 @@
 	async function toggleAllowUserKeys() {
 		// `allowUserKeys` is already flipped by the toggle's binding.
 		await api('/api/admin/config', 'PUT', { allowUserKeys });
+		flashSaved('userKeys');
 	}
 
 	async function toggleAllowUserPersonas() {
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
+		flashSaved('userPersonas');
 	}
 
 	async function loadModels(server: SystemServer) {
@@ -197,12 +215,14 @@
 
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
+		flashSaved(`models-${server.id}`);
 	}
 
 	async function addUser() {
 		if (!newUser.email || !newUser.password) return toast.error('Email and password are required');
 		await api('/api/admin/users', 'POST', newUser);
 		newUser = { email: '', password: '', role: 'user' };
+		showCreateUser = false;
 		await load();
 		toast.success('User created');
 	}
@@ -223,11 +243,17 @@
 			bind:checked={allowUserKeys}
 			on:change={toggleAllowUserKeys}
 		/>
+		{#if savedKeys['userKeys']}
+			<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>
+		{/if}
 		<FieldCheckbox
 			label="Allow users to create their own personas"
 			bind:checked={allowUserPersonas}
 			on:change={toggleAllowUserPersonas}
 		/>
+		{#if savedKeys['userPersonas']}
+			<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>
+		{/if}
 	</section>
 
 	<!-- Web search sharing -->
@@ -253,6 +279,7 @@
 					<option value="locked">Locked — users can't change it</option>
 					<option value="overridable">Users may override for themselves</option>
 				</select>
+				{#if savedKeys['search']}<span class="flex items-center gap-1 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
 		{/if}
@@ -277,6 +304,7 @@
 			bind:checked={promptsShareEnabled}
 			on:change={syncPromptsShare}
 		/>
+		{#if savedKeys['prompts']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
 		{#if promptsShareEnabled}
 			<select class={input} bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
 				<option value="locked">Locked — users can't change them</option>
@@ -298,6 +326,7 @@
 			bind:checked={titleShareEnabled}
 			on:change={syncTitleShare}
 		/>
+		{#if savedKeys['title']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
 		{#if titleShareEnabled}
 			<select class={input} bind:value={titleSharing} onchange={saveTitle}>
 				<option value="locked">Locked — users can't change it</option>
@@ -337,6 +366,7 @@
 						<option value="locked">Locked — users can't change it</option>
 						<option value="overridable">Default — users may change it</option>
 					</select>
+					{#if savedKeys['defaultModel']}<span class="flex items-center gap-1 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
 				{/if}
 			</div>
 		{/if}
@@ -408,22 +438,40 @@
 			</div>
 		{/each}
 
-		<div class="flex flex-col gap-2 rounded-md border border-dashed border-shade-4 p-3">
-			<span class="text-sm font-medium">Create a user</span>
-			<input class={input} type="email" bind:value={newUser.email} placeholder="Email" />
-			<input
-				class={input}
-				type="password"
-				bind:value={newUser.password}
-				placeholder="Initial password"
-			/>
-			<select class={input} bind:value={newUser.role}>
-				<option value="user">user</option>
-				<option value="admin">admin</option>
-			</select>
-			<div>
+		{#if showCreateUser}
+			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
+				<div class="flex items-center justify-between">
+					<span class="text-sm font-medium">Create a user</span>
+					<button
+						type="button"
+						onclick={() => (showCreateUser = false)}
+						class="text-muted transition-colors hover:text-active"
+						aria-label="Close"
+					>
+						<X class="h-4 w-4" />
+					</button>
+				</div>
+				<input class={input} type="email" bind:value={newUser.email} placeholder="Email" />
+				<input
+					class={input}
+					type="password"
+					bind:value={newUser.password}
+					placeholder="Initial password"
+				/>
+				<select class={input} bind:value={newUser.role}>
+					<option value="user">user</option>
+					<option value="admin">admin</option>
+				</select>
 				<Button on:click={addUser}><Plus class="base-icon" /> Create user</Button>
 			</div>
-		</div>
+		{:else}
+			<button
+				type="button"
+				onclick={() => (showCreateUser = true)}
+				class="flex items-center gap-2 self-start rounded-md border border-dashed border-shade-4 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-active"
+			>
+				<Plus class="h-4 w-4" /> Add user
+			</button>
+		{/if}
 	</section>
 </div>
