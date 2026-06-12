@@ -79,6 +79,7 @@ export class OpenAIStrategy implements ChatStrategy {
 		const response = await this.openai.chat.completions.create({
 			model: payload.model,
 			messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
+			temperature: payload.options?.temperature,
 			stream: false
 		});
 		return response.choices?.[0]?.message?.content ?? '';
