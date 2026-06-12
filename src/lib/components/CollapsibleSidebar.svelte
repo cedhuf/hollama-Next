@@ -99,7 +99,7 @@
 	data-testid="sidebar"
 >
 	<!-- Header -->
-	<div class="flex items-center border-b px-4 py-4">
+	<div class="flex h-[var(--app-header-h)] items-center border-b px-4">
 		{#if isCollapsed}
 			<div class="flex w-full justify-center">
 				<button
@@ -206,7 +206,7 @@
 			>
 				{#if activeSection === 'sessions'}
 					{#if personaLaunchers.length > 0}
-						<div class="border-b bg-shade-2 px-2 py-2.5">
+						<div class="border-b bg-shade-1/70 px-2 py-2.5 backdrop-blur-md">
 							<p
 								class="mb-1.5 text-center text-[11px] font-semibold uppercase tracking-wider text-accent"
 							>

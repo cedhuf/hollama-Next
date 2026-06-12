@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
+	import { formatAskAnswer, stripAskBlock } from '$lib/askChoice';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
@@ -9,6 +10,7 @@
 		session: Session;
 		editor: Editor;
 		handleRetry: (index: number) => void;
+		handleChoose?: (text: string) => void;
 		assistantLabel?: string;
 	}
 
@@ -16,8 +18,20 @@
 		session = $bindable(),
 		editor = $bindable(),
 		handleRetry,
+		handleChoose = undefined,
 		assistantLabel = undefined
 	}: Props = $props();
+
+	// Lock the picked option(s) onto the message (so reload renders them) and send
+	// the selection as a normal user message.
+	function chooseAnswer(message: Message, selected: string[][]) {
+		if (!message.choices || message.choices.answered) return;
+		const text = formatAskAnswer(message.choices.questions, selected);
+		if (!text) return;
+		message.choices = { ...message.choices, answered: true, selected };
+		saveSession(session);
+		handleChoose?.(text);
+	}
 
 	function handleEditMessage(message: Message) {
 		editor.messageIndexToEdit = session.messages.findIndex((m) => m === message);
@@ -49,6 +63,7 @@
 			retryIndex={['assistant', 'system'].includes(message.role) ? i : undefined}
 			{handleRetry}
 			{assistantLabel}
+			onChoose={(selected) => chooseAnswer(message, selected)}
 			handleEditMessage={() => handleEditMessage(message)}
 			handleDeleteAttachment={() => handleDeleteAttachment(message)}
 		/>
@@ -59,7 +74,7 @@
 	<Article
 		message={{
 			role: 'assistant',
-			content: editor.completion || '...',
+			content: stripAskBlock(editor.completion || '') || '...',
 			reasoning: editor.reasoning,
 			webSearch: editor.webSearchInfo
 		}}

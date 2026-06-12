@@ -103,4 +103,18 @@
 			</FieldHelp>
 		{/if}
 	</div>
+
+	<div class="flex flex-col gap-2 border-t border-shade-3 pt-4">
+		<P><strong>Interactive choices</strong></P>
+		<FieldCheckbox
+			label="Let the model offer quick-choice buttons"
+			bind:checked={$settingsStore.interactiveChoices}
+		/>
+		<FieldHelp>
+			<P>
+				When a request is ambiguous and depends on a preference, the model can present a few
+				tappable options instead of guessing. Your selection is sent as a normal message.
+			</P>
+		</FieldHelp>
+	</div>
 </Fieldset>

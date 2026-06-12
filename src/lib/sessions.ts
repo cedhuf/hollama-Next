@@ -4,6 +4,7 @@ import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { sessionsStore, settingsStore, sortStore } from '$lib/localStorage';
 
+import type { AskChoices } from './askChoice';
 import { getLastUsedModels } from './chat';
 import type { Knowledge } from './knowledge';
 import type { Model } from './settings';
@@ -17,6 +18,7 @@ export interface Message {
 	reasoning?: string;
 	images?: { data: string; filename: string }[]; // Store image data and filename
 	webSearch?: { query: string; resultCount: number }; // Set when web search context was injected
+	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
 }
 
 export interface Session {

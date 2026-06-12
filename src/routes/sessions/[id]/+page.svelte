@@ -7,6 +7,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { ASK_INSTRUCTION, parseAskBlock } from '$lib/askChoice';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
@@ -258,6 +259,13 @@
 		else handleSubmitNewMessage(images);
 	}
 
+	// A quick-choice selection becomes a normal user message (no tool_result).
+	function handleChoose(text: string) {
+		if (!text || editor.isCompletionInProgress) return;
+		editor.prompt = text;
+		handleSubmit();
+	}
+
 	async function handleRetry(index: number) {
 		// Remove all the messages after the index
 		session.messages = session.messages.slice(0, index);
@@ -285,6 +293,11 @@
 		let chatMessages = session.systemPrompt.content
 			? [session.systemPrompt, ...messages]
 			: messages;
+
+		// Interactive quick-choice buttons: teach the model the <ask> protocol.
+		if ($settingsStore.interactiveChoices) {
+			chatMessages = [{ role: 'system', content: ASK_INSTRUCTION }, ...chatMessages];
+		}
 
 		let searchInfo: { query: string; resultCount: number } | undefined;
 
@@ -425,11 +438,16 @@
 			// Finalize processing of any remaining content
 			reasoningProcessor.finalize();
 
+			// Pull out an <ask> quick-choice block, if the model emitted one. The
+			// stored content drops the raw block (buttons render from `choices`).
+			const { content, choices } = parseAskBlock(editor.completion);
+
 			const message: Message = {
 				role: 'assistant',
-				content: editor.completion,
+				content,
 				reasoning: editor.reasoning,
-				webSearch: searchInfo
+				webSearch: searchInfo,
+				choices
 			};
 
 			session.messages = [...session.messages, message];
@@ -574,7 +592,13 @@
 				: ''}"
 			bind:this={messagesWindow}
 		>
-			<Messages bind:session bind:editor {handleRetry} assistantLabel={persona?.name} />
+			<Messages
+				bind:session
+				bind:editor
+				{handleRetry}
+				{handleChoose}
+				assistantLabel={persona?.name}
+			/>
 		</div>
 	{/if}
 

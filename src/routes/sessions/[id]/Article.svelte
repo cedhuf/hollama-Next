@@ -12,6 +12,7 @@
 	import { type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
+	import AskChoices from './AskChoices.svelte';
 	import AttachmentImage from './AttachmentImage.svelte';
 
 	let {
@@ -20,6 +21,7 @@
 		handleRetry = undefined,
 		handleEditMessage = undefined,
 		handleDeleteAttachment = undefined,
+		onChoose = undefined,
 		isStreamingArticle = false,
 		isSearching = false,
 		searchQuery = undefined,
@@ -32,6 +34,8 @@
 		handleRetry?: (index: number) => void;
 		handleEditMessage?: (message: Message) => void;
 		handleDeleteAttachment?: (message: Message) => void;
+		/** Called with the picked option(s) when the message has quick-choice buttons. */
+		onChoose?: (selected: string[][]) => void;
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
 		searchQuery?: string;
@@ -194,6 +198,9 @@
 		{/if}
 		{#if message.content}
 			<Markdown markdown={message.content} />
+		{/if}
+		{#if message.choices && onChoose}
+			<AskChoices choices={message.choices} {onChoose} />
 		{/if}
 		{#if message.images && message.images.length}
 			<div class="article__images mt-2 flex flex-wrap gap-1">
