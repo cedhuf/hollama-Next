@@ -99,7 +99,7 @@
 	data-testid="sidebar"
 >
 	<!-- Header -->
-	<div class="flex h-[var(--app-header-h)] items-center border-b px-4">
+	<div class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4">
 		{#if isCollapsed}
 			<div class="flex w-full justify-center">
 				<button
