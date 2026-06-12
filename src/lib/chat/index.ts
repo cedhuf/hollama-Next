@@ -28,6 +28,9 @@ export interface ChatStrategy {
 
 	getModels(): Promise<Model[]>;
 
+	/** A single non-streaming completion (used to let the model decide on search). */
+	complete?(payload: ChatRequest): Promise<string>;
+
 	pull?(
 		payload: PullRequest,
 		onChunk: (progress: ProgressResponse | StatusResponse | ErrorResponse) => void

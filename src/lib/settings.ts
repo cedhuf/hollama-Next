@@ -21,6 +21,7 @@ export interface Settings {
 	generateTitlesWithAI: boolean;
 	titleModel: string | null;
 	webSearchByDefault: boolean;
+	webSearchAuto: boolean;
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	generateTitlesWithAI: false,
 	titleModel: null,
 	webSearchByDefault: false,
+	webSearchAuto: false,
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',

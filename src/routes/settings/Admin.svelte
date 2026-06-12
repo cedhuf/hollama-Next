@@ -4,6 +4,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import Button from '$lib/components/Button.svelte';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
 
@@ -36,7 +37,12 @@
 	let newUser = $state({ email: '', password: '', role: 'user' });
 
 	let searchSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let shareEnabled = $state(false);
 	let sharedUrl = $state('');
+
+	function syncShare() {
+		searchSharing = shareEnabled ? (searchSharing === 'off' ? 'locked' : searchSharing) : 'off';
+	}
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
 		const response = await fetch(url, {
@@ -59,6 +65,7 @@
 		]);
 		allowUserKeys = config.allowUserKeys;
 		searchSharing = config.searchSharing ?? 'off';
+		shareEnabled = searchSharing !== 'off';
 		sharedUrl = config.searchUrl ?? '';
 		servers = (
 			serverList as Pick<
@@ -84,9 +91,8 @@
 	onMount(load);
 
 	async function toggleAllowUserKeys() {
-		const next = !allowUserKeys;
-		await api('/api/admin/config', 'PUT', { allowUserKeys: next });
-		allowUserKeys = next;
+		// `allowUserKeys` is already flipped by the toggle's binding.
+		await api('/api/admin/config', 'PUT', { allowUserKeys });
 	}
 
 	async function loadModels(server: SystemServer) {
@@ -133,10 +139,11 @@
 	<!-- General -->
 	<section class="flex flex-col gap-2">
 		<P><strong>Administration</strong></P>
-		<label class="flex items-center gap-2 text-sm">
-			<input type="checkbox" checked={allowUserKeys} onchange={toggleAllowUserKeys} />
-			Allow users to add their own provider connections
-		</label>
+		<FieldCheckbox
+			label="Allow users to add their own provider connections"
+			bind:checked={allowUserKeys}
+			on:change={toggleAllowUserKeys}
+		/>
 	</section>
 
 	<!-- Web search sharing -->
@@ -152,15 +159,19 @@
 				No engine configured yet — set one up in the Chat tab first, then you can share it.
 			</span>
 		{:else}
-			<select class={input} bind:value={searchSharing}>
-				<option value="off">Not shared — each user configures their own</option>
-				<option value="locked">Shared and locked — users can't change it</option>
-				<option value="overridable">Shared — users may override for themselves</option>
-			</select>
-			{#if sharedUrl && searchSharing !== 'off'}
-				<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>
+			<FieldCheckbox
+				label="Share my search engine with users"
+				bind:checked={shareEnabled}
+				on:change={syncShare}
+			/>
+			{#if shareEnabled}
+				<select class={input} bind:value={searchSharing}>
+					<option value="locked">Locked — users can't change it</option>
+					<option value="overridable">Users may override for themselves</option>
+				</select>
+				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
-			<div><Button on:click={saveSearch}>Save sharing</Button></div>
+			<div><Button on:click={saveSearch}>Save</Button></div>
 		{/if}
 	</section>
 

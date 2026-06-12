@@ -112,10 +112,22 @@
 				</button>
 			{/if}
 
-			<label class="mt-1 flex items-center gap-2 text-sm">
-				<input type="checkbox" bind:checked={$settingsStore.webSearchByDefault} />
-				Enable web search by default
-			</label>
+			<div class="mt-1 flex flex-col gap-2">
+				<FieldCheckbox
+					label="Enable web search by default"
+					bind:checked={$settingsStore.webSearchByDefault}
+				/>
+				<FieldCheckbox
+					label="Let the model decide when to search the web automatically"
+					bind:checked={$settingsStore.webSearchAuto}
+				/>
+				<FieldHelp>
+					<P>
+						The model first decides whether a question needs the web. Most modern models (even
+						Ollama) handle this well, but a few small ones may not.
+					</P>
+				</FieldHelp>
+			</div>
 		</div>
 	{/if}
 </Fieldset>

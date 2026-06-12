@@ -2,17 +2,17 @@
 	export let label: string;
 	export let checked: boolean | undefined = undefined;
 	export let name: string = '';
+	export let disabled: boolean = false;
 </script>
 
 <label
-	class="field-checkbox inline-flex flex-grow items-center gap-x-2 text-balance rounded-md border border-shade-4 px-3 py-2 text-sm leading-tight hover:border-shade-6 hover:text-active"
+	class="inline-flex flex-grow cursor-pointer items-center gap-2.5 text-balance text-sm leading-tight {disabled
+		? 'cursor-not-allowed opacity-60'
+		: ''}"
 >
-	<input
-		type="checkbox"
-		bind:checked
-		class="field-checkbox__input accent-accent"
-		{name}
-		on:change
-	/>
+	<input type="checkbox" bind:checked {name} {disabled} on:change class="peer sr-only" />
+	<span
+		class="relative h-5 w-9 shrink-0 rounded-full bg-shade-3 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:bg-accent peer-checked:after:translate-x-4"
+	></span>
 	{label}
 </label>
