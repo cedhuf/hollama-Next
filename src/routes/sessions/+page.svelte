@@ -3,7 +3,6 @@
 		ArrowRight,
 		ArrowUp,
 		Code,
-		Globe,
 		GraduationCap,
 		Lightbulb,
 		MessageSquareText,
@@ -16,15 +15,20 @@
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import type { Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import { getSessionTitle } from '$lib/sessions';
+	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { generateRandomId } from '$lib/utils';
+
+	import PromptAttachments from './[id]/PromptAttachments.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
 
 	let prompt = $state('');
 	let selectedModel = $state($settingsStore.defaultModel || undefined);
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
+	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);
 
 	const greeting = $derived.by(() => {
@@ -81,13 +85,11 @@
 	}
 
 	function submit(text: string) {
-		if (!text.trim()) return;
+		const content = text.trim();
+		if (!content && !attachments.length) return;
 		const id = generateRandomId();
-		const params = new URLSearchParams();
-		params.set('q', text.trim());
-		if (selectedModel) params.set('model', selectedModel);
-		if (webSearch) params.set('search', '1');
-		goto(`/sessions/${id}?${params.toString()}`);
+		pendingMessage.set({ prompt: content, model: selectedModel, webSearch, attachments });
+		goto(`/sessions/${id}`);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -111,20 +113,8 @@
 			</div>
 
 			<div class="mb-8 w-full">
-				<div class="mb-3 flex items-center justify-center gap-2">
+				<div class="mb-3 flex items-center justify-center">
 					<ModelPicker bind:value={selectedModel} variant="hero" />
-					{#if searchAvailable}
-						<button
-							type="button"
-							onclick={() => (webSearch = !webSearch)}
-							aria-label="Web search"
-							class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-sm transition-colors {webSearch
-								? 'border-accent text-active'
-								: 'border-shade-3 text-muted hover:text-active'}"
-						>
-							<Globe class="h-4 w-4" />
-						</button>
-					{/if}
 				</div>
 				<div
 					class="rounded-2xl border border-shade-3 bg-shade-0 shadow-sm transition-all hover:border-shade-4 focus-within:border-shade-5 focus-within:shadow-md"
@@ -136,15 +126,17 @@
 						bind:value={prompt}
 						onkeydown={handleKeyDown}
 					></textarea>
-					<div class="flex items-center justify-end px-4 pb-3 pt-1">
-						<button
-							onclick={() => submit(prompt)}
-							disabled={!prompt.trim()}
-							class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity disabled:opacity-30"
-						>
-							<ArrowUp class="h-4 w-4" />
-						</button>
-					</div>
+					<PromptAttachments bind:attachments bind:webSearch {searchAvailable}>
+						{#snippet actions()}
+							<button
+								onclick={() => submit(prompt)}
+								disabled={!prompt.trim() && !attachments.length}
+								class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity disabled:opacity-30"
+							>
+								<ArrowUp class="h-4 w-4" />
+							</button>
+						{/snippet}
+					</PromptAttachments>
 				</div>
 			</div>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Globe, Settings2 } from '@lucide/svelte';
+	import { Settings2 } from '@lucide/svelte';
 	import { onMount, tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -18,6 +19,11 @@
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
+	import {
+		imagesPayload,
+		knowledgeContextMessage,
+		type KnowledgeAttachment
+	} from '$lib/promptAttachments';
 	import { buildSearchContext, searchConfig } from '$lib/search';
 	import {
 		getSessionTitle,
@@ -28,6 +34,7 @@
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { settingsModalOpen } from '$lib/stores/modal';
+	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import type { PageData } from './$types';
@@ -113,6 +120,35 @@
 		editor.view = 'messages';
 		editor.isNewSession = !session?.messages?.length;
 		scrollToBottom();
+
+		// A message composed on the home page (prompt + model + attachments) is
+		// handed off via the pendingMessage store, then submitted here.
+		const pending = get(pendingMessage);
+		if (pending) {
+			pendingMessage.set(null);
+			editor.prompt = pending.prompt;
+			editor.isNewSession = false;
+
+			if (pending.model) {
+				modelName = pending.model;
+				const model = $settingsStore.models.find((m) => m.name === pending.model);
+				if (model) session.model = model;
+			}
+
+			editor.webSearch = pending.webSearch;
+
+			const knowledgeMessages = pending.attachments
+				.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
+				.map((a) => knowledgeContextMessage(a.knowledge!));
+			if (knowledgeMessages.length) {
+				session.messages = [...session.messages, ...knowledgeMessages];
+			}
+
+			const images = imagesPayload(pending.attachments);
+			await tick();
+			handleSubmit(images.length ? images : undefined);
+			return;
+		}
 
 		const promptParam = page.url.searchParams.get('q');
 		if (promptParam) {
@@ -408,16 +444,6 @@
 		{/snippet}
 
 		{#snippet nav()}
-			{#if searchAvailable}
-				<Button
-					variant="icon"
-					isActive={editor.webSearch}
-					onclick={() => (editor.webSearch = !editor.webSearch)}
-					aria-label="Web search"
-				>
-					<Globe class="base-icon" />
-				</Button>
-			{/if}
 			<Button variant="icon" onclick={() => ($settingsModalOpen = true)}>
 				<Settings2 class="base-icon" />
 			</Button>

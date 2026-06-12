@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Brain, CircleStop, Image, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
+	import { CircleStop, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
 	import MessageSquareText from '@lucide/svelte/icons/message-square-text';
 	import Settings_2 from '@lucide/svelte/icons/settings-2';
-	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -10,28 +9,21 @@
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 	import { ConnectionType } from '$lib/connections';
-	import { loadKnowledge, type Knowledge } from '$lib/knowledge';
-	import { knowledgeStore, serversStore } from '$lib/localStorage';
-	import type { Editor, Message, Session } from '$lib/sessions';
+	import { serversStore } from '$lib/localStorage';
+	import {
+		imagesPayload,
+		knowledgeContextMessage,
+		type Attachment,
+		type ImageAttachment,
+		type KnowledgeAttachment
+	} from '$lib/promptAttachments';
+	import { searchConfig } from '$lib/search';
+	import type { Editor, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
 
-	import AttachmentImage from './AttachmentImage.svelte';
-	import KnowledgeSelect from './KnowledgeSelect.svelte';
+	import PromptAttachments from './PromptAttachments.svelte';
 
-	type KnowledgeAttachment = {
-		type: 'knowledge';
-		fieldId: string;
-		knowledge?: Knowledge;
-	};
-
-	type ImageAttachment = {
-		type: 'image';
-		id: string;
-		name: string;
-		dataUrl: string;
-	};
-
-	type Attachment = KnowledgeAttachment | ImageAttachment;
+	const searchAvailable = $derived($searchConfig.available);
 
 	interface Props {
 		editor: Editor;
@@ -157,104 +149,16 @@
 		});
 	}
 
-	function handleSelectKnowledge(fieldId: string, knowledgeId: string) {
-		attachments = attachments.map((a) =>
-			a.type === 'knowledge' && a.fieldId === fieldId
-				? { ...a, knowledge: loadKnowledge(knowledgeId) }
-				: a
-		);
-	}
-
-	function handleImageUploadClick() {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.accept = '.png,.jpg,.jpeg,image/png,image/jpeg';
-		input.multiple = true;
-		input.onchange = (e) => {
-			const files = (e.target as HTMLInputElement).files;
-			if (!files || files.length === 0) return;
-
-			const allowedTypes = ['image/png', 'image/jpeg'];
-			const newAttachments: Attachment[] = [];
-			let unsupportedFiles = false;
-
-			const filePromises = Array.from(files).map((file) => {
-				return new Promise<void>((resolve) => {
-					if (!allowedTypes.includes(file.type)) {
-						unsupportedFiles = true;
-						resolve();
-						return;
-					}
-
-					const reader = new FileReader();
-					reader.onload = (event) => {
-						const dataUrl = event.target?.result as string;
-						if (dataUrl) {
-							newAttachments.push({
-								type: 'image',
-								id: generateRandomId(),
-								name: file.name,
-								dataUrl
-							});
-						}
-						resolve();
-					};
-					reader.onerror = () => {
-						console.error('Error reading file:', file.name);
-						resolve();
-					};
-					reader.readAsDataURL(file);
-				});
-			});
-
-			Promise.all(filePromises).then(() => {
-				if (unsupportedFiles) {
-					toast.warning('Some files were ignored. Only PNG and JPEG images are supported.');
-				}
-				if (newAttachments.length > 0) {
-					attachments = [...attachments, ...newAttachments];
-				}
-			});
-		};
-		input.click();
-	}
-
-	function handleDeleteAttachment(id: string) {
-		attachments = [
-			...attachments.filter((a) => (a.type === 'knowledge' ? a.fieldId : a.id) !== id)
-		];
-	}
-
 	function submit() {
-		const knowledgeAttachments = attachments.filter(
-			(a): a is KnowledgeAttachment => a.type === 'knowledge'
-		);
-		if (knowledgeAttachments.length) {
-			const knowledgeAttachmentMessages: Message[] = [];
-			attachments.forEach((a) => {
-				if (a.type === 'knowledge' && a.knowledge)
-					knowledgeAttachmentMessages.push({
-						role: 'user',
-						knowledge: a.knowledge,
-						content: `
-<CONTEXT>
-	<CONTEXT_NAME>${a.knowledge.name}</CONTEXT_NAME>
-	<CONTEXT_CONTENT>${a.knowledge.content}</CONTEXT_CONTENT>
-</CONTEXT>
-`
-					});
-			});
-			session.messages = [...session.messages, ...knowledgeAttachmentMessages];
-			attachments = attachments.filter((a) => a.type !== 'knowledge');
+		const knowledgeMessages = attachments
+			.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
+			.map((a) => knowledgeContextMessage(a.knowledge!));
+		if (knowledgeMessages.length) {
+			session.messages = [...session.messages, ...knowledgeMessages];
 		}
 
-		const imageAttachments = attachments.filter((a): a is ImageAttachment => a.type === 'image');
-		const imagesPayload = imageAttachments.map((a) => ({
-			filename: a.name,
-			data: a.dataUrl.replace(/^data:image\/[a-zA-Z]+;base64,/, '')
-		}));
-
-		handleSubmit(imagesPayload.length ? imagesPayload : undefined);
+		const images = imagesPayload(attachments);
+		handleSubmit(images.length ? images : undefined);
 		attachments = [];
 	}
 </script>
@@ -324,111 +228,52 @@
 					onpaste={handlePaste}
 				></textarea>
 
-				{#if attachments.length}
-					<div class="attachments overflow-scrollbar flex max-h-48 flex-col gap-y-1 px-3 pb-1">
-						{#each attachments as attachment (attachment.type === 'knowledge' ? attachment.fieldId : attachment.id)}
-							<div class="attachment flex w-full justify-between">
-								{#if attachment.type === 'knowledge'}
-									<div class="attachment__knowledge w-full">
-										<KnowledgeSelect
-											value={attachment.knowledge?.id}
-											options={$knowledgeStore?.filter(
-												(k) =>
-													!attachments.find((a) => {
-														if (a.type !== 'knowledge' || attachment.type !== 'knowledge')
-															return false;
-														return a.fieldId !== attachment.fieldId && a.knowledge?.id === k.id;
-													})
-											)}
-											showLabel={false}
-											fieldId={`attachment-${attachment.fieldId}`}
-											onChange={(knowledgeId) =>
-												knowledgeId && handleSelectKnowledge(attachment.fieldId, knowledgeId)}
-											allowClear={false}
-										/>
-									</div>
-								{:else if attachment.type === 'image'}
-									<AttachmentImage dataUrl={attachment.dataUrl} name={attachment.name} />
-								{/if}
+				<PromptAttachments bind:attachments bind:webSearch={editor.webSearch} {searchAvailable}>
+					{#snippet actions()}
+						<div class="flex items-center gap-x-1">
+							{#if editor.messageIndexToEdit !== null}
 								<Button
 									variant="outline"
-									onclick={() =>
-										handleDeleteAttachment(
-											attachment.type === 'knowledge' ? attachment.fieldId : attachment.id
-										)}
-									data-testid="attachment-delete"
+									onclick={() => {
+										editor.prompt = '';
+										editor.messageIndexToEdit = null;
+										editor.isCodeEditor = false;
+									}}
 								>
-									<Trash_2 class="base-icon" />
+									{$LL.cancel()}
 								</Button>
-							</div>
-						{/each}
-					</div>
-				{/if}
+							{/if}
 
-				<div class="flex items-center justify-between px-2 pb-2 pt-0.5">
-					<div class="flex gap-x-0.5">
-						<Button
-							variant="icon"
-							onclick={() => {
-								attachments = [...attachments, { type: 'knowledge', fieldId: generateRandomId() }];
-							}}
-							data-testid="knowledge-attachment"
-						>
-							<Brain class="base-icon" />
-						</Button>
-						<Button
-							variant="icon"
-							onclick={handleImageUploadClick}
-							data-testid="image-attachment"
-							title={$LL.attachImage()}
-						>
-							<Image class="base-icon" />
-						</Button>
-					</div>
-
-					<div class="flex items-center gap-x-1">
-						{#if editor.messageIndexToEdit !== null}
-							<Button
-								variant="outline"
-								onclick={() => {
-									editor.prompt = '';
-									editor.messageIndexToEdit = null;
-									editor.isCodeEditor = false;
-								}}
-							>
-								{$LL.cancel()}
-							</Button>
-						{/if}
-
-						{#if editor.isCompletionInProgress}
-							<Button title={$LL.stopCompletion()} variant="outline" onclick={stopCompletion}>
-								<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
-									<span
-										class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
-									>
-										<CircleStop class="base-icon" />
-									</span>
-									<span
-										class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
-									>
-										<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
-									</span>
-								</div>
-							</Button>
-						{:else}
-							<ButtonSubmit
-								handleSubmit={submit}
-								hasMetaKey={editor.isCodeEditor}
-								disabled={(!editor.prompt &&
-									!attachments.filter((a) => a.type === 'image').length) ||
-									!session.model ||
-									editor.isCompletionInProgress}
-							>
-								{$LL.run()}
-							</ButtonSubmit>
-						{/if}
-					</div>
-				</div>
+							{#if editor.isCompletionInProgress}
+								<Button title={$LL.stopCompletion()} variant="outline" onclick={stopCompletion}>
+									<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
+										<span
+											class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
+										>
+											<CircleStop class="base-icon" />
+										</span>
+										<span
+											class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
+										>
+											<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
+										</span>
+									</div>
+								</Button>
+							{:else}
+								<ButtonSubmit
+									handleSubmit={submit}
+									hasMetaKey={editor.isCodeEditor}
+									disabled={(!editor.prompt &&
+										!attachments.filter((a) => a.type === 'image').length) ||
+										!session.model ||
+										editor.isCompletionInProgress}
+								>
+									{$LL.run()}
+								</ButtonSubmit>
+							{/if}
+						</div>
+					{/snippet}
+				</PromptAttachments>
 			</div>
 		{/if}
 	</div>
