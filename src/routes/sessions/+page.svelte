@@ -3,6 +3,7 @@
 		ArrowRight,
 		ArrowUp,
 		Code,
+		Globe,
 		GraduationCap,
 		Lightbulb,
 		MessageSquareText,
@@ -15,11 +16,15 @@
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import { searchConfig } from '$lib/search';
 	import { getSessionTitle } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
 
+	const searchAvailable = $derived($searchConfig.available);
+
 	let prompt = $state('');
 	let selectedModel = $state($settingsStore.defaultModel || undefined);
+	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
 	let openCategory = $state<string | null>(null);
 
 	const greeting = $derived.by(() => {
@@ -81,6 +86,7 @@
 		const params = new URLSearchParams();
 		params.set('q', text.trim());
 		if (selectedModel) params.set('model', selectedModel);
+		if (webSearch) params.set('search', '1');
 		goto(`/sessions/${id}?${params.toString()}`);
 	}
 
@@ -105,8 +111,20 @@
 			</div>
 
 			<div class="mb-8 w-full">
-				<div class="flex items-center justify-center gap-2 mb-3">
+				<div class="mb-3 flex items-center justify-center gap-2">
 					<ModelPicker bind:value={selectedModel} variant="hero" />
+					{#if searchAvailable}
+						<button
+							type="button"
+							onclick={() => (webSearch = !webSearch)}
+							aria-label="Web search"
+							class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-sm transition-colors {webSearch
+								? 'border-accent text-active'
+								: 'border-shade-3 text-muted hover:text-active'}"
+						>
+							<Globe class="h-4 w-4" />
+						</button>
+					{/if}
 				</div>
 				<div
 					class="rounded-2xl border border-shade-3 bg-shade-0 shadow-sm transition-all hover:border-shade-4 focus-within:border-shade-5 focus-within:shadow-md"
