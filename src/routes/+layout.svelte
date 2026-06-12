@@ -85,6 +85,16 @@
 				theme = mode;
 			}
 			document.documentElement.setAttribute('data-color-theme', theme);
+
+			// Keep the OS/browser chrome tint in sync with the live shell colour
+			// (covers the theme styles — Dracula, Catppuccin — not just light/dark).
+			if (browser) {
+				const meta = document.querySelector('meta[name="theme-color"]');
+				const shade2 = getComputedStyle(document.documentElement)
+					.getPropertyValue('--color-shade-2')
+					.trim();
+				if (meta && shade2) meta.setAttribute('content', shade2);
+			}
 		};
 
 		applyTheme();
@@ -246,14 +256,16 @@
 	<SettingsModal />
 	<Onboarding />
 
-	<div class="relative flex h-dvh w-screen bg-shade-2 lg:p-4">
+	<div
+		class="safe-top safe-bottom relative flex h-dvh w-screen overflow-hidden bg-shade-2 lg:p-4 lg:pt-4 lg:pb-4"
+	>
 		<CollapsibleSidebar />
 		<div class="relative flex-1">
 			<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
 			{#if !$settingsStore.sidebarExpanded}
 				<button
 					onclick={() => ($settingsStore.sidebarExpanded = true)}
-					class="absolute left-3 top-3 z-10 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
+					class="absolute left-3 top-3 z-20 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
 					aria-label={$LL.expandSidebar()}
 					title={$LL.expandSidebar()}
 				>

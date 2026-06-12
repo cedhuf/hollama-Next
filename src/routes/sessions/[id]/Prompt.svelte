@@ -48,6 +48,10 @@
 			ConnectionType.Ollama
 	);
 
+	// Persona chats keep the composer minimal — no parameters/controls tab and no
+	// expand-to-code-editor toggle.
+	const isPersona = $derived(!!session.personaId);
+
 	$effect(() => {
 		if (attachments.length) scrollToBottom(true);
 	});
@@ -169,48 +173,50 @@
 		: ''}"
 >
 	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
-		<div class="flex items-center justify-end gap-x-2">
-			<nav class="segmented-nav flex items-center rounded bg-shade-2 p-0.5">
-				<div
-					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'messages'
-						? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
-						: ''}"
-				>
-					<Button
-						aria-label={$LL.messages()}
-						variant="icon"
-						onclick={switchToMessages}
-						class="h-full"
-						isActive={editor.view === 'messages'}
+		{#if !isPersona}
+			<div class="flex items-center justify-end gap-x-2">
+				<nav class="segmented-nav flex items-center rounded bg-shade-2 p-0.5">
+					<div
+						class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'messages'
+							? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
+							: ''}"
 					>
-						<MessageSquareText class="base-icon" />
-					</Button>
-				</div>
-				<div
-					class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'controls'
-						? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
-						: ''}"
-				>
-					<Button
-						aria-label={$LL.controls()}
-						variant="icon"
-						onclick={switchToControls}
-						class="h-full"
-						isActive={editor.view === 'controls'}
+						<Button
+							aria-label={$LL.messages()}
+							variant="icon"
+							onclick={switchToMessages}
+							class="h-full"
+							isActive={editor.view === 'messages'}
+						>
+							<MessageSquareText class="base-icon" />
+						</Button>
+					</div>
+					<div
+						class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'controls'
+							? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
+							: ''}"
 					>
-						<Settings_2 class="base-icon" />
-					</Button>
-				</div>
-			</nav>
+						<Button
+							aria-label={$LL.controls()}
+							variant="icon"
+							onclick={switchToControls}
+							class="h-full"
+							isActive={editor.view === 'controls'}
+						>
+							<Settings_2 class="base-icon" />
+						</Button>
+					</div>
+				</nav>
 
-			<Button
-				variant={editor.isCodeEditor ? 'default' : 'outline'}
-				class="prompt-editor__toggle h-full"
-				onclick={toggleCodeEditor}
-			>
-				<UnfoldVertical class="base-icon" />
-			</Button>
-		</div>
+				<Button
+					variant={editor.isCodeEditor ? 'default' : 'outline'}
+					class="prompt-editor__toggle h-full"
+					onclick={toggleCodeEditor}
+				>
+					<UnfoldVertical class="base-icon" />
+				</Button>
+			</div>
+		{/if}
 
 		{#if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
