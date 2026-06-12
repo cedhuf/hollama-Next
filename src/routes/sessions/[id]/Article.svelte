@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, ChevronDown, ChevronUp, Pencil, RefreshCw, Trash2 } from '@lucide/svelte';
+	import { Brain, ChevronDown, ChevronUp, Globe, Pencil, RefreshCw, Trash2 } from '@lucide/svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 
@@ -21,6 +21,8 @@
 		handleEditMessage = undefined,
 		handleDeleteAttachment = undefined,
 		isStreamingArticle = false,
+		isSearching = false,
+		searchQuery = undefined,
 		currentRawReasoning,
 		currentRawCompletion
 	}: {
@@ -30,6 +32,8 @@
 		handleEditMessage?: (message: Message) => void;
 		handleDeleteAttachment?: (message: Message) => void;
 		isStreamingArticle?: boolean;
+		isSearching?: boolean;
+		searchQuery?: string;
 		currentRawReasoning?: string;
 		currentRawCompletion?: string;
 	} = $props();
@@ -84,7 +88,7 @@
 				</Button>
 			</div>
 		</div>
-		<div class="attachment__interactive -mr-2 opacity-100 md:-mr-3 hover:opacity-100">
+		<div class="attachment__interactive -mr-2 md:-mr-3">
 			<Button
 				variant="icon"
 				onclick={() => handleDeleteAttachment && handleDeleteAttachment(message)}
@@ -115,7 +119,7 @@
 					{/if}
 				</Badge>
 			</div>
-			<div class="article__interactive -mr-2 opacity-100 md:-mr-3 hover:opacity-100">
+			<div class="article__interactive -mr-2 md:-mr-3">
 				{#if retryIndex}
 					<Button
 						title={$LL.retry()}
@@ -138,6 +142,22 @@
 				<ButtonCopy content={message.content} />
 			</div>
 		</nav>
+
+		{#if isSearching || message.webSearch}
+			<div class="article__search flex items-center gap-1.5 text-xs text-muted">
+				<Globe class="h-3 w-3 shrink-0 {isSearching ? 'animate-pulse' : ''}" />
+				{#if isSearching}
+					<span class="animate-pulse">
+						{searchQuery ? `Searching the web for “${searchQuery}”…` : 'Searching the web…'}
+					</span>
+				{:else if message.webSearch}
+					<span title={`Query: “${message.webSearch.query}”`}>
+						{message.webSearch.resultCount}
+						{message.webSearch.resultCount === 1 ? 'result' : 'results'} found
+					</span>
+				{/if}
+			</div>
+		{/if}
 
 		{#if message.reasoning}
 			<div
@@ -179,10 +199,16 @@
 {/if}
 
 <style lang="postcss">
-	.article__interactive,
-	.attachment__interactive {
-		@media (hover: hover) {
+	@media (hover: hover) {
+		.article__interactive,
+		.attachment__interactive {
 			opacity: 0;
+			transition: opacity 0.15s ease;
+		}
+
+		.article:hover .article__interactive,
+		.attachment:hover .attachment__interactive {
+			opacity: 1;
 		}
 	}
 </style>

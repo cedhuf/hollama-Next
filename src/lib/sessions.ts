@@ -15,6 +15,7 @@ export interface Message {
 	context?: number[];
 	reasoning?: string;
 	images?: { data: string; filename: string }[]; // Store image data and filename
+	webSearch?: { query: string; resultCount: number }; // Set when web search context was injected
 }
 
 export interface Session {
@@ -36,6 +37,9 @@ export interface Editor {
 	isNewSession: boolean;
 	shouldFocusTextarea: boolean;
 	webSearch?: boolean;
+	isSearching?: boolean; // True while a web search is running (live status)
+	searchQuery?: string; // The query being searched, shown live while isSearching
+	webSearchInfo?: { query: string; resultCount: number }; // Live result info for the streaming article
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];
 	completion?: string;
 	reasoning?: string;
