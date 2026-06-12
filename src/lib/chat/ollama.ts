@@ -12,7 +12,7 @@ import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { ollamaBaseUrl } from './endpoint';
-import type { ChatStrategy } from './index';
+import type { ChatRequest as AppChatRequest, ChatStrategy } from './index';
 
 export interface OllamaOptions {
 	numa: boolean;
@@ -92,6 +92,22 @@ export class OllamaStrategy implements ChatStrategy {
 				onChunk(message.content);
 			}
 		}
+	}
+
+	async complete(payload: AppChatRequest): Promise<string> {
+		const response = await fetch(`${this.base}/api/chat`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				model: payload.model,
+				messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
+				options: payload.options,
+				stream: false
+			})
+		});
+		if (!response.ok) return '';
+		const data = await response.json();
+		return data?.message?.content ?? '';
 	}
 
 	async getModels(): Promise<Model[]> {

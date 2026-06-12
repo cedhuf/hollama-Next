@@ -205,11 +205,37 @@
 			? [session.systemPrompt, ...messages]
 			: messages;
 
-		// Web search (always mode): prepend the results as context for any model.
-		if (searchAvailable && editor.webSearch) {
+		// Web search: prepend results as context. In "auto" mode the model first
+		// decides whether (and what) to search; otherwise we always search the
+		// latest message.
+		if (searchAvailable && editor.webSearch && session.model) {
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
-			if (lastUserMessage?.content) {
-				const context = await buildSearchContext(lastUserMessage.content);
+			let query: string | null = lastUserMessage?.content ?? null;
+
+			if (query && $settingsStore.webSearchAuto) {
+				const decider =
+					server.connectionType === ConnectionType.Ollama
+						? new OllamaStrategy(server)
+						: new OpenAIStrategy(server);
+				const decision = (
+					await decider.complete?.({
+						model: session.model.name,
+						options: session.options,
+						messages: [
+							...chatMessages.map((m) => ({ role: m.role, content: m.content })),
+							{
+								role: 'system' as const,
+								content:
+									"Decide if answering the user's last message needs current web information. If yes, reply with ONLY a concise web search query. If not, reply with exactly NONE."
+							}
+						]
+					})
+				)?.trim();
+				query = decision && !/^none\b/i.test(decision) ? decision : null;
+			}
+
+			if (query) {
+				const context = await buildSearchContext(query);
 				if (context) chatMessages = [{ role: 'system', content: context }, ...chatMessages];
 			}
 		}

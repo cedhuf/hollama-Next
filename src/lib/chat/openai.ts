@@ -75,6 +75,15 @@ export class OpenAIStrategy implements ChatStrategy {
 		}
 	}
 
+	async complete(payload: ChatRequest): Promise<string> {
+		const response = await this.openai.chat.completions.create({
+			model: payload.model,
+			messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
+			stream: false
+		});
+		return response.choices?.[0]?.message?.content ?? '';
+	}
+
 	async getModels(): Promise<Model[]> {
 		const response = await this.openai.models.list();
 		return response.data
