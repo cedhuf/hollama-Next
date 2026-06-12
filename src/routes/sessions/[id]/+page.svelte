@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Settings2 } from '@lucide/svelte';
-	import { onMount, tick } from 'svelte';
-	import { get } from 'svelte/store';
+	import { onMount, tick, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { get } from 'svelte/store';
 
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
@@ -11,6 +11,7 @@
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import { generateTitle } from '$lib/chat/title';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -33,8 +34,8 @@
 		type Message
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
-	import { settingsModalOpen } from '$lib/stores/modal';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
+	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import type { PageData } from './$types';
@@ -42,6 +43,7 @@
 	import Messages from './Messages.svelte';
 	import Prompt from './Prompt.svelte';
 	import { createReasoningProcessor } from './reasoningProcessor';
+	import SessionModal from './SessionModal.svelte';
 
 	interface Props {
 		data: PageData;
@@ -75,6 +77,29 @@
 
 	$effect(() => {
 		session.model = $settingsStore.models.find((m) => m.name === modelName);
+	});
+
+	let sessionModalOpen = $state(false);
+
+	// Tracks the last system prompt we auto-resolved, so a model switch can update
+	// it — but we never overwrite a hand-edited or knowledge-based prompt.
+	let lastAutoSystemPrompt = '';
+
+	function maybeAutoResolveSystemPrompt() {
+		if (session.systemPromptEdited) return;
+		if (session.messages.some((m) => m.role === 'assistant')) return; // conversation already started
+		const current = session.systemPrompt.content;
+		if (current && current !== lastAutoSystemPrompt) return; // manual / knowledge content — leave it
+		const resolved = effectiveSystemPrompt(modelName, $systemPromptsConfig.prompts);
+		if (resolved === current) return;
+		session.systemPrompt = { ...session.systemPrompt, content: resolved };
+		lastAutoSystemPrompt = resolved;
+	}
+
+	// Re-resolve the system prompt when the model changes (new/unedited sessions).
+	$effect(() => {
+		void modelName;
+		untrack(() => maybeAutoResolveSystemPrompt());
 	});
 
 	$effect(() => {
@@ -264,14 +289,26 @@
 
 				// A focused, deterministic router prompt with only the recent turns
 				// (NOT the session system prompt, which biases the model toward
-				// chatting instead of deciding). Temperature 0 makes it consistent.
+				// chatting instead of deciding). Temperature 0 + few-shot examples
+				// make weak models reliable — without them, models tend to "offer" to
+				// search instead of just doing it on a direct question.
 				const routerInstruction =
-					"You are a web-search router. Decide whether answering the user's LAST message needs a live web lookup right now.\n" +
-					"Reply with ONLY a short search query (a few keywords, in the user's language, no quotes, no explanation) when the answer depends on:\n" +
-					'- current, real-time or time-sensitive information (news, weather, prices, schedules, scores, "today"/"now"/"latest"/"aujourd\'hui"/"actualités"…),\n' +
-					'- facts that may have changed after your training cutoff,\n' +
-					'- or the user explicitly asks to search the web / look something up.\n' +
-					'Otherwise reply with exactly: NONE\n' +
+					"You are a web-search router. Look at the user's LAST message and decide whether answering it needs a live web lookup right now.\n\n" +
+					"Reply with EITHER a short web search query (a few keywords, in the user's language, no quotes, nothing else) OR the single word NONE.\n\n" +
+					'You MUST output a query (never NONE) when the message involves:\n' +
+					'- weather, news, prices, stocks, sports scores, schedules, opening hours, traffic;\n' +
+					'- anything tied to "today", "now", "current", "latest", "aujourd\'hui", "actualités", or a recent date;\n' +
+					'- events, releases or facts that may have changed after your training data;\n' +
+					'- or an explicit request to search / look something up online.\n\n' +
+					'Reply NONE only for timeless requests you can fully answer from your own knowledge (definitions, explanations, math, translation, coding, writing, general how-to).\n\n' +
+					'Examples:\n' +
+					'"Quelle est la météo aujourd\'hui à Vichy ?" -> météo Vichy aujourd\'hui\n' +
+					'"Les actualités du jour ?" -> actualités du jour France\n' +
+					'"Qui a gagné le match hier soir ?" -> résultat match hier soir\n' +
+					'"Cours de l\'action Tesla ?" -> cours action Tesla\n' +
+					'"Explique-moi la photosynthèse" -> NONE\n' +
+					'"Traduis bonjour en espagnol" -> NONE\n' +
+					'"Écris un poème sur l\'automne" -> NONE\n\n' +
 					'Never answer the question yourself. Output only the query, or NONE.';
 
 				const recentTurns = messages
@@ -288,7 +325,11 @@
 						})
 					)?.trim();
 					// Keep only the first line and strip any surrounding quotes.
-					if (decision) decision = decision.split('\n')[0].trim().replace(/^["']+|["']+$/g, '');
+					if (decision)
+						decision = decision
+							.split('\n')[0]
+							.trim()
+							.replace(/^["']+|["']+$/g, '');
 					query = decision && !/^none\b/i.test(decision) ? decision : null;
 				} catch {
 					// Router failed — fall back to searching the raw user message.
@@ -395,7 +436,8 @@
 	async function maybeGenerateTitle() {
 		// Auto-name a brand new session once its first exchange completes.
 		const isFirstExchange = session.messages.filter((m) => m.role === 'assistant').length === 1;
-		if (!$settingsStore.generateTitlesWithAI || session.title || !isFirstExchange) return;
+		if (!$chatDefaultsConfig.title.generateTitlesWithAI || session.title || !isFirstExchange)
+			return;
 
 		const firstUserMessage = session.messages.find(
 			(m) => m.role === 'user' && m.content && !m.knowledge
@@ -485,7 +527,7 @@
 		{/snippet}
 
 		{#snippet nav()}
-			<Button variant="icon" onclick={() => ($settingsModalOpen = true)}>
+			<Button variant="icon" onclick={() => (sessionModalOpen = true)} title={$LL.session()}>
 				<Settings2 class="base-icon" />
 			</Button>
 			{#if !editor.isNewSession}
@@ -510,3 +552,5 @@
 
 	<Prompt bind:session bind:editor {handleSubmit} {stopCompletion} {scrollToBottom} />
 </div>
+
+<SessionModal bind:open={sessionModalOpen} bind:session bind:modelName />

@@ -12,6 +12,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
@@ -26,7 +27,7 @@
 	const searchAvailable = $derived($searchConfig.available);
 
 	let prompt = $state('');
-	let selectedModel = $state($settingsStore.defaultModel || undefined);
+	let selectedModel = $state($chatDefaultsConfig.defaultModel.value || undefined);
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
 	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);

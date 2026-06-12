@@ -1,133 +1,230 @@
 <script lang="ts">
+	import { Trash2 } from '@lucide/svelte';
+
 	import LL from '$i18n/i18n-svelte';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import FieldHelp from '$lib/components/FieldHelp.svelte';
 	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
-	import { searchConfig } from '$lib/search';
+	import { systemPromptsConfig } from '$lib/systemPrompts';
 
-	const defaultModelValue = $derived($settingsStore.defaultModel ?? undefined);
-	const titleModelValue = $derived($settingsStore.titleModel ?? undefined);
+	const dmEditable = $derived($chatDefaultsConfig.defaultModel.editable);
+	const dmValue = $derived($chatDefaultsConfig.defaultModel.value || undefined);
+	const titleCfg = $derived($chatDefaultsConfig.title);
+	const titleModelValue = $derived(titleCfg.titleModel || undefined);
 
-	const input =
-		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent disabled:opacity-60';
-
-	// Show the section unless we're a server user with nothing configured yet.
-	const showSearch = $derived($searchConfig.editable || $searchConfig.available);
-	const canOverride = $derived(
-		$searchConfig.editable && $searchConfig.source === 'user' && !!$searchConfig.adminUrl
+	const spEditable = $derived($systemPromptsConfig.editable);
+	const spShared = $derived($systemPromptsConfig.shared);
+	const spSource = $derived($systemPromptsConfig.source);
+	const sharedPrompts = $derived($systemPromptsConfig.prompts);
+	const sharedPerModel = $derived(Object.entries(sharedPrompts.perModel));
+	const adminPrompts = $derived($systemPromptsConfig.adminPrompts);
+	const adminDefaultExists = $derived(
+		!!adminPrompts.global.trim() || Object.keys(adminPrompts.perModel).length > 0
 	);
+	const canRestore = $derived(spEditable && spSource === 'user' && adminDefaultExists);
 
 	function restoreServerDefault() {
-		$settingsStore.searchUrl = '';
+		$settingsStore.systemPrompts = { global: '', perModel: {} };
+	}
+
+	const field =
+		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
+
+	const perModelEntries = $derived(Object.entries($settingsStore.systemPrompts.perModel));
+	const availableToAdd = $derived(
+		[...new Set($settingsStore.models.map((m) => m.name))].filter(
+			(name) => !$settingsStore.systemPrompts.perModel[name]
+		)
+	);
+
+	function addModelPrompt(name: string) {
+		if (!name) return;
+		$settingsStore.systemPrompts = {
+			...$settingsStore.systemPrompts,
+			perModel: {
+				...$settingsStore.systemPrompts.perModel,
+				[name]: { prompt: '', mode: 'extend' }
+			}
+		};
+	}
+
+	function removeModelPrompt(name: string) {
+		const perModel = { ...$settingsStore.systemPrompts.perModel };
+		delete perModel[name];
+		$settingsStore.systemPrompts = { ...$settingsStore.systemPrompts, perModel };
 	}
 </script>
 
 <Fieldset>
 	<P><strong>Chat</strong></P>
 
-	<FieldSelectModel
-		isLabelVisible={true}
-		label={$LL.defaultModel()}
-		value={defaultModelValue}
-		onChange={(o) => ($settingsStore.defaultModel = o.value || null)}
-	/>
-
-	<FieldCheckbox
-		label={$LL.generateTitlesWithAI()}
-		bind:checked={$settingsStore.generateTitlesWithAI}
-	/>
-	<FieldHelp>
-		<P>{$LL.generateTitlesWithAIHelp()}</P>
-	</FieldHelp>
-
-	{#if $settingsStore.generateTitlesWithAI}
+	{#if dmEditable}
 		<FieldSelectModel
 			isLabelVisible={true}
-			label={$LL.titleModel()}
-			value={titleModelValue}
-			onChange={(o) => ($settingsStore.titleModel = o.value || null)}
+			label={$LL.defaultModel()}
+			value={dmValue}
+			onChange={(o) => ($settingsStore.defaultModel = o.value || null)}
 		/>
+	{:else}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="flex items-center gap-2 text-muted">
+				{$LL.defaultModel()}
+				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px]">set by admin</span>
+			</span>
+			<input class={field} disabled value={dmValue ?? '—'} />
+		</label>
 	{/if}
 
-	{#if showSearch}
-		<div class="mt-2 flex flex-col gap-2 border-t border-shade-2 pt-3">
-			<div class="flex items-center gap-2">
-				<P><strong>Web search</strong></P>
-				{#if $searchConfig.source === 'env'}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">env</span>
-				{:else if $searchConfig.source === 'admin' && !$searchConfig.editable}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted"
-						>shared by admin</span
-					>
-				{/if}
-			</div>
+	{#if titleCfg.editable}
+		<FieldCheckbox
+			label={$LL.generateTitlesWithAI()}
+			bind:checked={$settingsStore.generateTitlesWithAI}
+		/>
+		<FieldHelp>
+			<P>{$LL.generateTitlesWithAIHelp()}</P>
+		</FieldHelp>
 
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Backend URL (degoog / SearXNG)</span>
-				<input
-					class={input}
-					disabled={!$searchConfig.editable}
-					value={$searchConfig.editable ? $settingsStore.searchUrl : $searchConfig.url}
-					placeholder={$searchConfig.adminUrl || 'http://localhost:4444'}
-					oninput={(e) => ($settingsStore.searchUrl = e.currentTarget.value)}
-				/>
-			</label>
+		{#if $settingsStore.generateTitlesWithAI}
+			<FieldSelectModel
+				isLabelVisible={true}
+				label={$LL.titleModel()}
+				value={titleModelValue}
+				onChange={(o) => ($settingsStore.titleModel = o.value || null)}
+			/>
+		{/if}
+	{:else}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="flex items-center gap-2 text-muted">
+				{$LL.generateTitlesWithAI()}
+				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px]">set by admin</span>
+			</span>
+			<input
+				class={field}
+				disabled
+				value={titleCfg.generateTitlesWithAI ? `On — ${titleCfg.titleModel || '—'}` : 'Off'}
+			/>
+		</label>
+	{/if}
+</Fieldset>
 
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Backend</span>
+<Fieldset>
+	<div class="flex items-center gap-2">
+		<P><strong>System prompts</strong></P>
+		{#if spShared && !spEditable}
+			<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">shared by admin</span>
+		{:else if spShared}
+			<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">server default</span>
+		{/if}
+	</div>
+	<FieldHelp>
+		<P>
+			Applied to every new chat (lowest priority). A per-model prompt or a per-chat prompt overrides
+			it.
+		</P>
+	</FieldHelp>
+
+	{#if spEditable}
+		{#if canRestore}
+			<button
+				type="button"
+				onclick={restoreServerDefault}
+				class="w-fit text-xs text-link hover:underline"
+			>
+				Restore server default
+			</button>
+		{/if}
+
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-muted">Global prompt</span>
+			<textarea
+				class={field}
+				rows="3"
+				bind:value={$settingsStore.systemPrompts.global}
+				placeholder={adminDefaultExists && adminPrompts.global
+					? adminPrompts.global
+					: "e.g. You are concise and answer in the user's language…"}
+			></textarea>
+		</label>
+
+		<div class="mt-2 flex items-center justify-between gap-2">
+			<span class="text-sm font-medium">Per-model prompts</span>
+			{#if availableToAdd.length}
 				<select
-					class={input}
-					disabled={!$searchConfig.editable}
-					value={$searchConfig.editable ? $settingsStore.searchBackend : $searchConfig.backend}
-					onchange={(e) =>
-						($settingsStore.searchBackend = e.currentTarget.value as 'degoog' | 'searxng')}
+					class="{field} w-auto"
+					value=""
+					onchange={(e) => {
+						addModelPrompt(e.currentTarget.value);
+						e.currentTarget.value = '';
+					}}
 				>
-					<option value="degoog">degoog</option>
-					<option value="searxng">SearXNG</option>
+					<option value="" disabled selected>+ Add a model</option>
+					{#each availableToAdd as name (name)}
+						<option value={name}>{name}</option>
+					{/each}
 				</select>
-			</label>
-
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">API token (optional, for protected instances)</span>
-				<input
-					class={input}
-					type="password"
-					disabled={!$searchConfig.editable}
-					value={$searchConfig.editable ? $settingsStore.searchToken : ''}
-					placeholder={!$searchConfig.editable && $searchConfig.hasToken ? '•••••••• (set)' : ''}
-					oninput={(e) => ($settingsStore.searchToken = e.currentTarget.value)}
-				/>
-			</label>
-
-			{#if canOverride}
-				<button
-					type="button"
-					onclick={restoreServerDefault}
-					class="w-fit text-xs text-link hover:underline"
-				>
-					Restore server default
-				</button>
 			{/if}
-
-			<div class="mt-1 flex flex-col gap-2">
-				<FieldCheckbox
-					label="Enable web search by default"
-					bind:checked={$settingsStore.webSearchByDefault}
-				/>
-				<FieldCheckbox
-					label="Let the model decide when to search the web automatically"
-					bind:checked={$settingsStore.webSearchAuto}
-				/>
-				<FieldHelp>
-					<P>
-						The model first decides whether a question needs the web. Most modern models (even
-						Ollama) handle this well, but a few small ones may not.
-					</P>
-				</FieldHelp>
-			</div>
 		</div>
+
+		{#if perModelEntries.length}
+			<div class="flex flex-col gap-2">
+				{#each perModelEntries as [name] (name)}
+					<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-2.5">
+						<div class="flex items-center justify-between gap-2">
+							<span class="text-sm font-medium">{name}</span>
+							<button
+								type="button"
+								class="text-muted transition-colors hover:text-active"
+								onclick={() => removeModelPrompt(name)}
+								aria-label="Remove {name} prompt"
+							>
+								<Trash2 class="base-icon" />
+							</button>
+						</div>
+						<textarea
+							class={field}
+							rows="2"
+							bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
+							placeholder="Prompt for {name}…"
+						></textarea>
+						<select
+							class="{field} w-auto text-xs"
+							bind:value={$settingsStore.systemPrompts.perModel[name].mode}
+						>
+							<option value="extend">Extends the global prompt</option>
+							<option value="replace">Replaces the global prompt</option>
+						</select>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<FieldHelp>
+				<P>No per-model prompts yet. Add one to tailor instructions for a specific model.</P>
+			</FieldHelp>
+		{/if}
+	{:else}
+		<label class="flex flex-col gap-1 text-sm">
+			<span class="text-muted">Global prompt</span>
+			<textarea class={field} rows="3" disabled value={sharedPrompts.global}></textarea>
+		</label>
+
+		{#if sharedPerModel.length}
+			<div class="flex flex-col gap-2">
+				{#each sharedPerModel as [name, mp] (name)}
+					<div class="flex flex-col gap-1 rounded-md border border-shade-3 p-2.5">
+						<span class="text-sm font-medium">
+							{name}
+							<span class="text-xs text-muted">
+								({mp.mode === 'replace' ? 'replaces global' : 'extends global'})
+							</span>
+						</span>
+						<textarea class={field} rows="2" disabled value={mp.prompt}></textarea>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	{/if}
 </Fieldset>

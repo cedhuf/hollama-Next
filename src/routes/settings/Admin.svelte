@@ -40,8 +40,47 @@
 	let shareEnabled = $state(false);
 	let sharedUrl = $state('');
 
+	let systemPromptsSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let promptsShareEnabled = $state(false);
+	const hasOwnPrompts = $derived(
+		!!$settingsStore.systemPrompts.global.trim() ||
+			Object.keys($settingsStore.systemPrompts.perModel).length > 0
+	);
+
+	let defaultModelSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let defaultModelValue = $state('');
+	let titleSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let titleShareEnabled = $state(false);
+
+	const sharedModelNames = $derived(
+		Array.from(new Set(servers.flatMap((s) => s.sharedModels))).sort((a, b) =>
+			a.localeCompare(b, undefined, { sensitivity: 'base' })
+		)
+	);
+
 	function syncShare() {
 		searchSharing = shareEnabled ? (searchSharing === 'off' ? 'locked' : searchSharing) : 'off';
+		saveSearch();
+	}
+
+	function syncPromptsShare() {
+		systemPromptsSharing = promptsShareEnabled
+			? systemPromptsSharing === 'off'
+				? 'locked'
+				: systemPromptsSharing
+			: 'off';
+		saveSystemPrompts();
+	}
+
+	function onDefaultModelChange() {
+		if (!defaultModelValue) defaultModelSharing = 'off';
+		else if (defaultModelSharing === 'off') defaultModelSharing = 'locked';
+		saveDefaultModel();
+	}
+
+	function syncTitleShare() {
+		titleSharing = titleShareEnabled ? (titleSharing === 'off' ? 'locked' : titleSharing) : 'off';
+		saveTitle();
 	}
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
@@ -67,6 +106,12 @@
 		searchSharing = config.searchSharing ?? 'off';
 		shareEnabled = searchSharing !== 'off';
 		sharedUrl = config.searchUrl ?? '';
+		systemPromptsSharing = config.systemPromptsSharing ?? 'off';
+		promptsShareEnabled = systemPromptsSharing !== 'off';
+		defaultModelSharing = config.defaultModelSharing ?? 'off';
+		defaultModelValue = config.defaultModel ?? '';
+		titleSharing = config.titleSharing ?? 'off';
+		titleShareEnabled = titleSharing !== 'off';
 		servers = (
 			serverList as Pick<
 				SystemServer,
@@ -76,8 +121,9 @@
 		users = userList;
 	}
 
+	// All sharing controls autosave on change (no Save buttons). The search /
+	// prompts / title snapshots mirror the admin's own Chat config.
 	async function saveSearch() {
-		// Share the admin's own search config (configured in the Chat tab).
 		await api('/api/admin/config', 'PUT', {
 			searchSharing,
 			searchUrl: $settingsStore.searchUrl,
@@ -85,10 +131,37 @@
 			searchToken: $settingsStore.searchToken
 		});
 		sharedUrl = $settingsStore.searchUrl;
-		toast.success('Web search sharing saved');
 	}
 
-	onMount(load);
+	async function saveSystemPrompts() {
+		await api('/api/admin/config', 'PUT', {
+			systemPromptsSharing,
+			systemPrompts: $settingsStore.systemPrompts
+		});
+	}
+
+	async function saveDefaultModel() {
+		await api('/api/admin/config', 'PUT', { defaultModelSharing, defaultModel: defaultModelValue });
+	}
+
+	async function saveTitle() {
+		const model = $settingsStore.models.find((m) => m.name === $settingsStore.titleModel);
+		await api('/api/admin/config', 'PUT', {
+			titleSharing,
+			titleEnabled: $settingsStore.generateTitlesWithAI,
+			titleModel: $settingsStore.titleModel ?? '',
+			titleServerId: model?.serverId ?? ''
+		});
+	}
+
+	onMount(async () => {
+		await load();
+		// Refresh the snapshots from the admin's current Chat config on open, so
+		// editing prompts/search/title there stays in sync without a Save step.
+		if (shareEnabled) saveSearch();
+		if (promptsShareEnabled) saveSystemPrompts();
+		if (titleShareEnabled) saveTitle();
+	});
 
 	async function toggleAllowUserKeys() {
 		// `allowUserKeys` is already flipped by the toggle's binding.
@@ -113,11 +186,11 @@
 		server.sharedModels = server.sharedModels.includes(model)
 			? server.sharedModels.filter((m) => m !== model)
 			: [...server.sharedModels, model];
+		saveShared(server);
 	}
 
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
-		toast.success('Shared models updated');
 	}
 
 	async function addUser() {
@@ -165,13 +238,65 @@
 				on:change={syncShare}
 			/>
 			{#if shareEnabled}
-				<select class={input} bind:value={searchSharing}>
+				<select class={input} bind:value={searchSharing} onchange={saveSearch}>
 					<option value="locked">Locked — users can't change it</option>
 					<option value="overridable">Users may override for themselves</option>
 				</select>
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
-			<div><Button on:click={saveSearch}>Save</Button></div>
+		{/if}
+	</section>
+
+	<!-- System prompts sharing -->
+	<section class="flex flex-col gap-2">
+		<P><strong>System prompts sharing</strong></P>
+		<span class="-mt-1 text-xs text-muted">
+			Configure your prompts in the <strong>Chat</strong> tab; here you choose whether they're shared
+			with all users (read-only for them). Per-user prompts will come with groups.
+		</span>
+
+		{#if !hasOwnPrompts}
+			<span class="text-xs text-muted">
+				Nothing configured yet — set up your prompts in the Chat tab to share something.
+			</span>
+		{/if}
+
+		<FieldCheckbox
+			label="Share my system prompts with users"
+			bind:checked={promptsShareEnabled}
+			on:change={syncPromptsShare}
+		/>
+		{#if promptsShareEnabled}
+			<select class={input} bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
+				<option value="locked">Locked — users can't change them</option>
+				<option value="overridable">Users may override for themselves</option>
+			</select>
+		{/if}
+	</section>
+
+	<!-- Title generation sharing -->
+	<section class="flex flex-col gap-2">
+		<P><strong>Title generation sharing</strong></P>
+		<span class="-mt-1 text-xs text-muted">
+			Share your title-generation settings (from the <strong>Chat</strong> tab) with users. The title
+			model works even if it isn't in the shared models list.
+		</span>
+
+		<FieldCheckbox
+			label="Share my title generation with users"
+			bind:checked={titleShareEnabled}
+			on:change={syncTitleShare}
+		/>
+		{#if titleShareEnabled}
+			<select class={input} bind:value={titleSharing} onchange={saveTitle}>
+				<option value="locked">Locked — users can't change it</option>
+				<option value="overridable">Users may override for themselves</option>
+			</select>
+			<span class="text-xs text-muted">
+				Sharing: {$settingsStore.generateTitlesWithAI
+					? `on — ${$settingsStore.titleModel || 'no model'}`
+					: 'off'}
+			</span>
 		{/if}
 	</section>
 
@@ -185,6 +310,24 @@
 
 		{#if servers.length === 0}
 			<span class="text-sm text-muted">No system servers yet — add one in the Servers tab.</span>
+		{/if}
+
+		{#if sharedModelNames.length}
+			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
+				<span class="text-sm font-medium">Default model for users</span>
+				<select class={input} bind:value={defaultModelValue} onchange={onDefaultModelChange}>
+					<option value="">— none —</option>
+					{#each sharedModelNames as name (name)}
+						<option value={name}>{name}</option>
+					{/each}
+				</select>
+				{#if defaultModelValue}
+					<select class={input} bind:value={defaultModelSharing} onchange={saveDefaultModel}>
+						<option value="locked">Locked — users can't change it</option>
+						<option value="overridable">Default — users may change it</option>
+					</select>
+				{/if}
+			</div>
 		{/if}
 
 		{#each servers as server (server.id)}
@@ -221,11 +364,7 @@
 								</label>
 							{/each}
 						</div>
-						<div>
-							<Button on:click={() => saveShared(server)}>
-								Save ({server.sharedModels.length} shared)
-							</Button>
-						</div>
+						<span class="text-xs text-muted">{server.sharedModels.length} shared</span>
 					{:else}
 						<span class="text-xs text-muted">No models found.</span>
 					{/if}

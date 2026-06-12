@@ -12,6 +12,17 @@ export interface Model {
 	modifiedAt?: Date;
 }
 
+/** A per-model system prompt: extends the global prompt or replaces it entirely. */
+export interface ModelSystemPrompt {
+	prompt: string;
+	mode: 'extend' | 'replace';
+}
+
+export interface SystemPrompts {
+	global: string;
+	perModel: Record<string, ModelSystemPrompt>;
+}
+
 export interface Settings {
 	models: Model[];
 	lastUsedModels: Model[];
@@ -25,6 +36,7 @@ export interface Settings {
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
+	systemPrompts: SystemPrompts;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
@@ -51,6 +63,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',
+	systemPrompts: { global: '', perModel: {} },
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

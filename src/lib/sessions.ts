@@ -1,6 +1,7 @@
 import { get } from 'svelte/store';
 
 import type { OllamaOptions } from '$lib/chat/ollama';
+import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { sessionsStore, settingsStore, sortStore } from '$lib/localStorage';
 
 import { getLastUsedModels } from './chat';
@@ -26,6 +27,8 @@ export interface Session {
 	model?: Model;
 	updatedAt?: string;
 	title?: string;
+	/** True once the user edits the system prompt by hand — stops auto-resolution. */
+	systemPromptEdited?: boolean;
 }
 
 export interface Editor {
@@ -74,9 +77,10 @@ export const loadSession = (id: string): Session => {
 	}
 
 	if (!session) {
-		// Use the default model, or fall back to the last used
+		// Use the default model (resolved: an admin-shared default may apply), or
+		// fall back to the last used.
 		const settings = get(settingsStore);
-		const defaultModelName = settings.defaultModel;
+		const defaultModelName = get(chatDefaultsConfig).defaultModel.value || settings.defaultModel;
 		const model = defaultModelName
 			? settings.models?.find((m) => m.name === defaultModelName)
 			: undefined;
