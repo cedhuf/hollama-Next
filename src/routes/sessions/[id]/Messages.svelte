@@ -53,9 +53,12 @@
 		message={{
 			role: 'assistant',
 			content: editor.completion || '...',
-			reasoning: editor.reasoning
+			reasoning: editor.reasoning,
+			webSearch: editor.webSearchInfo
 		}}
 		isStreamingArticle={true}
+		isSearching={editor.isSearching}
+		searchQuery={editor.searchQuery}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={editor.completion}
 	/>

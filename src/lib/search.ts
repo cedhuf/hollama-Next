@@ -108,11 +108,21 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
 	}
 }
 
+export interface SearchContext {
+	context: string;
+	query: string;
+	resultCount: number;
+}
+
 /** Run a search and format the results as a system-context block (always mode). */
-export async function buildSearchContext(query: string): Promise<string | null> {
+export async function buildSearchContext(query: string): Promise<SearchContext | null> {
 	const results = await searchWeb(query);
 	if (!results.length) return null;
 
 	const body = results.map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.snippet}`).join('\n\n');
-	return `Web search results for the user's question (use them to answer accurately and cite sources by their [number] / URL when relevant):\n\n${body}`;
+	return {
+		context: `Web search results for the user's question (use them to answer accurately and cite sources by their [number] / URL when relevant):\n\n${body}`,
+		query,
+		resultCount: results.length
+	};
 }

@@ -232,6 +232,9 @@
 		editor.prompt = '';
 		editor.completion = '';
 		editor.reasoning = '';
+		editor.isSearching = false;
+		editor.searchQuery = undefined;
+		editor.webSearchInfo = undefined;
 
 		const server = $serversStore.find((s) => s.id === session.model?.serverId);
 		if (!server) throw new Error('Server not found');
@@ -241,10 +244,13 @@
 			? [session.systemPrompt, ...messages]
 			: messages;
 
+		let searchInfo: { query: string; resultCount: number } | undefined;
+
 		// Web search: prepend results as context. In "auto" mode the model first
 		// decides whether (and what) to search; otherwise we always search the
 		// latest message.
 		if (searchAvailable && editor.webSearch && session.model) {
+			editor.isSearching = true;
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
 
@@ -271,9 +277,17 @@
 			}
 
 			if (query) {
-				const context = await buildSearchContext(query);
-				if (context) chatMessages = [{ role: 'system', content: context }, ...chatMessages];
+				// In auto mode the query is a concise model-written reformulation worth
+				// showing; in explicit mode it's the raw (often long) user message, so hide it.
+				if ($settingsStore.webSearchAuto) editor.searchQuery = query;
+				const search = await buildSearchContext(query);
+				if (search) {
+					chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
+					searchInfo = { query: search.query, resultCount: search.resultCount };
+					editor.webSearchInfo = searchInfo;
+				}
 			}
+			editor.isSearching = false;
 		}
 
 		// Map messages for the chat request, converting images if necessary
@@ -330,7 +344,8 @@
 			const message: Message = {
 				role: 'assistant',
 				content: editor.completion,
-				reasoning: editor.reasoning
+				reasoning: editor.reasoning,
+				webSearch: searchInfo
 			};
 
 			session.messages = [...session.messages, message];
