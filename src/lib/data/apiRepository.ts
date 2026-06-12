@@ -5,7 +5,7 @@ import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
 import { fetchProviders, providerToServer } from '$lib/providers';
 import type { Session } from '$lib/sessions';
-import type { Settings } from '$lib/settings';
+import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import type { Backup, DataRepository } from './repository';
 
@@ -33,7 +33,9 @@ export class ApiRepository implements DataRepository {
 	}
 
 	async loadSettings(): Promise<Settings | null> {
-		return this.#get<Settings | null>('settings', null);
+		const stored = await this.#get<Partial<Settings> | null>('settings', null);
+		// Backfill any keys added since these settings were last saved (e.g. systemPrompts).
+		return stored ? { ...DEFAULT_SETTINGS, ...stored } : null;
 	}
 	async loadSessions(): Promise<Session[]> {
 		return this.#get<Session[]>('sessions', []);

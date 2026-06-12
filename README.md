@@ -14,13 +14,9 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 ### Features
 
-- Support for **Ollama**, **OpenAI**, **Claude** & **Infomaniak** servers
-- One-click provider presets — pick a provider, paste an API key
+- Support for Ollama and OpenAI compatible servers
 - Multi-server support
-- **Web search** — built-in internet search ([degoog](https://github.com/degoog-org/degoog) / SearXNG), toggled per-message from the prompt, with an optional _let the model decide when to search_ auto mode and a live _searching… / N results found_ status. Configurable from the GUI (or locked instance-wide via env), and admin-shareable in server mode
 - Attach **knowledge** & **images** from the same composer — on the home screen and inside any session
-- AI-generated session titles (with a dedicated, cheap model)
-- Full backup & restore of all your data
 - Text & vision models
 - Large prompt fields
 - Support for reasoning models
@@ -31,16 +27,27 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 - Copy code snippets, messages or entire sessions
 - Edit & retry messages
 - Stores data locally on your browser
-- Import & export stored data
-- Responsive layout
-- Light & dark themes
 - Multi-language interface
 - Download [Ollama models](https://ollama.ai/models) directly from the UI
+
+  #### New
+    - AI-generated session titles (with a dedicated, cheap model)
+    - **Web search** — built-in internet search ([degoog](https://github.com/degoog-org/degoog) / SearXNG), toggled per-message from the prompt, with an optional _let the model decide when to search_ auto mode and a live _searching… / N results found_ status. Configurable from the GUI (or locked instance-wide via env), and admin-shareable in server mode
+    - **System prompts** — global, per-model and per-conversation, editable from a conversation modal. In server mode an admin can share their prompts, default model and title settings (locked or overridable)
+    - One-click provider presets — pick a provider, paste an API key
+
+  #### Improved
+    - Responsive layout
+    - Light & dark original themes. More themes added (Dracula, Catpuccine)
+    - Import & export stored data, full backup & restore of all your data
 
 ### Roadmap
 
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
 - [X] Auth.js & multi-user support
+- [ ] **Enforce sharing server-side** — today "shared models" and "locked" prompts/search are GUI-level only, not a real security boundary (a technical user can still call any model on a system server or send their own system prompt). Enforce model allow-lists and locked prompts in the proxy.
+- [ ] User groups — per-group default prompts / models
+- [ ] Finish the Svelte 5 migration (drop the remaining legacy `on:` event directives)
 - [ ] Testing & polish
 
 > For everything already done in this fork, see [CHANGES.md](CHANGES.md).

@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 
+import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
@@ -19,10 +20,17 @@ const TITLE_SYSTEM_PROMPT =
  */
 export async function generateTitle(firstUserMessage: string): Promise<string | null> {
 	const settings = get(settingsStore);
-	const modelName = settings.titleModel;
+	const titleConfig = get(chatDefaultsConfig).title;
+	const modelName = titleConfig.titleModel;
 	if (!modelName) return null;
 
-	const model = settings.models.find((m) => m.name === modelName);
+	// The model may live on a system server the user can't list (an admin shared
+	// title model) — the proxy authorizes by server, so we use the shared serverId.
+	const model =
+		settings.models.find((m) => m.name === modelName) ??
+		(titleConfig.titleServerId
+			? { name: modelName, serverId: titleConfig.titleServerId }
+			: undefined);
 	if (!model) return null;
 
 	const server = get(serversStore).find((s) => s.id === model.serverId);

@@ -17,7 +17,7 @@ import type { AppData, Backup, DataRepository } from './repository';
 export class LocalStorageRepository implements DataRepository {
 	hydrate(): AppData {
 		return {
-			settings: this.#read(StorageKey.HollamaNextPreferences, DEFAULT_SETTINGS),
+			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.HollamaNextPreferences, {}) },
 			servers: this.#read<Server[]>(StorageKey.HollamaNextServers, []),
 			sessions: this.#read<Session[]>(StorageKey.HollamaNextSessions, []),
 			knowledge: this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, [])
@@ -25,7 +25,9 @@ export class LocalStorageRepository implements DataRepository {
 	}
 
 	async loadSettings(): Promise<Settings | null> {
-		return this.#read<Settings | null>(StorageKey.HollamaNextPreferences, null);
+		const stored = this.#read<Partial<Settings> | null>(StorageKey.HollamaNextPreferences, null);
+		// Backfill any keys added since these settings were last saved (e.g. systemPrompts).
+		return stored ? { ...DEFAULT_SETTINGS, ...stored } : null;
 	}
 	async loadServers(): Promise<Server[]> {
 		return this.#read<Server[]>(StorageKey.HollamaNextServers, []);

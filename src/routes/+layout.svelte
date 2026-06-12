@@ -14,6 +14,7 @@
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import {
@@ -27,6 +28,7 @@
 	import { loadServerSearch } from '$lib/search';
 	import { currentUser } from '$lib/stores/auth';
 	import { onboardingOpen } from '$lib/stores/modal';
+	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates } from '$lib/updates';
 
 	import type { LayoutData } from './$types';
@@ -96,6 +98,8 @@
 		// Fill the stores from the repository (no-op in local mode, network load in server mode).
 		await hydrateStores();
 		await loadServerSearch();
+		await loadServerSystemPrompts();
+		await loadServerChatDefaults();
 		booted = true;
 
 		// Language
