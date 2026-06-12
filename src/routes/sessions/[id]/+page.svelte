@@ -250,44 +250,70 @@
 		// decides whether (and what) to search; otherwise we always search the
 		// latest message.
 		if (searchAvailable && editor.webSearch && session.model) {
-			editor.isSearching = true;
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
 
+			// In auto mode the model first decides whether (and what) to search. This
+			// phase is transparent (no indicator): if it replies NONE we skip the
+			// search entirely and nothing is shown.
 			if (query && $settingsStore.webSearchAuto) {
 				const decider =
 					server.connectionType === ConnectionType.Ollama
 						? new OllamaStrategy(server)
 						: new OpenAIStrategy(server);
-				const decision = (
-					await decider.complete?.({
-						model: session.model.name,
-						options: session.options,
-						messages: [
-							...chatMessages.map((m) => ({ role: m.role, content: m.content })),
-							{
-								role: 'system' as const,
-								content:
-									"Decide if answering the user's last message needs current web information. If yes, reply with ONLY a concise web search query. If not, reply with exactly NONE."
-							}
-						]
-					})
-				)?.trim();
-				query = decision && !/^none\b/i.test(decision) ? decision : null;
+
+				// A focused, deterministic router prompt with only the recent turns
+				// (NOT the session system prompt, which biases the model toward
+				// chatting instead of deciding). Temperature 0 makes it consistent.
+				const routerInstruction =
+					"You are a web-search router. Decide whether answering the user's LAST message needs a live web lookup right now.\n" +
+					"Reply with ONLY a short search query (a few keywords, in the user's language, no quotes, no explanation) when the answer depends on:\n" +
+					'- current, real-time or time-sensitive information (news, weather, prices, schedules, scores, "today"/"now"/"latest"/"aujourd\'hui"/"actualités"…),\n' +
+					'- facts that may have changed after your training cutoff,\n' +
+					'- or the user explicitly asks to search the web / look something up.\n' +
+					'Otherwise reply with exactly: NONE\n' +
+					'Never answer the question yourself. Output only the query, or NONE.';
+
+				const recentTurns = messages
+					.filter((m) => m.role === 'user' || m.role === 'assistant')
+					.slice(-6)
+					.map((m) => ({ role: m.role, content: m.content }));
+
+				try {
+					let decision = (
+						await decider.complete?.({
+							model: session.model.name,
+							options: { temperature: 0 },
+							messages: [{ role: 'system' as const, content: routerInstruction }, ...recentTurns]
+						})
+					)?.trim();
+					// Keep only the first line and strip any surrounding quotes.
+					if (decision) decision = decision.split('\n')[0].trim().replace(/^["']+|["']+$/g, '');
+					query = decision && !/^none\b/i.test(decision) ? decision : null;
+				} catch {
+					// Router failed — fall back to searching the raw user message.
+				}
 			}
 
 			if (query) {
 				// In auto mode the query is a concise model-written reformulation worth
 				// showing; in explicit mode it's the raw (often long) user message, so hide it.
 				if ($settingsStore.webSearchAuto) editor.searchQuery = query;
-				const search = await buildSearchContext(query);
-				if (search) {
-					chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
-					searchInfo = { query: search.query, resultCount: search.resultCount };
-					editor.webSearchInfo = searchInfo;
+				editor.isSearching = true;
+				try {
+					const search = await buildSearchContext(query);
+					if (search) {
+						chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
+						searchInfo = { query: search.query, resultCount: search.resultCount };
+					} else {
+						searchInfo = { query, resultCount: 0 };
+					}
+				} catch {
+					searchInfo = { query, resultCount: 0 };
 				}
+				editor.isSearching = false;
+				editor.webSearchInfo = searchInfo;
 			}
-			editor.isSearching = false;
 		}
 
 		// Map messages for the chat request, converting images if necessary

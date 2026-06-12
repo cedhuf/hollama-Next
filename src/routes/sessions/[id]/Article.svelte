@@ -152,8 +152,12 @@
 					</span>
 				{:else if message.webSearch}
 					<span title={`Query: “${message.webSearch.query}”`}>
-						{message.webSearch.resultCount}
-						{message.webSearch.resultCount === 1 ? 'result' : 'results'} found
+						{#if message.webSearch.resultCount === 0}
+							No web results found
+						{:else}
+							{message.webSearch.resultCount}
+							{message.webSearch.resultCount === 1 ? 'result' : 'results'} found
+						{/if}
 					</span>
 				{/if}
 			</div>
