@@ -28,9 +28,30 @@
 		border-color: hsl(var(--hsl-shade-5));
 	}
 
+	html,
+	body {
+		/* Keep the app pinned to the viewport on mobile: no rubber-band scroll of the
+		   whole page and no stray horizontal overflow pushing content off-screen. */
+		overflow-x: hidden;
+		overscroll-behavior: none;
+	}
+
 	body {
 		color: hsl(var(--hsl-text-shade-1));
+		/* Fill the area behind the iOS status bar / home indicator with the app shell
+		   colour so the notch strip matches the rest of the interface. */
+		background-color: hsl(var(--hsl-shade-2));
 	}
+}
+
+/* iOS notch / home-indicator insets. They resolve to 0 on devices without a
+   safe area, so they're harmless on desktop. */
+@utility safe-top {
+	padding-top: env(safe-area-inset-top);
+}
+
+@utility safe-bottom {
+	padding-bottom: env(safe-area-inset-bottom);
 }
 
 @custom-variant dark (&:where([data-color-theme='dark']));

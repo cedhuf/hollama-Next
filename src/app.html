@@ -5,7 +5,20 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<link rel="stylesheet" href="/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/fonts/jetbrains-mono/jetbrains-mono.css" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- Lock the viewport to the device width, disable pinch/tap zoom, and let the
+		     page paint under the notch / home indicator (safe-area-inset-* become usable). -->
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+		/>
+		<!-- Installable PWA + iOS standalone (fullscreen, status bar drawn over the app). -->
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="apple-touch-icon" href="/favicon.png" />
+		<meta name="theme-color" content="#2e2e2e" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Hollama" />
 		<title>Hollama Next</title>
 		%sveltekit.head%
 	</head>
@@ -21,6 +34,10 @@
 		else theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 		if (themeStyle) document.documentElement.setAttribute('data-theme-style', themeStyle);
 		document.documentElement.setAttribute('data-color-theme', theme);
+		// Tint the browser/OS chrome (Android address bar, iOS Safari) to match the
+		// app background so the notch strip blends in. Refined live after hydration.
+		const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+		if (themeColorMeta) themeColorMeta.content = theme === 'dark' ? '#2e2e2e' : '#ebebeb';
 	</script>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
