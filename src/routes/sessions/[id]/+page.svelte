@@ -7,7 +7,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { ASK_INSTRUCTION, parseAskBlock } from '$lib/askChoice';
+	import { ASK_INSTRUCTION, askChoicesToText, parseAskBlock } from '$lib/askChoice';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
@@ -344,7 +344,13 @@
 				const recentTurns = messages
 					.filter((m) => m.role === 'user' || m.role === 'assistant')
 					.slice(-6)
-					.map((m) => ({ role: m.role, content: m.content }));
+					.map((m) => ({
+						role: m.role,
+						content:
+							m.role === 'assistant' && !m.content?.trim() && m.choices
+								? askChoicesToText(m.choices)
+								: m.content
+					}));
 
 				try {
 					let decision = (
@@ -391,8 +397,15 @@
 		const chatMessagesForRequest = chatMessages.map((msg) => {
 			// Ollama expects images as base64 strings without filename
 			const images = msg.images?.map((img) => img.data);
+			// An assistant turn that was only an <ask> block has empty content; some
+			// providers (Mistral) reject that, so send the questions as text.
+			const content =
+				msg.role === 'assistant' && !msg.content?.trim() && msg.choices
+					? askChoicesToText(msg.choices)
+					: msg.content;
 			return {
 				...msg,
+				content,
 				images // Override images with just the data
 			};
 		});
@@ -588,7 +601,7 @@
 	{:else}
 		<div
 			class="session__history base-fieldset-container overflow-scrollbar flex-grow {persona
-				? 'pt-20'
+				? 'pt-[var(--app-header-h)]'
 				: ''}"
 			bind:this={messagesWindow}
 		>

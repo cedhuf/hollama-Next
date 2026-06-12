@@ -97,6 +97,16 @@ export function stripAskBlock(raw: string): string {
 }
 
 /**
+ * A plain-text rendering of the questions, used as the assistant turn's content
+ * when it emitted only the <ask> block. Some providers (e.g. Mistral) reject an
+ * assistant message with empty content, and this also keeps the model's own
+ * context about what it just asked.
+ */
+export function askChoicesToText(choices: AskChoices): string {
+	return choices.questions.map((q) => q.question).join('\n');
+}
+
+/**
  * Build the self-describing `user` message sent after the user picks. Including
  * the question text keeps the choice unambiguous for the model even if its own
  * prior turn carried no visible text.
