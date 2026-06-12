@@ -17,14 +17,17 @@
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
+	import { buildDefaultPersonas } from '$lib/defaultPersonas';
 	import {
 		hydrateStores,
 		knowledgeStore,
+		personasStore,
 		serversStore,
 		sessionsStore,
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
+	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentUser } from '$lib/stores/auth';
 	import { onboardingOpen } from '$lib/stores/modal';
@@ -100,6 +103,17 @@
 		await loadServerSearch();
 		await loadServerSystemPrompts();
 		await loadServerChatDefaults();
+		await loadServerPersonas();
+
+		// Seed the built-in starter personas once, for admins (and local-mode users,
+		// who are always admin of their own data).
+		const isAdmin = env.PUBLIC_MODE === 'server' ? data.user?.role === 'admin' : true;
+		if (isAdmin && !$settingsStore.defaultPersonasSeeded) {
+			const model = $settingsStore.defaultModel || $settingsStore.models[0]?.name || '';
+			personasStore.set([...($personasStore ?? []), ...buildDefaultPersonas(model)]);
+			$settingsStore.defaultPersonasSeeded = true;
+		}
+
 		booted = true;
 
 		// Language

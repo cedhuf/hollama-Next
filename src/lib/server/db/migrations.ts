@@ -69,6 +69,18 @@ const migrations: Migration[] = [
 				value TEXT NOT NULL
 			);
 		`
+	},
+	{
+		version: 2,
+		up: `
+			CREATE TABLE personas (
+				id         TEXT PRIMARY KEY,
+				user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				data       TEXT NOT NULL,                 -- JSON Persona
+				updated_at TEXT NOT NULL
+			);
+			CREATE INDEX idx_personas_user ON personas(user_id);
+		`
 	}
 ];
 

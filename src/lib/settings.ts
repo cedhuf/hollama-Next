@@ -37,6 +37,17 @@ export interface Settings {
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
 	systemPrompts: SystemPrompts;
+	/** Set once the built-in starter personas have been seeded (admins / local mode). */
+	defaultPersonasSeeded: boolean;
+	// Home screen layout toggles
+	homeShowHeader: boolean;
+	homeShowSuggestions: boolean;
+	homeShowRecentPersonas: boolean;
+	homeRecentPersonasCount: number;
+	homeShowRecentSessions: boolean;
+	homeRecentSessionsCount: number;
+	/** Show personas you've talked to as pinned launchers in the sidebar. */
+	showPinnedPersonas: boolean;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
@@ -64,6 +75,14 @@ export const DEFAULT_SETTINGS: Settings = {
 	searchBackend: 'degoog',
 	searchToken: '',
 	systemPrompts: { global: '', perModel: {} },
+	defaultPersonasSeeded: false,
+	homeShowHeader: true,
+	homeShowSuggestions: true,
+	homeShowRecentPersonas: true,
+	homeRecentPersonasCount: 3,
+	homeShowRecentSessions: true,
+	homeRecentSessionsCount: 4,
+	showPinnedPersonas: true,
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

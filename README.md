@@ -4,10 +4,26 @@
 > **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
 >
 > I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, you can check the original project instead or other forks, no hard feelings — just being transparent.
+>
+> Recent work has focused on the **server / multi-user** mode. The **standalone (local)** mode may have temporary inconsistencies that still need a verification pass.
 
 A (less) minimal LLM chat app that runs _entirely_ in your browser.
 
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
+
+---
+
+<div align="center">
+
+### ✨ Introducing Personas
+
+**Give your AI a face, a voice and a name.**
+
+Build characters — a coach, a tutor, a companion — each with its own avatar, system prompt, model, greeting and knowledge, then chat with them as one ongoing relationship. Import existing ones (OpenWebUI-compatible), pin your favourites to the sidebar, and in server mode share them across your team.
+
+</div>
+
+---
 
 > [!IMPORTANT]
 > Feel free to participate ! There are no bad intervention. Just one rule to let the project easy to manage : issues are for bug only. If you want ta ask for a feature or anything else, please use the discussion. If it is community validated, then it will find a way to issue. Thanks !
@@ -31,22 +47,27 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 - Download [Ollama models](https://ollama.ai/models) directly from the UI
 
   #### New
-    - AI-generated session titles (with a dedicated, cheap model)
-    - **Web search** — built-in internet search ([degoog](https://github.com/degoog-org/degoog) / SearXNG), toggled per-message from the prompt, with an optional _let the model decide when to search_ auto mode and a live _searching… / N results found_ status. Configurable from the GUI (or locked instance-wide via env), and admin-shareable in server mode
-    - **System prompts** — global, per-model and per-conversation, editable from a conversation modal. In server mode an admin can share their prompts, default model and title settings (locked or overridable)
-    - One-click provider presets — pick a provider, paste an API key
+  - AI-generated session titles (with a dedicated, cheap model)
+  - **Web search** — built-in internet search ([degoog](https://github.com/degoog-org/degoog) / SearXNG), toggled per-message from the prompt, with an optional _let the model decide when to search_ auto mode and a live _searching… / N results found_ status. Configurable from the GUI (or locked instance-wide via env), and admin-shareable in server mode
+  - **System prompts** — global, per-model and per-conversation, editable from a conversation modal. In server mode an admin can share their prompts, default model and title settings (locked or overridable)
+  - **Personas & Library** — reusable characters (avatar, system prompt, model, greeting) created in a new **Library**, pinned to the sidebar and chatted with as one ongoing conversation. Import personas from a file (including OpenWebUI model exports). In server mode an admin can share personas for users to install, and choose whether users may create their own; three starter personas ship by default
+  - One-click provider presets — pick a provider, paste an API key
 
   #### Improved
-    - Responsive layout
-    - Light & dark original themes. More themes added (Dracula, Catpuccine)
-    - Import & export stored data, full backup & restore of all your data
+  - Responsive layout
+  - Light & dark original themes. More themes added (Dracula, Catpuccine)
+  - Import & export stored data, full backup & restore of all your data
 
 ### Roadmap
 
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
-- [X] Auth.js & multi-user support
+- [x] Auth.js & multi-user support
 - [ ] **Enforce sharing server-side** — today "shared models" and "locked" prompts/search are GUI-level only, not a real security boundary (a technical user can still call any model on a system server or send their own system prompt). Enforce model allow-lists and locked prompts in the proxy.
 - [ ] User groups — per-group default prompts / models
+- [ ] **Protect locked prompts from personas** — a persona's system prompt currently replaces the global one, so a modifiable shared persona can override a protective (e.g. child-safety) instance prompt. Enforce that locked instance prompts always apply, even under a persona
+- [ ] **Reusable playbooks** — write step-by-step instructions in Markdown once and reuse them in any conversation (a "how-to" the model follows, separate from a persona's system prompt)
+- [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording
+- [ ] **Revisit translations** — recent features ship English-only strings; many UI strings still need translating across all locales
 - [ ] Finish the Svelte 5 migration (drop the remaining legacy `on:` event directives)
 - [ ] Testing & polish
 
@@ -90,10 +111,13 @@ OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
 ```
 
 **Running modes** — Hollama runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
+
 > [!NOTE]
 > Why ?
+>
 > - This allow device synchronization, which was not possible before.
 > - This also allow multiple user instance.
+
 ---
 
 - **`local`** (default) — single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
@@ -105,15 +129,15 @@ Set `PUBLIC_MODE=server` to enable server mode. All server-mode state lives unde
 
 _Common (both modes):_
 
-| Variable                    | Default     | Description                                                                                         |
-| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------- |
-| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                            |
-| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                     |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = any (lock down on public instances) |
-| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                      |
-| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                      |
+| Variable                    | Default     | Description                                                                                                                                                  |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
+| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
+| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = any (lock down on public instances)                                                          |
+| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
+| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |
 | `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set, it's locked instance-wide; if unset, it's configurable from the GUI |
-| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                               |
+| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
 
 _Server mode (`PUBLIC_MODE=server`):_
 

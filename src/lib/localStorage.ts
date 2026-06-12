@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
@@ -75,7 +76,8 @@ const seed = repository.hydrate?.() ?? {
 	settings: DEFAULT_SETTINGS,
 	servers: [] as Server[],
 	sessions: [] as Session[],
-	knowledge: [] as Knowledge[]
+	knowledge: [] as Knowledge[],
+	personas: [] as Persona[]
 };
 
 export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SETTINGS, (v) =>
@@ -90,6 +92,9 @@ export const sessionsStore = persistedStore<Session[]>(seed.sessions, [], (v) =>
 export const knowledgeStore = persistedStore<Knowledge[]>(seed.knowledge, [], (v) =>
 	repository.saveKnowledge(v)
 );
+export const personasStore = persistedStore<Persona[]>(seed.personas, [], (v) =>
+	repository.savePersonas(v)
+);
 
 /**
  * Fill the stores from the repository at boot. A no-op in local mode (the seed
@@ -100,17 +105,19 @@ export async function hydrateStores(): Promise<void> {
 	if (repository.hydrate) return; // local mode: already seeded synchronously, ready
 
 	try {
-		const [settings, servers, sessions, knowledge] = await Promise.all([
+		const [settings, servers, sessions, knowledge, personas] = await Promise.all([
 			repository.loadSettings(),
 			repository.loadServers(),
 			repository.loadSessions(),
-			repository.loadKnowledge()
+			repository.loadKnowledge(),
+			repository.loadPersonas()
 		]);
 
 		if (settings) settingsStore.setQuiet(settings);
 		serversStore.setQuiet(servers);
 		sessionsStore.setQuiet(sessions);
 		knowledgeStore.setQuiet(knowledge);
+		personasStore.setQuiet(personas);
 	} finally {
 		// Only now may writes reach the server — the stores hold real data.
 		persistenceReady = true;

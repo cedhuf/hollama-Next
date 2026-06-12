@@ -29,6 +29,8 @@ export interface Session {
 	title?: string;
 	/** True once the user edits the system prompt by hand — stops auto-resolution. */
 	systemPromptEdited?: boolean;
+	/** Set when this conversation belongs to a persona (Library). */
+	personaId?: string;
 }
 
 export interface Editor {

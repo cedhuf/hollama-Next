@@ -18,8 +18,9 @@
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { ConnectionType } from '$lib/connections';
-	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 	import {
 		imagesPayload,
 		knowledgeContextMessage,
@@ -70,6 +71,11 @@
 	let modelName: string | undefined = $state();
 	let userScrolledUp = $state(false);
 	let shouldConfirmDeletion = $state(false);
+
+	// The persona this conversation belongs to, if any (drives the header identity).
+	const persona = $derived(
+		session.personaId ? $personasStore.find((p) => p.id === session.personaId) : undefined
+	);
 
 	$effect(() => {
 		if (data.id !== session.id) handleSessionChange();
@@ -145,6 +151,17 @@
 		editor.view = 'messages';
 		editor.isNewSession = !session?.messages?.length;
 		scrollToBottom();
+
+		// A persona conversation carries its own web-search preference.
+		const boundPersona = session.personaId
+			? get(personasStore).find((p) => p.id === session.personaId)
+			: null;
+		if (boundPersona) {
+			editor.webSearch = searchAvailable && !!boundPersona.webSearch;
+			// Heal the model if it wasn't resolvable when the conversation was created
+			// (e.g. an imported persona whose model was mapped afterwards).
+			if (!session.model && boundPersona.modelName) modelName = boundPersona.modelName;
+		}
 
 		// A message composed on the home page (prompt + model + attachments) is
 		// handed off via the pendingMessage store, then submitted here.
@@ -509,27 +526,36 @@
 	}
 </script>
 
-<div class="session flex h-full w-full flex-col overflow-hidden">
+<div class="session relative flex h-full w-full flex-col overflow-hidden">
 	<Head
 		title={[editor.isNewSession ? $LL.newSession() : getSessionTitle(session), $LL.sessions()]}
 	/>
-	<Header confirmDeletion={shouldConfirmDeletion}>
+	<Header confirmDeletion={shouldConfirmDeletion} floating={!!persona}>
 		{#snippet headline()}
-			<p data-testid="session-id" class="font-bold leading-none">
-				{$LL.session()}
-				<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>
-			</p>
-			<div class="flex items-center gap-1.5 text-xs text-muted">
-				{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
-				<span class="text-shade-5">•</span>
-				<ModelPicker bind:value={modelName} />
-			</div>
+			{#if persona}
+				<div class="flex items-center gap-3" title={persona.tagline}>
+					<PersonaAvatar {persona} size={48} />
+					<p class="text-base font-bold leading-none text-active">{persona.name}</p>
+				</div>
+			{:else}
+				<p data-testid="session-id" class="font-bold leading-none">
+					{$LL.session()}
+					<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>
+				</p>
+				<div class="flex items-center gap-1.5 text-xs text-muted">
+					{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
+					<span class="text-shade-5">•</span>
+					<ModelPicker bind:value={modelName} />
+				</div>
+			{/if}
 		{/snippet}
 
 		{#snippet nav()}
-			<Button variant="icon" onclick={() => (sessionModalOpen = true)} title={$LL.session()}>
-				<Settings2 class="base-icon" />
-			</Button>
+			{#if !persona}
+				<Button variant="icon" onclick={() => (sessionModalOpen = true)} title={$LL.session()}>
+					<Settings2 class="base-icon" />
+				</Button>
+			{/if}
 			{#if !editor.isNewSession}
 				{#if !shouldConfirmDeletion}
 					<ButtonCopy content={JSON.stringify(session.messages, null, 2)} />
@@ -543,10 +569,12 @@
 		<Controls bind:session />
 	{:else}
 		<div
-			class="session__history base-fieldset-container overflow-scrollbar flex-grow"
+			class="session__history base-fieldset-container overflow-scrollbar flex-grow {persona
+				? 'pt-20'
+				: ''}"
 			bind:this={messagesWindow}
 		>
-			<Messages bind:session bind:editor {handleRetry} />
+			<Messages bind:session bind:editor {handleRetry} assistantLabel={persona?.name} />
 		</div>
 	{/if}
 

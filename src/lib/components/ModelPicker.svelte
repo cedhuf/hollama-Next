@@ -9,9 +9,10 @@
 	interface Props {
 		value?: string;
 		variant?: 'default' | 'hero';
+		onSelect?: (name: string) => void;
 	}
 
-	let { value = $bindable(), variant = 'default' }: Props = $props();
+	let { value = $bindable(), variant = 'default', onSelect }: Props = $props();
 
 	let open = $state(false);
 	let query = $state('');
@@ -56,6 +57,7 @@
 		value = name;
 		open = false;
 		query = '';
+		onSelect?.(name);
 	}
 
 	function toggle() {

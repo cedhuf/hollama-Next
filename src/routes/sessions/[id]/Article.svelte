@@ -23,6 +23,7 @@
 		isStreamingArticle = false,
 		isSearching = false,
 		searchQuery = undefined,
+		assistantLabel = undefined,
 		currentRawReasoning,
 		currentRawCompletion
 	}: {
@@ -34,6 +35,8 @@
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
 		searchQuery?: string;
+		/** Label for assistant bubbles — the persona's name when in a persona chat. */
+		assistantLabel?: string;
 		currentRawReasoning?: string;
 		currentRawCompletion?: string;
 	} = $props();
@@ -113,7 +116,7 @@
 					{#if isUserRole}
 						{$LL.you()}
 					{:else if message.role === 'assistant'}
-						{$LL.assistant()}
+						{assistantLabel || $LL.assistant()}
 					{:else}
 						{$LL.system()}
 					{/if}

@@ -3,13 +3,14 @@ import { toast } from 'svelte-sonner';
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import type { Persona } from '$lib/personas';
 import { fetchProviders, providerToServer } from '$lib/providers';
 import type { Session } from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import type { Backup, DataRepository } from './repository';
 
-type Collection = 'sessions' | 'knowledge' | 'settings';
+type Collection = 'sessions' | 'knowledge' | 'personas' | 'settings';
 
 const DEBOUNCE_MS = 800;
 
@@ -43,6 +44,9 @@ export class ApiRepository implements DataRepository {
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#get<Knowledge[]>('knowledge', []);
 	}
+	async loadPersonas(): Promise<Persona[]> {
+		return this.#get<Persona[]>('personas', []);
+	}
 	async loadServers(): Promise<Server[]> {
 		const { servers } = await fetchProviders(true);
 		return servers.map(providerToServer);
@@ -56,6 +60,9 @@ export class ApiRepository implements DataRepository {
 	}
 	async saveKnowledge(value: Knowledge[]): Promise<void> {
 		this.#schedule('knowledge', value);
+	}
+	async savePersonas(value: Persona[]): Promise<void> {
+		this.#schedule('personas', value);
 	}
 	async saveServers(): Promise<void> {
 		// TODO (step 5): persist a user's personal servers.

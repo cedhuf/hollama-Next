@@ -18,6 +18,7 @@
 	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
 	import {
 		knowledgeStore,
+		personasStore,
 		serversStore,
 		sessionsStore,
 		settingsStore,
@@ -30,7 +31,8 @@
 		[StorageKey.HollamaNextPreferences]: settingsStore,
 		[StorageKey.HollamaNextServers]: serversStore,
 		[StorageKey.HollamaNextSessions]: sessionsStore,
-		[StorageKey.HollamaNextKnowledge]: knowledgeStore
+		[StorageKey.HollamaNextKnowledge]: knowledgeStore,
+		[StorageKey.HollamaNextPersonas]: personasStore
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -55,7 +57,8 @@
 		{ storageKey: StorageKey.HollamaNextServers, fileName: `hollama-servers.json` },
 		{ storageKey: StorageKey.HollamaNextPreferences, fileName: `hollama-preferences.json` },
 		{ storageKey: StorageKey.HollamaNextSessions, fileName: `hollama-sessions.json` },
-		{ storageKey: StorageKey.HollamaNextKnowledge, fileName: `hollama-knowledge.json` }
+		{ storageKey: StorageKey.HollamaNextKnowledge, fileName: `hollama-knowledge.json` },
+		{ storageKey: StorageKey.HollamaNextPersonas, fileName: `hollama-personas.json` }
 	];
 
 	// The value a category resets to when deleted.
@@ -63,7 +66,8 @@
 		[StorageKey.HollamaNextPreferences]: DEFAULT_SETTINGS,
 		[StorageKey.HollamaNextServers]: [],
 		[StorageKey.HollamaNextSessions]: [],
-		[StorageKey.HollamaNextKnowledge]: []
+		[StorageKey.HollamaNextKnowledge]: [],
+		[StorageKey.HollamaNextPersonas]: []
 	};
 
 	function exportData(storageKey: StorageKey, fileName: string) {
@@ -135,7 +139,8 @@
 			[StorageKey.HollamaNextPreferences]: $LL.areYouSureYouWantToDeleteAllPreferences(),
 			[StorageKey.HollamaNextServers]: $LL.areYouSureYouWantToDeleteAllServers(),
 			[StorageKey.HollamaNextSessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
-			[StorageKey.HollamaNextKnowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge()
+			[StorageKey.HollamaNextKnowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
+			[StorageKey.HollamaNextPersonas]: 'Are you sure you want to delete all personas?'
 		};
 
 		if (confirm(confirmMessages[storageKey])) {

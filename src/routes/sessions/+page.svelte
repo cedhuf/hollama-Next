@@ -15,7 +15,9 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
-	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import { getSessionTitle } from '$lib/sessions';
@@ -79,7 +81,17 @@
 
 	const activeSuggestions = $derived(openCategory ? suggestionsByCategory[openCategory] || [] : []);
 
-	const recentSessions = $derived(($sessionsStore ?? []).slice(0, 5));
+	const recentSessions = $derived(
+		($sessionsStore ?? []).slice(0, $settingsStore.homeRecentSessionsCount)
+	);
+	const recentPersonas = $derived(
+		$settingsStore.homeShowRecentPersonas
+			? conversedPersonas($personasStore, $sessionsStore ?? []).slice(
+					0,
+					$settingsStore.homeRecentPersonasCount
+				)
+			: []
+	);
 
 	function toggleCategory(id: string) {
 		openCategory = openCategory === id ? null : id;
@@ -106,12 +118,14 @@
 <div class="flex h-full flex-col">
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
-			<div class="mb-8 text-center">
-				<h1 class="text-2xl font-semibold tracking-tight text-active">
-					{greeting}
-				</h1>
-				<p class="mt-1.5 text-muted">{$LL.howCanIHelp()}</p>
-			</div>
+			{#if $settingsStore.homeShowHeader}
+				<div class="mb-8 text-center">
+					<h1 class="text-2xl font-semibold tracking-tight text-active">
+						{greeting}
+					</h1>
+					<p class="mt-1.5 text-muted">{$LL.howCanIHelp()}</p>
+				</div>
+			{/if}
 
 			<div class="mb-8 w-full">
 				<div class="mb-3 flex items-center justify-center">
@@ -141,59 +155,76 @@
 				</div>
 			</div>
 
-			<div class="w-full">
-				<div class="flex flex-wrap justify-center gap-2">
-					{#each categories as category (category.id)}
+			{#if $settingsStore.homeShowSuggestions}
+				<div class="w-full">
+					<div class="flex flex-wrap justify-center gap-2">
+						{#each categories as category (category.id)}
+							<button
+								type="button"
+								onclick={() => toggleCategory(category.id)}
+								class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {openCategory ===
+								category.id
+									? 'bg-accent/10 text-active font-medium'
+									: 'text-muted hover:text-active hover:bg-shade-2'}"
+							>
+								<category.icon class="h-3.5 w-3.5" />
+								{category.label}
+							</button>
+						{/each}
+					</div>
+
+					{#if openCategory && activeSuggestions.length > 0}
+						{@const currentCategory = categories.find((c) => c.id === openCategory)}
+						<div class="mt-3 rounded-xl border border-shade-3 bg-shade-0 overflow-hidden">
+							<div class="flex items-center gap-2 px-3 py-2 border-b border-shade-3">
+								{#if currentCategory}
+									<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
+								{/if}
+								<span class="text-xs font-medium text-muted flex-1">{openCategory}</span>
+								<button
+									type="button"
+									onclick={() => (openCategory = null)}
+									class="text-muted hover:text-active transition-colors"
+									aria-label="Close suggestions"
+								>
+									<X class="h-3.5 w-3.5" />
+								</button>
+							</div>
+							<div class="divide-y divide-shade-3">
+								{#each activeSuggestions as suggestion}
+									<button
+										type="button"
+										onclick={() => submit(suggestion)}
+										class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
+									>
+										<span class="flex-1">{suggestion}</span>
+										<ArrowRight
+											class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
+										/>
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+			{/if}
+
+			{#if recentPersonas.length > 0}
+				<div class="mt-10 flex w-full justify-center gap-4">
+					{#each recentPersonas as persona (persona.id)}
 						<button
 							type="button"
-							onclick={() => toggleCategory(category.id)}
-							class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors {openCategory ===
-							category.id
-								? 'bg-accent/10 text-active font-medium'
-								: 'text-muted hover:text-active hover:bg-shade-2'}"
+							onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+							class="transition-transform hover:scale-105"
+							title={`${persona.name} — ${persona.tagline}`}
 						>
-							<category.icon class="h-3.5 w-3.5" />
-							{category.label}
+							<PersonaAvatar {persona} size={48} />
 						</button>
 					{/each}
 				</div>
+			{/if}
 
-				{#if openCategory && activeSuggestions.length > 0}
-					{@const currentCategory = categories.find((c) => c.id === openCategory)}
-					<div class="mt-3 rounded-xl border border-shade-3 bg-shade-0 overflow-hidden">
-						<div class="flex items-center gap-2 px-3 py-2 border-b border-shade-3">
-							{#if currentCategory}
-								<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
-							{/if}
-							<span class="text-xs font-medium text-muted flex-1">{openCategory}</span>
-							<button
-								type="button"
-								onclick={() => (openCategory = null)}
-								class="text-muted hover:text-active transition-colors"
-								aria-label="Close suggestions"
-							>
-								<X class="h-3.5 w-3.5" />
-							</button>
-						</div>
-						<div class="divide-y divide-shade-3">
-							{#each activeSuggestions as suggestion}
-								<button
-									type="button"
-									onclick={() => submit(suggestion)}
-									class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
-								>
-									<span class="flex-1">{suggestion}</span>
-									<ArrowRight
-										class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
-									/>
-								</button>
-							{/each}
-						</div>
-					</div>
-				{/if}
-			</div>
-
-			{#if recentSessions.length > 0}
+			{#if $settingsStore.homeShowRecentSessions && recentSessions.length > 0}
 				<div class="mt-10 w-full">
 					<h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
 						{$LL.recentSessions()}
