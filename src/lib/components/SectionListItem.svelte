@@ -53,7 +53,7 @@
 <!-- Need to use `#key id` to re-render the delete nav after deletion -->
 {#key id}
 	<div
-		class="section-list-item flex flex-row items-center justify-between border-b pr-3 last:border-b-0 group"
+		class="section-list-item flex flex-row items-center justify-between border-b border-shade-2 pr-3 last:border-b-0 group"
 		class:bg-shade-0={page.url.pathname.includes(id)}
 		class:confirm-deletion={isDeleting}
 		class:confirm-editing={isEditing}

@@ -83,6 +83,21 @@
 				<Badge variant={badgeVariant} />
 			{/if}
 			<Badge>{server.label ? server.label : provider.name}</Badge>
+			<span
+				class="ml-1.5 inline-flex items-center gap-1 text-[11px] {server.isVerified
+					? 'text-positive'
+					: 'text-muted'}"
+				title={server.isVerified
+					? `Last verified ${typeof server.isVerified === 'string' ? server.isVerified : server.isVerified instanceof Date ? server.isVerified.toLocaleDateString() : ''}`
+					: 'Not yet verified'}
+			>
+				<span
+					class="inline-block h-1.5 w-1.5 rounded-full {server.isVerified
+						? 'bg-positive'
+						: 'bg-shade-4'}"
+				></span>
+				{server.isVerified ? 'Verified' : 'Unverified'}
+			</span>
 		{/snippet}
 
 		<Fieldset>

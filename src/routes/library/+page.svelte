@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Cpu, Download, FolderOpen, Pencil, Plus, Upload, UserRound } from '@lucide/svelte';
+	import { Cpu, Download, FolderOpen, Pencil, Plus, Upload, UserRound, Users } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 
@@ -133,6 +133,14 @@
 							</span>
 						{/if}
 					</button>
+					{#if persona.shared}
+						<span
+							class="absolute left-2 top-2.5 rounded-full bg-blue-500/15 p-0.5 text-active"
+							title="Shared with users"
+						>
+							<Users class="h-3 w-3" />
+						</span>
+					{/if}
 					<button
 						type="button"
 						aria-label="Edit persona"
