@@ -86,14 +86,14 @@
 			}
 			document.documentElement.setAttribute('data-color-theme', theme);
 
-			// Keep the OS/browser chrome tint in sync with the live shell colour
-			// (covers the theme styles — Dracula, Catppuccin — not just light/dark).
+			// Keep the OS/browser chrome tint in sync with the live safe-area chrome
+			// colour (shade-1), across all theme styles — Dracula, Catppuccin, …
 			if (browser) {
 				const meta = document.querySelector('meta[name="theme-color"]');
-				const shade2 = getComputedStyle(document.documentElement)
-					.getPropertyValue('--color-shade-2')
+				const chrome = getComputedStyle(document.documentElement)
+					.getPropertyValue('--color-shade-1')
 					.trim();
-				if (meta && shade2) meta.setAttribute('content', shade2);
+				if (meta && chrome) meta.setAttribute('content', chrome);
 			}
 		};
 
@@ -256,8 +256,10 @@
 	<SettingsModal />
 	<Onboarding />
 
+	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
+	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
 	<div
-		class="safe-top relative flex h-dvh w-full overflow-hidden bg-shade-2 lg:p-4 lg:pt-4 lg:pb-4"
+		class="safe-top safe-bottom relative flex h-dvh w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 	>
 		<CollapsibleSidebar />
 		<div class="relative min-w-0 flex-1">
