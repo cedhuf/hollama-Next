@@ -125,7 +125,10 @@
 						</div>
 						<div class="flex flex-1 flex-col gap-1 p-1.5">
 							<div class="h-1.5 w-3/4 rounded" style="background:{style.text}"></div>
-							<div class="self-end rounded-sm px-1 py-0.5" style="background:{style.accent};color:white">
+							<div
+								class="self-end rounded-sm px-1 py-0.5"
+								style="background:{style.accent};color:white"
+							>
 								<div class="h-1 w-6 rounded" style="background:rgba(255,255,255,0.7)"></div>
 							</div>
 						</div>

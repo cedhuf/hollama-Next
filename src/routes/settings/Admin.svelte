@@ -14,7 +14,8 @@
 	function flashSaved(key: string) {
 		savedKeys = { ...savedKeys, [key]: true };
 		setTimeout(() => {
-			const { [key]: _, ...rest } = savedKeys;
+			const rest = { ...savedKeys };
+			delete rest[key];
 			savedKeys = rest;
 		}, 1500);
 	}
@@ -137,7 +138,7 @@
 
 	// All sharing controls autosave on change (no Save buttons). The search /
 	// prompts / title snapshots mirror the admin's own Chat config.
-async function saveSearch() {
+	async function saveSearch() {
 		await api('/api/admin/config', 'PUT', {
 			searchSharing,
 			searchUrl: $settingsStore.searchUrl,
@@ -244,7 +245,9 @@ async function saveSearch() {
 			on:change={toggleAllowUserKeys}
 		/>
 		{#if savedKeys['userKeys']}
-			<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>
+			<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+				><Check class="h-3 w-3" /> Saved</span
+			>
 		{/if}
 		<FieldCheckbox
 			label="Allow users to create their own personas"
@@ -252,7 +255,9 @@ async function saveSearch() {
 			on:change={toggleAllowUserPersonas}
 		/>
 		{#if savedKeys['userPersonas']}
-			<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>
+			<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+				><Check class="h-3 w-3" /> Saved</span
+			>
 		{/if}
 	</section>
 
@@ -279,7 +284,9 @@ async function saveSearch() {
 					<option value="locked">Locked — users can't change it</option>
 					<option value="overridable">Users may override for themselves</option>
 				</select>
-				{#if savedKeys['search']}<span class="flex items-center gap-1 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
+				{#if savedKeys['search']}<span class="flex items-center gap-1 text-xs text-positive"
+						><Check class="h-3 w-3" /> Saved</span
+					>{/if}
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
 		{/if}
@@ -304,7 +311,9 @@ async function saveSearch() {
 			bind:checked={promptsShareEnabled}
 			on:change={syncPromptsShare}
 		/>
-		{#if savedKeys['prompts']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
+		{#if savedKeys['prompts']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+				><Check class="h-3 w-3" /> Saved</span
+			>{/if}
 		{#if promptsShareEnabled}
 			<select class={input} bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
 				<option value="locked">Locked — users can't change them</option>
@@ -326,7 +335,9 @@ async function saveSearch() {
 			bind:checked={titleShareEnabled}
 			on:change={syncTitleShare}
 		/>
-		{#if savedKeys['title']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
+		{#if savedKeys['title']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+				><Check class="h-3 w-3" /> Saved</span
+			>{/if}
 		{#if titleShareEnabled}
 			<select class={input} bind:value={titleSharing} onchange={saveTitle}>
 				<option value="locked">Locked — users can't change it</option>
@@ -366,7 +377,9 @@ async function saveSearch() {
 						<option value="locked">Locked — users can't change it</option>
 						<option value="overridable">Default — users may change it</option>
 					</select>
-					{#if savedKeys['defaultModel']}<span class="flex items-center gap-1 text-xs text-positive"><Check class="h-3 w-3" /> Saved</span>{/if}
+					{#if savedKeys['defaultModel']}<span class="flex items-center gap-1 text-xs text-positive"
+							><Check class="h-3 w-3" /> Saved</span
+						>{/if}
 				{/if}
 			</div>
 		{/if}

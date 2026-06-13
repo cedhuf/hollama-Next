@@ -81,7 +81,6 @@
 
 <!-- Mobile overlay (expanded only) -->
 {#if !isCollapsed}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-20 bg-black/50 lg:hidden"
 		transition:fade={{ duration: 100 }}
@@ -205,7 +204,9 @@
 			>
 				{#if activeSection === 'sessions'}
 					{#if personaLaunchers.length > 0}
-						<div class="sticky top-0 z-10 border-b bg-shade-1/60 px-2 py-2.5 backdrop-blur-md will-change-transform">
+						<div
+							class="sticky top-0 z-10 border-b bg-shade-1/60 px-2 py-2.5 backdrop-blur-md will-change-transform"
+						>
 							<p
 								class="mb-1.5 text-center text-[11px] font-semibold uppercase tracking-wider text-accent"
 							>

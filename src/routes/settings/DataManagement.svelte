@@ -272,9 +272,7 @@
 						<TriangleAlert class="base-icon" />
 						Yes, delete everything
 					</Button>
-					<Button variant="outline" onclick={() => (confirmReset = false)}>
-						Cancel
-					</Button>
+					<Button variant="outline" onclick={() => (confirmReset = false)}>Cancel</Button>
 				</div>
 			</div>
 		{:else}
