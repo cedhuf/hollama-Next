@@ -91,10 +91,10 @@
 {/if}
 
 <nav
-	class="flex h-full shrink-0 flex-col overflow-hidden bg-shade-1 transition-all duration-200 ease-in-out lg:rounded-xl lg:border
+	class="flex h-full shrink-0 flex-col overflow-hidden bg-shade-1 transition-[transform,width] duration-200 ease-in-out lg:rounded-xl lg:border
 		{isCollapsed
 		? 'hidden w-16 lg:flex lg:mr-2'
-		: 'safe-top safe-bottom fixed inset-y-0 left-0 z-30 w-[90vw] lg:relative lg:z-auto lg:w-96 lg:mr-4'}"
+		: 'safe-bottom fixed inset-y-0 left-0 z-30 w-[90vw] max-w-xs lg:relative lg:z-auto lg:w-96 lg:mr-4'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >

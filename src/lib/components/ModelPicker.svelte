@@ -71,16 +71,16 @@
 
 	$effect(() => {
 		if (!open) return;
-		const onClick = (e: MouseEvent) => {
+		const onPointer = (e: PointerEvent) => {
 			if (wrapper && !wrapper.contains(e.target as Node)) open = false;
 		};
 		const onKey = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') open = false;
 		};
-		window.addEventListener('click', onClick);
+		window.addEventListener('pointerdown', onPointer);
 		window.addEventListener('keydown', onKey);
 		return () => {
-			window.removeEventListener('click', onClick);
+			window.removeEventListener('pointerdown', onPointer);
 			window.removeEventListener('keydown', onKey);
 		};
 	});
@@ -104,7 +104,8 @@
 	{#if open}
 		<!-- The list is an extension of the field: one connected surface -->
 		<div
-			class="absolute left-0 top-0 z-50 flex w-full flex-col overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
+			class="fixed inset-x-4 bottom-4 z-50 flex flex-col overflow-hidden rounded-lg border border-shade-3 bg-shade-0 max-h-[60dvh]
+				sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-0 sm:w-full sm:max-h-72"
 		>
 			<div class="flex items-center gap-2 px-3 py-2.5">
 				<Search class="h-4 w-4 shrink-0 text-muted" />

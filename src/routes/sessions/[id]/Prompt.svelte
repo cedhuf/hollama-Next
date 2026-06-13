@@ -232,6 +232,8 @@
 					bind:value={editor.prompt}
 					onkeydown={handleKeyDown}
 					onpaste={handlePaste}
+					enterkeyhint="send"
+					inputmode="text"
 				></textarea>
 
 				<PromptAttachments bind:attachments bind:webSearch={editor.webSearch} {searchAvailable}>
