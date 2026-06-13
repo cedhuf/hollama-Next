@@ -1,42 +1,49 @@
 <script lang="ts">
 	import {
+		ChevronDown,
 		Library,
 		MessageSquareText,
 		PanelLeft,
 		PanelLeftClose,
 		Plus,
+		Search,
 		Settings2
 	} from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
+	import { env } from '$env/dynamic/public';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { knowledgeStore, personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
-	import { formatSessionMetadata, getSessionTitle } from '$lib/sessions';
+	import {
+		formatSessionMetadata,
+		getSessionTitle,
+		groupSessions,
+		type Session
+	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
 	import { updateStatusStore } from '$lib/updates';
-	import { formatTimestampToNow } from '$lib/utils';
 
 	import { generateNewUrl } from './ButtonNew';
-	import ButtonNew from './ButtonNew.svelte';
 	import EmptyMessage from './EmptyMessage.svelte';
 	import PersonaAvatar from './PersonaAvatar.svelte';
-	import SectionList from './SectionList.svelte';
 	import SectionListItem from './SectionListItem.svelte';
 
-	type SidebarSection = 'sessions' | 'knowledge';
-
-	let activeSection: SidebarSection = $state('sessions');
+	let query = $state('');
+	let personasOpen = $state(true);
 
 	const pathname = $derived(page.url.pathname);
 	const isCollapsed = $derived(!$settingsStore.sidebarExpanded);
-	// Personas you've talked to, surfaced as launchers atop the session list
-	// (unless disabled in settings). Their raw session row is hidden below to
-	// avoid duplication.
+	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
+	const onChats = $derived(pathname.includes('/sessions'));
+	const q = $derived(query.trim().toLowerCase());
+
+	// Personas you've talked to, surfaced atop the list (unless disabled in
+	// settings). Their raw session row is hidden below to avoid duplication.
 	const personaLaunchers = $derived(
 		$settingsStore.showPinnedPersonas ? conversedPersonas($personasStore, $sessionsStore ?? []) : []
 	);
@@ -47,25 +54,31 @@
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
 	);
 
+	const filteredPersonas = $derived(
+		q ? personaLaunchers.filter((p) => p.name.toLowerCase().includes(q)) : personaLaunchers
+	);
+	const filteredSessions = $derived(
+		q
+			? visibleSessions.filter((s) => getSessionTitle(s).toLowerCase().includes(q))
+			: visibleSessions
+	);
+	const sessionGroups = $derived(groupSessions(filteredSessions));
+	// Searching forces the personas section open so matches always show.
+	const showPersonaList = $derived(personasOpen || !!q);
+
+	// Surfaced in the collapsed rail (with a full-title tooltip) for quick reach.
+	const recentSessions = $derived(visibleSessions.slice(0, 4));
+
+	const connected = $derived(
+		env.PUBLIC_MODE === 'server' ? true : $serversStore.some((s) => s.isEnabled && s.isVerified)
+	);
+
 	function toggleExpanded() {
 		$settingsStore.sidebarExpanded = !$settingsStore.sidebarExpanded;
 	}
 
-	$effect(() => {
-		if (pathname.includes('/sessions')) {
-			activeSection = 'sessions';
-		} else if (pathname.includes('/knowledge') || pathname.includes('/library')) {
-			activeSection = 'knowledge';
-		}
-	});
-
-	function setActiveSection(section: SidebarSection) {
-		activeSection = section;
-		if (section === 'sessions') {
-			goto('/sessions');
-		} else if (section === 'knowledge') {
-			goto('/library');
-		}
+	function newChat() {
+		goto(generateNewUrl(Sitemap.SESSIONS));
 	}
 
 	function getInitials(): string {
@@ -74,10 +87,48 @@
 		return f + l || '?';
 	}
 
-	function newHref() {
-		return generateNewUrl(activeSection === 'sessions' ? Sitemap.SESSIONS : Sitemap.KNOWLEDGE);
+	function sessionInitial(s: Session): string {
+		return (getSessionTitle(s).trim().charAt(0) || '#').toUpperCase();
 	}
+
+	const hasName = $derived(!!($settingsStore.profileFirstName || $settingsStore.profileLastName));
 </script>
+
+{#snippet profileAvatar(size: number)}
+	{#if hasName}
+		<div
+			class="flex items-center justify-center rounded-full"
+			style="width:{size}px;height:{size}px;background-color:{$settingsStore.profileColor ||
+				'#6366f1'}"
+		>
+			{#if $settingsStore.profileAvatar}
+				<img
+					src={$settingsStore.profileAvatar}
+					alt="Avatar"
+					class="h-full w-full rounded-full object-cover"
+				/>
+			{:else}
+				<span class="text-sm font-bold text-shade-0">{getInitials()}</span>
+			{/if}
+		</div>
+	{:else}
+		<div
+			class="flex items-center justify-center rounded-full bg-shade-2 text-muted"
+			style="width:{size}px;height:{size}px"
+		>
+			<Settings2 class="h-4 w-4" />
+		</div>
+	{/if}
+{/snippet}
+
+{#snippet connectionDot()}
+	<span
+		class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-shade-1 {connected
+			? 'bg-positive'
+			: 'bg-shade-5'}"
+		title={connected ? 'Connected' : 'No server connected'}
+	></span>
+{/snippet}
 
 <!-- Mobile overlay (expanded only) -->
 {#if !isCollapsed}
@@ -126,224 +177,219 @@
 		{/if}
 	</div>
 
-	<!-- Tab buttons -->
-	<div class="flex bg-shade-2 px-3 py-2 text-sm {isCollapsed ? 'flex-col items-center gap-1' : ''}">
-		<button
-			onclick={() => setActiveSection('sessions')}
-			class="duration-25 flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:text-active
-				{isCollapsed ? 'w-full' : 'flex-1'}
-				{activeSection === 'sessions' && pathname.includes('/sessions')
-				? 'bg-shade-0 text-active shadow-sm'
-				: activeSection === 'sessions' && !pathname.includes('/sessions')
-					? 'bg-shade-1 text-muted shadow-sm'
-					: 'text-muted'}"
-			role="tab"
-			aria-selected={activeSection === 'sessions'}
-			aria-controls="sessions-panel"
-			title={$LL.sessions()}
-		>
-			<MessageSquareText class="h-4 w-4 shrink-0" />
-			<span class:hidden={isCollapsed}>{$LL.sessions()}</span>
-		</button>
-		<button
-			onclick={() => setActiveSection('knowledge')}
-			class="duration-25 flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium transition-colors hover:text-active
-				{isCollapsed ? 'w-full' : 'flex-1'}
-				{activeSection === 'knowledge' ? 'bg-shade-0 text-active shadow-sm' : 'text-muted'}"
-			role="tab"
-			aria-selected={activeSection === 'knowledge'}
-			aria-controls="knowledge-panel"
-			title="Library"
-		>
-			<Library class="h-4 w-4 shrink-0" />
-			<span class:hidden={isCollapsed}>Library</span>
-		</button>
-	</div>
+	{#if isCollapsed}
+		<!-- Collapsed rail: primary actions + quick launchers -->
+		<div class="flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto py-3">
+			<button
+				onclick={newChat}
+				title="New chat"
+				aria-label="New chat"
+				class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity hover:opacity-90"
+			>
+				<Plus class="h-5 w-5" />
+			</button>
+			<a
+				href="/sessions"
+				title="Chats"
+				aria-label="Chats"
+				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onChats
+					? 'bg-shade-0 text-active'
+					: 'text-muted hover:text-active'}"
+			>
+				<MessageSquareText class="h-5 w-5" />
+			</a>
+			<a
+				href="/library"
+				title="Library"
+				aria-label="Library"
+				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onLibrary
+					? 'bg-shade-0 text-active'
+					: 'text-muted hover:text-active'}"
+			>
+				<Library class="h-5 w-5" />
+			</a>
 
-	<!-- New button -->
-	<div class="border-b bg-shade-2 px-3 pb-3 pt-0">
-		{#if isCollapsed}
-			<div class="flex justify-center pt-2">
+			{#if personaLaunchers.length > 0}
+				<div class="my-1 h-px w-8 bg-shade-3"></div>
+				{#each personaLaunchers as persona (persona.id)}
+					<button
+						type="button"
+						onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+						title={persona.name}
+						class="transition-transform hover:scale-105"
+					>
+						<PersonaAvatar {persona} size={32} />
+					</button>
+				{/each}
+			{/if}
+
+			{#if recentSessions.length > 0}
+				<div class="my-1 h-px w-8 bg-shade-3"></div>
+				{#each recentSessions as session (session.id)}
+					<button
+						type="button"
+						onclick={() => goto(`/sessions/${session.id}`)}
+						title={getSessionTitle(session) || 'Untitled'}
+						aria-label={getSessionTitle(session) || 'Untitled'}
+						class="flex h-8 w-8 items-center justify-center rounded-md border text-xs font-medium transition-colors {pathname.includes(
+							session.id
+						)
+							? 'border-accent bg-shade-0 text-active'
+							: 'border-shade-3 text-muted hover:text-active'}"
+					>
+						{sessionInitial(session)}
+					</button>
+				{/each}
+			{/if}
+		</div>
+	{:else}
+		<!-- Top actions -->
+		<div class="flex flex-col gap-2 px-3 py-3">
+			<button
+				onclick={newChat}
+				class="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+			>
+				<Plus class="h-4 w-4" /> New chat
+			</button>
+
+			<div class="relative">
+				<Search
+					class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+				/>
+				<input
+					bind:value={query}
+					type="text"
+					placeholder="Search chats & personas"
+					class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-2.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+				/>
+			</div>
+
+			<div class="flex gap-1.5">
 				<a
-					href={newHref()}
-					class="flex items-center justify-center rounded-lg p-2 text-muted transition-colors hover:text-active"
-					aria-label={$LL.newSession()}
-					title={$LL.newSession()}
+					href="/sessions"
+					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
+						? 'bg-shade-0 text-active shadow-sm'
+						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
-					<Plus class="h-5 w-5" />
+					<MessageSquareText class="h-4 w-4 shrink-0" /> Chats
+				</a>
+				<a
+					href="/library"
+					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onLibrary
+						? 'bg-shade-0 text-active shadow-sm'
+						: 'text-muted hover:bg-shade-0 hover:text-active'}"
+				>
+					<Library class="h-4 w-4 shrink-0" /> Library
 				</a>
 			</div>
-		{:else}
-			<ButtonNew sitemap={activeSection === 'sessions' ? Sitemap.SESSIONS : Sitemap.KNOWLEDGE} />
-		{/if}
-	</div>
+		</div>
 
-	<!-- Collapsed: keep persona launchers reachable as avatars -->
-	{#if isCollapsed && personaLaunchers.length > 0}
-		<div class="flex flex-col items-center gap-2 border-b py-2.5">
-			{#each personaLaunchers as persona (persona.id)}
-				<button
-					type="button"
-					onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
-					title={persona.name}
-					class="transition-transform hover:scale-105"
-				>
-					<PersonaAvatar {persona} size={32} />
-				</button>
+		<!-- Scrollable list -->
+		<div class="min-h-0 flex-1 overflow-auto px-2 pb-2" style="overscroll-behavior-y: contain">
+			{#if filteredPersonas.length > 0}
+				<div class="mb-2">
+					<button
+						type="button"
+						onclick={() => (personasOpen = !personasOpen)}
+						class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
+					>
+						<span>Personas · {filteredPersonas.length}</span>
+						<ChevronDown
+							class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
+						/>
+					</button>
+					{#if showPersonaList}
+						<div class="flex flex-col gap-0.5">
+							{#each filteredPersonas as persona (persona.id)}
+								<button
+									type="button"
+									onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+									class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-shade-0
+										{persona.sessionId && pathname.includes(persona.sessionId)
+										? 'bg-shade-0 font-medium text-active'
+										: 'text-base'}"
+									title={persona.tagline}
+								>
+									<PersonaAvatar {persona} size={26} />
+									<span class="truncate">{persona.name}</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/if}
+
+			{#each sessionGroups as group (group.label)}
+				<div class="mb-2">
+					<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+						{group.label}
+					</p>
+					<div class="flex flex-col">
+						{#each group.sessions as session (session.id)}
+							<SectionListItem
+								sitemap={Sitemap.SESSIONS}
+								id={session.id}
+								title={getSessionTitle(session)}
+								subtitle={formatSessionMetadata(session)}
+								pinned={session.pinned}
+							/>
+						{/each}
+					</div>
+				</div>
 			{/each}
+
+			{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
+				<EmptyMessage>{q ? 'No matches' : $LL.emptySessions()}</EmptyMessage>
+			{/if}
 		</div>
 	{/if}
 
-	<!-- Content area -->
-	<div class:hidden={isCollapsed} class="flex min-h-0 flex-1 flex-col overflow-hidden">
-		<div class="flex-1 overflow-auto" style="overscroll-behavior-y: contain">
-			<section
-				id="sessions-panel"
-				aria-labelledby="sessions-tab"
-				hidden={activeSection !== 'sessions'}
-			>
-				{#if activeSection === 'sessions'}
-					{#if personaLaunchers.length > 0}
-						<div
-							class="sticky top-0 z-10 border-b bg-shade-1/60 px-2 py-2.5 backdrop-blur-md will-change-transform"
-						>
-							<p
-								class="mb-1.5 text-center text-[11px] font-semibold uppercase tracking-wider text-accent"
-							>
-								Personas
-							</p>
-							<div class="flex flex-col gap-0.5">
-								{#each personaLaunchers as persona (persona.id)}
-									<button
-										type="button"
-										onclick={() =>
-											goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
-										class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-shade-0
-											{persona.sessionId && pathname.includes(persona.sessionId)
-											? 'bg-shade-0 font-medium text-active'
-											: 'text-base'}"
-										title={persona.tagline}
-									>
-										<PersonaAvatar {persona} size={26} />
-										<span class="truncate">{persona.name}</span>
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/if}
-					<SectionList>
-						{#if visibleSessions.length > 0}
-							{#each visibleSessions as session (session.id)}
-								<SectionListItem
-									sitemap={Sitemap.SESSIONS}
-									id={session.id}
-									title={getSessionTitle(session)}
-									subtitle={formatSessionMetadata(session)}
-								/>
-							{/each}
-						{:else if personaLaunchers.length === 0}
-							<EmptyMessage>{$LL.emptySessions()}</EmptyMessage>
-						{/if}
-					</SectionList>
-				{/if}
-			</section>
-			<section
-				id="knowledge-panel"
-				aria-labelledby="knowledge-tab"
-				hidden={activeSection !== 'knowledge'}
-			>
-				{#if activeSection === 'knowledge'}
-					<SectionList>
-						{#if $knowledgeStore && $knowledgeStore.length > 0}
-							{#each $knowledgeStore as knowledge (knowledge.id)}
-								<SectionListItem
-									sitemap={Sitemap.KNOWLEDGE}
-									id={knowledge.id}
-									title={knowledge.name}
-									subtitle={formatTimestampToNow(knowledge.updatedAt)}
-								/>
-							{/each}
-						{:else}
-							<EmptyMessage>{$LL.emptyKnowledge()}</EmptyMessage>
-						{/if}
-					</SectionList>
-				{/if}
-			</section>
-		</div>
-	</div>
-
-	<!-- Bottom bar -->
-	<div class="mt-auto border-t px-3 py-3">
-		<div class="flex items-center justify-between">
-			{#if isCollapsed}
-				<div class="flex w-full justify-center">
-					<button
-						onclick={() => ($settingsModalOpen = true)}
-						class="duration-25 relative text-muted transition-colors hover:text-active {$updateStatusStore.showSidebarNotification
-							? 'after:absolute after:-right-0.5 after:top-0 after:h-2 after:w-2 after:rounded-full after:bg-warning'
-							: ''}"
-						title={$LL.settings()}
-					>
-						{#if $settingsStore.profileFirstName || $settingsStore.profileLastName}
-							<div
-								class="flex h-9 w-9 items-center justify-center rounded-full"
-								style="background-color: {$settingsStore.profileColor || '#6366f1'}"
-							>
-								{#if $settingsStore.profileAvatar}
-									<img
-										src={$settingsStore.profileAvatar}
-										alt="Avatar"
-										class="h-9 w-9 rounded-full object-cover"
-									/>
-								{:else}
-									<span class="text-sm font-bold text-shade-0">{getInitials()}</span>
-								{/if}
-							</div>
-						{:else}
-							<Settings2 class="h-5 w-5" />
-						{/if}
-					</button>
-				</div>
-			{:else}
-				{#if $settingsStore.profileFirstName || $settingsStore.profileLastName}
-					<div class="flex items-center gap-3">
-						<div
-							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-							style="background-color: {$settingsStore.profileColor || '#6366f1'}"
-						>
-							{#if $settingsStore.profileAvatar}
-								<img
-									src={$settingsStore.profileAvatar}
-									alt="Avatar"
-									class="h-9 w-9 rounded-full object-cover"
-								/>
-							{:else}
-								<span class="text-sm font-bold text-shade-0">{getInitials()}</span>
-							{/if}
-						</div>
-						<div class="flex flex-col">
-							<span class="truncate text-sm font-medium"
-								>{$settingsStore.profileFirstName} {$settingsStore.profileLastName}</span
-							>
-							<span class="text-xs text-muted"
-								>{$currentRole === 'admin' ? 'Administrator' : 'User'}</span
-							>
-						</div>
-					</div>
-				{/if}
-
+	<!-- Footer: profile + settings -->
+	<div class="mt-auto border-t p-2">
+		{#if isCollapsed}
+			<div class="flex justify-center">
 				<button
 					onclick={() => ($settingsModalOpen = true)}
-					class="duration-25 relative flex items-center rounded-md p-2 text-muted transition-colors hover:text-active {!$settingsStore.profileFirstName &&
-					!$settingsStore.profileLastName
-						? 'ml-auto'
-						: ''} {$updateStatusStore.showSidebarNotification
-						? 'before:absolute before:right-1 before:top-1 before:h-2 before:w-2 before:rounded-full before:bg-warning'
-						: ''}"
+					class="relative transition-transform hover:scale-105"
+					title={$LL.settings()}
+					aria-label={$LL.settings()}
 				>
-					<Settings2 class="h-5 w-5" />
+					{@render profileAvatar(36)}
+					{@render connectionDot()}
+					{#if $updateStatusStore.showSidebarNotification}
+						<span
+							class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-warning"
+							title="Update available"
+						></span>
+					{/if}
 				</button>
-			{/if}
-		</div>
+			</div>
+		{:else}
+			<button
+				onclick={() => ($settingsModalOpen = true)}
+				class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-shade-0"
+			>
+				<span class="relative shrink-0">
+					{@render profileAvatar(36)}
+					{@render connectionDot()}
+				</span>
+				<span class="flex min-w-0 flex-1 flex-col">
+					<span class="truncate text-sm font-medium">
+						{hasName
+							? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
+							: $LL.settings()}
+					</span>
+					<span class="text-xs text-muted">
+						{$currentRole === 'admin' ? 'Administrator' : 'User'}
+					</span>
+				</span>
+				<span class="relative shrink-0 text-muted">
+					<Settings2 class="h-5 w-5" />
+					{#if $updateStatusStore.showSidebarNotification}
+						<span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-warning"></span>
+					{/if}
+				</span>
+			</button>
+		{/if}
 	</div>
 </nav>

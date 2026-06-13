@@ -51,15 +51,43 @@
 	interface DataSource {
 		storageKey: StorageKey;
 		fileName: string;
+		label: string;
+		description: string;
 	}
 
-	const dataSources: DataSource[] = [
-		{ storageKey: StorageKey.HollamaNextServers, fileName: `hollama-servers.json` },
-		{ storageKey: StorageKey.HollamaNextPreferences, fileName: `hollama-preferences.json` },
-		{ storageKey: StorageKey.HollamaNextSessions, fileName: `hollama-sessions.json` },
-		{ storageKey: StorageKey.HollamaNextKnowledge, fileName: `hollama-knowledge.json` },
-		{ storageKey: StorageKey.HollamaNextPersonas, fileName: `hollama-personas.json` }
-	];
+	// Reactive (labels come from $LL) — one source of truth for the per-category rows.
+	const dataSources = $derived<DataSource[]>([
+		{
+			storageKey: StorageKey.HollamaNextServers,
+			fileName: `hollama-servers.json`,
+			label: $LL.servers(),
+			description: $LL.serversDescription()
+		},
+		{
+			storageKey: StorageKey.HollamaNextPreferences,
+			fileName: `hollama-preferences.json`,
+			label: $LL.preferences(),
+			description: $LL.preferencesDescription()
+		},
+		{
+			storageKey: StorageKey.HollamaNextSessions,
+			fileName: `hollama-sessions.json`,
+			label: $LL.sessions(),
+			description: $LL.sessionsDescription()
+		},
+		{
+			storageKey: StorageKey.HollamaNextKnowledge,
+			fileName: `hollama-knowledge.json`,
+			label: $LL.knowledge(),
+			description: $LL.knowledgeDescription()
+		},
+		{
+			storageKey: StorageKey.HollamaNextPersonas,
+			fileName: `hollama-personas.json`,
+			label: 'Personas',
+			description: 'Your saved characters and their settings'
+		}
+	]);
 
 	// The value a category resets to when deleted.
 	const defaults: Record<StorageKey, unknown> = {
@@ -214,20 +242,8 @@
 				class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-md border border-shade-4 p-2 text-sm leading-tight sm:flex-row sm:items-center"
 			>
 				<div class="flex flex-col">
-					<!-- HACK: because the labels are reactive we need to define them here -->
-					{#if dataSource.storageKey === StorageKey.HollamaNextServers}
-						<P><strong>{$LL.servers()}</strong></P>
-						<span class="text-xs text-muted">{$LL.serversDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaNextPreferences}
-						<P><strong>{$LL.preferences()}</strong></P>
-						<span class="text-xs text-muted">{$LL.preferencesDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaNextSessions}
-						<P><strong>{$LL.sessions()}</strong></P>
-						<span class="text-xs text-muted">{$LL.sessionsDescription()}</span>
-					{:else if dataSource.storageKey === StorageKey.HollamaNextKnowledge}
-						<P><strong>{$LL.knowledge()}</strong></P>
-						<span class="text-xs text-muted">{$LL.knowledgeDescription()}</span>
-					{/if}
+					<P><strong>{dataSource.label}</strong></P>
+					<span class="text-xs text-muted">{dataSource.description}</span>
 				</div>
 
 				<nav class="mt-4 flex justify-between sm:mt-0">
