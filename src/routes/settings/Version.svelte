@@ -12,6 +12,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { version } from '$app/environment';
 	import Badge from '$lib/components/Badge.svelte';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import { GITHUB_URL } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
@@ -58,27 +59,10 @@
 				{statusText || 'Unknown'}
 			</span>
 		</div>
-		<div class="about-card-row">
-			<span class="about-label text-muted">Auto-check</span>
-			<div class="about-toggle relative">
-				<input
-					id="auto-check-toggle"
-					type="checkbox"
-					class="toggle-input sr-only peer"
-					bind:checked={$settingsStore.autoCheckForUpdates}
-				/>
-				<label
-					for="auto-check-toggle"
-					class="toggle-track block h-5 w-9 cursor-pointer rounded-full bg-shade-4 transition-colors"
-					class:bg-accent={$settingsStore.autoCheckForUpdates}
-				>
-					<span
-						class="toggle-thumb block h-4 w-4 translate-x-0.5 translate-y-0.5 rounded-full bg-shade-0 transition-transform"
-						class:translate-x-4={$settingsStore.autoCheckForUpdates}
-					></span>
-				</label>
-			</div>
-		</div>
+		<FieldCheckbox
+			label="Check for updates automatically"
+			bind:checked={$settingsStore.autoCheckForUpdates}
+		/>
 		<button
 			class="about-check-btn w-full rounded-lg border bg-shade-1 px-4 py-2 text-sm font-medium transition-colors hover:bg-shade-2 disabled:opacity-50"
 			disabled={$updateStatusStore.isCheckingForUpdates}

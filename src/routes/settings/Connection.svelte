@@ -105,7 +105,7 @@
 				<FieldCheckbox
 					label={$LL.useModelsFromThisServer()}
 					bind:checked={server.isEnabled}
-					on:change={persist}
+					onChange={persist}
 				/>
 
 				<Button

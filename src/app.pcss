@@ -88,6 +88,12 @@
 	padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Shared control style for settings inputs/selects/textareas (one source of
+   truth instead of a per-file class string). */
+@utility settings-field {
+	@apply border-shade-3 bg-shade-0 text-active focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm outline-none;
+}
+
 @custom-variant dark (&:where([data-color-theme='dark']));
 
 @utility base-input {

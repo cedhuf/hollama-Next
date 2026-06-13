@@ -5,8 +5,9 @@
 
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
-	import P from '$lib/components/P.svelte';
 	import { settingsStore } from '$lib/localStorage';
+
+	import SettingsSection from './SettingsSection.svelte';
 
 	// Track which controls just saved, to flash a subtle checkmark.
 	let savedKeys = $state<Record<string, boolean>>({});
@@ -39,9 +40,6 @@
 		role: string;
 		created_at: string;
 	}
-
-	const input =
-		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
 
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
@@ -235,40 +233,41 @@
 	}
 </script>
 
-<div class="flex flex-col gap-6">
-	<!-- General -->
-	<section class="flex flex-col gap-2">
-		<P><strong>Administration</strong></P>
+<div class="flex flex-col gap-5">
+	<!-- User permissions -->
+	<SettingsSection
+		title="User permissions"
+		description="What signed-in users are allowed to do on this instance."
+		card
+	>
 		<FieldCheckbox
 			label="Allow users to add their own provider connections"
 			bind:checked={allowUserKeys}
-			on:change={toggleAllowUserKeys}
+			onChange={toggleAllowUserKeys}
 		/>
 		{#if savedKeys['userKeys']}
-			<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+			<span class="flex items-center gap-1 text-xs text-positive"
 				><Check class="h-3 w-3" /> Saved</span
 			>
 		{/if}
 		<FieldCheckbox
 			label="Allow users to create their own personas"
 			bind:checked={allowUserPersonas}
-			on:change={toggleAllowUserPersonas}
+			onChange={toggleAllowUserPersonas}
 		/>
 		{#if savedKeys['userPersonas']}
-			<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+			<span class="flex items-center gap-1 text-xs text-positive"
 				><Check class="h-3 w-3" /> Saved</span
 			>
 		{/if}
-	</section>
+	</SettingsSection>
 
 	<!-- Web search sharing -->
-	<section class="flex flex-col gap-2">
-		<P><strong>Web search sharing</strong></P>
-		<span class="-mt-1 text-xs text-muted">
-			Configure the search engine in the <strong>Chat</strong> tab; here you choose whether it's shared
-			with users.
-		</span>
-
+	<SettingsSection
+		title="Web search sharing"
+		description="Configure the search engine in the Chat tab; here you choose whether it's shared with users."
+		card
+	>
 		{#if !$settingsStore.searchUrl}
 			<span class="text-xs text-muted">
 				No engine configured yet — set one up in the Chat tab first, then you can share it.
@@ -277,10 +276,10 @@
 			<FieldCheckbox
 				label="Share my search engine with users"
 				bind:checked={shareEnabled}
-				on:change={syncShare}
+				onChange={syncShare}
 			/>
 			{#if shareEnabled}
-				<select class={input} bind:value={searchSharing} onchange={saveSearch}>
+				<select class="settings-field" bind:value={searchSharing} onchange={saveSearch}>
 					<option value="locked">Locked — users can't change it</option>
 					<option value="overridable">Users may override for themselves</option>
 				</select>
@@ -290,16 +289,14 @@
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
 		{/if}
-	</section>
+	</SettingsSection>
 
 	<!-- System prompts sharing -->
-	<section class="flex flex-col gap-2">
-		<P><strong>System prompts sharing</strong></P>
-		<span class="-mt-1 text-xs text-muted">
-			Configure your prompts in the <strong>Chat</strong> tab; here you choose whether they're shared
-			with all users (read-only for them). Per-user prompts will come with groups.
-		</span>
-
+	<SettingsSection
+		title="System prompts sharing"
+		description="Configure your prompts in the Chat tab; here you choose whether they're shared with all users (read-only for them). Per-user prompts will come with groups."
+		card
+	>
 		{#if !hasOwnPrompts}
 			<span class="text-xs text-muted">
 				Nothing configured yet — set up your prompts in the Chat tab to share something.
@@ -309,37 +306,35 @@
 		<FieldCheckbox
 			label="Share my system prompts with users"
 			bind:checked={promptsShareEnabled}
-			on:change={syncPromptsShare}
+			onChange={syncPromptsShare}
 		/>
-		{#if savedKeys['prompts']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+		{#if savedKeys['prompts']}<span class="flex items-center gap-1 text-xs text-positive"
 				><Check class="h-3 w-3" /> Saved</span
 			>{/if}
 		{#if promptsShareEnabled}
-			<select class={input} bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
+			<select class="settings-field" bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
 				<option value="locked">Locked — users can't change them</option>
 				<option value="overridable">Users may override for themselves</option>
 			</select>
 		{/if}
-	</section>
+	</SettingsSection>
 
 	<!-- Title generation sharing -->
-	<section class="flex flex-col gap-2">
-		<P><strong>Title generation sharing</strong></P>
-		<span class="-mt-1 text-xs text-muted">
-			Share your title-generation settings (from the <strong>Chat</strong> tab) with users. The title
-			model works even if it isn't in the shared models list.
-		</span>
-
+	<SettingsSection
+		title="Title generation sharing"
+		description="Share your title-generation settings (from the Chat tab) with users. The title model works even if it isn't in the shared models list."
+		card
+	>
 		<FieldCheckbox
 			label="Share my title generation with users"
 			bind:checked={titleShareEnabled}
-			on:change={syncTitleShare}
+			onChange={syncTitleShare}
 		/>
-		{#if savedKeys['title']}<span class="flex items-center gap-1 pl-11 text-xs text-positive"
+		{#if savedKeys['title']}<span class="flex items-center gap-1 text-xs text-positive"
 				><Check class="h-3 w-3" /> Saved</span
 			>{/if}
 		{#if titleShareEnabled}
-			<select class={input} bind:value={titleSharing} onchange={saveTitle}>
+			<select class="settings-field" bind:value={titleSharing} onchange={saveTitle}>
 				<option value="locked">Locked — users can't change it</option>
 				<option value="overridable">Users may override for themselves</option>
 			</select>
@@ -349,16 +344,13 @@
 					: 'off'}
 			</span>
 		{/if}
-	</section>
+	</SettingsSection>
 
 	<!-- Shared models -->
-	<section class="flex flex-col gap-3">
-		<P><strong>Shared models</strong></P>
-		<span class="-mt-2 text-xs text-muted">
-			Pick which models from each system server are available to users. Configure the servers
-			themselves in the <strong>Servers</strong> tab.
-		</span>
-
+	<SettingsSection
+		title="Shared models"
+		description="Pick which models from each system server are available to users. Configure the servers themselves in the Servers tab."
+	>
 		{#if servers.length === 0}
 			<span class="text-sm text-muted">No system servers yet — add one in the Servers tab.</span>
 		{/if}
@@ -366,14 +358,22 @@
 		{#if sharedModelNames.length}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
 				<span class="text-sm font-medium">Default model for users</span>
-				<select class={input} bind:value={defaultModelValue} onchange={onDefaultModelChange}>
+				<select
+					class="settings-field"
+					bind:value={defaultModelValue}
+					onchange={onDefaultModelChange}
+				>
 					<option value="">— none —</option>
 					{#each sharedModelNames as name (name)}
 						<option value={name}>{name}</option>
 					{/each}
 				</select>
 				{#if defaultModelValue}
-					<select class={input} bind:value={defaultModelSharing} onchange={saveDefaultModel}>
+					<select
+						class="settings-field"
+						bind:value={defaultModelSharing}
+						onchange={saveDefaultModel}
+					>
 						<option value="locked">Locked — users can't change it</option>
 						<option value="overridable">Default — users may change it</option>
 					</select>
@@ -435,11 +435,10 @@
 				{/if}
 			</div>
 		{/each}
-	</section>
+	</SettingsSection>
 
 	<!-- Users -->
-	<section class="flex flex-col gap-3">
-		<P><strong>Users</strong></P>
+	<SettingsSection title="Users" description="Accounts on this instance.">
 		{#each users as user (user.id)}
 			<div
 				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
@@ -464,14 +463,14 @@
 						<X class="h-4 w-4" />
 					</button>
 				</div>
-				<input class={input} type="email" bind:value={newUser.email} placeholder="Email" />
+				<input class="settings-field" type="email" bind:value={newUser.email} placeholder="Email" />
 				<input
-					class={input}
+					class="settings-field"
 					type="password"
 					bind:value={newUser.password}
 					placeholder="Initial password"
 				/>
-				<select class={input} bind:value={newUser.role}>
+				<select class="settings-field" bind:value={newUser.role}>
 					<option value="user">user</option>
 					<option value="admin">admin</option>
 				</select>
@@ -486,5 +485,5 @@
 				<Plus class="h-4 w-4" /> Add user
 			</button>
 		{/if}
-	</section>
+	</SettingsSection>
 </div>

@@ -10,6 +10,7 @@
 		User,
 		Wrench
 	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
@@ -30,11 +31,50 @@
 	const isAdmin = $derived($currentUser?.role === 'admin');
 
 	let activeTab = $state('profile');
+
+	interface Tab {
+		id: string;
+		label: string;
+		icon: Component<{ class?: string }>;
+		visible?: boolean;
+	}
+
+	const tabs = $derived<Tab[]>(
+		[
+			{ id: 'profile', label: $LL.profile(), icon: User },
+			{ id: 'servers', label: $LL.servers(), icon: Server },
+			{ id: 'admin', label: 'Admin', icon: Shield, visible: serverMode && isAdmin },
+			{ id: 'chat', label: 'Chat', icon: MessageSquare },
+			{ id: 'tools', label: 'Tools', icon: Wrench },
+			{ id: 'interface', label: $LL.interface(), icon: Settings2 },
+			{ id: 'data', label: 'Data', icon: Database },
+			{ id: 'version', label: 'About', icon: Info }
+		].filter((t) => t.visible !== false)
+	);
+
+	let tabEls: Record<string, HTMLButtonElement> = {};
+
+	// Roving arrow-key navigation across the tab list.
+	function onTablistKeydown(e: KeyboardEvent) {
+		const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'];
+		if (!keys.includes(e.key)) return;
+		e.preventDefault();
+		const idx = tabs.findIndex((t) => t.id === activeTab);
+		if (idx < 0) return;
+		const step = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1;
+		const next = tabs[(idx + step + tabs.length) % tabs.length];
+		activeTab = next.id;
+		tabEls[next.id]?.focus();
+	}
 </script>
 
 <Modal bind:open={$settingsModalOpen}>
 	<div class="flex w-full flex-col sm:flex-row">
-		<nav
+		<div
+			role="tablist"
+			aria-label={$LL.settings()}
+			tabindex={-1}
+			onkeydown={onTablistKeydown}
 			class="flex shrink-0 gap-1 overflow-x-auto border-b border-shade-2 bg-shade-0 p-2 pr-12 sm:w-48 sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-r sm:p-3 sm:pr-3"
 		>
 			<div class="mb-3 hidden items-center gap-2 px-2 text-xs font-semibold text-muted sm:flex">
@@ -42,95 +82,24 @@
 				{$LL.settings()}
 			</div>
 
-			<button
-				onclick={() => (activeTab = 'profile')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'profile'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<User class="h-4 w-4" />
-				{$LL.profile()}
-			</button>
-
-			<button
-				onclick={() => (activeTab = 'servers')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'servers'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<Server class="h-4 w-4" />
-				{$LL.servers()}
-			</button>
-
-			{#if serverMode && isAdmin}
+			{#each tabs as tab (tab.id)}
+				{@const Icon = tab.icon}
+				{@const active = activeTab === tab.id}
 				<button
-					onclick={() => (activeTab = 'admin')}
-					class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-					'admin'
-						? 'bg-shade-2 font-medium'
-						: ''}"
+					bind:this={tabEls[tab.id]}
+					role="tab"
+					aria-selected={active}
+					aria-controls="settings-panel"
+					tabindex={active ? 0 : -1}
+					onclick={() => (activeTab = tab.id)}
+					class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
+						? 'bg-accent/10 font-medium text-accent'
+						: 'text-base hover:bg-shade-2'}"
 				>
-					<Shield class="h-4 w-4" />
-					Admin
+					<Icon class="h-4 w-4 shrink-0" />
+					{tab.label}
 				</button>
-			{/if}
-
-			<button
-				onclick={() => (activeTab = 'chat')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'chat'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<MessageSquare class="h-4 w-4" />
-				Chat
-			</button>
-
-			<button
-				onclick={() => (activeTab = 'tools')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'tools'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<Wrench class="h-4 w-4" />
-				Tools
-			</button>
-
-			<button
-				onclick={() => (activeTab = 'interface')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'interface'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<Settings2 class="h-4 w-4" />
-				{$LL.interface()}
-			</button>
-
-			<button
-				onclick={() => (activeTab = 'data')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'data'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<Database class="h-4 w-4" />
-				Data
-			</button>
-
-			<button
-				onclick={() => (activeTab = 'version')}
-				class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-shade-2 {activeTab ===
-				'version'
-					? 'bg-shade-2 font-medium'
-					: ''}"
-			>
-				<Info class="h-4 w-4" />
-				About
-			</button>
+			{/each}
 
 			{#if serverMode}
 				<form method="POST" action="/auth/signout" class="shrink-0 sm:mt-auto">
@@ -139,14 +108,14 @@
 						type="submit"
 						class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
 					>
-						<LogOut class="h-4 w-4" />
+						<LogOut class="h-4 w-4 shrink-0" />
 						Sign out
 					</button>
 				</form>
 			{/if}
-		</nav>
+		</div>
 
-		<div class="flex-1 overflow-auto p-4">
+		<div id="settings-panel" role="tabpanel" class="flex-1 overflow-auto p-4">
 			{#if activeTab === 'servers'}
 				<Servers />
 			{:else if activeTab === 'admin'}
