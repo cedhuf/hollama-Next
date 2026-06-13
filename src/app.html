@@ -5,16 +5,14 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<link rel="stylesheet" href="/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/fonts/jetbrains-mono/jetbrains-mono.css" />
-		<!-- Lock the viewport to the device width, disable pinch/tap zoom, and let the
-		     page paint under the notch / home indicator (safe-area-inset-* become usable). -->
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-		/>
+		<!-- Fit the device width and paint under the notch / home indicator
+		     (safe-area-inset-* become usable). Zoom is left enabled for accessibility;
+		     the 16px input rule already prevents the iOS focus-zoom. -->
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<!-- Installable PWA + iOS standalone (fullscreen, status bar drawn over the app). -->
 		<link rel="manifest" href="/manifest.webmanifest" />
-		<link rel="apple-touch-icon" href="/favicon.png" />
-		<meta name="theme-color" content="#2e2e2e" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<meta name="theme-color" content="#242424" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -35,9 +33,10 @@
 		if (themeStyle) document.documentElement.setAttribute('data-theme-style', themeStyle);
 		document.documentElement.setAttribute('data-color-theme', theme);
 		// Tint the browser/OS chrome (Android address bar, iOS Safari) to match the
-		// app background so the notch strip blends in. Refined live after hydration.
+		// app's safe-area chrome (shade-1), so the notch / status strip blends in.
+		// Refined live after hydration to follow the active theme style.
 		const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-		if (themeColorMeta) themeColorMeta.content = theme === 'dark' ? '#2e2e2e' : '#ebebeb';
+		if (themeColorMeta) themeColorMeta.content = theme === 'dark' ? '#242424' : '#f5f5f5';
 	</script>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
