@@ -140,6 +140,8 @@
 						style="field-sizing: content; min-height: 56px; max-height: 200px;"
 						bind:value={prompt}
 						onkeydown={handleKeyDown}
+						enterkeyhint="send"
+						inputmode="text"
 					></textarea>
 					<PromptAttachments bind:attachments bind:webSearch {searchAvailable}>
 						{#snippet actions()}
