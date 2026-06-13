@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Cpu, Download, FolderOpen, Pencil, Plus, Upload, UserRound, Users } from '@lucide/svelte';
+	import {
+		Cpu,
+		Download,
+		FolderOpen,
+		Pencil,
+		Plus,
+		Upload,
+		UserRound,
+		Users
+	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 
