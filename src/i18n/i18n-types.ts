@@ -793,6 +793,82 @@ type RootTranslation = {
 	 * T​h​i​s​ ​w​i​l​l​ ​p​e​r​m​a​n​e​n​t​l​y​ ​d​e​l​e​t​e​ ​A​L​L​ ​y​o​u​r​ ​d​a​t​a​ ​—​ ​s​e​s​s​i​o​n​s​,​ ​k​n​o​w​l​e​d​g​e​,​ ​s​e​r​v​e​r​s​ ​a​n​d​ ​p​r​e​f​e​r​e​n​c​e​s​.​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.​ ​M​a​k​e​ ​s​u​r​e​ ​y​o​u​ ​h​a​v​e​ ​a​ ​b​a​c​k​u​p​.​ ​C​o​n​t​i​n​u​e​?
 	 */
 	resetEverythingConfirm: string
+	/**
+	 * N​e​w​ ​c​h​a​t
+	 */
+	newChat: string
+	/**
+	 * C​h​a​t​s
+	 */
+	chats: string
+	/**
+	 * L​i​b​r​a​r​y
+	 */
+	library: string
+	/**
+	 * S​e​a​r​c​h​ ​c​h​a​t​s​ ​&​ ​p​e​r​s​o​n​a​s
+	 */
+	searchChatsPersonas: string
+	/**
+	 * N​o​ ​m​a​t​c​h​e​s
+	 */
+	noMatches: string
+	/**
+	 * P​e​r​s​o​n​a​s
+	 */
+	personas: string
+	/**
+	 * P​i​n​n​e​d
+	 */
+	groupPinned: string
+	/**
+	 * T​o​d​a​y
+	 */
+	groupToday: string
+	/**
+	 * Y​e​s​t​e​r​d​a​y
+	 */
+	groupYesterday: string
+	/**
+	 * P​r​e​v​i​o​u​s​ ​7​ ​d​a​y​s
+	 */
+	groupPrevious7Days: string
+	/**
+	 * P​r​e​v​i​o​u​s​ ​3​0​ ​d​a​y​s
+	 */
+	groupPrevious30Days: string
+	/**
+	 * O​l​d​e​r
+	 */
+	groupOlder: string
+	/**
+	 * P​i​n
+	 */
+	pin: string
+	/**
+	 * U​n​p​i​n
+	 */
+	unpin: string
+	/**
+	 * C​o​n​n​e​c​t​e​d
+	 */
+	connected: string
+	/**
+	 * N​o​ ​s​e​r​v​e​r​ ​c​o​n​n​e​c​t​e​d
+	 */
+	noServerConnected: string
+	/**
+	 * U​n​t​i​t​l​e​d
+	 */
+	untitled: string
+	/**
+	 * A​d​m​i​n​i​s​t​r​a​t​o​r
+	 */
+	administrator: string
+	/**
+	 * U​s​e​r
+	 */
+	user: string
 }
 
 export type TranslationFunctions = {
@@ -1565,6 +1641,82 @@ The completion in progress will stop
 	 * This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?
 	 */
 	resetEverythingConfirm: () => LocalizedString
+	/**
+	 * New chat
+	 */
+	newChat: () => LocalizedString
+	/**
+	 * Chats
+	 */
+	chats: () => LocalizedString
+	/**
+	 * Library
+	 */
+	library: () => LocalizedString
+	/**
+	 * Search chats & personas
+	 */
+	searchChatsPersonas: () => LocalizedString
+	/**
+	 * No matches
+	 */
+	noMatches: () => LocalizedString
+	/**
+	 * Personas
+	 */
+	personas: () => LocalizedString
+	/**
+	 * Pinned
+	 */
+	groupPinned: () => LocalizedString
+	/**
+	 * Today
+	 */
+	groupToday: () => LocalizedString
+	/**
+	 * Yesterday
+	 */
+	groupYesterday: () => LocalizedString
+	/**
+	 * Previous 7 days
+	 */
+	groupPrevious7Days: () => LocalizedString
+	/**
+	 * Previous 30 days
+	 */
+	groupPrevious30Days: () => LocalizedString
+	/**
+	 * Older
+	 */
+	groupOlder: () => LocalizedString
+	/**
+	 * Pin
+	 */
+	pin: () => LocalizedString
+	/**
+	 * Unpin
+	 */
+	unpin: () => LocalizedString
+	/**
+	 * Connected
+	 */
+	connected: () => LocalizedString
+	/**
+	 * No server connected
+	 */
+	noServerConnected: () => LocalizedString
+	/**
+	 * Untitled
+	 */
+	untitled: () => LocalizedString
+	/**
+	 * Administrator
+	 */
+	administrator: () => LocalizedString
+	/**
+	 * User
+	 */
+	user: () => LocalizedString
 }
 
 export type Formatters = {}

@@ -85,7 +85,7 @@
 							<p class="text-sm text-muted">Let's set things up — it only takes a minute.</p>
 						</div>
 						<div class="flex w-full flex-col gap-2 pt-2">
-							<Button on:click={() => (step = 1)}>
+							<Button onclick={() => (step = 1)}>
 								Get started
 								<ArrowRight class="base-icon" />
 							</Button>
@@ -119,7 +119,7 @@
 							<h2 class="text-lg font-semibold tracking-tight">You're all set</h2>
 							<p class="text-sm text-muted">You can change any of this later in Settings.</p>
 						</div>
-						<Button on:click={finish}>Enter Hollama</Button>
+						<Button onclick={finish}>Enter Hollama</Button>
 					</div>
 				{/if}
 			</div>
@@ -127,7 +127,7 @@
 			<!-- Footer navigation -->
 			{#if step > 0 && step < 3}
 				<div class="flex items-center justify-between gap-2 border-t border-shade-2 p-4">
-					<Button variant="outline" on:click={() => (step -= 1)}>
+					<Button variant="outline" onclick={() => (step -= 1)}>
 						<ArrowLeft class="base-icon" />
 					</Button>
 					<div class="flex items-center gap-3">
@@ -140,7 +140,7 @@
 								Skip for now
 							</button>
 						{/if}
-						<Button on:click={() => (step += 1)}>
+						<Button onclick={() => (step += 1)}>
 							Continue
 							<ArrowRight class="base-icon" />
 						</Button>

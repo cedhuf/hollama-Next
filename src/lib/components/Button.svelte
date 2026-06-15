@@ -1,17 +1,34 @@
 <script lang="ts">
 	import { LoaderCircle } from '@lucide/svelte';
+	import type { Snippet } from 'svelte';
 
-	let className: string | undefined = undefined;
-	export { className as class };
-	export let variant: 'default' | 'outline' | 'link' | 'icon' | undefined = 'default';
-	export let href: string | undefined = undefined;
-	export let isLoading: boolean | undefined = false;
-	export let isActive: boolean | undefined = false;
+	interface Props {
+		variant?: 'default' | 'outline' | 'link' | 'icon';
+		href?: string;
+		isLoading?: boolean;
+		isActive?: boolean;
+		class?: string;
+		onclick?: (event: MouseEvent) => void;
+		children?: Snippet;
+		/** Pass-through attributes (title, disabled, data-testid, aria-*, …). */
+		[key: string]: unknown;
+	}
+
+	let {
+		variant = 'default',
+		href,
+		isLoading = false,
+		isActive = false,
+		class: className,
+		onclick,
+		children,
+		...rest
+	}: Props = $props();
 </script>
 
 {#if href}
 	<a
-		{...$$restProps}
+		{...rest}
 		{href}
 		class="
 			inline-flex items-center justify-center gap-2 rounded-md
@@ -25,13 +42,13 @@
 			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
 			{className}
 		"
-		on:click
+		{onclick}
 	>
-		<slot />
+		{@render children?.()}
 	</a>
 {:else}
 	<button
-		{...$$restProps}
+		{...rest}
 		class="
 			{isLoading ? 'relative' : ''}
 			inline-flex items-center justify-center gap-2 rounded-md
@@ -47,7 +64,7 @@
 			{className}
 		"
 		type="button"
-		on:click
+		{onclick}
 	>
 		<span
 			class="absolute inset-0 flex items-center justify-center bg-shade-2 {isLoading
@@ -56,7 +73,7 @@
 		>
 			<LoaderCircle class="base-icon animate-spin" />
 		</span>
-		<slot />
+		{@render children?.()}
 	</button>
 {/if}
 

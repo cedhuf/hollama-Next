@@ -84,7 +84,7 @@
 			class="h-full text-muted"
 			isLoading={isPullInProgress}
 			disabled={!modelTag || isPullInProgress || !server.isVerified}
-			on:click={pullModel}
+			onclick={pullModel}
 		>
 			<CloudDownload class="base-icon" />
 		</Button>

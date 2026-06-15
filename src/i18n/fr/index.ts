@@ -181,7 +181,28 @@ const fr = {
 	resetEverythingDescription:
 		"Supprimer définitivement toutes les données et réinitialiser l'application",
 	resetEverythingConfirm:
-		"Cela supprimera définitivement TOUTES vos données — sessions, connaissances, serveurs et préférences. Cette action est irréversible. Assurez-vous d'avoir une sauvegarde. Continuer ?"
+		"Cela supprimera définitivement TOUTES vos données — sessions, connaissances, serveurs et préférences. Cette action est irréversible. Assurez-vous d'avoir une sauvegarde. Continuer ?",
+
+	// Sidebar / navigation chrome
+	newChat: 'Nouveau chat',
+	chats: 'Discussions',
+	library: 'Bibliothèque',
+	searchChatsPersonas: 'Rechercher chats et personas',
+	noMatches: 'Aucun résultat',
+	personas: 'Personas',
+	groupPinned: 'Épinglés',
+	groupToday: "Aujourd'hui",
+	groupYesterday: 'Hier',
+	groupPrevious7Days: '7 derniers jours',
+	groupPrevious30Days: '30 derniers jours',
+	groupOlder: 'Plus ancien',
+	pin: 'Épingler',
+	unpin: 'Désépingler',
+	connected: 'Connecté',
+	noServerConnected: 'Aucun serveur connecté',
+	untitled: 'Sans titre',
+	administrator: 'Administrateur',
+	user: 'Utilisateur'
 } satisfies BaseTranslation;
 
 export default fr;
