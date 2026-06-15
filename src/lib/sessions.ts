@@ -148,8 +148,17 @@ export function toggleSessionPin(id: string): void {
 	sessionsStore.set([...sessions]);
 }
 
+export type SessionGroupKey =
+	| 'pinned'
+	| 'today'
+	| 'yesterday'
+	| 'previous7Days'
+	| 'previous30Days'
+	| 'older';
+
 export interface SessionGroup {
-	label: string;
+	/** i18n key — the component resolves it via $LL (e.g. groupToday). */
+	key: SessionGroupKey;
 	sessions: Session[];
 }
 
@@ -180,12 +189,12 @@ export function groupSessions(sessions: Session[]): SessionGroup[] {
 	}
 
 	const groups: SessionGroup[] = [];
-	if (pinned.length) groups.push({ label: 'Pinned', sessions: pinned });
-	if (buckets.today.length) groups.push({ label: 'Today', sessions: buckets.today });
-	if (buckets.yesterday.length) groups.push({ label: 'Yesterday', sessions: buckets.yesterday });
-	if (buckets.week.length) groups.push({ label: 'Previous 7 days', sessions: buckets.week });
-	if (buckets.month.length) groups.push({ label: 'Previous 30 days', sessions: buckets.month });
-	if (buckets.older.length) groups.push({ label: 'Older', sessions: buckets.older });
+	if (pinned.length) groups.push({ key: 'pinned', sessions: pinned });
+	if (buckets.today.length) groups.push({ key: 'today', sessions: buckets.today });
+	if (buckets.yesterday.length) groups.push({ key: 'yesterday', sessions: buckets.yesterday });
+	if (buckets.week.length) groups.push({ key: 'previous7Days', sessions: buckets.week });
+	if (buckets.month.length) groups.push({ key: 'previous30Days', sessions: buckets.month });
+	if (buckets.older.length) groups.push({ key: 'older', sessions: buckets.older });
 	return groups;
 }
 

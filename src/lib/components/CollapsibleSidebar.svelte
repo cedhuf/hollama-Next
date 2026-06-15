@@ -21,7 +21,8 @@
 		formatSessionMetadata,
 		getSessionTitle,
 		groupSessions,
-		type Session
+		type Session,
+		type SessionGroupKey
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
@@ -91,6 +92,23 @@
 		return (getSessionTitle(s).trim().charAt(0) || '#').toUpperCase();
 	}
 
+	function groupLabel(key: SessionGroupKey): string {
+		switch (key) {
+			case 'pinned':
+				return $LL.groupPinned();
+			case 'today':
+				return $LL.groupToday();
+			case 'yesterday':
+				return $LL.groupYesterday();
+			case 'previous7Days':
+				return $LL.groupPrevious7Days();
+			case 'previous30Days':
+				return $LL.groupPrevious30Days();
+			case 'older':
+				return $LL.groupOlder();
+		}
+	}
+
 	const hasName = $derived(!!($settingsStore.profileFirstName || $settingsStore.profileLastName));
 </script>
 
@@ -126,7 +144,7 @@
 		class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-shade-1 {connected
 			? 'bg-positive'
 			: 'bg-shade-5'}"
-		title={connected ? 'Connected' : 'No server connected'}
+		title={connected ? $LL.connected() : $LL.noServerConnected()}
 	></span>
 {/snippet}
 
@@ -182,16 +200,16 @@
 		<div class="flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto py-3">
 			<button
 				onclick={newChat}
-				title="New chat"
-				aria-label="New chat"
+				title={$LL.newChat()}
+				aria-label={$LL.newChat()}
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity hover:opacity-90"
 			>
 				<Plus class="h-5 w-5" />
 			</button>
 			<a
 				href="/sessions"
-				title="Chats"
-				aria-label="Chats"
+				title={$LL.chats()}
+				aria-label={$LL.chats()}
 				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onChats
 					? 'bg-shade-0 text-active'
 					: 'text-muted hover:text-active'}"
@@ -200,8 +218,8 @@
 			</a>
 			<a
 				href="/library"
-				title="Library"
-				aria-label="Library"
+				title={$LL.library()}
+				aria-label={$LL.library()}
 				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onLibrary
 					? 'bg-shade-0 text-active'
 					: 'text-muted hover:text-active'}"
@@ -229,8 +247,8 @@
 					<button
 						type="button"
 						onclick={() => goto(`/sessions/${session.id}`)}
-						title={getSessionTitle(session) || 'Untitled'}
-						aria-label={getSessionTitle(session) || 'Untitled'}
+						title={getSessionTitle(session) || $LL.untitled()}
+						aria-label={getSessionTitle(session) || $LL.untitled()}
 						class="flex h-8 w-8 items-center justify-center rounded-md border text-xs font-medium transition-colors {pathname.includes(
 							session.id
 						)
@@ -249,7 +267,8 @@
 				onclick={newChat}
 				class="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 			>
-				<Plus class="h-4 w-4" /> New chat
+				<Plus class="h-4 w-4" />
+				{$LL.newChat()}
 			</button>
 
 			<div class="relative">
@@ -259,7 +278,7 @@
 				<input
 					bind:value={query}
 					type="text"
-					placeholder="Search chats & personas"
+					placeholder={$LL.searchChatsPersonas()}
 					class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-2.5 text-sm outline-none placeholder:text-muted focus:border-accent"
 				/>
 			</div>
@@ -271,7 +290,8 @@
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
-					<MessageSquareText class="h-4 w-4 shrink-0" /> Chats
+					<MessageSquareText class="h-4 w-4 shrink-0" />
+					{$LL.chats()}
 				</a>
 				<a
 					href="/library"
@@ -279,7 +299,8 @@
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
-					<Library class="h-4 w-4 shrink-0" /> Library
+					<Library class="h-4 w-4 shrink-0" />
+					{$LL.library()}
 				</a>
 			</div>
 		</div>
@@ -293,7 +314,7 @@
 						onclick={() => (personasOpen = !personasOpen)}
 						class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
 					>
-						<span>Personas · {filteredPersonas.length}</span>
+						<span>{$LL.personas()} · {filteredPersonas.length}</span>
 						<ChevronDown
 							class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
 						/>
@@ -319,10 +340,10 @@
 				</div>
 			{/if}
 
-			{#each sessionGroups as group (group.label)}
+			{#each sessionGroups as group (group.key)}
 				<div class="mb-2">
 					<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
-						{group.label}
+						{groupLabel(group.key)}
 					</p>
 					<div class="flex flex-col">
 						{#each group.sessions as session (session.id)}
@@ -339,7 +360,7 @@
 			{/each}
 
 			{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
-				<EmptyMessage>{q ? 'No matches' : $LL.emptySessions()}</EmptyMessage>
+				<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
 			{/if}
 		</div>
 	{/if}
@@ -380,7 +401,7 @@
 							: $LL.settings()}
 					</span>
 					<span class="text-xs text-muted">
-						{$currentRole === 'admin' ? 'Administrator' : 'User'}
+						{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
 					</span>
 				</span>
 				<span class="relative shrink-0 text-muted">

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Pin } from '@lucide/svelte';
 
+	import LL from '$i18n/i18n-svelte';
 	import { page } from '$app/state';
 	import { toggleSessionPin } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
@@ -47,8 +48,8 @@
 				<button
 					type="button"
 					onclick={() => toggleSessionPin(id)}
-					title={pinned ? 'Unpin' : 'Pin'}
-					aria-label={pinned ? 'Unpin' : 'Pin'}
+					title={pinned ? $LL.unpin() : $LL.pin()}
+					aria-label={pinned ? $LL.unpin() : $LL.pin()}
 					class="rounded p-1 text-muted transition-colors hover:text-active {pinned
 						? 'text-accent hover:text-accent'
 						: ''}"

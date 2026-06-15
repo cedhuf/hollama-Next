@@ -32,7 +32,7 @@
 </script>
 
 <div class="copy-button">
-	<Button title={$LL.copy()} variant="icon" on:click={copyContent}>
+	<Button title={$LL.copy()} variant="icon" onclick={copyContent}>
 		<Files class="base-icon" />
 	</Button>
 </div>

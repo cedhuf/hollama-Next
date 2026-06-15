@@ -31,7 +31,7 @@
 		<Button
 			variant="icon"
 			class="edit-button__confirm hover:text-positive"
-			on:click={handleConfirm}
+			onclick={handleConfirm}
 			title={$LL.confirmEdit()}
 		>
 			<Check class="base-icon" />
@@ -40,7 +40,7 @@
 		<Button
 			variant="icon"
 			class="edit__cancel"
-			on:click={() => updateConfirmEdit(false)}
+			onclick={() => updateConfirmEdit(false)}
 			title={$LL.dismiss()}
 		>
 			<X class="base-icon" />
@@ -49,7 +49,7 @@
 		<Button
 			variant="icon"
 			class="edit__pencil"
-			on:click={() => updateConfirmEdit(true)}
+			onclick={() => updateConfirmEdit(true)}
 			title={$LL.editTitle()}
 		>
 			<Pencil class="base-icon" />

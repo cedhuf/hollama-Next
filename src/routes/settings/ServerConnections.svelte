@@ -231,7 +231,7 @@
 
 			<div class="flex items-center gap-2">
 				{#if !verified}
-					<Button on:click={verifyDraft} disabled={verifying || !draft.baseUrl}>
+					<Button onclick={verifyDraft} disabled={verifying || !draft.baseUrl}>
 						{#if verifying}
 							<LoaderCircle class="base-icon animate-spin" /> Verifying…
 						{:else}
@@ -239,7 +239,7 @@
 						{/if}
 					</Button>
 				{:else}
-					<Button on:click={saveDraft}><Check class="base-icon" /> Save</Button>
+					<Button onclick={saveDraft}><Check class="base-icon" /> Save</Button>
 					<span class="text-xs text-muted">{modelCount} models found</span>
 				{/if}
 			</div>

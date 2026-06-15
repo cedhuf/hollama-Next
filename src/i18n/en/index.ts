@@ -199,7 +199,28 @@ const en = {
 	resetEverything: 'Reset everything',
 	resetEverythingDescription: 'Permanently delete all data and reset the app',
 	resetEverythingConfirm:
-		'This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?'
+		'This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?',
+
+	// Sidebar / navigation chrome
+	newChat: 'New chat',
+	chats: 'Chats',
+	library: 'Library',
+	searchChatsPersonas: 'Search chats & personas',
+	noMatches: 'No matches',
+	personas: 'Personas',
+	groupPinned: 'Pinned',
+	groupToday: 'Today',
+	groupYesterday: 'Yesterday',
+	groupPrevious7Days: 'Previous 7 days',
+	groupPrevious30Days: 'Previous 30 days',
+	groupOlder: 'Older',
+	pin: 'Pin',
+	unpin: 'Unpin',
+	connected: 'Connected',
+	noServerConnected: 'No server connected',
+	untitled: 'Untitled',
+	administrator: 'Administrator',
+	user: 'User'
 } satisfies BaseTranslation;
 
 export default en;

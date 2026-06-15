@@ -444,7 +444,7 @@
 				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
 			>
 				<span>{user.email} <span class="text-xs text-muted">({user.role})</span></span>
-				<Button variant="icon" on:click={() => removeUser(user.id)}>
+				<Button variant="icon" onclick={() => removeUser(user.id)}>
 					<Trash2 class="base-icon" />
 				</Button>
 			</div>
@@ -474,7 +474,7 @@
 					<option value="user">user</option>
 					<option value="admin">admin</option>
 				</select>
-				<Button on:click={addUser}><Plus class="base-icon" /> Create user</Button>
+				<Button onclick={addUser}><Plus class="base-icon" /> Create user</Button>
 			</div>
 		{:else}
 			<button

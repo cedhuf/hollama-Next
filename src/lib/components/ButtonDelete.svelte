@@ -48,7 +48,7 @@
 		<Button
 			variant="icon"
 			class="delete-button__confirm hover:text-negative"
-			on:click={deleteRecord}
+			onclick={deleteRecord}
 			title={$LL.confirmDeletion()}
 		>
 			<Check class="base-icon" />
@@ -57,7 +57,7 @@
 		<Button
 			variant="icon"
 			class="delete__cancel"
-			on:click={() => updateConfirmDeletion(false)}
+			onclick={() => updateConfirmDeletion(false)}
 			title={$LL.dismiss()}
 		>
 			<X class="base-icon" />
@@ -66,7 +66,7 @@
 		<Button
 			variant="icon"
 			class="delete__trash"
-			on:click={() => updateConfirmDeletion(true)}
+			onclick={() => updateConfirmDeletion(true)}
 			title={sitemap === Sitemap.KNOWLEDGE ? $LL.deleteKnowledge() : $LL.deleteSession()}
 		>
 			<Trash2 class="base-icon" />

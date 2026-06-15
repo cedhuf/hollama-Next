@@ -111,7 +111,7 @@
 				<Button
 					class="max-h-full"
 					variant="outline"
-					on:click={deleteServer}
+					onclick={deleteServer}
 					aria-label={$LL.deleteServer()}
 				>
 					<Trash_2 class="base-icon" />
@@ -120,7 +120,7 @@
 				<Button
 					disabled={isLoading || !server.baseUrl}
 					variant={!server.isVerified ? 'default' : 'outline'}
-					on:click={verifyServer}
+					onclick={verifyServer}
 				>
 					{#if isLoading}
 						<LoaderCircle class="base-icon animate-spin" />
@@ -132,7 +132,7 @@
 				<Button
 					variant="outline"
 					isActive={editing}
-					on:click={() => (editing = !editing)}
+					onclick={() => (editing = !editing)}
 					aria-label="Edit connection"
 				>
 					<Pencil class="base-icon" />
