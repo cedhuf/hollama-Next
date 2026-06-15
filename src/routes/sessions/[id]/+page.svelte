@@ -33,7 +33,8 @@
 		loadSession,
 		saveSession,
 		type Editor,
-		type Message
+		type Message,
+		type WebSearchInfo
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
@@ -299,7 +300,7 @@
 			chatMessages = [{ role: 'system', content: ASK_INSTRUCTION }, ...chatMessages];
 		}
 
-		let searchInfo: { query: string; resultCount: number } | undefined;
+		let searchInfo: WebSearchInfo | undefined;
 
 		// Web search: prepend results as context. In "auto" mode the model first
 		// decides whether (and what) to search; otherwise we always search the
@@ -381,7 +382,11 @@
 					const search = await buildSearchContext(query);
 					if (search) {
 						chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
-						searchInfo = { query: search.query, resultCount: search.resultCount };
+						searchInfo = {
+							query: search.query,
+							resultCount: search.resultCount,
+							sources: search.results.map((r) => ({ title: r.title, url: r.url }))
+						};
 					} else {
 						searchInfo = { query, resultCount: 0 };
 					}

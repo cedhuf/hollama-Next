@@ -10,6 +10,19 @@ import type { Knowledge } from './knowledge';
 import type { Model } from './settings';
 import { formatTimestampToNow } from './utils';
 
+/** A single cited web source (title + url; snippets are dropped to keep storage small). */
+export interface SearchSource {
+	title: string;
+	url: string;
+}
+
+/** What we keep about a web search: the query, how many results, and the cited sources. */
+export interface WebSearchInfo {
+	query: string;
+	resultCount: number;
+	sources?: SearchSource[];
+}
+
 export interface Message {
 	role: 'user' | 'assistant' | 'system';
 	content: string;
@@ -17,7 +30,7 @@ export interface Message {
 	context?: number[];
 	reasoning?: string;
 	images?: { data: string; filename: string }[]; // Store image data and filename
-	webSearch?: { query: string; resultCount: number }; // Set when web search context was injected
+	webSearch?: WebSearchInfo; // Set when web search context was injected
 	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
 }
 
@@ -48,7 +61,7 @@ export interface Editor {
 	webSearch?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
 	searchQuery?: string; // The query being searched, shown live while isSearching
-	webSearchInfo?: { query: string; resultCount: number }; // Live result info for the streaming article
+	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];
 	completion?: string;
 	reasoning?: string;
