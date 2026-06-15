@@ -7,7 +7,12 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { ASK_INSTRUCTION, askChoicesToText, parseAskBlock } from '$lib/askChoice';
+	import {
+		ASK_INSTRUCTION,
+		askChoicesToText,
+		formatAskAnswer,
+		parseAskBlock
+	} from '$lib/askChoice';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
@@ -266,6 +271,26 @@
 		editor.prompt = text;
 		handleSubmit();
 	}
+
+	// Lock the picked option(s) onto the message (so reload renders them) and send
+	// the selection as a normal user message. Shared by the inline bubble and the
+	// docked panel above the composer.
+	function chooseAnswer(message: Message, selected: string[][]) {
+		if (!message.choices || message.choices.answered) return;
+		const text = formatAskAnswer(message.choices.questions, selected);
+		if (!text) return;
+		message.choices = { ...message.choices, answered: true, selected };
+		saveSession(session);
+		handleChoose(text);
+	}
+
+	// The unanswered quick-choice awaiting input — shown docked above the composer
+	// (Claude-style) instead of inline, and skipped in the message list until answered.
+	const pendingChoice = $derived.by(() => {
+		if (editor.isCompletionInProgress) return null;
+		const last = session.messages.at(-1);
+		return last?.role === 'assistant' && last.choices && !last.choices.answered ? last : null;
+	});
 
 	async function handleRetry(index: number) {
 		// Remove all the messages after the index
@@ -614,13 +639,22 @@
 				bind:session
 				bind:editor
 				{handleRetry}
-				{handleChoose}
+				{chooseAnswer}
+				{pendingChoice}
 				assistantLabel={persona?.name}
 			/>
 		</div>
 	{/if}
 
-	<Prompt bind:session bind:editor {handleSubmit} {stopCompletion} {scrollToBottom} />
+	<Prompt
+		bind:session
+		bind:editor
+		{handleSubmit}
+		{stopCompletion}
+		{scrollToBottom}
+		{pendingChoice}
+		{chooseAnswer}
+	/>
 </div>
 
 <SessionModal bind:open={sessionModalOpen} bind:session bind:modelName />

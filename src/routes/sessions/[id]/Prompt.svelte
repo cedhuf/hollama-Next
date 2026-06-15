@@ -18,9 +18,10 @@
 		type KnowledgeAttachment
 	} from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
-	import type { Editor, Session } from '$lib/sessions';
+	import type { Editor, Message, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
 
+	import AskChoices from './AskChoices.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
@@ -31,6 +32,9 @@
 		handleSubmit: (images?: { data: string; filename: string }[]) => void;
 		stopCompletion: () => void;
 		scrollToBottom: (shouldForceScroll: boolean) => void;
+		/** Pending quick-choice, docked above the composer until answered. */
+		pendingChoice?: Message | null;
+		chooseAnswer: (message: Message, selected: string[][]) => void;
 	}
 
 	let {
@@ -38,7 +42,9 @@
 		session = $bindable(),
 		handleSubmit,
 		stopCompletion,
-		scrollToBottom
+		scrollToBottom,
+		pendingChoice = null,
+		chooseAnswer
 	}: Props = $props();
 
 	let attachments: Attachment[] = $state([]);
@@ -173,6 +179,17 @@
 		: ''}"
 >
 	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
+		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor}
+			{@const choice = pendingChoice}
+			<div class="ask-dock rounded-xl border border-shade-3 bg-shade-0 p-3">
+				<AskChoices
+					choices={choice.choices!}
+					onChoose={(selected) => chooseAnswer(choice, selected)}
+					disabled={editor.isCompletionInProgress}
+				/>
+			</div>
+		{/if}
+
 		{#if !isPersona}
 			<div class="flex items-center justify-end gap-x-2">
 				<nav class="segmented-nav flex items-center rounded bg-shade-2 p-0.5">
