@@ -38,6 +38,8 @@ export interface Settings {
 	searchToken: string;
 	/** Let the model offer interactive quick-choice buttons to clarify a preference. */
 	interactiveChoices: boolean;
+	/** Prepend the current date/time to each request so the model is anchored in the present. */
+	sendCurrentDate: boolean;
 	systemPrompts: SystemPrompts;
 	/** Set once the built-in starter personas have been seeded (admins / local mode). */
 	defaultPersonasSeeded: boolean;
@@ -77,6 +79,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	searchBackend: 'degoog',
 	searchToken: '',
 	interactiveChoices: true,
+	sendCurrentDate: true,
 	systemPrompts: { global: '', perModel: {} },
 	defaultPersonasSeeded: false,
 	homeShowHeader: true,

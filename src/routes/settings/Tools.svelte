@@ -117,4 +117,19 @@
 			</P>
 		</FieldHelp>
 	</div>
+
+	<div class="flex flex-col gap-2 border-t border-shade-3 pt-4">
+		<P><strong>Current date</strong></P>
+		<FieldCheckbox
+			label="Tell the model today's date and time"
+			bind:checked={$settingsStore.sendCurrentDate}
+		/>
+		<FieldHelp>
+			<P>
+				A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts
+				as impossible. This prepends the current date/time (your local timezone) to each request so
+				it stays anchored in the present.
+			</P>
+		</FieldHelp>
+	</div>
 </Fieldset>

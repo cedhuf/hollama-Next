@@ -26,6 +26,7 @@
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { ConnectionType } from '$lib/connections';
+	import { currentDateSystemMessage } from '$lib/currentDate';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 	import {
 		imagesPayload,
@@ -323,6 +324,12 @@
 		// Interactive quick-choice buttons: teach the model the <ask> protocol.
 		if ($settingsStore.interactiveChoices) {
 			chatMessages = [{ role: 'system', content: ASK_INSTRUCTION }, ...chatMessages];
+		}
+
+		// Anchor the model in real time so it doesn't fall back on its training-cutoff
+		// sense of "now" (and reject facts that postdate it). Led first in the context.
+		if ($settingsStore.sendCurrentDate) {
+			chatMessages = [{ role: 'system', content: currentDateSystemMessage() }, ...chatMessages];
 		}
 
 		let searchInfo: WebSearchInfo | undefined;
