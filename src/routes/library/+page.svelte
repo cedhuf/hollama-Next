@@ -50,7 +50,7 @@
 
 	function install(persona: Persona) {
 		installPersona(persona);
-		toast.success(`Installed “${persona.name}”`);
+		toast.success($LL.installedPersona({ name: persona.name }));
 	}
 
 	function createPersona() {
@@ -75,8 +75,8 @@
 			try {
 				onData(JSON.parse(e.target?.result as string));
 			} catch (error) {
-				toast.error('Import failed', {
-					description: error instanceof Error ? error.message : 'Invalid file'
+				toast.error($LL.importError(), {
+					description: error instanceof Error ? error.message : $LL.invalidFile()
 				});
 			} finally {
 				input.value = '';
@@ -88,29 +88,29 @@
 	function onImportPersonas(event: Event) {
 		readJsonFile(event.target as HTMLInputElement, (data) => {
 			const personas = parsePersonasImport(data);
-			if (personas.length === 0) return toast.error('No personas found in this file');
+			if (personas.length === 0) return toast.error($LL.noPersonasInFile());
 			for (const persona of personas) savePersona(persona);
-			toast.success(`Imported ${personas.length} persona${personas.length === 1 ? '' : 's'}`);
+			toast.success($LL.importedPersonas({ count: personas.length }));
 		});
 	}
 
 	function onImportKnowledge(event: Event) {
 		readJsonFile(event.target as HTMLInputElement, (data) => {
 			const items = parseKnowledgeImport(data);
-			if (items.length === 0) return toast.error('No knowledge found in this file');
+			if (items.length === 0) return toast.error($LL.noKnowledgeInFile());
 			for (const item of items) saveKnowledge(item);
-			toast.success(`Imported ${items.length} collection${items.length === 1 ? '' : 's'}`);
+			toast.success($LL.importedCollections({ count: items.length }));
 		});
 	}
 </script>
 
-<Head title="Library" />
+<Head title={$LL.library()} />
 
 <div class="flex h-full flex-col overflow-auto">
 	<div class="mx-auto w-full max-w-4xl px-6 py-8">
 		<!-- Header -->
 		<div class="mb-1 flex items-center justify-between gap-3">
-			<h1 class="text-xl font-semibold tracking-tight text-active">Library</h1>
+			<h1 class="text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
 
 			<div class="relative shrink-0">
 				<button
@@ -118,14 +118,15 @@
 					onclick={() => (importOpen = !importOpen)}
 					class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 				>
-					<Upload class="h-4 w-4" /> Import
+					<Upload class="h-4 w-4" />
+					{$LL.import()}
 					<ChevronDown class="h-3.5 w-3.5 opacity-80" />
 				</button>
 
 				{#if importOpen}
 					<button
 						class="fixed inset-0 z-10 cursor-default"
-						aria-label="Close import menu"
+						aria-label={$LL.dismiss()}
 						onclick={() => (importOpen = false)}
 					></button>
 					<div
@@ -141,7 +142,8 @@
 								}}
 								class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
 							>
-								<UserRound class="h-4 w-4 shrink-0 text-muted" /> Import persona
+								<UserRound class="h-4 w-4 shrink-0 text-muted" />
+								{$LL.importPersona()}
 							</button>
 						{/if}
 						<button
@@ -152,19 +154,18 @@
 							}}
 							class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
 						>
-							<FolderOpen class="h-4 w-4 shrink-0 text-muted" /> Import knowledge
+							<FolderOpen class="h-4 w-4 shrink-0 text-muted" />
+							{$LL.importKnowledge()}
 						</button>
 					</div>
 				{/if}
 			</div>
 		</div>
-		<p class="mb-7 text-sm text-muted">
-			Everything you create lives here — your personas and your knowledge.
-		</p>
+		<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
 
 		<!-- Personas -->
 		<div class="mb-3 flex items-baseline gap-2">
-			<h2 class="text-sm font-medium text-active">Personas</h2>
+			<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
 			<span class="text-xs text-muted">{$personasStore.length}</span>
 		</div>
 
@@ -181,13 +182,16 @@
 							{#if persona.shared}
 								<span
 									class="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition-opacity group-hover:opacity-0"
-									title="Shared with users"
+									title={$LL.sharedWithUsers()}
 								>
-									<Users class="h-3 w-3" /> Shared
+									<Users class="h-3 w-3" />
+									{$LL.shared()}
 								</span>
 							{/if}
 						</div>
-						<p class="truncate text-sm font-medium text-active">{persona.name || 'Untitled'}</p>
+						<p class="truncate text-sm font-medium text-active">
+							{persona.name || $LL.untitled()}
+						</p>
 						{#if persona.tagline}
 							<p class="mb-2 line-clamp-2 text-xs text-muted">{persona.tagline}</p>
 						{/if}
@@ -199,8 +203,8 @@
 					</button>
 					<button
 						type="button"
-						aria-label="Edit persona"
-						title="Edit"
+						aria-label={$LL.editPersona()}
+						title={$LL.edit()}
 						onclick={() => editPersona(persona)}
 						class="absolute right-2 top-2.5 rounded p-0.5 text-muted opacity-0 transition-colors hover:text-active group-hover:opacity-100"
 					>
@@ -217,7 +221,7 @@
 					class="flex min-h-[118px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
 				>
 					<Plus class="h-5 w-5" />
-					<span class="text-xs">New persona</span>
+					<span class="text-xs">{$LL.newPersona()}</span>
 				</button>
 			{/if}
 		</div>
@@ -225,7 +229,7 @@
 		<!-- Shared by admin -->
 		{#if sharedToShow.length > 0}
 			<div class="mb-3 flex items-baseline gap-2">
-				<h2 class="text-sm font-medium text-active">Shared by admin</h2>
+				<h2 class="text-sm font-medium text-active">{$LL.sharedByAdmin()}</h2>
 				<span class="text-xs text-muted">{sharedToShow.length}</span>
 			</div>
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
@@ -234,7 +238,9 @@
 						<div class="mb-2.5">
 							<PersonaAvatar {persona} size={40} />
 						</div>
-						<p class="truncate text-sm font-medium text-active">{persona.name || 'Untitled'}</p>
+						<p class="truncate text-sm font-medium text-active">
+							{persona.name || $LL.untitled()}
+						</p>
 						{#if persona.tagline}
 							<p class="mb-2 line-clamp-2 text-xs text-muted">{persona.tagline}</p>
 						{/if}
@@ -243,7 +249,8 @@
 							onclick={() => install(persona)}
 							class="mt-auto flex items-center justify-center gap-1.5 rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
 						>
-							<Download class="h-3.5 w-3.5" /> Install
+							<Download class="h-3.5 w-3.5" />
+							{$LL.install()}
 						</button>
 					</div>
 				{/each}
@@ -264,7 +271,9 @@
 				>
 					<FolderOpen class="h-5 w-5 shrink-0 text-muted" />
 					<div class="min-w-0">
-						<p class="truncate text-sm font-medium text-active">{knowledge.name || 'Untitled'}</p>
+						<p class="truncate text-sm font-medium text-active">
+							{knowledge.name || $LL.untitled()}
+						</p>
 						<p class="text-[11px] text-muted">{formatTimestampToNow(knowledge.updatedAt)}</p>
 					</div>
 				</a>
@@ -275,7 +284,7 @@
 				class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
 			>
 				<Plus class="h-4 w-4" />
-				<span class="text-xs">New collection</span>
+				<span class="text-xs">{$LL.newCollection()}</span>
 			</a>
 		</div>
 	</div>

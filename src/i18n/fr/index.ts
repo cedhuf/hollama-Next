@@ -202,7 +202,25 @@ const fr = {
 	noServerConnected: 'Aucun serveur connecté',
 	untitled: 'Sans titre',
 	administrator: 'Administrateur',
-	user: 'Utilisateur'
+	user: 'Utilisateur',
+
+	// Library
+	librarySubtitle: 'Tout ce que vous créez vit ici — vos personas et vos connaissances.',
+	sharedWithUsers: 'Partagé avec les utilisateurs',
+	shared: 'Partagé',
+	newPersona: 'Nouveau persona',
+	sharedByAdmin: "Partagé par l'admin",
+	install: 'Installer',
+	importPersona: 'Importer un persona',
+	importKnowledge: 'Importer une connaissance',
+	newCollection: 'Nouvelle collection',
+	editPersona: 'Modifier le persona',
+	invalidFile: 'Fichier invalide',
+	noPersonasInFile: 'Aucun persona trouvé dans ce fichier',
+	noKnowledgeInFile: 'Aucune connaissance trouvée dans ce fichier',
+	installedPersona: '« {name} » installé',
+	importedPersonas: '{count:number} persona{{s}} importé{{s}}',
+	importedCollections: '{count:number} collection{{s}} importée{{s}}'
 } satisfies BaseTranslation;
 
 export default fr;
