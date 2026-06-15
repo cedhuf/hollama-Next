@@ -10,7 +10,7 @@
 
 	import ButtonCopy from './ButtonCopy.svelte';
 
-	let { markdown }: { markdown: string } = $props();
+	let { markdown, citations }: { markdown: string; citations?: string[] } = $props();
 	const CODE_SNIPPET_ID = 'code-snippet';
 
 	function normalizeMarkdown(content: string) {
@@ -62,6 +62,53 @@
 	md.use(texmath, {
 		engine: katex,
 		delimiters: ['dollars', 'brackets', 'doxygen', 'gitlab', 'julia', 'kramdown', 'beg_end']
+	});
+
+	// Turn inline `[n]` references into clickable citation links pointing at the
+	// n-th web source. Runs on already-tokenized text, so code spans and fenced
+	// blocks (which are separate token types) are never touched.
+	md.core.ruler.push('citations', (state) => {
+		if (!citations || citations.length === 0) return;
+		for (const block of state.tokens) {
+			if (block.type !== 'inline' || !block.children) continue;
+			const out: typeof block.children = [];
+			for (const token of block.children) {
+				if (token.type !== 'text' || !/\[\d{1,3}\]/.test(token.content)) {
+					out.push(token);
+					continue;
+				}
+				const text = token.content;
+				const re = /\[(\d{1,3})\]/g;
+				let last = 0;
+				let match: RegExpExecArray | null;
+				while ((match = re.exec(text))) {
+					const url = citations[Number(match[1]) - 1];
+					if (!url) continue; // unknown citation number — leave the [n] as plain text
+					if (match.index > last) {
+						const before = new state.Token('text', '', 0);
+						before.content = text.slice(last, match.index);
+						out.push(before);
+					}
+					const open = new state.Token('link_open', 'a', 1);
+					open.attrSet('href', url);
+					open.attrSet('class', 'citation');
+					open.attrSet('target', '_blank');
+					open.attrSet('rel', 'noreferrer');
+					const label = new state.Token('text', '', 0);
+					label.content = match[1];
+					out.push(open, label, new state.Token('link_close', 'a', -1));
+					last = match.index + match[0].length;
+				}
+				if (last === 0) {
+					out.push(token); // nothing was linkified
+				} else if (last < text.length) {
+					const after = new state.Token('text', '', 0);
+					after.content = text.slice(last);
+					out.push(after);
+				}
+			}
+			block.children = out;
+		}
 	});
 
 	$effect(() => {
@@ -168,6 +215,16 @@
 
 	.markdown :global(a) {
 		@apply text-link;
+	}
+
+	/* Inline web-search citation badge, e.g. the small accent "1" after a claim. */
+	.markdown :global(a.citation) {
+		@apply bg-accent/10 text-accent ml-0.5 inline-flex items-center rounded px-1 align-super text-[0.7em] font-medium no-underline;
+		line-height: 1;
+	}
+
+	.markdown :global(a.citation:hover) {
+		@apply bg-accent/20;
 	}
 
 	.markdown :global(table) {

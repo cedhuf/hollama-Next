@@ -112,6 +112,7 @@ export interface SearchContext {
 	context: string;
 	query: string;
 	resultCount: number;
+	results: SearchResult[];
 }
 
 /** Run a search and format the results as a system-context block (always mode). */
@@ -121,8 +122,9 @@ export async function buildSearchContext(query: string): Promise<SearchContext |
 
 	const body = results.map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.snippet}`).join('\n\n');
 	return {
-		context: `Web search results for the user's question (use them to answer accurately and cite sources by their [number] / URL when relevant):\n\n${body}`,
+		context: `Web search results for the user's question. Use them to answer accurately, and cite the sources you rely on inline with their [number] (e.g. "... was released in 2024 [1].") so they can be verified:\n\n${body}`,
 		query,
-		resultCount: results.length
+		resultCount: results.length,
+		results
 	};
 }

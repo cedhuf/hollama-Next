@@ -47,6 +47,8 @@
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
 	const isUserRole = $derived(message.role === 'user' && !isKnowledgeAttachment);
+	// URLs indexed by citation number, so the answer's inline [n] become links.
+	const citations = $derived(message.webSearch?.sources?.map((s) => s.url));
 	let isReasoningVisible = $state(false);
 	let userHasInteractedWithToggle = $state(false);
 
@@ -79,6 +81,24 @@
 			}
 		}
 	});
+
+	/** Bare hostname for a source pill, e.g. "example.com". */
+	function domainOf(url: string): string {
+		try {
+			return new URL(url).hostname.replace(/^www\./, '');
+		} catch {
+			return url;
+		}
+	}
+
+	/** Favicon URL for a source (DuckDuckGo's icon service; falls back to hidden on error). */
+	function faviconOf(url: string): string {
+		try {
+			return `https://icons.duckduckgo.com/ip3/${new URL(url).hostname}.ico`;
+		} catch {
+			return '';
+		}
+	}
 </script>
 
 {#if isKnowledgeAttachment}
@@ -150,23 +170,18 @@
 			</div>
 		</nav>
 
-		{#if isSearching || message.webSearch}
-			<div class="article__search flex items-center gap-1.5 text-xs text-muted">
-				<Globe class="h-3 w-3 shrink-0 {isSearching ? 'animate-pulse' : ''}" />
-				{#if isSearching}
-					<span class="animate-pulse">
-						{searchQuery ? `Searching the web for “${searchQuery}”…` : 'Searching the web…'}
-					</span>
-				{:else if message.webSearch}
-					<span title={`Query: “${message.webSearch.query}”`}>
-						{#if message.webSearch.resultCount === 0}
-							No web results found
-						{:else}
-							{message.webSearch.resultCount}
-							{message.webSearch.resultCount === 1 ? 'result' : 'results'} found
-						{/if}
-					</span>
+		{#if isSearching}
+			<div class="article__search flex flex-wrap items-center gap-1.5 text-xs text-muted">
+				<Globe class="h-3 w-3 shrink-0 animate-pulse" />
+				<span class="animate-pulse">Searching the web</span>
+				{#if searchQuery}
+					<span class="rounded-full bg-shade-2 px-2 py-0.5 text-muted">{searchQuery}</span>
 				{/if}
+			</div>
+		{:else if message.webSearch && message.webSearch.resultCount === 0}
+			<div class="article__search flex items-center gap-1.5 text-xs text-muted">
+				<Globe class="h-3 w-3 shrink-0" />
+				<span title={`Query: “${message.webSearch.query}”`}>No web results found</span>
 			</div>
 		{/if}
 
@@ -197,8 +212,43 @@
 			</div>
 		{/if}
 		{#if message.content}
-			<Markdown markdown={message.content} />
+			<Markdown markdown={message.content} {citations} />
 		{/if}
+
+		{#if message.webSearch?.sources?.length}
+			<div class="article__sources mt-3 flex flex-col gap-1.5">
+				<span class="flex items-center gap-1.5 text-xs font-medium text-muted">
+					<Globe class="h-3 w-3 shrink-0" />
+					Sources · {message.webSearch.sources.length}
+				</span>
+				<div class="flex flex-wrap gap-1.5">
+					{#each message.webSearch.sources as source, i (source.url + i)}
+						<a
+							href={source.url}
+							target="_blank"
+							rel="noreferrer"
+							title={source.title || source.url}
+							class="flex max-w-[15rem] items-center gap-1.5 rounded-full border border-shade-3 bg-shade-1 py-1 pl-1.5 pr-2.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
+						>
+							<span
+								class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-shade-2 text-[9px] font-semibold"
+							>
+								{i + 1}
+							</span>
+							<img
+								src={faviconOf(source.url)}
+								alt=""
+								class="h-3.5 w-3.5 shrink-0 rounded-sm"
+								loading="lazy"
+								onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')}
+							/>
+							<span class="truncate">{domainOf(source.url)}</span>
+						</a>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
 		{#if message.choices && onChoose}
 			<AskChoices choices={message.choices} {onChoose} />
 		{/if}

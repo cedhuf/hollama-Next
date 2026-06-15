@@ -320,19 +320,32 @@
 						/>
 					</button>
 					{#if showPersonaList}
-						<div class="flex flex-col gap-0.5">
+						<!-- iOS Messages-style pinned grid: large avatars, max 3 per row, partial rows centred. -->
+						<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
 							{#each filteredPersonas as persona (persona.id)}
+								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
 								<button
 									type="button"
 									onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
-									class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-shade-0
-										{persona.sessionId && pathname.includes(persona.sessionId)
-										? 'bg-shade-0 font-medium text-active'
-										: 'text-base'}"
-									title={persona.tagline}
+									class="flex w-[31%] flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0 {active
+										? 'bg-shade-0'
+										: ''}"
+									title={persona.tagline || persona.name}
 								>
-									<PersonaAvatar {persona} size={26} />
-									<span class="truncate">{persona.name}</span>
+									<span
+										class="relative inline-flex rounded-full {active
+											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-0'
+											: ''}"
+									>
+										<PersonaAvatar {persona} size={52} />
+									</span>
+									<span
+										class="w-full truncate text-center text-xs {active
+											? 'font-medium text-active'
+											: 'text-muted'}"
+									>
+										{persona.name}
+									</span>
 								</button>
 							{/each}
 						</div>
