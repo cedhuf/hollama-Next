@@ -869,6 +869,73 @@ type RootTranslation = {
 	 * U​s​e​r
 	 */
 	user: string
+	/**
+	 * E​v​e​r​y​t​h​i​n​g​ ​y​o​u​ ​c​r​e​a​t​e​ ​l​i​v​e​s​ ​h​e​r​e​ ​—​ ​y​o​u​r​ ​p​e​r​s​o​n​a​s​ ​a​n​d​ ​y​o​u​r​ ​k​n​o​w​l​e​d​g​e​.
+	 */
+	librarySubtitle: string
+	/**
+	 * S​h​a​r​e​d​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	sharedWithUsers: string
+	/**
+	 * S​h​a​r​e​d
+	 */
+	shared: string
+	/**
+	 * N​e​w​ ​p​e​r​s​o​n​a
+	 */
+	newPersona: string
+	/**
+	 * S​h​a​r​e​d​ ​b​y​ ​a​d​m​i​n
+	 */
+	sharedByAdmin: string
+	/**
+	 * I​n​s​t​a​l​l
+	 */
+	install: string
+	/**
+	 * I​m​p​o​r​t​ ​p​e​r​s​o​n​a
+	 */
+	importPersona: string
+	/**
+	 * I​m​p​o​r​t​ ​k​n​o​w​l​e​d​g​e
+	 */
+	importKnowledge: string
+	/**
+	 * N​e​w​ ​c​o​l​l​e​c​t​i​o​n
+	 */
+	newCollection: string
+	/**
+	 * E​d​i​t​ ​p​e​r​s​o​n​a
+	 */
+	editPersona: string
+	/**
+	 * I​n​v​a​l​i​d​ ​f​i​l​e
+	 */
+	invalidFile: string
+	/**
+	 * N​o​ ​p​e​r​s​o​n​a​s​ ​f​o​u​n​d​ ​i​n​ ​t​h​i​s​ ​f​i​l​e
+	 */
+	noPersonasInFile: string
+	/**
+	 * N​o​ ​k​n​o​w​l​e​d​g​e​ ​f​o​u​n​d​ ​i​n​ ​t​h​i​s​ ​f​i​l​e
+	 */
+	noKnowledgeInFile: string
+	/**
+	 * I​n​s​t​a​l​l​e​d​ ​“​{​n​a​m​e​}​”
+	 * @param {string} name
+	 */
+	installedPersona: RequiredParams<'name'>
+	/**
+	 * I​m​p​o​r​t​e​d​ ​{​c​o​u​n​t​}​ ​p​e​r​s​o​n​a​{​{​s​}​}
+	 * @param {number} count
+	 */
+	importedPersonas: RequiredParams<'count'>
+	/**
+	 * I​m​p​o​r​t​e​d​ ​{​c​o​u​n​t​}​ ​c​o​l​l​e​c​t​i​o​n​{​{​s​}​}
+	 * @param {number} count
+	 */
+	importedCollections: RequiredParams<'count'>
 }
 
 export type TranslationFunctions = {
@@ -1717,6 +1784,70 @@ The completion in progress will stop
 	 * User
 	 */
 	user: () => LocalizedString
+	/**
+	 * Everything you create lives here — your personas and your knowledge.
+	 */
+	librarySubtitle: () => LocalizedString
+	/**
+	 * Shared with users
+	 */
+	sharedWithUsers: () => LocalizedString
+	/**
+	 * Shared
+	 */
+	shared: () => LocalizedString
+	/**
+	 * New persona
+	 */
+	newPersona: () => LocalizedString
+	/**
+	 * Shared by admin
+	 */
+	sharedByAdmin: () => LocalizedString
+	/**
+	 * Install
+	 */
+	install: () => LocalizedString
+	/**
+	 * Import persona
+	 */
+	importPersona: () => LocalizedString
+	/**
+	 * Import knowledge
+	 */
+	importKnowledge: () => LocalizedString
+	/**
+	 * New collection
+	 */
+	newCollection: () => LocalizedString
+	/**
+	 * Edit persona
+	 */
+	editPersona: () => LocalizedString
+	/**
+	 * Invalid file
+	 */
+	invalidFile: () => LocalizedString
+	/**
+	 * No personas found in this file
+	 */
+	noPersonasInFile: () => LocalizedString
+	/**
+	 * No knowledge found in this file
+	 */
+	noKnowledgeInFile: () => LocalizedString
+	/**
+	 * Installed “{name}”
+	 */
+	installedPersona: (arg: { name: string }) => LocalizedString
+	/**
+	 * Imported {count} persona{{s}}
+	 */
+	importedPersonas: (arg: { count: number }) => LocalizedString
+	/**
+	 * Imported {count} collection{{s}}
+	 */
+	importedCollections: (arg: { count: number }) => LocalizedString
 }
 
 export type Formatters = {}

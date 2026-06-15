@@ -220,7 +220,25 @@ const en = {
 	noServerConnected: 'No server connected',
 	untitled: 'Untitled',
 	administrator: 'Administrator',
-	user: 'User'
+	user: 'User',
+
+	// Library
+	librarySubtitle: 'Everything you create lives here — your personas and your knowledge.',
+	sharedWithUsers: 'Shared with users',
+	shared: 'Shared',
+	newPersona: 'New persona',
+	sharedByAdmin: 'Shared by admin',
+	install: 'Install',
+	importPersona: 'Import persona',
+	importKnowledge: 'Import knowledge',
+	newCollection: 'New collection',
+	editPersona: 'Edit persona',
+	invalidFile: 'Invalid file',
+	noPersonasInFile: 'No personas found in this file',
+	noKnowledgeInFile: 'No knowledge found in this file',
+	installedPersona: 'Installed “{name:string}”',
+	importedPersonas: 'Imported {count:number} persona{{s}}',
+	importedCollections: 'Imported {count:number} collection{{s}}'
 } satisfies BaseTranslation;
 
 export default en;
