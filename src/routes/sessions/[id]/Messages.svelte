@@ -1,6 +1,6 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { formatAskAnswer, stripAskBlock } from '$lib/askChoice';
+	import { stripAskBlock } from '$lib/askChoice';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
@@ -10,7 +10,10 @@
 		session: Session;
 		editor: Editor;
 		handleRetry: (index: number) => void;
-		handleChoose?: (text: string) => void;
+		/** Locks a quick-choice and sends it; lives in +page so the docked panel shares it. */
+		chooseAnswer: (message: Message, selected: string[][]) => void;
+		/** The pending quick-choice (shown docked above the composer, so it's skipped inline). */
+		pendingChoice?: Message | null;
 		assistantLabel?: string;
 	}
 
@@ -18,20 +21,17 @@
 		session = $bindable(),
 		editor = $bindable(),
 		handleRetry,
-		handleChoose = undefined,
+		chooseAnswer,
+		pendingChoice = null,
 		assistantLabel = undefined
 	}: Props = $props();
 
-	// Lock the picked option(s) onto the message (so reload renders them) and send
-	// the selection as a normal user message.
-	function chooseAnswer(message: Message, selected: string[][]) {
-		if (!message.choices || message.choices.answered) return;
-		const text = formatAskAnswer(message.choices.questions, selected);
-		if (!text) return;
-		message.choices = { ...message.choices, answered: true, selected };
-		saveSession(session);
-		handleChoose?.(text);
-	}
+	// While the model is streaming an <ask> block the visible text is empty — show
+	// a choices skeleton instead of a bare "…".
+	const streamingContent = $derived(stripAskBlock(editor.completion || ''));
+	const preparingChoices = $derived(
+		!!editor.isCompletionInProgress && !streamingContent && /<ask\b/i.test(editor.completion || '')
+	);
 
 	function handleEditMessage(message: Message) {
 		editor.messageIndexToEdit = session.messages.findIndex((m) => m === message);
@@ -57,30 +57,33 @@
 {/if}
 
 {#each session.messages as message, i (session.id + i)}
-	{#key message.role}
-		<Article
-			{message}
-			retryIndex={['assistant', 'system'].includes(message.role) ? i : undefined}
-			{handleRetry}
-			{assistantLabel}
-			onChoose={(selected) => chooseAnswer(message, selected)}
-			handleEditMessage={() => handleEditMessage(message)}
-			handleDeleteAttachment={() => handleDeleteAttachment(message)}
-		/>
-	{/key}
+	{#if message !== pendingChoice}
+		{#key message.role}
+			<Article
+				{message}
+				retryIndex={['assistant', 'system'].includes(message.role) ? i : undefined}
+				{handleRetry}
+				{assistantLabel}
+				onChoose={(selected) => chooseAnswer(message, selected)}
+				handleEditMessage={() => handleEditMessage(message)}
+				handleDeleteAttachment={() => handleDeleteAttachment(message)}
+			/>
+		{/key}
+	{/if}
 {/each}
 
 {#if editor.isCompletionInProgress}
 	<Article
 		message={{
 			role: 'assistant',
-			content: stripAskBlock(editor.completion || '') || '...',
+			content: streamingContent || '...',
 			reasoning: editor.reasoning,
 			webSearch: editor.webSearchInfo
 		}}
 		isStreamingArticle={true}
 		isSearching={editor.isSearching}
 		searchQuery={editor.searchQuery}
+		{preparingChoices}
 		{assistantLabel}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={editor.completion}

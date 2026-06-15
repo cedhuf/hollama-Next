@@ -220,7 +220,12 @@ const fr = {
 	noKnowledgeInFile: 'Aucune connaissance trouvée dans ce fichier',
 	installedPersona: '« {name} » installé',
 	importedPersonas: '{count:number} persona{{s}} importé{{s}}',
-	importedCollections: '{count:number} collection{{s}} importée{{s}}'
+	importedCollections: '{count:number} collection{{s}} importée{{s}}',
+	send: 'Envoyer',
+	otherChoice: 'Autre…',
+	otherChoicePlaceholder: 'Saisis ta réponse',
+	multipleAllowed: 'Choix multiple possible',
+	preparingOptions: 'Préparation des options'
 } satisfies BaseTranslation;
 
 export default fr;

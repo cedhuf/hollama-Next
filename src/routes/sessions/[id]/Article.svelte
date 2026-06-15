@@ -25,6 +25,7 @@
 		isStreamingArticle = false,
 		isSearching = false,
 		searchQuery = undefined,
+		preparingChoices = false,
 		assistantLabel = undefined,
 		currentRawReasoning,
 		currentRawCompletion
@@ -39,6 +40,8 @@
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
 		searchQuery?: string;
+		/** True while the model is streaming an <ask> block — show a choices skeleton. */
+		preparingChoices?: boolean;
 		/** Label for assistant bubbles — the persona's name when in a persona chat. */
 		assistantLabel?: string;
 		currentRawReasoning?: string;
@@ -211,7 +214,16 @@
 				{/if}
 			</div>
 		{/if}
-		{#if message.content}
+		{#if preparingChoices}
+			<div class="ask-skeleton flex flex-col gap-2">
+				<span class="animate-pulse text-sm text-muted">{$LL.preparingOptions()}…</span>
+				<div class="flex flex-wrap gap-1.5">
+					{#each [0, 1, 2] as i (i)}
+						<span class="h-8 w-24 animate-pulse rounded-full bg-shade-2"></span>
+					{/each}
+				</div>
+			</div>
+		{:else if message.content}
 			<Markdown markdown={message.content} {citations} />
 		{/if}
 

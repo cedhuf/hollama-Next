@@ -936,6 +936,26 @@ type RootTranslation = {
 	 * @param {number} count
 	 */
 	importedCollections: RequiredParams<'count'>
+	/**
+	 * S​e​n​d
+	 */
+	send: string
+	/**
+	 * O​t​h​e​r​…
+	 */
+	otherChoice: string
+	/**
+	 * T​y​p​e​ ​y​o​u​r​ ​a​n​s​w​e​r
+	 */
+	otherChoicePlaceholder: string
+	/**
+	 * C​h​o​o​s​e​ ​o​n​e​ ​o​r​ ​m​o​r​e
+	 */
+	multipleAllowed: string
+	/**
+	 * P​r​e​p​a​r​i​n​g​ ​o​p​t​i​o​n​s
+	 */
+	preparingOptions: string
 }
 
 export type TranslationFunctions = {
@@ -1848,6 +1868,26 @@ The completion in progress will stop
 	 * Imported {count} collection{{s}}
 	 */
 	importedCollections: (arg: { count: number }) => LocalizedString
+	/**
+	 * Send
+	 */
+	send: () => LocalizedString
+	/**
+	 * Other…
+	 */
+	otherChoice: () => LocalizedString
+	/**
+	 * Type your answer
+	 */
+	otherChoicePlaceholder: () => LocalizedString
+	/**
+	 * Choose one or more
+	 */
+	multipleAllowed: () => LocalizedString
+	/**
+	 * Preparing options
+	 */
+	preparingOptions: () => LocalizedString
 }
 
 export type Formatters = {}

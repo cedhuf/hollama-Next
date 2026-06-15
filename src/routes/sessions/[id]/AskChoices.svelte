@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Check } from '@lucide/svelte';
 
+	import LL from '$i18n/i18n-svelte';
 	import type { AskChoices } from '$lib/askChoice';
 
 	let {
@@ -13,31 +14,55 @@
 		disabled?: boolean;
 	} = $props();
 
-	// Local selection while the user is still picking. Once answered, we read the
-	// locked-in selection off the message instead. The question set is fixed for a
-	// given message, so capturing it once here is correct.
+	// Local working state while the user is still picking. Once answered we read
+	// the locked-in selection off the message instead. The question set is fixed
+	// for a given message, so capturing it once here is correct.
 	// svelte-ignore state_referenced_locally
 	let picks = $state<string[][]>(choices.questions.map(() => []));
+	// svelte-ignore state_referenced_locally
+	let customOpen = $state<boolean[]>(choices.questions.map(() => false));
+	// svelte-ignore state_referenced_locally
+	let customText = $state<string[]>(choices.questions.map(() => ''));
 
 	const answered = $derived(!!choices.answered);
-	const display = $derived<string[][]>(answered ? (choices.selected ?? []) : picks);
-	const allPicked = $derived(choices.questions.every((_, i) => (picks[i]?.length ?? 0) > 0));
-	// A lone single-select question submits on tap — no extra confirm step.
+
+	/** The effective answer(s) for a question: picked options + a non-empty custom value. */
+	function effective(qi: number): string[] {
+		const base = picks[qi] ?? [];
+		const extra = customOpen[qi] && customText[qi].trim() ? [customText[qi].trim()] : [];
+		return [...base, ...extra];
+	}
+
+	/** Values to render as selected: the locked answer when answered, else the live pick. */
+	function selectedValues(qi: number): string[] {
+		return answered ? (choices.selected?.[qi] ?? []) : effective(qi);
+	}
+
+	/** Locked-in answers that aren't one of the offered options — i.e. free-text answers. */
+	function customAnswers(qi: number): string[] {
+		const opts = choices.questions[qi].options;
+		return (choices.selected?.[qi] ?? []).filter((v) => !opts.includes(v));
+	}
+
+	const allPicked = $derived(choices.questions.every((_, i) => effective(i).length > 0));
+	// Auto-submit only the trivial case: a single single-select question with no custom input open.
 	const autoSubmit = $derived(
-		choices.questions.length === 1 && choices.questions[0].type === 'single_select'
+		choices.questions.length === 1 &&
+			choices.questions[0].type === 'single_select' &&
+			!customOpen[0]
 	);
 
 	function isSelected(qi: number, option: string): boolean {
-		return (display[qi] ?? []).includes(option);
+		return selectedValues(qi).includes(option);
 	}
 
-	function toggle(qi: number, option: string) {
+	function toggleOption(qi: number, option: string) {
 		if (answered || disabled) return;
-		const question = choices.questions[qi];
-		if (question.type === 'single_select') {
+		if (choices.questions[qi].type === 'single_select') {
 			picks[qi] = [option];
+			customOpen[qi] = false; // a concrete option supersedes a custom answer
 			if (autoSubmit) {
-				onChoose(picks.map((a) => [...a]));
+				submit();
 				return;
 			}
 		} else {
@@ -45,40 +70,102 @@
 				? picks[qi].filter((o) => o !== option)
 				: [...picks[qi], option];
 		}
-		picks = [...picks];
+	}
+
+	function toggleCustom(qi: number) {
+		if (answered || disabled) return;
+		customOpen[qi] = !customOpen[qi];
+		if (customOpen[qi] && choices.questions[qi].type === 'single_select') {
+			picks[qi] = []; // single-select: a custom answer replaces the option
+		}
 	}
 
 	function submit() {
 		if (answered || disabled || !allPicked) return;
-		onChoose(picks.map((a) => [...a]));
+		onChoose(choices.questions.map((_, i) => effective(i)));
 	}
 </script>
 
 <div class="ask flex flex-col gap-3">
 	{#each choices.questions as question, qi (qi)}
+		{@const multi = question.type === 'multi_select'}
 		<div class="flex flex-col gap-1.5">
-			<p class="text-sm font-medium text-active">{question.question}</p>
+			<div class="flex items-baseline gap-2">
+				<p class="text-sm font-medium text-active">{question.question}</p>
+				{#if multi && !answered}
+					<span class="shrink-0 text-xs text-muted">{$LL.multipleAllowed()}</span>
+				{/if}
+			</div>
 			<div class="flex flex-wrap gap-1.5">
 				{#each question.options as option (option)}
 					{@const selected = isSelected(qi, option)}
 					<button
 						type="button"
 						disabled={answered || disabled}
-						onclick={() => toggle(qi, option)}
-						class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors
+						onclick={() => toggleOption(qi, option)}
+						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors
 							{selected
 							? 'border-accent bg-accent/10 font-medium text-active'
 							: 'border-shade-3 text-base hover:bg-shade-1'}
 							{answered && !selected ? 'opacity-40' : ''}
 							{answered || disabled ? 'cursor-default' : ''}"
 					>
-						{#if selected}
-							<Check class="h-3.5 w-3.5 shrink-0 text-accent" />
-						{/if}
+						<span
+							class="flex h-3.5 w-3.5 shrink-0 items-center justify-center border transition-colors {multi
+								? 'rounded-[4px]'
+								: 'rounded-full'} {selected
+								? 'border-accent bg-accent text-shade-0'
+								: 'border-shade-4'}"
+						>
+							{#if selected}
+								<Check class="h-2.5 w-2.5" strokeWidth={3} />
+							{/if}
+						</span>
 						{option}
 					</button>
 				{/each}
+
+				<!-- Locked-in free-text answers (answered state). -->
+				{#if answered}
+					{#each customAnswers(qi) as value (value)}
+						<span
+							class="flex items-center gap-2 rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-sm font-medium text-active"
+						>
+							<Check class="h-3 w-3 shrink-0 text-accent" strokeWidth={3} />
+							{value}
+						</span>
+					{/each}
+				{:else}
+					<!-- Free-text escape hatch: answer in the user's own words. -->
+					<button
+						type="button"
+						{disabled}
+						onclick={() => toggleCustom(qi)}
+						class="rounded-full border border-dashed px-3 py-1.5 text-sm transition-colors
+							{customOpen[qi] ? 'border-accent text-accent' : 'border-shade-4 text-muted hover:bg-shade-1'}"
+					>
+						{$LL.otherChoice()}
+					</button>
+				{/if}
 			</div>
+
+			{#if customOpen[qi] && !answered}
+				<!-- svelte-ignore a11y_autofocus -->
+				<input
+					type="text"
+					bind:value={customText[qi]}
+					placeholder={$LL.otherChoicePlaceholder()}
+					{disabled}
+					autofocus
+					onkeydown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							submit();
+						}
+					}}
+					class="w-full rounded-lg border border-shade-3 bg-shade-0 px-3 py-1.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+				/>
+			{/if}
 		</div>
 	{/each}
 
@@ -89,7 +176,7 @@
 			onclick={submit}
 			class="w-fit rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-shade-0 transition-opacity disabled:opacity-40"
 		>
-			Send
+			{$LL.send()}
 		</button>
 	{/if}
 </div>

@@ -238,7 +238,12 @@ const en = {
 	noKnowledgeInFile: 'No knowledge found in this file',
 	installedPersona: 'Installed “{name:string}”',
 	importedPersonas: 'Imported {count:number} persona{{s}}',
-	importedCollections: 'Imported {count:number} collection{{s}}'
+	importedCollections: 'Imported {count:number} collection{{s}}',
+	send: 'Send',
+	otherChoice: 'Other…',
+	otherChoicePlaceholder: 'Type your answer',
+	multipleAllowed: 'Choose one or more',
+	preparingOptions: 'Preparing options'
 } satisfies BaseTranslation;
 
 export default en;
