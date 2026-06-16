@@ -24,7 +24,7 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		placeholders: ['{datetime}'],
 		hint: 'Anchors the model in the present so it trusts recent facts.',
 		default:
-			'The current date and time is {datetime}. Treat this as the authoritative present moment — it overrides any date you might infer from your training data. If something seems impossible only because it postdates your training, do not dismiss it as fake or a rumour; defer to this date and to any real-time or web-search information you are given.'
+			'The current date and time is {datetime}. Treat this as the authoritative present — it overrides any date you would infer from your training data. Do not reject something as impossible, fake, or a rumour merely because it postdates your training cutoff; weigh it on its own merits and on any sources you are given.'
 	},
 	searchRouter: {
 		label: 'Web search — query',
@@ -58,7 +58,7 @@ Never answer the question yourself. Output only the query, or NONE.`
 		label: 'Web search — results',
 		placeholders: ['{results}'],
 		hint: 'How the model uses the retrieved results and cites them.',
-		default: `Web search results for the user's question, retrieved just now (current as of today). Use them as your primary source and prefer the most recent and official ones. Calibrate your confidence to the sources: state confirmed or official information as fact, and clearly flag anything that is only a rumour, leak or insider claim as such. Do not downgrade a confirmed, official fact to a "rumour" just because it postdates your training. Cite the sources you rely on inline with their [number] (e.g. "... releases on June 25 [1].") so they can be verified:
+		default: `Web search results for the user's question, retrieved just now (current as of today). Use them as your primary source and prefer the most recent and official ones. Calibrate your confidence to the sources: state confirmed or official information as fact, and clearly flag anything that is only a rumour, leak or insider claim as such. Cite the sources you rely on inline with their [number] (e.g. "... releases on June 25 [1].") so they can be verified:
 
 {results}`
 	},
