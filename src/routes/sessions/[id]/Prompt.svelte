@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { CircleStop, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
-	import MessageSquareText from '@lucide/svelte/icons/message-square-text';
 	import Settings_2 from '@lucide/svelte/icons/settings-2';
 	import { toast } from 'svelte-sonner';
 
@@ -57,6 +56,34 @@
 	// Persona chats keep the composer minimal — no parameters/controls tab and no
 	// expand-to-code-editor toggle.
 	const isPersona = $derived(!!session.personaId);
+
+	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
+	const tools = $derived([
+		...(searchAvailable
+			? [
+					{
+						label: 'Web search',
+						checked: !!editor.webSearch,
+						onChange: (v: boolean) => (editor.webSearch = v)
+					}
+				]
+			: []),
+		{
+			label: 'Interactive choices',
+			checked: !!editor.interactiveChoices,
+			onChange: (v: boolean) => (editor.interactiveChoices = v)
+		},
+		{
+			label: 'Current date',
+			checked: !!editor.sendCurrentDate,
+			onChange: (v: boolean) => (editor.sendCurrentDate = v)
+		}
+	]);
+
+	function toggleControls() {
+		if (editor.view === 'controls') switchToMessages();
+		else switchToControls();
+	}
 
 	$effect(() => {
 		if (attachments.length) scrollToBottom(true);
@@ -174,14 +201,14 @@
 </script>
 
 <div
-	class="prompt-editor sticky bottom-0 z-10 mx-auto flex w-full flex-col border-t bg-shade-1 p-3 md:p-4 lg:p-6 2xl:max-w-[80ch] 2xl:rounded-t-lg 2xl:border-l 2xl:border-r {editor.isCodeEditor
+	class="prompt-editor sticky bottom-0 z-10 mx-auto w-full bg-gradient-to-t from-shade-1 to-transparent px-3 pb-3 pt-6 md:px-4 md:pb-4 lg:from-shade-2 2xl:max-w-[80ch] {editor.isCodeEditor
 		? 'prompt-editor--fullscreen min-h-[60dvh] md:min-h-[75dvh]'
 		: ''}"
 >
 	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
 		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor}
 			{@const choice = pendingChoice}
-			<div class="ask-dock rounded-xl border border-shade-3 bg-shade-0 p-3">
+			<div class="ask-dock rounded-2xl border border-shade-3 bg-shade-0 p-3 shadow-lg">
 				<AskChoices
 					choices={choice.choices!}
 					onChoose={(selected) => chooseAnswer(choice, selected)}
@@ -190,60 +217,16 @@
 			</div>
 		{/if}
 
-		{#if !isPersona}
-			<div class="flex items-center justify-end gap-x-2">
-				<nav class="segmented-nav flex items-center rounded bg-shade-2 p-0.5">
-					<div
-						class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'messages'
-							? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
-							: ''}"
-					>
-						<Button
-							aria-label={$LL.messages()}
-							variant="icon"
-							onclick={switchToMessages}
-							class="h-full"
-							isActive={editor.view === 'messages'}
-						>
-							<MessageSquareText class="base-icon" />
-						</Button>
-					</div>
-					<div
-						class="segmented-nav__button h-full rounded-sm text-shade-6 {editor.view === 'controls'
-							? 'segmented-nav__button--active bg-shade-0 text-shade-0 shadow'
-							: ''}"
-					>
-						<Button
-							aria-label={$LL.controls()}
-							variant="icon"
-							onclick={switchToControls}
-							class="h-full"
-							isActive={editor.view === 'controls'}
-						>
-							<Settings_2 class="base-icon" />
-						</Button>
-					</div>
-				</nav>
-
-				<Button
-					variant={editor.isCodeEditor ? 'default' : 'outline'}
-					class="prompt-editor__toggle h-full"
-					onclick={toggleCodeEditor}
-				>
-					<UnfoldVertical class="base-icon" />
-				</Button>
-			</div>
-		{/if}
-
 		{#if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
+			<!-- Floating composer: rounded card; controls live in the bottom row by Run. -->
 			<div
-				class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 transition-colors focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2"
+				class="flex flex-col rounded-2xl border border-shade-3 bg-shade-0 shadow-lg transition-colors focus-within:border-shade-5"
 			>
 				<textarea
 					name="prompt"
-					class="prompt-editor__textarea base-input min-h-14 max-h-48 resize-none px-3 pt-3"
+					class="prompt-editor__textarea base-input min-h-14 max-h-48 resize-none px-4 pt-3.5"
 					placeholder={$LL.promptPlaceholder()}
 					bind:this={editor.promptTextarea}
 					bind:value={editor.prompt}
@@ -253,9 +236,30 @@
 					inputmode="text"
 				></textarea>
 
-				<PromptAttachments bind:attachments bind:webSearch={editor.webSearch} {searchAvailable}>
+				<PromptAttachments bind:attachments {tools}>
 					{#snippet actions()}
 						<div class="flex items-center gap-x-1">
+							{#if !isPersona}
+								<Button
+									variant="icon"
+									title={$LL.controls()}
+									aria-label={$LL.controls()}
+									isActive={editor.view === 'controls'}
+									onclick={toggleControls}
+								>
+									<Settings_2 class="base-icon" />
+								</Button>
+								<Button
+									variant="icon"
+									class="hidden lg:inline-flex"
+									title={$LL.prompt()}
+									isActive={editor.isCodeEditor}
+									onclick={toggleCodeEditor}
+								>
+									<UnfoldVertical class="base-icon" />
+								</Button>
+							{/if}
+
 							{#if editor.messageIndexToEdit !== null}
 								<Button
 									variant="outline"

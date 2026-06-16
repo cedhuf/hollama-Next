@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
+	import { Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -8,18 +8,6 @@
 	import { settingsStore } from '$lib/localStorage';
 
 	import SettingsSection from './SettingsSection.svelte';
-
-	// Track which controls just saved, to flash a subtle checkmark.
-	let savedKeys = $state<Record<string, boolean>>({});
-
-	function flashSaved(key: string) {
-		savedKeys = { ...savedKeys, [key]: true };
-		setTimeout(() => {
-			const rest = { ...savedKeys };
-			delete rest[key];
-			savedKeys = rest;
-		}, 1500);
-	}
 
 	// Admin = governance only. Servers are configured in the Servers tab; here the
 	// admin picks which of each system server's models to share, manages users,
@@ -144,7 +132,6 @@
 			searchToken: $settingsStore.searchToken
 		});
 		sharedUrl = $settingsStore.searchUrl;
-		flashSaved('search');
 	}
 
 	async function saveSystemPrompts() {
@@ -152,12 +139,10 @@
 			systemPromptsSharing,
 			systemPrompts: $settingsStore.systemPrompts
 		});
-		flashSaved('prompts');
 	}
 
 	async function saveDefaultModel() {
 		await api('/api/admin/config', 'PUT', { defaultModelSharing, defaultModel: defaultModelValue });
-		flashSaved('defaultModel');
 	}
 
 	async function saveTitle() {
@@ -168,7 +153,6 @@
 			titleModel: $settingsStore.titleModel ?? '',
 			titleServerId: model?.serverId ?? ''
 		});
-		flashSaved('title');
 	}
 
 	onMount(async () => {
@@ -183,12 +167,10 @@
 	async function toggleAllowUserKeys() {
 		// `allowUserKeys` is already flipped by the toggle's binding.
 		await api('/api/admin/config', 'PUT', { allowUserKeys });
-		flashSaved('userKeys');
 	}
 
 	async function toggleAllowUserPersonas() {
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
-		flashSaved('userPersonas');
 	}
 
 	async function loadModels(server: SystemServer) {
@@ -214,7 +196,6 @@
 
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
-		flashSaved(`models-${server.id}`);
 	}
 
 	async function addUser() {
@@ -245,21 +226,11 @@
 			bind:checked={allowUserKeys}
 			onChange={toggleAllowUserKeys}
 		/>
-		{#if savedKeys['userKeys']}
-			<span class="flex items-center gap-1 text-xs text-positive"
-				><Check class="h-3 w-3" /> Saved</span
-			>
-		{/if}
 		<FieldCheckbox
 			label="Allow users to create their own personas"
 			bind:checked={allowUserPersonas}
 			onChange={toggleAllowUserPersonas}
 		/>
-		{#if savedKeys['userPersonas']}
-			<span class="flex items-center gap-1 text-xs text-positive"
-				><Check class="h-3 w-3" /> Saved</span
-			>
-		{/if}
 	</SettingsSection>
 
 	<!-- Web search sharing -->
@@ -283,9 +254,6 @@
 					<option value="locked">Locked — users can't change it</option>
 					<option value="overridable">Users may override for themselves</option>
 				</select>
-				{#if savedKeys['search']}<span class="flex items-center gap-1 text-xs text-positive"
-						><Check class="h-3 w-3" /> Saved</span
-					>{/if}
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
 		{/if}
@@ -308,9 +276,6 @@
 			bind:checked={promptsShareEnabled}
 			onChange={syncPromptsShare}
 		/>
-		{#if savedKeys['prompts']}<span class="flex items-center gap-1 text-xs text-positive"
-				><Check class="h-3 w-3" /> Saved</span
-			>{/if}
 		{#if promptsShareEnabled}
 			<select class="settings-field" bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
 				<option value="locked">Locked — users can't change them</option>
@@ -330,9 +295,6 @@
 			bind:checked={titleShareEnabled}
 			onChange={syncTitleShare}
 		/>
-		{#if savedKeys['title']}<span class="flex items-center gap-1 text-xs text-positive"
-				><Check class="h-3 w-3" /> Saved</span
-			>{/if}
 		{#if titleShareEnabled}
 			<select class="settings-field" bind:value={titleSharing} onchange={saveTitle}>
 				<option value="locked">Locked — users can't change it</option>
@@ -377,9 +339,6 @@
 						<option value="locked">Locked — users can't change it</option>
 						<option value="overridable">Default — users may change it</option>
 					</select>
-					{#if savedKeys['defaultModel']}<span class="flex items-center gap-1 text-xs text-positive"
-							><Check class="h-3 w-3" /> Saved</span
-						>{/if}
 				{/if}
 			</div>
 		{/if}

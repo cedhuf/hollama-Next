@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { Brain, Globe, Image } from '@lucide/svelte';
+	import { Brain, Image, Zap } from '@lucide/svelte';
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import type { Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import { loadKnowledge } from '$lib/knowledge';
 	import { knowledgeStore } from '$lib/localStorage';
 	import type { Attachment, ImageAttachment } from '$lib/promptAttachments';
@@ -14,19 +16,19 @@
 	import AttachmentImage from './AttachmentImage.svelte';
 	import KnowledgeSelect from './KnowledgeSelect.svelte';
 
+	type ToolToggle = { label: string; checked: boolean; onChange: (value: boolean) => void };
+
 	interface Props {
 		attachments: Attachment[];
-		webSearch?: boolean;
-		searchAvailable?: boolean;
+		/** Per-conversation tool switches shown in the lightning dropdown. */
+		tools?: ToolToggle[];
 		actions?: Snippet;
 	}
 
-	let {
-		attachments = $bindable([]),
-		webSearch = $bindable(false),
-		searchAvailable = false,
-		actions
-	}: Props = $props();
+	let { attachments = $bindable([]), tools = [], actions }: Props = $props();
+
+	let toolsOpen = $state(false);
+	const anyToolOn = $derived(tools.some((t) => t.checked));
 
 	function addKnowledge() {
 		attachments = [...attachments, { type: 'knowledge', fieldId: generateRandomId() }];
@@ -136,7 +138,7 @@
 {/if}
 
 <div class="flex items-center justify-between px-2 pb-2 pt-0.5">
-	<div class="flex gap-x-0.5">
+	<div class="flex items-center gap-x-0.5">
 		<Button variant="icon" onclick={addKnowledge} data-testid="knowledge-attachment">
 			<Brain class="base-icon" />
 		</Button>
@@ -148,20 +150,44 @@
 		>
 			<Image class="base-icon" />
 		</Button>
-		{#if searchAvailable}
-			<button
-				type="button"
-				onclick={() => (webSearch = !webSearch)}
-				title="Web search"
-				aria-label="Web search"
-				aria-pressed={webSearch}
-				data-testid="web-search-toggle"
-				class="flex items-center justify-center rounded-md px-2.5 py-2 transition-colors {webSearch
-					? 'bg-accent/15 text-accent'
-					: 'text-muted hover:bg-shade-1 hover:text-active'}"
-			>
-				<Globe class="base-icon" />
-			</button>
+		{#if tools.length}
+			<div class="relative">
+				<button
+					type="button"
+					onclick={() => (toolsOpen = !toolsOpen)}
+					title="Tools"
+					aria-label="Tools"
+					aria-pressed={anyToolOn}
+					data-testid="tools-toggle"
+					class="flex items-center justify-center rounded-md px-2.5 py-2 transition-colors {anyToolOn
+						? 'bg-accent/15 text-accent'
+						: 'text-muted hover:bg-shade-1 hover:text-active'}"
+				>
+					<Zap class="base-icon" />
+				</button>
+				{#if toolsOpen}
+					<button
+						class="fixed inset-0 z-10 cursor-default"
+						aria-label="Dismiss"
+						onclick={() => (toolsOpen = false)}
+					></button>
+					<div
+						class="absolute bottom-full left-0 z-20 mb-2 w-60 rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg"
+						transition:fade={{ duration: 80 }}
+					>
+						<p
+							class="px-2 pb-1 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted"
+						>
+							Tools
+						</p>
+						{#each tools as tool (tool.label)}
+							<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+								<FieldCheckbox label={tool.label} checked={tool.checked} onChange={tool.onChange} />
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		{/if}
 	</div>
 

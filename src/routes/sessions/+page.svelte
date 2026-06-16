@@ -35,6 +35,12 @@
 	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);
 
+	const tools = $derived(
+		searchAvailable
+			? [{ label: 'Web search', checked: webSearch, onChange: (v: boolean) => (webSearch = v) }]
+			: []
+	);
+
 	const greeting = $derived.by(() => {
 		const hour = new Date().getHours();
 		if (hour < 12) return $LL.goodMorning();
@@ -148,7 +154,7 @@
 						enterkeyhint="send"
 						inputmode="text"
 					></textarea>
-					<PromptAttachments bind:attachments bind:webSearch {searchAvailable}>
+					<PromptAttachments bind:attachments {tools}>
 						{#snippet actions()}
 							<button
 								onclick={() => submit(prompt)}
