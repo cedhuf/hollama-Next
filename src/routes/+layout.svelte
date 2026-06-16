@@ -115,12 +115,22 @@
 		await loadServerChatDefaults();
 		await loadServerPersonas();
 
-		// Seed the built-in starter personas once, for admins (and local-mode users,
-		// who are always admin of their own data).
+		// Seed the built-in starter personas, for admins (and local-mode users, who are
+		// always admin of their own data). Idempotent by name: a newly-added default
+		// backfills on next boot, but a starter the user deleted is never re-added.
 		const isAdmin = env.PUBLIC_MODE === 'server' ? data.user?.role === 'admin' : true;
-		if (isAdmin && !$settingsStore.defaultPersonasSeeded) {
+		if (isAdmin) {
+			const seeded = [...($settingsStore.seededPersonaNames ?? [])];
+			// Migrate the old boolean: prior seeding accounts for the original three.
+			if ($settingsStore.defaultPersonasSeeded && seeded.length === 0) {
+				seeded.push('Max', 'Lou', 'Nova');
+			}
 			const model = $settingsStore.defaultModel || $settingsStore.models[0]?.name || '';
-			personasStore.set([...($personasStore ?? []), ...buildDefaultPersonas(model)]);
+			const allDefaults = buildDefaultPersonas(model);
+			const missing = allDefaults.filter((p) => !seeded.includes(p.name));
+			if (missing.length) personasStore.set([...($personasStore ?? []), ...missing]);
+			for (const p of allDefaults) if (!seeded.includes(p.name)) seeded.push(p.name);
+			$settingsStore.seededPersonaNames = seeded;
 			$settingsStore.defaultPersonasSeeded = true;
 		}
 
