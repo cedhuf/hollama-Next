@@ -12,7 +12,6 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
 	import { repository } from '$lib/data';
 	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
@@ -25,6 +24,8 @@
 		StorageKey
 	} from '$lib/localStorage';
 	import { DEFAULT_SETTINGS } from '$lib/settings';
+
+	import SettingsSection from './SettingsSection.svelte';
 
 	// Maps each storage key to its reactive store, for generic per-category ops.
 	const stores: Record<StorageKey, Writable<unknown>> = {
@@ -190,9 +191,7 @@
 	}
 </script>
 
-<Fieldset>
-	<P><strong>Data management</strong></P>
-
+<div class="flex flex-col gap-5">
 	<input
 		id="import-backup-input"
 		type="file"
@@ -226,55 +225,60 @@
 		</nav>
 	</div>
 
-	{#each dataSources as dataSource (dataSource.storageKey)}
-		<div
-			class="flex flex-grow flex-col gap-2 sm:flex-row"
-			data-testid={`data-management-${dataSource.storageKey}`}
-		>
-			<input
-				id={`import-${dataSource.storageKey}-input`}
-				type="file"
-				accept="application/json"
-				style="display: none;"
-				onchange={(e) => importData(e, dataSource.storageKey)}
-			/>
+	<SettingsSection
+		title="By category"
+		description="Export, import or delete each kind of data on its own."
+	>
+		{#each dataSources as dataSource (dataSource.storageKey)}
 			<div
-				class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-md border border-shade-4 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+				class="flex flex-grow flex-col gap-2 sm:flex-row"
+				data-testid={`data-management-${dataSource.storageKey}`}
 			>
-				<div class="flex flex-col">
-					<P><strong>{dataSource.label}</strong></P>
-					<span class="text-xs text-muted">{dataSource.description}</span>
-				</div>
+				<input
+					id={`import-${dataSource.storageKey}-input`}
+					type="file"
+					accept="application/json"
+					style="display: none;"
+					onchange={(e) => importData(e, dataSource.storageKey)}
+				/>
+				<div
+					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-md border border-shade-4 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+				>
+					<div class="flex flex-col">
+						<P><strong>{dataSource.label}</strong></P>
+						<span class="text-xs text-muted">{dataSource.description}</span>
+					</div>
 
-				<nav class="mt-4 flex justify-between sm:mt-0">
-					<Button
-						variant="icon"
-						onclick={() => exportData(dataSource.storageKey, dataSource.fileName)}
-					>
-						<Download class="base-icon" />
-						{$LL.export()}
-					</Button>
-					<Button
-						variant="icon"
-						onclick={() =>
-							document
-								.getElementById(`import-${dataSource.storageKey.toLowerCase()}-input`)
-								?.click()}
-					>
-						<FolderUp class="base-icon" />
-						{$LL.import()}
-					</Button>
-					<Button variant="icon" onclick={() => deleteData(dataSource.storageKey)}>
-						<Trash2 class="base-icon" />
-						{$LL.delete()}
-					</Button>
-				</nav>
+					<nav class="mt-4 flex justify-between sm:mt-0">
+						<Button
+							variant="icon"
+							onclick={() => exportData(dataSource.storageKey, dataSource.fileName)}
+						>
+							<Download class="base-icon" />
+							{$LL.export()}
+						</Button>
+						<Button
+							variant="icon"
+							onclick={() =>
+								document
+									.getElementById(`import-${dataSource.storageKey.toLowerCase()}-input`)
+									?.click()}
+						>
+							<FolderUp class="base-icon" />
+							{$LL.import()}
+						</Button>
+						<Button variant="icon" onclick={() => deleteData(dataSource.storageKey)}>
+							<Trash2 class="base-icon" />
+							{$LL.delete()}
+						</Button>
+					</nav>
+				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
+	</SettingsSection>
 
 	<div
-		class="mt-6 flex flex-col gap-2 rounded-md border border-negative/40 bg-shade-1 p-4 text-sm"
+		class="flex flex-col gap-2 rounded-md border border-negative/40 bg-shade-1 p-4 text-sm"
 		data-testid="data-management-reset"
 	>
 		<P><strong class="text-negative">{$LL.dangerZone()}</strong></P>
@@ -298,4 +302,4 @@
 			</Button>
 		{/if}
 	</div>
-</Fieldset>
+</div>
