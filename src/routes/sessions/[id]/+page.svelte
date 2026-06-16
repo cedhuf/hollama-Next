@@ -78,6 +78,12 @@
 	let userScrolledUp = $state(false);
 	let shouldConfirmDeletion = $state(false);
 
+	// The chat composer floats over the message list (translucent + blur). We reserve
+	// matching bottom space in the scroll area so the last message clears it. Only the
+	// plain chat view floats; controls and the expanded code editor stay in flow.
+	let promptHeight = $state(0);
+	const composerFloating = $derived(editor.view === 'messages' && !editor.isCodeEditor);
+
 	// The persona this conversation belongs to, if any (drives the header identity).
 	const persona = $derived(
 		session.personaId ? $personasStore.find((p) => p.id === session.personaId) : undefined
@@ -631,6 +637,7 @@
 			class="session__history base-fieldset-container overflow-scrollbar flex-grow {persona
 				? 'pt-[var(--app-header-h)]'
 				: ''}"
+			style={composerFloating ? `padding-bottom: ${promptHeight + 16}px` : undefined}
 			bind:this={messagesWindow}
 		>
 			<Messages
@@ -644,15 +651,20 @@
 		</div>
 	{/if}
 
-	<Prompt
-		bind:session
-		bind:editor
-		{handleSubmit}
-		{stopCompletion}
-		{scrollToBottom}
-		{pendingChoice}
-		{chooseAnswer}
-	/>
+	<div
+		class={composerFloating ? 'pointer-events-none absolute inset-x-0 bottom-0 z-10' : ''}
+		bind:clientHeight={promptHeight}
+	>
+		<Prompt
+			bind:session
+			bind:editor
+			{handleSubmit}
+			{stopCompletion}
+			{scrollToBottom}
+			{pendingChoice}
+			{chooseAnswer}
+		/>
+	</div>
 </div>
 
 <SessionModal bind:open={sessionModalOpen} bind:session bind:modelName />
