@@ -8,6 +8,7 @@
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import { settingsStore } from '$lib/localStorage';
 
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	const numberField =
@@ -59,7 +60,7 @@
 	] as const;
 </script>
 
-<div class="flex flex-col gap-5">
+<SettingsPanel>
 	<SettingsSection title="Appearance">
 		<FieldSelect
 			name="language"
@@ -187,4 +188,4 @@
 			bind:checked={$settingsStore.showPinnedPersonas}
 		/>
 	</SettingsSection>
-</div>
+</SettingsPanel>

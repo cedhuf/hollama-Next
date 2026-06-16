@@ -4,13 +4,13 @@
 	import LL from '$i18n/i18n-svelte';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
-	import Fieldset from '$lib/components/Fieldset.svelte';
-	import P from '$lib/components/P.svelte';
 	import { ConnectionType, getDefaultServer, PROVIDERS } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 
 	import Connection from './Connection.svelte';
 	import ServerConnections from './ServerConnections.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
+	import SettingsSection from './SettingsSection.svelte';
 
 	let justAddedId = $state<string | null>(null);
 
@@ -24,27 +24,28 @@
 {#if isServerMode}
 	<ServerConnections />
 {:else}
-	<Fieldset>
-		<P>
-			<strong>{$LL.servers()}</strong>
-		</P>
+	<SettingsPanel>
+		<SettingsSection
+			title={$LL.servers()}
+			description="Connect Ollama or an OpenAI-compatible provider to start chatting."
+		>
+			<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+				{#each PROVIDERS as provider (provider.type)}
+					<button
+						type="button"
+						onclick={() => addServer(provider.type)}
+						class="group flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2.5 text-left transition-colors hover:bg-shade-1"
+					>
+						<Plus class="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" />
+						<span class="truncate text-sm font-medium">{provider.name}</span>
+					</button>
+				{/each}
+			</div>
+		</SettingsSection>
 
-		<div class="provider-grid mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
-			{#each PROVIDERS as provider (provider.type)}
-				<button
-					type="button"
-					onclick={() => addServer(provider.type)}
-					class="provider-card group flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2.5 text-left transition-colors hover:border-accent hover:bg-shade-1"
-				>
-					<Plus class="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" />
-					<span class="truncate text-sm font-medium">{provider.name}</span>
-				</button>
-			{/each}
-		</div>
-
-		<div class="servers flex flex-col gap-y-4">
+		<div class="flex flex-col gap-y-4">
 			{#if !$serversStore.length}
-				<div class="col-span-full flex text-balance rounded-md border border-shade-3 text-center">
+				<div class="flex rounded-lg border border-shade-3 text-balance text-center">
 					<EmptyMessage>{$LL.noServerConnections()}</EmptyMessage>
 				</div>
 			{/if}
@@ -58,5 +59,5 @@
 				/>
 			{/each}
 		</div>
-	</Fieldset>
+	</SettingsPanel>
 {/if}
