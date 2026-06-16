@@ -46,6 +46,8 @@ export interface Settings {
 	systemPrompts: SystemPrompts;
 	/** Set once the built-in starter personas have been seeded (admins / local mode). */
 	defaultPersonasSeeded: boolean;
+	/** Names of starter personas already seeded, so new defaults backfill without re-adding deleted ones. */
+	seededPersonaNames: string[];
 	// Home screen layout toggles
 	homeShowHeader: boolean;
 	homeShowSuggestions: boolean;
@@ -86,6 +88,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	promptOverrides: {},
 	systemPrompts: { global: '', perModel: {} },
 	defaultPersonasSeeded: false,
+	seededPersonaNames: [],
 	homeShowHeader: true,
 	homeShowSuggestions: true,
 	homeShowRecentPersonas: true,

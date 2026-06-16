@@ -14,6 +14,13 @@
 	const CODE_SNIPPET_ID = 'code-snippet';
 
 	function normalizeMarkdown(content: string) {
+		// Some models cite with <cite id="3, 5">…</cite> instead of [3, 5]; normalise to
+		// brackets so the raw tag never leaks and the citation linkifier can handle them.
+		content = content.replace(
+			/<cite\b[^>]*?\bid=["']?([\d\s,]+?)["']?[^>]*>.*?<\/cite>/gis,
+			'[$1]'
+		);
+
 		// Replace multiple newlines with double newlines
 		content = content.replace(/\n{2,}/g, '\n\n');
 
@@ -64,42 +71,49 @@
 		delimiters: ['dollars', 'brackets', 'doxygen', 'gitlab', 'julia', 'kramdown', 'beg_end']
 	});
 
-	// Turn inline `[n]` references into clickable citation links pointing at the
-	// n-th web source. Runs on already-tokenized text, so code spans and fenced
+	// Turn inline `[n]` (and `[n, m]` lists) into clickable citation links pointing at
+	// the n-th web source. Runs on already-tokenized text, so code spans and fenced
 	// blocks (which are separate token types) are never touched.
+	const CITE = /\[\s*\d{1,3}(?:\s*,\s*\d{1,3})*\s*\]/; // guard (non-global)
 	md.core.ruler.push('citations', (state) => {
 		if (!citations || citations.length === 0) return;
 		for (const block of state.tokens) {
 			if (block.type !== 'inline' || !block.children) continue;
 			const out: typeof block.children = [];
 			for (const token of block.children) {
-				if (token.type !== 'text' || !/\[\d{1,3}\]/.test(token.content)) {
+				if (token.type !== 'text' || !CITE.test(token.content)) {
 					out.push(token);
 					continue;
 				}
 				const text = token.content;
-				const re = /\[(\d{1,3})\]/g;
+				const re = /\[\s*(\d{1,3}(?:\s*,\s*\d{1,3})*)\s*\]/g;
 				let last = 0;
+				let linkified = false;
 				let match: RegExpExecArray | null;
 				while ((match = re.exec(text))) {
-					const url = citations[Number(match[1]) - 1];
-					if (!url) continue; // unknown citation number — leave the [n] as plain text
+					// Resolve each number in the bracket; skip ones we have no source for.
+					const nums = match[1].split(',').map((n) => Number(n.trim()));
+					const resolved = nums.filter((n) => citations[n - 1]);
+					if (resolved.length === 0) continue; // leave the whole [..] as plain text
 					if (match.index > last) {
 						const before = new state.Token('text', '', 0);
 						before.content = text.slice(last, match.index);
 						out.push(before);
 					}
-					const open = new state.Token('link_open', 'a', 1);
-					open.attrSet('href', url);
-					open.attrSet('class', 'citation');
-					open.attrSet('target', '_blank');
-					open.attrSet('rel', 'noreferrer');
-					const label = new state.Token('text', '', 0);
-					label.content = match[1];
-					out.push(open, label, new state.Token('link_close', 'a', -1));
+					for (const n of resolved) {
+						const open = new state.Token('link_open', 'a', 1);
+						open.attrSet('href', citations[n - 1]);
+						open.attrSet('class', 'citation');
+						open.attrSet('target', '_blank');
+						open.attrSet('rel', 'noreferrer');
+						const label = new state.Token('text', '', 0);
+						label.content = String(n);
+						out.push(open, label, new state.Token('link_close', 'a', -1));
+					}
 					last = match.index + match[0].length;
+					linkified = true;
 				}
-				if (last === 0) {
+				if (!linkified) {
 					out.push(token); // nothing was linkified
 				} else if (last < text.length) {
 					const after = new state.Token('text', '', 0);
