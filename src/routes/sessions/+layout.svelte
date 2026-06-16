@@ -2,6 +2,7 @@
 	import { type Snippet } from 'svelte';
 
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import { getLastUsedModels } from '$lib/chat';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { OllamaStrategy } from '$lib/chat/ollama';
@@ -13,6 +14,9 @@
 	import { type Model } from '$lib/settings';
 
 	let { children }: { children: Snippet } = $props();
+
+	// The landing page is frameless (like Library); a conversation sits in a card.
+	const isHome = $derived(page.route.id === '/sessions');
 
 	async function listModels(): Promise<Model[]> {
 		// In server mode, models come from /api/providers (system: admin-curated
@@ -62,9 +66,16 @@
 <RobotsNoIndex />
 
 <div class="flex h-full w-full">
-	<main class="flex min-w-0 flex-1 flex-col bg-shade-1 lg:rounded-xl lg:border">
-		<div class="flex-1 overflow-auto">
+	{#if isHome}
+		<!-- Frameless landing, like Library: content sits directly on the app canvas. -->
+		<div class="flex min-w-0 flex-1 flex-col">
 			{@render children()}
 		</div>
-	</main>
+	{:else}
+		<main class="flex min-w-0 flex-1 flex-col bg-shade-1 lg:rounded-xl lg:border">
+			<div class="flex-1 overflow-auto">
+				{@render children()}
+			</div>
+		</main>
+	{/if}
 </div>
