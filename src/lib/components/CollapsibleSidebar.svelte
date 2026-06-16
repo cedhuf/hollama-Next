@@ -67,6 +67,15 @@
 	// Searching forces the personas section open so matches always show.
 	const showPersonaList = $derived(personasOpen || !!q);
 
+	// Balanced columns for the persona grid: fill rows evenly (4→4, 6→3, 5→3…),
+	// capped at 4 so avatars stay a reasonable size.
+	const personaCols = $derived.by(() => {
+		const n = filteredPersonas.length;
+		if (n <= 1) return 1;
+		const rows = Math.ceil(n / 4);
+		return Math.ceil(n / rows);
+	});
+
 	// Surfaced in the collapsed rail (with a full-title tooltip) for quick reach.
 	const recentSessions = $derived(visibleSessions.slice(0, 4));
 
@@ -320,24 +329,23 @@
 						/>
 					</button>
 					{#if showPersonaList}
-						<!-- iOS Messages-style pinned grid: large avatars, max 3 per row, partial rows centred. -->
+						<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
 						<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
 							{#each filteredPersonas as persona (persona.id)}
 								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
 								<button
 									type="button"
 									onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
-									class="flex w-[31%] flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0 {active
-										? 'bg-shade-0'
-										: ''}"
+									style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
+									class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
 									title={persona.tagline || persona.name}
 								>
 									<span
 										class="relative inline-flex rounded-full {active
-											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-0'
+											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
 											: ''}"
 									>
-										<PersonaAvatar {persona} size={52} />
+										<PersonaAvatar {persona} size={44} />
 									</span>
 									<span
 										class="w-full truncate text-center text-xs {active
