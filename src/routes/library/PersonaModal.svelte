@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Download, Trash2 } from '@lucide/svelte';
+	import { Download, ImagePlus, Trash2, X } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import { env } from '$env/dynamic/public';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import { knowledgeStore } from '$lib/localStorage';
@@ -17,15 +18,15 @@
 	import { publishSharedPersonas } from '$lib/personasConfig';
 	import { currentRole } from '$lib/stores/auth';
 
+	import SettingsField from '../settings/SettingsField.svelte';
+	import SettingsSection from '../settings/SettingsSection.svelte';
+
 	interface Props {
 		open: boolean;
 		persona: Persona;
 	}
 
 	let { open = $bindable(false), persona = $bindable() }: Props = $props();
-
-	const field =
-		'w-full rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none focus:border-accent';
 
 	const initials = $derived(personaInitials(persona.name));
 	const attached = $derived(persona.knowledgeIds ?? []);
@@ -45,6 +46,23 @@
 		const ids = persona.knowledgeIds ?? [];
 		persona.knowledgeIds = ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
 		persist();
+	}
+
+	function uploadImage() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/png,image/jpeg,image/webp';
+		input.onchange = () => {
+			const file = input.files?.[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				persona.avatarImage = e.target?.result as string;
+				persist();
+			};
+			reader.readAsDataURL(file);
+		};
+		input.click();
 	}
 
 	function removeImage() {
@@ -73,133 +91,156 @@
 	}
 </script>
 
-<Modal bind:open>
-	<div class="flex w-full flex-col gap-5 overflow-auto p-6">
-		<!-- Identity -->
-		<div class="flex items-center gap-3">
-			<div
-				class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full text-lg font-semibold text-shade-0"
-				style="background-color: {persona.avatarColor}"
+<Modal bind:open closeButton={false}>
+	<div class="flex h-full w-full flex-col">
+		<!-- Header: live title + close, aligned like the Settings modal -->
+		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
+			<span class="truncate text-sm font-semibold text-active">
+				{persona.name.trim() || 'New persona'}
+			</span>
+			<button
+				type="button"
+				onclick={() => (open = false)}
+				aria-label="Close"
+				class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
 			>
-				{#if persona.avatarImage}
-					<img src={persona.avatarImage} alt={persona.name} class="h-14 w-14 object-cover" />
-				{:else}
-					{initials}
+				<X class="h-4 w-4" />
+			</button>
+		</div>
+
+		<!-- Body -->
+		<div class="flex-1 overflow-auto p-4">
+			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
+				<SettingsSection title="Identity">
+					<div class="flex items-center gap-4">
+						<button
+							type="button"
+							onclick={uploadImage}
+							title="Upload a picture"
+							aria-label="Upload a picture"
+							class="group relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full text-lg font-semibold text-shade-0 ring-2 ring-shade-3"
+							style="background-color: {persona.avatarColor}"
+						>
+							{#if persona.avatarImage}
+								<img
+									src={persona.avatarImage}
+									alt={persona.name}
+									class="h-full w-full object-cover"
+								/>
+							{:else}
+								{initials}
+							{/if}
+							<span
+								class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+							>
+								<ImagePlus class="h-5 w-5" />
+							</span>
+						</button>
+						<div class="flex min-w-0 flex-1 flex-col gap-2">
+							<input
+								class="settings-field"
+								bind:value={persona.name}
+								oninput={persist}
+								placeholder="Name (e.g. Léa)"
+							/>
+							<input
+								class="settings-field"
+								bind:value={persona.tagline}
+								oninput={persist}
+								placeholder="One-line description (e.g. Patient maths tutor)"
+							/>
+						</div>
+					</div>
+
+					<SettingsField label="Avatar colour">
+						<div class="flex flex-wrap items-center gap-2">
+							{#each PERSONA_AVATAR_COLORS as color (color)}
+								<button
+									type="button"
+									aria-label="Choose avatar colour"
+									onclick={() => {
+										persona.avatarColor = color;
+										persist();
+									}}
+									class="h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-shade-1 transition-all {persona.avatarColor ===
+									color
+										? 'ring-accent'
+										: 'ring-transparent hover:ring-shade-4'}"
+									style="background-color: {color}"
+								></button>
+							{/each}
+							{#if persona.avatarImage}
+								<button
+									type="button"
+									class="ml-auto text-xs text-link hover:underline"
+									onclick={removeImage}
+								>
+									Remove image
+								</button>
+							{/if}
+						</div>
+					</SettingsField>
+				</SettingsSection>
+
+				<SettingsSection title="Behaviour">
+					<SettingsField label="Model">
+						<ModelPicker bind:value={persona.modelName} onSelect={persist} />
+					</SettingsField>
+
+					<SettingsField label="System prompt" hint="The persona's personality lives here.">
+						<textarea
+							class="settings-field min-h-40 resize-y"
+							rows="7"
+							bind:value={persona.systemPrompt}
+							oninput={persist}
+							placeholder="Who they are, how they speak, what they do… (e.g. “You are Léa, a patient maths tutor…”)"
+						></textarea>
+					</SettingsField>
+
+					<SettingsField label="Greeting (optional)">
+						<textarea
+							class="settings-field resize-y"
+							rows="2"
+							bind:value={persona.greeting}
+							oninput={persist}
+							placeholder="Opening line shown when the conversation starts…"
+						></textarea>
+					</SettingsField>
+
+					<FieldCheckbox
+						label="Allow web search"
+						bind:checked={persona.webSearch}
+						onChange={persist}
+					/>
+					{#if canShare}
+						<FieldCheckbox
+							label="Share with users"
+							bind:checked={persona.shared}
+							onChange={onShareChange}
+						/>
+					{/if}
+				</SettingsSection>
+
+				{#if $knowledgeStore.length > 0}
+					<SettingsSection title="Knowledge" description="Collections this persona can draw on.">
+						<div class="flex flex-col gap-1 rounded-lg border border-shade-3 bg-shade-0 p-1.5">
+							{#each $knowledgeStore as k (k.id)}
+								<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+									<FieldCheckbox
+										label={k.name || 'Untitled'}
+										checked={attached.includes(k.id)}
+										onChange={() => toggleKnowledge(k.id)}
+									/>
+								</div>
+							{/each}
+						</div>
+					</SettingsSection>
 				{/if}
 			</div>
-			<div class="flex min-w-0 flex-1 flex-col gap-2">
-				<input
-					class={field}
-					bind:value={persona.name}
-					oninput={persist}
-					placeholder="Name (e.g. Léa)"
-				/>
-				<input
-					class={field}
-					bind:value={persona.tagline}
-					oninput={persist}
-					placeholder="One-line description (e.g. Patient maths tutor)"
-				/>
-			</div>
 		</div>
 
-		<!-- Avatar colour / image -->
-		<div class="flex items-center gap-2">
-			<span class="text-xs text-muted">Avatar</span>
-			<div class="flex flex-wrap items-center gap-1.5">
-				{#each PERSONA_AVATAR_COLORS as color (color)}
-					<button
-						type="button"
-						aria-label="Choose avatar colour"
-						onclick={() => {
-							persona.avatarColor = color;
-							persist();
-						}}
-						class="h-5 w-5 rounded-full ring-offset-1 ring-offset-shade-1 transition-all {persona.avatarColor ===
-						color
-							? 'ring-2 ring-active'
-							: ''}"
-						style="background-color: {color}"
-					></button>
-				{/each}
-			</div>
-			{#if persona.avatarImage}
-				<button
-					type="button"
-					class="ml-auto text-xs text-link hover:underline"
-					onclick={removeImage}
-				>
-					Remove image
-				</button>
-			{/if}
-		</div>
-
-		<!-- Model -->
-		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-muted">Model</span>
-			<ModelPicker bind:value={persona.modelName} onSelect={persist} />
-		</label>
-
-		<!-- System prompt: the "soul" -->
-		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-muted">System prompt</span>
-			<textarea
-				class={field}
-				rows="7"
-				bind:value={persona.systemPrompt}
-				oninput={persist}
-				placeholder="Who they are, how they speak, what they do… (e.g. “You are Léa, a patient maths tutor…”)"
-			></textarea>
-			<span class="text-xs text-muted">The persona's personality lives here.</span>
-		</label>
-
-		<!-- Greeting -->
-		<label class="flex flex-col gap-1 text-sm">
-			<span class="text-muted">Greeting <span class="text-muted">(optional)</span></span>
-			<textarea
-				class={field}
-				rows="2"
-				bind:value={persona.greeting}
-				oninput={persist}
-				placeholder="Opening line shown when the conversation starts…"
-			></textarea>
-		</label>
-
-		<!-- Web search -->
-		<label class="flex items-center gap-2 text-sm">
-			<input type="checkbox" bind:checked={persona.webSearch} onchange={persist} />
-			<span>Allow web search</span>
-		</label>
-
-		<!-- Admin: share with users -->
-		{#if canShare}
-			<label class="flex items-center gap-2 text-sm">
-				<input type="checkbox" bind:checked={persona.shared} onchange={onShareChange} />
-				<span>Share with users</span>
-			</label>
-		{/if}
-
-		<!-- Knowledge -->
-		{#if $knowledgeStore.length > 0}
-			<div class="flex flex-col gap-1.5 text-sm">
-				<span class="text-muted">Knowledge</span>
-				<div class="flex flex-col gap-1 rounded-md border border-shade-3 bg-shade-0 p-2">
-					{#each $knowledgeStore as k (k.id)}
-						<label class="flex items-center gap-2">
-							<input
-								type="checkbox"
-								checked={attached.includes(k.id)}
-								onchange={() => toggleKnowledge(k.id)}
-							/>
-							<span class="truncate">{k.name || 'Untitled'}</span>
-						</label>
-					{/each}
-				</div>
-			</div>
-		{/if}
-
-		<!-- Actions -->
-		<div class="flex items-center justify-between border-t border-shade-3 pt-4">
+		<!-- Footer: actions pinned so Delete/Export are always reachable -->
+		<div class="flex shrink-0 items-center justify-between border-t border-shade-2 px-4 py-3">
 			<button
 				type="button"
 				class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
@@ -209,7 +250,7 @@
 			</button>
 			<button
 				type="button"
-				class="flex items-center gap-1.5 text-xs text-red-600 transition-colors hover:underline"
+				class="flex items-center gap-1.5 text-xs text-negative transition-colors hover:underline"
 				onclick={remove}
 			>
 				<Trash2 class="h-3.5 w-3.5" /> Delete
