@@ -1,6 +1,7 @@
 import { derived, get, writable } from 'svelte/store';
 
 import { env } from '$env/dynamic/public';
+import { resolvePrompt } from '$lib/defaultPrompts';
 import { settingsStore } from '$lib/localStorage';
 
 const isServer = env.PUBLIC_MODE === 'server';
@@ -122,7 +123,7 @@ export async function buildSearchContext(query: string): Promise<SearchContext |
 
 	const body = results.map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.snippet}`).join('\n\n');
 	return {
-		context: `Web search results for the user's question. Use them to answer accurately, and cite the sources you rely on inline with their [number] (e.g. "... was released in 2024 [1].") so they can be verified:\n\n${body}`,
+		context: resolvePrompt('searchContext', get(settingsStore).promptOverrides, { results: body }),
 		query,
 		resultCount: results.length,
 		results

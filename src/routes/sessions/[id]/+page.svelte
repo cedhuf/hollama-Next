@@ -7,12 +7,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import {
-		ASK_INSTRUCTION,
-		askChoicesToText,
-		formatAskAnswer,
-		parseAskBlock
-	} from '$lib/askChoice';
+	import { askChoicesToText, formatAskAnswer, parseAskBlock } from '$lib/askChoice';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
@@ -26,7 +21,8 @@
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { ConnectionType } from '$lib/connections';
-	import { currentDateSystemMessage } from '$lib/currentDate';
+	import { formatCurrentDateTime } from '$lib/currentDate';
+	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 	import {
 		imagesPayload,
@@ -323,13 +319,17 @@
 
 		// Interactive quick-choice buttons: teach the model the <ask> protocol.
 		if ($settingsStore.interactiveChoices) {
-			chatMessages = [{ role: 'system', content: ASK_INSTRUCTION }, ...chatMessages];
+			const content = resolvePrompt('interactiveChoices', $settingsStore.promptOverrides);
+			chatMessages = [{ role: 'system', content }, ...chatMessages];
 		}
 
 		// Anchor the model in real time so it doesn't fall back on its training-cutoff
 		// sense of "now" (and reject facts that postdate it). Led first in the context.
 		if ($settingsStore.sendCurrentDate) {
-			chatMessages = [{ role: 'system', content: currentDateSystemMessage() }, ...chatMessages];
+			const content = resolvePrompt('currentDate', $settingsStore.promptOverrides, {
+				datetime: formatCurrentDateTime()
+			});
+			chatMessages = [{ role: 'system', content }, ...chatMessages];
 		}
 
 		let searchInfo: WebSearchInfo | undefined;
@@ -350,29 +350,13 @@
 						? new OllamaStrategy(server)
 						: new OpenAIStrategy(server);
 
-				// A focused, deterministic router prompt with only the recent turns
-				// (NOT the session system prompt, which biases the model toward
-				// chatting instead of deciding). Temperature 0 + few-shot examples
-				// make weak models reliable — without them, models tend to "offer" to
-				// search instead of just doing it on a direct question.
-				const routerInstruction =
-					"You are a web-search router. Look at the user's LAST message and decide whether answering it needs a live web lookup right now.\n\n" +
-					"Reply with EITHER a short web search query (a few keywords, in the user's language, no quotes, nothing else) OR the single word NONE.\n\n" +
-					'You MUST output a query (never NONE) when the message involves:\n' +
-					'- weather, news, prices, stocks, sports scores, schedules, opening hours, traffic;\n' +
-					'- anything tied to "today", "now", "current", "latest", "aujourd\'hui", "actualités", or a recent date;\n' +
-					'- events, releases or facts that may have changed after your training data;\n' +
-					'- or an explicit request to search / look something up online.\n\n' +
-					'Reply NONE only for timeless requests you can fully answer from your own knowledge (definitions, explanations, math, translation, coding, writing, general how-to).\n\n' +
-					'Examples:\n' +
-					'"Quelle est la météo aujourd\'hui à Vichy ?" -> météo Vichy aujourd\'hui\n' +
-					'"Les actualités du jour ?" -> actualités du jour France\n' +
-					'"Qui a gagné le match hier soir ?" -> résultat match hier soir\n' +
-					'"Cours de l\'action Tesla ?" -> cours action Tesla\n' +
-					'"Explique-moi la photosynthèse" -> NONE\n' +
-					'"Traduis bonjour en espagnol" -> NONE\n' +
-					'"Écris un poème sur l\'automne" -> NONE\n\n' +
-					'Never answer the question yourself. Output only the query, or NONE.';
+				// The query writer: decides whether to search and reformulates a neutral,
+				// date-anchored query (query rewriting). Fed only the recent turns — not
+				// the session system prompt, which would bias it toward chatting. Run at
+				// temperature 0 for determinism. Editable in Settings → Tools.
+				const routerInstruction = resolvePrompt('searchRouter', $settingsStore.promptOverrides, {
+					datetime: formatCurrentDateTime()
+				});
 
 				const recentTurns = messages
 					.filter((m) => m.role === 'user' || m.role === 'assistant')

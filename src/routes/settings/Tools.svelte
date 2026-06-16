@@ -3,6 +3,7 @@
 	import FieldHelp from '$lib/components/FieldHelp.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
+	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
 
@@ -17,6 +18,26 @@
 
 	function restoreServerDefault() {
 		$settingsStore.searchUrl = '';
+	}
+
+	// System-instruction editor: one prompt shown at a time. The textarea reflects the
+	// override if set, else the built-in default; editing stores an override (cleared
+	// again if it's blanked or matches the default).
+	let selectedPrompt = $state<PromptKey>('currentDate');
+	const selectedOverride = $derived($settingsStore.promptOverrides?.[selectedPrompt]);
+	const selectedText = $derived(selectedOverride ?? DEFAULT_PROMPTS[selectedPrompt].default);
+
+	function setOverride(key: PromptKey, value: string) {
+		const next = { ...$settingsStore.promptOverrides };
+		if (!value.trim() || value === DEFAULT_PROMPTS[key].default) delete next[key];
+		else next[key] = value;
+		$settingsStore.promptOverrides = next;
+	}
+
+	function resetOverride(key: PromptKey) {
+		const next = { ...$settingsStore.promptOverrides };
+		delete next[key];
+		$settingsStore.promptOverrides = next;
 	}
 </script>
 
@@ -131,5 +152,46 @@
 				it stays anchored in the present.
 			</P>
 		</FieldHelp>
+	</div>
+
+	<div class="flex flex-col gap-2 border-t border-shade-3 pt-4">
+		<P><strong>System instructions</strong></P>
+		<FieldHelp>
+			<P>
+				The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or
+				tweak it — leave it on the default unless you know what you're changing.
+			</P>
+		</FieldHelp>
+
+		<select class={input} bind:value={selectedPrompt} aria-label="Instruction to edit">
+			{#each PROMPT_KEYS as key (key)}
+				<option value={key}>{DEFAULT_PROMPTS[key].label}</option>
+			{/each}
+		</select>
+
+		<p class="text-xs text-muted">{DEFAULT_PROMPTS[selectedPrompt].hint}</p>
+
+		<textarea
+			class="{input} min-h-36 resize-y font-mono text-xs leading-relaxed"
+			value={selectedText}
+			oninput={(e) => setOverride(selectedPrompt, e.currentTarget.value)}
+		></textarea>
+
+		<div class="flex items-center justify-between gap-2">
+			<span class="text-xs text-muted">
+				{#if DEFAULT_PROMPTS[selectedPrompt].placeholders}
+					Placeholders: {DEFAULT_PROMPTS[selectedPrompt].placeholders?.join(', ')}
+				{/if}
+			</span>
+			{#if selectedOverride !== undefined}
+				<button
+					type="button"
+					class="shrink-0 text-xs text-link hover:underline"
+					onclick={() => resetOverride(selectedPrompt)}
+				>
+					Reset to default
+				</button>
+			{/if}
+		</div>
 	</div>
 </Fieldset>

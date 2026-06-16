@@ -3,6 +3,7 @@ import { env } from '$env/dynamic/public';
 import { version } from '$app/environment';
 
 import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
+import type { PromptKey } from './defaultPrompts';
 
 export interface Model {
 	serverId: string;
@@ -40,6 +41,8 @@ export interface Settings {
 	interactiveChoices: boolean;
 	/** Prepend the current date/time to each request so the model is anchored in the present. */
 	sendCurrentDate: boolean;
+	/** Per-instruction overrides of the built-in system prompts (empty = use the default). */
+	promptOverrides: Partial<Record<PromptKey, string>>;
 	systemPrompts: SystemPrompts;
 	/** Set once the built-in starter personas have been seeded (admins / local mode). */
 	defaultPersonasSeeded: boolean;
@@ -80,6 +83,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	searchToken: '',
 	interactiveChoices: true,
 	sendCurrentDate: true,
+	promptOverrides: {},
 	systemPrompts: { global: '', perModel: {} },
 	defaultPersonasSeeded: false,
 	homeShowHeader: true,

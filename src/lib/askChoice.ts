@@ -23,21 +23,6 @@ export interface AskChoices {
 	selected?: string[][];
 }
 
-/** Instruction injected into the system prompt when the feature is enabled. */
-export const ASK_INSTRUCTION = `# Interactive choices
-When the user's request is genuinely ambiguous and hinges on a personal preference you cannot infer, you MAY ask for a quick choice instead of guessing. To do so, output a SINGLE block exactly like this and then STOP — write nothing before or after it:
-
-<ask>
-{"questions":[{"question":"...","type":"single_select","options":["...","..."]}]}
-</ask>
-
-Rules:
-- At most 3 questions; each with 2 to 4 short options. "type" is "single_select" or "multi_select".
-- Write the questions and options in the user's language.
-- Use this ONLY to clarify a preference before carrying out a task (planning, recommendations, design choices, …).
-- Do NOT use it for factual or direct questions, when the user already gave enough constraints, or when they are asking for YOUR opinion between options.
-- When you use it, the block must be the entire message — no greeting, no explanation, no answer.`;
-
 interface RawQuestion {
 	question?: unknown;
 	type?: unknown;
