@@ -8,7 +8,8 @@
 		Settings2,
 		Shield,
 		User,
-		Wrench
+		Wrench,
+		X
 	} from '@lucide/svelte';
 	import type { Component } from 'svelte';
 
@@ -68,71 +69,104 @@
 	}
 </script>
 
-<Modal bind:open={$settingsModalOpen}>
+<Modal bind:open={$settingsModalOpen} closeButton={false}>
 	<div class="flex w-full flex-col sm:flex-row">
 		<div
-			role="tablist"
-			aria-label={$LL.settings()}
-			tabindex={-1}
-			onkeydown={onTablistKeydown}
-			class="flex shrink-0 gap-1 overflow-x-auto border-b border-shade-2 bg-shade-0 p-2 pr-12 sm:w-48 sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-r sm:p-3 sm:pr-3"
+			class="flex shrink-0 flex-col border-b border-shade-2 bg-shade-0 sm:w-48 sm:border-b-0 sm:border-r"
 		>
-			<div class="mb-3 hidden items-center gap-2 px-2 text-xs font-semibold text-muted sm:flex">
-				<Settings2 class="h-4 w-4" />
-				{$LL.settings()}
+			<!-- Sidebar header: title at left, same height as the panel header on the right. -->
+			<div
+				class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-3"
+			>
+				<div class="flex items-center gap-2 text-sm font-semibold text-muted">
+					<Settings2 class="h-4 w-4" />
+					{$LL.settings()}
+				</div>
+				<!-- The panel-side close (X) is desktop-only, so the mobile close lives here. -->
+				<button
+					type="button"
+					onclick={() => ($settingsModalOpen = false)}
+					aria-label="Close"
+					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active sm:hidden"
+				>
+					<X class="h-4 w-4" />
+				</button>
 			</div>
 
-			{#each tabs as tab (tab.id)}
-				{@const Icon = tab.icon}
-				{@const active = activeTab === tab.id}
-				<button
-					bind:this={tabEls[tab.id]}
-					role="tab"
-					aria-selected={active}
-					aria-controls="settings-panel"
-					tabindex={active ? 0 : -1}
-					onclick={() => (activeTab = tab.id)}
-					class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
-						? 'bg-accent/10 font-medium text-accent'
-						: 'text-base hover:bg-shade-2'}"
-				>
-					<Icon class="h-4 w-4 shrink-0" />
-					{tab.label}
-				</button>
-			{/each}
-
-			{#if serverMode}
-				<form method="POST" action="/auth/signout" class="shrink-0 sm:mt-auto">
-					<input type="hidden" name="callbackUrl" value="/login" />
+			<div
+				role="tablist"
+				aria-label={$LL.settings()}
+				tabindex={-1}
+				onkeydown={onTablistKeydown}
+				class="flex gap-1 overflow-x-auto p-2 sm:flex-1 sm:flex-col sm:overflow-visible sm:p-3"
+			>
+				{#each tabs as tab (tab.id)}
+					{@const Icon = tab.icon}
+					{@const active = activeTab === tab.id}
 					<button
-						type="submit"
-						class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						bind:this={tabEls[tab.id]}
+						role="tab"
+						aria-selected={active}
+						aria-controls="settings-panel"
+						tabindex={active ? 0 : -1}
+						onclick={() => (activeTab = tab.id)}
+						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
+							? 'bg-accent/10 font-medium text-accent'
+							: 'text-base hover:bg-shade-2'}"
 					>
-						<LogOut class="h-4 w-4 shrink-0" />
-						Sign out
+						<Icon class="h-4 w-4 shrink-0" />
+						{tab.label}
 					</button>
-				</form>
-			{/if}
+				{/each}
+
+				{#if serverMode}
+					<form method="POST" action="/auth/signout" class="shrink-0 sm:mt-auto">
+						<input type="hidden" name="callbackUrl" value="/login" />
+						<button
+							type="submit"
+							class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						>
+							<LogOut class="h-4 w-4 shrink-0" />
+							Sign out
+						</button>
+					</form>
+				{/if}
+			</div>
 		</div>
 
-		<div id="settings-panel" role="tabpanel" class="flex-1 overflow-auto p-4">
-			{#if activeTab === 'servers'}
-				<Servers />
-			{:else if activeTab === 'admin'}
-				<Admin />
-			{:else if activeTab === 'chat'}
-				<Chat />
-			{:else if activeTab === 'tools'}
-				<Tools />
-			{:else if activeTab === 'interface'}
-				<Interface />
-			{:else if activeTab === 'profile'}
-				<Profile />
-			{:else if activeTab === 'data'}
-				<DataManagement />
-			{:else if activeTab === 'version'}
-				<Version />
-			{/if}
+		<!-- Panel: matching-height header carrying the close (X), aligned with the sidebar title. -->
+		<div class="flex min-w-0 flex-1 flex-col">
+			<div
+				class="hidden h-12 shrink-0 items-center justify-end border-b border-shade-2 px-3 sm:flex"
+			>
+				<button
+					type="button"
+					onclick={() => ($settingsModalOpen = false)}
+					aria-label="Close"
+					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+				>
+					<X class="h-4 w-4" />
+				</button>
+			</div>
+			<div id="settings-panel" role="tabpanel" class="flex-1 overflow-auto p-4">
+				{#if activeTab === 'servers'}
+					<Servers />
+				{:else if activeTab === 'admin'}
+					<Admin />
+				{:else if activeTab === 'chat'}
+					<Chat />
+				{:else if activeTab === 'tools'}
+					<Tools />
+				{:else if activeTab === 'interface'}
+					<Interface />
+				{:else if activeTab === 'profile'}
+					<Profile />
+				{:else if activeTab === 'data'}
+					<DataManagement />
+				{:else if activeTab === 'version'}
+					<Version />
+				{/if}
+			</div>
 		</div>
 	</div>
 </Modal>

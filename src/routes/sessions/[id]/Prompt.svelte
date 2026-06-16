@@ -57,6 +57,10 @@
 	// expand-to-code-editor toggle.
 	const isPersona = $derived(!!session.personaId);
 
+	// In the plain chat view the composer floats over the messages; the strip below
+	// it stays opaque so scrolling text never peeks under the input.
+	const isFloating = $derived(editor.view === 'messages' && !editor.isCodeEditor);
+
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
 	const tools = $derived([
 		...(searchAvailable
@@ -201,11 +205,11 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto mx-auto w-full max-w-[80ch] px-3 pb-3 pt-2 md:px-4 md:pb-4 {editor.isCodeEditor
+	class="prompt-editor pointer-events-auto w-full px-4 pt-2 lg:px-6 xl:px-8 {editor.isCodeEditor
 		? 'prompt-editor--fullscreen min-h-[60dvh] md:min-h-[75dvh]'
 		: ''}"
 >
-	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
+	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
 		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor}
 			{@const choice = pendingChoice}
 			<div
@@ -308,6 +312,12 @@
 			</div>
 		{/if}
 	</div>
+	{#if isFloating}
+		<!-- Opaque strip in the conversation-card colour (shade-1): keeps a little breathing
+		     room below the input while preventing scrolling text from peeking under it. Inset
+		     (no full-bleed) so it never paints over the card's rounded bottom corners. -->
+		<div class="h-3 bg-shade-1 md:h-4" aria-hidden="true"></div>
+	{/if}
 </div>
 
 <style lang="postcss">
