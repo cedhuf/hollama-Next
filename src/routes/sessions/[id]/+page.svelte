@@ -69,7 +69,9 @@
 		isCompletionInProgress: false,
 		shouldFocusTextarea: false,
 		isNewSession: true,
-		webSearch: searchAvailable && $settingsStore.webSearchByDefault
+		webSearch: searchAvailable && $settingsStore.webSearchByDefault,
+		interactiveChoices: $settingsStore.interactiveChoices,
+		sendCurrentDate: $settingsStore.sendCurrentDate
 	});
 	let messagesWindow: HTMLDivElement | undefined = $state();
 	let modelName: string | undefined = $state();
@@ -154,6 +156,8 @@
 		modelName = session.model?.name || '';
 		editor.view = 'messages';
 		editor.isNewSession = !session?.messages?.length;
+		editor.interactiveChoices = $settingsStore.interactiveChoices;
+		editor.sendCurrentDate = $settingsStore.sendCurrentDate;
 		scrollToBottom();
 
 		// A persona conversation carries its own web-search preference.
@@ -318,14 +322,14 @@
 			: messages;
 
 		// Interactive quick-choice buttons: teach the model the <ask> protocol.
-		if ($settingsStore.interactiveChoices) {
+		if (editor.interactiveChoices) {
 			const content = resolvePrompt('interactiveChoices', $settingsStore.promptOverrides);
 			chatMessages = [{ role: 'system', content }, ...chatMessages];
 		}
 
 		// Anchor the model in real time so it doesn't fall back on its training-cutoff
 		// sense of "now" (and reject facts that postdate it). Led first in the context.
-		if ($settingsStore.sendCurrentDate) {
+		if (editor.sendCurrentDate) {
 			const content = resolvePrompt('currentDate', $settingsStore.promptOverrides, {
 				datetime: formatCurrentDateTime()
 			});
@@ -596,8 +600,11 @@
 				</p>
 				<div class="flex items-center gap-1.5 text-xs text-muted">
 					{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
-					<span class="text-shade-5">•</span>
-					<ModelPicker bind:value={modelName} />
+					<!-- Model picker hidden on mobile (space); change it via the conversation settings (⚙). -->
+					<span class="hidden items-center gap-1.5 lg:flex">
+						<span class="text-shade-5">•</span>
+						<ModelPicker bind:value={modelName} />
+					</span>
 				</div>
 			{/if}
 		{/snippet}

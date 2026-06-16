@@ -59,6 +59,9 @@ export interface Editor {
 	isNewSession: boolean;
 	shouldFocusTextarea: boolean;
 	webSearch?: boolean;
+	/** Per-conversation tool toggles, seeded from the global settings each time a session loads. */
+	interactiveChoices?: boolean;
+	sendCurrentDate?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
 	searchQuery?: string; // The query being searched, shown live while isSearching
 	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article

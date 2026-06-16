@@ -58,6 +58,29 @@
 		mobileDrawerOpen.set(false);
 	});
 
+	// Native drawer gestures: edge-swipe right to open, swipe left to close.
+	let touchStartX = 0;
+	let touchStartY = 0;
+	let drawerWasClosed = false;
+
+	function onTouchStart(event: TouchEvent) {
+		const t = event.touches[0];
+		touchStartX = t.clientX;
+		touchStartY = t.clientY;
+		drawerWasClosed = !$mobileDrawerOpen;
+	}
+
+	function onTouchEnd(event: TouchEvent) {
+		if (!browser || window.innerWidth >= 1024) return;
+		const t = event.changedTouches[0];
+		const dx = t.clientX - touchStartX;
+		const dy = t.clientY - touchStartY;
+		// Only a deliberate, mostly-horizontal swipe counts.
+		if (Math.abs(dx) < 60 || Math.abs(dx) <= Math.abs(dy)) return;
+		if (drawerWasClosed && dx > 0 && touchStartX < 28) mobileDrawerOpen.set(true);
+		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
+	}
+
 	$effect(() => {
 		if (!$settingsStore.userLanguage) return;
 		loadLocale($settingsStore.userLanguage);
@@ -250,6 +273,9 @@
 	}}
 	position="top-center"
 />
+
+<!-- Global drawer swipe gestures (mobile). -->
+<svelte:window ontouchstart={onTouchStart} ontouchend={onTouchEnd} />
 
 {#if $page.url.pathname === '/login'}
 	<!-- Login renders standalone, without the app shell. -->
