@@ -201,14 +201,16 @@
 </script>
 
 <div
-	class="prompt-editor sticky bottom-0 z-10 mx-auto w-full bg-gradient-to-t from-shade-1 to-transparent px-3 pb-3 pt-6 md:px-4 md:pb-4 lg:from-shade-2 2xl:max-w-[80ch] {editor.isCodeEditor
+	class="prompt-editor pointer-events-auto mx-auto w-full max-w-[80ch] px-3 pb-3 pt-2 md:px-4 md:pb-4 {editor.isCodeEditor
 		? 'prompt-editor--fullscreen min-h-[60dvh] md:min-h-[75dvh]'
 		: ''}"
 >
 	<div class="prompt-editor__form flex h-full min-h-0 flex-col gap-y-2">
 		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor}
 			{@const choice = pendingChoice}
-			<div class="ask-dock rounded-2xl border border-shade-3 bg-shade-0 p-3 shadow-lg">
+			<div
+				class="ask-dock rounded-2xl border border-shade-3 bg-shade-0/80 p-3 shadow-lg backdrop-blur-xl"
+			>
 				<AskChoices
 					choices={choice.choices!}
 					onChoose={(selected) => chooseAnswer(choice, selected)}
@@ -220,9 +222,9 @@
 		{#if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
-			<!-- Floating composer: rounded card; controls live in the bottom row by Run. -->
+			<!-- Floating composer: translucent blurred card; controls live in the bottom row by Run. -->
 			<div
-				class="flex flex-col rounded-2xl border border-shade-3 bg-shade-0 shadow-lg transition-colors focus-within:border-shade-5"
+				class="flex flex-col rounded-2xl border border-shade-3 bg-shade-0/80 shadow-lg backdrop-blur-xl transition-colors focus-within:border-shade-5"
 			>
 				<textarea
 					name="prompt"
