@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LoaderCircle, PanelLeft } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
@@ -31,6 +31,7 @@
 	import { loadServerSearch } from '$lib/search';
 	import { currentUser } from '$lib/stores/auth';
 	import { onboardingOpen } from '$lib/stores/modal';
+	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates } from '$lib/updates';
 
@@ -49,17 +50,12 @@
 		currentUser.set(data.user);
 	});
 
-	onNavigate(async (navigation) => {
+	onNavigate(async () => {
 		// Check for updates whenever the user follows a link (if auto-check is enabled)
 		if (!($settingsStore.autoCheckForUpdates === false)) await checkForUpdates();
 
-		// Auto-collapse sidebar on mobile when navigating (except for exact /sessions and /knowledge)
-		if (browser && window.innerWidth < 1024) {
-			const pathname = navigation.to?.url.pathname;
-			if (pathname && pathname !== '/sessions' && pathname !== '/knowledge') {
-				$settingsStore.sidebarExpanded = false;
-			}
-		}
+		// Close the mobile drawer on every navigation (standard drawer behaviour).
+		mobileDrawerOpen.set(false);
 	});
 
 	$effect(() => {
@@ -273,17 +269,6 @@
 	>
 		<CollapsibleSidebar />
 		<div class="relative min-w-0 flex-1">
-			<!-- Mobile-only trigger to reopen the sidebar drawer (sits in the header's left gutter) -->
-			{#if !$settingsStore.sidebarExpanded}
-				<button
-					onclick={() => ($settingsStore.sidebarExpanded = true)}
-					class="absolute left-3 top-3 z-20 rounded-lg border bg-shade-1 p-2 text-muted shadow-sm transition-colors hover:text-active lg:hidden"
-					aria-label={$LL.expandSidebar()}
-					title={$LL.expandSidebar()}
-				>
-					<PanelLeft class="h-5 w-5" />
-				</button>
-			{/if}
 			{@render children()}
 		</div>
 	</div>

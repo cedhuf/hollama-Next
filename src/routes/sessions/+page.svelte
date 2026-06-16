@@ -16,6 +16,7 @@
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
@@ -116,6 +117,10 @@
 <Head title={$LL.sessions()} />
 
 <div class="flex h-full flex-col">
+	<!-- Mobile-only strip so the drawer is reachable on this header-less landing page. -->
+	<div class="flex shrink-0 items-center p-3 lg:hidden">
+		<SidebarToggle class="-ml-1" />
+	</div>
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			{#if $settingsStore.homeShowHeader}
