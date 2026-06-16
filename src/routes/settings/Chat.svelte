@@ -10,6 +10,8 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { systemPromptsConfig } from '$lib/systemPrompts';
 
+	import SettingsField from './SettingsField.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	const dmEditable = $derived($chatDefaultsConfig.defaultModel.editable);
@@ -57,7 +59,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-5">
+<SettingsPanel>
 	<SettingsSection title="Defaults">
 		{#if dmEditable}
 			<FieldSelectModel
@@ -67,13 +69,12 @@
 				onChange={(o) => ($settingsStore.defaultModel = o.value || null)}
 			/>
 		{:else}
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="flex items-center gap-2 text-muted">
-					{$LL.defaultModel()}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px]">set by admin</span>
-				</span>
+			<SettingsField label={$LL.defaultModel()}>
+				{#snippet badge()}
+					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">set by admin</span>
+				{/snippet}
 				<input class="settings-field" disabled value={dmValue ?? '—'} />
-			</label>
+			</SettingsField>
 		{/if}
 
 		{#if titleCfg.editable}
@@ -94,17 +95,16 @@
 				/>
 			{/if}
 		{:else}
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="flex items-center gap-2 text-muted">
-					{$LL.generateTitlesWithAI()}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px]">set by admin</span>
-				</span>
+			<SettingsField label={$LL.generateTitlesWithAI()}>
+				{#snippet badge()}
+					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">set by admin</span>
+				{/snippet}
 				<input
 					class="settings-field"
 					disabled
 					value={titleCfg.generateTitlesWithAI ? `On — ${titleCfg.titleModel || '—'}` : 'Off'}
 				/>
-			</label>
+			</SettingsField>
 		{/if}
 	</SettingsSection>
 
@@ -131,8 +131,7 @@
 				</button>
 			{/if}
 
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Global prompt</span>
+			<SettingsField label="Global prompt">
 				<textarea
 					class="settings-field"
 					rows="3"
@@ -141,7 +140,7 @@
 						? adminPrompts.global
 						: "e.g. You are concise and answer in the user's language…"}
 				></textarea>
-			</label>
+			</SettingsField>
 
 			<div class="mt-2 flex items-center justify-between gap-2">
 				<span class="text-sm font-medium">Per-model prompts</span>
@@ -199,10 +198,9 @@
 				</FieldHelp>
 			{/if}
 		{:else}
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Global prompt</span>
+			<SettingsField label="Global prompt">
 				<textarea class="settings-field" rows="3" disabled value={sharedPrompts.global}></textarea>
-			</label>
+			</SettingsField>
 
 			{#if sharedPerModel.length}
 				<div class="flex flex-col gap-2">
@@ -221,4 +219,4 @@
 			{/if}
 		{/if}
 	</SettingsSection>
-</div>
+</SettingsPanel>

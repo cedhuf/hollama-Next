@@ -7,6 +7,7 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import { settingsStore } from '$lib/localStorage';
 
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	// Admin = governance only. Servers are configured in the Servers tab; here the
@@ -214,7 +215,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-5">
+<SettingsPanel>
 	<!-- User permissions -->
 	<SettingsSection
 		title="User permissions"
@@ -445,4 +446,4 @@
 			</button>
 		{/if}
 	</SettingsSection>
-</div>
+</SettingsPanel>

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { isServerMode } from '$lib/chat/endpoint';
-	import FieldInput from '$lib/components/FieldInput.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { currentRole, currentUser } from '$lib/stores/auth';
 
+	import SettingsField from './SettingsField.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	const PRESET_COLORS = [
@@ -43,7 +44,7 @@
 	const email = $derived(isServerMode ? ($currentUser?.email ?? '') : $settingsStore.profileEmail);
 </script>
 
-<div class="mx-auto flex max-w-[80ch] flex-col gap-6">
+<SettingsPanel>
 	<!-- Identity card -->
 	<div class="flex items-center gap-4 rounded-xl border border-shade-3 bg-shade-0 p-4">
 		<div
@@ -68,38 +69,43 @@
 	<!-- Identity -->
 	<SettingsSection title={$LL.profile()}>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-			<FieldInput
-				name="profile-first-name"
-				label={$LL.firstName()}
-				bind:value={$settingsStore.profileFirstName}
-				placeholder={$LL.firstName()}
-			/>
-			<FieldInput
-				name="profile-last-name"
-				label={$LL.lastName()}
-				bind:value={$settingsStore.profileLastName}
-				placeholder={$LL.lastName()}
-			/>
+			<SettingsField label={$LL.firstName()}>
+				<input
+					class="settings-field"
+					bind:value={$settingsStore.profileFirstName}
+					placeholder={$LL.firstName()}
+				/>
+			</SettingsField>
+			<SettingsField label={$LL.lastName()}>
+				<input
+					class="settings-field"
+					bind:value={$settingsStore.profileLastName}
+					placeholder={$LL.lastName()}
+				/>
+			</SettingsField>
 		</div>
 
 		<!-- Email: editable in local mode; in server mode it's the account email,
 		     owned by the IdP/admin and read-only. -->
-		<div class="flex flex-col gap-1">
-			<span class="text-sm font-medium">Email</span>
-			{#if isServerMode}
+		{#if isServerMode}
+			<SettingsField
+				label="Email"
+				hint={$currentUser?.oidc
+					? 'Managed by your identity provider.'
+					: 'Set by your administrator.'}
+			>
 				<input class="settings-field" value={$currentUser?.email ?? ''} disabled />
-				<span class="text-xs text-muted">
-					{$currentUser?.oidc ? 'Managed by your identity provider.' : 'Set by your administrator.'}
-				</span>
-			{:else}
+			</SettingsField>
+		{:else}
+			<SettingsField label="Email">
 				<input
 					class="settings-field"
 					type="email"
 					placeholder="you@example.com"
 					bind:value={$settingsStore.profileEmail}
 				/>
-			{/if}
-		</div>
+			</SettingsField>
+		{/if}
 	</SettingsSection>
 
 	<!-- Avatar -->
@@ -129,11 +135,12 @@
 			/>
 		</div>
 
-		<FieldInput
-			name="profile-avatar"
-			label={$LL.avatarUrl()}
-			bind:value={$settingsStore.profileAvatar}
-			placeholder="https://example.com/avatar.jpg"
-		/>
+		<SettingsField label={$LL.avatarUrl()}>
+			<input
+				class="settings-field"
+				bind:value={$settingsStore.profileAvatar}
+				placeholder="https://example.com/avatar.jpg"
+			/>
+		</SettingsField>
 	</SettingsSection>
-</div>
+</SettingsPanel>

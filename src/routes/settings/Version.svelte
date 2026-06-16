@@ -43,7 +43,7 @@
 	);
 </script>
 
-<div class="about mx-auto flex max-w-md flex-col gap-5 py-4">
+<div class="about mx-auto flex max-w-md flex-col gap-6 py-4">
 	<div class="about-header flex flex-col items-center gap-3 py-2">
 		<img class="about-logo h-14 w-14" src="/favicon.png" alt="Hollama Next logo" />
 		<div class="about-title-group flex items-center gap-3">

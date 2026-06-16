@@ -12,7 +12,6 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import P from '$lib/components/P.svelte';
 	import { repository } from '$lib/data';
 	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
 	import {
@@ -25,6 +24,7 @@
 	} from '$lib/localStorage';
 	import { DEFAULT_SETTINGS } from '$lib/settings';
 
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	// Maps each storage key to its reactive store, for generic per-category ops.
@@ -191,7 +191,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-5">
+<SettingsPanel>
 	<input
 		id="import-backup-input"
 		type="file"
@@ -200,11 +200,11 @@
 		onchange={importBackup}
 	/>
 	<div
-		class="inline-flex w-full flex-col justify-between gap-x-2 text-balance rounded-md border border-accent/40 bg-shade-1 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+		class="inline-flex w-full flex-col justify-between gap-x-2 text-balance rounded-lg border border-accent/40 bg-shade-1 p-3 text-sm leading-tight sm:flex-row sm:items-center"
 		data-testid="data-management-backup"
 	>
 		<div class="flex flex-col">
-			<P><strong>Backup &amp; restore</strong></P>
+			<span class="text-sm font-medium text-active">Backup &amp; restore</span>
 			<span class="text-xs text-muted"
 				>Export or import everything (sessions, knowledge, servers, preferences) in a single file</span
 			>
@@ -242,10 +242,10 @@
 					onchange={(e) => importData(e, dataSource.storageKey)}
 				/>
 				<div
-					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-md border border-shade-4 p-2 text-sm leading-tight sm:flex-row sm:items-center"
+					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-tight sm:flex-row sm:items-center"
 				>
 					<div class="flex flex-col">
-						<P><strong>{dataSource.label}</strong></P>
+						<span class="text-sm font-medium text-active">{dataSource.label}</span>
 						<span class="text-xs text-muted">{dataSource.description}</span>
 					</div>
 
@@ -278,14 +278,14 @@
 	</SettingsSection>
 
 	<div
-		class="flex flex-col gap-2 rounded-md border border-negative/40 bg-shade-1 p-4 text-sm"
+		class="flex flex-col gap-2 rounded-lg border border-negative/40 bg-shade-1 p-4 text-sm"
 		data-testid="data-management-reset"
 	>
-		<P><strong class="text-negative">{$LL.dangerZone()}</strong></P>
+		<span class="text-sm font-medium text-negative">{$LL.dangerZone()}</span>
 		<span class="text-xs text-muted">{$LL.resetEverythingDescription()}</span>
 
 		{#if confirmReset}
-			<div class="flex flex-col gap-2 rounded-md border border-negative/30 bg-shade-0 p-3">
+			<div class="flex flex-col gap-2 rounded-lg border border-negative/30 bg-shade-0 p-3">
 				<span class="text-sm font-medium text-negative">Are you sure? This cannot be undone.</span>
 				<div class="flex gap-2">
 					<Button variant="default" class="!bg-negative !text-shade-0" onclick={resetEverything}>
@@ -302,4 +302,4 @@
 			</Button>
 		{/if}
 	</div>
-</div>
+</SettingsPanel>

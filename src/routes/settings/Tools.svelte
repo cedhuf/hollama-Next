@@ -6,6 +6,8 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
 
+	import SettingsField from './SettingsField.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	// Show the section unless we're a server user with nothing configured yet.
@@ -39,7 +41,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-5">
+<SettingsPanel>
 	<SettingsSection title="Web search">
 		{#snippet badge()}
 			{#if $searchConfig.source === 'env'}
@@ -50,8 +52,7 @@
 		{/snippet}
 
 		{#if showSearch}
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Backend URL (degoog / SearXNG)</span>
+			<SettingsField label="Backend URL (degoog / SearXNG)">
 				<input
 					class="settings-field disabled:opacity-60"
 					disabled={!$searchConfig.editable}
@@ -59,10 +60,9 @@
 					placeholder={$searchConfig.adminUrl || 'http://localhost:4444'}
 					oninput={(e) => ($settingsStore.searchUrl = e.currentTarget.value)}
 				/>
-			</label>
+			</SettingsField>
 
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">Backend</span>
+			<SettingsField label="Backend">
 				<select
 					class="settings-field disabled:opacity-60"
 					disabled={!$searchConfig.editable}
@@ -73,10 +73,9 @@
 					<option value="degoog">degoog</option>
 					<option value="searxng">SearXNG</option>
 				</select>
-			</label>
+			</SettingsField>
 
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">API token (optional, for protected instances)</span>
+			<SettingsField label="API token (optional, for protected instances)">
 				<input
 					class="settings-field disabled:opacity-60"
 					type="password"
@@ -85,7 +84,7 @@
 					placeholder={!$searchConfig.editable && $searchConfig.hasToken ? '•••••••• (set)' : ''}
 					oninput={(e) => ($settingsStore.searchToken = e.currentTarget.value)}
 				/>
-			</label>
+			</SettingsField>
 
 			{#if canOverride}
 				<button
@@ -175,4 +174,4 @@
 			{/if}
 		</div>
 	</SettingsSection>
-</div>
+</SettingsPanel>
