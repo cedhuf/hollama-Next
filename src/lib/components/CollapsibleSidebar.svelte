@@ -13,6 +13,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
@@ -27,6 +28,7 @@
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
+	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { updateStatusStore } from '$lib/updates';
 
 	import { generateNewUrl } from './ButtonNew';
@@ -38,7 +40,6 @@
 	let personasOpen = $state(true);
 
 	const pathname = $derived(page.url.pathname);
-	const isCollapsed = $derived(!$settingsStore.sidebarExpanded);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onChats = $derived(pathname.includes('/sessions'));
 	const q = $derived(query.trim().toLowerCase());
@@ -83,8 +84,28 @@
 		env.PUBLIC_MODE === 'server' ? true : $serversStore.some((s) => s.isEnabled && s.isVerified)
 	);
 
-	function toggleExpanded() {
-		$settingsStore.sidebarExpanded = !$settingsStore.sidebarExpanded;
+	// Mobile drawer open/close is transient (sidebar store, starts closed); desktop
+	// rail/full is the persisted sidebarExpanded preference. Kept separate so the
+	// drawer never persists and the two modes don't fight over one boolean.
+	let isMobile = $state(false);
+	$effect(() => {
+		if (!browser) return;
+		const mq = window.matchMedia('(max-width: 1023px)');
+		const sync = () => (isMobile = mq.matches);
+		sync();
+		mq.addEventListener('change', sync);
+		return () => mq.removeEventListener('change', sync);
+	});
+
+	// The desktop icon rail only exists when collapsed on desktop; mobile is always the full drawer.
+	const showRail = $derived(!isMobile && !$settingsStore.sidebarExpanded);
+
+	function expandSidebar() {
+		$settingsStore.sidebarExpanded = true;
+	}
+	function collapseOrClose() {
+		if (isMobile) mobileDrawerOpen.set(false);
+		else $settingsStore.sidebarExpanded = false;
 	}
 
 	function newChat() {
@@ -157,30 +178,31 @@
 	></span>
 {/snippet}
 
-<!-- Mobile overlay (expanded only) -->
-{#if !isCollapsed}
+<!-- Mobile drawer backdrop -->
+{#if $mobileDrawerOpen}
 	<div
 		class="fixed inset-0 z-20 bg-black/50 lg:hidden"
 		transition:fade={{ duration: 100 }}
-		onclick={toggleExpanded}
+		onclick={() => mobileDrawerOpen.set(false)}
 		role="presentation"
 	></div>
 {/if}
 
+<!-- Mobile: a fixed drawer that slides in/out (open state in the sidebar store).
+     Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="flex h-full shrink-0 flex-col overflow-hidden bg-shade-1 transition-[transform,width] duration-200 ease-in-out lg:rounded-xl lg:border
-		{isCollapsed
-		? 'hidden w-16 lg:flex lg:mr-2'
-		: 'safe-top safe-bottom fixed inset-y-0 left-0 z-30 w-[90vw] max-w-xs lg:relative lg:z-auto lg:mr-4 lg:w-96 lg:max-w-none'}"
+	class="safe-top safe-bottom fixed inset-y-0 left-0 z-30 flex h-full w-[90vw] max-w-xs shrink-0 flex-col overflow-hidden bg-shade-1 transition-[transform,width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
+		{$mobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'}
+		{$settingsStore.sidebarExpanded ? 'lg:mr-4 lg:w-96' : 'lg:mr-2 lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
 	<!-- Header -->
 	<div class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4">
-		{#if isCollapsed}
+		{#if showRail}
 			<div class="flex w-full justify-center">
 				<button
-					onclick={toggleExpanded}
+					onclick={expandSidebar}
 					class="rounded-lg p-2 text-muted transition-colors hover:text-active"
 					aria-label={$LL.expandSidebar()}
 					title={$LL.expandSidebar()}
@@ -194,7 +216,7 @@
 				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">Hollama Next</span>
 			</a>
 			<button
-				onclick={toggleExpanded}
+				onclick={collapseOrClose}
 				class="ml-auto rounded-lg p-2 text-muted transition-colors hover:text-active"
 				aria-label={$LL.collapseSidebar()}
 				title={$LL.collapseSidebar()}
@@ -204,7 +226,7 @@
 		{/if}
 	</div>
 
-	{#if isCollapsed}
+	{#if showRail}
 		<!-- Collapsed rail: primary actions + quick launchers -->
 		<div class="flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto py-3">
 			<button
@@ -388,7 +410,7 @@
 
 	<!-- Footer: profile + settings -->
 	<div class="mt-auto border-t p-2">
-		{#if isCollapsed}
+		{#if showRail}
 			<div class="flex justify-center">
 				<button
 					onclick={() => ($settingsModalOpen = true)}

@@ -6,9 +6,13 @@
 		<link rel="stylesheet" href="/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/fonts/jetbrains-mono/jetbrains-mono.css" />
 		<!-- Fit the device width and paint under the notch / home indicator
-		     (safe-area-inset-* become usable). Zoom is left enabled for accessibility;
-		     the 16px input rule already prevents the iOS focus-zoom. -->
-		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		     (safe-area-inset-* become usable). Zoom is disabled for a native, stable
+		     feel (pinch-zoom shifted the safe areas); the 16px input rule also blocks
+		     the iOS focus-zoom. -->
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+		/>
 		<!-- Installable PWA + iOS standalone (fullscreen, status bar drawn over the app). -->
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />

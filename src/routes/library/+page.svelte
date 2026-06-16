@@ -18,6 +18,7 @@
 	import { generateNewUrl } from '$lib/components/ButtonNew.js';
 	import Head from '$lib/components/Head.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 	import { parseKnowledgeImport, saveKnowledge } from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import {
@@ -110,7 +111,10 @@
 	<div class="mx-auto w-full max-w-4xl px-6 py-8">
 		<!-- Header -->
 		<div class="mb-1 flex items-center justify-between gap-3">
-			<h1 class="text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
+			<div class="flex min-w-0 items-center gap-1">
+				<SidebarToggle class="-ml-1" />
+				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
+			</div>
 
 			<div class="relative shrink-0">
 				<button
@@ -181,7 +185,7 @@
 							<PersonaAvatar {persona} size={40} />
 							{#if persona.shared}
 								<span
-									class="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition-opacity group-hover:opacity-0"
+									class="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition-opacity group-hover:opacity-0 [@media(hover:none)]:opacity-0"
 									title={$LL.sharedWithUsers()}
 								>
 									<Users class="h-3 w-3" />
@@ -206,7 +210,7 @@
 						aria-label={$LL.editPersona()}
 						title={$LL.edit()}
 						onclick={() => editPersona(persona)}
-						class="absolute right-2 top-2.5 rounded p-0.5 text-muted opacity-0 transition-colors hover:text-active group-hover:opacity-100"
+						class="absolute right-2 top-2.5 rounded p-0.5 text-muted transition hover:text-active [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
 					>
 						<Pencil class="h-3.5 w-3.5" />
 					</button>

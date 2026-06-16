@@ -1,23 +1,19 @@
 <script lang="ts">
-	import { PanelLeftClose, PanelLeftOpen } from '@lucide/svelte';
+	import { PanelLeft } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { settingsStore } from '$lib/localStorage';
+	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
-	function toggleExpanded() {
-		$settingsStore.sidebarExpanded = !$settingsStore.sidebarExpanded;
-	}
+	let { class: className = '' }: { class?: string } = $props();
 </script>
 
+<!-- Opens the sidebar drawer on mobile; hidden on desktop where the rail is always visible. -->
 <button
-	onclick={toggleExpanded}
-	class="absolute left-4 top-4 z-30 rounded-lg border bg-shade-1 p-2 transition-colors hover:bg-shade-2"
-	aria-label={$settingsStore.sidebarExpanded ? $LL.collapseSidebar() : $LL.expandSidebar()}
-	title={$settingsStore.sidebarExpanded ? $LL.collapseSidebar() : $LL.expandSidebar()}
+	type="button"
+	onclick={() => mobileDrawerOpen.set(true)}
+	class="shrink-0 rounded-lg p-2 text-muted transition-colors hover:text-active lg:hidden {className}"
+	aria-label={$LL.expandSidebar()}
+	title={$LL.expandSidebar()}
 >
-	{#if $settingsStore.sidebarExpanded}
-		<PanelLeftOpen class="h-4 w-4" />
-	{:else}
-		<PanelLeftClose class="h-4 w-4" />
-	{/if}
+	<PanelLeft class="h-5 w-5" />
 </button>
