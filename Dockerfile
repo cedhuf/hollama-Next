@@ -25,6 +25,9 @@ WORKDIR /app
 
 ENV PUBLIC_ADAPTER='docker-node'
 ENV PORT=4173
+# Request body cap (adapter-node default is only 512K, too small for chat image
+# attachments which are base64-inlined). Override with -e BODY_SIZE_LIMIT=… (0 = unlimited).
+ENV BODY_SIZE_LIMIT=25M
 
 COPY --from=builder --chown=appuser:appgroup /app/build ./build
 
