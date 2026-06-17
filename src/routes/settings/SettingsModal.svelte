@@ -135,7 +135,9 @@
 		</div>
 
 		<!-- Panel: matching-height header carrying the close (X), aligned with the sidebar title. -->
-		<div class="flex min-w-0 flex-1 flex-col">
+		<!-- min-h-0 so the flex-1 panel stays bounded in the mobile column layout, letting
+		     the inner content scroll instead of overflowing (desktop is a row, unaffected). -->
+		<div class="flex min-h-0 min-w-0 flex-1 flex-col">
 			<div
 				class="hidden h-12 shrink-0 items-center justify-end border-b border-shade-2 px-3 sm:flex"
 			>

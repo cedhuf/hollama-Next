@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { LoaderCircle, PanelLeft } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
 
@@ -299,12 +300,17 @@
 		class="safe-top safe-bottom relative flex h-dvh w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 	>
 		<CollapsibleSidebar />
-		<!-- Content side slides right (iOS-style push) when the mobile drawer opens; a
-		     no-op on desktop, where the sidebar lives in flow. -->
+		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
+		     that slides right to uncover the stationary sidebar underneath; left-rounded
+		     corners (matching the phone's screen radius) + a left-edge shadow make it read
+		     as a sheet lifted above the menu. The shadow is only painted while open and
+		     fades with the slide — otherwise it would bleed through the rounded corner
+		     notch and reveal the rounding even when the page covers the whole screen.
+		     A no-op on desktop, where the sidebar lives in flow. -->
 		<div
-			class="relative flex min-w-0 flex-1 flex-col transition-transform duration-200 ease-in-out {$mobileDrawerOpen
-				? 'max-lg:translate-x-[min(84vw,22rem)]'
-				: ''}"
+			class="relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-200 ease-in-out max-lg:overflow-hidden max-lg:rounded-l-[1.75rem] max-lg:bg-shade-1 {$mobileDrawerOpen
+				? 'max-lg:translate-x-[min(84vw,22rem)] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
+				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 		>
 			<!-- Mobile-only top safe area added in front of every route's own content
 			     (headers untouched); it hosts the single floating toggle below. Gone on
@@ -322,6 +328,16 @@
 			>
 				<PanelLeft class="h-5 w-5" />
 			</button>
+			<!-- Scrim lives inside the sliding card, so it only dims the page (never the
+			     revealed sidebar) and travels with it; tap anywhere on the page to close. -->
+			{#if $mobileDrawerOpen}
+				<div
+					class="absolute inset-0 z-20 bg-black/30 lg:hidden"
+					transition:fade={{ duration: 150 }}
+					onclick={() => mobileDrawerOpen.set(false)}
+					role="presentation"
+				></div>
+			{/if}
 		</div>
 	</div>
 {/if}
