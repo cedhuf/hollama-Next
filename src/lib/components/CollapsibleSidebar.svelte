@@ -15,6 +15,7 @@
 	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
@@ -211,7 +212,7 @@
 				</button>
 			</div>
 		{:else}
-			<a href="/sessions" class="flex items-center gap-2">
+			<a href={resolve('/sessions')} class="flex items-center gap-2">
 				<img class="h-8 w-8 shrink-0" src="/favicon.png" alt="Hollama Next logo" />
 				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">Hollama Next</span>
 			</a>
@@ -238,7 +239,7 @@
 				<Plus class="h-5 w-5" />
 			</button>
 			<a
-				href="/sessions"
+				href={resolve('/sessions')}
 				title={$LL.chats()}
 				aria-label={$LL.chats()}
 				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onChats
@@ -248,7 +249,7 @@
 				<MessageSquareText class="h-5 w-5" />
 			</a>
 			<a
-				href="/library"
+				href={resolve('/library')}
 				title={$LL.library()}
 				aria-label={$LL.library()}
 				class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onLibrary
@@ -263,7 +264,10 @@
 				{#each personaLaunchers as persona (persona.id)}
 					<button
 						type="button"
-						onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+						onclick={() =>
+							goto(
+								resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
+							)}
 						title={persona.name}
 						class="transition-transform hover:scale-105"
 					>
@@ -277,7 +281,7 @@
 				{#each recentSessions as session (session.id)}
 					<button
 						type="button"
-						onclick={() => goto(`/sessions/${session.id}`)}
+						onclick={() => goto(resolve('/sessions/[id]', { id: session.id }))}
 						title={getSessionTitle(session) || $LL.untitled()}
 						aria-label={getSessionTitle(session) || $LL.untitled()}
 						class="flex h-8 w-8 items-center justify-center rounded-md border text-xs font-medium transition-colors {pathname.includes(
@@ -316,7 +320,7 @@
 
 			<div class="flex gap-1.5">
 				<a
-					href="/sessions"
+					href={resolve('/sessions')}
 					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
@@ -325,7 +329,7 @@
 					{$LL.chats()}
 				</a>
 				<a
-					href="/library"
+					href={resolve('/library')}
 					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onLibrary
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
@@ -357,7 +361,12 @@
 								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
 								<button
 									type="button"
-									onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+									onclick={() =>
+										goto(
+											resolve('/sessions/[id]', {
+												id: launchPersona(persona, $settingsStore.models)
+											})
+										)}
 									style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
 									class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
 									title={persona.tagline || persona.name}

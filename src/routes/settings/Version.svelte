@@ -76,7 +76,7 @@
 		<a
 			href={GITHUB_URL}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="noopener noreferrer external"
 			class="about-link-card flex items-center gap-3 rounded-xl border bg-shade-0 px-4 py-3 transition-colors hover:bg-shade-2"
 		>
 			<div

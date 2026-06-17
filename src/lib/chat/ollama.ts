@@ -72,15 +72,11 @@ export class OllamaStrategy implements ChatStrategy {
 		if (!response.body) throw new Error('Ollama response is missing body');
 
 		const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-		let isCompletionDone = false;
 
-		while (!isCompletionDone) {
+		while (true) {
 			const { value, done } = await reader.read();
 
-			if (done) {
-				isCompletionDone = true;
-				break;
-			}
+			if (done) break;
 
 			if (!response.ok && value) throw new Error(JSON.parse(value).error);
 			if (!value) continue;
@@ -142,15 +138,11 @@ export class OllamaStrategy implements ChatStrategy {
 		if (!response.body) throw new Error('Ollama response is missing body');
 
 		const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
-		let isPullComplete = false;
 
-		while (!isPullComplete) {
+		while (true) {
 			const { value, done } = await reader.read();
 
-			if (done) {
-				isPullComplete = true;
-				break;
-			}
+			if (done) break;
 
 			if (!response.ok && value) throw new Error(JSON.parse(value).error);
 			if (!value) continue;

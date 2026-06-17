@@ -27,6 +27,9 @@
 </script>
 
 {#if href}
+	<!-- Generic anchor primitive: href may be an internal resolve() path or an external
+	     URL (link variant, target=_blank). Resolution is the caller's responsibility. -->
+	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	<a
 		{...rest}
 		{href}
@@ -46,6 +49,7 @@
 	>
 		{@render children?.()}
 	</a>
+	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {:else}
 	<button
 		{...rest}
