@@ -9,7 +9,6 @@
 		Search,
 		Settings2
 	} from '@lucide/svelte';
-	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
@@ -179,21 +178,11 @@
 	></span>
 {/snippet}
 
-<!-- Mobile drawer backdrop -->
-{#if $mobileDrawerOpen}
-	<div
-		class="fixed inset-0 z-20 bg-black/50 lg:hidden"
-		transition:fade={{ duration: 100 }}
-		onclick={() => mobileDrawerOpen.set(false)}
-		role="presentation"
-	></div>
-{/if}
-
-<!-- Mobile: a fixed drawer that slides in/out (open state in the sidebar store).
-     Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
+<!-- Mobile: a fixed, stationary drawer pinned under the page (iOS reveal) — the page
+     slides aside to uncover it, the sidebar itself never moves. Desktop: an in-flow
+     rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="safe-top safe-bottom fixed inset-y-0 left-0 z-30 flex h-full w-[min(84vw,22rem)] shrink-0 flex-col overflow-hidden bg-shade-1 transition-[transform,width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
-		{$mobileDrawerOpen ? 'translate-x-0' : '-translate-x-full'}
+	class="safe-top safe-bottom fixed inset-y-0 left-0 flex h-full w-[min(84vw,22rem)] shrink-0 flex-col overflow-hidden bg-shade-1 transition-[width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
 		{$settingsStore.sidebarExpanded ? 'lg:mr-4 lg:w-96' : 'lg:mr-2 lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"

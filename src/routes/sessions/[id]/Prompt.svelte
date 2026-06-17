@@ -20,7 +20,7 @@
 	import type { Editor, Message, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
 
-	import AskChoices from './AskChoices.svelte';
+	import AskChoicesCard from './AskChoicesCard.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
@@ -47,6 +47,14 @@
 	}: Props = $props();
 
 	let attachments: Attachment[] = $state([]);
+
+	// The quick-choice card takes over the composer; dismissing (✕) falls back to free
+	// typing for the current choice. A fresh (or cleared) pending choice re-arms the card.
+	let choiceBypassed = $state(false);
+	$effect(() => {
+		void pendingChoice;
+		choiceBypassed = false;
+	});
 
 	const isOllamaFamily = $derived(
 		$serversStore.find((s) => s.id === session.model?.serverId)?.connectionType ===
@@ -210,20 +218,19 @@
 		: ''}"
 >
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
-		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor}
+		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor && !choiceBypassed}
 			{@const choice = pendingChoice}
-			<div
-				class="ask-dock rounded-2xl border border-shade-3 bg-shade-0/80 p-3 shadow-lg backdrop-blur-xl"
-			>
-				<AskChoices
+			<!-- Interactive quick-choice temporarily takes over the composer (Claude-style):
+			     one question at a time, numbered + scrollable, dismiss (✕) to type freely. -->
+			{#key choice}
+				<AskChoicesCard
 					choices={choice.choices!}
 					onChoose={(selected) => chooseAnswer(choice, selected)}
+					onDismiss={() => (choiceBypassed = true)}
 					disabled={editor.isCompletionInProgress}
 				/>
-			</div>
-		{/if}
-
-		{#if editor.isCodeEditor}
+			{/key}
+		{:else if editor.isCodeEditor}
 			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
 			<!-- Floating composer: translucent blurred card; controls live in the bottom row by Run. -->
