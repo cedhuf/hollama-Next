@@ -24,8 +24,7 @@
 		allowClear = true,
 		allowSearch = true,
 		isLabelVisible = true,
-		onChange = (_value: Option) => {},
-		children,
+		onChange = () => {},
 		nav
 	}: {
 		name: string;
@@ -38,7 +37,6 @@
 		allowSearch?: boolean;
 		isLabelVisible?: boolean;
 		onChange?: (value: Option) => void;
-		children?: import('svelte').Snippet;
 		nav?: import('svelte').Snippet;
 	} = $props();
 

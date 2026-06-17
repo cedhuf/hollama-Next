@@ -15,10 +15,10 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { generateNewUrl } from '$lib/components/ButtonNew.js';
 	import Head from '$lib/components/Head.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
-	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 	import { parseKnowledgeImport, saveKnowledge } from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import {
@@ -65,7 +65,7 @@
 	}
 
 	function chatWith(persona: Persona) {
-		goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`);
+		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
 	}
 
 	function readJsonFile(input: HTMLInputElement, onData: (data: unknown) => void) {
@@ -112,7 +112,6 @@
 		<!-- Header -->
 		<div class="mb-1 flex items-center justify-between gap-3">
 			<div class="flex min-w-0 items-center gap-1">
-				<SidebarToggle class="-ml-1" />
 				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
 			</div>
 

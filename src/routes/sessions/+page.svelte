@@ -12,11 +12,11 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
-	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
@@ -109,7 +109,7 @@
 		if (!content && !attachments.length) return;
 		const id = generateRandomId();
 		pendingMessage.set({ prompt: content, model: selectedModel, webSearch, attachments });
-		goto(`/sessions/${id}`);
+		goto(resolve('/sessions/[id]', { id }));
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -123,10 +123,6 @@
 <Head title={$LL.sessions()} />
 
 <div class="flex h-full flex-col">
-	<!-- Mobile-only strip so the drawer is reachable on this header-less landing page. -->
-	<div class="flex shrink-0 items-center p-3 lg:hidden">
-		<SidebarToggle class="-ml-1" />
-	</div>
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			{#if $settingsStore.homeShowHeader}
@@ -204,7 +200,7 @@
 								</button>
 							</div>
 							<div class="divide-y divide-shade-3">
-								{#each activeSuggestions as suggestion}
+								{#each activeSuggestions as suggestion (suggestion)}
 									<button
 										type="button"
 										onclick={() => submit(suggestion)}
@@ -227,7 +223,10 @@
 					{#each recentPersonas as persona (persona.id)}
 						<button
 							type="button"
-							onclick={() => goto(`/sessions/${launchPersona(persona, $settingsStore.models)}`)}
+							onclick={() =>
+								goto(
+									resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
+								)}
 							class="transition-transform hover:scale-105"
 							title={`${persona.name} — ${persona.tagline}`}
 						>
@@ -243,9 +242,9 @@
 						{$LL.recentSessions()}
 					</h2>
 					<div class="divide-y divide-shade-3 rounded-xl border border-shade-3 bg-shade-0">
-						{#each recentSessions as session}
+						{#each recentSessions as session (session.id)}
 							<a
-								href={`/sessions/${session.id}`}
+								href={resolve('/sessions/[id]', { id: session.id })}
 								class="flex items-center gap-3 px-4 py-3 text-sm text-base transition-colors hover:bg-shade-1 first:rounded-t-xl last:rounded-b-xl"
 							>
 								<MessageSquareText class="h-4 w-4 flex-shrink-0 text-muted" />

@@ -77,7 +77,11 @@
 		const dy = t.clientY - touchStartY;
 		// Only a deliberate, mostly-horizontal swipe counts.
 		if (Math.abs(dx) < 60 || Math.abs(dx) <= Math.abs(dy)) return;
-		if (drawerWasClosed && dx > 0 && touchStartX < 28) mobileDrawerOpen.set(true);
+		// Open: a rightward swipe that begins just *inland* of the very edge. The first
+		// ~20px belong to iOS's system back-swipe, so we start the open band past it to
+		// avoid fighting the system gesture (the extreme edge is left to iOS).
+		if (drawerWasClosed && dx > 0 && touchStartX > 24 && touchStartX < 80)
+			mobileDrawerOpen.set(true);
 		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
 	}
 

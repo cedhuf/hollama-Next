@@ -7,6 +7,7 @@
 	import { Sitemap } from '$lib/sitemap';
 
 	import ButtonDelete from './ButtonDelete.svelte';
+	import { generateNewUrl } from './ButtonNew';
 
 	interface Props {
 		sitemap: Sitemap;
@@ -33,7 +34,7 @@
 		<a
 			class="relative z-0 min-w-0 flex-1 py-2 {isActive ? 'text-active' : 'hover:text-active'}"
 			data-testid={isSession ? 'session-item' : 'knowledge-item'}
-			href={`/${sitemap}/${id}`}
+			href={generateNewUrl(sitemap, id)}
 		>
 			<p class="truncate text-sm font-medium {isActive ? 'text-active' : ''}">{title}</p>
 			<p class="truncate text-xs text-muted">{subtitle}</p>

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	import SidebarToggle from './SidebarToggle.svelte';
-
 	interface Props {
 		confirmDeletion?: boolean;
 		headline: Snippet;
@@ -20,7 +18,6 @@
 		: 'border-b bg-shade-1'} {confirmDeletion ? 'confirm-deletion' : ''}"
 >
 	<div class="flex min-w-0 flex-1 items-center gap-2">
-		<SidebarToggle class="-ml-1" />
 		<div class="flex min-w-0 flex-1 flex-col gap-1">
 			{@render headline()}
 		</div>

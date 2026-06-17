@@ -98,7 +98,7 @@
 				aria-label={$LL.settings()}
 				tabindex={-1}
 				onkeydown={onTablistKeydown}
-				class="flex gap-1 overflow-x-auto p-2 sm:flex-1 sm:flex-col sm:overflow-visible sm:p-3"
+				class="flex touch-pan-x gap-1 overflow-x-auto p-2 sm:flex-1 sm:touch-auto sm:flex-col sm:overflow-visible sm:p-3"
 			>
 				{#each tabs as tab (tab.id)}
 					{@const Icon = tab.icon}

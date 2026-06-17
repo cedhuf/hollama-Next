@@ -238,7 +238,7 @@
 						<a
 							href={source.url}
 							target="_blank"
-							rel="noreferrer"
+							rel="noreferrer external"
 							title={source.title || source.url}
 							class="flex max-w-[15rem] items-center gap-1.5 rounded-full border border-shade-3 bg-shade-1 py-1 pl-1.5 pr-2.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
 						>

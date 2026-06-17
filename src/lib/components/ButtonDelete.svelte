@@ -3,6 +3,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { deleteStoreItem, knowledgeStore, sessionsStore } from '$lib/localStorage';
 	import { unbindPersonaSession } from '$lib/personas';
 	import { Sitemap } from '$lib/sitemap';
@@ -23,12 +24,12 @@
 		switch (sitemap) {
 			case Sitemap.KNOWLEDGE:
 				if ($knowledgeStore) $knowledgeStore = deleteStoreItem($knowledgeStore, id);
-				return goto('/knowledge');
+				return goto(resolve('/knowledge'));
 
 			case Sitemap.SESSIONS:
 				if ($sessionsStore) $sessionsStore = deleteStoreItem($sessionsStore, id);
 				unbindPersonaSession(id);
-				return goto('/sessions');
+				return goto(resolve('/sessions'));
 
 			default:
 				break;
