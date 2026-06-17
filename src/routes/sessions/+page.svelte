@@ -15,6 +15,7 @@
 	import { resolve } from '$app/paths';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
+	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
@@ -123,6 +124,7 @@
 <Head title={$LL.sessions()} />
 
 <div class="flex h-full flex-col">
+	<MobileMenuBar />
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			{#if $settingsStore.homeShowHeader}

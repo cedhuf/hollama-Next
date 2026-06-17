@@ -592,12 +592,19 @@
 	<Head
 		title={[editor.isNewSession ? $LL.newSession() : getSessionTitle(session), $LL.sessions()]}
 	/>
-	<Header confirmDeletion={shouldConfirmDeletion} floating={!!persona}>
+	<Header confirmDeletion={shouldConfirmDeletion}>
 		{#snippet headline()}
 			{#if persona}
-				<div class="flex items-center gap-3" title={persona.tagline}>
-					<PersonaAvatar {persona} size={48} />
-					<p class="text-base font-bold leading-none text-active">{persona.name}</p>
+				<!-- Persona identity, laid out like the classic title/meta pair: avatar + name,
+				     tagline as the muted second line. -->
+				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
+					<PersonaAvatar {persona} size={32} />
+					<div class="flex min-w-0 flex-col gap-0.5">
+						<p class="truncate text-sm font-bold leading-none text-active">{persona.name}</p>
+						{#if persona.tagline}
+							<p class="truncate text-xs leading-none text-muted">{persona.tagline}</p>
+						{/if}
+					</div>
 				</div>
 			{:else}
 				<p data-testid="session-id" class="font-bold leading-none">
@@ -634,9 +641,7 @@
 		<Controls bind:session />
 	{:else}
 		<div
-			class="session__history base-fieldset-container overflow-scrollbar flex-grow {persona
-				? 'pt-[var(--app-header-h)]'
-				: ''}"
+			class="session__history base-fieldset-container overflow-scrollbar flex-grow"
 			style={composerFloating ? `padding-bottom: ${promptHeight + 16}px` : undefined}
 			bind:this={messagesWindow}
 		>

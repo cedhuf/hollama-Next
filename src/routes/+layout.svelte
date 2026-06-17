@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { LoaderCircle, PanelLeft } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { toast, Toaster } from 'svelte-sonner';
+	import { fade } from 'svelte/transition';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
 
 	import LL, { setLocale } from '$i18n/i18n-svelte';
@@ -50,7 +50,6 @@
 	$effect(() => {
 		currentUser.set(data.user);
 	});
-
 
 	onNavigate(async () => {
 		// Check for updates whenever the user follows a link (if auto-check is enabled)
@@ -312,22 +311,12 @@
 				? 'max-lg:translate-x-[min(84vw,22rem)] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
 				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 		>
-			<!-- Mobile-only top safe area added in front of every route's own content
-			     (headers untouched); it hosts the single floating toggle below. Gone on
-			     desktop, where the sidebar is always visible. -->
-			<div class="h-[var(--app-header-h)] shrink-0 lg:hidden"></div>
+			<!-- Each route now owns the single sidebar toggle at its top-left (inside its
+			     header bar, or a blank MobileMenuBar on headerless pages), so there's no
+			     extra top strip here. -->
 			<div class="relative min-h-0 min-w-0 flex-1">
 				{@render children()}
 			</div>
-			<!-- One shared floating drawer toggle, sitting in that top safe area on every
-			     mobile route. It slides away with the page when the drawer opens. -->
-			<button
-				onclick={() => mobileDrawerOpen.set(true)}
-				class="absolute left-2 top-0 z-10 flex h-[var(--app-header-h)] items-center px-2 text-muted transition-colors hover:text-active lg:hidden"
-				aria-label={$LL.expandSidebar()}
-			>
-				<PanelLeft class="h-5 w-5" />
-			</button>
 			<!-- Scrim lives inside the sliding card, so it only dims the page (never the
 			     revealed sidebar) and travels with it; tap anywhere on the page to close. -->
 			{#if $mobileDrawerOpen}
