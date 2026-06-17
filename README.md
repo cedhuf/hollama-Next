@@ -1,4 +1,8 @@
 # Hollama Next
+![GitHub last commit](https://img.shields.io/github/last-commit/cedhuf/hollama-Next)
+![GitHub License](https://img.shields.io/github/license/cedhuf/hollama-Next)
+![GitHub Discussions](https://img.shields.io/github/discussions/cedhuf/hollama-Next)
+![Languages](https://img.shields.io/github/languages/top/cedhuf/hollama-Next?logo=github)
 
 > [!WARNING]
 > **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
