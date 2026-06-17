@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LoaderCircle } from '@lucide/svelte';
+	import { LoaderCircle, PanelLeft } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
@@ -49,6 +49,7 @@
 	$effect(() => {
 		currentUser.set(data.user);
 	});
+
 
 	onNavigate(async () => {
 		// Check for updates whenever the user follows a link (if auto-check is enabled)
@@ -298,8 +299,29 @@
 		class="safe-top safe-bottom relative flex h-dvh w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 	>
 		<CollapsibleSidebar />
-		<div class="relative min-w-0 flex-1">
-			{@render children()}
+		<!-- Content side slides right (iOS-style push) when the mobile drawer opens; a
+		     no-op on desktop, where the sidebar lives in flow. -->
+		<div
+			class="relative flex min-w-0 flex-1 flex-col transition-transform duration-200 ease-in-out {$mobileDrawerOpen
+				? 'max-lg:translate-x-[min(84vw,22rem)]'
+				: ''}"
+		>
+			<!-- Mobile-only top safe area added in front of every route's own content
+			     (headers untouched); it hosts the single floating toggle below. Gone on
+			     desktop, where the sidebar is always visible. -->
+			<div class="h-[var(--app-header-h)] shrink-0 lg:hidden"></div>
+			<div class="relative min-h-0 min-w-0 flex-1">
+				{@render children()}
+			</div>
+			<!-- One shared floating drawer toggle, sitting in that top safe area on every
+			     mobile route. It slides away with the page when the drawer opens. -->
+			<button
+				onclick={() => mobileDrawerOpen.set(true)}
+				class="absolute left-2 top-0 z-10 flex h-[var(--app-header-h)] items-center px-2 text-muted transition-colors hover:text-active lg:hidden"
+				aria-label={$LL.expandSidebar()}
+			>
+				<PanelLeft class="h-5 w-5" />
+			</button>
 		</div>
 	</div>
 {/if}
