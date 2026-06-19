@@ -7,7 +7,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
-	import { ConnectionType } from '$lib/connections';
+	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 	import {
 		imagesPayload,
@@ -61,6 +61,11 @@
 			ConnectionType.Ollama
 	);
 
+	const supportsReasoning = $derived.by(() => {
+		const ct = $serversStore.find((s) => s.id === session.model?.serverId)?.connectionType;
+		return ct !== undefined && supportsReasoningToggle(ct);
+	});
+
 	// Persona chats keep the composer minimal — no parameters/controls tab and no
 	// expand-to-code-editor toggle.
 	const isPersona = $derived(!!session.personaId);
@@ -90,7 +95,7 @@
 			checked: !!editor.sendCurrentDate,
 			onChange: (v: boolean) => (editor.sendCurrentDate = v)
 		},
-		...(isOllamaFamily
+		...(supportsReasoning
 			? [
 					{
 						// On = auto (Ollama enables thinking only when the model supports it).

@@ -18,7 +18,8 @@
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
-	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { supportsReasoningToggle } from '$lib/connections';
+	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
@@ -33,14 +34,40 @@
 	let prompt = $state('');
 	let selectedModel = $state($chatDefaultsConfig.defaultModel.value || undefined);
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
+	let interactiveChoices = $state($settingsStore.interactiveChoices);
+	let sendCurrentDate = $state($settingsStore.sendCurrentDate);
+	let thinking = $state(true);
 	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);
 
-	const tools = $derived(
-		searchAvailable
+	// Reasoning is only offered for backends that actually support it (Ollama's
+	// native `think`, or OpenAI-compatible/Infomaniak `enable_thinking`).
+	const supportsReasoning = $derived.by(() => {
+		const model = $settingsStore.models.find((m) => m.name === selectedModel);
+		const ct = model && $serversStore.find((s) => s.id === model.serverId)?.connectionType;
+		return ct !== undefined && supportsReasoningToggle(ct);
+	});
+
+	// Mirror the session composer's lightning dropdown so the home page can pre-set
+	// the same per-conversation switches; they ride along in `pendingMessage`.
+	const tools = $derived([
+		...(searchAvailable
 			? [{ label: 'Web search', checked: webSearch, onChange: (v: boolean) => (webSearch = v) }]
-			: []
-	);
+			: []),
+		{
+			label: 'Interactive choices',
+			checked: interactiveChoices,
+			onChange: (v: boolean) => (interactiveChoices = v)
+		},
+		{
+			label: 'Current date',
+			checked: sendCurrentDate,
+			onChange: (v: boolean) => (sendCurrentDate = v)
+		},
+		...(supportsReasoning
+			? [{ label: 'Reasoning', checked: thinking, onChange: (v: boolean) => (thinking = v) }]
+			: [])
+	]);
 
 	const greeting = $derived.by(() => {
 		const hour = new Date().getHours();
@@ -109,7 +136,15 @@
 		const content = text.trim();
 		if (!content && !attachments.length) return;
 		const id = generateRandomId();
-		pendingMessage.set({ prompt: content, model: selectedModel, webSearch, attachments });
+		pendingMessage.set({
+			prompt: content,
+			model: selectedModel,
+			webSearch,
+			interactiveChoices,
+			sendCurrentDate,
+			thinking,
+			attachments
+		});
 		goto(resolve('/sessions/[id]', { id }));
 	}
 
