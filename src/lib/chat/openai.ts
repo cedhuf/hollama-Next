@@ -4,7 +4,7 @@ import type {
 	ChatCompletionMessageParam
 } from 'openai/resources/index.mjs';
 
-import { ConnectionType, type Server } from '$lib/connections';
+import { supportsThinkingRequest, type Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { openaiClientConfig } from './endpoint';
@@ -65,14 +65,14 @@ export class OpenAIStrategy implements ChatStrategy {
 	): Promise<void> {
 		const formattedMessages = this.formatMessages(payload.messages);
 
-		// Self-hosted OpenAI-compatible servers (vLLM, llama.cpp, SGLang, …) gate the
-		// model's chain-of-thought behind a chat-template flag that has to be passed
-		// per request — the server-side default isn't always applied. Real OpenAI /
-		// Claude reject unknown body fields, so only send it to generic
-		// OpenAI-compatible endpoints, and retry once without it if rejected.
+		// Self-hosted OpenAI-compatible servers (vLLM, llama.cpp, SGLang, …) and
+		// Infomaniak gate the model's chain-of-thought behind a chat-template flag that
+		// has to be passed per request — the server-side default isn't always applied.
+		// Real OpenAI / Claude reject unknown body fields, so this is scoped to the
+		// endpoints that accept it, and retried once without it if rejected.
 		const wantThink = payload.think !== false;
 		const thinkBody =
-			wantThink && this.server.connectionType === ConnectionType.OpenAICompatible
+			wantThink && supportsThinkingRequest(this.server.connectionType)
 				? { chat_template_kwargs: { enable_thinking: true } }
 				: undefined;
 

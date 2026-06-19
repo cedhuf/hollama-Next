@@ -100,6 +100,28 @@ export function isOpenAiCompatible(connectionType: ConnectionType): boolean {
 	return getProvider(connectionType).family === 'openai';
 }
 
+/**
+ * Whether this connection accepts an explicit "enable thinking" request flag
+ * (`chat_template_kwargs.enable_thinking`). Self-hosted OpenAI-compatible servers
+ * (vLLM / llama.cpp / SGLang) and Infomaniak (a generic OpenAI-compatible endpoint,
+ * typically vLLM-backed) take it. Hosted OpenAI / Claude reject unknown body fields,
+ * and Ollama has its own native `think` path — so they're excluded here.
+ */
+export function supportsThinkingRequest(connectionType: ConnectionType): boolean {
+	return (
+		connectionType === ConnectionType.OpenAICompatible ||
+		connectionType === ConnectionType.Infomaniak
+	);
+}
+
+/**
+ * Whether the composer should offer the per-conversation Reasoning toggle: Ollama
+ * (native thinking) plus any endpoint that takes the explicit thinking flag.
+ */
+export function supportsReasoningToggle(connectionType: ConnectionType): boolean {
+	return connectionType === ConnectionType.Ollama || supportsThinkingRequest(connectionType);
+}
+
 export function getDefaultServer(connectionType: ConnectionType): Server {
 	const provider = getProvider(connectionType);
 

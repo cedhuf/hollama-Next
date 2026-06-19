@@ -194,6 +194,12 @@
 			}
 
 			editor.webSearch = pending.webSearch;
+			// Carry over the composer tool switches set on the home page (undefined →
+			// keep the session defaults already assigned above).
+			if (pending.thinking !== undefined) editor.thinking = pending.thinking;
+			if (pending.interactiveChoices !== undefined)
+				editor.interactiveChoices = pending.interactiveChoices;
+			if (pending.sendCurrentDate !== undefined) editor.sendCurrentDate = pending.sendCurrentDate;
 
 			const knowledgeMessages = pending.attachments
 				.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
