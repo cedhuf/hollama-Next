@@ -13,6 +13,27 @@ const TITLE_SYSTEM_PROMPT =
 	'following message. Reply with only the title — no quotes, no markdown, no trailing punctuation.';
 
 /**
+ * Session titles render as plain text, so any markdown the model returns despite
+ * the instruction (e.g. `**Bold**`, `# Heading`, `` `code` ``) would show as raw
+ * markup. Strip the common inline/block markers while keeping the text, then tidy
+ * surrounding quotes, trailing punctuation and whitespace.
+ */
+function stripTitleMarkdown(raw: string): string {
+	return raw
+		.trim()
+		.replace(/^title\s*[:\-—]\s*/i, '') // drop a "Title:" prefix some models add
+		.replace(/^\s*(?:#{1,6}\s+|>\s+|[-*+]\s+|\d+[.)]\s+)/, '') // leading heading/quote/list marker
+		.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → link text
+		.replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
+		.replace(/(\*|_)(.*?)\1/g, '$2') // italic
+		.replace(/`+([^`]*)`+/g, '$1') // inline code
+		.replace(/^["'“”']+|["'“”']+$/g, '') // surrounding quotes
+		.replace(/[.\s]+$/, '') // trailing dots / whitespace
+		.replace(/\s+/g, ' ') // collapse internal whitespace / newlines
+		.trim();
+}
+
+/**
  * Generates a concise session title from the first user message using the
  * model selected in settings (`titleModel`). Returns `null` if titling is
  * not configured or if anything goes wrong — title generation is best-effort
@@ -59,12 +80,9 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 			}
 		);
 
-		const title = result
-			.replace(/<think>[\s\S]*?<\/think>/g, '') // drop reasoning blocks if any
-			.trim()
-			.replace(/^["']|["']$/g, '')
-			.replace(/[.\s]+$/, '')
-			.slice(0, 80);
+		const title = stripTitleMarkdown(
+			result.replace(/<think>[\s\S]*?<\/think>/g, '') // drop reasoning blocks if any
+		).slice(0, 80);
 
 		return title || null;
 	} catch (error) {

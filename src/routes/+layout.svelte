@@ -86,22 +86,28 @@
 		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
 	}
 
-	// iOS force-scrolls the document to reveal a focused input when the on-screen keyboard
-	// opens, but doesn't reset that scroll on dismiss — leaving the app shell scrolled up so
-	// the body background (a different colour) shows as a phantom strip below it. When the
-	// visual viewport grows back (keyboard closed), snap the page scroll to the top. No-op on
-	// platforms without the VisualViewport API or when nothing scrolled.
+	// iOS (and especially installed PWAs) handles the on-screen keyboard poorly: opening it
+	// doesn't shrink `dvh`, so the app shell stays full-height and iOS force-scrolls the
+	// document to reveal the input — exposing the body background as a phantom strip, and the
+	// gap lingers after dismissal. Track the *visual* viewport instead and (a) size the shell
+	// to the actually-visible height (via --viewport-height) so the composer sits flush above
+	// the keyboard with no leftover space, and (b) undo any stray document scroll iOS added.
+	// No-op on platforms without the VisualViewport API.
 	onMount(() => {
 		const vv = window.visualViewport;
 		if (!vv) return;
-		let lastHeight = vv.height;
-		const onResize = () => {
-			const grew = vv.height > lastHeight + 1;
-			lastHeight = vv.height;
-			if (grew && window.scrollY !== 0) window.scrollTo(0, 0);
+		const root = document.documentElement;
+		const sync = () => {
+			root.style.setProperty('--viewport-height', `${Math.round(vv.height)}px`);
+			if (window.scrollY !== 0) window.scrollTo(0, 0);
 		};
-		vv.addEventListener('resize', onResize);
-		return () => vv.removeEventListener('resize', onResize);
+		sync();
+		vv.addEventListener('resize', sync);
+		vv.addEventListener('scroll', sync);
+		return () => {
+			vv.removeEventListener('resize', sync);
+			vv.removeEventListener('scroll', sync);
+		};
 	});
 
 	$effect(() => {
@@ -314,7 +320,7 @@
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
 	<div
-		class="safe-top safe-bottom relative flex h-dvh w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		class="app-shell safe-top safe-bottom relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 	>
 		<CollapsibleSidebar />
 		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
@@ -351,11 +357,28 @@
 
 <style lang="postcss">
 	:global(html) {
-		/* Must match bg-shade-2 (the app shell) so the notch, home indicator, and
-		   desktop rounded-corner margins all share one seamless background. */
+		/* Desktop: match bg-shade-2 (the app-shell canvas) so the rounded-corner
+		   margins share one seamless background. */
 		background-color: var(--color-shade-2);
 		font-size: 1rem;
 		line-height: 1.5rem;
 		letter-spacing: normal;
+	}
+
+	/* Mobile: the app shell is shade-1, so the root background must match it.
+	   Otherwise any sliver iOS briefly exposes around the keyboard — or a strip
+	   lingering after dismissal — shows shade-2 as a wrong-coloured band. */
+	@media (max-width: 1023px) {
+		:global(html),
+		:global(body) {
+			background-color: var(--color-shade-1);
+		}
+	}
+
+	/* Track the *visual* viewport height (set from JS, see onMount) so the iOS
+	   keyboard never leaves leftover space below the composer. Falls back to the
+	   dynamic viewport height before/without the script (SSR, desktop, no API). */
+	.app-shell {
+		height: var(--viewport-height, 100dvh);
 	}
 </style>

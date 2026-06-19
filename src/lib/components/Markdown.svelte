@@ -5,7 +5,6 @@
 	import MarkdownIt from 'markdown-it/lib/index.mjs';
 	import { mount } from 'svelte';
 
-	import 'highlight.js/styles/github.min.css';
 	import 'katex/dist/katex.min.css';
 
 	import ButtonCopy from './ButtonCopy.svelte';
@@ -150,6 +149,14 @@
 <style lang="postcss">
 	@reference "../../app.pcss";
 
+	/* As a flex child (of the message bubble), allow shrinking below content width
+	   so a long code line / table / URL scrolls or wraps instead of widening — and
+	   ultimately horizontally scrolling — the whole chat panel on mobile. */
+	.markdown {
+		min-width: 0;
+		max-width: 100%;
+	}
+
 	.markdown :global(> *:first-child) {
 		@apply mt-0;
 	}
@@ -158,49 +165,59 @@
 		@apply mb-0;
 	}
 
+	/* Headings: a restrained, monotonic scale tuned for chat answers (close to
+	   ChatGPT/Claude) — strong colour, tight tracking, more space above than below
+	   so a heading hugs the text it introduces. No width cap (it forced odd wraps). */
 	.markdown :global(h1),
 	.markdown :global(h2),
 	.markdown :global(h3),
 	.markdown :global(h4),
 	.markdown :global(h5),
 	.markdown :global(h6) {
-		@apply max-w-[35ch] tracking-tight;
+		@apply text-active tracking-tight;
 	}
 
 	.markdown :global(h1) {
-		@apply my-10 max-w-[22ch] text-3xl font-bold md:text-4xl;
+		@apply mb-3 mt-6 text-xl font-bold md:text-2xl;
 	}
 
 	.markdown :global(h2) {
-		@apply mt-8 text-xl font-semibold md:text-2xl;
+		@apply mb-2 mt-6 text-lg font-semibold md:text-xl;
 	}
 
 	.markdown :global(h3) {
-		@apply my-2 text-2xl font-light;
+		@apply mb-2 mt-5 text-base font-semibold md:text-lg;
 	}
 
 	.markdown :global(h4) {
-		@apply mt-8 text-lg font-semibold md:text-xl;
+		@apply mb-1 mt-4 text-base font-semibold;
 	}
 
-	.markdown :global(h5),
+	.markdown :global(h5) {
+		@apply mb-1 mt-4 text-sm font-semibold;
+	}
+
 	.markdown :global(h6) {
-		@apply mt-8 font-semibold;
+		@apply text-muted mb-1 mt-4 text-sm font-semibold;
 	}
 
 	.markdown :global(p) {
-		@apply my-3;
+		@apply my-3 leading-relaxed;
 	}
 
 	.markdown :global(p),
 	.markdown :global(li) {
 		@apply max-w-prose text-sm;
 		@apply md:text-base;
+		/* Break long unbreakable strings (URLs, hashes) instead of overflowing. */
+		overflow-wrap: break-word;
 	}
 
+	/* Lists: indent with left padding (so markers sit in the gutter and nested
+	   lists step in cleanly) rather than symmetric margins. */
 	.markdown :global(ul),
 	.markdown :global(ol) {
-		@apply mx-7 my-2 flex list-outside flex-col gap-y-1;
+		@apply my-3 list-outside pl-6;
 	}
 
 	.markdown :global(ol) {
@@ -212,7 +229,25 @@
 	}
 
 	.markdown :global(li) {
-		@apply my-0.5;
+		@apply my-1;
+	}
+
+	/* Tight nested lists, and no double spacing for loose (paragraph-wrapped) items. */
+	.markdown :global(li > ul),
+	.markdown :global(li > ol) {
+		@apply my-1;
+	}
+
+	.markdown :global(li > p) {
+		@apply my-0;
+	}
+
+	.markdown :global(li > p + p) {
+		@apply mt-2;
+	}
+
+	.markdown :global(hr) {
+		@apply border-shade-3 my-6;
 	}
 
 	.markdown :global(blockquote) {
@@ -241,8 +276,22 @@
 		@apply bg-accent/20;
 	}
 
+	/* Wide tables scroll inside their own block instead of stretching the bubble and
+	   pushing the whole chat panel into a horizontal scroll (GitHub/ChatGPT pattern).
+	   `display: block` + `width: max-content` lets the table size to its content, while
+	   `max-width: 100%` caps it to the bubble and turns on the internal scrollbar. */
 	.markdown :global(table) {
-		@apply w-full border-separate border-spacing-0 rounded-md;
+		@apply overflow-scrollbar my-4 border-separate border-spacing-0 rounded-md text-sm;
+		display: block;
+		width: max-content;
+		max-width: 100%;
+	}
+
+	/* Long display-math equations scroll inside their own block instead of
+	   overflowing the bubble (same rationale as wide code/tables). */
+	.markdown :global(.katex-display) {
+		@apply overflow-scrollbar;
+		max-width: 100%;
 	}
 
 	.markdown :global(th),
@@ -281,23 +330,27 @@
 	/* Code */
 
 	.markdown :global(pre) {
-		@apply overflow-scrollbar border-shade-2 relative my-6 rounded-md border;
+		@apply overflow-scrollbar border-shade-2 relative my-4 rounded-md border;
 		@apply first:mt-0;
+		max-width: 100%;
 	}
 
 	.markdown :global(code) {
 		@apply bg-shade-2 text-accent rounded-md p-1 text-xs;
 		@apply md:text-sm;
 		font-variant-ligatures: none;
+		/* Inline code: break long tokens (paths, hashes) rather than overflow. */
+		overflow-wrap: anywhere;
 	}
 
+	/* Code block: readable default colour (highlight.js token spans override per
+	   token, set in app.pcss); keep lines intact so they scroll, never wrap. */
 	.markdown :global(pre code) {
-		@apply bg-shade-0/50 block p-4 pr-12 text-base text-xs;
+		@apply bg-shade-0/50 block p-4 pr-12 text-xs;
 		@apply md:text-sm;
-	}
-
-	.markdown :global(pre code:where([data-color-theme='dark'], [data-color-theme='dark'] *)) {
-		@apply bg-shade-0/50 text-muted;
+		color: hsl(var(--hsl-text-shade-1));
+		overflow-wrap: normal;
+		word-break: normal;
 	}
 
 	.markdown :global(a:has(code)) {
