@@ -86,6 +86,24 @@
 		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
 	}
 
+	// iOS force-scrolls the document to reveal a focused input when the on-screen keyboard
+	// opens, but doesn't reset that scroll on dismiss — leaving the app shell scrolled up so
+	// the body background (a different colour) shows as a phantom strip below it. When the
+	// visual viewport grows back (keyboard closed), snap the page scroll to the top. No-op on
+	// platforms without the VisualViewport API or when nothing scrolled.
+	onMount(() => {
+		const vv = window.visualViewport;
+		if (!vv) return;
+		let lastHeight = vv.height;
+		const onResize = () => {
+			const grew = vv.height > lastHeight + 1;
+			lastHeight = vv.height;
+			if (grew && window.scrollY !== 0) window.scrollTo(0, 0);
+		};
+		vv.addEventListener('resize', onResize);
+		return () => vv.removeEventListener('resize', onResize);
+	});
+
 	$effect(() => {
 		if (!$settingsStore.userLanguage) return;
 		loadLocale($settingsStore.userLanguage);
