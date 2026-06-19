@@ -268,4 +268,85 @@
 		--hsl-warning-muted: 30 100% 10%;
 		--hsl-positive-muted: 120 100% 10%;
 	}
+
+	/* Syntax-highlighting (highlight.js) token colours, driven by colour mode so code
+	   stays legible on both the light and dark `shade-0` code background — across every
+	   theme style. Replaces highlight.js's bundled stylesheet, which was light-only and
+	   washed out in dark mode. Palette = GitHub Primer (proven contrast both ways). */
+	:root {
+		--hljs-comment: #6e7781;
+		--hljs-keyword: #cf222e;
+		--hljs-string: #0a3069;
+		--hljs-number: #0550ae;
+		--hljs-title: #8250df;
+		--hljs-built-in: #953800;
+		--hljs-tag: #116329;
+	}
+
+	[data-color-theme='dark'] {
+		--hljs-comment: #8b949e;
+		--hljs-keyword: #ff7b72;
+		--hljs-string: #a5d6ff;
+		--hljs-number: #79c0ff;
+		--hljs-title: #d2a8ff;
+		--hljs-built-in: #ffa657;
+		--hljs-tag: #7ee787;
+	}
+}
+
+/* highlight.js token → colour mapping (global; these classes only appear inside
+   rendered Markdown code blocks). Plain CSS so Tailwind never purges them. */
+.hljs-comment,
+.hljs-quote {
+	color: var(--hljs-comment);
+	font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag,
+.hljs-deletion {
+	color: var(--hljs-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta .hljs-string {
+	color: var(--hljs-string);
+}
+.hljs-number,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attr,
+.hljs-attribute,
+.hljs-bullet,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+	color: var(--hljs-number);
+}
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+	color: var(--hljs-title);
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-params,
+.hljs-symbol {
+	color: var(--hljs-built-in);
+}
+.hljs-tag {
+	color: var(--hljs-tag);
+}
+.hljs-meta {
+	color: var(--hljs-comment);
+}
+.hljs-emphasis {
+	font-style: italic;
+}
+.hljs-strong {
+	font-weight: 600;
 }
