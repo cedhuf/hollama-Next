@@ -50,11 +50,12 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 				messages: [
 					{ role: 'system', content: TITLE_SYSTEM_PROMPT },
 					{ role: 'user', content: firstUserMessage }
-				]
+				],
+				think: false // Titles are a quick one-shot — never spend reasoning on them.
 			},
 			controller.signal,
-			(chunk) => {
-				result += chunk;
+			(part) => {
+				result += part.content ?? '';
 			}
 		);
 
