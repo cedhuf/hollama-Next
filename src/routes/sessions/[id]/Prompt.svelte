@@ -89,7 +89,18 @@
 			label: 'Current date',
 			checked: !!editor.sendCurrentDate,
 			onChange: (v: boolean) => (editor.sendCurrentDate = v)
-		}
+		},
+		...(isOllamaFamily
+			? [
+					{
+						// On = auto (Ollama enables thinking only when the model supports it).
+						// Off = never request reasoning.
+						label: 'Reasoning',
+						checked: editor.thinking !== false,
+						onChange: (v: boolean) => (editor.thinking = v)
+					}
+				]
+			: [])
 	]);
 
 	function toggleControls() {

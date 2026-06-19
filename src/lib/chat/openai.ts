@@ -8,7 +8,7 @@ import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { openaiClientConfig } from './endpoint';
-import type { ChatRequest, ChatStrategy, Message } from './index';
+import type { ChatChunk, ChatRequest, ChatStrategy, Message } from './index';
 
 export class OpenAIStrategy implements ChatStrategy {
 	private openai: OpenAI;
@@ -26,7 +26,7 @@ export class OpenAIStrategy implements ChatStrategy {
 	async chat(
 		payload: ChatRequest,
 		abortSignal: AbortSignal,
-		onChunk: (content: string) => void
+		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
 		const formattedMessages = payload.messages.map(
 			(message: Message): ChatCompletionMessageParam => {
@@ -71,7 +71,12 @@ export class OpenAIStrategy implements ChatStrategy {
 
 		for await (const chunk of response) {
 			if (abortSignal.aborted) break;
-			onChunk(chunk.choices?.[0]?.delta?.content ?? '');
+			const delta = chunk.choices?.[0]?.delta;
+			// Some OpenAI-compatible reasoning endpoints (e.g. DeepSeek) stream the chain
+			// of thought in a non-standard `reasoning_content` field — surface it if present.
+			const thinking = (delta as { reasoning_content?: string } | undefined)?.reasoning_content;
+			if (thinking) onChunk({ thinking });
+			if (delta?.content) onChunk({ content: delta.content });
 		}
 	}
 

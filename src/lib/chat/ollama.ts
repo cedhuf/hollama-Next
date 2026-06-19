@@ -12,7 +12,7 @@ import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { ollamaBaseUrl } from './endpoint';
-import type { ChatRequest as AppChatRequest, ChatStrategy } from './index';
+import type { ChatRequest as AppChatRequest, ChatChunk, ChatStrategy } from './index';
 
 export interface OllamaOptions {
 	numa: boolean;
@@ -53,19 +53,79 @@ export interface OllamaOptions {
 export class OllamaStrategy implements ChatStrategy {
 	private base: string;
 
+	/** Per-(server, model) cache of whether the model advertises the `thinking` capability. */
+	private static thinkingSupport = new Map<string, boolean>();
+
 	constructor(private server: Server) {
 		this.base = ollamaBaseUrl(server);
+	}
+
+	/**
+	 * Ask `/api/show` whether a model supports thinking. Passing `think: true` to a
+	 * model without the capability makes recent Ollama return HTTP 400, so we gate on
+	 * this. When the answer is unknown (old Ollama, network error) we optimistically
+	 * assume yes and rely on the runtime fallback in `chat()`.
+	 */
+	private async supportsThinking(model: string): Promise<boolean> {
+		const key = `${this.base}::${model}`;
+		const cached = OllamaStrategy.thinkingSupport.get(key);
+		if (cached !== undefined) return cached;
+
+		try {
+			const response = await fetch(`${this.base}/api/show`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ model })
+			});
+			if (!response.ok) return true; // unknown → assume yes, rely on fallback
+			const data = await response.json();
+			const supported = Array.isArray(data?.capabilities)
+				? data.capabilities.includes('thinking')
+				: true; // capabilities absent (older Ollama) → assume yes, rely on fallback
+			OllamaStrategy.thinkingSupport.set(key, supported);
+			return supported;
+		} catch {
+			return true; // network/parse issue → assume yes, rely on fallback
+		}
 	}
 
 	async chat(
 		payload: ChatRequest,
 		abortSignal: AbortSignal,
-		onChunk: (content: string) => void
+		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
+		const wantThink = (payload as AppChatRequest).think !== false;
+		const useThink = wantThink && (await this.supportsThinking(payload.model));
+
+		try {
+			await this.streamChat(payload, useThink, abortSignal, onChunk);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			// Belt-and-suspenders: a model rejected thinking despite our capability check.
+			// Remember it and retry once without thinking so the chat still completes.
+			if (useThink && /does not support thinking/i.test(message)) {
+				OllamaStrategy.thinkingSupport.set(`${this.base}::${payload.model}`, false);
+				await this.streamChat(payload, false, abortSignal, onChunk);
+				return;
+			}
+			throw error;
+		}
+	}
+
+	private async streamChat(
+		payload: ChatRequest,
+		think: boolean,
+		abortSignal: AbortSignal,
+		onChunk: (part: ChatChunk) => void
+	): Promise<void> {
+		// Forward the resolved boolean: `think: false` is always safe, and `think: true`
+		// only reaches models we already verified support it.
+		const body = { ...payload, think };
+
 		const response = await fetch(`${this.base}/api/chat`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'text/event-stream' },
-			body: JSON.stringify(payload),
+			body: JSON.stringify(body),
 			signal: abortSignal
 		});
 
@@ -85,7 +145,9 @@ export class OllamaStrategy implements ChatStrategy {
 
 			for (const chatResponse of chatResponses) {
 				const { message } = JSON.parse(chatResponse) as ChatResponse;
-				onChunk(message.content);
+				// Reasoning models stream `thinking` separately from `content`.
+				if (message.thinking) onChunk({ thinking: message.thinking });
+				if (message.content) onChunk({ content: message.content });
 			}
 		}
 	}

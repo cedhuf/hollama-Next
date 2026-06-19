@@ -17,13 +17,22 @@ export interface ChatRequest {
 	messages: Message[];
 	stream?: boolean;
 	options?: Partial<OllamaOptions>;
+	/**
+	 * Whether the user allows the model to reason ("auto"). Defaults to true.
+	 * Ollama only enables thinking when the model actually supports it; set to
+	 * false to never request it (e.g. title generation, or a per-session toggle).
+	 */
+	think?: boolean;
 }
+
+/** A single streamed delta: regular `content` and/or separate reasoning `thinking`. */
+export type ChatChunk = { content?: string; thinking?: string };
 
 export interface ChatStrategy {
 	chat(
 		payload: ChatRequest,
 		abortSignal: AbortSignal,
-		onChunk: (content: string) => void
+		onChunk: (part: ChatChunk) => void
 	): Promise<void>;
 
 	getModels(): Promise<Model[]>;

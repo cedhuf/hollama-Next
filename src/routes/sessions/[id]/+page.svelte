@@ -71,7 +71,8 @@
 		isNewSession: true,
 		webSearch: searchAvailable && $settingsStore.webSearchByDefault,
 		interactiveChoices: $settingsStore.interactiveChoices,
-		sendCurrentDate: $settingsStore.sendCurrentDate
+		sendCurrentDate: $settingsStore.sendCurrentDate,
+		thinking: true
 	});
 	let messagesWindow: HTMLDivElement | undefined = $state();
 	let modelName: string | undefined = $state();
@@ -164,6 +165,7 @@
 		editor.isNewSession = !session?.messages?.length;
 		editor.interactiveChoices = $settingsStore.interactiveChoices;
 		editor.sendCurrentDate = $settingsStore.sendCurrentDate;
+		editor.thinking = true;
 		scrollToBottom();
 
 		// A persona conversation carries its own web-search preference.
@@ -444,7 +446,8 @@
 		let chatRequest: ChatRequest = {
 			model: session.model.name,
 			options: session.options,
-			messages: chatMessagesForRequest
+			messages: chatMessagesForRequest,
+			think: editor.thinking !== false
 		};
 
 		try {
@@ -473,9 +476,12 @@
 				}
 			);
 
-			await strategy.chat(chatRequest, editor.abortController.signal, async (chunk) => {
-				// Process the chunk using the FSM-based processor
-				reasoningProcessor.processChunk(chunk);
+			await strategy.chat(chatRequest, editor.abortController.signal, async (part) => {
+				// Native reasoning (Ollama `message.thinking`, OpenAI `reasoning_content`)
+				// streams straight into the reasoning panel. Regular content still goes
+				// through the FSM so inline <think> tags from other providers are split out.
+				if (part.thinking) editor.reasoning += part.thinking;
+				if (part.content) reasoningProcessor.processChunk(part.content);
 				await scrollToBottom();
 			});
 
