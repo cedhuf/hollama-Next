@@ -106,6 +106,13 @@
 				/>
 			</SettingsField>
 		{/if}
+		<FieldCheckbox
+			label={$LL.autoExpandReasoningBlocks()}
+			bind:checked={$settingsStore.autoExpandReasoningBlocks}
+		/>
+		<FieldHelp>
+			<P>{$LL.autoExpandReasoningBlocksHelp()}</P>
+		</FieldHelp>
 	</SettingsSection>
 
 	<SettingsSection
@@ -138,8 +145,7 @@
 					bind:value={$settingsStore.systemPrompts.global}
 					placeholder={adminDefaultExists && adminPrompts.global
 						? adminPrompts.global
-						: "e.g. You are concise and answer in the user's language…"}
-				></textarea>
+						: "e.g. You are concise and answer in the user's language…"}></textarea>
 			</SettingsField>
 
 			<div class="mt-2 flex items-center justify-between gap-2">
@@ -180,8 +186,7 @@
 								class="settings-field"
 								rows="2"
 								bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
-								placeholder="Prompt for {name}…"
-							></textarea>
+								placeholder="Prompt for {name}…"></textarea>
 							<select
 								class="settings-field w-auto text-xs"
 								bind:value={$settingsStore.systemPrompts.perModel[name].mode}

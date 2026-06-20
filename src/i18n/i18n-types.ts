@@ -956,6 +956,14 @@ type RootTranslation = {
 	 * P​r​e​p​a​r​i​n​g​ ​o​p​t​i​o​n​s
 	 */
 	preparingOptions: string
+	/**
+	 * A​u​t​o​m​a​t​i​c​a​l​l​y​ ​e​x​p​a​n​d​ ​a​n​d​ ​c​o​l​l​a​p​s​e​ ​r​e​a​s​o​n​i​n​g
+	 */
+	autoExpandReasoningBlocks: string
+	/**
+	 * R​e​a​s​o​n​i​n​g​ ​e​x​p​a​n​d​s​ ​w​h​i​l​e​ ​s​t​r​e​a​m​i​n​g​ ​a​n​d​ ​c​o​l​l​a​p​s​e​s​ ​w​h​e​n​ ​c​o​m​p​l​e​t​e
+	 */
+	autoExpandReasoningBlocksHelp: string
 }
 
 export type TranslationFunctions = {
@@ -1888,6 +1896,14 @@ The completion in progress will stop
 	 * Preparing options
 	 */
 	preparingOptions: () => LocalizedString
+	/**
+	 * Automatically expand and collapse reasoning
+	 */
+	autoExpandReasoningBlocks: () => LocalizedString
+	/**
+	 * Reasoning expands while streaming and collapses when complete
+	 */
+	autoExpandReasoningBlocksHelp: () => LocalizedString
 }
 
 export type Formatters = {}
