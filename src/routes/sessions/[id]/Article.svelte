@@ -9,6 +9,7 @@
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import Markdown from '$lib/components/Markdown.svelte';
+	import { settingsStore } from '$lib/localStorage';
 	import { type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
@@ -61,6 +62,7 @@
 	}
 
 	$effect(() => {
+		if (!$settingsStore.autoExpandReasoningBlocks) return;
 		if (isStreamingArticle && !userHasInteractedWithToggle) {
 			const hasReasoning = currentRawReasoning && currentRawReasoning.trim() !== '';
 			const hasCompletion = currentRawCompletion && currentRawCompletion.trim() !== '';
@@ -76,6 +78,7 @@
 	// Reset user interaction state if this component instance is reused for a non-streaming to streaming transition
 	// or if the message fundamentally changes, indicating a new context.
 	$effect(() => {
+		if (!$settingsStore.autoExpandReasoningBlocks) return;
 		if (!isStreamingArticle) {
 			userHasInteractedWithToggle = false;
 			// Also ensure reasoning is collapsed for non-streaming articles by default unless it already has content

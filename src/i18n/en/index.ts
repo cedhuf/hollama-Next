@@ -243,7 +243,9 @@ const en = {
 	otherChoice: 'Other…',
 	otherChoicePlaceholder: 'Type your answer',
 	multipleAllowed: 'Choose one or more',
-	preparingOptions: 'Preparing options'
+	preparingOptions: 'Preparing options',
+	autoExpandReasoningBlocks: 'Automatically expand and collapse reasoning',
+	autoExpandReasoningBlocksHelp: 'Reasoning expands while streaming and collapses when complete'
 } satisfies BaseTranslation;
 
 export default en;
