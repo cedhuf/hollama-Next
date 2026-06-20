@@ -32,6 +32,7 @@ export interface Message {
 	images?: { data: string; filename: string }[]; // Store image data and filename
 	webSearch?: WebSearchInfo; // Set when web search context was injected
 	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
+	isReasoningVisible?: boolean
 }
 
 export interface Session {
