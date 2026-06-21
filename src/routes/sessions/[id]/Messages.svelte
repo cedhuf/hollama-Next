@@ -50,6 +50,21 @@
 		session.messages = session.messages.filter((m) => m !== message);
 		saveSession(session);
 	}
+	let streamingReasoningExpanded = $state(false);
+
+	// Capture the exact moment the stream completes, and move the visibility state
+	// from the temporary 'streamingReasoningExpanded' onto the permanent message object.
+	$effect(() => {
+		if (!editor.isCompletionInProgress) {
+			const completedMessage = session.messages[session.messages.length - 1];
+			if (completedMessage && completedMessage.role === 'assistant') {
+				// Save the user's toggle state permanently to this individual message
+				completedMessage.isReasoningVisible = streamingReasoningExpanded;
+			}
+			// Reset for the next turn
+			streamingReasoningExpanded = false;
+		}
+	});
 </script>
 
 {#if editor.isNewSession}
@@ -67,6 +82,7 @@
 				onChoose={(selected) => chooseAnswer(message, selected)}
 				handleEditMessage={() => handleEditMessage(message)}
 				handleDeleteAttachment={() => handleDeleteAttachment(message)}
+				bind:streamingReasoningExpanded={message.isReasoningVisible!}
 			/>
 		{/key}
 	{/if}
@@ -87,5 +103,6 @@
 		{assistantLabel}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={editor.completion}
+		bind:streamingReasoningExpanded
 	/>
 {/if}

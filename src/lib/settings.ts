@@ -68,6 +68,8 @@ export interface Settings {
 	profileEmail: string;
 	profileAvatar: string;
 	profileColor: string;
+	/** Automatically expand and collapse reasoning blocks during streaming. */
+	autoExpandReasoningBlocks: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -109,5 +111,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	profileLastName: '',
 	profileEmail: '',
 	profileAvatar: '',
-	profileColor: '#6366f1'
+	profileColor: '#6366f1',
+	autoExpandReasoningBlocks: false
 };

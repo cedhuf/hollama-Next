@@ -9,6 +9,7 @@
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import Markdown from '$lib/components/Markdown.svelte';
+	import { settingsStore } from '$lib/localStorage';
 	import { type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
@@ -28,7 +29,8 @@
 		preparingChoices = false,
 		assistantLabel = undefined,
 		currentRawReasoning,
-		currentRawCompletion
+		currentRawCompletion,
+		streamingReasoningExpanded = $bindable()
 	}: {
 		message: Message;
 		retryIndex?: number;
@@ -46,6 +48,7 @@
 		assistantLabel?: string;
 		currentRawReasoning?: string;
 		currentRawCompletion?: string;
+		streamingReasoningExpanded: boolean;
 	} = $props();
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
@@ -58,29 +61,37 @@
 	function toggleReasoningVisibility() {
 		isReasoningVisible = !isReasoningVisible;
 		userHasInteractedWithToggle = true;
+		// Push the update out to the parent binding immediately
+		streamingReasoningExpanded = isReasoningVisible;
 	}
 
 	$effect(() => {
-		if (isStreamingArticle && !userHasInteractedWithToggle) {
-			const hasReasoning = currentRawReasoning && currentRawReasoning.trim() !== '';
-			const hasCompletion = currentRawCompletion && currentRawCompletion.trim() !== '';
-
-			if (hasReasoning && !hasCompletion) {
-				isReasoningVisible = true;
-			} else if (hasCompletion) {
-				isReasoningVisible = false;
+		if (!$settingsStore.autoExpandReasoningBlocks) {
+			// Synchronize initial rendering from the parent's past configurations
+			if (streamingReasoningExpanded) {
+				isReasoningVisible = streamingReasoningExpanded;
 			}
-		}
-	});
+			return;
+		} else {
+			if (isStreamingArticle && !userHasInteractedWithToggle) {
+				const hasReasoning = currentRawReasoning && currentRawReasoning.trim() !== '';
+				const hasCompletion = currentRawCompletion && currentRawCompletion.trim() !== '';
 
-	// Reset user interaction state if this component instance is reused for a non-streaming to streaming transition
-	// or if the message fundamentally changes, indicating a new context.
-	$effect(() => {
-		if (!isStreamingArticle) {
-			userHasInteractedWithToggle = false;
-			// Also ensure reasoning is collapsed for non-streaming articles by default unless it already has content
-			if (!message.reasoning || message.reasoning.trim() === '') {
-				isReasoningVisible = false;
+				if (hasReasoning && !hasCompletion) {
+					isReasoningVisible = true;
+				} else if (hasCompletion) {
+					isReasoningVisible = false;
+				}
+			}
+
+			// Reset user interaction state if this component instance is reused for a non-streaming to streaming transition
+			// or if the message fundamentally changes, indicating a new context.
+			if (!isStreamingArticle) {
+				userHasInteractedWithToggle = false;
+				// Also ensure reasoning is collapsed for non-streaming articles by default unless it already has content
+				if (!message.reasoning || message.reasoning.trim() === '') {
+					isReasoningVisible = false;
+				}
 			}
 		}
 	});
