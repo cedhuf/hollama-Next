@@ -51,19 +51,21 @@
 		saveSession(session);
 	}
 	let streamingReasoningExpanded = $state(false);
+	let wasCompletionInProgress = false;
 
-	// Capture the exact moment the stream completes, and move the visibility state
-	// from the temporary 'streamingReasoningExpanded' onto the permanent message object.
+	// On the edge where streaming finishes, carry the live reasoning toggle onto the
+	// freshly-appended assistant message (it's pushed before isCompletionInProgress flips).
 	$effect(() => {
-		if (!editor.isCompletionInProgress) {
-			const completedMessage = session.messages[session.messages.length - 1];
-			if (completedMessage && completedMessage.role === 'assistant') {
-				// Save the user's toggle state permanently to this individual message
-				completedMessage.isReasoningVisible = streamingReasoningExpanded;
+		const inProgress = editor.isCompletionInProgress;
+		if (wasCompletionInProgress && !inProgress) {
+			const completed = session.messages[session.messages.length - 1];
+			if (completed && completed.role === 'assistant' && streamingReasoningExpanded) {
+				completed.isReasoningVisible = true;
+				saveSession(session);
 			}
-			// Reset for the next turn
 			streamingReasoningExpanded = false;
 		}
+		wasCompletionInProgress = inProgress;
 	});
 </script>
 
@@ -82,7 +84,7 @@
 				onChoose={(selected) => chooseAnswer(message, selected)}
 				handleEditMessage={() => handleEditMessage(message)}
 				handleDeleteAttachment={() => handleDeleteAttachment(message)}
-				bind:streamingReasoningExpanded={message.isReasoningVisible!}
+				onToggleReasoning={() => saveSession(session)}
 			/>
 		{/key}
 	{/if}

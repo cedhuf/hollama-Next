@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Brain, ChevronDown, ChevronUp, Globe, Pencil, RefreshCw, Trash2 } from '@lucide/svelte';
+	import { untrack } from 'svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 
@@ -30,7 +31,8 @@
 		assistantLabel = undefined,
 		currentRawReasoning,
 		currentRawCompletion,
-		streamingReasoningExpanded = $bindable()
+		streamingReasoningExpanded = $bindable(false),
+		onToggleReasoning = undefined
 	}: {
 		message: Message;
 		retryIndex?: number;
@@ -48,51 +50,54 @@
 		assistantLabel?: string;
 		currentRawReasoning?: string;
 		currentRawCompletion?: string;
-		streamingReasoningExpanded: boolean;
+		/** Two-way bound to the parent only for the live (streaming) article. */
+		streamingReasoningExpanded?: boolean;
+		/** Called after the user toggles a completed message, so the parent can persist. */
+		onToggleReasoning?: () => void;
 	} = $props();
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
 	const isUserRole = $derived(message.role === 'user' && !isKnowledgeAttachment);
 	// URLs indexed by citation number, so the answer's inline [n] become links.
 	const citations = $derived(message.webSearch?.sources?.map((s) => s.url));
-	let isReasoningVisible = $state(false);
+	// Seed from the persisted value (initial only) so a restored-expanded panel doesn't
+	// play its intro animation on load; the effect below keeps it in sync afterwards.
+	let isReasoningVisible = $state(untrack(() => message.isReasoningVisible) ?? false);
 	let userHasInteractedWithToggle = $state(false);
 
 	function toggleReasoningVisibility() {
 		isReasoningVisible = !isReasoningVisible;
 		userHasInteractedWithToggle = true;
-		// Push the update out to the parent binding immediately
-		streamingReasoningExpanded = isReasoningVisible;
+		if (isStreamingArticle) {
+			// Live article: hand the state to the parent so it can carry over on completion.
+			streamingReasoningExpanded = isReasoningVisible;
+		} else {
+			// Completed message: persist the choice on the message and let the parent save.
+			message.isReasoningVisible = isReasoningVisible;
+			onToggleReasoning?.();
+		}
 	}
 
+	// While streaming, auto-expand the reasoning panel — but only when the setting is on
+	// and the user hasn't manually overridden the toggle this turn.
 	$effect(() => {
-		if (!$settingsStore.autoExpandReasoningBlocks) {
-			// Synchronize initial rendering from the parent's past configurations
-			if (streamingReasoningExpanded) {
-				isReasoningVisible = streamingReasoningExpanded;
-			}
-			return;
-		} else {
-			if (isStreamingArticle && !userHasInteractedWithToggle) {
-				const hasReasoning = currentRawReasoning && currentRawReasoning.trim() !== '';
-				const hasCompletion = currentRawCompletion && currentRawCompletion.trim() !== '';
+		if (!$settingsStore.autoExpandReasoningBlocks) return;
+		if (isStreamingArticle && !userHasInteractedWithToggle) {
+			const hasReasoning = !!currentRawReasoning?.trim();
+			const hasCompletion = !!currentRawCompletion?.trim();
 
-				if (hasReasoning && !hasCompletion) {
-					isReasoningVisible = true;
-				} else if (hasCompletion) {
-					isReasoningVisible = false;
-				}
+			if (hasReasoning && !hasCompletion) {
+				isReasoningVisible = true;
+			} else if (hasCompletion) {
+				isReasoningVisible = false;
 			}
+		}
+	});
 
-			// Reset user interaction state if this component instance is reused for a non-streaming to streaming transition
-			// or if the message fundamentally changes, indicating a new context.
-			if (!isStreamingArticle) {
-				userHasInteractedWithToggle = false;
-				// Also ensure reasoning is collapsed for non-streaming articles by default unless it already has content
-				if (!message.reasoning || message.reasoning.trim() === '') {
-					isReasoningVisible = false;
-				}
-			}
+	// Completed (non-streaming) messages reflect the visibility persisted on the message.
+	$effect(() => {
+		if (!isStreamingArticle) {
+			isReasoningVisible = message.isReasoningVisible ?? false;
 		}
 	});
 

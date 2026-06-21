@@ -225,7 +225,10 @@ const fr = {
 	otherChoice: 'Autre…',
 	otherChoicePlaceholder: 'Saisis ta réponse',
 	multipleAllowed: 'Choix multiple possible',
-	preparingOptions: 'Préparation des options'
+	preparingOptions: 'Préparation des options',
+	autoExpandReasoningBlocks: 'Déplier et replier automatiquement le raisonnement',
+	autoExpandReasoningBlocksHelp:
+		'Le raisonnement se déplie pendant la génération et se replie une fois terminé'
 } satisfies BaseTranslation;
 
 export default fr;
