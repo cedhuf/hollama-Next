@@ -86,30 +86,6 @@
 		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
 	}
 
-	// iOS (and especially installed PWAs) handles the on-screen keyboard poorly: opening it
-	// doesn't shrink `dvh`, so the app shell stays full-height and iOS force-scrolls the
-	// document to reveal the input — exposing the body background as a phantom strip, and the
-	// gap lingers after dismissal. Track the *visual* viewport instead and (a) size the shell
-	// to the actually-visible height (via --viewport-height) so the composer sits flush above
-	// the keyboard with no leftover space, and (b) undo any stray document scroll iOS added.
-	// No-op on platforms without the VisualViewport API.
-	onMount(() => {
-		const vv = window.visualViewport;
-		if (!vv) return;
-		const root = document.documentElement;
-		const sync = () => {
-			root.style.setProperty('--viewport-height', `${Math.round(vv.height)}px`);
-			if (window.scrollY !== 0) window.scrollTo(0, 0);
-		};
-		sync();
-		vv.addEventListener('resize', sync);
-		vv.addEventListener('scroll', sync);
-		return () => {
-			vv.removeEventListener('resize', sync);
-			vv.removeEventListener('scroll', sync);
-		};
-	});
-
 	$effect(() => {
 		if (!$settingsStore.userLanguage) return;
 		loadLocale($settingsStore.userLanguage);
@@ -320,7 +296,7 @@
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
 	<div
-		class="app-shell safe-top safe-bottom relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		class="app-shell relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 	>
 		<CollapsibleSidebar />
 		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
@@ -365,9 +341,8 @@
 		letter-spacing: normal;
 	}
 
-	/* Mobile: the app shell is shade-1, so the root background must match it.
-	   Otherwise any sliver iOS briefly exposes around the keyboard — or a strip
-	   lingering after dismissal — shows shade-2 as a wrong-coloured band. */
+	/* Mobile: the app shell is shade-1, so the root background must match it — the OS-managed
+	   status-bar and home-indicator strips then blend in seamlessly. */
 	@media (max-width: 1023px) {
 		:global(html),
 		:global(body) {
@@ -375,10 +350,10 @@
 		}
 	}
 
-	/* Track the *visual* viewport height (set from JS, see onMount) so the iOS
-	   keyboard never leaves leftover space below the composer. Falls back to the
-	   dynamic viewport height before/without the script (SSR, desktop, no API). */
+	/* Full-height app shell — the same model as desktop, just responsive. No viewport-fit=cover,
+	   so iOS keeps the web view inside the safe area itself and handles the keyboard natively;
+	   `dvh` already tracks the dynamic viewport (browser toolbars) without any JS. */
 	.app-shell {
-		height: var(--viewport-height, 100dvh);
+		height: 100dvh;
 	}
 </style>
