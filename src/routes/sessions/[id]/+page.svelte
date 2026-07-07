@@ -323,6 +323,7 @@
 		editor.prompt = '';
 		editor.completion = '';
 		editor.reasoning = '';
+		editor.streamingReasoningExpanded = false;
 		editor.isSearching = false;
 		editor.searchQuery = undefined;
 		editor.webSearchInfo = undefined;
@@ -503,7 +504,10 @@
 				content,
 				reasoning: editor.reasoning,
 				webSearch: searchInfo,
-				choices
+				choices,
+				// Stamped BEFORE the message is appended so the completed Article mounts
+				// with the panel already in the right state — no post-render re-open flash.
+				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning)
 			};
 
 			session.messages = [...session.messages, message];
@@ -551,7 +555,8 @@
 			const message: Message = {
 				role: 'assistant',
 				content: editor.completion || '',
-				reasoning: editor.reasoning || ''
+				reasoning: editor.reasoning || '',
+				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning)
 			};
 			session.messages = [...session.messages, message];
 			session.updatedAt = new Date().toISOString();

@@ -79,7 +79,7 @@
 			<div class="flex-1 overflow-auto px-5 py-4">
 				{#if step === 0}
 					<div class="flex flex-col items-center gap-4 py-4 text-center">
-						<img class="h-14 w-14" src="/favicon.png" alt="Hollama Next" />
+						<img class="logo-ink h-14 w-14" src="/logo-mark.png" alt="Hollama Next" />
 						<div class="flex flex-col gap-1">
 							<h2 class="text-lg font-semibold tracking-tight">Welcome to Hollama Next</h2>
 							<p class="text-sm text-muted">Let's set things up — it only takes a minute.</p>

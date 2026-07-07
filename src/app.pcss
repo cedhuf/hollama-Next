@@ -118,6 +118,11 @@
 	}
 }
 
+/* Logo mark (logo-mark.png): black ink on transparency — invert the ink to white in dark mode. */
+[data-color-theme='dark'] .logo-ink {
+	filter: invert(1);
+}
+
 @utility text-link {
 	@apply hover:text-accent underline underline-offset-4;
 }

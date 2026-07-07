@@ -50,23 +50,6 @@
 		session.messages = session.messages.filter((m) => m !== message);
 		saveSession(session);
 	}
-	let streamingReasoningExpanded = $state(false);
-	let wasCompletionInProgress = false;
-
-	// On the edge where streaming finishes, carry the live reasoning toggle onto the
-	// freshly-appended assistant message (it's pushed before isCompletionInProgress flips).
-	$effect(() => {
-		const inProgress = editor.isCompletionInProgress;
-		if (wasCompletionInProgress && !inProgress) {
-			const completed = session.messages[session.messages.length - 1];
-			if (completed && completed.role === 'assistant' && streamingReasoningExpanded) {
-				completed.isReasoningVisible = true;
-				saveSession(session);
-			}
-			streamingReasoningExpanded = false;
-		}
-		wasCompletionInProgress = inProgress;
-	});
 </script>
 
 {#if editor.isNewSession}
@@ -105,6 +88,6 @@
 		{assistantLabel}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={editor.completion}
-		bind:streamingReasoningExpanded
+		bind:streamingReasoningExpanded={editor.streamingReasoningExpanded}
 	/>
 {/if}

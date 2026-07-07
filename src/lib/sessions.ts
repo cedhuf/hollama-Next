@@ -71,6 +71,8 @@ export interface Editor {
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];
 	completion?: string;
 	reasoning?: string;
+	/** Live reasoning-panel toggle on the streaming article; stamped onto the message at completion. */
+	streamingReasoningExpanded?: boolean;
 	promptTextarea?: HTMLTextAreaElement;
 	abortController?: AbortController;
 }
