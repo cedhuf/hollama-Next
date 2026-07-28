@@ -5,26 +5,12 @@ import { initFormatters } from './formatters'
 import type { Locales, Translations } from './i18n-types'
 import { loadedFormatters, loadedLocales, locales } from './i18n-util'
 
-import de from './de'
 import en from './en'
-import es from './es'
 import fr from './fr'
-import ja from './ja'
-import pt_br from './pt-br'
-import tr from './tr'
-import vi from './vi'
-import zh_cn from './zh-cn'
 
 const localeTranslations = {
-	de,
 	en,
-	es,
 	fr,
-	ja,
-	'pt-br': pt_br,
-	tr,
-	vi,
-	'zh-cn': zh_cn,
 }
 
 export const loadLocale = (locale: Locales): void => {

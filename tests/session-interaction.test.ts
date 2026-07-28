@@ -7,8 +7,7 @@ import {
 	MOCK_SESSION_1_RESPONSE_2,
 	MOCK_SESSION_1_RESPONSE_3,
 	mockCompletionResponse,
-	mockOllamaModelsResponse,
-	textEditorLocator
+	mockOllamaModelsResponse
 } from './utils';
 
 test.describe('Session interaction', () => {
@@ -251,33 +250,31 @@ test.describe('Session interaction', () => {
 		await page.getByTestId('new-session').click();
 		await chooseModel(page, MOCK_API_TAGS_RESPONSE.models[0].name);
 		await promptTextarea.fill('Who would win in a fight between Emma Watson and Jessica Alba?');
-		await expect(textEditorLocator(page, 'Prompt')).not.toBeVisible();
 		await expect(promptEditor).not.toHaveClass(/ prompt-editor--fullscreen/);
 		await expect(promptTextarea).not.toHaveValue('Nevermind...');
 		await expect(promptTextarea).toBeVisible();
 
-		// Switch to fullscreen and enable text-editor
+		// Expanding only grows the composer — the same textarea stays mounted, keeping
+		// its value and every control (toggle, Run, attachments) reachable.
 		await promptEditorToggle.click();
-		await expect(promptTextarea).not.toBeVisible();
 		await expect(promptEditor).toHaveClass(/ prompt-editor--fullscreen/);
-		await expect(textEditorLocator(page, 'Prompt')).toBeVisible();
-		await expect(textEditorLocator(page, 'Prompt')).toHaveText(
+		await expect(promptTextarea).toBeVisible();
+		await expect(promptTextarea).toHaveValue(
 			'Who would win in a fight between Emma Watson and Jessica Alba?'
 		);
-		await textEditorLocator(page, 'Prompt').clear();
-		await textEditorLocator(page, 'Prompt').fill('Nevermind...');
+		await promptTextarea.clear();
+		await promptTextarea.fill('Nevermind...');
 
-		// Switch back to normal
+		// Collapse back — this is the regression: the toggle must survive expansion.
 		await promptEditorToggle.click();
-		await expect(textEditorLocator(page, 'Prompt')).not.toBeVisible();
 		await expect(promptEditor).not.toHaveClass(/ prompt-editor--fullscreen/);
 		await expect(promptTextarea).toBeVisible();
 		await expect(promptTextarea).toHaveValue('Nevermind...');
 
-		// Switch to fullscreen again
+		// Expand again
 		await promptEditorToggle.click();
 		await expect(promptEditor).toHaveClass(/ prompt-editor--fullscreen/);
-		await expect(promptTextarea).not.toBeVisible();
+		await expect(promptTextarea).toBeVisible();
 
 		// Submit the form and check the prompt is reset
 		await page.getByText('Run').click();
@@ -320,8 +317,8 @@ test.describe('Session interaction', () => {
 
 		await page.locator('.article', { hasText: 'You' }).first().hover();
 		await page.locator('.article', { hasText: 'You' }).first().getByTitle('Edit').click();
-		await textEditorLocator(page, 'Prompt').clear();
-		await textEditorLocator(page, 'Prompt').fill('Hello world!');
+		await promptTextarea.clear();
+		await promptTextarea.fill('Hello world!');
 		await page.getByText('Run').click();
 
 		expect(
@@ -361,15 +358,16 @@ test.describe('Session interaction', () => {
 			)
 		).toBeVisible();
 
+		// Editing loads the message into the regular composer, so Cancel stays reachable.
 		await editButton.click();
-		await expect(promptTextarea).not.toBeVisible();
-		await expect(textEditorLocator(page, 'Prompt')).toHaveText(
+		await expect(promptTextarea).toBeVisible();
+		await expect(promptTextarea).toHaveValue(
 			'Who would win in a fight between Emma Watson and Jessica Alba?'
 		);
 		await expect(cancelButton).toBeVisible();
 
-		await textEditorLocator(page, 'Prompt').clear();
-		await textEditorLocator(page, 'Prompt').fill(
+		await promptTextarea.clear();
+		await promptTextarea.fill(
 			'Who would win in a fight between Scarlett Johansson and Jessica Alba?'
 		);
 		await cancelButton.click();

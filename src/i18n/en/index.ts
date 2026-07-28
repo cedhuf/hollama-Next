@@ -174,6 +174,8 @@ const en = {
 	knowledgeDescription: 'Entire knowledge base',
 	expandSidebar: 'Expand sidebar',
 	collapseSidebar: 'Collapse sidebar',
+	expandPrompt: 'Expand the prompt',
+	collapsePrompt: 'Collapse the prompt',
 	profile: 'Profile',
 	goodMorning: 'Good morning',
 	goodAfternoon: 'Good afternoon',

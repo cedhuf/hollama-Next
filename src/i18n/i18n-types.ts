@@ -6,15 +6,8 @@ export type BaseTranslation = BaseTranslationType
 export type BaseLocale = 'en'
 
 export type Locales =
-	| 'de'
 	| 'en'
-	| 'es'
 	| 'fr'
-	| 'ja'
-	| 'pt-br'
-	| 'tr'
-	| 'vi'
-	| 'zh-cn'
 
 export type Translation = RootTranslation
 
@@ -697,6 +690,14 @@ type RootTranslation = {
 	 * C​o​l​l​a​p​s​e​ ​s​i​d​e​b​a​r
 	 */
 	collapseSidebar: string
+	/**
+	 * E​x​p​a​n​d​ ​t​h​e​ ​p​r​o​m​p​t
+	 */
+	expandPrompt: string
+	/**
+	 * C​o​l​l​a​p​s​e​ ​t​h​e​ ​p​r​o​m​p​t
+	 */
+	collapsePrompt: string
 	/**
 	 * P​r​o​f​i​l​e
 	 */
@@ -1640,6 +1641,14 @@ The completion in progress will stop
 	 * Collapse sidebar
 	 */
 	collapseSidebar: () => LocalizedString
+	/**
+	 * Expand the prompt
+	 */
+	expandPrompt: () => LocalizedString
+	/**
+	 * Collapse the prompt
+	 */
+	collapsePrompt: () => LocalizedString
 	/**
 	 * Profile
 	 */

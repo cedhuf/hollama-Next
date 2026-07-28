@@ -65,7 +65,7 @@
 		prompt: '',
 		view: 'messages',
 		messageIndexToEdit: null,
-		isCodeEditor: false,
+		isExpanded: false,
 		isCompletionInProgress: false,
 		shouldFocusTextarea: false,
 		isNewSession: true,
@@ -83,7 +83,7 @@
 	// matching bottom space in the scroll area so the last message clears it. Only the
 	// plain chat view floats; controls and the expanded code editor stay in flow.
 	let promptHeight = $state(0);
-	const composerFloating = $derived(editor.view === 'messages' && !editor.isCodeEditor);
+	const composerFloating = $derived(editor.view === 'messages' && !editor.isExpanded);
 
 	// The persona this conversation belongs to, if any (drives the header identity).
 	const persona = $derived(
@@ -276,7 +276,7 @@
 	function handleSubmit(images?: { data: string; filename: string }[]) {
 		if (!editor.prompt && (!images || images.length === 0)) return;
 		if (!session.model) return;
-		editor.isCodeEditor = false;
+		editor.isExpanded = false;
 		editor.isNewSession = false;
 		editor.view = 'messages';
 

@@ -1,6 +1,13 @@
-import type { BaseTranslation } from '../i18n-types';
+import en from '../en';
+import { extendDictionary } from '../i18n-util';
 
-const fr = {
+/**
+ * French overrides on top of the English base. Every key not listed here falls
+ * back to its English string automatically, so adding a key to `en/` never
+ * breaks this file and never leaves a blank in the UI — translate it when you
+ * get to it. Run `pnpm run i18n:status` to see what's still untranslated.
+ */
+const fr = extendDictionary(en, {
 	addConnection: 'Ajouter une connexion',
 	allowConnections: 'Changez les paramètres de votre serveur pour autoriser les connexions depuis',
 	allowMixedContent: 'Autoriser le contenu mixte',
@@ -8,7 +15,11 @@ const fr = {
 	areYouSureYouWantToDeleteAllKnowledge:
 		'Êtes-vous sûr de vouloir supprimer toute la connaissance?',
 	areYouSureYouWantToDeleteAllSessions: 'Êtes-vous sûr de vouloir supprimer toutes les sessions?',
-	areYouSureYouWantToDeleteAllSettings: 'Êtes-vous sûr de vouloir supprimer tous les paramètres?',
+	areYouSureYouWantToDeleteAllPreferences:
+		'Êtes-vous sûr de vouloir supprimer toutes les préférences ?',
+	areYouSureYouWantToDeleteAllServers: 'Êtes-vous sûr de vouloir supprimer tous les serveurs ?',
+	areYouSureYouWantToImportData:
+		'Êtes-vous sûr de vouloir importer ? Cela écrasera les données existantes',
 	areYouSureYouWantToLeave: "Êtes-vous sûr de vouloir quitter?\nLa complétion en cours s'arrêtera",
 	assistant: 'Assistant',
 	automatic: 'Auto',
@@ -228,7 +239,29 @@ const fr = {
 	preparingOptions: 'Préparation des options',
 	autoExpandReasoningBlocks: 'Déplier et replier automatiquement le raisonnement',
 	autoExpandReasoningBlocksHelp:
-		'Le raisonnement se déplie pendant la génération et se replie une fois terminé'
-} satisfies BaseTranslation;
+		'Le raisonnement se déplie pendant la génération et se replie une fois terminé',
+	attachImage: 'Joindre une image',
+	confirmEdit: 'Confirmer la modification',
+	delete: 'Supprimer',
+	editTitle: 'Modifier le titre',
+	export: 'Exporter',
+	import: 'Importer',
+	preferences: 'Préférences',
+	unsavedChangesWillBeLost:
+		'Vous avez des modifications non enregistrées qui seront perdues. Continuer ?',
+	importSuccess: 'Importation réussie',
+	importError: "Échec de l'importation",
+	deleteSuccess: 'Supprimé avec succès',
+	serversDescription: 'Connexions, filtres de modèles et libellés',
+	preferencesDescription: 'Langue, thème, modèles récemment utilisés, etc.',
+	sessionsDescription:
+		'Historique complet des conversations, pièces jointes et réglages personnalisés des modèles',
+	knowledgeDescription: 'Ensemble de la base de connaissances',
+	expandSidebar: 'Déplier la barre latérale',
+	collapseSidebar: 'Replier la barre latérale',
+	profile: 'Profil',
+	expandPrompt: 'Agrandir la zone de saisie',
+	collapsePrompt: 'Réduire la zone de saisie'
+});
 
 export default fr;

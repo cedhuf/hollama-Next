@@ -55,7 +55,7 @@ export interface Editor {
 	prompt: string;
 	view: 'messages' | 'controls';
 	messageIndexToEdit: number | null;
-	isCodeEditor: boolean;
+	isExpanded: boolean;
 	isCompletionInProgress: boolean;
 	isNewSession: boolean;
 	shouldFocusTextarea: boolean;

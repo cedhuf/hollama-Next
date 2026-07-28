@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { CircleStop, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
+	import { CircleStop, FoldVertical, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
 	import Settings_2 from '@lucide/svelte/icons/settings-2';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
-	import FieldTextEditor from '$lib/components/FieldTextEditor.svelte';
 	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 	import {
@@ -72,7 +71,7 @@
 
 	// In the plain chat view the composer floats over the messages; the strip below
 	// it stays opaque so scrolling text never peeks under the input.
-	const isFloating = $derived(editor.view === 'messages' && !editor.isCodeEditor);
+	const isFloating = $derived(editor.view === 'messages' && !editor.isExpanded);
 
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
 	const tools = $derived([
@@ -123,9 +122,9 @@
 		}
 	});
 
-	function toggleCodeEditor() {
-		editor.isCodeEditor = !editor.isCodeEditor;
-		editor.shouldFocusTextarea = !editor.isCodeEditor;
+	function toggleExpanded() {
+		editor.isExpanded = !editor.isExpanded;
+		editor.promptTextarea?.focus();
 	}
 
 	function switchToMessages() {
@@ -142,8 +141,18 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.shiftKey) return;
 		if (event.key !== 'Enter') return;
+
+		// Expanded is the long-form mode: Enter breaks the line and ⌘/Ctrl+Enter sends,
+		// so paragraphs can be written without the composer firing on every return.
+		if (editor.isExpanded) {
+			if (!event.metaKey && !event.ctrlKey) return;
+			event.preventDefault();
+			submit();
+			return;
+		}
+
+		if (event.shiftKey) return;
 		event.preventDefault();
 		submit();
 	}
@@ -229,12 +238,12 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto w-full px-4 pt-2 lg:px-6 xl:px-8 {editor.isCodeEditor
-		? 'prompt-editor--fullscreen min-h-[60dvh] md:min-h-[75dvh]'
+	class="prompt-editor pointer-events-auto w-full px-4 pt-2 lg:px-6 xl:px-8 {editor.isExpanded
+		? 'prompt-editor--fullscreen'
 		: ''}"
 >
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
-		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isCodeEditor && !choiceBypassed}
+		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isExpanded && !choiceBypassed}
 			{@const choice = pendingChoice}
 			<!-- Interactive quick-choice temporarily takes over the composer (Claude-style):
 			     one question at a time, numbered + scrollable, dismiss (✕) to type freely. -->
@@ -246,22 +255,25 @@
 					disabled={editor.isCompletionInProgress}
 				/>
 			{/key}
-		{:else if editor.isCodeEditor}
-			<FieldTextEditor label={$LL.prompt()} handleSubmit={submit} bind:value={editor.prompt} />
 		{:else}
-			<!-- Floating composer: translucent blurred card; controls live in the bottom row by Run. -->
+			<!-- One composer, always: expanding only grows the card, so the toggle, Run,
+			     Cancel, attachments and tools stay reachable in every state. -->
 			<div
 				class="flex flex-col rounded-2xl border border-shade-3 bg-shade-0/80 shadow-lg backdrop-blur-xl transition-colors focus-within:border-shade-5"
 			>
+				<!-- The textarea auto-grows with its content (field-sizing); expanding only
+				     raises its floor and ceiling, so no flex-height chain to depend on. -->
 				<textarea
 					name="prompt"
-					class="prompt-editor__textarea base-input min-h-14 max-h-48 resize-none px-4 pt-3.5"
+					class="prompt-editor__textarea base-input resize-none px-4 pt-3.5 {editor.isExpanded
+						? 'min-h-[52dvh] max-h-[70dvh]'
+						: 'min-h-14 max-h-[40dvh]'}"
 					placeholder={$LL.promptPlaceholder()}
 					bind:this={editor.promptTextarea}
 					bind:value={editor.prompt}
 					onkeydown={handleKeyDown}
 					onpaste={handlePaste}
-					enterkeyhint="send"
+					enterkeyhint={editor.isExpanded ? 'enter' : 'send'}
 					inputmode="text"
 				></textarea>
 
@@ -280,12 +292,18 @@
 								</Button>
 								<Button
 									variant="icon"
-									class="hidden lg:inline-flex"
-									title={$LL.prompt()}
-									isActive={editor.isCodeEditor}
-									onclick={toggleCodeEditor}
+									class="prompt-editor__toggle hidden lg:inline-flex"
+									title={editor.isExpanded ? $LL.collapsePrompt() : $LL.expandPrompt()}
+									aria-label={editor.isExpanded ? $LL.collapsePrompt() : $LL.expandPrompt()}
+									aria-expanded={editor.isExpanded}
+									isActive={editor.isExpanded}
+									onclick={toggleExpanded}
 								>
-									<UnfoldVertical class="base-icon" />
+									{#if editor.isExpanded}
+										<FoldVertical class="base-icon" />
+									{:else}
+										<UnfoldVertical class="base-icon" />
+									{/if}
 								</Button>
 							{/if}
 
@@ -295,7 +313,7 @@
 									onclick={() => {
 										editor.prompt = '';
 										editor.messageIndexToEdit = null;
-										editor.isCodeEditor = false;
+										editor.isExpanded = false;
 									}}
 								>
 									{$LL.cancel()}
@@ -320,7 +338,7 @@
 							{:else}
 								<ButtonSubmit
 									handleSubmit={submit}
-									hasMetaKey={editor.isCodeEditor}
+									hasMetaKey={editor.isExpanded}
 									disabled={(!editor.prompt &&
 										!attachments.filter((a) => a.type === 'image').length) ||
 										!session.model ||
@@ -345,6 +363,7 @@
 
 <style lang="postcss">
 	.prompt-editor__textarea {
+		/* Grows with what's typed, bounded by min/max-height — no manual resize needed. */
 		field-sizing: content;
 		font-variant-ligatures: none;
 	}

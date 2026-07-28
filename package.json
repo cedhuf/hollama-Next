@@ -14,7 +14,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"typesafe-i18n": "typesafe-i18n"
+		"typesafe-i18n": "typesafe-i18n",
+		"i18n:status": "node scripts/i18n-status.mjs"
 	},
 	"devDependencies": {
 		"@codemirror/state": "^6.6.0",

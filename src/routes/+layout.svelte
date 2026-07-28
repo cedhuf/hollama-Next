@@ -3,14 +3,14 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
-	import { detectLocale, navigatorDetector } from 'typesafe-i18n/detectors';
+	import { navigatorDetector } from 'typesafe-i18n/detectors';
 
 	import LL, { setLocale } from '$i18n/i18n-svelte';
+	import { detectLocale } from '$i18n/i18n-util';
 	import { loadLocale } from '$i18n/i18n-util.sync';
 
 	import '../app.pcss';
 
-	import type { Locales } from '$i18n/i18n-types';
 	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
@@ -163,11 +163,9 @@
 
 		// Language
 		if (!$settingsStore.userLanguage)
-			$settingsStore.userLanguage = detectLocale(
-				'en',
-				['en', 'de', 'zh-cn', 'es', 'fr', 'pt-br', 'ja', 'tr', 'vi'],
-				navigatorDetector
-			) as Locales;
+			// `detectLocale` is generated from the installed locale folders, so a new
+			// language is picked up here without touching this file.
+			$settingsStore.userLanguage = detectLocale(navigatorDetector);
 
 		loadLocale($settingsStore.userLanguage);
 		setLocale($settingsStore.userLanguage);

@@ -27,11 +27,10 @@ test('seed data and take screenshots for README.md', async ({ page }) => {
 	await page.goto('/sessions/ulxz6l'); // Visiting a fake session id so it doesn't change from test to test
 	await expect(page.getByText('No sessions')).toBeVisible();
 	await expect(page.locator('.prompt-editor__textarea')).toBeVisible();
-	await expect(page.locator('.text-editor')).not.toBeVisible();
 
 	await page.locator('.prompt-editor__toggle').click();
-	await expect(page.locator('.text-editor')).toBeVisible();
-	await expect(page.locator('.prompt-editor__textarea')).not.toBeVisible();
+	await expect(page.locator('.prompt-editor')).toHaveClass(/ prompt-editor--fullscreen/);
+	await expect(page.locator('.prompt-editor__textarea')).toBeVisible();
 	expect(await page.screenshot()).toMatchSnapshot({ name: 'session-new.png' });
 
 	// Stage 2 sessions

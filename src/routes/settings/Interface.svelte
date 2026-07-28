@@ -5,6 +5,7 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
+	import { languageOptions } from '$lib/i18n';
 	import { settingsStore } from '$lib/localStorage';
 
 	import SettingsPanel from './SettingsPanel.svelte';
@@ -32,17 +33,7 @@
 			allowClear={false}
 			allowSearch={false}
 			onChange={changeLanguage}
-			options={[
-				{ value: 'en', label: 'English' },
-				{ value: 'de', label: 'Deutsch' },
-				{ value: 'zh-cn', label: '中文 (简体)' },
-				{ value: 'es', label: 'Español' },
-				{ value: 'fr', label: 'Français' },
-				{ value: 'pt-br', label: 'Português (Brasil)' },
-				{ value: 'ja', label: '日本語' },
-				{ value: 'tr', label: 'Türkçe' },
-				{ value: 'vi', label: 'Tiếng Việt' }
-			]}
+			options={languageOptions}
 		/>
 
 		<ThemePicker />

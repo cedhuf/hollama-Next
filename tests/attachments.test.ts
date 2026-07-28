@@ -334,8 +334,8 @@ test.describe('Attachments', () => {
 			'session.png'
 		);
 
-		// Update prompt text
-		const textEditor = page.locator('.text-editor .cm-content');
+		// Update prompt text — editing reuses the regular composer textarea
+		const textEditor = page.locator('.prompt-editor__textarea');
 		await textEditor.clear();
 		await textEditor.fill('Describe these two images');
 
