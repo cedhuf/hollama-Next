@@ -17,7 +17,7 @@
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import ModelPicker from '$lib/components/ModelPicker.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { formatCurrentDateTime } from '$lib/currentDate';
@@ -646,7 +646,7 @@
 					<!-- Model picker hidden on mobile (space); change it via the conversation settings (⚙). -->
 					<span class="hidden items-center gap-1.5 lg:flex">
 						<span class="text-shade-5">•</span>
-						<ModelPicker bind:value={modelName} />
+						<ModelSelect bind:value={modelName} />
 					</span>
 				</div>
 			{/if}

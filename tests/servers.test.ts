@@ -167,7 +167,7 @@ test.describe('Servers', () => {
 		await expect(modelCombobox).toBeDisabled();
 
 		await page.getByText('Settings').click();
-		await page.getByText('Re-verify').click();
+		await page.getByRole('button', { name: 'Sync' }).click();
 		await expect(useModelsFromThisServerCheckbox).toBeChecked();
 	});
 

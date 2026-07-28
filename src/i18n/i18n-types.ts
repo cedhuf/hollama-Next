@@ -509,10 +509,6 @@ type RootTranslation = {
 	 */
 	run: string
 	/**
-	 * R​e​-​v​e​r​i​f​y
-	 */
-	reVerify: string
-	/**
 	 * R​u​n​t​i​m​e​ ​o​p​t​i​o​n​s
 	 */
 	runtimeOptions: string
@@ -626,6 +622,10 @@ type RootTranslation = {
 	 * U​s​e​ ​m​o​d​e​l​s​ ​f​r​o​m​ ​t​h​i​s​ ​s​e​r​v​e​r
 	 */
 	useModelsFromThisServer: string
+	/**
+	 * S​y​n​c
+	 */
+	sync: string
 	/**
 	 * V​e​r​i​f​y
 	 */
@@ -1462,10 +1462,6 @@ The completion in progress will stop
 	 */
 	run: () => LocalizedString
 	/**
-	 * Re-verify
-	 */
-	reVerify: () => LocalizedString
-	/**
 	 * Runtime options
 	 */
 	runtimeOptions: () => LocalizedString
@@ -1577,6 +1573,10 @@ The completion in progress will stop
 	 * Use models from this server
 	 */
 	useModelsFromThisServer: () => LocalizedString
+	/**
+	 * Sync
+	 */
+	sync: () => LocalizedString
 	/**
 	 * Verify
 	 */

@@ -81,6 +81,13 @@ const migrations: Migration[] = [
 			);
 			CREATE INDEX idx_personas_user ON personas(user_id);
 		`
+	},
+	{
+		version: 3,
+		up: `
+			-- When the connection was last synced successfully. NULL = never verified.
+			ALTER TABLE servers ADD COLUMN verified_at TEXT;
+		`
 	}
 ];
 

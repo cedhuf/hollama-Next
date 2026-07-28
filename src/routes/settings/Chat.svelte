@@ -5,7 +5,7 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import FieldHelp from '$lib/components/FieldHelp.svelte';
-	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import P from '$lib/components/P.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
@@ -63,12 +63,12 @@
 <SettingsPanel>
 	<SettingsSection title="Defaults">
 		{#if dmEditable}
-			<FieldSelectModel
-				isLabelVisible={true}
-				label={$LL.defaultModel()}
-				value={dmValue}
-				onChange={(o) => ($settingsStore.defaultModel = o.value || null)}
-			/>
+			<SettingsField label={$LL.defaultModel()}>
+				<ModelSelect
+					value={dmValue}
+					onSelect={(name) => ($settingsStore.defaultModel = name || null)}
+				/>
+			</SettingsField>
 		{:else}
 			<SettingsField label={$LL.defaultModel()}>
 				{#snippet badge()}
@@ -88,12 +88,12 @@
 			</FieldHelp>
 
 			{#if $settingsStore.generateTitlesWithAI}
-				<FieldSelectModel
-					isLabelVisible={true}
-					label={$LL.titleModel()}
-					value={titleModelValue}
-					onChange={(o) => ($settingsStore.titleModel = o.value || null)}
-				/>
+				<SettingsField label={$LL.titleModel()}>
+					<ModelSelect
+						value={titleModelValue}
+						onSelect={(name) => ($settingsStore.titleModel = name || null)}
+					/>
+				</SettingsField>
 			{/if}
 		{:else}
 			<SettingsField label={$LL.generateTitlesWithAI()}>

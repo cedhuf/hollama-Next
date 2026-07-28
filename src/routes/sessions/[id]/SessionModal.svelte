@@ -2,7 +2,7 @@
 	import { MessagesSquare } from '@lucide/svelte';
 
 	import Modal from '$lib/components/Modal.svelte';
-	import ModelPicker from '$lib/components/ModelPicker.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { getSessionTitle, saveSession, type Session } from '$lib/sessions';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 
@@ -54,7 +54,7 @@
 
 		<label class="flex flex-col gap-1 text-sm">
 			<span class="text-muted">Model</span>
-			<ModelPicker bind:value={modelName} />
+			<ModelSelect bind:value={modelName} />
 		</label>
 
 		<label class="flex flex-col gap-1 text-sm">

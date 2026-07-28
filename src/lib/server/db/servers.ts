@@ -13,6 +13,8 @@ export interface ServerRow {
 	label: string | null;
 	model_filter: string | null;
 	is_enabled: number;
+	/** ISO date of the last successful sync; NULL when never verified. */
+	verified_at: string | null;
 	created_at: string;
 }
 
@@ -81,6 +83,7 @@ export function updateServer(
 		label?: string | null;
 		modelFilter?: string | null;
 		isEnabled?: boolean;
+		verifiedAt?: string | null;
 	}
 ): void {
 	const sets: string[] = [];
@@ -105,6 +108,10 @@ export function updateServer(
 	if (patch.isEnabled !== undefined) {
 		sets.push('is_enabled = ?');
 		values.push(patch.isEnabled ? 1 : 0);
+	}
+	if (patch.verifiedAt !== undefined) {
+		sets.push('verified_at = ?');
+		values.push(patch.verifiedAt);
 	}
 	if (sets.length === 0) return;
 

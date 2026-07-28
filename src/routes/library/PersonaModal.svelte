@@ -6,7 +6,7 @@
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import ModelPicker from '$lib/components/ModelPicker.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { knowledgeStore } from '$lib/localStorage';
 	import {
 		deletePersona,
@@ -131,7 +131,7 @@
 
 				<SettingsSection title="Behaviour">
 					<SettingsField label="Model">
-						<ModelPicker bind:value={persona.modelName} onSelect={persist} />
+						<ModelSelect bind:value={persona.modelName} onSelect={persist} />
 					</SettingsField>
 
 					<SettingsField label="System prompt" hint="The persona's personality lives here.">

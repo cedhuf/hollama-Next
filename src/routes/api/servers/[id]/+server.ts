@@ -21,7 +21,8 @@ export async function PUT(event) {
 		apiKey: body.apiKey,
 		label: body.label,
 		modelFilter: body.modelFilter,
-		isEnabled: body.isEnabled
+		isEnabled: body.isEnabled,
+		verifiedAt: body.verifiedAt
 	});
 	return json(toProviderView(getServer(event.params.id)!));
 }

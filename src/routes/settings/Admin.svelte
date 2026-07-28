@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { PlayCircle, Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
+	import { PlayCircle, Plus, Trash2, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import MultiSelect from '$lib/components/MultiSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
@@ -28,8 +29,6 @@
 		label: string | null;
 		isEnabled: boolean;
 		sharedModels: string[];
-		available: string[] | null;
-		loadingModels: boolean;
 	}
 	interface UserRow {
 		id: string;
@@ -122,13 +121,29 @@
 		defaultModelValue = config.defaultModel ?? '';
 		titleSharing = config.titleSharing ?? 'off';
 		titleShareEnabled = titleSharing !== 'off';
-		servers = (
-			serverList as Pick<
-				SystemServer,
-				'id' | 'connectionType' | 'label' | 'isEnabled' | 'sharedModels'
-			>[]
-		).map((s) => ({ ...s, available: null, loadingModels: false }));
+		servers = serverList as SystemServer[];
 		users = userList;
+	}
+
+	/**
+	 * Models offered by each system server. `/api/providers` already returns the
+	 * full (unfiltered) list for admins — the same `listProviderModels` call the
+	 * old per-server "Load models" button made — so there is nothing to fetch here.
+	 * Refreshing the catalogue is done from the Servers tab.
+	 */
+	const availableByServer = $derived.by(() => {
+		const byServer: Record<string, string[]> = {};
+		for (const model of $settingsStore.models ?? []) {
+			(byServer[model.serverId] ??= []).push(model.name);
+		}
+		return byServer;
+	});
+
+	/** Shared models are kept even if the server no longer lists them. */
+	function optionsFor(server: SystemServer) {
+		return Array.from(new Set([...(availableByServer[server.id] ?? []), ...server.sharedModels]))
+			.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+			.map((model) => ({ value: model, label: model }));
 	}
 
 	// All sharing controls autosave on change (no Save buttons). The search /
@@ -180,27 +195,6 @@
 
 	async function toggleAllowUserPersonas() {
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
-	}
-
-	async function loadModels(server: SystemServer) {
-		server.loadingModels = true;
-		try {
-			const models = (await api<string[]>(`/api/admin/servers/${server.id}/models`, 'GET')) ?? [];
-			server.available = Array.from(new Set([...models, ...server.sharedModels])).sort((a, b) =>
-				a.localeCompare(b, undefined, { sensitivity: 'base' })
-			);
-			if (models.length === 0)
-				toast.info('No models returned (check the server in the Servers tab)');
-		} finally {
-			server.loadingModels = false;
-		}
-	}
-
-	function toggleShared(server: SystemServer, model: string) {
-		server.sharedModels = server.sharedModels.includes(model)
-			? server.sharedModels.filter((m) => m !== model)
-			: [...server.sharedModels, model];
-		saveShared(server);
 	}
 
 	async function saveShared(server: SystemServer) {
@@ -352,52 +346,27 @@
 
 		{#each servers as server (server.id)}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
-				<div class="flex items-center justify-between gap-2">
-					<span class="text-sm font-medium">
-						{server.label || server.connectionType}
-						{#if !server.isEnabled}<span class="text-xs text-muted">(disabled)</span>{/if}
-					</span>
-					<button
-						type="button"
-						onclick={() => loadModels(server)}
-						disabled={server.loadingModels}
-						class="flex items-center gap-1 text-xs text-link hover:underline disabled:opacity-50"
-					>
-						<RefreshCw class="h-3 w-3 {server.loadingModels ? 'animate-spin' : ''}" />
-						{server.available ? 'Reload models' : 'Load models'}
-					</button>
-				</div>
+				<span class="text-sm font-medium">
+					{server.label || server.connectionType}
+					{#if !server.isEnabled}<span class="text-xs text-muted">(disabled)</span>{/if}
+				</span>
 
-				{#if server.available}
-					{#if server.available.length}
-						<div class="max-h-44 overflow-auto rounded-md border border-shade-3 p-1">
-							{#each server.available as model (model)}
-								<label
-									class="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-shade-2"
-								>
-									<input
-										type="checkbox"
-										checked={server.sharedModels.includes(model)}
-										onchange={() => toggleShared(server, model)}
-									/>
-									{model}
-								</label>
-							{/each}
-						</div>
-						<span class="text-xs text-muted">{server.sharedModels.length} shared</span>
-					{:else}
-						<span class="text-xs text-muted">No models found.</span>
-					{/if}
+				{#if optionsFor(server).length}
+					<MultiSelect
+						value={server.sharedModels}
+						searchable
+						placeholder="Select models to share"
+						options={optionsFor(server)}
+						onChange={(selected) => {
+							server.sharedModels = selected;
+							saveShared(server);
+						}}
+					/>
+					<span class="text-xs text-muted">{server.sharedModels.length} shared</span>
 				{:else}
-					<div class="flex flex-wrap gap-1">
-						{#if server.sharedModels.length}
-							{#each server.sharedModels as model (model)}
-								<span class="rounded bg-shade-2 px-2 py-0.5 text-xs">{model}</span>
-							{/each}
-						{:else}
-							<span class="text-xs text-muted">No models shared yet.</span>
-						{/if}
-					</div>
+					<span class="text-xs text-muted">
+						No models available — check this server in the Servers tab.
+					</span>
 				{/if}
 			</div>
 		{/each}

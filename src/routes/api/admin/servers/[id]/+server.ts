@@ -20,7 +20,8 @@ export async function PUT(event) {
 		apiKey: body.apiKey, // omit to keep, '' / null to clear
 		label: body.label,
 		modelFilter: body.modelFilter,
-		isEnabled: body.isEnabled
+		isEnabled: body.isEnabled,
+		verifiedAt: body.verifiedAt
 	});
 	if (Array.isArray(body.sharedModels)) setSharedModels(event.params.id, body.sharedModels);
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp, LoaderCircle, Pencil } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp, LoaderCircle, Pencil, RefreshCw } from '@lucide/svelte';
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
@@ -27,14 +27,25 @@
 		onDelete: () => void;
 		/** Start with the endpoint details expanded (e.g. a freshly-added server). */
 		startEditing?: boolean;
+		/** Called after a successful sync, so the parent can refresh the catalogue. */
+		onSynced?: () => Promise<void> | void;
 	}
 
-	let { server, onChange, onDelete, startEditing = false }: Props = $props();
+	let { server, onChange, onDelete, startEditing = false, onSynced }: Props = $props();
 	let strategy: OllamaStrategy | OpenAIStrategy;
 	let isLoading = $state(false);
 	let showAdvanced = $state(false);
 	// svelte-ignore state_referenced_locally
 	let editing = $state(startEditing);
+
+	/** `isVerified` arrives as a Date locally and as an ISO string from the API. */
+	const syncedAt = $derived(
+		server.isVerified
+			? server.isVerified instanceof Date
+				? server.isVerified
+				: new Date(server.isVerified)
+			: null
+	);
 
 	const provider = $derived(getProvider(server.connectionType));
 	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
@@ -54,20 +65,32 @@
 		onChange();
 	}
 
-	async function verifyServer() {
+	/**
+	 * One action for the whole round-trip: check the endpoint answers, stamp the
+	 * verified date (persisted by the parent) and pull this provider's models in.
+	 * There is no separate "verify" and "refresh" — syncing is what both meant.
+	 */
+	async function syncServer() {
 		isLoading = true;
 		const toastId = toast.loading($LL.connecting());
 
 		strategy = isOpenAiFamily ? new OpenAIStrategy(server) : new OllamaStrategy(server);
-		server.isVerified = (await strategy.verifyServer()) ? new Date() : null;
+		const ok = await strategy.verifyServer();
+		server.isVerified = ok ? new Date() : null;
 
-		if (server.isVerified) {
+		if (ok) {
 			server.isEnabled = true;
+			persist();
+			try {
+				await onSynced?.();
+			} catch {
+				// The connection is fine; only the catalogue refresh failed.
+			}
 			toast.success($LL.connectionIsVerified(), { id: toastId });
 		} else {
+			persist();
 			toast.error($LL.connectionFailedToVerify(), { id: toastId });
 		}
-		persist();
 		isLoading = false;
 	}
 
@@ -84,19 +107,15 @@
 			{/if}
 			<Badge>{server.label ? server.label : provider.name}</Badge>
 			<span
-				class="ml-1.5 inline-flex items-center gap-1 text-[11px] {server.isVerified
+				class="ml-1.5 inline-flex items-center gap-1 text-[11px] {syncedAt
 					? 'text-positive'
 					: 'text-muted'}"
-				title={server.isVerified
-					? `Last verified ${typeof server.isVerified === 'string' ? server.isVerified : server.isVerified instanceof Date ? server.isVerified.toLocaleDateString() : ''}`
-					: 'Not yet verified'}
+				title={syncedAt ? `Last synced ${syncedAt.toLocaleString()}` : 'Never synced'}
 			>
 				<span
-					class="inline-block h-1.5 w-1.5 rounded-full {server.isVerified
-						? 'bg-positive'
-						: 'bg-shade-4'}"
+					class="inline-block h-1.5 w-1.5 rounded-full {syncedAt ? 'bg-positive' : 'bg-shade-4'}"
 				></span>
-				{server.isVerified ? 'Verified' : 'Unverified'}
+				{syncedAt ? 'Synced' : 'Not synced'}
 			</span>
 		{/snippet}
 
@@ -117,16 +136,20 @@
 					<Trash_2 class="base-icon" />
 				</Button>
 
+				<!-- One stable label: the button no longer changes width (nor says "Re-…")
+				     once the connection has been verified. -->
 				<Button
 					disabled={isLoading || !server.baseUrl}
 					variant={!server.isVerified ? 'default' : 'outline'}
-					onclick={verifyServer}
+					onclick={syncServer}
+					title={$LL.sync()}
 				>
 					{#if isLoading}
 						<LoaderCircle class="base-icon animate-spin" />
 					{:else}
-						{server.isVerified ? $LL.reVerify() : $LL.verify()}
+						<RefreshCw class="base-icon" />
 					{/if}
+					{$LL.sync()}
 				</Button>
 
 				<Button

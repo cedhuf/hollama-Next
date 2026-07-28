@@ -16,7 +16,7 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
-	import ModelPicker from '$lib/components/ModelPicker.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
@@ -173,7 +173,7 @@
 
 			<div class="mb-8 w-full">
 				<div class="mb-3 flex items-center justify-center">
-					<ModelPicker bind:value={selectedModel} variant="hero" />
+					<ModelSelect bind:value={selectedModel} variant="hero" />
 				</div>
 				<div
 					class="rounded-2xl border border-shade-3 bg-shade-0 shadow-sm transition-all hover:border-shade-4 focus-within:border-shade-5 focus-within:shadow-md"

@@ -7,6 +7,8 @@
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import P from '$lib/components/P.svelte';
 	import { ConnectionType, getDefaultServer, PROVIDERS, type Server } from '$lib/connections';
+	import { settingsStore } from '$lib/localStorage';
+	import { fetchProviders, providerModels } from '$lib/providers';
 	import { currentUser } from '$lib/stores/auth';
 
 	import Connection from './Connection.svelte';
@@ -24,6 +26,7 @@
 		label: string | null;
 		modelFilter?: string | null;
 		isEnabled: boolean;
+		verifiedAt?: string | null;
 		scope?: string;
 	}
 
@@ -57,7 +60,8 @@
 			label: v.label ?? undefined,
 			modelFilter: v.modelFilter ?? undefined,
 			isEnabled: v.isEnabled,
-			isVerified: null,
+			// Restored from the server, so the badge survives a reload.
+			isVerified: v.verifiedAt ? new Date(v.verifiedAt) : null,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -82,6 +86,17 @@
 			? await fetch('/api/admin/servers').then((r) => r.json())
 			: providers.servers.filter((s: ApiServer) => s.scope === 'personal');
 		servers = list.map(toServer);
+	}
+
+	/**
+	 * Refresh the shared model catalogue after a connection syncs. `/api/providers`
+	 * is cached for the session, so a successful sync is the moment to force it.
+	 */
+	async function refreshCatalogue() {
+		const { servers: providers } = await fetchProviders(true);
+		$settingsStore.models = providerModels(providers).sort((a, b) =>
+			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		);
 	}
 
 	onMount(load);
@@ -161,6 +176,10 @@
 					label: server.label ?? null,
 					modelFilter: server.modelFilter ?? null,
 					isEnabled: server.isEnabled,
+					verifiedAt:
+						server.isVerified instanceof Date
+							? server.isVerified.toISOString()
+							: (server.isVerified ?? null),
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			});
@@ -194,6 +213,7 @@
 				startEditing={server.id === justAddedId}
 				onChange={() => persist(server)}
 				onDelete={() => removeServer(server.id)}
+				onSynced={refreshCatalogue}
 			/>
 		{/each}
 
