@@ -46,6 +46,11 @@
 
 	const email = $derived(isServerMode ? ($currentUser?.email ?? '') : $settingsStore.profileEmail);
 
+	// An OIDC-provisioned identity is owned by the provider: name and avatar are
+	// re-read from its claims, so editing them here would silently diverge. The
+	// panel stays visible — the fields simply become read-only.
+	const oidcManaged = $derived(isServerMode && !!$currentUser?.oidc);
+
 	// Avatar editing (colour + image) lives in a popover on the avatar itself, mirroring
 	// the persona editor — colour swatches only show when there's no picture.
 	let avatarMenuOpen = $state(false);
@@ -75,25 +80,46 @@
 	<!-- Identity card -->
 	<div class="flex items-center gap-4 rounded-xl border border-shade-3 bg-shade-0 p-4">
 		<div class="relative shrink-0">
-			<button
-				type="button"
-				onclick={() => (avatarMenuOpen = !avatarMenuOpen)}
-				title="Edit avatar"
-				aria-label="Edit avatar"
-				class="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full text-xl font-bold text-white ring-2 ring-shade-3"
-				style="background-color: {$settingsStore.profileColor}"
-			>
-				{#if $settingsStore.profileAvatar}
-					<img src={$settingsStore.profileAvatar} alt="Avatar" class="h-full w-full object-cover" />
-				{:else}
-					{initials}
-				{/if}
-				<span
-					class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+			{#if oidcManaged}
+				<div
+					class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full text-xl font-bold text-white ring-2 ring-shade-3"
+					style="background-color: {$settingsStore.profileColor}"
 				>
-					<Pencil class="h-4 w-4" />
-				</span>
-			</button>
+					{#if $settingsStore.profileAvatar}
+						<img
+							src={$settingsStore.profileAvatar}
+							alt="Avatar"
+							class="h-full w-full object-cover"
+						/>
+					{:else}
+						{initials}
+					{/if}
+				</div>
+			{:else}
+				<button
+					type="button"
+					onclick={() => (avatarMenuOpen = !avatarMenuOpen)}
+					title="Edit avatar"
+					aria-label="Edit avatar"
+					class="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full text-xl font-bold text-white ring-2 ring-shade-3"
+					style="background-color: {$settingsStore.profileColor}"
+				>
+					{#if $settingsStore.profileAvatar}
+						<img
+							src={$settingsStore.profileAvatar}
+							alt="Avatar"
+							class="h-full w-full object-cover"
+						/>
+					{:else}
+						{initials}
+					{/if}
+					<span
+						class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+					>
+						<Pencil class="h-4 w-4" />
+					</span>
+				</button>
+			{/if}
 
 			{#if avatarMenuOpen}
 				<button
@@ -168,19 +194,33 @@
 	<!-- Identity -->
 	<SettingsSection title={$LL.profile()}>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-			<SettingsField label={$LL.firstName()}>
-				<input
-					class="settings-field"
-					bind:value={$settingsStore.profileFirstName}
-					placeholder={$LL.firstName()}
-				/>
+			<SettingsField
+				label={$LL.firstName()}
+				hint={oidcManaged ? 'Managed by your identity provider.' : undefined}
+			>
+				{#if oidcManaged}
+					<input class="settings-field" value={$settingsStore.profileFirstName} disabled />
+				{:else}
+					<input
+						class="settings-field"
+						bind:value={$settingsStore.profileFirstName}
+						placeholder={$LL.firstName()}
+					/>
+				{/if}
 			</SettingsField>
-			<SettingsField label={$LL.lastName()}>
-				<input
-					class="settings-field"
-					bind:value={$settingsStore.profileLastName}
-					placeholder={$LL.lastName()}
-				/>
+			<SettingsField
+				label={$LL.lastName()}
+				hint={oidcManaged ? 'Managed by your identity provider.' : undefined}
+			>
+				{#if oidcManaged}
+					<input class="settings-field" value={$settingsStore.profileLastName} disabled />
+				{:else}
+					<input
+						class="settings-field"
+						bind:value={$settingsStore.profileLastName}
+						placeholder={$LL.lastName()}
+					/>
+				{/if}
 			</SettingsField>
 		</div>
 

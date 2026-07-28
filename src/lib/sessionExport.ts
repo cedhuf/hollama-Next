@@ -1,0 +1,77 @@
+import { getSessionTitle, type Message, type Session } from '$lib/sessions';
+
+export type ExportFormat = 'json' | 'markdown';
+
+/** The raw message array — the shape the app stores, for re-import or tooling. */
+export function sessionToJson(session: Session): string {
+	return JSON.stringify(session.messages, null, 2);
+}
+
+function speaker(message: Message, assistantLabel?: string): string {
+	if (message.role === 'user') return 'You';
+	if (message.role === 'system') return 'System';
+	return assistantLabel || 'Assistant';
+}
+
+/**
+ * A readable transcript: one heading per turn, with the extras that carry meaning
+ * on their own (attachments, sources, reasoning) kept but folded out of the way.
+ */
+export function sessionToMarkdown(session: Session, assistantLabel?: string): string {
+	const parts: string[] = [];
+
+	const title = getSessionTitle(session);
+	parts.push(`# ${title || `Session #${session.id}`}`);
+	if (session.updatedAt) parts.push(`_${new Date(session.updatedAt).toLocaleString()}_`);
+
+	for (const message of session.messages) {
+		// A knowledge attachment is a document, not a turn — name it rather than
+		// dumping its full body into the transcript.
+		if (message.knowledge) {
+			parts.push(`## ${speaker(message, assistantLabel)}`, `📎 **${message.knowledge.name}**`);
+			continue;
+		}
+
+		parts.push(`## ${speaker(message, assistantLabel)}`);
+
+		for (const image of message.images ?? []) {
+			parts.push(`🖼️ _${image.filename}_`);
+		}
+
+		if (message.reasoning?.trim()) {
+			// <details> keeps long chains of thought collapsed wherever the markdown
+			// is rendered, while staying plain text everywhere else.
+			parts.push(
+				[
+					'<details>',
+					'<summary>Reasoning</summary>',
+					'',
+					message.reasoning.trim(),
+					'',
+					'</details>'
+				].join('\n')
+			);
+		}
+
+		if (message.content.trim()) parts.push(message.content.trim());
+
+		const sources = message.webSearch?.sources ?? [];
+		if (sources.length) {
+			parts.push(
+				['**Sources**', ...sources.map((s, i) => `${i + 1}. [${s.title || s.url}](${s.url})`)].join(
+					'\n'
+				)
+			);
+		}
+	}
+
+	return parts.join('\n\n') + '\n';
+}
+
+export function serializeSession(
+	session: Session,
+	format: ExportFormat,
+	assistantLabel?: string
+): string {
+	return format === 'json' ? sessionToJson(session) : sessionToMarkdown(session, assistantLabel);
+}

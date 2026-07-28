@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
+	import { PlayCircle, Plus, RefreshCw, Trash2, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import { settingsStore } from '$lib/localStorage';
+	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -212,6 +213,13 @@
 		if (!confirm('Delete this user and all their data?')) return;
 		await api(`/api/admin/users/${id}`, 'DELETE');
 		await load();
+	}
+
+	/** Replay the first-connection welcome tour, so it can be reviewed on demand. */
+	function replayWelcome() {
+		$settingsStore.welcomeComplete = false;
+		$settingsModalOpen = false;
+		$welcomeOpen = true;
 	}
 </script>
 
@@ -445,5 +453,25 @@
 				<Plus class="h-4 w-4" /> Add user
 			</button>
 		{/if}
+	</SettingsSection>
+
+	<!-- Developer options -->
+	<SettingsSection
+		title="Developer options"
+		description="Tools for checking flows a user normally only sees once."
+	>
+		<div
+			class="flex items-center justify-between gap-3 rounded-md border border-shade-3 p-3 text-sm"
+		>
+			<div class="flex min-w-0 flex-col">
+				<span class="font-medium text-active">New-user onboarding</span>
+				<span class="text-xs text-muted">
+					Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.
+				</span>
+			</div>
+			<Button variant="outline" onclick={replayWelcome}>
+				<PlayCircle class="base-icon" /> Launch
+			</Button>
+		</div>
 	</SettingsSection>
 </SettingsPanel>

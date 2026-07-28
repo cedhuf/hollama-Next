@@ -14,7 +14,6 @@
 	import { generateTitle } from '$lib/chat/title';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
@@ -44,6 +43,7 @@
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import type { PageData } from './$types';
+	import ButtonCopyConversation from './ButtonCopyConversation.svelte';
 	import Controls from './Controls.svelte';
 	import Messages from './Messages.svelte';
 	import Prompt from './Prompt.svelte';
@@ -89,6 +89,10 @@
 	const persona = $derived(
 		session.personaId ? $personasStore.find((p) => p.id === session.personaId) : undefined
 	);
+
+	// Empty until the conversation has a real title (or a first user message to
+	// derive one from) — the header falls back to "Session #id" until then.
+	const sessionTitle = $derived(editor.isNewSession ? '' : getSessionTitle(session));
 
 	$effect(() => {
 		if (data.id !== session.id) handleSessionChange();
@@ -624,9 +628,18 @@
 					</div>
 				</div>
 			{:else}
-				<p data-testid="session-id" class="font-bold leading-none">
-					{$LL.session()}
-					<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>
+				<!-- Once a conversation has a title it becomes the headline, with the id
+				     kept as a parenthesised link so it stays copyable/navigable. -->
+				<p data-testid="session-id" class="truncate font-bold leading-none">
+					{#if sessionTitle}
+						{sessionTitle}
+						<span class="text-muted">
+							(<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>)
+						</span>
+					{:else}
+						{$LL.session()}
+						<Button variant="link" href={`/sessions/${session.id}`}>#{session.id}</Button>
+					{/if}
 				</p>
 				<div class="flex items-center gap-1.5 text-xs text-muted">
 					{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
@@ -647,7 +660,7 @@
 			{/if}
 			{#if !editor.isNewSession}
 				{#if !shouldConfirmDeletion}
-					<ButtonCopy content={JSON.stringify(session.messages, null, 2)} />
+					<ButtonCopyConversation {session} assistantLabel={persona?.name} />
 				{/if}
 				<ButtonDelete sitemap={Sitemap.SESSIONS} id={session.id} bind:shouldConfirmDeletion />
 			{/if}

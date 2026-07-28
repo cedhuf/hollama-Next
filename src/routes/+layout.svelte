@@ -31,7 +31,7 @@
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentUser } from '$lib/stores/auth';
-	import { onboardingOpen } from '$lib/stores/modal';
+	import { onboardingOpen, welcomeOpen } from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates } from '$lib/updates';
@@ -39,6 +39,7 @@
 	import type { LayoutData } from './$types';
 	import Onboarding from './Onboarding.svelte';
 	import SettingsModal from './settings/SettingsModal.svelte';
+	import Welcome from './Welcome.svelte';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
@@ -249,6 +250,17 @@
 		) {
 			$onboardingOpen = true;
 		}
+
+		// Server mode has no first-run wizard (the account and its profile are
+		// provisioned for the user), so new users get the welcome tour instead —
+		// once, on their first connection.
+		if (
+			env.PUBLIC_MODE === 'server' &&
+			env.PUBLIC_DISABLE_ONBOARDING !== 'true' &&
+			!$settingsStore.welcomeComplete
+		) {
+			$welcomeOpen = true;
+		}
 	});
 </script>
 
@@ -292,6 +304,7 @@
 {:else}
 	<SettingsModal />
 	<Onboarding />
+	<Welcome />
 
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->

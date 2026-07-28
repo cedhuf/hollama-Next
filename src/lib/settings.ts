@@ -62,6 +62,8 @@ export interface Settings {
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
 	onboardingComplete: boolean;
+	/** Server mode: the new-user welcome tour (app intro, theme, personas) has been seen. */
+	welcomeComplete: boolean;
 	hollamaMetadata: HollamaNextMetadata;
 	profileFirstName: string;
 	profileLastName: string;
@@ -103,6 +105,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	userLanguage: null,
 	sidebarExpanded: true,
 	onboardingComplete: false,
+	welcomeComplete: false,
 	hollamaMetadata: {
 		currentVersion: version,
 		isDocker: env.PUBLIC_ADAPTER === 'docker-node'
