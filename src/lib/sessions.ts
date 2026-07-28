@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 
 import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
+import { modelLabel, type Server } from '$lib/connections';
 import { sessionsStore, settingsStore, sortStore } from '$lib/localStorage';
 
 import type { AskChoices } from './askChoice';
@@ -153,10 +154,19 @@ export const saveSession = (session: Session): void => {
 	settingsStore.update((settings) => ({ ...settings, lastUsedModels }));
 };
 
-export function formatSessionMetadata(session: Session) {
+/**
+ * Sidebar subtitle: when it ran, and on what.
+ *
+ * `servers` is passed in rather than read from the store so the caller's template
+ * re-renders when a connection's display names change.
+ */
+export function formatSessionMetadata(session: Session, servers: Server[] = []) {
 	const subtitles: string[] = [];
 	if (session.updatedAt) subtitles.push(formatTimestampToNow(session.updatedAt));
-	if (session.model) subtitles.push(session.model.name);
+	if (session.model) {
+		const server = servers.find((s) => s.id === session.model?.serverId);
+		subtitles.push(modelLabel(server, session.model.name));
+	}
 	return subtitles.join(' • ');
 }
 

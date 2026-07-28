@@ -18,13 +18,25 @@ export function toAdminView(row: ServerRow) {
 }
 
 /**
+ * The custom display names for the models a caller is actually allowed to see.
+ *
+ * Labels are keyed by model id, so handing over the whole map would disclose the
+ * ids of models a user isn't offered — hence the filter through the visible list.
+ */
+export function pickModelLabels(serverId: string, models: string[]): Record<string, string> {
+	const all = getModelLabels(serverId);
+	const visible: Record<string, string> = {};
+	for (const name of models) if (all[name]) visible[name] = all[name];
+	return visible;
+}
+
+/**
  * User-facing view of a usable provider. System servers expose only the
  * admin-curated shared models and hide their endpoint; personal servers show
  * their own config (still never the key).
  */
 export function toProviderView(row: ServerRow) {
 	if (row.owner_user_id === null) {
-		const shared = getSharedModels(row.id);
 		return {
 			id: row.id,
 			scope: 'system' as const,

@@ -392,7 +392,7 @@
 								sitemap={Sitemap.SESSIONS}
 								id={session.id}
 								title={getSessionTitle(session)}
-								subtitle={formatSessionMetadata(session)}
+								subtitle={formatSessionMetadata(session, $serversStore)}
 								pinned={session.pinned}
 							/>
 						{/each}

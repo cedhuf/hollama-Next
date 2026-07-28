@@ -7,8 +7,8 @@
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import P from '$lib/components/P.svelte';
 	import { ConnectionType, getDefaultServer, PROVIDERS, type Server } from '$lib/connections';
-	import { settingsStore } from '$lib/localStorage';
-	import { fetchProviders, providerModels } from '$lib/providers';
+	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { fetchProviders, providerModels, providerToServer } from '$lib/providers';
 	import { currentUser } from '$lib/stores/auth';
 
 	import Connection from './Connection.svelte';
@@ -102,6 +102,10 @@
 		$settingsStore.models = providerModels(providers).sort((a, b) =>
 			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 		);
+		// The model dropdowns read colours and display names off `serversStore`,
+		// which is otherwise only filled at boot — refresh it too, or the change
+		// stays invisible until a reload.
+		serversStore.setQuiet(providers.map(providerToServer));
 	}
 
 	onMount(load);
@@ -170,7 +174,7 @@
 
 	// Debounced PUT per server; the key is sent only when (re)typed.
 	const timers: Record<string, ReturnType<typeof setTimeout>> = {};
-	function persist(server: Server) {
+	function persist(server: Server, afterSave?: () => void) {
 		clearTimeout(timers[server.id]);
 		timers[server.id] = setTimeout(() => {
 			void fetch(`${base}/${server.id}`, {
@@ -189,7 +193,7 @@
 					modelLabels: server.modelLabels ?? {},
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
-			});
+			}).then(() => afterSave?.());
 		}, 500);
 	}
 
@@ -207,7 +211,7 @@
 	<ModelNames
 		server={renaming}
 		onBack={() => (renamingId = null)}
-		onChange={() => persist(renaming)}
+		onChange={() => persist(renaming, refreshCatalogue)}
 	/>
 {:else}
 	<div class="flex flex-col gap-4">

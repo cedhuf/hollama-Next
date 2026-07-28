@@ -8,11 +8,15 @@
 	import { serversStore } from '$lib/localStorage';
 
 	import Connection from './Connection.svelte';
+	import ModelNames from './ModelNames.svelte';
 	import ServerConnections from './ServerConnections.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	let justAddedId = $state<string | null>(null);
+	/** When set, the tab shows the model-name editor for that connection instead. */
+	let renamingId = $state<string | null>(null);
+	const renaming = $derived($serversStore.find((s) => s.id === renamingId));
 
 	function addServer(connectionType: ConnectionType) {
 		const server = getDefaultServer(connectionType);
@@ -23,6 +27,14 @@
 
 {#if isServerMode}
 	<ServerConnections />
+{:else if renaming}
+	<SettingsPanel>
+		<ModelNames
+			server={renaming}
+			onBack={() => (renamingId = null)}
+			onChange={() => serversStore.update((s) => [...s])}
+		/>
+	</SettingsPanel>
 {:else}
 	<SettingsPanel>
 		<SettingsSection
@@ -56,6 +68,7 @@
 					startEditing={server.id === justAddedId}
 					onChange={() => serversStore.update((s) => [...s])}
 					onDelete={() => serversStore.update((s) => s.filter((x) => x.id !== server.id))}
+					onRenameModels={() => (renamingId = server.id)}
 				/>
 			{/each}
 		</div>
