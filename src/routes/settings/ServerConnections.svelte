@@ -30,6 +30,8 @@
 		verifiedAt?: string | null;
 		color?: string | null;
 		modelLabels?: Record<string, string>;
+		/** A stored key is never returned; this is all the browser gets to know. */
+		hasApiKey?: boolean;
 		scope?: string;
 	}
 
@@ -38,6 +40,8 @@
 
 	let allowUserKeys = $state(false);
 	let servers = $state<Server[]>([]);
+	/** Which connections already hold a key, keyed by id (see `ApiServer.hasApiKey`). */
+	let storedKeys = $state<Record<string, boolean>>({});
 
 	const isAdmin = $derived($currentUser?.role === 'admin');
 	const base = $derived(isAdmin ? '/api/admin/servers' : '/api/servers');
@@ -48,7 +52,8 @@
 		baseUrl: '',
 		label: '',
 		apiKey: '',
-		modelFilter: '' as string | null
+		modelFilter: '' as string | null,
+		color: ''
 	});
 	let verifying = $state(false);
 	let verified = $state(false);
@@ -91,6 +96,7 @@
 			? await fetch('/api/admin/servers').then((r) => r.json())
 			: providers.servers.filter((s: ApiServer) => s.scope === 'personal');
 		servers = list.map(toServer);
+		storedKeys = Object.fromEntries(list.map((v) => [v.id, !!v.hasApiKey]));
 	}
 
 	/**
@@ -111,13 +117,17 @@
 	onMount(load);
 
 	function selectPreset(type: ConnectionType) {
-		const preset = getDefaultServer(type);
+		const preset = getDefaultServer(
+			type,
+			servers.map((s) => s.color)
+		);
 		draft = {
 			connectionType: type,
 			baseUrl: preset.baseUrl,
-			label: PROVIDERS.find((p) => p.type === type)?.name ?? '',
+			label: '',
 			apiKey: '',
-			modelFilter: preset.modelFilter ?? ''
+			modelFilter: preset.modelFilter ?? '',
+			color: preset.color ?? ''
 		};
 		verified = false;
 	}
@@ -157,6 +167,7 @@
 			label: draft.label || null,
 			modelFilter: draft.modelFilter || null,
 			apiKey: draft.apiKey || null,
+			color: draft.color || null,
 			isEnabled: true
 		});
 		draft = {
@@ -164,7 +175,8 @@
 			baseUrl: '',
 			label: '',
 			apiKey: '',
-			modelFilter: ''
+			modelFilter: '',
+			color: ''
 		};
 		verified = false;
 		await load();
@@ -175,6 +187,8 @@
 	// Debounced PUT per server; the key is sent only when (re)typed.
 	const timers: Record<string, ReturnType<typeof setTimeout>> = {};
 	function persist(server: Server, afterSave?: () => void) {
+		// Typing a key means one is now stored, even though the API won't echo it back.
+		if (server.apiKey) storedKeys[server.id] = true;
 		clearTimeout(timers[server.id]);
 		timers[server.id] = setTimeout(() => {
 			void fetch(`${base}/${server.id}`, {
@@ -233,6 +247,7 @@
 				<Connection
 					{server}
 					startEditing={server.id === justAddedId}
+					hasApiKey={storedKeys[server.id]}
 					onChange={() => persist(server)}
 					onDelete={() => removeServer(server.id)}
 					onSynced={refreshCatalogue}

@@ -23,7 +23,11 @@ export async function GET(event) {
 					user.role === 'admin' ? await listProviderModels(server) : getSharedModels(server.id);
 				// Display names ride along with the catalogue, so every model dropdown
 				// can render them without a second round-trip.
-				return { ...toProviderView(server), models, modelLabels: pickModelLabels(server.id, models) };
+				return {
+					...toProviderView(server),
+					models,
+					modelLabels: pickModelLabels(server.id, models)
+				};
 			})
 	);
 	const personal = await Promise.all(
@@ -31,7 +35,11 @@ export async function GET(event) {
 			.filter((server) => server.is_enabled)
 			.map(async (server) => {
 				const models = await listProviderModels(server);
-				return { ...toProviderView(server), models, modelLabels: pickModelLabels(server.id, models) };
+				return {
+					...toProviderView(server),
+					models,
+					modelLabels: pickModelLabels(server.id, models)
+				};
 			})
 	);
 

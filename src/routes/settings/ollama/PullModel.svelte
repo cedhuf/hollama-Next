@@ -6,10 +6,9 @@
 	import LL from '$i18n/i18n-svelte';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import Button from '$lib/components/Button.svelte';
-	import FieldHelp from '$lib/components/FieldHelp.svelte';
-	import FieldInput from '$lib/components/FieldInput.svelte';
-	import P from '$lib/components/P.svelte';
 	import type { Server } from '$lib/connections';
+
+	import SettingsField from '../SettingsField.svelte';
 
 	interface Props {
 		server: Server;
@@ -71,32 +70,31 @@
 	}
 </script>
 
-<FieldInput
-	name={`pull-model-${server.id}`}
-	label={$LL.pullModel()}
-	placeholder={$LL.pullModelPlaceholder()}
-	bind:value={modelTag}
-	disabled={isPullInProgress || !server.isVerified}
->
-	<svelte:fragment slot="nav">
+<SettingsField label={$LL.pullModel()}>
+	<div class="flex items-center gap-2">
+		<input
+			class="settings-field"
+			id={`pull-model-${server.id}`}
+			placeholder={$LL.pullModelPlaceholder()}
+			bind:value={modelTag}
+			disabled={isPullInProgress || !server.isVerified}
+		/>
 		<Button
+			variant="outline"
 			aria-label={$LL.downloadModel()}
-			class="h-full text-muted"
+			class="shrink-0"
 			isLoading={isPullInProgress}
 			disabled={!modelTag || isPullInProgress || !server.isVerified}
 			onclick={pullModel}
 		>
 			<CloudDownload class="base-icon" />
 		</Button>
-	</svelte:fragment>
-	<svelte:fragment slot="help">
-		<FieldHelp>
-			<P>
-				{$LL.browseModels()}
-				<Button href="https://ollama.com/library" variant="link" target="_blank">
-					{$LL.ollamaLibrary()}
-				</Button>
-			</P>
-		</FieldHelp>
-	</svelte:fragment>
-</FieldInput>
+	</div>
+</SettingsField>
+
+<p class="-mt-2 text-xs leading-snug text-muted">
+	{$LL.browseModels()}
+	<Button href="https://ollama.com/library" variant="link" target="_blank">
+		{$LL.ollamaLibrary()}
+	</Button>
+</p>

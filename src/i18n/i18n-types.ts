@@ -31,6 +31,18 @@ type RootTranslation = {
 	 */
 	apiKey: string
 	/**
+	 * K​e​y​ ​s​a​v​e​d
+	 */
+	apiKeySaved: string
+	/**
+	 * R​e​p​l​a​c​e
+	 */
+	apiKeyReplace: string
+	/**
+	 * K​e​e​p​ ​c​u​r​r​e​n​t​ ​k​e​y
+	 */
+	apiKeyKeep: string
+	/**
 	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​a​l​l​ ​k​n​o​w​l​e​d​g​e​?
 	 */
 	areYouSureYouWantToDeleteAllKnowledge: string
@@ -139,6 +151,32 @@ type RootTranslation = {
 	 * C​o​n​n​e​c​t​i​o​n​ ​t​y​p​e
 	 */
 	connectionType: string
+	/**
+	 * C​o​n​n​e​c​t​i​o​n​ ​s​e​t​t​i​n​g​s
+	 */
+	connectionSettings: string
+	/**
+	 * S​y​n​c​e​d
+	 */
+	synced: string
+	/**
+	 * N​o​t​ ​s​y​n​c​e​d
+	 */
+	notSynced: string
+	/**
+	 * L​a​s​t​ ​s​y​n​c​e​d​ ​{​d​a​t​e​}
+	 * @param {string} date
+	 */
+	lastSynced: RequiredParams<'date'>
+	/**
+	 * N​e​v​e​r​ ​s​y​n​c​e​d​ ​—​ ​r​u​n​ ​a​ ​s​y​n​c​ ​t​o​ ​l​o​a​d​ ​i​t​s​ ​m​o​d​e​l​s
+	 */
+	neverSynced: string
+	/**
+	 * {​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}
+	 * @param {number} count
+	 */
+	modelsCount: RequiredParams<'count'>
 	/**
 	 * I​d​e​n​t​i​f​i​e​s​ ​t​h​e​ ​c​o​n​n​e​c​t​i​o​n​ ​i​n​ ​t​h​e​ ​m​o​d​e​l​s​ ​l​i​s​t
 	 */
@@ -997,6 +1035,18 @@ export type TranslationFunctions = {
 	 */
 	apiKey: () => LocalizedString
 	/**
+	 * Key saved
+	 */
+	apiKeySaved: () => LocalizedString
+	/**
+	 * Replace
+	 */
+	apiKeyReplace: () => LocalizedString
+	/**
+	 * Keep current key
+	 */
+	apiKeyKeep: () => LocalizedString
+	/**
 	 * Are you sure you want to delete all knowledge?
 	 */
 	areYouSureYouWantToDeleteAllKnowledge: () => LocalizedString
@@ -1105,6 +1155,30 @@ The completion in progress will stop
 	 * Connection type
 	 */
 	connectionType: () => LocalizedString
+	/**
+	 * Connection settings
+	 */
+	connectionSettings: () => LocalizedString
+	/**
+	 * Synced
+	 */
+	synced: () => LocalizedString
+	/**
+	 * Not synced
+	 */
+	notSynced: () => LocalizedString
+	/**
+	 * Last synced {date}
+	 */
+	lastSynced: (arg: { date: string }) => LocalizedString
+	/**
+	 * Never synced — run a sync to load its models
+	 */
+	neverSynced: () => LocalizedString
+	/**
+	 * {count} model{{s}}
+	 */
+	modelsCount: (arg: { count: number }) => LocalizedString
 	/**
 	 * Identifies the connection in the models list
 	 */

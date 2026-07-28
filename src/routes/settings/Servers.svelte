@@ -19,7 +19,10 @@
 	const renaming = $derived($serversStore.find((s) => s.id === renamingId));
 
 	function addServer(connectionType: ConnectionType) {
-		const server = getDefaultServer(connectionType);
+		const server = getDefaultServer(
+			connectionType,
+			$serversStore.map((s) => s.color)
+		);
 		serversStore.update((servers) => [...servers, server]);
 		justAddedId = server.id;
 	}

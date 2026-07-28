@@ -141,11 +141,13 @@
 
 	/** Shared models are kept even if the server no longer lists them. */
 	function optionsFor(server: SystemServer) {
-		return Array.from(new Set([...(availableByServer[server.id] ?? []), ...server.sharedModels]))
-			.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-			// Deliberately the raw ids: this is the admin's sharing console, where the
-			// exact model being exposed matters more than a friendly name.
-			.map((model) => ({ value: model, label: model }));
+		return (
+			Array.from(new Set([...(availableByServer[server.id] ?? []), ...server.sharedModels]))
+				.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+				// Deliberately the raw ids: this is the admin's sharing console, where the
+				// exact model being exposed matters more than a friendly name.
+				.map((model) => ({ value: model, label: model }))
+		);
 	}
 
 	// All sharing controls autosave on change (no Save buttons). The search /

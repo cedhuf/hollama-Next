@@ -22,7 +22,8 @@ export async function POST(event) {
 		apiKey: body.apiKey ?? null,
 		label: body.label ?? null,
 		modelFilter: body.modelFilter ?? null,
-		isEnabled: body.isEnabled ?? true
+		isEnabled: body.isEnabled ?? true,
+		color: body.color ?? null
 	});
 	return json(toProviderView(server), { status: 201 });
 }

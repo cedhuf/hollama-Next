@@ -51,13 +51,15 @@ export function createServer(input: {
 	label?: string | null;
 	modelFilter?: string | null;
 	isEnabled?: boolean;
+	/** Badge accent, assigned by the client so it can avoid colours already in use. */
+	color?: string | null;
 }): ServerRow {
 	const id = randomUUID();
 	getDb()
 		.prepare(
 			`INSERT INTO servers
-			 (id, owner_user_id, connection_type, base_url, api_key_enc, label, model_filter, is_enabled, created_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			 (id, owner_user_id, connection_type, base_url, api_key_enc, label, model_filter, is_enabled, color, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		)
 		.run(
 			id,
@@ -68,6 +70,7 @@ export function createServer(input: {
 			input.label ?? null,
 			input.modelFilter ?? null,
 			input.isEnabled ? 1 : 0,
+			input.color ?? null,
 			new Date().toISOString()
 		);
 	return getServer(id)!;

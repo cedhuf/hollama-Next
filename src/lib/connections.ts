@@ -35,7 +35,7 @@ export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = {
 	[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
 };
 
-/** Palette offered when overriding a connection's colour. */
+/** Palette a connection's colour is drawn from. */
 export const SERVER_COLORS = [
 	'#1D9E75',
 	'#378ADD',
@@ -54,10 +54,37 @@ export function modelLabel(server: Pick<Server, 'modelLabels'> | undefined, name
 	return server?.modelLabels?.[name]?.trim() || name;
 }
 
-/** The badge for a connection: its own colour when set, the provider default otherwise. */
+/**
+ * The badge for a connection. Every connection gets its own colour at creation;
+ * the provider default only covers rows created before that was the case.
+ */
 export function serverBadge(server: Pick<Server, 'connectionType' | 'color'>) {
 	const fallback = PROVIDER_BADGES[server.connectionType] ?? { id: '', color: '#888780' };
 	return { id: fallback.id, color: server.color || fallback.color };
+}
+
+/**
+ * A colour for a new connection, preferring one nobody else is using — two
+ * providers sharing an accent would defeat the point of colouring them at all.
+ * Once the palette is exhausted it just picks at random.
+ */
+export function pickServerColor(usedColors: (string | undefined)[] = []): string {
+	const used = new Set(usedColors.filter(Boolean).map((color) => color!.toLowerCase()));
+	const free = SERVER_COLORS.filter((color) => !used.has(color.toLowerCase()));
+	const pool = free.length ? free : SERVER_COLORS;
+	return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/**
+ * Up to two letters standing in for a connection: initials for a multi-word name,
+ * the first two characters otherwise.
+ */
+export function serverInitials(name: string): string {
+	const words = name.split(/[\s\-_/.]+/).filter(Boolean);
+	if (words.length > 1) return (words[0][0] + words[1][0]).toUpperCase();
+	const first = words[0] ?? '';
+	if (!first) return '?';
+	return first.charAt(0).toUpperCase() + first.charAt(1).toLowerCase();
 }
 
 /**
@@ -163,7 +190,11 @@ export function supportsReasoningToggle(connectionType: ConnectionType): boolean
 	return connectionType === ConnectionType.Ollama || supportsThinkingRequest(connectionType);
 }
 
-export function getDefaultServer(connectionType: ConnectionType): Server {
+export function getDefaultServer(
+	connectionType: ConnectionType,
+	/** Colours already taken, so the new connection gets a distinct one. */
+	usedColors: (string | undefined)[] = []
+): Server {
 	const provider = getProvider(connectionType);
 
 	return {
@@ -171,6 +202,7 @@ export function getDefaultServer(connectionType: ConnectionType): Server {
 		baseUrl: provider.baseUrl,
 		connectionType,
 		modelFilter: provider.modelFilter,
+		color: pickServerColor(usedColors),
 		isVerified: null,
 		isEnabled: false
 	};
