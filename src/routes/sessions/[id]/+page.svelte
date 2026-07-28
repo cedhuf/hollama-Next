@@ -621,16 +621,18 @@
 				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
 					<PersonaAvatar {persona} size={32} />
 					<div class="flex min-w-0 flex-col gap-0.5">
-						<p class="truncate text-sm font-bold leading-none text-active">{persona.name}</p>
+						<p class="truncate text-sm font-bold leading-tight text-active">{persona.name}</p>
 						{#if persona.tagline}
-							<p class="truncate text-xs leading-none text-muted">{persona.tagline}</p>
+							<p class="truncate text-xs leading-tight text-muted">{persona.tagline}</p>
 						{/if}
 					</div>
 				</div>
 			{:else}
 				<!-- Once a conversation has a title it becomes the headline, with the id
 				     kept as a parenthesised link so it stays copyable/navigable. -->
-				<p data-testid="session-id" class="truncate font-bold leading-none">
+				<!-- leading-tight, not leading-none: `truncate` hides overflow, so a line box
+				     the exact height of the font clips descenders. -->
+				<p data-testid="session-id" class="truncate font-bold leading-tight">
 					{#if sessionTitle}
 						{sessionTitle}
 						<span class="text-muted">
@@ -643,20 +645,36 @@
 				</p>
 				<div class="flex items-center gap-1.5 text-xs text-muted">
 					{editor.isNewSession ? $LL.newSession() : formatTimestampToNow(session.updatedAt ?? '')}
-					<!-- Model picker hidden on mobile (space); change it via the conversation settings (⚙). -->
-					<span class="hidden items-center gap-1.5 lg:flex">
-						<span class="text-shade-5">•</span>
-						<ModelSelect bind:value={modelName} />
-					</span>
 				</div>
 			{/if}
 		{/snippet}
 
 		{#snippet nav()}
 			{#if !persona}
-				<Button variant="icon" onclick={() => (sessionModalOpen = true)} title={$LL.session()}>
-					<Settings2 class="base-icon" />
-				</Button>
+				<!-- Model + settings as one control: the model belongs to this conversation's
+				     configuration, so it sits with the button that opens it. Keeping it out
+				     of the headline also leaves the title its full height. On mobile only the
+				     settings half shows — the model is changed from inside the panel.
+				     The border lives on the group rather than on each half, so focusing (or
+				     opening) the picker rings the whole control instead of stopping mid-way. -->
+				<div
+					class="mr-1 flex items-center overflow-hidden rounded-md border border-shade-3 transition-colors focus-within:border-accent has-[[data-state=open]]:border-accent"
+				>
+					<span class="hidden lg:flex">
+						<ModelSelect bind:value={modelName} variant="attached" />
+					</span>
+					<!-- Transparent on the header's own background: the control is chrome, not
+					     content, so it only lifts on hover. -->
+					<button
+						type="button"
+						class="flex h-8 items-center justify-center bg-transparent px-2 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						onclick={() => (sessionModalOpen = true)}
+						title={$LL.session()}
+						aria-label={$LL.session()}
+					>
+						<Settings2 class="base-icon" />
+					</button>
+				</div>
 			{/if}
 			{#if !editor.isNewSession}
 				{#if !shouldConfirmDeletion}

@@ -77,7 +77,7 @@
 	<Article
 		message={{
 			role: 'assistant',
-			content: streamingContent || '...',
+			content: streamingContent,
 			reasoning: editor.reasoning,
 			webSearch: editor.webSearchInfo
 		}}

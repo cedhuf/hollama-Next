@@ -213,7 +213,7 @@ test.describe('Attachments', () => {
 		// ESM-compatible path resolution for test image
 		const __filename = fileURLToPath(import.meta.url);
 		const __dirname = path.dirname(__filename);
-		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'motd.png');
+		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'settings.png');
 
 		await page.goto('/');
 		await page.getByRole('tab', { name: 'Sessions' }).click();
@@ -238,7 +238,7 @@ test.describe('Attachments', () => {
 			page.locator('.prompt-editor').getByTestId('attachment-image-preview')
 		).toBeVisible();
 		await expect(page.locator('.prompt-editor').getByTestId('attachment-image-name')).toHaveText(
-			'motd.png'
+			'settings.png'
 		);
 
 		// Delete the image
@@ -302,7 +302,7 @@ test.describe('Attachments', () => {
 		await expect(articleImages.first()).toBeVisible();
 		const articleFilenames = page.getByTestId('attachment-image-name');
 		await expect(articleFilenames).toHaveCount(1);
-		await expect(articleFilenames.first()).toHaveText('motd.png');
+		await expect(articleFilenames.first()).toHaveText('settings.png');
 
 		// --- Edit the message and add another image ---
 		let userMessageArticle = page.locator('article', { hasText: 'Describe this image' });
@@ -312,7 +312,7 @@ test.describe('Attachments', () => {
 		// Assert original image is in attachments
 		const promptAttachments = page.locator('.prompt-editor .attachment');
 		await expect(promptAttachments).toHaveCount(1);
-		await expect(promptAttachments.getByTestId('attachment-image-name')).toHaveText('motd.png');
+		await expect(promptAttachments.getByTestId('attachment-image-name')).toHaveText('settings.png');
 		await expect(promptAttachments.getByTestId('attachment-image-name')).not.toHaveText(
 			'session.png'
 		);
@@ -328,7 +328,7 @@ test.describe('Attachments', () => {
 		// Assert both images are in attachments
 		await expect(promptAttachments).toHaveCount(2);
 		await expect(promptAttachments.getByTestId('attachment-image-name').nth(0)).toHaveText(
-			'motd.png'
+			'settings.png'
 		);
 		await expect(promptAttachments.getByTestId('attachment-image-name').nth(1)).toHaveText(
 			'session.png'
@@ -383,7 +383,7 @@ test.describe('Attachments', () => {
 		// Assert session history shows edited message with both images
 		await expect(userMessageArticle.getByTestId('attachment-image-preview')).toHaveCount(2);
 		await expect(userMessageArticle.getByTestId('attachment-image-name').nth(0)).toHaveText(
-			'motd.png'
+			'settings.png'
 		);
 		await expect(userMessageArticle.getByTestId('attachment-image-name').nth(1)).toHaveText(
 			'session.png'
@@ -397,16 +397,18 @@ test.describe('Attachments', () => {
 		// Assert both images are back in attachments
 		await expect(promptAttachments).toHaveCount(2);
 
-		// Delete the first image (motd.png)
+		// Delete the first image (settings.png)
 		await promptAttachments
-			.filter({ hasText: 'motd.png' })
+			.filter({ hasText: 'settings.png' })
 			.getByTestId('attachment-delete')
 			.click();
 
 		// Assert only the second image remains
 		await expect(promptAttachments).toHaveCount(1);
 		await expect(promptAttachments.getByTestId('attachment-image-name')).toHaveText('session.png');
-		await expect(promptAttachments.getByTestId('attachment-image-name')).not.toHaveText('motd.png');
+		await expect(promptAttachments.getByTestId('attachment-image-name')).not.toHaveText(
+			'settings.png'
+		);
 
 		// Update prompt text
 		await textEditor.clear();
@@ -457,7 +459,7 @@ test.describe('Attachments', () => {
 		await expect(userMessageArticle.getByTestId('attachment-image-preview')).toHaveCount(1);
 		await expect(userMessageArticle.getByTestId('attachment-image-name')).toHaveText('session.png');
 		await expect(userMessageArticle.getByTestId('attachment-image-name')).not.toHaveText(
-			'motd.png'
+			'settings.png'
 		);
 		await expect(page.getByText('Description of one image')).toBeVisible(); // Check assistant response
 	});
@@ -469,7 +471,7 @@ test.describe('Attachments', () => {
 		// ESM-compatible path resolution for test image
 		const __filename = fileURLToPath(import.meta.url);
 		const __dirname = path.dirname(__filename);
-		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'motd.png');
+		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'settings.png');
 
 		await mockOpenAIModelsResponse(page, MOCK_OPENAI_MODELS);
 
@@ -558,7 +560,7 @@ test.describe('Attachments', () => {
 		// ESM-compatible path resolution for test image
 		const __filename = fileURLToPath(import.meta.url);
 		const __dirname = path.dirname(__filename);
-		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'motd.png');
+		const testImagePath = path.resolve(__dirname, 'docs.test.ts-snapshots', 'settings.png');
 
 		await page.goto('/');
 		await page.getByRole('tab', { name: 'Sessions' }).click();

@@ -48,12 +48,12 @@ test.describe('Sidebar on mobile', () => {
 		}
 		await expect(sidebar).toBeVisible();
 
-		// Navigate to MOTD
+		// Navigate to Knowledge
 		await page
 			.getByRole('navigation', { name: 'Main navigation' })
-			.getByRole('link', { name: 'Motd' })
+			.getByRole('link', { name: 'Knowledge' })
 			.click();
-		await expect(page).toHaveURL('/motd');
+		await expect(page).toHaveURL('/knowledge');
 
 		// Sidebar should auto-collapse on mobile
 		await expect(sidebar).not.toBeVisible();

@@ -150,7 +150,7 @@ test('performs automatic update check on navigation when enabled', async ({ page
 	const settingsLink = page.getByLabel('Main navigation').getByRole('link', { name: 'Settings' });
 	await expect(settingsLink).not.toHaveClass(/before:bg-warning/);
 
-	await page.getByRole('link', { name: 'Motd' }).click();
+	await page.getByRole('link', { name: 'Knowledge' }).click();
 	await expect(autoUpdateCheckbox).not.toBeVisible();
 	await expect(settingsLink).toHaveClass(/before:bg-warning/);
 	await expect(page.getByText('A newer version is available')).not.toBeVisible();

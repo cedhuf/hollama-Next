@@ -216,7 +216,7 @@ test.describe('Session interaction', () => {
 		await expect(userMessage).toBeVisible();
 		await expect(userMessage).toContainText('Hello world!');
 		await expect(aiMessage).toBeVisible();
-		await expect(aiMessage).toContainText('...');
+		await expect(aiMessage.getByTestId('thinking-indicator')).toBeVisible();
 		await expect(promptTextarea).toHaveValue('');
 		await expect(runButton).toBeDisabled();
 		await expect(stopButton).toBeVisible();
@@ -539,7 +539,7 @@ test.describe('Session interaction', () => {
 		await runButton.click();
 
 		// Wait for the completion to start
-		await expect(page.getByText('...')).toBeVisible();
+		await expect(page.getByTestId('thinking-indicator')).toBeVisible();
 
 		// Set up dialog handler to cancel
 		dialogHandler = async (dialog) => {
@@ -554,7 +554,7 @@ test.describe('Session interaction', () => {
 		// Check that we're still on the session page
 		await expect(page.getByTestId('session-id')).toBeVisible();
 		// Wait for the completion to start
-		await expect(page.getByText('...')).toBeVisible();
+		await expect(page.getByTestId('thinking-indicator')).toBeVisible();
 
 		// Set up dialog handler to confirm
 		dialogHandler = async (dialog) => {

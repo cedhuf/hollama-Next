@@ -30,12 +30,12 @@ test.describe('Sidebar on desktop', () => {
 		await expect(page).toHaveURL('/settings');
 		await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible();
 
-		// Navigate to MOTD page via sidebar link
+		// Navigate to Knowledge via sidebar link
 		await page
 			.getByRole('navigation', { name: 'Main navigation' })
-			.getByRole('link', { name: 'Motd' })
+			.getByRole('link', { name: 'Knowledge' })
 			.click();
-		await expect(page).toHaveURL('/motd');
+		await expect(page).toHaveURL('/knowledge');
 		await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible();
 	});
 
@@ -150,12 +150,12 @@ test.describe('Sidebar on desktop', () => {
 	test('navigation links work correctly', async ({ page }) => {
 		await page.goto('/');
 
-		// Test MOTD link in sidebar
+		// Test Knowledge link in sidebar
 		await page
 			.getByRole('navigation', { name: 'Main navigation' })
-			.getByRole('link', { name: 'Motd' })
+			.getByRole('link', { name: 'Knowledge' })
 			.click();
-		await expect(page).toHaveURL('/motd');
+		await expect(page).toHaveURL('/knowledge');
 
 		// Test Settings link in sidebar
 		await page
@@ -233,12 +233,12 @@ test.describe('Sidebar on desktop', () => {
 		// Sidebar should remain open on desktop
 		await expect(sidebar).toBeVisible();
 
-		// Navigate to MOTD
+		// Navigate to Knowledge
 		await page
 			.getByRole('navigation', { name: 'Main navigation' })
-			.getByRole('link', { name: 'Motd' })
+			.getByRole('link', { name: 'Knowledge' })
 			.click();
-		await expect(page).toHaveURL('/motd');
+		await expect(page).toHaveURL('/knowledge');
 
 		// Sidebar should still remain open on desktop
 		await expect(sidebar).toBeVisible();

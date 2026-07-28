@@ -10,6 +10,7 @@
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import Markdown from '$lib/components/Markdown.svelte';
+	import ThinkingIndicator from '$lib/components/ThinkingIndicator.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
@@ -241,6 +242,9 @@
 			</div>
 		{:else if message.content}
 			<Markdown markdown={message.content} {citations} />
+		{:else if isStreamingArticle}
+			<!-- Streaming has started but no token has landed yet. -->
+			<ThinkingIndicator />
 		{/if}
 
 		{#if message.webSearch?.sources?.length}

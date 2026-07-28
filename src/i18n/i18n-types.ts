@@ -312,10 +312,6 @@ type RootTranslation = {
 	 */
 	mainGpu: string
 	/**
-	 * M​e​s​s​a​g​e​ ​o​f​ ​t​h​e​ ​d​a​y
-	 */
-	messageOfTheDay: string
-	/**
 	 * M​e​s​s​a​g​e​s
 	 */
 	messages: string
@@ -356,10 +352,6 @@ type RootTranslation = {
 	 * H​i​d​e​s​ ​m​o​d​e​l​ ​n​a​m​e​s​ ​t​h​a​t​ ​d​o​n​'​t​ ​s​t​a​r​t​ ​w​i​t​h​ ​t​h​e​ ​f​i​l​t​e​r
 	 */
 	modelsFilterHelp: string
-	/**
-	 * M​o​t​d
-	 */
-	motd: string
 	/**
 	 * N​a​m​e
 	 */
@@ -1266,10 +1258,6 @@ The completion in progress will stop
 	 */
 	mainGpu: () => LocalizedString
 	/**
-	 * Message of the day
-	 */
-	messageOfTheDay: () => LocalizedString
-	/**
 	 * Messages
 	 */
 	messages: () => LocalizedString
@@ -1309,10 +1297,6 @@ The completion in progress will stop
 	 * Hides model names that don't start with the filter
 	 */
 	modelsFilterHelp: () => LocalizedString
-	/**
-	 * Motd
-	 */
-	motd: () => LocalizedString
 	/**
 	 * Name
 	 */

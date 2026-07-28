@@ -1,26 +1,16 @@
 <script lang="ts">
-	import {
-		ChevronDown,
-		ChevronUp,
-		CodeXml,
-		Coffee,
-		ExternalLink,
-		GitFork,
-		Heart
-	} from '@lucide/svelte';
+	import { CodeXml, Coffee, ExternalLink, GitFork, Heart } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { version } from '$app/environment';
 	import Badge from '$lib/components/Badge.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
-	import Markdown from '$lib/components/Markdown.svelte';
 	import { GITHUB_URL } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 
-	import motdContent from '../motd/motd.md?raw';
-
-	let motdExpanded = $state(false);
+	const UPSTREAM_URL = 'https://github.com/fmaclen/hollama';
+	const KOFI_URL = 'https://ko-fi.com/cedric52222';
 
 	$effect(() => {
 		// Mark the update as seen when the About tab is open. Guard against
@@ -72,81 +62,57 @@
 		</button>
 	</div>
 
-	<div class="about-links flex flex-col gap-2">
+	<!-- Source links sit two-up: same card language as before, just halved. -->
+	<div class="about-links grid grid-cols-2 gap-2">
 		<a
 			href={GITHUB_URL}
 			target="_blank"
 			rel="noopener noreferrer external"
-			class="about-link-card flex items-center gap-3 rounded-xl border bg-shade-0 px-4 py-3 transition-colors hover:bg-shade-2"
+			class="about-link-card flex min-w-0 items-center gap-2.5 rounded-xl border bg-shade-0 px-3 py-3 transition-colors hover:bg-shade-2"
 		>
 			<div
 				class="about-link-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-shade-2"
 			>
 				<CodeXml class="h-5 w-5" />
 			</div>
-			<div class="about-link-body flex flex-1 flex-col">
-				<span class="about-link-title text-sm font-medium">GitHub</span>
-				<span class="about-link-desc text-xs text-muted">cedhuf/hollama-Next</span>
+			<div class="about-link-body flex min-w-0 flex-1 flex-col">
+				<span class="about-link-title truncate text-sm font-medium">GitHub</span>
+				<span class="about-link-desc truncate text-xs text-muted">cedhuf/hollama-Next</span>
 			</div>
 			<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
 		</a>
+
 		<a
-			href="https://github.com/fmaclen/hollama"
+			href={UPSTREAM_URL}
 			target="_blank"
 			rel="noopener noreferrer"
-			class="about-link-card flex items-center gap-3 rounded-xl border bg-shade-0 px-4 py-3 transition-colors hover:bg-shade-2"
+			class="about-link-card flex min-w-0 items-center gap-2.5 rounded-xl border bg-shade-0 px-3 py-3 transition-colors hover:bg-shade-2"
 		>
 			<div
 				class="about-link-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-shade-2"
 			>
 				<GitFork class="h-5 w-5" />
 			</div>
-			<div class="about-link-body flex flex-1 flex-col">
-				<span class="about-link-title text-sm font-medium">Forked from fmaclen/hollama</span>
-				<span class="about-link-desc text-xs text-muted"
-					>The original project by Fernando Maclen</span
-				>
-			</div>
-			<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
-		</a>
-		<a
-			href="https://ko-fi.com/cedric52222"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="about-link-card flex items-center gap-3 rounded-xl border bg-shade-0 px-4 py-3 transition-colors hover:bg-shade-2"
-		>
-			<div
-				class="about-link-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-shade-2"
-			>
-				<Coffee class="h-5 w-5" />
-			</div>
-			<div class="about-link-body flex flex-1 flex-col">
-				<span class="about-link-title text-sm font-medium">Ko-fi</span>
-				<span class="about-link-desc text-xs text-muted">Support the project</span>
+			<div class="about-link-body flex min-w-0 flex-1 flex-col">
+				<span class="about-link-title truncate text-sm font-medium">Forked from</span>
+				<span class="about-link-desc truncate text-xs text-muted">fmaclen/hollama</span>
 			</div>
 			<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
 		</a>
 	</div>
 
-	<button
-		onclick={() => (motdExpanded = !motdExpanded)}
-		class="about-motd-toggle flex w-full items-center gap-2 rounded-xl border bg-shade-0 px-4 py-3 text-sm font-medium transition-colors hover:bg-shade-2"
+	<!-- Ko-fi keeps its own brand colour so it reads as the button people know,
+	     while sharing the shape and rhythm of the cards above. -->
+	<a
+		href={KOFI_URL}
+		target="_blank"
+		rel="noopener noreferrer"
+		style="background-color:#ff5e5b"
+		class="about-support flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
 	>
-		{#if motdExpanded}
-			<ChevronUp class="h-4 w-4 shrink-0 text-muted" />
-		{:else}
-			<ChevronDown class="h-4 w-4 shrink-0 text-muted" />
-		{/if}
-		<span>{$LL.messageOfTheDay()}</span>
-	</button>
-
-	{#if motdExpanded}
-		<div
-			class="about-motd-body max-h-64 overflow-y-auto rounded-xl border bg-shade-0 p-4 text-sm leading-relaxed"
-		>
-			<Markdown markdown={motdContent} />
-		</div>
-	{/if}
+		<Coffee class="h-4 w-4 shrink-0" />
+		Buy me a coffee
+	</a>
 
 	<div class="about-footer flex items-center justify-center gap-1 pb-2 text-xs text-muted">
 		Made with <Heart class="inline h-3.5 w-3.5 text-negative" /> by cedhuf
