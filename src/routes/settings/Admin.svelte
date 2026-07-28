@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
+	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import MultiSelect from '$lib/components/MultiSelect.svelte';
@@ -18,10 +19,10 @@
 	// and toggles whether users may add their own providers.
 
 	/** The governance choice repeated by every "share this with users" control. */
-	const sharingOptions = (subject: string) => [
-		{ value: 'locked', label: `Locked — users can't change ${subject}` },
-		{ value: 'overridable', label: 'Users may override for themselves' }
-	];
+	const sharingOptions = $derived([
+		{ value: 'locked', label: $LL.lockedForUsers() },
+		{ value: 'overridable', label: $LL.overridableForUsers() }
+	]);
 
 	interface SystemServer {
 		id: string;
@@ -98,7 +99,7 @@
 			body: body ? JSON.stringify(body) : undefined
 		});
 		if (!response.ok) {
-			toast.error('Request failed', { description: `HTTP ${response.status}` });
+			toast.error($LL.requestFailed(), { description: `HTTP ${response.status}` });
 			throw new Error(`HTTP ${response.status}`);
 		}
 		return response.status === 204 ? null : ((await response.json()) as T);
@@ -206,12 +207,12 @@
 	}
 
 	async function addUser() {
-		if (!newUser.email || !newUser.password) return toast.error('Email and password are required');
+		if (!newUser.email || !newUser.password) return toast.error($LL.emailAndPasswordRequired());
 		await api('/api/admin/users', 'POST', newUser);
 		newUser = { email: '', password: '', role: 'user' };
 		showCreateUser = false;
 		await load();
-		toast.success('User created');
+		toast.success($LL.userCreated());
 	}
 
 	async function removeUser(id: string) {
@@ -231,17 +232,17 @@
 <SettingsPanel>
 	<!-- User permissions -->
 	<SettingsSection
-		title="User permissions"
-		description="What signed-in users are allowed to do on this instance."
+		title={$LL.userPermissions()}
+		description={$LL.userPermissionsDescription()}
 		card
 	>
 		<FieldCheckbox
-			label="Allow users to add their own provider connections"
+			label={$LL.allowUserProviders()}
 			bind:checked={allowUserKeys}
 			onChange={toggleAllowUserKeys}
 		/>
 		<FieldCheckbox
-			label="Allow users to create their own personas"
+			label={$LL.allowUserPersonas()}
 			bind:checked={allowUserPersonas}
 			onChange={toggleAllowUserPersonas}
 		/>
@@ -249,48 +250,46 @@
 
 	<!-- Web search sharing -->
 	<SettingsSection
-		title="Web search sharing"
-		description="Configure the search engine in the Chat tab; here you choose whether it's shared with users."
+		title={$LL.webSearchSharing()}
+		description={$LL.webSearchSharingDescription()}
 		card
 	>
 		{#if !$settingsStore.searchUrl}
-			<span class="text-xs text-muted">
-				No engine configured yet — set one up in the Chat tab first, then you can share it.
-			</span>
+			<span class="text-xs text-muted">{$LL.noEngineConfigured()}</span>
 		{:else}
 			<FieldCheckbox
-				label="Share my search engine with users"
+				label={$LL.shareSearchEngine()}
 				bind:checked={shareEnabled}
 				onChange={syncShare}
 			/>
 			{#if shareEnabled}
-				<Select bind:value={searchSharing} options={sharingOptions('it')} onChange={saveSearch} />
-				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
+				<Select bind:value={searchSharing} options={sharingOptions} onChange={saveSearch} />
+				{#if sharedUrl}
+					<span class="text-xs text-muted">{$LL.currentlySharing({ value: sharedUrl })}</span>
+				{/if}
 			{/if}
 		{/if}
 	</SettingsSection>
 
 	<!-- System prompts sharing -->
 	<SettingsSection
-		title="System prompts sharing"
-		description="Configure your prompts in the Chat tab; here you choose whether they're shared with all users (read-only for them). Per-user prompts will come with groups."
+		title={$LL.systemPromptsSharing()}
+		description={$LL.systemPromptsSharingDescription()}
 		card
 	>
 		{#if !hasOwnPrompts}
-			<span class="text-xs text-muted">
-				Nothing configured yet — set up your prompts in the Chat tab to share something.
-			</span>
+			<span class="text-xs text-muted">{$LL.noPromptsConfigured()}</span>
 		{/if}
 
 		<FieldCheckbox
-			label="Share my system prompts with users"
+			label={$LL.shareSystemPrompts()}
 			bind:checked={promptsShareEnabled}
 			onChange={syncPromptsShare}
 		/>
 		{#if promptsShareEnabled}
 			<Select
 				bind:value={systemPromptsSharing}
-				options={sharingOptions('them')}
+				options={sharingOptions}
 				onChange={saveSystemPrompts}
 			/>
 		{/if}
@@ -298,40 +297,37 @@
 
 	<!-- Title generation sharing -->
 	<SettingsSection
-		title="Title generation sharing"
-		description="Share your title-generation settings (from the Chat tab) with users. The title model works even if it isn't in the shared models list."
+		title={$LL.titleGenerationSharing()}
+		description={$LL.titleGenerationSharingDescription()}
 		card
 	>
 		<FieldCheckbox
-			label="Share my title generation with users"
+			label={$LL.shareTitleGeneration()}
 			bind:checked={titleShareEnabled}
 			onChange={syncTitleShare}
 		/>
 		{#if titleShareEnabled}
-			<Select bind:value={titleSharing} options={sharingOptions('it')} onChange={saveTitle} />
+			<Select bind:value={titleSharing} options={sharingOptions} onChange={saveTitle} />
 			<span class="text-xs text-muted">
-				Sharing: {$settingsStore.generateTitlesWithAI
-					? `on — ${$settingsStore.titleModel || 'no model'}`
-					: 'off'}
+				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
+					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
+					: $LL.off()}
 			</span>
 		{/if}
 	</SettingsSection>
 
 	<!-- Shared models -->
-	<SettingsSection
-		title="Shared models"
-		description="Pick which models from each system server are available to users. Configure the servers themselves in the Servers tab."
-	>
+	<SettingsSection title={$LL.sharedModels()} description={$LL.sharedModelsDescription()}>
 		{#if servers.length === 0}
-			<span class="text-sm text-muted">No system servers yet — add one in the Servers tab.</span>
+			<span class="text-sm text-muted">{$LL.noSystemServers()}</span>
 		{/if}
 
 		{#if sharedModelNames.length}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
-				<span class="text-sm font-medium">Default model for users</span>
+				<span class="text-sm font-medium">{$LL.defaultModelForUsers()}</span>
 				<Select
 					bind:value={defaultModelValue}
-					emptyLabel="— none —"
+					emptyLabel={$LL.none()}
 					options={sharedModelNames.map((name) => ({ value: name, label: name }))}
 					onChange={onDefaultModelChange}
 				/>
@@ -339,8 +335,8 @@
 					<Select
 						bind:value={defaultModelSharing}
 						options={[
-							{ value: 'locked', label: "Locked — users can't change it" },
-							{ value: 'overridable', label: 'Default — users may change it' }
+							{ value: 'locked', label: $LL.lockedForUsers() },
+							{ value: 'overridable', label: $LL.defaultUsersMayChange() }
 						]}
 						onChange={saveDefaultModel}
 					/>
@@ -352,32 +348,32 @@
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
 				<span class="text-sm font-medium">
 					{server.label || server.connectionType}
-					{#if !server.isEnabled}<span class="text-xs text-muted">(disabled)</span>{/if}
+					{#if !server.isEnabled}<span class="text-xs text-muted">({$LL.off()})</span>{/if}
 				</span>
 
 				{#if optionsFor(server).length}
 					<MultiSelect
 						value={server.sharedModels}
 						searchable
-						placeholder="Select models to share"
+						placeholder={$LL.selectModelsToShare()}
 						options={optionsFor(server)}
 						onChange={(selected) => {
 							server.sharedModels = selected;
 							saveShared(server);
 						}}
 					/>
-					<span class="text-xs text-muted">{server.sharedModels.length} shared</span>
-				{:else}
 					<span class="text-xs text-muted">
-						No models available — check this server in the Servers tab.
+						{$LL.sharedCount({ count: server.sharedModels.length })}
 					</span>
+				{:else}
+					<span class="text-xs text-muted">{$LL.noModelsCheckServersTab()}</span>
 				{/if}
 			</div>
 		{/each}
 	</SettingsSection>
 
 	<!-- Users -->
-	<SettingsSection title="Users" description="Accounts on this instance.">
+	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
 		{#each users as user (user.id)}
 			<div
 				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
@@ -392,12 +388,12 @@
 		{#if showCreateUser}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
 				<div class="flex items-center justify-between">
-					<span class="text-sm font-medium">Create a user</span>
+					<span class="text-sm font-medium">{$LL.createAUser()}</span>
 					<button
 						type="button"
 						onclick={() => (showCreateUser = false)}
 						class="text-muted transition-colors hover:text-active"
-						aria-label="Close"
+						aria-label={$LL.close()}
 					>
 						<X class="h-4 w-4" />
 					</button>
@@ -407,7 +403,7 @@
 					class="settings-field"
 					type="password"
 					bind:value={newUser.password}
-					placeholder="Initial password"
+					placeholder={$LL.initialPassword()}
 				/>
 				<Select
 					bind:value={newUser.role}
@@ -416,7 +412,7 @@
 						{ value: 'admin', label: 'admin' }
 					]}
 				/>
-				<Button onclick={addUser}><Plus class="base-icon" /> Create user</Button>
+				<Button onclick={addUser}><Plus class="base-icon" /> {$LL.createUser()}</Button>
 			</div>
 		{:else}
 			<button
@@ -424,27 +420,24 @@
 				onclick={() => (showCreateUser = true)}
 				class="flex items-center gap-2 self-start rounded-md border border-dashed border-shade-4 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-active"
 			>
-				<Plus class="h-4 w-4" /> Add user
+				<Plus class="h-4 w-4" />
+				{$LL.addUser()}
 			</button>
 		{/if}
 	</SettingsSection>
 
 	<!-- Developer options -->
-	<SettingsSection
-		title="Developer options"
-		description="Tools for checking flows a user normally only sees once."
-	>
+	<SettingsSection title={$LL.developerOptions()} description={$LL.developerOptionsDescription()}>
 		<div
 			class="flex items-center justify-between gap-3 rounded-md border border-shade-3 p-3 text-sm"
 		>
 			<div class="flex min-w-0 flex-col">
-				<span class="font-medium text-active">New-user onboarding</span>
-				<span class="text-xs text-muted">
-					Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.
-				</span>
+				<span class="font-medium text-active">{$LL.newUserOnboarding()}</span>
+				<span class="text-xs text-muted">{$LL.newUserOnboardingDescription()}</span>
 			</div>
 			<Button variant="outline" onclick={replayWelcome}>
-				<PlayCircle class="base-icon" /> Launch
+				<PlayCircle class="base-icon" />
+				{$LL.launch()}
 			</Button>
 		</div>
 	</SettingsSection>

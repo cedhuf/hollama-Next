@@ -6,6 +6,7 @@
 	import { getSessionTitle, saveSession, type Session } from '$lib/sessions';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 
+	import SettingsBadge from '../../settings/SettingsBadge.svelte';
 	import SettingsField from '../../settings/SettingsField.svelte';
 	import SettingsSection from '../../settings/SettingsSection.svelte';
 
@@ -84,8 +85,7 @@
 				>
 					{#snippet badge()}
 						{#if isOverridden}
-							<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">overridden</span
-							>
+							<SettingsBadge>overridden</SettingsBadge>
 						{/if}
 					{/snippet}
 

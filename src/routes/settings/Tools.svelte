@@ -1,13 +1,15 @@
 <script lang="ts">
+	import LL from '$i18n/i18n-svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
-	import FieldHelp from '$lib/components/FieldHelp.svelte';
-	import P from '$lib/components/P.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
 
+	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
+	import SettingsHint from './SettingsHint.svelte';
+	import SettingsLink from './SettingsLink.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -43,17 +45,17 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title="Web search">
+	<SettingsSection title={$LL.webSearch()}>
 		{#snippet badge()}
 			{#if $searchConfig.source === 'env'}
-				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">env</span>
+				<SettingsBadge>env</SettingsBadge>
 			{:else if $searchConfig.source === 'admin' && !$searchConfig.editable}
-				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">shared by admin</span>
+				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 			{/if}
 		{/snippet}
 
 		{#if showSearch}
-			<SettingsField label="Backend URL (degoog / SearXNG)">
+			<SettingsField label={$LL.webSearchBackendUrl()}>
 				<input
 					class="settings-field disabled:opacity-60"
 					disabled={!$searchConfig.editable}
@@ -63,7 +65,7 @@
 				/>
 			</SettingsField>
 
-			<SettingsField label="Backend">
+			<SettingsField label={$LL.webSearchBackend()}>
 				<Select
 					disabled={!$searchConfig.editable}
 					value={$searchConfig.editable ? $settingsStore.searchBackend : $searchConfig.backend}
@@ -76,73 +78,53 @@
 				/>
 			</SettingsField>
 
-			<SettingsField label="API token (optional, for protected instances)">
+			<SettingsField label={$LL.webSearchToken()}>
 				<input
 					class="settings-field disabled:opacity-60"
 					type="password"
 					disabled={!$searchConfig.editable}
 					value={$searchConfig.editable ? $settingsStore.searchToken : ''}
-					placeholder={!$searchConfig.editable && $searchConfig.hasToken ? '•••••••• (set)' : ''}
+					placeholder={!$searchConfig.editable && $searchConfig.hasToken
+						? $LL.webSearchTokenSet()
+						: ''}
 					oninput={(e) => ($settingsStore.searchToken = e.currentTarget.value)}
 				/>
 			</SettingsField>
 
 			{#if canOverride}
-				<button
-					type="button"
-					onclick={restoreServerDefault}
-					class="w-fit text-xs text-link hover:underline"
-				>
-					Restore server default
-				</button>
+				<SettingsLink onclick={restoreServerDefault}>{$LL.restoreServerDefault()}</SettingsLink>
 			{/if}
 
 			<div class="mt-1 flex flex-col gap-2">
 				<FieldCheckbox
-					label="Enable web search by default"
+					label={$LL.webSearchByDefault()}
 					bind:checked={$settingsStore.webSearchByDefault}
 				/>
-				<FieldCheckbox
-					label="Let the model decide when to search the web automatically"
-					bind:checked={$settingsStore.webSearchAuto}
-				/>
-				<FieldHelp>
-					<P>
-						The model first decides whether a question needs the web. Most modern models (even
-						Ollama) handle this well, but a few small ones may not.
-					</P>
-				</FieldHelp>
+				<FieldCheckbox label={$LL.webSearchAuto()} bind:checked={$settingsStore.webSearchAuto} />
+				<SettingsHint>{$LL.webSearchAutoHelp()}</SettingsHint>
 			</div>
 		{:else}
-			<FieldHelp>
-				<P>Web search isn't available yet. An admin can configure it for this instance.</P>
-			</FieldHelp>
+			<SettingsHint>{$LL.webSearchUnavailable()}</SettingsHint>
 		{/if}
 	</SettingsSection>
 
 	<SettingsSection
-		title="Interactive choices"
-		description="When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message."
+		title={$LL.interactiveChoicesTitle()}
+		description={$LL.interactiveChoicesDescription()}
 	>
 		<FieldCheckbox
-			label="Let the model offer quick-choice buttons"
+			label={$LL.interactiveChoicesToggle()}
 			bind:checked={$settingsStore.interactiveChoices}
 		/>
 	</SettingsSection>
 
-	<SettingsSection
-		title="Current date"
-		description="A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts as impossible. This prepends the current date/time (your local timezone) to each request so it stays anchored in the present."
-	>
-		<FieldCheckbox
-			label="Tell the model today's date and time"
-			bind:checked={$settingsStore.sendCurrentDate}
-		/>
+	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()}>
+		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />
 	</SettingsSection>
 
 	<SettingsSection
-		title="System instructions"
-		description="The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you're changing."
+		title={$LL.systemInstructionsTitle()}
+		description={$LL.systemInstructionsDescription()}
 	>
 		<Select
 			value={selectedPrompt}
@@ -161,17 +143,13 @@
 		<div class="flex items-center justify-between gap-2">
 			<span class="text-xs text-muted">
 				{#if DEFAULT_PROMPTS[selectedPrompt].placeholders}
-					Placeholders: {DEFAULT_PROMPTS[selectedPrompt].placeholders?.join(', ')}
+					{$LL.placeholders()}: {DEFAULT_PROMPTS[selectedPrompt].placeholders?.join(', ')}
 				{/if}
 			</span>
 			{#if selectedOverride !== undefined}
-				<button
-					type="button"
-					class="shrink-0 text-xs text-link hover:underline"
-					onclick={() => resetOverride(selectedPrompt)}
-				>
-					Reset to default
-				</button>
+				<SettingsLink align="end" onclick={() => resetOverride(selectedPrompt)}>
+					{$LL.resetToDefault()}
+				</SettingsLink>
 			{/if}
 		</div>
 	</SettingsSection>

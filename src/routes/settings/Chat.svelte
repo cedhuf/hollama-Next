@@ -4,14 +4,15 @@
 	import LL from '$i18n/i18n-svelte';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
-	import FieldHelp from '$lib/components/FieldHelp.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import P from '$lib/components/P.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { systemPromptsConfig } from '$lib/systemPrompts';
 
+	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
+	import SettingsHint from './SettingsHint.svelte';
+	import SettingsLink from './SettingsLink.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -61,7 +62,7 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title="Defaults">
+	<SettingsSection title={$LL.defaults()}>
 		{#if dmEditable}
 			<SettingsField label={$LL.defaultModel()}>
 				<ModelSelect
@@ -72,7 +73,7 @@
 		{:else}
 			<SettingsField label={$LL.defaultModel()}>
 				{#snippet badge()}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">set by admin</span>
+					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
 				{/snippet}
 				<input class="settings-field" disabled value={dmValue ?? '—'} />
 			</SettingsField>
@@ -83,9 +84,7 @@
 				label={$LL.generateTitlesWithAI()}
 				bind:checked={$settingsStore.generateTitlesWithAI}
 			/>
-			<FieldHelp>
-				<P>{$LL.generateTitlesWithAIHelp()}</P>
-			</FieldHelp>
+			<SettingsHint>{$LL.generateTitlesWithAIHelp()}</SettingsHint>
 
 			{#if $settingsStore.generateTitlesWithAI}
 				<SettingsField label={$LL.titleModel()}>
@@ -98,12 +97,14 @@
 		{:else}
 			<SettingsField label={$LL.generateTitlesWithAI()}>
 				{#snippet badge()}
-					<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">set by admin</span>
+					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
 				{/snippet}
 				<input
 					class="settings-field"
 					disabled
-					value={titleCfg.generateTitlesWithAI ? `On — ${titleCfg.titleModel || '—'}` : 'Off'}
+					value={titleCfg.generateTitlesWithAI
+						? `${$LL.on()} — ${titleCfg.titleModel || '—'}`
+						: $LL.off()}
 				/>
 			</SettingsField>
 		{/if}
@@ -111,52 +112,41 @@
 			label={$LL.autoExpandReasoningBlocks()}
 			bind:checked={$settingsStore.autoExpandReasoningBlocks}
 		/>
-		<FieldHelp>
-			<P>{$LL.autoExpandReasoningBlocksHelp()}</P>
-		</FieldHelp>
+		<SettingsHint>{$LL.autoExpandReasoningBlocksHelp()}</SettingsHint>
 	</SettingsSection>
 
-	<SettingsSection
-		title="System prompts"
-		description="Applied to every new chat (lowest priority). A per-model prompt or a per-chat prompt overrides it."
-	>
+	<SettingsSection title={$LL.systemPromptsTitle()} description={$LL.systemPromptsDescription()}>
 		{#snippet badge()}
 			{#if spShared && !spEditable}
-				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">shared by admin</span>
+				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 			{:else if spShared}
-				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">server default</span>
+				<SettingsBadge>{$LL.serverDefaultBadge()}</SettingsBadge>
 			{/if}
 		{/snippet}
 
 		{#if spEditable}
 			{#if canRestore}
-				<button
-					type="button"
-					onclick={restoreServerDefault}
-					class="w-fit text-xs text-link hover:underline"
-				>
-					Restore server default
-				</button>
+				<SettingsLink onclick={restoreServerDefault}>{$LL.restoreServerDefault()}</SettingsLink>
 			{/if}
 
-			<SettingsField label="Global prompt">
+			<SettingsField label={$LL.globalPrompt()}>
 				<textarea
 					class="settings-field"
 					rows="3"
 					bind:value={$settingsStore.systemPrompts.global}
 					placeholder={adminDefaultExists && adminPrompts.global
 						? adminPrompts.global
-						: "e.g. You are concise and answer in the user's language…"}
+						: $LL.globalPromptPlaceholder()}
 				></textarea>
 			</SettingsField>
 
 			<div class="mt-2 flex items-center justify-between gap-2">
-				<span class="text-sm font-medium">Per-model prompts</span>
+				<span class="text-sm font-medium">{$LL.perModelPrompts()}</span>
 				{#if availableToAdd.length}
 					<Select
 						class="w-auto"
 						value=""
-						emptyLabel="+ Add a model"
+						emptyLabel={$LL.addAModel()}
 						options={availableToAdd.map((name) => ({ value: name, label: name }))}
 						onChange={(option) => option.value && addModelPrompt(option.value)}
 					/>
@@ -173,7 +163,7 @@
 									type="button"
 									class="text-muted transition-colors hover:text-active"
 									onclick={() => removeModelPrompt(name)}
-									aria-label="Remove {name} prompt"
+									aria-label={$LL.removeModelPrompt({ model: name })}
 								>
 									<Trash2 class="base-icon" />
 								</button>
@@ -182,26 +172,24 @@
 								class="settings-field"
 								rows="2"
 								bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
-								placeholder="Prompt for {name}…"
+								placeholder={$LL.promptForModel({ model: name })}
 							></textarea>
 							<Select
 								class="w-auto text-xs"
 								bind:value={$settingsStore.systemPrompts.perModel[name].mode}
 								options={[
-									{ value: 'extend', label: 'Extends the global prompt' },
-									{ value: 'replace', label: 'Replaces the global prompt' }
+									{ value: 'extend', label: $LL.extendsGlobalPrompt() },
+									{ value: 'replace', label: $LL.replacesGlobalPrompt() }
 								]}
 							/>
 						</div>
 					{/each}
 				</div>
 			{:else}
-				<FieldHelp>
-					<P>No per-model prompts yet. Add one to tailor instructions for a specific model.</P>
-				</FieldHelp>
+				<SettingsHint>{$LL.noPerModelPrompts()}</SettingsHint>
 			{/if}
 		{:else}
-			<SettingsField label="Global prompt">
+			<SettingsField label={$LL.globalPrompt()}>
 				<textarea class="settings-field" rows="3" disabled value={sharedPrompts.global}></textarea>
 			</SettingsField>
 
@@ -212,7 +200,7 @@
 							<span class="text-sm font-medium">
 								{name}
 								<span class="text-xs text-muted">
-									({mp.mode === 'replace' ? 'replaces global' : 'extends global'})
+									({mp.mode === 'replace' ? $LL.replacesGlobalShort() : $LL.extendsGlobalShort()})
 								</span>
 							</span>
 							<textarea class="settings-field" rows="2" disabled value={mp.prompt}></textarea>

@@ -274,7 +274,157 @@ const fr = extendDictionary(en, {
 	collapseSidebar: 'Replier la barre latérale',
 	profile: 'Profil',
 	expandPrompt: 'Agrandir la zone de saisie',
-	collapsePrompt: 'Réduire la zone de saisie'
+	collapsePrompt: 'Réduire la zone de saisie',
+
+	// --- Paramètres › Chat -----------------------------------------------------
+	defaults: 'Valeurs par défaut',
+	setByAdmin: "défini par l'administrateur",
+	sharedByAdminBadge: "partagé par l'administrateur",
+	serverDefaultBadge: 'valeur du serveur',
+	restoreServerDefault: 'Restaurer la valeur du serveur',
+	systemPromptsTitle: 'Invites système',
+	systemPromptsDescription:
+		'Appliquée à chaque nouvelle conversation (priorité la plus basse). Une invite par modèle ou par conversation la remplace.',
+	globalPrompt: 'Invite globale',
+	globalPromptPlaceholder: "ex. Tu es concis et tu réponds dans la langue de l'utilisateur…",
+	perModelPrompts: 'Invites par modèle',
+	addAModel: '+ Ajouter un modèle',
+	removeModelPrompt: "Supprimer l'invite de {model:string}",
+	promptForModel: 'Invite pour {model:string}…',
+	extendsGlobalPrompt: "Complète l'invite globale",
+	replacesGlobalPrompt: "Remplace l'invite globale",
+	extendsGlobalShort: 'complète la globale',
+	replacesGlobalShort: 'remplace la globale',
+	noPerModelPrompts:
+		'Aucune invite par modèle. Ajoutez-en une pour adapter les instructions à un modèle précis.',
+	on: 'Activé',
+	off: 'Désactivé',
+
+	// --- Paramètres › Outils ---------------------------------------------------
+	webSearch: 'Recherche web',
+	webSearchBackendUrl: 'URL du moteur (degoog / SearXNG)',
+	webSearchBackend: 'Moteur',
+	webSearchToken: 'Jeton API (facultatif, pour les instances protégées)',
+	webSearchTokenSet: '•••••••• (défini)',
+	webSearchByDefault: 'Activer la recherche web par défaut',
+	webSearchAuto: 'Laisser le modèle décider quand chercher sur le web',
+	webSearchAutoHelp:
+		"Le modèle détermine d'abord si une question nécessite le web. La plupart des modèles récents (même sous Ollama) s'en sortent bien, quelques petits modèles moins.",
+	webSearchUnavailable:
+		"La recherche web n'est pas encore disponible. Un administrateur peut la configurer pour cette instance.",
+	interactiveChoicesTitle: 'Choix interactifs',
+	interactiveChoicesDescription:
+		"Quand une demande est ambiguë et dépend d'une préférence, le modèle peut proposer quelques options à toucher plutôt que de deviner. Votre choix est envoyé comme un message normal.",
+	interactiveChoicesToggle: 'Laisser le modèle proposer des boutons de choix rapide',
+	currentDateTitle: 'Date du jour',
+	currentDateDescription:
+		"Un modèle n'a pas d'horloge et suppose sinon être à sa date de fin d'entraînement — rejetant les faits plus récents comme impossibles. Ceci ajoute la date et l'heure actuelles (votre fuseau) à chaque requête pour l'ancrer dans le présent.",
+	currentDateToggle: "Indiquer au modèle la date et l'heure du jour",
+	systemInstructionsTitle: 'Instructions système',
+	systemInstructionsDescription:
+		"Les invites en coulisses qu'Hollama injecte pour les fonctions ci-dessus. Choisissez-en une pour la consulter ou l'ajuster — laissez la valeur par défaut sauf si vous savez ce que vous changez.",
+	placeholders: 'Variables',
+	resetToDefault: 'Rétablir la valeur par défaut',
+
+	// --- Paramètres › Données --------------------------------------------------
+	backupAndRestore: 'Sauvegarde et restauration',
+	backupAndRestoreDescription:
+		'Exportez ou importez tout (sessions, connaissances, serveurs, préférences) dans un seul fichier.',
+	backup: 'Sauvegarder',
+	restore: 'Restaurer',
+	byCategory: 'Par catégorie',
+	byCategoryDescription: 'Exportez, importez ou supprimez chaque type de donnée séparément.',
+	personasDescription: 'Vos personnages enregistrés et leurs réglages',
+	areYouSureYouWantToDeleteAllPersonas: 'Êtes-vous sûr de vouloir supprimer tous les personas ?',
+	confirmResetEverything: 'Êtes-vous sûr ? Cette action est irréversible.',
+	yesDeleteEverything: 'Oui, tout supprimer',
+
+	// --- Paramètres › Serveurs -------------------------------------------------
+	systemServers: 'Serveurs système',
+	systemServersDescription:
+		"Partagés avec tout le monde — choisissez les modèles à exposer dans l'onglet Admin. Les clés sont chiffrées et ne sont jamais envoyées au navigateur.",
+	yourServers: 'Vos serveurs',
+	yourServersDescription: 'Vos propres connexions, privées à votre compte.',
+	providersManagedByAdmin: 'Les fournisseurs sont gérés par votre administrateur.',
+	addAServer: 'Ajouter un serveur',
+	addAServerDescription:
+		'Connectez Ollama ou un fournisseur compatible OpenAI pour commencer à discuter.',
+	optional: 'Facultatif',
+	verifying: 'Vérification…',
+	modelsFound: '{count:number} modèle{{s}} trouvé{{s}}',
+	serverAdded: 'Serveur ajouté',
+	requestFailed: 'La requête a échoué',
+	baseUrlRequired: "L'URL de base est requise",
+	connectionFailed: 'Échec de la connexion',
+	connectionVerifiedWithModels: 'Connexion vérifiée — {count:number} modèle{{s}}',
+
+	// --- Paramètres › Interface ------------------------------------------------
+	appearance: 'Apparence',
+	homeScreen: "Écran d'accueil",
+	showGreetingHeader: "Afficher l'en-tête de bienvenue",
+	showPromptSuggestions: 'Afficher les suggestions',
+	showRecentPersonas: 'Afficher les personas récents',
+	showRecentSessions: 'Afficher les sessions récentes',
+	howManyToShow: 'Combien en afficher',
+	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
+
+	// --- Paramètres › À propos -------------------------------------------------
+	source: 'Source',
+	buyMeACoffee: 'Offrez-moi un café',
+	madeWithLoveBy: 'Fait avec',
+	byAuthor: 'par cedhuf',
+
+	// --- Paramètres › Admin ----------------------------------------------------
+	userPermissions: 'Permissions des utilisateurs',
+	userPermissionsDescription: 'Ce que les utilisateurs connectés ont le droit de faire ici.',
+	allowUserProviders: 'Autoriser les utilisateurs à ajouter leurs propres connexions',
+	allowUserPersonas: 'Autoriser les utilisateurs à créer leurs propres personas',
+	lockedForUsers: 'Verrouillé — les utilisateurs ne peuvent pas le changer',
+	overridableForUsers: 'Les utilisateurs peuvent le remplacer pour eux-mêmes',
+	webSearchSharing: 'Partage de la recherche web',
+	webSearchSharingDescription:
+		"Configurez le moteur de recherche dans l'onglet Chat ; ici vous choisissez s'il est partagé avec les utilisateurs.",
+	shareSearchEngine: 'Partager mon moteur de recherche avec les utilisateurs',
+	noEngineConfigured:
+		"Aucun moteur configuré — commencez par en définir un dans l'onglet Chat, vous pourrez ensuite le partager.",
+	currentlySharing: 'Partagé actuellement : {value:string}',
+	systemPromptsSharing: 'Partage des invites système',
+	systemPromptsSharingDescription:
+		"Configurez vos invites dans l'onglet Chat ; ici vous choisissez si elles sont partagées avec tous les utilisateurs (en lecture seule pour eux). Les invites par utilisateur viendront avec les groupes.",
+	shareSystemPrompts: 'Partager mes invites système avec les utilisateurs',
+	noPromptsConfigured:
+		"Rien de configuré — définissez vos invites dans l'onglet Chat pour avoir quelque chose à partager.",
+	titleGenerationSharing: 'Partage de la génération de titres',
+	titleGenerationSharingDescription:
+		"Partagez vos réglages de génération de titres (onglet Chat) avec les utilisateurs. Le modèle de titre fonctionne même s'il n'est pas dans la liste des modèles partagés.",
+	shareTitleGeneration: 'Partager ma génération de titres avec les utilisateurs',
+	sharingLabel: 'Partage',
+	sharedModels: 'Modèles partagés',
+	sharedModelsDescription:
+		"Choisissez les modèles de chaque serveur système mis à disposition des utilisateurs. Les serveurs eux-mêmes se configurent dans l'onglet Serveurs.",
+	noSystemServers: "Aucun serveur système — ajoutez-en un dans l'onglet Serveurs.",
+	defaultModelForUsers: 'Modèle par défaut des utilisateurs',
+	none: '— aucun —',
+	defaultUsersMayChange: 'Par défaut — les utilisateurs peuvent le changer',
+	selectModelsToShare: 'Sélectionnez les modèles à partager',
+	sharedCount: '{count:number} partagé{{s}}',
+	noModelsCheckServersTab: "Aucun modèle disponible — vérifiez ce serveur dans l'onglet Serveurs.",
+	users: 'Utilisateurs',
+	usersDescription: 'Comptes de cette instance.',
+	createAUser: 'Créer un utilisateur',
+	initialPassword: 'Mot de passe initial',
+	createUser: "Créer l'utilisateur",
+	addUser: 'Ajouter un utilisateur',
+	userCreated: 'Utilisateur créé',
+	emailAndPasswordRequired: "L'e-mail et le mot de passe sont requis",
+	developerOptions: 'Options développeur',
+	developerOptionsDescription:
+		"Outils pour vérifier des parcours qu'un utilisateur ne voit normalement qu'une fois.",
+	newUserOnboarding: 'Accueil des nouveaux utilisateurs',
+	newUserOnboardingDescription:
+		"Rejoue la visite de bienvenue. Ferme cette fenêtre ; la terminer remet la visite à l'état « vue ».",
+	launch: 'Lancer',
+	close: 'Fermer'
 });
 
 export default fr;

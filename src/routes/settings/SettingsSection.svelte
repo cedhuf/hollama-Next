@@ -15,7 +15,7 @@
 </script>
 
 <section
-	class="flex flex-col gap-2.5 {card ? 'rounded-lg border border-shade-3 bg-shade-0 p-4' : ''}"
+	class="flex flex-col gap-2.5 {card ? 'rounded-xl border border-shade-3 bg-shade-0 p-4' : ''}"
 >
 	<div class="flex flex-col gap-0.5">
 		<div class="flex items-center gap-2">

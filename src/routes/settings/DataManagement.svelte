@@ -85,8 +85,8 @@
 		{
 			storageKey: StorageKey.HollamaNextPersonas,
 			fileName: `hollama-personas.json`,
-			label: 'Personas',
-			description: 'Your saved characters and their settings'
+			label: $LL.personas(),
+			description: $LL.personasDescription()
 		}
 	]);
 
@@ -169,7 +169,7 @@
 			[StorageKey.HollamaNextServers]: $LL.areYouSureYouWantToDeleteAllServers(),
 			[StorageKey.HollamaNextSessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
 			[StorageKey.HollamaNextKnowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
-			[StorageKey.HollamaNextPersonas]: 'Are you sure you want to delete all personas?'
+			[StorageKey.HollamaNextPersonas]: $LL.areYouSureYouWantToDeleteAllPersonas()
 		};
 
 		if (confirm(confirmMessages[storageKey])) {
@@ -199,36 +199,27 @@
 		style="display: none;"
 		onchange={importBackup}
 	/>
-	<div
-		class="inline-flex w-full flex-col justify-between gap-x-2 text-balance rounded-lg border border-accent/40 bg-shade-1 p-3 text-sm leading-tight sm:flex-row sm:items-center"
-		data-testid="data-management-backup"
+	<SettingsSection
+		title={$LL.backupAndRestore()}
+		description={$LL.backupAndRestoreDescription()}
+		card
 	>
-		<div class="flex flex-col">
-			<span class="text-sm font-medium text-active">Backup &amp; restore</span>
-			<span class="text-xs text-muted"
-				>Export or import everything (sessions, knowledge, servers, preferences) in a single file</span
-			>
-		</div>
-
-		<nav class="mt-4 flex justify-between gap-x-2 sm:mt-0">
-			<Button variant="icon" onclick={exportBackup}>
+		<nav class="flex gap-2" data-testid="data-management-backup">
+			<Button variant="outline" onclick={exportBackup}>
 				<Archive class="base-icon" />
-				Backup
+				{$LL.backup()}
 			</Button>
 			<Button
-				variant="icon"
+				variant="outline"
 				onclick={() => document.getElementById('import-backup-input')?.click()}
 			>
 				<ArchiveRestore class="base-icon" />
-				Restore
+				{$LL.restore()}
 			</Button>
 		</nav>
-	</div>
+	</SettingsSection>
 
-	<SettingsSection
-		title="By category"
-		description="Export, import or delete each kind of data on its own."
-	>
+	<SettingsSection title={$LL.byCategory()} description={$LL.byCategoryDescription()}>
 		{#each dataSources as dataSource (dataSource.storageKey)}
 			<div
 				class="flex flex-grow flex-col gap-2 sm:flex-row"
@@ -242,7 +233,7 @@
 					onchange={(e) => importData(e, dataSource.storageKey)}
 				/>
 				<div
-					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-tight sm:flex-row sm:items-center"
+					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-xl border border-shade-3 bg-shade-0 p-3 text-sm leading-tight sm:flex-row sm:items-center"
 				>
 					<div class="flex flex-col">
 						<span class="text-sm font-medium text-active">{dataSource.label}</span>
@@ -277,22 +268,26 @@
 		{/each}
 	</SettingsSection>
 
-	<div
-		class="flex flex-col gap-2 rounded-lg border border-negative/40 bg-shade-1 p-4 text-sm"
+	<!-- Danger zone: a card like the others, but outlined in the negative colour so
+	     it never gets skimmed past as just another section. -->
+	<section
+		class="flex flex-col gap-2.5 rounded-xl border border-negative/40 bg-shade-0 p-4"
 		data-testid="data-management-reset"
 	>
-		<span class="text-sm font-medium text-negative">{$LL.dangerZone()}</span>
-		<span class="text-xs text-muted">{$LL.resetEverythingDescription()}</span>
+		<div class="flex flex-col gap-0.5">
+			<h3 class="text-sm font-medium text-negative">{$LL.dangerZone()}</h3>
+			<p class="text-xs leading-snug text-muted">{$LL.resetEverythingDescription()}</p>
+		</div>
 
 		{#if confirmReset}
-			<div class="flex flex-col gap-2 rounded-lg border border-negative/30 bg-shade-0 p-3">
-				<span class="text-sm font-medium text-negative">Are you sure? This cannot be undone.</span>
+			<div class="flex flex-col gap-2 rounded-md border border-negative/30 bg-shade-1 p-3">
+				<span class="text-sm font-medium text-negative">{$LL.confirmResetEverything()}</span>
 				<div class="flex gap-2">
 					<Button variant="default" class="!bg-negative !text-shade-0" onclick={resetEverything}>
 						<TriangleAlert class="base-icon" />
-						Yes, delete everything
+						{$LL.yesDeleteEverything()}
 					</Button>
-					<Button variant="outline" onclick={() => (confirmReset = false)}>Cancel</Button>
+					<Button variant="outline" onclick={() => (confirmReset = false)}>{$LL.cancel()}</Button>
 				</div>
 			</div>
 		{:else}
@@ -301,5 +296,5 @@
 				{$LL.resetEverything()}
 			</Button>
 		{/if}
-	</div>
+	</section>
 </SettingsPanel>

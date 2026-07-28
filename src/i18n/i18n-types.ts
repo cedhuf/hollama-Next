@@ -1015,6 +1015,484 @@ type RootTranslation = {
 	 * R​e​a​s​o​n​i​n​g​ ​e​x​p​a​n​d​s​ ​w​h​i​l​e​ ​s​t​r​e​a​m​i​n​g​ ​a​n​d​ ​c​o​l​l​a​p​s​e​s​ ​w​h​e​n​ ​c​o​m​p​l​e​t​e
 	 */
 	autoExpandReasoningBlocksHelp: string
+	/**
+	 * D​e​f​a​u​l​t​s
+	 */
+	defaults: string
+	/**
+	 * s​e​t​ ​b​y​ ​a​d​m​i​n
+	 */
+	setByAdmin: string
+	/**
+	 * s​h​a​r​e​d​ ​b​y​ ​a​d​m​i​n
+	 */
+	sharedByAdminBadge: string
+	/**
+	 * s​e​r​v​e​r​ ​d​e​f​a​u​l​t
+	 */
+	serverDefaultBadge: string
+	/**
+	 * R​e​s​t​o​r​e​ ​s​e​r​v​e​r​ ​d​e​f​a​u​l​t
+	 */
+	restoreServerDefault: string
+	/**
+	 * S​y​s​t​e​m​ ​p​r​o​m​p​t​s
+	 */
+	systemPromptsTitle: string
+	/**
+	 * A​p​p​l​i​e​d​ ​t​o​ ​e​v​e​r​y​ ​n​e​w​ ​c​h​a​t​ ​(​l​o​w​e​s​t​ ​p​r​i​o​r​i​t​y​)​.​ ​A​ ​p​e​r​-​m​o​d​e​l​ ​p​r​o​m​p​t​ ​o​r​ ​a​ ​p​e​r​-​c​h​a​t​ ​p​r​o​m​p​t​ ​o​v​e​r​r​i​d​e​s​ ​i​t​.
+	 */
+	systemPromptsDescription: string
+	/**
+	 * G​l​o​b​a​l​ ​p​r​o​m​p​t
+	 */
+	globalPrompt: string
+	/**
+	 * e​.​g​.​ ​Y​o​u​ ​a​r​e​ ​c​o​n​c​i​s​e​ ​a​n​d​ ​a​n​s​w​e​r​ ​i​n​ ​t​h​e​ ​u​s​e​r​'​s​ ​l​a​n​g​u​a​g​e​…
+	 */
+	globalPromptPlaceholder: string
+	/**
+	 * P​e​r​-​m​o​d​e​l​ ​p​r​o​m​p​t​s
+	 */
+	perModelPrompts: string
+	/**
+	 * +​ ​A​d​d​ ​a​ ​m​o​d​e​l
+	 */
+	addAModel: string
+	/**
+	 * R​e​m​o​v​e​ ​t​h​e​ ​p​r​o​m​p​t​ ​f​o​r​ ​{​m​o​d​e​l​}
+	 * @param {string} model
+	 */
+	removeModelPrompt: RequiredParams<'model'>
+	/**
+	 * P​r​o​m​p​t​ ​f​o​r​ ​{​m​o​d​e​l​}​…
+	 * @param {string} model
+	 */
+	promptForModel: RequiredParams<'model'>
+	/**
+	 * E​x​t​e​n​d​s​ ​t​h​e​ ​g​l​o​b​a​l​ ​p​r​o​m​p​t
+	 */
+	extendsGlobalPrompt: string
+	/**
+	 * R​e​p​l​a​c​e​s​ ​t​h​e​ ​g​l​o​b​a​l​ ​p​r​o​m​p​t
+	 */
+	replacesGlobalPrompt: string
+	/**
+	 * e​x​t​e​n​d​s​ ​g​l​o​b​a​l
+	 */
+	extendsGlobalShort: string
+	/**
+	 * r​e​p​l​a​c​e​s​ ​g​l​o​b​a​l
+	 */
+	replacesGlobalShort: string
+	/**
+	 * N​o​ ​p​e​r​-​m​o​d​e​l​ ​p​r​o​m​p​t​s​ ​y​e​t​.​ ​A​d​d​ ​o​n​e​ ​t​o​ ​t​a​i​l​o​r​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​f​o​r​ ​a​ ​s​p​e​c​i​f​i​c​ ​m​o​d​e​l​.
+	 */
+	noPerModelPrompts: string
+	/**
+	 * O​n
+	 */
+	on: string
+	/**
+	 * O​f​f
+	 */
+	off: string
+	/**
+	 * W​e​b​ ​s​e​a​r​c​h
+	 */
+	webSearch: string
+	/**
+	 * B​a​c​k​e​n​d​ ​U​R​L​ ​(​d​e​g​o​o​g​ ​/​ ​S​e​a​r​X​N​G​)
+	 */
+	webSearchBackendUrl: string
+	/**
+	 * B​a​c​k​e​n​d
+	 */
+	webSearchBackend: string
+	/**
+	 * A​P​I​ ​t​o​k​e​n​ ​(​o​p​t​i​o​n​a​l​,​ ​f​o​r​ ​p​r​o​t​e​c​t​e​d​ ​i​n​s​t​a​n​c​e​s​)
+	 */
+	webSearchToken: string
+	/**
+	 * •​•​•​•​•​•​•​•​ ​(​s​e​t​)
+	 */
+	webSearchTokenSet: string
+	/**
+	 * E​n​a​b​l​e​ ​w​e​b​ ​s​e​a​r​c​h​ ​b​y​ ​d​e​f​a​u​l​t
+	 */
+	webSearchByDefault: string
+	/**
+	 * L​e​t​ ​t​h​e​ ​m​o​d​e​l​ ​d​e​c​i​d​e​ ​w​h​e​n​ ​t​o​ ​s​e​a​r​c​h​ ​t​h​e​ ​w​e​b​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	webSearchAuto: string
+	/**
+	 * T​h​e​ ​m​o​d​e​l​ ​f​i​r​s​t​ ​d​e​c​i​d​e​s​ ​w​h​e​t​h​e​r​ ​a​ ​q​u​e​s​t​i​o​n​ ​n​e​e​d​s​ ​t​h​e​ ​w​e​b​.​ ​M​o​s​t​ ​m​o​d​e​r​n​ ​m​o​d​e​l​s​ ​(​e​v​e​n​ ​O​l​l​a​m​a​)​ ​h​a​n​d​l​e​ ​t​h​i​s​ ​w​e​l​l​,​ ​b​u​t​ ​a​ ​f​e​w​ ​s​m​a​l​l​ ​o​n​e​s​ ​m​a​y​ ​n​o​t​.
+	 */
+	webSearchAutoHelp: string
+	/**
+	 * W​e​b​ ​s​e​a​r​c​h​ ​i​s​n​'​t​ ​a​v​a​i​l​a​b​l​e​ ​y​e​t​.​ ​A​n​ ​a​d​m​i​n​ ​c​a​n​ ​c​o​n​f​i​g​u​r​e​ ​i​t​ ​f​o​r​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	webSearchUnavailable: string
+	/**
+	 * I​n​t​e​r​a​c​t​i​v​e​ ​c​h​o​i​c​e​s
+	 */
+	interactiveChoicesTitle: string
+	/**
+	 * W​h​e​n​ ​a​ ​r​e​q​u​e​s​t​ ​i​s​ ​a​m​b​i​g​u​o​u​s​ ​a​n​d​ ​d​e​p​e​n​d​s​ ​o​n​ ​a​ ​p​r​e​f​e​r​e​n​c​e​,​ ​t​h​e​ ​m​o​d​e​l​ ​c​a​n​ ​p​r​e​s​e​n​t​ ​a​ ​f​e​w​ ​t​a​p​p​a​b​l​e​ ​o​p​t​i​o​n​s​ ​i​n​s​t​e​a​d​ ​o​f​ ​g​u​e​s​s​i​n​g​.​ ​Y​o​u​r​ ​s​e​l​e​c​t​i​o​n​ ​i​s​ ​s​e​n​t​ ​a​s​ ​a​ ​n​o​r​m​a​l​ ​m​e​s​s​a​g​e​.
+	 */
+	interactiveChoicesDescription: string
+	/**
+	 * L​e​t​ ​t​h​e​ ​m​o​d​e​l​ ​o​f​f​e​r​ ​q​u​i​c​k​-​c​h​o​i​c​e​ ​b​u​t​t​o​n​s
+	 */
+	interactiveChoicesToggle: string
+	/**
+	 * C​u​r​r​e​n​t​ ​d​a​t​e
+	 */
+	currentDateTitle: string
+	/**
+	 * A​ ​m​o​d​e​l​ ​h​a​s​ ​n​o​ ​c​l​o​c​k​ ​a​n​d​ ​o​t​h​e​r​w​i​s​e​ ​a​s​s​u​m​e​s​ ​i​t​s​ ​t​r​a​i​n​i​n​g​-​c​u​t​o​f​f​ ​d​a​t​e​ ​—​ ​r​e​j​e​c​t​i​n​g​ ​n​e​w​e​r​ ​f​a​c​t​s​ ​a​s​ ​i​m​p​o​s​s​i​b​l​e​.​ ​T​h​i​s​ ​p​r​e​p​e​n​d​s​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​d​a​t​e​/​t​i​m​e​ ​(​y​o​u​r​ ​l​o​c​a​l​ ​t​i​m​e​z​o​n​e​)​ ​t​o​ ​e​a​c​h​ ​r​e​q​u​e​s​t​ ​s​o​ ​i​t​ ​s​t​a​y​s​ ​a​n​c​h​o​r​e​d​ ​i​n​ ​t​h​e​ ​p​r​e​s​e​n​t​.
+	 */
+	currentDateDescription: string
+	/**
+	 * T​e​l​l​ ​t​h​e​ ​m​o​d​e​l​ ​t​o​d​a​y​'​s​ ​d​a​t​e​ ​a​n​d​ ​t​i​m​e
+	 */
+	currentDateToggle: string
+	/**
+	 * S​y​s​t​e​m​ ​i​n​s​t​r​u​c​t​i​o​n​s
+	 */
+	systemInstructionsTitle: string
+	/**
+	 * T​h​e​ ​b​e​h​i​n​d​-​t​h​e​-​s​c​e​n​e​s​ ​p​r​o​m​p​t​s​ ​H​o​l​l​a​m​a​ ​i​n​j​e​c​t​s​ ​f​o​r​ ​t​h​e​ ​f​e​a​t​u​r​e​s​ ​a​b​o​v​e​.​ ​P​i​c​k​ ​o​n​e​ ​t​o​ ​v​i​e​w​ ​o​r​ ​t​w​e​a​k​ ​i​t​ ​—​ ​l​e​a​v​e​ ​i​t​ ​o​n​ ​t​h​e​ ​d​e​f​a​u​l​t​ ​u​n​l​e​s​s​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​y​o​u​ ​a​r​e​ ​c​h​a​n​g​i​n​g​.
+	 */
+	systemInstructionsDescription: string
+	/**
+	 * P​l​a​c​e​h​o​l​d​e​r​s
+	 */
+	placeholders: string
+	/**
+	 * R​e​s​e​t​ ​t​o​ ​d​e​f​a​u​l​t
+	 */
+	resetToDefault: string
+	/**
+	 * B​a​c​k​u​p​ ​&​ ​r​e​s​t​o​r​e
+	 */
+	backupAndRestore: string
+	/**
+	 * E​x​p​o​r​t​ ​o​r​ ​i​m​p​o​r​t​ ​e​v​e​r​y​t​h​i​n​g​ ​(​s​e​s​s​i​o​n​s​,​ ​k​n​o​w​l​e​d​g​e​,​ ​s​e​r​v​e​r​s​,​ ​p​r​e​f​e​r​e​n​c​e​s​)​ ​i​n​ ​a​ ​s​i​n​g​l​e​ ​f​i​l​e​.
+	 */
+	backupAndRestoreDescription: string
+	/**
+	 * B​a​c​k​u​p
+	 */
+	backup: string
+	/**
+	 * R​e​s​t​o​r​e
+	 */
+	restore: string
+	/**
+	 * B​y​ ​c​a​t​e​g​o​r​y
+	 */
+	byCategory: string
+	/**
+	 * E​x​p​o​r​t​,​ ​i​m​p​o​r​t​ ​o​r​ ​d​e​l​e​t​e​ ​e​a​c​h​ ​k​i​n​d​ ​o​f​ ​d​a​t​a​ ​o​n​ ​i​t​s​ ​o​w​n​.
+	 */
+	byCategoryDescription: string
+	/**
+	 * Y​o​u​r​ ​s​a​v​e​d​ ​c​h​a​r​a​c​t​e​r​s​ ​a​n​d​ ​t​h​e​i​r​ ​s​e​t​t​i​n​g​s
+	 */
+	personasDescription: string
+	/**
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​a​l​l​ ​p​e​r​s​o​n​a​s​?
+	 */
+	areYouSureYouWantToDeleteAllPersonas: string
+	/**
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​?​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.
+	 */
+	confirmResetEverything: string
+	/**
+	 * Y​e​s​,​ ​d​e​l​e​t​e​ ​e​v​e​r​y​t​h​i​n​g
+	 */
+	yesDeleteEverything: string
+	/**
+	 * S​y​s​t​e​m​ ​s​e​r​v​e​r​s
+	 */
+	systemServers: string
+	/**
+	 * S​h​a​r​e​d​ ​w​i​t​h​ ​e​v​e​r​y​o​n​e​ ​—​ ​p​i​c​k​ ​w​h​i​c​h​ ​m​o​d​e​l​s​ ​t​o​ ​e​x​p​o​s​e​ ​i​n​ ​t​h​e​ ​A​d​m​i​n​ ​t​a​b​.​ ​K​e​y​s​ ​a​r​e​ ​e​n​c​r​y​p​t​e​d​ ​a​n​d​ ​n​e​v​e​r​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​b​r​o​w​s​e​r​.
+	 */
+	systemServersDescription: string
+	/**
+	 * Y​o​u​r​ ​s​e​r​v​e​r​s
+	 */
+	yourServers: string
+	/**
+	 * Y​o​u​r​ ​o​w​n​ ​p​r​o​v​i​d​e​r​ ​c​o​n​n​e​c​t​i​o​n​s​,​ ​p​r​i​v​a​t​e​ ​t​o​ ​y​o​u​r​ ​a​c​c​o​u​n​t​.
+	 */
+	yourServersDescription: string
+	/**
+	 * P​r​o​v​i​d​e​r​s​ ​a​r​e​ ​m​a​n​a​g​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
+	 */
+	providersManagedByAdmin: string
+	/**
+	 * A​d​d​ ​a​ ​s​e​r​v​e​r
+	 */
+	addAServer: string
+	/**
+	 * C​o​n​n​e​c​t​ ​O​l​l​a​m​a​ ​o​r​ ​a​n​ ​O​p​e​n​A​I​-​c​o​m​p​a​t​i​b​l​e​ ​p​r​o​v​i​d​e​r​ ​t​o​ ​s​t​a​r​t​ ​c​h​a​t​t​i​n​g​.
+	 */
+	addAServerDescription: string
+	/**
+	 * O​p​t​i​o​n​a​l
+	 */
+	optional: string
+	/**
+	 * V​e​r​i​f​y​i​n​g​…
+	 */
+	verifying: string
+	/**
+	 * {​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}​ ​f​o​u​n​d
+	 * @param {number} count
+	 */
+	modelsFound: RequiredParams<'count'>
+	/**
+	 * S​e​r​v​e​r​ ​a​d​d​e​d
+	 */
+	serverAdded: string
+	/**
+	 * R​e​q​u​e​s​t​ ​f​a​i​l​e​d
+	 */
+	requestFailed: string
+	/**
+	 * B​a​s​e​ ​U​R​L​ ​i​s​ ​r​e​q​u​i​r​e​d
+	 */
+	baseUrlRequired: string
+	/**
+	 * C​o​n​n​e​c​t​i​o​n​ ​f​a​i​l​e​d
+	 */
+	connectionFailed: string
+	/**
+	 * C​o​n​n​e​c​t​i​o​n​ ​v​e​r​i​f​i​e​d​ ​—​ ​{​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}
+	 * @param {number} count
+	 */
+	connectionVerifiedWithModels: RequiredParams<'count'>
+	/**
+	 * A​p​p​e​a​r​a​n​c​e
+	 */
+	appearance: string
+	/**
+	 * H​o​m​e​ ​s​c​r​e​e​n
+	 */
+	homeScreen: string
+	/**
+	 * S​h​o​w​ ​g​r​e​e​t​i​n​g​ ​h​e​a​d​e​r
+	 */
+	showGreetingHeader: string
+	/**
+	 * S​h​o​w​ ​p​r​o​m​p​t​ ​s​u​g​g​e​s​t​i​o​n​s
+	 */
+	showPromptSuggestions: string
+	/**
+	 * S​h​o​w​ ​r​e​c​e​n​t​ ​p​e​r​s​o​n​a​s
+	 */
+	showRecentPersonas: string
+	/**
+	 * S​h​o​w​ ​r​e​c​e​n​t​ ​s​e​s​s​i​o​n​s
+	 */
+	showRecentSessions: string
+	/**
+	 * H​o​w​ ​m​a​n​y​ ​t​o​ ​s​h​o​w
+	 */
+	howManyToShow: string
+	/**
+	 * P​i​n​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​t​a​l​k​ ​t​o​ ​a​t​ ​t​h​e​ ​t​o​p​ ​o​f​ ​t​h​e​ ​s​i​d​e​b​a​r
+	 */
+	pinPersonasInSidebar: string
+	/**
+	 * S​o​u​r​c​e
+	 */
+	source: string
+	/**
+	 * B​u​y​ ​m​e​ ​a​ ​c​o​f​f​e​e
+	 */
+	buyMeACoffee: string
+	/**
+	 * M​a​d​e​ ​w​i​t​h
+	 */
+	madeWithLoveBy: string
+	/**
+	 * b​y​ ​c​e​d​h​u​f
+	 */
+	byAuthor: string
+	/**
+	 * U​s​e​r​ ​p​e​r​m​i​s​s​i​o​n​s
+	 */
+	userPermissions: string
+	/**
+	 * W​h​a​t​ ​s​i​g​n​e​d​-​i​n​ ​u​s​e​r​s​ ​a​r​e​ ​a​l​l​o​w​e​d​ ​t​o​ ​d​o​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	userPermissionsDescription: string
+	/**
+	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​a​d​d​ ​t​h​e​i​r​ ​o​w​n​ ​p​r​o​v​i​d​e​r​ ​c​o​n​n​e​c​t​i​o​n​s
+	 */
+	allowUserProviders: string
+	/**
+	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​c​r​e​a​t​e​ ​t​h​e​i​r​ ​o​w​n​ ​p​e​r​s​o​n​a​s
+	 */
+	allowUserPersonas: string
+	/**
+	 * L​o​c​k​e​d​ ​—​ ​u​s​e​r​s​ ​c​a​n​'​t​ ​c​h​a​n​g​e​ ​t​h​i​s
+	 */
+	lockedForUsers: string
+	/**
+	 * U​s​e​r​s​ ​m​a​y​ ​o​v​e​r​r​i​d​e​ ​f​o​r​ ​t​h​e​m​s​e​l​v​e​s
+	 */
+	overridableForUsers: string
+	/**
+	 * W​e​b​ ​s​e​a​r​c​h​ ​s​h​a​r​i​n​g
+	 */
+	webSearchSharing: string
+	/**
+	 * C​o​n​f​i​g​u​r​e​ ​t​h​e​ ​s​e​a​r​c​h​ ​e​n​g​i​n​e​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​;​ ​h​e​r​e​ ​y​o​u​ ​c​h​o​o​s​e​ ​w​h​e​t​h​e​r​ ​i​t​'​s​ ​s​h​a​r​e​d​ ​w​i​t​h​ ​u​s​e​r​s​.
+	 */
+	webSearchSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​m​y​ ​s​e​a​r​c​h​ ​e​n​g​i​n​e​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	shareSearchEngine: string
+	/**
+	 * N​o​ ​e​n​g​i​n​e​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​ ​—​ ​s​e​t​ ​o​n​e​ ​u​p​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​f​i​r​s​t​,​ ​t​h​e​n​ ​y​o​u​ ​c​a​n​ ​s​h​a​r​e​ ​i​t​.
+	 */
+	noEngineConfigured: string
+	/**
+	 * C​u​r​r​e​n​t​l​y​ ​s​h​a​r​i​n​g​:​ ​{​v​a​l​u​e​}
+	 * @param {string} value
+	 */
+	currentlySharing: RequiredParams<'value'>
+	/**
+	 * S​y​s​t​e​m​ ​p​r​o​m​p​t​s​ ​s​h​a​r​i​n​g
+	 */
+	systemPromptsSharing: string
+	/**
+	 * C​o​n​f​i​g​u​r​e​ ​y​o​u​r​ ​p​r​o​m​p​t​s​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​;​ ​h​e​r​e​ ​y​o​u​ ​c​h​o​o​s​e​ ​w​h​e​t​h​e​r​ ​t​h​e​y​'​r​e​ ​s​h​a​r​e​d​ ​w​i​t​h​ ​a​l​l​ ​u​s​e​r​s​ ​(​r​e​a​d​-​o​n​l​y​ ​f​o​r​ ​t​h​e​m​)​.​ ​P​e​r​-​u​s​e​r​ ​p​r​o​m​p​t​s​ ​w​i​l​l​ ​c​o​m​e​ ​w​i​t​h​ ​g​r​o​u​p​s​.
+	 */
+	systemPromptsSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​m​y​ ​s​y​s​t​e​m​ ​p​r​o​m​p​t​s​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	shareSystemPrompts: string
+	/**
+	 * N​o​t​h​i​n​g​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​ ​—​ ​s​e​t​ ​u​p​ ​y​o​u​r​ ​p​r​o​m​p​t​s​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​t​o​ ​s​h​a​r​e​ ​s​o​m​e​t​h​i​n​g​.
+	 */
+	noPromptsConfigured: string
+	/**
+	 * T​i​t​l​e​ ​g​e​n​e​r​a​t​i​o​n​ ​s​h​a​r​i​n​g
+	 */
+	titleGenerationSharing: string
+	/**
+	 * S​h​a​r​e​ ​y​o​u​r​ ​t​i​t​l​e​-​g​e​n​e​r​a​t​i​o​n​ ​s​e​t​t​i​n​g​s​ ​(​f​r​o​m​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​)​ ​w​i​t​h​ ​u​s​e​r​s​.​ ​T​h​e​ ​t​i​t​l​e​ ​m​o​d​e​l​ ​w​o​r​k​s​ ​e​v​e​n​ ​i​f​ ​i​t​ ​i​s​n​'​t​ ​i​n​ ​t​h​e​ ​s​h​a​r​e​d​ ​m​o​d​e​l​s​ ​l​i​s​t​.
+	 */
+	titleGenerationSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​m​y​ ​t​i​t​l​e​ ​g​e​n​e​r​a​t​i​o​n​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	shareTitleGeneration: string
+	/**
+	 * S​h​a​r​i​n​g
+	 */
+	sharingLabel: string
+	/**
+	 * S​h​a​r​e​d​ ​m​o​d​e​l​s
+	 */
+	sharedModels: string
+	/**
+	 * P​i​c​k​ ​w​h​i​c​h​ ​m​o​d​e​l​s​ ​f​r​o​m​ ​e​a​c​h​ ​s​y​s​t​e​m​ ​s​e​r​v​e​r​ ​a​r​e​ ​a​v​a​i​l​a​b​l​e​ ​t​o​ ​u​s​e​r​s​.​ ​C​o​n​f​i​g​u​r​e​ ​t​h​e​ ​s​e​r​v​e​r​s​ ​t​h​e​m​s​e​l​v​e​s​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 */
+	sharedModelsDescription: string
+	/**
+	 * N​o​ ​s​y​s​t​e​m​ ​s​e​r​v​e​r​s​ ​y​e​t​ ​—​ ​a​d​d​ ​o​n​e​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 */
+	noSystemServers: string
+	/**
+	 * D​e​f​a​u​l​t​ ​m​o​d​e​l​ ​f​o​r​ ​u​s​e​r​s
+	 */
+	defaultModelForUsers: string
+	/**
+	 * —​ ​n​o​n​e​ ​—
+	 */
+	none: string
+	/**
+	 * D​e​f​a​u​l​t​ ​—​ ​u​s​e​r​s​ ​m​a​y​ ​c​h​a​n​g​e​ ​i​t
+	 */
+	defaultUsersMayChange: string
+	/**
+	 * S​e​l​e​c​t​ ​m​o​d​e​l​s​ ​t​o​ ​s​h​a​r​e
+	 */
+	selectModelsToShare: string
+	/**
+	 * {​c​o​u​n​t​}​ ​s​h​a​r​e​d
+	 * @param {number} count
+	 */
+	sharedCount: RequiredParams<'count'>
+	/**
+	 * N​o​ ​m​o​d​e​l​s​ ​a​v​a​i​l​a​b​l​e​ ​—​ ​c​h​e​c​k​ ​t​h​i​s​ ​s​e​r​v​e​r​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 */
+	noModelsCheckServersTab: string
+	/**
+	 * U​s​e​r​s
+	 */
+	users: string
+	/**
+	 * A​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	usersDescription: string
+	/**
+	 * C​r​e​a​t​e​ ​a​ ​u​s​e​r
+	 */
+	createAUser: string
+	/**
+	 * I​n​i​t​i​a​l​ ​p​a​s​s​w​o​r​d
+	 */
+	initialPassword: string
+	/**
+	 * C​r​e​a​t​e​ ​u​s​e​r
+	 */
+	createUser: string
+	/**
+	 * A​d​d​ ​u​s​e​r
+	 */
+	addUser: string
+	/**
+	 * U​s​e​r​ ​c​r​e​a​t​e​d
+	 */
+	userCreated: string
+	/**
+	 * E​m​a​i​l​ ​a​n​d​ ​p​a​s​s​w​o​r​d​ ​a​r​e​ ​r​e​q​u​i​r​e​d
+	 */
+	emailAndPasswordRequired: string
+	/**
+	 * D​e​v​e​l​o​p​e​r​ ​o​p​t​i​o​n​s
+	 */
+	developerOptions: string
+	/**
+	 * T​o​o​l​s​ ​f​o​r​ ​c​h​e​c​k​i​n​g​ ​f​l​o​w​s​ ​a​ ​u​s​e​r​ ​n​o​r​m​a​l​l​y​ ​o​n​l​y​ ​s​e​e​s​ ​o​n​c​e​.
+	 */
+	developerOptionsDescription: string
+	/**
+	 * N​e​w​-​u​s​e​r​ ​o​n​b​o​a​r​d​i​n​g
+	 */
+	newUserOnboarding: string
+	/**
+	 * R​e​p​l​a​y​ ​t​h​e​ ​w​e​l​c​o​m​e​ ​t​o​u​r​.​ ​C​l​o​s​e​s​ ​t​h​i​s​ ​d​i​a​l​o​g​;​ ​f​i​n​i​s​h​i​n​g​ ​i​t​ ​m​a​r​k​s​ ​t​h​e​ ​t​o​u​r​ ​a​s​ ​s​e​e​n​ ​a​g​a​i​n​.
+	 */
+	newUserOnboardingDescription: string
+	/**
+	 * L​a​u​n​c​h
+	 */
+	launch: string
+	/**
+	 * C​l​o​s​e
+	 */
+	close: string
 }
 
 export type TranslationFunctions = {
@@ -2011,6 +2489,478 @@ The completion in progress will stop
 	 * Reasoning expands while streaming and collapses when complete
 	 */
 	autoExpandReasoningBlocksHelp: () => LocalizedString
+	/**
+	 * Defaults
+	 */
+	defaults: () => LocalizedString
+	/**
+	 * set by admin
+	 */
+	setByAdmin: () => LocalizedString
+	/**
+	 * shared by admin
+	 */
+	sharedByAdminBadge: () => LocalizedString
+	/**
+	 * server default
+	 */
+	serverDefaultBadge: () => LocalizedString
+	/**
+	 * Restore server default
+	 */
+	restoreServerDefault: () => LocalizedString
+	/**
+	 * System prompts
+	 */
+	systemPromptsTitle: () => LocalizedString
+	/**
+	 * Applied to every new chat (lowest priority). A per-model prompt or a per-chat prompt overrides it.
+	 */
+	systemPromptsDescription: () => LocalizedString
+	/**
+	 * Global prompt
+	 */
+	globalPrompt: () => LocalizedString
+	/**
+	 * e.g. You are concise and answer in the user's language…
+	 */
+	globalPromptPlaceholder: () => LocalizedString
+	/**
+	 * Per-model prompts
+	 */
+	perModelPrompts: () => LocalizedString
+	/**
+	 * + Add a model
+	 */
+	addAModel: () => LocalizedString
+	/**
+	 * Remove the prompt for {model}
+	 */
+	removeModelPrompt: (arg: { model: string }) => LocalizedString
+	/**
+	 * Prompt for {model}…
+	 */
+	promptForModel: (arg: { model: string }) => LocalizedString
+	/**
+	 * Extends the global prompt
+	 */
+	extendsGlobalPrompt: () => LocalizedString
+	/**
+	 * Replaces the global prompt
+	 */
+	replacesGlobalPrompt: () => LocalizedString
+	/**
+	 * extends global
+	 */
+	extendsGlobalShort: () => LocalizedString
+	/**
+	 * replaces global
+	 */
+	replacesGlobalShort: () => LocalizedString
+	/**
+	 * No per-model prompts yet. Add one to tailor instructions for a specific model.
+	 */
+	noPerModelPrompts: () => LocalizedString
+	/**
+	 * On
+	 */
+	on: () => LocalizedString
+	/**
+	 * Off
+	 */
+	off: () => LocalizedString
+	/**
+	 * Web search
+	 */
+	webSearch: () => LocalizedString
+	/**
+	 * Backend URL (degoog / SearXNG)
+	 */
+	webSearchBackendUrl: () => LocalizedString
+	/**
+	 * Backend
+	 */
+	webSearchBackend: () => LocalizedString
+	/**
+	 * API token (optional, for protected instances)
+	 */
+	webSearchToken: () => LocalizedString
+	/**
+	 * •••••••• (set)
+	 */
+	webSearchTokenSet: () => LocalizedString
+	/**
+	 * Enable web search by default
+	 */
+	webSearchByDefault: () => LocalizedString
+	/**
+	 * Let the model decide when to search the web automatically
+	 */
+	webSearchAuto: () => LocalizedString
+	/**
+	 * The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.
+	 */
+	webSearchAutoHelp: () => LocalizedString
+	/**
+	 * Web search isn't available yet. An admin can configure it for this instance.
+	 */
+	webSearchUnavailable: () => LocalizedString
+	/**
+	 * Interactive choices
+	 */
+	interactiveChoicesTitle: () => LocalizedString
+	/**
+	 * When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message.
+	 */
+	interactiveChoicesDescription: () => LocalizedString
+	/**
+	 * Let the model offer quick-choice buttons
+	 */
+	interactiveChoicesToggle: () => LocalizedString
+	/**
+	 * Current date
+	 */
+	currentDateTitle: () => LocalizedString
+	/**
+	 * A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts as impossible. This prepends the current date/time (your local timezone) to each request so it stays anchored in the present.
+	 */
+	currentDateDescription: () => LocalizedString
+	/**
+	 * Tell the model today's date and time
+	 */
+	currentDateToggle: () => LocalizedString
+	/**
+	 * System instructions
+	 */
+	systemInstructionsTitle: () => LocalizedString
+	/**
+	 * The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.
+	 */
+	systemInstructionsDescription: () => LocalizedString
+	/**
+	 * Placeholders
+	 */
+	placeholders: () => LocalizedString
+	/**
+	 * Reset to default
+	 */
+	resetToDefault: () => LocalizedString
+	/**
+	 * Backup & restore
+	 */
+	backupAndRestore: () => LocalizedString
+	/**
+	 * Export or import everything (sessions, knowledge, servers, preferences) in a single file.
+	 */
+	backupAndRestoreDescription: () => LocalizedString
+	/**
+	 * Backup
+	 */
+	backup: () => LocalizedString
+	/**
+	 * Restore
+	 */
+	restore: () => LocalizedString
+	/**
+	 * By category
+	 */
+	byCategory: () => LocalizedString
+	/**
+	 * Export, import or delete each kind of data on its own.
+	 */
+	byCategoryDescription: () => LocalizedString
+	/**
+	 * Your saved characters and their settings
+	 */
+	personasDescription: () => LocalizedString
+	/**
+	 * Are you sure you want to delete all personas?
+	 */
+	areYouSureYouWantToDeleteAllPersonas: () => LocalizedString
+	/**
+	 * Are you sure? This cannot be undone.
+	 */
+	confirmResetEverything: () => LocalizedString
+	/**
+	 * Yes, delete everything
+	 */
+	yesDeleteEverything: () => LocalizedString
+	/**
+	 * System servers
+	 */
+	systemServers: () => LocalizedString
+	/**
+	 * Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.
+	 */
+	systemServersDescription: () => LocalizedString
+	/**
+	 * Your servers
+	 */
+	yourServers: () => LocalizedString
+	/**
+	 * Your own provider connections, private to your account.
+	 */
+	yourServersDescription: () => LocalizedString
+	/**
+	 * Providers are managed by your administrator.
+	 */
+	providersManagedByAdmin: () => LocalizedString
+	/**
+	 * Add a server
+	 */
+	addAServer: () => LocalizedString
+	/**
+	 * Connect Ollama or an OpenAI-compatible provider to start chatting.
+	 */
+	addAServerDescription: () => LocalizedString
+	/**
+	 * Optional
+	 */
+	optional: () => LocalizedString
+	/**
+	 * Verifying…
+	 */
+	verifying: () => LocalizedString
+	/**
+	 * {count} model{{s}} found
+	 */
+	modelsFound: (arg: { count: number }) => LocalizedString
+	/**
+	 * Server added
+	 */
+	serverAdded: () => LocalizedString
+	/**
+	 * Request failed
+	 */
+	requestFailed: () => LocalizedString
+	/**
+	 * Base URL is required
+	 */
+	baseUrlRequired: () => LocalizedString
+	/**
+	 * Connection failed
+	 */
+	connectionFailed: () => LocalizedString
+	/**
+	 * Connection verified — {count} model{{s}}
+	 */
+	connectionVerifiedWithModels: (arg: { count: number }) => LocalizedString
+	/**
+	 * Appearance
+	 */
+	appearance: () => LocalizedString
+	/**
+	 * Home screen
+	 */
+	homeScreen: () => LocalizedString
+	/**
+	 * Show greeting header
+	 */
+	showGreetingHeader: () => LocalizedString
+	/**
+	 * Show prompt suggestions
+	 */
+	showPromptSuggestions: () => LocalizedString
+	/**
+	 * Show recent personas
+	 */
+	showRecentPersonas: () => LocalizedString
+	/**
+	 * Show recent sessions
+	 */
+	showRecentSessions: () => LocalizedString
+	/**
+	 * How many to show
+	 */
+	howManyToShow: () => LocalizedString
+	/**
+	 * Pin personas you talk to at the top of the sidebar
+	 */
+	pinPersonasInSidebar: () => LocalizedString
+	/**
+	 * Source
+	 */
+	source: () => LocalizedString
+	/**
+	 * Buy me a coffee
+	 */
+	buyMeACoffee: () => LocalizedString
+	/**
+	 * Made with
+	 */
+	madeWithLoveBy: () => LocalizedString
+	/**
+	 * by cedhuf
+	 */
+	byAuthor: () => LocalizedString
+	/**
+	 * User permissions
+	 */
+	userPermissions: () => LocalizedString
+	/**
+	 * What signed-in users are allowed to do on this instance.
+	 */
+	userPermissionsDescription: () => LocalizedString
+	/**
+	 * Allow users to add their own provider connections
+	 */
+	allowUserProviders: () => LocalizedString
+	/**
+	 * Allow users to create their own personas
+	 */
+	allowUserPersonas: () => LocalizedString
+	/**
+	 * Locked — users can't change this
+	 */
+	lockedForUsers: () => LocalizedString
+	/**
+	 * Users may override for themselves
+	 */
+	overridableForUsers: () => LocalizedString
+	/**
+	 * Web search sharing
+	 */
+	webSearchSharing: () => LocalizedString
+	/**
+	 * Configure the search engine in the Chat tab; here you choose whether it's shared with users.
+	 */
+	webSearchSharingDescription: () => LocalizedString
+	/**
+	 * Share my search engine with users
+	 */
+	shareSearchEngine: () => LocalizedString
+	/**
+	 * No engine configured yet — set one up in the Chat tab first, then you can share it.
+	 */
+	noEngineConfigured: () => LocalizedString
+	/**
+	 * Currently sharing: {value}
+	 */
+	currentlySharing: (arg: { value: string }) => LocalizedString
+	/**
+	 * System prompts sharing
+	 */
+	systemPromptsSharing: () => LocalizedString
+	/**
+	 * Configure your prompts in the Chat tab; here you choose whether they're shared with all users (read-only for them). Per-user prompts will come with groups.
+	 */
+	systemPromptsSharingDescription: () => LocalizedString
+	/**
+	 * Share my system prompts with users
+	 */
+	shareSystemPrompts: () => LocalizedString
+	/**
+	 * Nothing configured yet — set up your prompts in the Chat tab to share something.
+	 */
+	noPromptsConfigured: () => LocalizedString
+	/**
+	 * Title generation sharing
+	 */
+	titleGenerationSharing: () => LocalizedString
+	/**
+	 * Share your title-generation settings (from the Chat tab) with users. The title model works even if it isn't in the shared models list.
+	 */
+	titleGenerationSharingDescription: () => LocalizedString
+	/**
+	 * Share my title generation with users
+	 */
+	shareTitleGeneration: () => LocalizedString
+	/**
+	 * Sharing
+	 */
+	sharingLabel: () => LocalizedString
+	/**
+	 * Shared models
+	 */
+	sharedModels: () => LocalizedString
+	/**
+	 * Pick which models from each system server are available to users. Configure the servers themselves in the Servers tab.
+	 */
+	sharedModelsDescription: () => LocalizedString
+	/**
+	 * No system servers yet — add one in the Servers tab.
+	 */
+	noSystemServers: () => LocalizedString
+	/**
+	 * Default model for users
+	 */
+	defaultModelForUsers: () => LocalizedString
+	/**
+	 * — none —
+	 */
+	none: () => LocalizedString
+	/**
+	 * Default — users may change it
+	 */
+	defaultUsersMayChange: () => LocalizedString
+	/**
+	 * Select models to share
+	 */
+	selectModelsToShare: () => LocalizedString
+	/**
+	 * {count} shared
+	 */
+	sharedCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * No models available — check this server in the Servers tab.
+	 */
+	noModelsCheckServersTab: () => LocalizedString
+	/**
+	 * Users
+	 */
+	users: () => LocalizedString
+	/**
+	 * Accounts on this instance.
+	 */
+	usersDescription: () => LocalizedString
+	/**
+	 * Create a user
+	 */
+	createAUser: () => LocalizedString
+	/**
+	 * Initial password
+	 */
+	initialPassword: () => LocalizedString
+	/**
+	 * Create user
+	 */
+	createUser: () => LocalizedString
+	/**
+	 * Add user
+	 */
+	addUser: () => LocalizedString
+	/**
+	 * User created
+	 */
+	userCreated: () => LocalizedString
+	/**
+	 * Email and password are required
+	 */
+	emailAndPasswordRequired: () => LocalizedString
+	/**
+	 * Developer options
+	 */
+	developerOptions: () => LocalizedString
+	/**
+	 * Tools for checking flows a user normally only sees once.
+	 */
+	developerOptionsDescription: () => LocalizedString
+	/**
+	 * New-user onboarding
+	 */
+	newUserOnboarding: () => LocalizedString
+	/**
+	 * Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.
+	 */
+	newUserOnboardingDescription: () => LocalizedString
+	/**
+	 * Launch
+	 */
+	launch: () => LocalizedString
+	/**
+	 * Close
+	 */
+	close: () => LocalizedString
 }
 
 export type Formatters = {}

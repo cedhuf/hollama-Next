@@ -5,6 +5,8 @@
 	import { modelLabel, serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 
+	import SettingsPanel from './SettingsPanel.svelte';
+
 	/**
 	 * Rename a connection's models for display only — the real id is still what gets
 	 * sent to the provider, matched by `modelFilter` and stored on sessions.
@@ -45,7 +47,8 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3">
+<!-- The sub-view owns its shell, so both modes present it identically. -->
+<SettingsPanel>
 	<!-- Header: back to the connection list, plus which connection we're editing -->
 	<div class="flex items-center gap-2">
 		<button
@@ -78,7 +81,9 @@
 	<p class="text-xs leading-snug text-muted">{$LL.modelNamesHelp()}</p>
 
 	{#if models.length}
-		<div class="overflow-scrollbar flex min-h-0 flex-1 flex-col gap-1 rounded-md border p-1.5">
+		<div
+			class="overflow-scrollbar flex min-h-0 flex-1 flex-col gap-1 rounded-xl border border-shade-3 p-1.5"
+		>
 			{#each models as name (name)}
 				<div class="grid grid-cols-2 items-center gap-2 rounded px-1.5 py-1">
 					<span class="truncate font-mono text-xs text-muted" title={name}>{name}</span>
@@ -93,8 +98,8 @@
 			{/each}
 		</div>
 	{:else}
-		<p class="rounded-md border border-dashed p-6 text-center text-sm text-muted">
+		<p class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted">
 			{$LL.noModelsToRename()}
 		</p>
 	{/if}
-</div>
+</SettingsPanel>

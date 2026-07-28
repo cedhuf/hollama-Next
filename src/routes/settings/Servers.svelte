@@ -31,19 +31,14 @@
 {#if isServerMode}
 	<ServerConnections />
 {:else if renaming}
-	<SettingsPanel>
-		<ModelNames
-			server={renaming}
-			onBack={() => (renamingId = null)}
-			onChange={() => serversStore.update((s) => [...s])}
-		/>
-	</SettingsPanel>
+	<ModelNames
+		server={renaming}
+		onBack={() => (renamingId = null)}
+		onChange={() => serversStore.update((s) => [...s])}
+	/>
 {:else}
 	<SettingsPanel>
-		<SettingsSection
-			title={$LL.servers()}
-			description="Connect Ollama or an OpenAI-compatible provider to start chatting."
-		>
+		<SettingsSection title={$LL.servers()} description={$LL.addAServerDescription()}>
 			<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 				{#each PROVIDERS as provider (provider.type)}
 					<button

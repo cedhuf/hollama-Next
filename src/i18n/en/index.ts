@@ -259,7 +259,154 @@ const en = {
 	multipleAllowed: 'Choose one or more',
 	preparingOptions: 'Preparing options',
 	autoExpandReasoningBlocks: 'Automatically expand and collapse reasoning',
-	autoExpandReasoningBlocksHelp: 'Reasoning expands while streaming and collapses when complete'
+	autoExpandReasoningBlocksHelp: 'Reasoning expands while streaming and collapses when complete',
+
+	// --- Settings › Chat -------------------------------------------------------
+	defaults: 'Defaults',
+	setByAdmin: 'set by admin',
+	sharedByAdminBadge: 'shared by admin',
+	serverDefaultBadge: 'server default',
+	restoreServerDefault: 'Restore server default',
+	systemPromptsTitle: 'System prompts',
+	systemPromptsDescription:
+		'Applied to every new chat (lowest priority). A per-model prompt or a per-chat prompt overrides it.',
+	globalPrompt: 'Global prompt',
+	globalPromptPlaceholder: "e.g. You are concise and answer in the user's language…",
+	perModelPrompts: 'Per-model prompts',
+	addAModel: '+ Add a model',
+	removeModelPrompt: 'Remove the prompt for {model:string}',
+	promptForModel: 'Prompt for {model:string}…',
+	extendsGlobalPrompt: 'Extends the global prompt',
+	replacesGlobalPrompt: 'Replaces the global prompt',
+	extendsGlobalShort: 'extends global',
+	replacesGlobalShort: 'replaces global',
+	noPerModelPrompts:
+		'No per-model prompts yet. Add one to tailor instructions for a specific model.',
+	on: 'On',
+	off: 'Off',
+
+	// --- Settings › Tools ------------------------------------------------------
+	webSearch: 'Web search',
+	webSearchBackendUrl: 'Backend URL (degoog / SearXNG)',
+	webSearchBackend: 'Backend',
+	webSearchToken: 'API token (optional, for protected instances)',
+	webSearchTokenSet: '•••••••• (set)',
+	webSearchByDefault: 'Enable web search by default',
+	webSearchAuto: 'Let the model decide when to search the web automatically',
+	webSearchAutoHelp:
+		'The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.',
+	webSearchUnavailable:
+		"Web search isn't available yet. An admin can configure it for this instance.",
+	interactiveChoicesTitle: 'Interactive choices',
+	interactiveChoicesDescription:
+		'When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message.',
+	interactiveChoicesToggle: 'Let the model offer quick-choice buttons',
+	currentDateTitle: 'Current date',
+	currentDateDescription:
+		'A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts as impossible. This prepends the current date/time (your local timezone) to each request so it stays anchored in the present.',
+	currentDateToggle: "Tell the model today's date and time",
+	systemInstructionsTitle: 'System instructions',
+	systemInstructionsDescription:
+		'The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.',
+	placeholders: 'Placeholders',
+	resetToDefault: 'Reset to default',
+
+	// --- Settings › Data -------------------------------------------------------
+	backupAndRestore: 'Backup & restore',
+	backupAndRestoreDescription:
+		'Export or import everything (sessions, knowledge, servers, preferences) in a single file.',
+	backup: 'Backup',
+	restore: 'Restore',
+	byCategory: 'By category',
+	byCategoryDescription: 'Export, import or delete each kind of data on its own.',
+	personasDescription: 'Your saved characters and their settings',
+	areYouSureYouWantToDeleteAllPersonas: 'Are you sure you want to delete all personas?',
+	confirmResetEverything: 'Are you sure? This cannot be undone.',
+	yesDeleteEverything: 'Yes, delete everything',
+
+	// --- Settings › Servers ----------------------------------------------------
+	systemServers: 'System servers',
+	systemServersDescription:
+		'Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.',
+	yourServers: 'Your servers',
+	yourServersDescription: 'Your own provider connections, private to your account.',
+	providersManagedByAdmin: 'Providers are managed by your administrator.',
+	addAServer: 'Add a server',
+	addAServerDescription: 'Connect Ollama or an OpenAI-compatible provider to start chatting.',
+	optional: 'Optional',
+	verifying: 'Verifying…',
+	modelsFound: '{count:number} model{{s}} found',
+	serverAdded: 'Server added',
+	requestFailed: 'Request failed',
+	baseUrlRequired: 'Base URL is required',
+	connectionFailed: 'Connection failed',
+	connectionVerifiedWithModels: 'Connection verified — {count:number} model{{s}}',
+
+	// --- Settings › Interface --------------------------------------------------
+	appearance: 'Appearance',
+	homeScreen: 'Home screen',
+	showGreetingHeader: 'Show greeting header',
+	showPromptSuggestions: 'Show prompt suggestions',
+	showRecentPersonas: 'Show recent personas',
+	showRecentSessions: 'Show recent sessions',
+	howManyToShow: 'How many to show',
+	pinPersonasInSidebar: 'Pin personas you talk to at the top of the sidebar',
+
+	// --- Settings › About ------------------------------------------------------
+	source: 'Source',
+	buyMeACoffee: 'Buy me a coffee',
+	madeWithLoveBy: 'Made with',
+	byAuthor: 'by cedhuf',
+	// --- Settings › Admin ------------------------------------------------------
+	userPermissions: 'User permissions',
+	userPermissionsDescription: 'What signed-in users are allowed to do on this instance.',
+	allowUserProviders: 'Allow users to add their own provider connections',
+	allowUserPersonas: 'Allow users to create their own personas',
+	lockedForUsers: "Locked — users can't change this",
+	overridableForUsers: 'Users may override for themselves',
+	webSearchSharing: 'Web search sharing',
+	webSearchSharingDescription:
+		"Configure the search engine in the Chat tab; here you choose whether it's shared with users.",
+	shareSearchEngine: 'Share my search engine with users',
+	noEngineConfigured:
+		'No engine configured yet — set one up in the Chat tab first, then you can share it.',
+	currentlySharing: 'Currently sharing: {value:string}',
+	systemPromptsSharing: 'System prompts sharing',
+	systemPromptsSharingDescription:
+		"Configure your prompts in the Chat tab; here you choose whether they're shared with all users (read-only for them). Per-user prompts will come with groups.",
+	shareSystemPrompts: 'Share my system prompts with users',
+	noPromptsConfigured:
+		'Nothing configured yet — set up your prompts in the Chat tab to share something.',
+	titleGenerationSharing: 'Title generation sharing',
+	titleGenerationSharingDescription:
+		"Share your title-generation settings (from the Chat tab) with users. The title model works even if it isn't in the shared models list.",
+	shareTitleGeneration: 'Share my title generation with users',
+	sharingLabel: 'Sharing',
+	sharedModels: 'Shared models',
+	sharedModelsDescription:
+		'Pick which models from each system server are available to users. Configure the servers themselves in the Servers tab.',
+	noSystemServers: 'No system servers yet — add one in the Servers tab.',
+	defaultModelForUsers: 'Default model for users',
+	none: '— none —',
+	defaultUsersMayChange: 'Default — users may change it',
+	selectModelsToShare: 'Select models to share',
+	sharedCount: '{count:number} shared',
+	noModelsCheckServersTab: 'No models available — check this server in the Servers tab.',
+	users: 'Users',
+	usersDescription: 'Accounts on this instance.',
+	createAUser: 'Create a user',
+	initialPassword: 'Initial password',
+	createUser: 'Create user',
+	addUser: 'Add user',
+	userCreated: 'User created',
+	emailAndPasswordRequired: 'Email and password are required',
+	developerOptions: 'Developer options',
+	developerOptionsDescription: 'Tools for checking flows a user normally only sees once.',
+	newUserOnboarding: 'New-user onboarding',
+	newUserOnboardingDescription:
+		'Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.',
+	launch: 'Launch',
+	close: 'Close'
 } satisfies BaseTranslation;
 
 export default en;
