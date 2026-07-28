@@ -11,13 +11,14 @@
 		Users
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { generateNewUrl } from '$lib/components/ButtonNew.js';
 	import Head from '$lib/components/Head.svelte';
+	import Menu from '$lib/components/Menu.svelte';
+	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { parseKnowledgeImport, saveKnowledge } from '$lib/knowledge';
@@ -38,7 +39,6 @@
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
-	let importOpen = $state(false);
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
 
@@ -118,53 +118,29 @@
 					<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
 				</div>
 
-				<div class="relative shrink-0">
-					<button
-						type="button"
-						onclick={() => (importOpen = !importOpen)}
-						class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
-					>
-						<Upload class="h-4 w-4" />
-						{$LL.import()}
-						<ChevronDown class="h-3.5 w-3.5 opacity-80" />
-					</button>
-
-					{#if importOpen}
-						<button
-							class="fixed inset-0 z-10 cursor-default"
-							aria-label={$LL.dismiss()}
-							onclick={() => (importOpen = false)}
-						></button>
-						<div
-							class="absolute right-0 top-full z-20 mt-1.5 flex w-48 flex-col gap-0.5 rounded-lg border border-shade-3 bg-shade-0 p-1 shadow-lg"
-							transition:fade={{ duration: 80 }}
-						>
-							{#if canCreate}
-								<button
-									type="button"
-									onclick={() => {
-										importOpen = false;
-										personaFileInput?.click();
-									}}
-									class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
-								>
-									<UserRound class="h-4 w-4 shrink-0 text-muted" />
-									{$LL.importPersona()}
-								</button>
-							{/if}
+				<div class="shrink-0">
+					<Menu class="w-48">
+						{#snippet trigger({ props })}
 							<button
+								{...props}
 								type="button"
-								onclick={() => {
-									importOpen = false;
-									knowledgeFileInput?.click();
-								}}
-								class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+								class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 							>
-								<FolderOpen class="h-4 w-4 shrink-0 text-muted" />
-								{$LL.importKnowledge()}
+								<Upload class="h-4 w-4" />
+								{$LL.import()}
+								<ChevronDown class="h-3.5 w-3.5 opacity-80" />
 							</button>
-						</div>
-					{/if}
+						{/snippet}
+
+						{#if canCreate}
+							<MenuItem icon={UserRound} onclick={() => personaFileInput?.click()}>
+								{$LL.importPersona()}
+							</MenuItem>
+						{/if}
+						<MenuItem icon={FolderOpen} onclick={() => knowledgeFileInput?.click()}>
+							{$LL.importKnowledge()}
+						</MenuItem>
+					</Menu>
 				</div>
 			</div>
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>

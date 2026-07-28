@@ -5,6 +5,7 @@
 
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
@@ -14,6 +15,12 @@
 	// Admin = governance only. Servers are configured in the Servers tab; here the
 	// admin picks which of each system server's models to share, manages users,
 	// and toggles whether users may add their own providers.
+
+	/** The governance choice repeated by every "share this with users" control. */
+	const sharingOptions = (subject: string) => [
+		{ value: 'locked', label: `Locked — users can't change ${subject}` },
+		{ value: 'overridable', label: 'Users may override for themselves' }
+	];
 
 	interface SystemServer {
 		id: string;
@@ -259,10 +266,7 @@
 				onChange={syncShare}
 			/>
 			{#if shareEnabled}
-				<select class="settings-field" bind:value={searchSharing} onchange={saveSearch}>
-					<option value="locked">Locked — users can't change it</option>
-					<option value="overridable">Users may override for themselves</option>
-				</select>
+				<Select bind:value={searchSharing} options={sharingOptions('it')} onChange={saveSearch} />
 				{#if sharedUrl}<span class="text-xs text-muted">Currently sharing: {sharedUrl}</span>{/if}
 			{/if}
 		{/if}
@@ -286,10 +290,11 @@
 			onChange={syncPromptsShare}
 		/>
 		{#if promptsShareEnabled}
-			<select class="settings-field" bind:value={systemPromptsSharing} onchange={saveSystemPrompts}>
-				<option value="locked">Locked — users can't change them</option>
-				<option value="overridable">Users may override for themselves</option>
-			</select>
+			<Select
+				bind:value={systemPromptsSharing}
+				options={sharingOptions('them')}
+				onChange={saveSystemPrompts}
+			/>
 		{/if}
 	</SettingsSection>
 
@@ -305,10 +310,7 @@
 			onChange={syncTitleShare}
 		/>
 		{#if titleShareEnabled}
-			<select class="settings-field" bind:value={titleSharing} onchange={saveTitle}>
-				<option value="locked">Locked — users can't change it</option>
-				<option value="overridable">Users may override for themselves</option>
-			</select>
+			<Select bind:value={titleSharing} options={sharingOptions('it')} onChange={saveTitle} />
 			<span class="text-xs text-muted">
 				Sharing: {$settingsStore.generateTitlesWithAI
 					? `on — ${$settingsStore.titleModel || 'no model'}`
@@ -329,25 +331,21 @@
 		{#if sharedModelNames.length}
 			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
 				<span class="text-sm font-medium">Default model for users</span>
-				<select
-					class="settings-field"
+				<Select
 					bind:value={defaultModelValue}
-					onchange={onDefaultModelChange}
-				>
-					<option value="">— none —</option>
-					{#each sharedModelNames as name (name)}
-						<option value={name}>{name}</option>
-					{/each}
-				</select>
+					emptyLabel="— none —"
+					options={sharedModelNames.map((name) => ({ value: name, label: name }))}
+					onChange={onDefaultModelChange}
+				/>
 				{#if defaultModelValue}
-					<select
-						class="settings-field"
+					<Select
 						bind:value={defaultModelSharing}
-						onchange={saveDefaultModel}
-					>
-						<option value="locked">Locked — users can't change it</option>
-						<option value="overridable">Default — users may change it</option>
-					</select>
+						options={[
+							{ value: 'locked', label: "Locked — users can't change it" },
+							{ value: 'overridable', label: 'Default — users may change it' }
+						]}
+						onChange={saveDefaultModel}
+					/>
 				{/if}
 			</div>
 		{/if}
@@ -438,10 +436,13 @@
 					bind:value={newUser.password}
 					placeholder="Initial password"
 				/>
-				<select class="settings-field" bind:value={newUser.role}>
-					<option value="user">user</option>
-					<option value="admin">admin</option>
-				</select>
+				<Select
+					bind:value={newUser.role}
+					options={[
+						{ value: 'user', label: 'user' },
+						{ value: 'admin', label: 'admin' }
+					]}
+				/>
 				<Button onclick={addUser}><Plus class="base-icon" /> Create user</Button>
 			</div>
 		{:else}

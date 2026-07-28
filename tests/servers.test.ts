@@ -275,7 +275,7 @@ test.describe('Servers', () => {
 		expect(modelCombobox).not.toBeDisabled();
 
 		await modelCombobox.click();
-		const modelOption = page.locator('.field-combobox-item-label');
+		const modelOption = page.locator('.select-item-label');
 		await expect(modelOption).toHaveCount(3);
 		await expect(modelOption.last()).toContainText(MOCK_LLAMA_CPP_MODELS[0].id);
 		await expect(modelOption.last()).toContainText('llama.cpp');

@@ -1,0 +1,233 @@
+<script lang="ts">
+	import { Check, ChevronsUpDown, Search, X } from '@lucide/svelte';
+	import { Select } from 'bits-ui';
+	import type { Snippet } from 'svelte';
+
+	import Badge from '$lib/components/Badge.svelte';
+
+	export type SelectOption = {
+		value: string;
+		label: string;
+		badge?: string | string[];
+		/** Secondary text shown after the label (e.g. a parameter size). */
+		hint?: string;
+		/** Colours the badge inline instead of using the Badge variants. */
+		badgeColor?: string;
+	};
+	export type SelectGroup = { label: string; options: SelectOption[] };
+	export type SelectOptionOrGroup = SelectOption | SelectGroup;
+
+	/**
+	 * Picks *one value from a list* (the action counterpart is `Menu`).
+	 *
+	 * Built on bits-ui, so it is portalled (never clipped by an `overflow-hidden`
+	 * ancestor), flips when there is no room below, matches the trigger's width and
+	 * supports keyboard typeahead — none of which a hand-rolled panel or a raw
+	 * `<select>` gave us consistently.
+	 */
+	interface Props {
+		value?: string;
+		options: SelectOptionOrGroup[];
+		placeholder?: string;
+		disabled?: boolean;
+		/** Rendered as the first, empty entry — lets the user pick "nothing". */
+		emptyLabel?: string;
+		id?: string;
+		name?: string;
+		class?: string;
+		/** Adds a filter box above the list — for long lists like model catalogues. */
+		searchable?: boolean;
+		searchPlaceholder?: string;
+		/** Replaces the default trigger; receives the props to spread onto your button. */
+		trigger?: Snippet<[{ props: Record<string, unknown>; label: string; hasValue: boolean }]>;
+		/** Shows an inline clear (✕) button once a value is set. */
+		allowClear?: boolean;
+		onChange?: (option: SelectOption) => void;
+	}
+
+	let {
+		value = $bindable(),
+		options,
+		placeholder = '',
+		disabled = false,
+		emptyLabel,
+		id,
+		name,
+		class: className = '',
+		searchable = false,
+		searchPlaceholder = '',
+		trigger,
+		allowClear = false,
+		onChange
+	}: Props = $props();
+
+	let open = $state(false);
+	let query = $state('');
+
+	/** Filtered view of `options`, preserving groups and dropping the empty ones. */
+	const shown = $derived.by(() => {
+		const q = query.trim().toLowerCase();
+		if (!q) return options;
+		return options
+			.map((entry) =>
+				'options' in entry
+					? { ...entry, options: entry.options.filter((o) => o.label.toLowerCase().includes(q)) }
+					: entry
+			)
+			.filter((entry) =>
+				'options' in entry ? entry.options.length > 0 : entry.label.toLowerCase().includes(q)
+			);
+	});
+
+	const flat = $derived(options.flatMap((entry) => ('options' in entry ? entry.options : [entry])));
+	const selected = $derived(flat.find((option) => option.value === value));
+	const isDisabled = $derived(disabled || flat.length === 0);
+
+	function handleValueChange(next: string) {
+		value = next || undefined;
+		query = '';
+		const option = flat.find((o) => o.value === next);
+		onChange?.(option ?? { value: '', label: emptyLabel ?? '' });
+	}
+</script>
+
+{#snippet row(option: SelectOption)}
+	<Select.Item
+		value={option.value}
+		label={option.label}
+		class="select-item flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm text-active transition-colors focus-visible:outline-none data-[highlighted]:bg-shade-1"
+	>
+		{#snippet children({ selected: isSelected })}
+			<!-- The check cell is always rendered so labels never reflow between states. -->
+			<span class="flex h-4 w-4 shrink-0 items-center justify-center">
+				{#if isSelected}<Check class="h-4 w-4" />{/if}
+			</span>
+			<span class="min-w-0 flex-1 truncate" title={option.label}>
+				{option.label}{#if option.hint}<span class="text-xs text-muted"> · {option.hint}</span>{/if}
+			</span>
+			{#if option.badge}
+				<span class="flex shrink-0 gap-1">
+					{#each Array.isArray(option.badge) ? option.badge : [option.badge] as badge (badge)}
+						{#if badge}
+							{#if option.badgeColor}
+								<span
+									class="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
+									style="border-color: {option.badgeColor}; color: {option.badgeColor}"
+								>
+									{badge}
+								</span>
+							{:else}
+								<Badge variant={badge === 'openai' || badge === 'ollama' ? badge : undefined}>
+									{badge}
+								</Badge>
+							{/if}
+						{/if}
+					{/each}
+				</span>
+			{/if}
+		{/snippet}
+	</Select.Item>
+{/snippet}
+
+<Select.Root
+	type="single"
+	bind:open
+	bind:value={() => value ?? '', handleValueChange}
+	{name}
+	disabled={isDisabled}
+>
+	{#if trigger}
+		<Select.Trigger {id}>
+			{#snippet child({ props })}
+				{@render trigger({
+					props,
+					label: selected?.label ?? emptyLabel ?? placeholder,
+					hasValue: !!selected
+				})}
+			{/snippet}
+		</Select.Trigger>
+	{:else}
+		<Select.Trigger
+			{id}
+			class="select-trigger flex w-full items-center justify-between gap-2 rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm text-active outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:opacity-50 {className}"
+		>
+			<span class="min-w-0 truncate text-left {selected ? '' : 'text-muted'}">
+				{selected?.label ?? emptyLabel ?? placeholder}
+			</span>
+			<span class="flex shrink-0 items-center gap-1">
+				{#if allowClear && selected}
+					<!-- Inside the trigger, so it needs to swallow the click that would open it. -->
+					<span
+						role="button"
+						tabindex="0"
+						aria-label="Clear"
+						class="rounded p-0.5 text-muted transition-colors hover:text-active"
+						onclick={(e) => {
+							e.stopPropagation();
+							handleValueChange('');
+						}}
+						onkeydown={(e) => {
+							if (e.key !== 'Enter' && e.key !== ' ') return;
+							e.stopPropagation();
+							e.preventDefault();
+							handleValueChange('');
+						}}
+					>
+						<X class="h-4 w-4" />
+					</span>
+				{/if}
+				<ChevronsUpDown class="h-4 w-4 text-muted" />
+			</span>
+		</Select.Trigger>
+	{/if}
+
+	<Select.Portal>
+		<Select.Content
+			sideOffset={6}
+			collisionPadding={12}
+			class="z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg focus-visible:outline-none"
+		>
+			{#if searchable}
+				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal
+				     them from this input and jump around the list instead. -->
+				<div class="mb-1 flex items-center gap-2 border-b border-shade-2 px-2 pb-2">
+					<Search class="h-4 w-4 shrink-0 text-muted" />
+					<input
+						bind:value={query}
+						placeholder={searchPlaceholder || placeholder}
+						class="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+						onkeydown={(e) => {
+							if (e.key !== 'Escape' && e.key !== 'Enter' && !e.key.startsWith('Arrow'))
+								e.stopPropagation();
+						}}
+					/>
+				</div>
+			{/if}
+			{#if emptyLabel && !query}
+				{@render row({ value: '', label: emptyLabel })}
+			{/if}
+			{#each shown as entry (entry.label)}
+				{#if 'options' in entry}
+					{#if entry.options.length}
+						<Select.Group>
+							<Select.GroupHeading
+								class="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted"
+							>
+								{entry.label}
+							</Select.GroupHeading>
+							{#each entry.options as option (option.value)}
+								{@render row(option)}
+							{/each}
+						</Select.Group>
+					{/if}
+				{:else}
+					{@render row(entry)}
+				{/if}
+			{:else}
+				<p class="px-2.5 py-3 text-center text-sm text-muted">
+					{query ? 'No matches' : placeholder}
+				</p>
+			{/each}
+		</Select.Content>
+	</Select.Portal>
+</Select.Root>

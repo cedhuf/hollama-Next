@@ -38,7 +38,7 @@ test.describe('FieldSelect', () => {
 
 		// Select an option
 		await page.getByRole('option', { name: MOCK_API_TAGS_RESPONSE.models[0].name }).click();
-		await expect(modelCombobox).toHaveValue(MOCK_API_TAGS_RESPONSE.models[0].name);
+		await expect(modelCombobox).toHaveText(MOCK_API_TAGS_RESPONSE.models[0].name);
 		await expect(page.getByTitle('Clear')).toBeVisible();
 		await expect(page.getByRole('option')).toHaveCount(0);
 
@@ -54,15 +54,15 @@ test.describe('FieldSelect', () => {
 
 		// Clear selection using X button
 		await page.getByTitle('Clear').click();
-		await expect(modelCombobox).toHaveValue('');
+		await expect(modelCombobox).toHaveText('Available models');
 
 		// Select an option again
 		await page.getByRole('option', { name: MOCK_API_TAGS_RESPONSE.models[1].name }).click();
-		await expect(modelCombobox).toHaveValue(MOCK_API_TAGS_RESPONSE.models[1].name);
+		await expect(modelCombobox).toHaveText(MOCK_API_TAGS_RESPONSE.models[1].name);
 
 		// Clear selection by deleting input content
 		await modelCombobox.fill('');
-		await expect(modelCombobox).toHaveValue('');
+		await expect(modelCombobox).toHaveText('Available models');
 		// The value is still selected
 		await expect(page.getByTitle('Clear')).toBeVisible();
 		// The placeholder is set to the previous selected value
@@ -73,7 +73,7 @@ test.describe('FieldSelect', () => {
 
 		// Click outside the comboboxto apply the cleared value
 		await page.keyboard.press('Escape');
-		await expect(modelCombobox).toHaveValue('');
+		await expect(modelCombobox).toHaveText('Available models');
 		await expect(modelCombobox).toHaveAttribute('placeholder', 'Available models');
 		await expect(page.getByRole('option')).toHaveCount(0);
 		await expect(page.getByTitle('Clear')).not.toBeVisible();
@@ -117,7 +117,7 @@ test.describe('FieldSelect', () => {
 		const recentlyUsedModelsGroup = page.locator('.field-combobox-group', {
 			hasText: 'Recently used models'
 		});
-		const recentlyUsedModels = recentlyUsedModelsGroup.locator('.field-combobox-item-label-option');
+		const recentlyUsedModels = recentlyUsedModelsGroup.locator('.select-item-label-option');
 		await expect(recentlyUsedModels).toHaveCount(2);
 		await expect(recentlyUsedModels.nth(0)).toHaveText(MOCK_API_TAGS_RESPONSE.models[0].name);
 		await expect(recentlyUsedModels.nth(1)).toHaveText(MOCK_API_TAGS_RESPONSE.models[1].name);

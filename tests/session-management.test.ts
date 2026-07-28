@@ -176,7 +176,7 @@ test.describe('Session management', () => {
 
 		// Click first session and verify its state
 		await page.getByTestId('session-item').first().click();
-		await expect(page.getByRole('combobox')).toHaveValue(MOCK_API_TAGS_RESPONSE.models[1].name);
+		await expect(page.getByRole('combobox')).toHaveText(MOCK_API_TAGS_RESPONSE.models[1].name);
 		await expect(page.getByText('The fox says various things')).toBeVisible();
 		await expect(
 			page.getByText('Create a new session or choose an existing one from the list')

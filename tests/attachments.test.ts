@@ -49,7 +49,7 @@ test.describe('Attachments', () => {
 		await expect(knowledgeAttachmentButton).toBeVisible();
 		knowledgeAttachments = page
 			.locator('.attachment')
-			.filter({ has: page.locator('.field-combobox-input') });
+			.filter({ has: page.locator('.select-trigger') });
 	});
 
 	test('can add and remove knowledge attachments', async ({ page }) => {
@@ -63,17 +63,17 @@ test.describe('Attachments', () => {
 
 		// Verify attachments are visible and contain correct names
 		await expect(knowledgeAttachments).toHaveCount(2);
-		await expect(knowledgeAttachments.first().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.first().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[0].name
 		);
-		await expect(knowledgeAttachments.last().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.last().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[1].name
 		);
 
 		// Remove first attachment using Trash button
 		await knowledgeAttachments.first().getByTestId('attachment-delete').click();
 		await expect(knowledgeAttachments).toHaveCount(1);
-		await expect(knowledgeAttachments.first().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.first().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[1].name
 		);
 	});
@@ -137,7 +137,7 @@ test.describe('Attachments', () => {
 		await page.getByPlaceholder('Knowledge').last().click();
 
 		// Should only show unselected knowledge options
-		const options = page.locator('.field-combobox-item');
+		const options = page.locator('.select-item');
 		await expect(options).toHaveCount(MOCK_KNOWLEDGE.length - 1);
 		await expect(options).not.toContainText(MOCK_KNOWLEDGE[0].name);
 		await expect(options).toContainText(MOCK_KNOWLEDGE[1].name);
@@ -153,14 +153,14 @@ test.describe('Attachments', () => {
 
 		// Verify attachment still exists
 		await expect(knowledgeAttachments).toHaveCount(1);
-		await expect(knowledgeAttachments.first().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.first().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[0].name
 		);
 
 		// Toggle back and verify again
 		await page.getByLabel('Messages').click();
 		await expect(knowledgeAttachments).toHaveCount(1);
-		await expect(knowledgeAttachments.first().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.first().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[0].name
 		);
 	});
@@ -194,7 +194,7 @@ test.describe('Attachments', () => {
 		await knowledgeAttachmentButton.click();
 		await chooseFromCombobox(page, 'Knowledge', MOCK_KNOWLEDGE[0].name, true);
 		await expect(knowledgeAttachments).toHaveCount(1);
-		await expect(knowledgeAttachments.first().locator('.field-combobox-input')).toHaveValue(
+		await expect(knowledgeAttachments.first().locator('.select-trigger')).toHaveText(
 			MOCK_KNOWLEDGE[0].name
 		);
 

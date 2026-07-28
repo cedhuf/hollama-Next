@@ -2,6 +2,7 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import FieldHelp from '$lib/components/FieldHelp.svelte';
 	import P from '$lib/components/P.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
@@ -63,16 +64,16 @@
 			</SettingsField>
 
 			<SettingsField label="Backend">
-				<select
-					class="settings-field disabled:opacity-60"
+				<Select
 					disabled={!$searchConfig.editable}
 					value={$searchConfig.editable ? $settingsStore.searchBackend : $searchConfig.backend}
-					onchange={(e) =>
-						($settingsStore.searchBackend = e.currentTarget.value as 'degoog' | 'searxng')}
-				>
-					<option value="degoog">degoog</option>
-					<option value="searxng">SearXNG</option>
-				</select>
+					options={[
+						{ value: 'degoog', label: 'degoog' },
+						{ value: 'searxng', label: 'SearXNG' }
+					]}
+					onChange={(option) =>
+						($settingsStore.searchBackend = option.value as 'degoog' | 'searxng')}
+				/>
 			</SettingsField>
 
 			<SettingsField label="API token (optional, for protected instances)">
@@ -143,11 +144,11 @@
 		title="System instructions"
 		description="The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you're changing."
 	>
-		<select class="settings-field" bind:value={selectedPrompt} aria-label="Instruction to edit">
-			{#each PROMPT_KEYS as key (key)}
-				<option value={key}>{DEFAULT_PROMPTS[key].label}</option>
-			{/each}
-		</select>
+		<Select
+			value={selectedPrompt}
+			options={PROMPT_KEYS.map((key) => ({ value: key, label: DEFAULT_PROMPTS[key].label }))}
+			onChange={(option) => (selectedPrompt = option.value as PromptKey)}
+		/>
 
 		<p class="text-xs text-muted">{DEFAULT_PROMPTS[selectedPrompt].hint}</p>
 

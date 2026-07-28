@@ -226,9 +226,7 @@ test.describe('Session interaction', () => {
 		// Before the completion is stopped, make sure the Run button is disabled
 		// even if there is a prompt in the textarea and a model selected
 		await promptTextarea.fill('Hello again!');
-		await expect(page.locator('.field-combobox-input')).toHaveValue(
-			MOCK_API_TAGS_RESPONSE.models[0].name
-		);
+		await expect(page.locator('.select-trigger')).toHaveText(MOCK_API_TAGS_RESPONSE.models[0].name);
 		await expect(runButton).toBeDisabled();
 
 		await promptTextarea.fill('');

@@ -214,10 +214,10 @@ export async function chooseFromCombobox(
 	// If true, use the placeholder instead of the label
 	usePlaceholder: boolean = false
 ) {
-	const locator = usePlaceholder
-		? page.getByPlaceholder(label, { exact: true })
-		: page.getByLabel(label, { exact: true });
-	await locator.click();
+	// The <label> stays in the DOM even when visually hidden, so label association
+	// resolves the trigger in both cases; `usePlaceholder` is kept for call sites.
+	void usePlaceholder;
+	await page.getByLabel(label, { exact: true }).click();
 	await page.getByText(option, { exact: true }).click();
 }
 

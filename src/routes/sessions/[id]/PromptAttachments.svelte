@@ -3,11 +3,11 @@
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import type { Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { fade } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import Menu from '$lib/components/Menu.svelte';
 	import { loadKnowledge } from '$lib/knowledge';
 	import { knowledgeStore } from '$lib/localStorage';
 	import type { Attachment, ImageAttachment } from '$lib/promptAttachments';
@@ -27,7 +27,6 @@
 
 	let { attachments = $bindable([]), tools = [], actions }: Props = $props();
 
-	let toolsOpen = $state(false);
 	const anyToolOn = $derived(tools.some((t) => t.checked));
 
 	function addKnowledge() {
@@ -151,43 +150,34 @@
 			<Image class="base-icon" />
 		</Button>
 		{#if tools.length}
-			<div class="relative">
-				<button
-					type="button"
-					onclick={() => (toolsOpen = !toolsOpen)}
-					title="Tools"
-					aria-label="Tools"
-					aria-pressed={anyToolOn}
-					data-testid="tools-toggle"
-					class="flex items-center justify-center rounded-md px-2.5 py-2 transition-colors {anyToolOn
-						? 'bg-accent/15 text-accent'
-						: 'text-muted hover:bg-shade-1 hover:text-active'}"
-				>
-					<Zap class="base-icon" />
-				</button>
-				{#if toolsOpen}
+			<!-- Toggles, not one-shot actions: the rows stay plain checkboxes so the menu
+			     survives each click, but the panel itself is the shared portalled one. -->
+			<Menu side="top" align="start" class="w-60">
+				{#snippet trigger({ props })}
 					<button
-						class="fixed inset-0 z-10 cursor-default"
-						aria-label="Dismiss"
-						onclick={() => (toolsOpen = false)}
-					></button>
-					<div
-						class="absolute bottom-full left-0 z-20 mb-2 w-60 rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg"
-						transition:fade={{ duration: 80 }}
+						{...props}
+						type="button"
+						title="Tools"
+						aria-label="Tools"
+						aria-pressed={anyToolOn}
+						data-testid="tools-toggle"
+						class="flex items-center justify-center rounded-md px-2.5 py-2 transition-colors {anyToolOn
+							? 'bg-accent/15 text-accent'
+							: 'text-muted hover:bg-shade-1 hover:text-active'}"
 					>
-						<p
-							class="px-2 pb-1 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted"
-						>
-							Tools
-						</p>
-						{#each tools as tool (tool.label)}
-							<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
-								<FieldCheckbox label={tool.label} checked={tool.checked} onChange={tool.onChange} />
-							</div>
-						{/each}
+						<Zap class="base-icon" />
+					</button>
+				{/snippet}
+
+				<p class="px-2 pb-1 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+					Tools
+				</p>
+				{#each tools as tool (tool.label)}
+					<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+						<FieldCheckbox label={tool.label} checked={tool.checked} onChange={tool.onChange} />
 					</div>
-				{/if}
-			</div>
+				{/each}
+			</Menu>
 		{/if}
 	</div>
 

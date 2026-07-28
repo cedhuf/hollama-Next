@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Download, ImagePlus, Pencil, Trash2, X } from '@lucide/svelte';
+	import { Download, Trash2, X } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { fade } from 'svelte/transition';
 
 	import { env } from '$env/dynamic/public';
+	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelPicker from '$lib/components/ModelPicker.svelte';
@@ -33,10 +33,6 @@
 	const attached = $derived(persona.knowledgeIds ?? []);
 	const canShare = $derived(env.PUBLIC_MODE === 'server' && $currentRole === 'admin');
 
-	// Avatar editing (colour + image) lives in a popover on the avatar itself, so the
-	// form stays light — the colour picker only appears when there's no image.
-	let avatarMenuOpen = $state(false);
-
 	function onShareChange() {
 		persist();
 		publishSharedPersonas();
@@ -50,28 +46,6 @@
 	function toggleKnowledge(id: string) {
 		const ids = persona.knowledgeIds ?? [];
 		persona.knowledgeIds = ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
-		persist();
-	}
-
-	function uploadImage() {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.accept = 'image/png,image/jpeg,image/webp';
-		input.onchange = () => {
-			const file = input.files?.[0];
-			if (!file) return;
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				persona.avatarImage = e.target?.result as string;
-				persist();
-			};
-			reader.readAsDataURL(file);
-		};
-		input.click();
-	}
-
-	function removeImage() {
-		persona.avatarImage = undefined;
 		persist();
 	}
 
@@ -118,95 +92,25 @@
 			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
 				<SettingsSection title="Identity">
 					<div class="flex items-center gap-4">
-						<div class="relative shrink-0">
-							<button
-								type="button"
-								onclick={() => (avatarMenuOpen = !avatarMenuOpen)}
-								title="Edit avatar"
-								aria-label="Edit avatar"
-								class="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full text-lg font-semibold text-shade-0 ring-2 ring-shade-3"
-								style="background-color: {persona.avatarColor}"
-							>
-								{#if persona.avatarImage}
-									<img
-										src={persona.avatarImage}
-										alt={persona.name}
-										class="h-full w-full object-cover"
-									/>
-								{:else}
-									{initials}
-								{/if}
-								<span
-									class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
-								>
-									<Pencil class="h-4 w-4" />
-								</span>
-							</button>
-
-							{#if avatarMenuOpen}
-								<button
-									class="fixed inset-0 z-10 cursor-default"
-									aria-label="Dismiss"
-									onclick={() => (avatarMenuOpen = false)}
-								></button>
-								<div
-									class="absolute left-0 top-full z-20 mt-2 w-52 rounded-xl border border-shade-3 bg-shade-0 p-2 shadow-lg"
-									transition:fade={{ duration: 80 }}
-								>
-									{#if persona.avatarImage}
-										<button
-											type="button"
-											onclick={() => {
-												avatarMenuOpen = false;
-												uploadImage();
-											}}
-											class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
-										>
-											<ImagePlus class="h-4 w-4 shrink-0 text-muted" /> Replace picture
-										</button>
-										<button
-											type="button"
-											onclick={() => {
-												removeImage();
-												avatarMenuOpen = false;
-											}}
-											class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
-										>
-											<Trash2 class="h-4 w-4 shrink-0 text-muted" /> Remove picture
-										</button>
-									{:else}
-										<div class="grid grid-cols-4 gap-2 p-1">
-											{#each PERSONA_AVATAR_COLORS as color (color)}
-												<button
-													type="button"
-													aria-label="Choose avatar colour"
-													onclick={() => {
-														persona.avatarColor = color;
-														persist();
-													}}
-													class="h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-shade-0 transition-all {persona.avatarColor ===
-													color
-														? 'ring-accent'
-														: 'ring-transparent hover:ring-shade-4'}"
-													style="background-color: {color}"
-												></button>
-											{/each}
-										</div>
-										<div class="my-1 border-t border-shade-2"></div>
-										<button
-											type="button"
-											onclick={() => {
-												avatarMenuOpen = false;
-												uploadImage();
-											}}
-											class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
-										>
-											<ImagePlus class="h-4 w-4 shrink-0 text-muted" /> Upload a picture
-										</button>
-									{/if}
-								</div>
-							{/if}
-						</div>
+						<AvatarEditor
+							image={persona.avatarImage}
+							color={persona.avatarColor}
+							{initials}
+							colors={PERSONA_AVATAR_COLORS}
+							label={persona.name}
+							onColorChange={(c) => {
+								persona.avatarColor = c;
+								persist();
+							}}
+							onImageChange={(url) => {
+								persona.avatarImage = url;
+								persist();
+							}}
+							onImageRemove={() => {
+								persona.avatarImage = undefined;
+								persist();
+							}}
+						/>
 
 						<div class="flex min-w-0 flex-1 flex-col gap-2">
 							<input

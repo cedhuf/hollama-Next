@@ -11,7 +11,7 @@ test.describe('Locales', () => {
 		await page.goto('/settings');
 		await expect(langueCombobox).not.toBeVisible();
 		await expect(languageCombobox).toBeVisible();
-		await expect(languageCombobox).toHaveValue('English');
+		await expect(languageCombobox).toHaveText('English');
 		await expect(page.getByTestId('data-management-hollama-servers')).toContainText('Servers');
 
 		await languageCombobox.click();
@@ -23,7 +23,7 @@ test.describe('Locales', () => {
 		await page.getByRole('option', { name: 'Français' }).click();
 
 		await expect(languageCombobox).not.toBeVisible();
-		await expect(langueCombobox).toHaveValue('Français');
+		await expect(langueCombobox).toHaveText('Français');
 		let localStorageValue = await page.evaluate(() =>
 			window.localStorage.getItem('hollama-settings')
 		);

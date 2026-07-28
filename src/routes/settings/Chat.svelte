@@ -7,6 +7,7 @@
 	import FieldHelp from '$lib/components/FieldHelp.svelte';
 	import FieldSelectModel from '$lib/components/FieldSelectModel.svelte';
 	import P from '$lib/components/P.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { systemPromptsConfig } from '$lib/systemPrompts';
 
@@ -145,25 +146,20 @@
 					bind:value={$settingsStore.systemPrompts.global}
 					placeholder={adminDefaultExists && adminPrompts.global
 						? adminPrompts.global
-						: "e.g. You are concise and answer in the user's language…"}></textarea>
+						: "e.g. You are concise and answer in the user's language…"}
+				></textarea>
 			</SettingsField>
 
 			<div class="mt-2 flex items-center justify-between gap-2">
 				<span class="text-sm font-medium">Per-model prompts</span>
 				{#if availableToAdd.length}
-					<select
-						class="settings-field w-auto"
+					<Select
+						class="w-auto"
 						value=""
-						onchange={(e) => {
-							addModelPrompt(e.currentTarget.value);
-							e.currentTarget.value = '';
-						}}
-					>
-						<option value="" disabled selected>+ Add a model</option>
-						{#each availableToAdd as name (name)}
-							<option value={name}>{name}</option>
-						{/each}
-					</select>
+						emptyLabel="+ Add a model"
+						options={availableToAdd.map((name) => ({ value: name, label: name }))}
+						onChange={(option) => option.value && addModelPrompt(option.value)}
+					/>
 				{/if}
 			</div>
 
@@ -186,14 +182,16 @@
 								class="settings-field"
 								rows="2"
 								bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
-								placeholder="Prompt for {name}…"></textarea>
-							<select
-								class="settings-field w-auto text-xs"
+								placeholder="Prompt for {name}…"
+							></textarea>
+							<Select
+								class="w-auto text-xs"
 								bind:value={$settingsStore.systemPrompts.perModel[name].mode}
-							>
-								<option value="extend">Extends the global prompt</option>
-								<option value="replace">Replaces the global prompt</option>
-							</select>
+								options={[
+									{ value: 'extend', label: 'Extends the global prompt' },
+									{ value: 'replace', label: 'Replaces the global prompt' }
+								]}
+							/>
 						</div>
 					{/each}
 				</div>
