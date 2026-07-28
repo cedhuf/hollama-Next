@@ -140,6 +140,34 @@ export function getSharedModels(serverId: string): string[] {
 	).map((row) => row.model_name);
 }
 
+/** Display-only labels for a server's models, keyed by the real model id. */
+export function getModelLabels(serverId: string): Record<string, string> {
+	const rows = getDb()
+		.prepare('SELECT model_name, label FROM model_labels WHERE server_id = ?')
+		.all(serverId) as { model_name: string; label: string }[];
+	return Object.fromEntries(rows.map((row) => [row.model_name, row.label]));
+}
+
+/** Replaces the whole set; blank labels are dropped so the table stays sparse. */
+export function setModelLabels(serverId: string, labels: Record<string, string>): void {
+	const db = getDb();
+	db.exec('BEGIN');
+	try {
+		db.prepare('DELETE FROM model_labels WHERE server_id = ?').run(serverId);
+		const insert = db.prepare(
+			'INSERT INTO model_labels (server_id, model_name, label) VALUES (?, ?, ?)'
+		);
+		for (const [name, label] of Object.entries(labels)) {
+			const trimmed = label?.trim();
+			if (trimmed) insert.run(serverId, name, trimmed);
+		}
+		db.exec('COMMIT');
+	} catch (error) {
+		db.exec('ROLLBACK');
+		throw error;
+	}
+}
+
 export function setSharedModels(serverId: string, models: string[]): void {
 	const db = getDb();
 	db.exec('BEGIN');

@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
-import { deleteServer, getServer, updateServer } from '$lib/server/db/servers';
+import { deleteServer, getServer, setModelLabels, updateServer } from '$lib/server/db/servers';
 import { toProviderView } from '$lib/server/serverViews';
 
 // A user may only touch their own personal servers.
@@ -25,6 +25,9 @@ export async function PUT(event) {
 		verifiedAt: body.verifiedAt,
 		color: body.color
 	});
+	if (body.modelLabels && typeof body.modelLabels === 'object') {
+		setModelLabels(event.params.id, body.modelLabels);
+	}
 	return json(toProviderView(getServer(event.params.id)!));
 }
 

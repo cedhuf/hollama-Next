@@ -12,6 +12,7 @@
 	import { currentUser } from '$lib/stores/auth';
 
 	import Connection from './Connection.svelte';
+	import ModelNames from './ModelNames.svelte';
 
 	// Server-mode connections. Admins manage shared SYSTEM servers; users their
 	// own PERSONAL servers (when enabled). Saved servers use the full Connection
@@ -28,6 +29,7 @@
 		isEnabled: boolean;
 		verifiedAt?: string | null;
 		color?: string | null;
+		modelLabels?: Record<string, string>;
 		scope?: string;
 	}
 
@@ -64,6 +66,7 @@
 			// Restored from the server, so the badge survives a reload.
 			isVerified: v.verifiedAt ? new Date(v.verifiedAt) : null,
 			color: v.color ?? undefined,
+			modelLabels: v.modelLabels ?? undefined,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -183,11 +186,16 @@
 							? server.isVerified.toISOString()
 							: (server.isVerified ?? null),
 					color: server.color ?? null,
+					modelLabels: server.modelLabels ?? {},
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			});
 		}, 500);
 	}
+
+	/** When set, the tab shows the model-name editor for that connection instead. */
+	let renamingId = $state<string | null>(null);
+	const renaming = $derived(servers.find((s) => s.id === renamingId));
 
 	async function removeServer(id: string) {
 		await api(`${base}/${id}`, 'DELETE');
@@ -195,77 +203,86 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-1">
-		<P><strong>{isAdmin ? 'System servers' : 'Your servers'}</strong></P>
-		<span class="text-xs text-muted">
-			{isAdmin
-				? 'Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.'
-				: 'Your own provider connections, private to your account.'}
-		</span>
+{#if renaming}
+	<ModelNames
+		server={renaming}
+		onBack={() => (renamingId = null)}
+		onChange={() => persist(renaming)}
+	/>
+{:else}
+	<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-1">
+			<P><strong>{isAdmin ? 'System servers' : 'Your servers'}</strong></P>
+			<span class="text-xs text-muted">
+				{isAdmin
+					? 'Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.'
+					: 'Your own provider connections, private to your account.'}
+			</span>
+		</div>
+
+		{#if !canManage}
+			<div class="rounded-md border border-shade-3">
+				<EmptyMessage>Providers are managed by your administrator.</EmptyMessage>
+			</div>
+		{:else}
+			{#each servers as server (server.id)}
+				<Connection
+					{server}
+					startEditing={server.id === justAddedId}
+					onChange={() => persist(server)}
+					onDelete={() => removeServer(server.id)}
+					onSynced={refreshCatalogue}
+					onRenameModels={() => (renamingId = server.id)}
+				/>
+			{/each}
+
+			<!-- Add a server: Verify, then Save -->
+			<div class="flex flex-col gap-2 rounded-md border border-dashed border-shade-4 p-3">
+				<span class="text-sm font-medium">Add a server</span>
+				<div class="flex flex-wrap gap-1.5">
+					{#each PROVIDERS as provider (provider.type)}
+						<button
+							type="button"
+							onclick={() => selectPreset(provider.type)}
+							class="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-shade-6 {draft.connectionType ===
+							provider.type
+								? 'border-accent text-active'
+								: 'border-shade-4 text-muted'}"
+						>
+							{provider.name}
+						</button>
+					{/each}
+				</div>
+				<input
+					class={input}
+					bind:value={draft.label}
+					oninput={touch}
+					placeholder="Label (optional)"
+				/>
+				<input class={input} bind:value={draft.baseUrl} oninput={touch} placeholder="Base URL" />
+				<input
+					class={input}
+					type="password"
+					bind:value={draft.apiKey}
+					oninput={touch}
+					placeholder="API key (optional)"
+				/>
+
+				<div class="flex items-center gap-2">
+					{#if !verified}
+						<Button onclick={verifyDraft} disabled={verifying || !draft.baseUrl}>
+							{#if verifying}
+								<LoaderCircle class="base-icon animate-spin" /> Verifying…
+							{:else}
+								Verify
+							{/if}
+						</Button>
+					{:else}
+						<Button onclick={saveDraft}><Check class="base-icon" /> Save</Button>
+						<span class="text-xs text-muted">{modelCount} models found</span>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</div>
-
-	{#if !canManage}
-		<div class="rounded-md border border-shade-3">
-			<EmptyMessage>Providers are managed by your administrator.</EmptyMessage>
-		</div>
-	{:else}
-		{#each servers as server (server.id)}
-			<Connection
-				{server}
-				startEditing={server.id === justAddedId}
-				onChange={() => persist(server)}
-				onDelete={() => removeServer(server.id)}
-				onSynced={refreshCatalogue}
-			/>
-		{/each}
-
-		<!-- Add a server: Verify, then Save -->
-		<div class="flex flex-col gap-2 rounded-md border border-dashed border-shade-4 p-3">
-			<span class="text-sm font-medium">Add a server</span>
-			<div class="flex flex-wrap gap-1.5">
-				{#each PROVIDERS as provider (provider.type)}
-					<button
-						type="button"
-						onclick={() => selectPreset(provider.type)}
-						class="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-shade-6 {draft.connectionType ===
-						provider.type
-							? 'border-accent text-active'
-							: 'border-shade-4 text-muted'}"
-					>
-						{provider.name}
-					</button>
-				{/each}
-			</div>
-			<input
-				class={input}
-				bind:value={draft.label}
-				oninput={touch}
-				placeholder="Label (optional)"
-			/>
-			<input class={input} bind:value={draft.baseUrl} oninput={touch} placeholder="Base URL" />
-			<input
-				class={input}
-				type="password"
-				bind:value={draft.apiKey}
-				oninput={touch}
-				placeholder="API key (optional)"
-			/>
-
-			<div class="flex items-center gap-2">
-				{#if !verified}
-					<Button onclick={verifyDraft} disabled={verifying || !draft.baseUrl}>
-						{#if verifying}
-							<LoaderCircle class="base-icon animate-spin" /> Verifying…
-						{:else}
-							Verify
-						{/if}
-					</Button>
-				{:else}
-					<Button onclick={saveDraft}><Check class="base-icon" /> Save</Button>
-					<span class="text-xs text-muted">{modelCount} models found</span>
-				{/if}
-			</div>
-		</div>
-	{/if}
-</div>
+{/if}

@@ -95,6 +95,18 @@ const migrations: Migration[] = [
 			-- Badge colour override; NULL falls back to the provider default.
 			ALTER TABLE servers ADD COLUMN color TEXT;
 		`
+	},
+	{
+		version: 5,
+		up: `
+			-- Display-only names for models, sparse: a row only where one was set.
+			CREATE TABLE model_labels (
+				server_id  TEXT NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
+				model_name TEXT NOT NULL,
+				label      TEXT NOT NULL,
+				PRIMARY KEY (server_id, model_name)
+			);
+		`
 	}
 ];
 

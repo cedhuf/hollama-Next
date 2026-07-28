@@ -3,7 +3,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Select, { type SelectOptionOrGroup } from '$lib/components/Select.svelte';
-	import { serverBadge } from '$lib/connections';
+	import { modelLabel, serverBadge } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
@@ -38,9 +38,11 @@
 
 	function toOption(model: Model) {
 		const badge = badgeFor(model.serverId);
+		const server = $serversStore.find((s) => s.id === model.serverId);
 		return {
 			value: model.name,
-			label: model.name,
+			// Display-only: the value stays the real id, which is what gets sent.
+			label: modelLabel(server, model.name),
 			hint: model.parameterSize,
 			badge: badge.id || undefined,
 			badgeColor: badge.color

@@ -19,6 +19,11 @@ export interface Server {
 	apiKey?: string;
 	/** Accent used for this connection's badge; falls back to the provider default. */
 	color?: string;
+	/**
+	 * Display-only overrides, keyed by the real model id. Never sent to the API and
+	 * never persisted on sessions — `model.name` stays the single identifier.
+	 */
+	modelLabels?: Record<string, string>;
 }
 
 /** Default badge colour and short id per provider, dark-mode safe. */
@@ -43,6 +48,11 @@ export const SERVER_COLORS = [
 	'#eab308',
 	'#888780'
 ] as const;
+
+/** How a model should read on screen: its custom label when set, its id otherwise. */
+export function modelLabel(server: Pick<Server, 'modelLabels'> | undefined, name: string): string {
+	return server?.modelLabels?.[name]?.trim() || name;
+}
 
 /** The badge for a connection: its own colour when set, the provider default otherwise. */
 export function serverBadge(server: Pick<Server, 'connectionType' | 'color'>) {

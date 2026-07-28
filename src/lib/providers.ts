@@ -12,6 +12,7 @@ export interface ProviderView {
 	baseUrl?: string;
 	modelFilter?: string | null;
 	color?: string | null;
+	modelLabels?: Record<string, string>;
 	hasApiKey?: boolean;
 }
 
@@ -44,7 +45,8 @@ export function providerToServer(provider: ProviderView): Server {
 		isEnabled: provider.isEnabled,
 		label: provider.label ?? undefined,
 		modelFilter: provider.modelFilter ?? undefined,
-		color: provider.color ?? undefined
+		color: provider.color ?? undefined,
+		modelLabels: provider.modelLabels ?? undefined
 	};
 }
 

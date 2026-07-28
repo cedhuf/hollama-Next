@@ -1,7 +1,13 @@
 import { error, json } from '@sveltejs/kit';
 
 import { requireAdmin } from '$lib/server/api';
-import { deleteServer, getServer, setSharedModels, updateServer } from '$lib/server/db/servers';
+import {
+	deleteServer,
+	getServer,
+	setModelLabels,
+	setSharedModels,
+	updateServer
+} from '$lib/server/db/servers';
 import { toAdminView } from '$lib/server/serverViews';
 
 function requireSystemServer(id: string) {
@@ -24,6 +30,9 @@ export async function PUT(event) {
 		verifiedAt: body.verifiedAt,
 		color: body.color
 	});
+	if (body.modelLabels && typeof body.modelLabels === 'object') {
+		setModelLabels(event.params.id, body.modelLabels);
+	}
 	if (Array.isArray(body.sharedModels)) setSharedModels(event.params.id, body.sharedModels);
 
 	return json(toAdminView(getServer(event.params.id)!));

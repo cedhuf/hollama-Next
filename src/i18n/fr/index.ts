@@ -34,6 +34,10 @@ const fr = extendDictionary(en, {
 	checkingForUpdates: 'Recherche de mises à jour...',
 	checkNow: 'Vérifier maintenant',
 	clear: 'Effacer',
+	noModelsToRename: 'Aucun modèle disponible. Synchronisez d’abord cette connexion.',
+	modelNamesHelp:
+		"Renomme les modèles pour l'affichage uniquement — les requêtes utilisent toujours l'identifiant réel.",
+	modelNames: 'Noms des modèles',
 	reset: 'Réinitialiser',
 	color: 'Couleur',
 	confirmDeletion: 'Confirmer la suppression',

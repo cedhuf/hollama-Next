@@ -102,7 +102,11 @@
 			<span class="flex h-4 w-4 shrink-0 items-center justify-center">
 				{#if isSelected}<Check class="h-4 w-4" />{/if}
 			</span>
-			<span class="min-w-0 flex-1 truncate" title={option.label}>
+			<!-- When a label hides the underlying id (renamed models), the tooltip shows it. -->
+			<span
+				class="min-w-0 flex-1 truncate"
+				title={option.value && option.value !== option.label ? option.value : option.label}
+			>
 				{option.label}{#if option.hint}<span class="text-xs text-muted"> · {option.hint}</span>{/if}
 			</span>
 			{#if option.badge}

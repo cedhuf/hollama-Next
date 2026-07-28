@@ -1,4 +1,4 @@
-import { getSharedModels, type ServerRow } from '$lib/server/db/servers';
+import { getModelLabels, getSharedModels, type ServerRow } from '$lib/server/db/servers';
 
 /** Admin view of a system server: full config minus the (never-exposed) key. */
 export function toAdminView(row: ServerRow) {
@@ -12,7 +12,8 @@ export function toAdminView(row: ServerRow) {
 		verifiedAt: row.verified_at,
 		color: row.color,
 		hasApiKey: !!row.api_key_enc,
-		sharedModels: getSharedModels(row.id)
+		sharedModels: getSharedModels(row.id),
+		modelLabels: getModelLabels(row.id)
 	};
 }
 
@@ -23,6 +24,7 @@ export function toAdminView(row: ServerRow) {
  */
 export function toProviderView(row: ServerRow) {
 	if (row.owner_user_id === null) {
+		const shared = getSharedModels(row.id);
 		return {
 			id: row.id,
 			scope: 'system' as const,

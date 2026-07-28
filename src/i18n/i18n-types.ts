@@ -108,6 +108,18 @@ type RootTranslation = {
 	 */
 	clear: string
 	/**
+	 * N​o​ ​m​o​d​e​l​s​ ​a​v​a​i​l​a​b​l​e​.​ ​S​y​n​c​ ​t​h​i​s​ ​c​o​n​n​e​c​t​i​o​n​ ​f​i​r​s​t​.
+	 */
+	noModelsToRename: string
+	/**
+	 * R​e​n​a​m​e​ ​m​o​d​e​l​s​ ​f​o​r​ ​d​i​s​p​l​a​y​ ​o​n​l​y​ ​—​ ​r​e​q​u​e​s​t​s​ ​s​t​i​l​l​ ​u​s​e​ ​t​h​e​ ​r​e​a​l​ ​m​o​d​e​l​ ​i​d​.
+	 */
+	modelNamesHelp: string
+	/**
+	 * M​o​d​e​l​ ​n​a​m​e​s
+	 */
+	modelNames: string
+	/**
 	 * R​e​s​e​t
 	 */
 	reset: string
@@ -1061,6 +1073,18 @@ The completion in progress will stop
 	 * Clear
 	 */
 	clear: () => LocalizedString
+	/**
+	 * No models available. Sync this connection first.
+	 */
+	noModelsToRename: () => LocalizedString
+	/**
+	 * Rename models for display only — requests still use the real model id.
+	 */
+	modelNamesHelp: () => LocalizedString
+	/**
+	 * Model names
+	 */
+	modelNames: () => LocalizedString
 	/**
 	 * Reset
 	 */

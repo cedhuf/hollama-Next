@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown, ChevronUp, LoaderCircle, Pencil, RefreshCw } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp, LoaderCircle, Pencil, RefreshCw, Tags } from '@lucide/svelte';
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 	import { toast } from 'svelte-sonner';
 
@@ -36,9 +36,18 @@
 		startEditing?: boolean;
 		/** Called after a successful sync, so the parent can refresh the catalogue. */
 		onSynced?: () => Promise<void> | void;
+		/** Opens the model-name editor for this connection (a sub-view, not a modal). */
+		onRenameModels?: () => void;
 	}
 
-	let { server, onChange, onDelete, startEditing = false, onSynced }: Props = $props();
+	let {
+		server,
+		onChange,
+		onDelete,
+		startEditing = false,
+		onSynced,
+		onRenameModels
+	}: Props = $props();
 	let strategy: OllamaStrategy | OpenAIStrategy;
 	let isLoading = $state(false);
 	let showAdvanced = $state(false);
@@ -290,6 +299,17 @@
 						</div>
 					</div>
 				</div>
+
+				{#if onRenameModels}
+					<button
+						type="button"
+						onclick={onRenameModels}
+						class="flex w-fit items-center gap-1 text-xs text-link transition-colors hover:underline"
+					>
+						<Tags class="h-3.5 w-3.5" />
+						{$LL.modelNames()}
+					</button>
+				{/if}
 
 				<!-- Identified providers keep their preset endpoint tucked away -->
 				{#if provider.identified}
