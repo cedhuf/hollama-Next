@@ -64,7 +64,7 @@
 		<!-- Body -->
 		<div class="min-h-0 flex-1 overflow-auto p-4">
 			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
-				<SettingsSection title="Conversation">
+				<SettingsSection title="Conversation" card>
 					<SettingsField label="Title">
 						<input
 							class="settings-field"
@@ -82,6 +82,7 @@
 				<SettingsSection
 					title="System prompt"
 					description="Specific to this conversation. Pre-filled from your global / per-model prompts; edit to override just here."
+					card
 				>
 					{#snippet badge()}
 						{#if isOverridden}

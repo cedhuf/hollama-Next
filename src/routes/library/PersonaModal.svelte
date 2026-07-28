@@ -90,7 +90,7 @@
 		<!-- Body -->
 		<div class="min-h-0 flex-1 overflow-auto p-4">
 			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
-				<SettingsSection title="Identity">
+				<SettingsSection title="Identity" card>
 					<div class="flex items-center gap-4">
 						<AvatarEditor
 							image={persona.avatarImage}
@@ -129,7 +129,7 @@
 					</div>
 				</SettingsSection>
 
-				<SettingsSection title="Behaviour">
+				<SettingsSection title="Behaviour" card>
 					<SettingsField label="Model">
 						<ModelSelect bind:value={persona.modelName} onSelect={persist} />
 					</SettingsField>

@@ -62,7 +62,7 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title={$LL.defaults()}>
+	<SettingsSection title={$LL.defaults()} card>
 		{#if dmEditable}
 			<SettingsField label={$LL.defaultModel()}>
 				<ModelSelect
@@ -140,12 +140,14 @@
 				></textarea>
 			</SettingsField>
 
-			<div class="mt-2 flex items-center justify-between gap-2">
+			<!-- Heading and picker stacked: side by side, the model names in the picker
+			     wrapped onto a second line as soon as they got long. -->
+			<div class="mt-2 flex flex-col gap-1.5">
 				<span class="text-sm font-medium">{$LL.perModelPrompts()}</span>
 				{#if availableToAdd.length}
 					<Select
-						class="w-auto"
 						value=""
+						searchable
 						emptyLabel={$LL.addAModel()}
 						options={availableToAdd.map((name) => ({ value: name, label: name }))}
 						onChange={(option) => option.value && addModelPrompt(option.value)}
@@ -158,7 +160,7 @@
 					{#each perModelEntries as [name] (name)}
 						<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-2.5">
 							<div class="flex items-center justify-between gap-2">
-								<span class="text-sm font-medium">{name}</span>
+								<span class="min-w-0 truncate text-sm font-medium" title={name}>{name}</span>
 								<button
 									type="button"
 									class="text-muted transition-colors hover:text-active"
@@ -175,7 +177,6 @@
 								placeholder={$LL.promptForModel({ model: name })}
 							></textarea>
 							<Select
-								class="w-auto text-xs"
 								bind:value={$settingsStore.systemPrompts.perModel[name].mode}
 								options={[
 									{ value: 'extend', label: $LL.extendsGlobalPrompt() },

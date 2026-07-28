@@ -11,6 +11,7 @@
 	import SettingsField from './SettingsField.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
+	import SettingsSlider from './SettingsSlider.svelte';
 
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
@@ -23,7 +24,7 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title={$LL.appearance()}>
+	<SettingsSection title={$LL.appearance()} card>
 		<SettingsField label={$LL.language()}>
 			<Select
 				id="language"
@@ -37,7 +38,7 @@
 		<ThemePicker />
 	</SettingsSection>
 
-	<SettingsSection title={$LL.homeScreen()}>
+	<SettingsSection title={$LL.homeScreen()} card>
 		<FieldCheckbox label={$LL.showGreetingHeader()} bind:checked={$settingsStore.homeShowHeader} />
 		<FieldCheckbox
 			label={$LL.showPromptSuggestions()}
@@ -49,16 +50,11 @@
 			bind:checked={$settingsStore.homeShowRecentPersonas}
 		/>
 		{#if $settingsStore.homeShowRecentPersonas}
-			<label class="flex items-center justify-between gap-2 pl-11 text-sm text-muted">
-				<span>{$LL.howManyToShow()}</span>
-				<input
-					type="number"
-					min="1"
-					max="5"
-					bind:value={$settingsStore.homeRecentPersonasCount}
-					class="settings-field w-16 shrink-0 px-2 py-1"
-				/>
-			</label>
+			<SettingsSlider
+				label={$LL.howManyToShow()}
+				bind:value={$settingsStore.homeRecentPersonasCount}
+				indented
+			/>
 		{/if}
 
 		<FieldCheckbox
@@ -66,20 +62,15 @@
 			bind:checked={$settingsStore.homeShowRecentSessions}
 		/>
 		{#if $settingsStore.homeShowRecentSessions}
-			<label class="flex items-center justify-between gap-2 pl-11 text-sm text-muted">
-				<span>{$LL.howManyToShow()}</span>
-				<input
-					type="number"
-					min="1"
-					max="10"
-					bind:value={$settingsStore.homeRecentSessionsCount}
-					class="settings-field w-16 shrink-0 px-2 py-1"
-				/>
-			</label>
+			<SettingsSlider
+				label={$LL.howManyToShow()}
+				bind:value={$settingsStore.homeRecentSessionsCount}
+				indented
+			/>
 		{/if}
 	</SettingsSection>
 
-	<SettingsSection title={$LL.personas()}>
+	<SettingsSection title={$LL.personas()} card>
 		<FieldCheckbox
 			label={$LL.pinPersonasInSidebar()}
 			bind:checked={$settingsStore.showPinnedPersonas}

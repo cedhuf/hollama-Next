@@ -204,13 +204,16 @@
 		description={$LL.backupAndRestoreDescription()}
 		card
 	>
-		<nav class="flex gap-2" data-testid="data-management-backup">
-			<Button variant="outline" onclick={exportBackup}>
+		<!-- Two equal halves: neither action is the primary one, so neither should
+		     look bigger than the other. -->
+		<nav class="grid grid-cols-2 gap-2" data-testid="data-management-backup">
+			<Button variant="outline" class="w-full justify-center" onclick={exportBackup}>
 				<Archive class="base-icon" />
 				{$LL.backup()}
 			</Button>
 			<Button
 				variant="outline"
+				class="w-full justify-center"
 				onclick={() => document.getElementById('import-backup-input')?.click()}
 			>
 				<ArchiveRestore class="base-icon" />

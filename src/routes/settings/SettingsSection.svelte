@@ -4,7 +4,14 @@
 	interface Props {
 		title: string;
 		description?: string;
-		/** Render as a bordered card (used to group governance controls). */
+		/**
+		 * Render as a bordered card.
+		 *
+		 * The rule, so it stays consistent: set it when the section holds plain
+		 * controls — the frame is what groups them. Leave it off when the section
+		 * hosts its own bordered children (connection cards, per-model prompts, the
+		 * data rows): a box inside a box flattens the hierarchy instead of showing it.
+		 */
 		card?: boolean;
 		/** Optional content beside the title (e.g. a status badge). */
 		badge?: Snippet;

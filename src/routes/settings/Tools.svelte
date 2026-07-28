@@ -45,7 +45,7 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title={$LL.webSearch()}>
+	<SettingsSection title={$LL.webSearch()} card>
 		{#snippet badge()}
 			{#if $searchConfig.source === 'env'}
 				<SettingsBadge>env</SettingsBadge>
@@ -111,6 +111,7 @@
 	<SettingsSection
 		title={$LL.interactiveChoicesTitle()}
 		description={$LL.interactiveChoicesDescription()}
+		card
 	>
 		<FieldCheckbox
 			label={$LL.interactiveChoicesToggle()}
@@ -118,13 +119,14 @@
 		/>
 	</SettingsSection>
 
-	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()}>
+	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()} card>
 		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />
 	</SettingsSection>
 
 	<SettingsSection
 		title={$LL.systemInstructionsTitle()}
 		description={$LL.systemInstructionsDescription()}
+		card
 	>
 		<Select
 			value={selectedPrompt}

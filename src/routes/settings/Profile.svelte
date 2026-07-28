@@ -74,7 +74,7 @@
 	</div>
 
 	<!-- Identity -->
-	<SettingsSection title={$LL.profile()}>
+	<SettingsSection title={$LL.profile()} card>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
 			<SettingsField
 				label={$LL.firstName()}

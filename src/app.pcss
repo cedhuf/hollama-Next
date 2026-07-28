@@ -127,6 +127,105 @@
 	@apply hover:text-accent underline underline-offset-4;
 }
 
+/* Modal entrance/exit.
+   bits-ui stamps `data-state` on the overlay and the content and waits for any
+   running animation before unmounting, so the close animation gets to play. The
+   backdrop blur rides the overlay's fade, which is why it appears rather than
+   snapping on. */
+@keyframes modal-overlay-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes modal-overlay-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes modal-content-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes modal-content-out {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(4px) scale(0.99);
+	}
+}
+
+.modal-overlay[data-state='open'] {
+	animation: modal-overlay-in 160ms ease-out;
+}
+
+.modal-overlay[data-state='closed'] {
+	animation: modal-overlay-out 120ms ease-in;
+}
+
+.modal-content[data-state='open'] {
+	/* Decelerating curve: the dialog arrives rather than slides to a stop. */
+	animation: modal-content-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-content[data-state='closed'] {
+	animation: modal-content-out 130ms ease-in;
+}
+
+/* On phones the dialog is the screen, so it rises from the bottom edge like a
+   sheet instead of zooming from the middle — scaling something full-bleed reads
+   as the whole page flexing. */
+@media (max-width: 639px) {
+	@keyframes modal-content-in {
+		from {
+			opacity: 0;
+			transform: translateY(2.5%);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes modal-content-out {
+		from {
+			opacity: 1;
+			transform: translateY(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateY(1.5%);
+		}
+	}
+}
+
+/* Honour the OS setting: the dialog still appears, just without the movement. */
+@media (prefers-reduced-motion: reduce) {
+	.modal-overlay[data-state='open'],
+	.modal-overlay[data-state='closed'],
+	.modal-content[data-state='open'],
+	.modal-content[data-state='closed'] {
+		animation-duration: 1ms;
+	}
+}
+
 @utility overflow-scrollbar {
 	overflow: auto;
 	scrollbar-width: auto;

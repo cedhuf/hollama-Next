@@ -18,7 +18,7 @@
 		value?: string;
 		/**
 		 * `hero` — wide home-screen field.
-		 * `default` — standard form field.
+		 * `default` — standard form field, filling its `SettingsField`.
 		 * `attached` — left half of a joined control: it draws no outer border of its
 		 *   own (the wrapper owns it, so focus rings the whole group), only a divider
 		 *   towards its neighbour. Its width is fluid so it borrows whatever room the
@@ -93,7 +93,7 @@
 				class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2 text-left text-sm transition-colors hover:border-shade-4 focus:border-accent focus:outline-none {variant ===
 				'hero'
 					? 'w-full max-w-xl'
-					: 'w-64 max-w-full'}"
+					: 'w-full'}"
 			>
 				<span class="truncate {hasValue ? 'text-active' : 'text-muted'}">{label}</span>
 				<ChevronDown class="ml-auto h-4 w-4 shrink-0 text-muted" />
