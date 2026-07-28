@@ -88,6 +88,13 @@ const migrations: Migration[] = [
 			-- When the connection was last synced successfully. NULL = never verified.
 			ALTER TABLE servers ADD COLUMN verified_at TEXT;
 		`
+	},
+	{
+		version: 4,
+		up: `
+			-- Badge colour override; NULL falls back to the provider default.
+			ALTER TABLE servers ADD COLUMN color TEXT;
+		`
 	}
 ];
 

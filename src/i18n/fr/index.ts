@@ -34,6 +34,8 @@ const fr = extendDictionary(en, {
 	checkingForUpdates: 'Recherche de mises à jour...',
 	checkNow: 'Vérifier maintenant',
 	clear: 'Effacer',
+	reset: 'Réinitialiser',
+	color: 'Couleur',
 	confirmDeletion: 'Confirmer la suppression',
 	connectionType: 'Type de connexion',
 	connectionLabelHelp: 'Identifie la connexion dans la liste des modèles',

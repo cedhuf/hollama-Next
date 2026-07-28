@@ -1,4 +1,5 @@
 # Hollama Next
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/cedhuf/hollama-Next)
 ![GitHub License](https://img.shields.io/github/license/cedhuf/hollama-Next)
 ![GitHub Discussions](https://img.shields.io/github/discussions/cedhuf/hollama-Next)

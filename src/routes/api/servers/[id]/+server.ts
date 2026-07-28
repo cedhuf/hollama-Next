@@ -22,7 +22,8 @@ export async function PUT(event) {
 		label: body.label,
 		modelFilter: body.modelFilter,
 		isEnabled: body.isEnabled,
-		verifiedAt: body.verifiedAt
+		verifiedAt: body.verifiedAt,
+		color: body.color
 	});
 	return json(toProviderView(getServer(event.params.id)!));
 }

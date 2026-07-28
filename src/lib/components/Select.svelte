@@ -110,16 +110,11 @@
 					{#each Array.isArray(option.badge) ? option.badge : [option.badge] as badge (badge)}
 						{#if badge}
 							{#if option.badgeColor}
-								<!-- The provider matters, but so does reading the model name. In a narrow
-								     panel it collapses to its colour dot (name in the tooltip); once
-								     there is room, the full pill comes back. -->
+								<!-- Provider pill in the connection's own colour. It is always shown:
+								     the panel width is copied from the trigger, so there is no varying
+								     "available space" a responsive rule could react to. -->
 								<span
-									class="h-2 w-2 rounded-full @[11rem]:hidden"
-									style="background-color: {option.badgeColor}"
-									title={badge}
-								></span>
-								<span
-									class="hidden rounded-full border px-2 py-0.5 text-[11px] @[11rem]:inline"
+									class="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
 									style="border-color: {option.badgeColor}; color: {option.badgeColor}"
 								>
 									{badge}
@@ -193,7 +188,7 @@
 		<Select.Content
 			sideOffset={6}
 			collisionPadding={12}
-			class="@container z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg focus-visible:outline-none"
+			class="z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg focus-visible:outline-none"
 		>
 			{#if searchable}
 				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal

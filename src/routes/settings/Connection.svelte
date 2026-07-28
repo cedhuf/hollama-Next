@@ -13,7 +13,14 @@
 	import FieldInput from '$lib/components/FieldInput.svelte';
 	import Fieldset from '$lib/components/Fieldset.svelte';
 	import P from '$lib/components/P.svelte';
-	import { ConnectionType, getProvider, isOpenAiCompatible, type Server } from '$lib/connections';
+	import {
+		ConnectionType,
+		getProvider,
+		isOpenAiCompatible,
+		SERVER_COLORS,
+		serverBadge,
+		type Server
+	} from '$lib/connections';
 
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';
 	import PullModel from './ollama/PullModel.svelte';
@@ -47,6 +54,7 @@
 			: null
 	);
 
+	const badge = $derived(serverBadge(server));
 	const provider = $derived(getProvider(server.connectionType));
 	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
 	const isOllamaFamily = $derived(server.connectionType === ConnectionType.Ollama);
@@ -106,6 +114,12 @@
 				<Badge variant={badgeVariant} />
 			{/if}
 			<Badge>{server.label ? server.label : provider.name}</Badge>
+			<!-- The colour that identifies this connection wherever its models appear. -->
+			<span
+				class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+				style="background-color: {badge.color}"
+				title={badge.id || $LL.color()}
+			></span>
 			<span
 				class="ml-1.5 inline-flex items-center gap-1 text-[11px] {syncedAt
 					? 'text-positive'
@@ -239,6 +253,42 @@
 							</FieldHelp>
 						</svelte:fragment>
 					</FieldInput>
+
+					<!-- The badge colour is what identifies this connection in the model list,
+					     so it is picked here rather than being locked to the provider type. -->
+					<div class="flex flex-col gap-1.5">
+						<span class="text-xs font-medium">{$LL.color()}</span>
+						<div class="flex flex-wrap items-center gap-2">
+							{#each SERVER_COLORS as swatch (swatch)}
+								<button
+									type="button"
+									aria-label={swatch}
+									aria-pressed={badge.color.toLowerCase() === swatch.toLowerCase()}
+									onclick={() => {
+										server.color = swatch;
+										persist();
+									}}
+									class="h-6 w-6 rounded-full ring-2 ring-offset-2 ring-offset-shade-0 transition-all {badge.color.toLowerCase() ===
+									swatch.toLowerCase()
+										? 'ring-accent'
+										: 'ring-transparent hover:ring-shade-4'}"
+									style="background-color: {swatch}"
+								></button>
+							{/each}
+							{#if server.color}
+								<button
+									type="button"
+									onclick={() => {
+										server.color = undefined;
+										persist();
+									}}
+									class="text-xs text-muted transition-colors hover:text-active"
+								>
+									{$LL.reset()}
+								</button>
+							{/if}
+						</div>
+					</div>
 				</div>
 
 				<!-- Identified providers keep their preset endpoint tucked away -->

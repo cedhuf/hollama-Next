@@ -11,6 +11,7 @@ export interface ProviderView {
 	models?: string[];
 	baseUrl?: string;
 	modelFilter?: string | null;
+	color?: string | null;
 	hasApiKey?: boolean;
 }
 
@@ -42,7 +43,8 @@ export function providerToServer(provider: ProviderView): Server {
 		isVerified: new Date(),
 		isEnabled: provider.isEnabled,
 		label: provider.label ?? undefined,
-		modelFilter: provider.modelFilter ?? undefined
+		modelFilter: provider.modelFilter ?? undefined,
+		color: provider.color ?? undefined
 	};
 }
 

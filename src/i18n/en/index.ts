@@ -25,6 +25,8 @@ const en = {
 	checkingForUpdates: 'Checking for updates...',
 	checkNow: 'Check now',
 	clear: 'Clear',
+	reset: 'Reset',
+	color: 'Colour',
 	confirmDeletion: 'Confirm deletion',
 	confirmEdit: 'Confirm edit',
 	connectionType: 'Connection type',

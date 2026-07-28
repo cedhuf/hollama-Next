@@ -15,6 +15,8 @@ export interface ServerRow {
 	is_enabled: number;
 	/** ISO date of the last successful sync; NULL when never verified. */
 	verified_at: string | null;
+	/** Badge colour override; NULL falls back to the provider default. */
+	color: string | null;
 	created_at: string;
 }
 
@@ -84,6 +86,7 @@ export function updateServer(
 		modelFilter?: string | null;
 		isEnabled?: boolean;
 		verifiedAt?: string | null;
+		color?: string | null;
 	}
 ): void {
 	const sets: string[] = [];
@@ -112,6 +115,10 @@ export function updateServer(
 	if (patch.verifiedAt !== undefined) {
 		sets.push('verified_at = ?');
 		values.push(patch.verifiedAt);
+	}
+	if (patch.color !== undefined) {
+		sets.push('color = ?');
+		values.push(patch.color);
 	}
 	if (sets.length === 0) return;
 

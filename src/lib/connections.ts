@@ -17,6 +17,37 @@ export interface Server {
 	label?: string;
 	modelFilter?: string;
 	apiKey?: string;
+	/** Accent used for this connection's badge; falls back to the provider default. */
+	color?: string;
+}
+
+/** Default badge colour and short id per provider, dark-mode safe. */
+export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = {
+	[ConnectionType.Ollama]: { id: 'ollama', color: '#1D9E75' },
+	[ConnectionType.OpenAI]: { id: 'openai', color: '#378ADD' },
+	[ConnectionType.Anthropic]: { id: 'claude', color: '#D85A30' },
+	[ConnectionType.Infomaniak]: { id: 'infomaniak', color: '#BA7517' },
+	[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
+};
+
+/** Palette offered when overriding a connection's colour. */
+export const SERVER_COLORS = [
+	'#1D9E75',
+	'#378ADD',
+	'#D85A30',
+	'#BA7517',
+	'#6366f1',
+	'#8b5cf6',
+	'#ec4899',
+	'#14b8a6',
+	'#eab308',
+	'#888780'
+] as const;
+
+/** The badge for a connection: its own colour when set, the provider default otherwise. */
+export function serverBadge(server: Pick<Server, 'connectionType' | 'color'>) {
+	const fallback = PROVIDER_BADGES[server.connectionType] ?? { id: '', color: '#888780' };
+	return { id: fallback.id, color: server.color || fallback.color };
 }
 
 /**

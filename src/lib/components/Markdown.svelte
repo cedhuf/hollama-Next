@@ -178,27 +178,27 @@
 	}
 
 	.markdown :global(h1) {
-		@apply mb-3 mt-6 text-xl font-bold md:text-2xl;
+		@apply mt-6 mb-3 text-xl font-bold md:text-2xl;
 	}
 
 	.markdown :global(h2) {
-		@apply mb-2 mt-6 text-lg font-semibold md:text-xl;
+		@apply mt-6 mb-2 text-lg font-semibold md:text-xl;
 	}
 
 	.markdown :global(h3) {
-		@apply mb-2 mt-5 text-base font-semibold md:text-lg;
+		@apply mt-5 mb-2 text-base font-semibold md:text-lg;
 	}
 
 	.markdown :global(h4) {
-		@apply mb-1 mt-4 text-base font-semibold;
+		@apply mt-4 mb-1 text-base font-semibold;
 	}
 
 	.markdown :global(h5) {
-		@apply mb-1 mt-4 text-sm font-semibold;
+		@apply mt-4 mb-1 text-sm font-semibold;
 	}
 
 	.markdown :global(h6) {
-		@apply text-muted mb-1 mt-4 text-sm font-semibold;
+		@apply text-muted mt-4 mb-1 text-sm font-semibold;
 	}
 
 	.markdown :global(p) {

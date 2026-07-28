@@ -3,7 +3,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Select, { type SelectOptionOrGroup } from '$lib/components/Select.svelte';
-	import { ConnectionType } from '$lib/connections';
+	import { serverBadge } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
@@ -30,18 +30,10 @@
 
 	let { value = $bindable(), variant = 'default', onSelect }: Props = $props();
 
-	// Short, dark-mode-safe provider identity for the badge.
-	const PROVIDER: Record<string, { id: string; color: string }> = {
-		[ConnectionType.Ollama]: { id: 'ollama', color: '#1D9E75' },
-		[ConnectionType.OpenAI]: { id: 'openai', color: '#378ADD' },
-		[ConnectionType.Anthropic]: { id: 'claude', color: '#D85A30' },
-		[ConnectionType.Infomaniak]: { id: 'infomaniak', color: '#BA7517' },
-		[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
-	};
-
+	/** Badge for a model's connection — honours the colour set on that connection. */
 	function badgeFor(serverId: string) {
 		const server = $serversStore.find((s) => s.id === serverId);
-		return PROVIDER[server?.connectionType ?? ''] ?? { id: '', color: '#888780' };
+		return server ? serverBadge(server) : { id: '', color: '#888780' };
 	}
 
 	function toOption(model: Model) {

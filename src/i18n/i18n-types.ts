@@ -108,6 +108,14 @@ type RootTranslation = {
 	 */
 	clear: string
 	/**
+	 * R​e​s​e​t
+	 */
+	reset: string
+	/**
+	 * C​o​l​o​u​r
+	 */
+	color: string
+	/**
 	 * C​o​n​f​i​r​m​ ​d​e​l​e​t​i​o​n
 	 */
 	confirmDeletion: string
@@ -1053,6 +1061,14 @@ The completion in progress will stop
 	 * Clear
 	 */
 	clear: () => LocalizedString
+	/**
+	 * Reset
+	 */
+	reset: () => LocalizedString
+	/**
+	 * Colour
+	 */
+	color: () => LocalizedString
 	/**
 	 * Confirm deletion
 	 */

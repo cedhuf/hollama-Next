@@ -10,6 +10,7 @@ export function toAdminView(row: ServerRow) {
 		modelFilter: row.model_filter,
 		isEnabled: !!row.is_enabled,
 		verifiedAt: row.verified_at,
+		color: row.color,
 		hasApiKey: !!row.api_key_enc,
 		sharedModels: getSharedModels(row.id)
 	};
@@ -29,6 +30,7 @@ export function toProviderView(row: ServerRow) {
 			label: row.label,
 			isEnabled: !!row.is_enabled,
 			verifiedAt: row.verified_at,
+			color: row.color,
 			models: getSharedModels(row.id)
 		};
 	}
@@ -41,6 +43,7 @@ export function toProviderView(row: ServerRow) {
 		modelFilter: row.model_filter,
 		isEnabled: !!row.is_enabled,
 		verifiedAt: row.verified_at,
+		color: row.color,
 		hasApiKey: !!row.api_key_enc
 	};
 }

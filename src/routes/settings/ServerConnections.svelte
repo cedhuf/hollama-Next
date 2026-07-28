@@ -27,6 +27,7 @@
 		modelFilter?: string | null;
 		isEnabled: boolean;
 		verifiedAt?: string | null;
+		color?: string | null;
 		scope?: string;
 	}
 
@@ -62,6 +63,7 @@
 			isEnabled: v.isEnabled,
 			// Restored from the server, so the badge survives a reload.
 			isVerified: v.verifiedAt ? new Date(v.verifiedAt) : null,
+			color: v.color ?? undefined,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -180,6 +182,7 @@
 						server.isVerified instanceof Date
 							? server.isVerified.toISOString()
 							: (server.isVerified ?? null),
+					color: server.color ?? null,
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			});
