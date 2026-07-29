@@ -176,6 +176,7 @@ const en = {
 	sync: 'Sync',
 	verify: 'Verify',
 	version: 'Version',
+	viewRelease: 'View release',
 	vocabOnly: 'Vocab only',
 	writePromptToStart: 'Write a prompt to start a new session',
 	you: 'You',

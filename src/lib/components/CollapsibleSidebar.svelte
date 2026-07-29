@@ -30,7 +30,6 @@
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
-	import { updateStatusStore } from '$lib/updates';
 
 	import { generateNewUrl } from './ButtonNew';
 	import EmptyMessage from './EmptyMessage.svelte';
@@ -421,12 +420,6 @@
 				>
 					{@render profileAvatar(36)}
 					{@render connectionDot()}
-					{#if $updateStatusStore.showSidebarNotification}
-						<span
-							class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-warning"
-							title="Update available"
-						></span>
-					{/if}
 				</button>
 			</div>
 		{:else}
@@ -452,11 +445,8 @@
 						{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
 					</span>
 				</span>
-				<span class="relative shrink-0 text-muted">
+				<span class="shrink-0 text-muted">
 					<Settings2 class="h-5 w-5" />
-					{#if $updateStatusStore.showSidebarNotification}
-						<span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-warning"></span>
-					{/if}
 				</span>
 			</button>
 		{/if}

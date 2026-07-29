@@ -2,6 +2,7 @@
 	import { LoaderCircle } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
 	import { toast, Toaster } from 'svelte-sonner';
+	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { navigatorDetector } from 'typesafe-i18n/detectors';
 
@@ -15,10 +16,12 @@
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { buildDefaultPersonas } from '$lib/defaultPersonas';
+	import { releaseUrl } from '$lib/github';
 	import {
 		hydrateStores,
 		knowledgeStore,
@@ -30,11 +33,11 @@
 	} from '$lib/localStorage';
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerSearch } from '$lib/search';
-	import { currentUser } from '$lib/stores/auth';
+	import { currentRole, currentUser } from '$lib/stores/auth';
 	import { onboardingOpen, welcomeOpen } from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
-	import { checkForUpdates } from '$lib/updates';
+	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 
 	import type { LayoutData } from './$types';
 	import Onboarding from './Onboarding.svelte';
@@ -50,6 +53,44 @@
 
 	$effect(() => {
 		currentUser.set(data.user);
+	});
+
+	$effect(() => {
+		const { latestVersion, isCurrentVersionLatest, isCheckingForUpdates } = $updateStatusStore;
+		if (isCheckingForUpdates || isCurrentVersionLatest || !latestVersion) return;
+
+		// On a shared instance only an admin can act on this. A user would get a
+		// notice about something they can't do anything about — the About tab still
+		// lets them check by hand.
+		if (isServerMode && $currentRole !== 'admin') return;
+
+		// Read through `get` rather than `$settingsStore`: subscribing here would
+		// make the write below re-run this effect.
+		if (get(settingsStore).notifiedUpdateVersion === latestVersion) return;
+		settingsStore.update((settings) => ({ ...settings, notifiedUpdateVersion: latestVersion }));
+
+		toast($LL.isLatestVersion(), {
+			description: latestVersion,
+			position: 'bottom-right',
+			// It stays until dismissed: an update notice that disappears on its own
+			// is one the user never had a chance to act on.
+			duration: Number.POSITIVE_INFINITY,
+			closeButton: true,
+			action: {
+				label: $LL.viewRelease(),
+				onClick: () => window.open(releaseUrl(latestVersion), '_blank', 'noopener,noreferrer')
+			},
+			classes: {
+				toast: 'flex-col items-start gap-y-1 bg-shade-1 text-active border border-shade-3 pr-8',
+				description: 'text-muted',
+				actionButton: 'text-accent font-medium hover:underline',
+				// The close button is the toast's first child, so the `flex-col` above
+				// would stack it on top of the title. Taking it out of the flow puts it
+				// back in the corner every other dialog in the app closes from.
+				closeButton:
+					'absolute! left-auto! right-1! top-1! translate-x-0! translate-y-0! border-0! bg-transparent! text-muted hover:text-active'
+			}
+		});
 	});
 
 	onNavigate(async () => {

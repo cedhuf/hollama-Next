@@ -7,7 +7,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-	import { GITHUB_URL } from '$lib/github';
+	import { GITHUB_URL, releaseUrl } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 
@@ -16,14 +16,6 @@
 
 	const UPSTREAM_URL = 'https://github.com/fmaclen/hollama';
 	const KOFI_URL = 'https://ko-fi.com/cedric52222';
-
-	$effect(() => {
-		// Mark the update as seen when the About tab is open. Guard against
-		// re-writing so the effect doesn't read and write the same state in a loop.
-		if ($updateStatusStore.showSidebarNotification) {
-			updateStatusStore.update((status) => ({ ...status, showSidebarNotification: false }));
-		}
-	});
 
 	const statusText = $derived(
 		$updateStatusStore.isCheckingForUpdates
@@ -35,6 +27,16 @@
 					: $updateStatusStore.latestVersion
 						? `${$LL.isLatestVersion()} ${$updateStatusStore.latestVersion}`
 						: ''
+	);
+
+	/** Only the "a newer version is available" wording leads anywhere. */
+	const updateHref = $derived(
+		!$updateStatusStore.isCheckingForUpdates &&
+			!$updateStatusStore.couldntCheckForUpdates &&
+			!$updateStatusStore.isCurrentVersionLatest &&
+			$updateStatusStore.latestVersion
+			? releaseUrl($updateStatusStore.latestVersion)
+			: null
 	);
 
 	const links = [
@@ -56,7 +58,18 @@
 	<SettingsSection title={$LL.version()} card>
 		<div class="flex items-center justify-between gap-3 text-sm">
 			<span class="text-muted">{$LL.currentVersion()}</span>
-			<span class="font-medium text-active">{statusText || '—'}</span>
+			{#if updateHref}
+				<a
+					href={updateHref}
+					target="_blank"
+					rel="noopener noreferrer external"
+					class="text-link font-medium text-accent"
+				>
+					{statusText}
+				</a>
+			{:else}
+				<span class="font-medium text-active">{statusText || '—'}</span>
+			{/if}
 		</div>
 
 		<FieldCheckbox

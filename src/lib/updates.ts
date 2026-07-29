@@ -13,19 +13,16 @@ const HOLLAMA_METADATA_ENDPOINT = '/api/metadata';
 const ONE_WEEK_IN_SECONDS = 604800;
 
 export interface UpdateStatus {
-	canRefreshToUpdate: boolean;
 	isCurrentVersionLatest: boolean;
 	isCheckingForUpdates: boolean;
-	showSidebarNotification: boolean;
 	couldntCheckForUpdates: boolean;
+	/** Empty until a check has run, so nothing is announced on a cold start. */
 	latestVersion: string;
 }
 
 export const updateStatusStore = writable<UpdateStatus>({
-	canRefreshToUpdate: false,
 	isCurrentVersionLatest: false,
 	isCheckingForUpdates: false,
-	showSidebarNotification: false,
 	couldntCheckForUpdates: false,
 	latestVersion: ''
 });
@@ -78,9 +75,11 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 	}
 
 	status.latestVersion = settings.hollamaMetadata.currentVersion;
-	status.canRefreshToUpdate = isNewerVersion(status.latestVersion, version);
+	// The running server is already ahead of the code this tab loaded: a reload is
+	// enough, no need to ask GitHub anything.
+	const serverIsAhead = isNewerVersion(status.latestVersion, version);
 
-	if (!status.canRefreshToUpdate) {
+	if (!serverIsAhead) {
 		// This build is what the server serves, so the only place left to look is
 		// the release list on GitHub.
 		try {
@@ -98,7 +97,6 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 	}
 
 	status.isCurrentVersionLatest = !isNewerVersion(status.latestVersion, version);
-	status.showSidebarNotification = !status.isCurrentVersionLatest;
 	status.isCheckingForUpdates = false;
 	updateStatusStore.set(status);
 

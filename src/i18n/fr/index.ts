@@ -179,6 +179,7 @@ const fr = extendDictionary(en, {
 	sync: 'Synchroniser',
 	verify: 'Vérifier',
 	version: 'Version',
+	viewRelease: 'Voir la version',
 	vocabOnly: 'Vocabulaire uniquement',
 	writePromptToStart: 'Écrivez une invite pour démarrer une nouvelle session',
 	you: 'Vous',

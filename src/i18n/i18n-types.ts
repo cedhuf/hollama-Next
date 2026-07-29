@@ -701,6 +701,10 @@ type RootTranslation = {
 	 */
 	version: string
 	/**
+	 * V​i​e​w​ ​r​e​l​e​a​s​e
+	 */
+	viewRelease: string
+	/**
 	 * V​o​c​a​b​ ​o​n​l​y
 	 */
 	vocabOnly: string
@@ -2201,6 +2205,10 @@ The completion in progress will stop
 	 * Version
 	 */
 	version: () => LocalizedString
+	/**
+	 * View release
+	 */
+	viewRelease: () => LocalizedString
 	/**
 	 * Vocab only
 	 */

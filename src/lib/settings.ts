@@ -1,5 +1,4 @@
 import type { Locales } from '$i18n/i18n-types';
-import { env } from '$env/dynamic/public';
 import { version } from '$app/environment';
 
 import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
@@ -29,6 +28,8 @@ export interface Settings {
 	lastUsedModels: Model[];
 	lastUpdateCheck: number | null;
 	autoCheckForUpdates: boolean;
+	/** The version already announced by a toast, so it is only announced once. */
+	notifiedUpdateVersion: string;
 	defaultModel: string | null;
 	generateTitlesWithAI: boolean;
 	titleModel: string | null;
@@ -83,6 +84,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	lastUsedModels: [],
 	lastUpdateCheck: null,
 	autoCheckForUpdates: false,
+	notifiedUpdateVersion: '',
 	defaultModel: null,
 	generateTitlesWithAI: false,
 	titleModel: null,
@@ -112,10 +114,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	sidebarExpanded: true,
 	onboardingComplete: false,
 	welcomeComplete: false,
-	hollamaMetadata: {
-		currentVersion: version,
-		isDocker: env.PUBLIC_ADAPTER === 'docker-node'
-	},
+	hollamaMetadata: { currentVersion: version },
 	profileFirstName: '',
 	profileLastName: '',
 	profileEmail: '',
