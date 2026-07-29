@@ -41,6 +41,9 @@ const fr = extendDictionary(en, {
 	modelNamesHelp:
 		"Renomme les modèles pour l'affichage uniquement — les requêtes utilisent toujours l'identifiant réel.",
 	modelNames: 'Noms des modèles',
+	resetAllNames: 'Tout réinitialiser',
+	confirmResetNames: 'Effacer tous les noms personnalisés ?',
+	searchModels: 'Rechercher un modèle',
 	reset: 'Réinitialiser',
 	color: 'Couleur',
 	confirmDeletion: 'Confirmer la suppression',

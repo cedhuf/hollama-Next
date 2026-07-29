@@ -132,6 +132,18 @@ type RootTranslation = {
 	 */
 	modelNames: string
 	/**
+	 * R​e​s​e​t​ ​a​l​l
+	 */
+	resetAllNames: string
+	/**
+	 * C​l​e​a​r​ ​e​v​e​r​y​ ​c​u​s​t​o​m​ ​n​a​m​e​?
+	 */
+	confirmResetNames: string
+	/**
+	 * S​e​a​r​c​h​ ​m​o​d​e​l​s
+	 */
+	searchModels: string
+	/**
 	 * R​e​s​e​t
 	 */
 	reset: string
@@ -1613,6 +1625,18 @@ The completion in progress will stop
 	 * Model names
 	 */
 	modelNames: () => LocalizedString
+	/**
+	 * Reset all
+	 */
+	resetAllNames: () => LocalizedString
+	/**
+	 * Clear every custom name?
+	 */
+	confirmResetNames: () => LocalizedString
+	/**
+	 * Search models
+	 */
+	searchModels: () => LocalizedString
 	/**
 	 * Reset
 	 */

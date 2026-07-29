@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { ArrowLeft, RotateCcw } from '@lucide/svelte';
+	import { ArrowLeft, RotateCcw, Search, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { modelLabel, serverBadge, type Server } from '$lib/connections';
+	import { serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 
 	import SettingsPanel from './SettingsPanel.svelte';
@@ -23,6 +23,9 @@
 
 	let { server, onBack, onChange }: Props = $props();
 
+	let query = $state('');
+	let confirmingReset = $state(false);
+
 	const badge = $derived(serverBadge(server));
 	// The catalogue is already loaded for the model picker; just take this server's.
 	const models = $derived(
@@ -32,6 +35,18 @@
 			.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
 	);
 	const renamedCount = $derived(models.filter((name) => server.modelLabels?.[name]?.trim()).length);
+
+	// Match on the id *and* the custom name: once a model is renamed, its new name
+	// is the only one you remember.
+	const visible = $derived.by(() => {
+		const needle = query.trim().toLowerCase();
+		if (!needle) return models;
+		return models.filter(
+			(name) =>
+				name.toLowerCase().includes(needle) ||
+				(server.modelLabels?.[name] ?? '').toLowerCase().includes(needle)
+		);
+	});
 
 	function setLabel(name: string, value: string) {
 		const labels = { ...(server.modelLabels ?? {}) };
@@ -43,6 +58,7 @@
 
 	function resetAll() {
 		server.modelLabels = {};
+		confirmingReset = false;
 		onChange();
 	}
 </script>
@@ -54,7 +70,7 @@
 		<button
 			type="button"
 			onclick={onBack}
-			class="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+			class="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
 		>
 			<ArrowLeft class="h-4 w-4" />
 			{$LL.servers()}
@@ -66,37 +82,107 @@
 		<span class="truncate text-sm font-medium text-active">
 			{server.label || badge.id || server.baseUrl}
 		</span>
-		{#if renamedCount}
-			<button
-				type="button"
-				onclick={resetAll}
-				class="ml-auto flex shrink-0 items-center gap-1 text-xs text-muted transition-colors hover:text-active"
-			>
-				<RotateCcw class="h-3 w-3" />
-				{$LL.reset()}
-			</button>
+		{#if models.length}
+			<span class="ml-auto shrink-0 text-xs tabular-nums text-muted">
+				{renamedCount} / {models.length}
+			</span>
 		{/if}
 	</div>
 
 	<p class="text-xs leading-snug text-muted">{$LL.modelNamesHelp()}</p>
 
 	{#if models.length}
-		<div
-			class="overflow-scrollbar flex min-h-0 flex-1 flex-col gap-1 rounded-xl border border-shade-3 p-1.5"
-		>
-			{#each models as name (name)}
-				<div class="grid grid-cols-2 items-center gap-2 rounded px-1.5 py-1">
-					<span class="truncate font-mono text-xs text-muted" title={name}>{name}</span>
-					<input
-						class="settings-field py-1 text-sm"
-						value={server.modelLabels?.[name] ?? ''}
-						placeholder={modelLabel(server, name)}
-						oninput={(e) => setLabel(name, e.currentTarget.value)}
-						aria-label={name}
-					/>
-				</div>
-			{/each}
+		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
+		     reach one. -->
+		<div class="flex items-center gap-2">
+			<div class="relative flex-1">
+				<Search
+					class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+				/>
+				<input
+					class="settings-field pl-8"
+					type="search"
+					bind:value={query}
+					placeholder={$LL.searchModels()}
+					aria-label={$LL.searchModels()}
+				/>
+			</div>
+
+			{#if renamedCount}
+				{#if confirmingReset}
+					<button
+						type="button"
+						onclick={resetAll}
+						class="shrink-0 rounded-md bg-negative px-2.5 py-1.5 text-xs font-medium text-shade-0"
+					>
+						{$LL.reset()}
+					</button>
+					<button
+						type="button"
+						onclick={() => (confirmingReset = false)}
+						class="shrink-0 text-xs text-muted transition-colors hover:text-active"
+					>
+						{$LL.cancel()}
+					</button>
+				{:else}
+					<button
+						type="button"
+						onclick={() => (confirmingReset = true)}
+						class="flex shrink-0 items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+					>
+						<RotateCcw class="h-3 w-3" />
+						{$LL.resetAllNames()}
+					</button>
+				{/if}
+			{/if}
 		</div>
+
+		{#if confirmingReset}
+			<p class="-mt-2 text-xs text-negative">{$LL.confirmResetNames()}</p>
+		{/if}
+
+		{#if visible.length}
+			<!-- One row per model, one column at every width: the editable name on top,
+			     the real id underneath. Side by side, both halves were too narrow to
+			     read on a phone — and the id was printed twice, once as the
+			     placeholder of its own field. -->
+			<div class="flex flex-col gap-1.5">
+				{#each visible as name (name)}
+					{@const label = server.modelLabels?.[name] ?? ''}
+					<div
+						class="flex flex-col gap-1 rounded-lg border p-2 transition-colors {label.trim()
+							? 'border-accent/40 bg-shade-0'
+							: 'border-shade-3'}"
+					>
+						<div class="flex items-center gap-1.5">
+							<input
+								class="settings-field py-1 text-sm"
+								value={label}
+								placeholder={name}
+								oninput={(e) => setLabel(name, e.currentTarget.value)}
+								aria-label={name}
+							/>
+							{#if label.trim()}
+								<button
+									type="button"
+									onclick={() => setLabel(name, '')}
+									aria-label={$LL.clear()}
+									title={$LL.clear()}
+									class="shrink-0 rounded-md p-1.5 text-muted transition-colors hover:text-active"
+								>
+									<X class="h-4 w-4" />
+								</button>
+							{/if}
+						</div>
+						<span class="truncate px-1 font-mono text-[11px] text-muted" title={name}>{name}</span>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<p class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted">
+				{$LL.searchEmpty()}
+			</p>
+		{/if}
 	{:else}
 		<p class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted">
 			{$LL.noModelsToRename()}
