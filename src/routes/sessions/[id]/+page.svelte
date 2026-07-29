@@ -29,6 +29,7 @@
 		knowledgeContextMessage,
 		type KnowledgeAttachment
 	} from '$lib/promptAttachments';
+	import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 	import { buildSearchContext, searchConfig } from '$lib/search';
 	import {
 		getSessionTitle,
@@ -462,7 +463,13 @@
 				try {
 					const search = await buildSearchContext(query);
 					if (search) {
-						chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
+						// The protocol is only advertised when the tool that serves it is
+						// available: promising the model a page it can't be given is worse
+						// than snippets alone.
+						const context = $webFetchConfig.available
+							? `${search.context}\n\n${resolvePrompt('searchRead', $settingsStore.promptOverrides)}`
+							: search.context;
+						chatMessages = [{ role: 'system', content: context }, ...chatMessages];
 						searchInfo = {
 							query: search.query,
 							resultCount: search.resultCount,
@@ -519,31 +526,76 @@
 
 			if (!strategy) throw new Error('Invalid strategy');
 
-			// Create a reasoning processor to handle tag parsing
-			const reasoningProcessor = createReasoningProcessor(
-				(text) => {
-					editor.completion += text;
-				},
-				(text) => {
-					editor.reasoning += text;
+			// Two rounds at most: the model may answer the first with a <read> block
+			// asking for the full text of some results, which is fetched and handed
+			// back for the second. It never gets a third — an answer is due by then.
+			for (let round = 0; round < 2; round++) {
+				editor.completion = '';
+				editor.reasoning = '';
+
+				// Create a reasoning processor to handle tag parsing
+				const reasoningProcessor = createReasoningProcessor(
+					(text) => {
+						editor.completion += text;
+					},
+					(text) => {
+						editor.reasoning += text;
+					}
+				);
+
+				await strategy.chat(chatRequest, editor.abortController.signal, async (part) => {
+					// Native reasoning (Ollama `message.thinking`, OpenAI `reasoning_content`)
+					// streams straight into the reasoning panel. Regular content still goes
+					// through the FSM so inline <think> tags from other providers are split out.
+					if (part.thinking) editor.reasoning += part.thinking;
+					if (part.content) reasoningProcessor.processChunk(part.content);
+					await scrollToBottom();
+				});
+
+				// Finalize processing of any remaining content
+				reasoningProcessor.finalize();
+
+				if (round > 0) break;
+				const wanted = parseReadBlock(editor.completion);
+				const sources = searchInfo?.sources ?? [];
+				if (!wanted.length || !sources.length || !$webFetchConfig.available) break;
+
+				const urls = wanted.map((n) => sources[n - 1]?.url).filter((url): url is string => !!url);
+				if (!urls.length) break;
+
+				editor.isSearching = true;
+				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
+				try {
+					read = await buildPageContext(urls);
+				} catch {
+					// Unreachable pages shouldn't cost the user their answer: fall through
+					// and let the model reply from the snippets it already has.
 				}
-			);
+				editor.isSearching = false;
+				if (!read) break;
 
-			await strategy.chat(chatRequest, editor.abortController.signal, async (part) => {
-				// Native reasoning (Ollama `message.thinking`, OpenAI `reasoning_content`)
-				// streams straight into the reasoning panel. Regular content still goes
-				// through the FSM so inline <think> tags from other providers are split out.
-				if (part.thinking) editor.reasoning += part.thinking;
-				if (part.content) reasoningProcessor.processChunk(part.content);
-				await scrollToBottom();
-			});
-
-			// Finalize processing of any remaining content
-			reasoningProcessor.finalize();
+				searchInfo = {
+					...searchInfo!,
+					sources: read.pages.map((page) => ({ title: page.title, url: page.url }))
+				};
+				editor.webSearchInfo = searchInfo;
+				chatRequest = {
+					...chatRequest,
+					messages: [
+						...chatRequest.messages,
+						{
+							role: 'system',
+							content: resolvePrompt('pageContext', $settingsStore.promptOverrides, {
+								pages: read.context
+							})
+						}
+					]
+				};
+			}
 
 			// Pull out an <ask> quick-choice block, if the model emitted one. The
 			// stored content drops the raw block (buttons render from `choices`).
-			const { content, choices } = parseAskBlock(editor.completion);
+			const { content, choices } = parseAskBlock(stripReadBlock(editor.completion));
 
 			const message: Message = {
 				role: 'assistant',

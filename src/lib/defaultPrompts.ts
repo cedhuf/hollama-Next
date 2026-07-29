@@ -10,6 +10,7 @@ export type PromptKey =
 	| 'searchRouter'
 	| 'searchContext'
 	| 'pageContext'
+	| 'searchRead'
 	| 'interactiveChoices';
 
 export interface PromptDef {
@@ -67,6 +68,15 @@ Never answer the question yourself. Output only the query, or NONE.`
 
 {results}`
 	},
+	searchRead: {
+		label: 'Web search — read a result',
+		hint: 'Lets the model open the full text of a result instead of answering from snippets.',
+		default: `The results above are titles and short snippets, not the pages themselves. If answering accurately needs what a page actually says — a changelog, a release note, a specification, anything where the detail matters — reply with ONLY this block and nothing else:
+
+<read>1,3</read>
+
+using the numbers of the results you want. Their full text will be given to you and you will then answer. Ask only for what you need, three results at most. If the snippets are genuinely enough, just answer normally.`
+	},
 	pageContext: {
 		label: 'Web fetch — pages',
 		placeholders: ['{pages}'],
@@ -99,6 +109,7 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
 	'searchRouter',
 	'searchContext',
+	'searchRead',
 	'pageContext',
 	'interactiveChoices'
 ];

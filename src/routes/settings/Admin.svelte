@@ -12,7 +12,6 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
-	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
