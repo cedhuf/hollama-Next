@@ -42,6 +42,7 @@
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 	import { formatTimestampToNow } from '$lib/utils';
+	import { buildPageContext, extractUrls, webFetchConfig } from '$lib/webFetch';
 
 	import type { PageData } from './$types';
 	import ButtonCopyConversation from './ButtonCopyConversation.svelte';
@@ -71,6 +72,7 @@
 		shouldFocusTextarea: false,
 		isNewSession: true,
 		webSearch: searchAvailable && $settingsStore.webSearchByDefault,
+		webFetch: $webFetchConfig.available && $settingsStore.webFetchByDefault,
 		interactiveChoices: $settingsStore.interactiveChoices,
 		sendCurrentDate: $settingsStore.sendCurrentDate,
 		thinking: true
@@ -362,10 +364,45 @@
 
 		let searchInfo: WebSearchInfo | undefined;
 
+		// Pages the user linked to are read in full, and take precedence over a
+		// search: given an address, looking it up by keyword is the wrong move —
+		// the model would answer from snippets about the page instead of the page.
+		const linkedUrls = editor.webFetch
+			? extractUrls(messages.filter((m) => m.role === 'user').at(-1)?.content ?? '')
+			: [];
+
+		if (linkedUrls.length && $webFetchConfig.available) {
+			editor.isSearching = true;
+			try {
+				const read = await buildPageContext(linkedUrls);
+				if (read) {
+					chatMessages = [
+						{
+							role: 'system',
+							content: resolvePrompt('pageContext', $settingsStore.promptOverrides, {
+								pages: read.context
+							})
+						},
+						...chatMessages
+					];
+					searchInfo = {
+						query: '',
+						resultCount: read.pages.length,
+						sources: read.pages.map((p) => ({ title: p.title, url: p.url }))
+					};
+				}
+			} catch {
+				// Reading failed: fall through to the normal flow rather than block the
+				// message the user actually wants to send.
+			}
+			editor.isSearching = false;
+			editor.webSearchInfo = searchInfo;
+		}
+
 		// Web search: prepend results as context. In "auto" mode the model first
 		// decides whether (and what) to search; otherwise we always search the
 		// latest message.
-		if (searchAvailable && editor.webSearch && session.model) {
+		if (!linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
 			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
 

@@ -697,6 +697,65 @@ type RootTranslation = {
 	 */
 	verify: string
 	/**
+	 * W​e​b​ ​f​e​t​c​h
+	 */
+	webFetchSharing: string
+	/**
+	 * L​e​t​ ​u​s​e​r​s​ ​r​e​a​d​ ​t​h​e​ ​p​a​g​e​s​ ​t​h​e​i​r​ ​m​e​s​s​a​g​e​s​ ​l​i​n​k​ ​t​o​,​ ​w​i​t​h​ ​y​o​u​r​ ​o​w​n​ ​l​i​m​i​t​s​.​ ​S​h​a​r​i​n​g​ ​i​t​ ​w​h​i​l​e​ ​i​t​ ​i​s​ ​o​f​f​ ​i​n​ ​y​o​u​r​ ​T​o​o​l​s​ ​t​a​b​ ​d​i​s​a​b​l​e​s​ ​i​t​ ​f​o​r​ ​e​v​e​r​y​o​n​e​.
+	 */
+	webFetchSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​w​e​b​ ​f​e​t​c​h​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	shareWebFetch: string
+	/**
+	 * C​u​r​r​e​n​t​l​y​ ​s​h​a​r​i​n​g​:​ ​{​p​a​g​e​s​}​ ​p​a​g​e​s​,​ ​{​c​h​a​r​s​}​k​ ​c​h​a​r​a​c​t​e​r​s​ ​p​e​r​ ​p​a​g​e​.
+	 * @param {unknown} chars
+	 * @param {unknown} pages
+	 */
+	currentlySharingWebFetch: RequiredParams<'chars' | 'pages'>
+	/**
+	 * C​u​r​r​e​n​t​l​y​ ​s​h​a​r​i​n​g​:​ ​o​f​f​ ​—​ ​n​o​ ​u​s​e​r​ ​m​a​y​ ​r​e​a​d​ ​p​a​g​e​s​.
+	 */
+	currentlySharingWebFetchOff: string
+	/**
+	 * W​e​b​ ​f​e​t​c​h
+	 */
+	webFetchTitle: string
+	/**
+	 * R​e​a​d​ ​t​h​e​ ​p​a​g​e​s​ ​a​ ​m​e​s​s​a​g​e​ ​l​i​n​k​s​ ​t​o​,​ ​i​n​s​t​e​a​d​ ​o​f​ ​s​e​a​r​c​h​i​n​g​ ​a​r​o​u​n​d​ ​t​h​e​m​.
+	 */
+	webFetchDescription: string
+	/**
+	 * R​e​a​d​ ​l​i​n​k​e​d​ ​p​a​g​e​s
+	 */
+	webFetchToggle: string
+	/**
+	 * O​n​ ​b​y​ ​d​e​f​a​u​l​t​ ​i​n​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
+	 */
+	webFetchByDefault: string
+	/**
+	 * P​a​g​e​s​ ​r​e​a​d​ ​p​e​r​ ​m​e​s​s​a​g​e
+	 */
+	webFetchMaxPages: string
+	/**
+	 * C​h​a​r​a​c​t​e​r​s​ ​k​e​p​t​ ​p​e​r​ ​p​a​g​e
+	 */
+	webFetchMaxChars: string
+	/**
+	 * O​n​l​y​ ​e​x​p​l​i​c​i​t​ ​h​t​t​p​(​s​)​ ​l​i​n​k​s​ ​a​r​e​ ​r​e​a​d​.​ ​R​e​q​u​e​s​t​s​ ​a​r​e​ ​m​a​d​e​ ​b​y​ ​t​h​e​ ​s​e​r​v​e​r​,​ ​w​h​i​c​h​ ​r​e​f​u​s​e​s​ ​p​r​i​v​a​t​e​ ​a​n​d​ ​l​o​c​a​l​ ​a​d​d​r​e​s​s​e​s​.
+	 */
+	webFetchHint: string
+	/**
+	 * E​n​a​b​l​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​—​ ​u​p​ ​t​o​ ​{​p​a​g​e​s​}​ ​p​a​g​e​s​ ​p​e​r​ ​m​e​s​s​a​g​e​.
+	 * @param {unknown} pages
+	 */
+	webFetchLockedOn: RequiredParams<'pages'>
+	/**
+	 * D​i​s​a​b​l​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
+	 */
+	webFetchLockedOff: string
+	/**
 	 * V​e​r​s​i​o​n
 	 */
 	version: string
@@ -2201,6 +2260,62 @@ The completion in progress will stop
 	 * Verify
 	 */
 	verify: () => LocalizedString
+	/**
+	 * Web fetch
+	 */
+	webFetchSharing: () => LocalizedString
+	/**
+	 * Let users read the pages their messages link to, with your own limits. Sharing it while it is off in your Tools tab disables it for everyone.
+	 */
+	webFetchSharingDescription: () => LocalizedString
+	/**
+	 * Share web fetch with users
+	 */
+	shareWebFetch: () => LocalizedString
+	/**
+	 * Currently sharing: {pages} pages, {chars}k characters per page.
+	 */
+	currentlySharingWebFetch: (arg: { chars: unknown, pages: unknown }) => LocalizedString
+	/**
+	 * Currently sharing: off — no user may read pages.
+	 */
+	currentlySharingWebFetchOff: () => LocalizedString
+	/**
+	 * Web fetch
+	 */
+	webFetchTitle: () => LocalizedString
+	/**
+	 * Read the pages a message links to, instead of searching around them.
+	 */
+	webFetchDescription: () => LocalizedString
+	/**
+	 * Read linked pages
+	 */
+	webFetchToggle: () => LocalizedString
+	/**
+	 * On by default in new conversations
+	 */
+	webFetchByDefault: () => LocalizedString
+	/**
+	 * Pages read per message
+	 */
+	webFetchMaxPages: () => LocalizedString
+	/**
+	 * Characters kept per page
+	 */
+	webFetchMaxChars: () => LocalizedString
+	/**
+	 * Only explicit http(s) links are read. Requests are made by the server, which refuses private and local addresses.
+	 */
+	webFetchHint: () => LocalizedString
+	/**
+	 * Enabled by your administrator — up to {pages} pages per message.
+	 */
+	webFetchLockedOn: (arg: { pages: unknown }) => LocalizedString
+	/**
+	 * Disabled by your administrator.
+	 */
+	webFetchLockedOff: () => LocalizedString
 	/**
 	 * Version
 	 */

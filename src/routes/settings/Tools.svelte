@@ -5,6 +5,7 @@
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
+	import { webFetchConfig } from '$lib/webFetch';
 
 	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
@@ -12,6 +13,7 @@
 	import SettingsLink from './SettingsLink.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
+	import SettingsSlider from './SettingsSlider.svelte';
 
 	// Show the section unless we're a server user with nothing configured yet.
 	const showSearch = $derived($searchConfig.editable || $searchConfig.available);
@@ -106,6 +108,48 @@
 		{:else}
 			<SettingsHint>{$LL.webSearchUnavailable()}</SettingsHint>
 		{/if}
+	</SettingsSection>
+
+	<SettingsSection title={$LL.webFetchTitle()} description={$LL.webFetchDescription()} card>
+		{#if $webFetchConfig.editable}
+			<FieldCheckbox label={$LL.webFetchToggle()} bind:checked={$settingsStore.webFetchEnabled} />
+			{#if $settingsStore.webFetchEnabled}
+				<FieldCheckbox
+					label={$LL.webFetchByDefault()}
+					bind:checked={$settingsStore.webFetchByDefault}
+				/>
+				<SettingsField label={$LL.webFetchMaxPages()}>
+					<SettingsSlider
+						label={$LL.webFetchMaxPages()}
+						min={1}
+						max={10}
+						bind:value={$settingsStore.webFetchMaxPages}
+					/>
+				</SettingsField>
+				<SettingsField label={$LL.webFetchMaxChars()}>
+					<SettingsSlider
+						label={$LL.webFetchMaxChars()}
+						min={5000}
+						max={100000}
+						step={5000}
+						format={(v) => `${Math.round(v / 1000)}k`}
+						bind:value={$settingsStore.webFetchMaxChars}
+					/>
+				</SettingsField>
+			{/if}
+		{:else}
+			<!-- Locked by the admin: `/api/fetch` applies the same policy, so this is
+			     a statement of fact rather than a disabled control. -->
+			<div class="flex items-center gap-2">
+				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
+				<span class="text-xs text-muted">
+					{$webFetchConfig.available
+						? $LL.webFetchLockedOn({ pages: $webFetchConfig.maxPages })
+						: $LL.webFetchLockedOff()}
+				</span>
+			</div>
+		{/if}
+		<SettingsHint>{$LL.webFetchHint()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection

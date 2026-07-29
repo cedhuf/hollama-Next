@@ -9,6 +9,7 @@ import {
 	setAllowUserPersonas,
 	setConfig
 } from '$lib/server/db/config';
+import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
 
 export async function GET(event) {
 	await requireAdmin(event);
@@ -21,7 +22,11 @@ export async function GET(event) {
 		systemPromptsSharing: getConfig('systemPromptsSharing') ?? 'off',
 		defaultModelSharing: getConfig('defaultModelSharing') ?? 'off',
 		defaultModel: getConfig('defaultModel') ?? '',
-		titleSharing: getConfig('titleSharing') ?? 'off'
+		titleSharing: getConfig('titleSharing') ?? 'off',
+		webFetchSharing: getConfig('webFetchSharing') ?? 'off',
+		webFetchEnabled: getConfig('webFetchEnabled') !== 'false',
+		webFetchMaxPages: Number(getConfig('webFetchMaxPages') ?? WEB_FETCH_DEFAULTS.maxPages),
+		webFetchMaxChars: Number(getConfig('webFetchMaxChars') ?? WEB_FETCH_DEFAULTS.maxChars)
 	});
 }
 
@@ -54,6 +59,21 @@ export async function PUT(event) {
 	}
 	if (['off', 'locked', 'overridable'].includes(body?.titleSharing)) {
 		setConfig('titleSharing', body.titleSharing);
+	}
+
+	// Web fetch: the admin shares their own configuration, exactly as they share
+	// their search engine — Admin only decides who else gets it.
+	if (['off', 'locked', 'overridable'].includes(body?.webFetchSharing)) {
+		setConfig('webFetchSharing', body.webFetchSharing);
+	}
+	if (typeof body?.webFetchEnabled === 'boolean') {
+		setConfig('webFetchEnabled', body.webFetchEnabled ? 'true' : 'false');
+	}
+	if (Number.isFinite(body?.webFetchMaxPages)) {
+		setConfig('webFetchMaxPages', String(body.webFetchMaxPages));
+	}
+	if (Number.isFinite(body?.webFetchMaxChars)) {
+		setConfig('webFetchMaxChars', String(body.webFetchMaxChars));
 	}
 	// Snapshot the admin's chat defaults when (re)sharing.
 	if (typeof body?.defaultModel === 'string') setConfig('defaultModel', body.defaultModel);

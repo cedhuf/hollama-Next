@@ -63,6 +63,8 @@ export interface Editor {
 	isNewSession: boolean;
 	shouldFocusTextarea: boolean;
 	webSearch?: boolean;
+	/** Read the pages the message links to, in full, instead of searching around them. */
+	webFetch?: boolean;
 	/** Per-conversation tool toggles, seeded from the global settings each time a session loads. */
 	interactiveChoices?: boolean;
 	sendCurrentDate?: boolean;

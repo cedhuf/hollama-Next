@@ -38,6 +38,7 @@
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
+	import { loadWebFetchConfig } from '$lib/webFetch';
 
 	import type { LayoutData } from './$types';
 	import Onboarding from './Onboarding.svelte';
@@ -177,6 +178,7 @@
 		// Fill the stores from the repository (no-op in local mode, network load in server mode).
 		await hydrateStores();
 		await loadServerSearch();
+		await loadWebFetchConfig();
 		await loadServerSystemPrompts();
 		await loadServerChatDefaults();
 		await loadServerPersonas();

@@ -67,6 +67,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 - Attach **knowledge** and **images** from the composer, on the home screen and in any conversation
 - Edit and retry messages; copy a message, a code block, or a whole conversation (JSON or Markdown)
 - **Web search** — [degoog](https://github.com/degoog-org/degoog) or SearXNG, toggled per message, with an optional _let the model decide_ mode and a live status. Configurable from the GUI, lockable instance-wide via env, shareable by an admin
+- **Web fetch** — paste a link and the model reads the page itself, in full, rather than answering from search snippets. Toggled per message, capped in pages and characters, and switchable instance-wide by an admin
 - **Interactive choices** — when a request is ambiguous, the model can offer tappable options instead of guessing
 - **System prompts** — global, per-model and per-conversation
 - AI-generated conversation titles, using a dedicated (cheap) model
@@ -89,7 +90,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
 - [x] Auth.js & multi-user support
-- [ ] **Enforce sharing server-side** — today "shared models" and "locked" prompts/search are GUI-level only, not a real security boundary (a technical user can still call any model on a system server or send their own system prompt). Enforce model allow-lists and locked prompts in the proxy.
+- [ ] **Enforce sharing server-side** — "shared models" and "locked" prompts/search are still GUI-level only, not a real security boundary (a technical user can call any model on a system server, or send their own system prompt). Shared **tools** are already enforced in `/api/fetch`, which is the pattern to follow: resolve the admin policy in the endpoint and refuse there. Model allow-lists and locked prompts need the same treatment in the proxy.
 - [ ] User groups — per-group default prompts / models
 - [ ] **Protect locked prompts from personas** — a persona's system prompt currently replaces the global one, so a modifiable shared persona can override a protective (e.g. child-safety) instance prompt. Enforce that locked instance prompts always apply, even under a persona
 - [ ] **Reusable playbooks** — write step-by-step instructions in Markdown once and reuse them in any conversation (a "how-to" the model follows, separate from a persona's system prompt)
@@ -161,10 +162,20 @@ _Common (both modes):_
 | `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
 | `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
 | `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any** (see the warning below)                                                              |
+| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the **web fetch** tool may read; empty = any public host                                                                                |
 | `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
 | `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |
 | `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set, it's locked instance-wide; if unset, it's configurable from the GUI |
 | `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
+
+> [!WARNING]
+> **The web fetch tool makes requests leave your server.** It reads the URL a user
+> pastes, from inside your network. Private, loopback and link-local addresses are
+> refused — including the cloud metadata endpoint — and redirects are re-checked at
+> every hop, but an instance open to untrusted users is still letting them choose
+> what your server connects to. Restrict it with `FETCH_ALLOWED_ORIGINS`, or turn
+> the tool off for everyone under _Settings → Admin → Shared tools_. That switch is
+> enforced by the endpoint itself, not just hidden in the interface.
 
 > [!WARNING]
 > **Set `PROXY_ALLOWED_ORIGINS` on any instance reachable from the internet.** The

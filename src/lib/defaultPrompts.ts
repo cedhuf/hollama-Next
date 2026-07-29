@@ -5,7 +5,12 @@
 // send time via {placeholder} tokens, so an override keeps working as long as it
 // preserves the token it needs.
 
-export type PromptKey = 'currentDate' | 'searchRouter' | 'searchContext' | 'interactiveChoices';
+export type PromptKey =
+	| 'currentDate'
+	| 'searchRouter'
+	| 'searchContext'
+	| 'pageContext'
+	| 'interactiveChoices';
 
 export interface PromptDef {
 	/** Short label for the Settings dropdown. */
@@ -62,6 +67,14 @@ Never answer the question yourself. Output only the query, or NONE.`
 
 {results}`
 	},
+	pageContext: {
+		label: 'Web fetch — pages',
+		placeholders: ['{pages}'],
+		hint: 'How the model uses the full text of the pages the message links to.',
+		default: `The full text of the pages the user linked to, retrieved just now. This is the actual content of those pages, not a summary: base your answer on it rather than on what you remember about them, and quote or cite the relevant parts. If a page could not be read, say so plainly instead of answering from memory. Cite pages inline with their [number]:
+
+{pages}`
+	},
 	interactiveChoices: {
 		label: 'Interactive choices',
 		hint: 'Teaches the model the <ask> quick-choice protocol.',
@@ -86,6 +99,7 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
 	'searchRouter',
 	'searchContext',
+	'pageContext',
 	'interactiveChoices'
 ];
 

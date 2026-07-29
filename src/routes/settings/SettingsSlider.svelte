@@ -19,9 +19,12 @@
 		value: number;
 		min?: number;
 		max?: number;
+		step?: number;
+		/** Draws the value in place of the raw number (e.g. "20k characters"). */
+		format?: (value: number) => string;
 	}
 
-	let { label, value = $bindable(), min = 0, max = 10 }: Props = $props();
+	let { label, value = $bindable(), min = 0, max = 10, step = 1, format }: Props = $props();
 </script>
 
 <div class="flex items-center gap-3">
@@ -30,7 +33,7 @@
 		bind:value
 		{min}
 		{max}
-		step={1}
+		{step}
 		aria-label={label}
 		class="relative flex h-5 w-full touch-none select-none items-center"
 	>
@@ -43,5 +46,11 @@
 		/>
 	</Slider.Root>
 
-	<span class="w-5 shrink-0 text-right text-sm font-medium tabular-nums text-active">{value}</span>
+	<span
+		class="shrink-0 text-right text-sm font-medium tabular-nums text-active {format
+			? 'w-16'
+			: 'w-5'}"
+	>
+		{format ? format(value) : value}
+	</span>
 </div>

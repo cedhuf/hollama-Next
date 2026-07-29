@@ -12,6 +12,7 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
+	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -52,6 +53,8 @@
 	let shareEnabled = $state(false);
 	let sharedUrl = $state('');
 
+	let webFetchSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let webFetchShareEnabled = $state(false);
 	let systemPromptsSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let promptsShareEnabled = $state(false);
 	const hasOwnPrompts = $derived(
@@ -120,6 +123,8 @@
 			searchSharing = config.searchSharing ?? 'off';
 			shareEnabled = searchSharing !== 'off';
 			sharedUrl = config.searchUrl ?? '';
+			webFetchSharing = config.webFetchSharing ?? 'off';
+			webFetchShareEnabled = webFetchSharing !== 'off';
 			systemPromptsSharing = config.systemPromptsSharing ?? 'off';
 			promptsShareEnabled = systemPromptsSharing !== 'off';
 			defaultModelSharing = config.defaultModelSharing ?? 'off';
@@ -168,6 +173,29 @@
 			searchToken: $settingsStore.searchToken
 		});
 		sharedUrl = $settingsStore.searchUrl;
+	}
+
+	/**
+	 * Web fetch is configured once, in the Tools tab; here the admin only decides
+	 * who else gets that configuration — the tool being off is shareable too, and
+	 * that is what turns it off for the whole instance.
+	 */
+	async function saveWebFetch() {
+		await api('/api/admin/config', 'PUT', {
+			webFetchSharing,
+			webFetchEnabled: $settingsStore.webFetchEnabled,
+			webFetchMaxPages: $settingsStore.webFetchMaxPages,
+			webFetchMaxChars: $settingsStore.webFetchMaxChars
+		});
+	}
+
+	function syncWebFetchShare() {
+		webFetchSharing = webFetchShareEnabled
+			? webFetchSharing === 'off'
+				? 'locked'
+				: webFetchSharing
+			: 'off';
+		saveWebFetch();
 	}
 
 	async function saveSystemPrompts() {
@@ -319,6 +347,30 @@
 				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
 					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
 					: $LL.off()}
+			</span>
+		{/if}
+	</SettingsSection>
+
+	<!-- Web fetch sharing -->
+	<SettingsSection
+		title={$LL.webFetchSharing()}
+		description={$LL.webFetchSharingDescription()}
+		card
+	>
+		<FieldCheckbox
+			label={$LL.shareWebFetch()}
+			bind:checked={webFetchShareEnabled}
+			onChange={syncWebFetchShare}
+		/>
+		{#if webFetchShareEnabled}
+			<Select bind:value={webFetchSharing} options={sharingOptions} onChange={saveWebFetch} />
+			<span class="text-xs text-muted">
+				{$settingsStore.webFetchEnabled
+					? $LL.currentlySharingWebFetch({
+							pages: $settingsStore.webFetchMaxPages,
+							chars: Math.round($settingsStore.webFetchMaxChars / 1000)
+						})
+					: $LL.currentlySharingWebFetchOff()}
 			</span>
 		{/if}
 	</SettingsSection>

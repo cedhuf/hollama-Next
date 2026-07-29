@@ -178,6 +178,23 @@ const fr = extendDictionary(en, {
 	useModelsFromThisServer: 'Utiliser les modèles de ce serveur',
 	sync: 'Synchroniser',
 	verify: 'Vérifier',
+	webFetchSharing: 'Lecture de pages',
+	webFetchSharingDescription:
+		"Autoriser les utilisateurs à lire les pages liées dans leurs messages, avec vos propres limites. La partager alors qu'elle est désactivée dans votre onglet Outils la désactive pour tout le monde.",
+	shareWebFetch: 'Partager la lecture de pages',
+	currentlySharingWebFetch: 'Partagé actuellement : {pages} pages, {chars}k caractères par page.',
+	currentlySharingWebFetchOff:
+		'Partagé actuellement : désactivée — personne ne peut lire de pages.',
+	webFetchTitle: 'Lecture de pages',
+	webFetchDescription: 'Lire les pages liées dans un message, au lieu de chercher autour.',
+	webFetchToggle: 'Lire les pages liées',
+	webFetchByDefault: 'Activé par défaut dans les nouvelles conversations',
+	webFetchMaxPages: 'Pages lues par message',
+	webFetchMaxChars: 'Caractères conservés par page',
+	webFetchHint:
+		'Seuls les liens http(s) explicites sont lus. Les requêtes partent du serveur, qui refuse les adresses privées et locales.',
+	webFetchLockedOn: "Activé par votre administrateur — jusqu'à {pages} pages par message.",
+	webFetchLockedOff: 'Désactivé par votre administrateur.',
 	version: 'Version',
 	viewRelease: 'Voir la version',
 	vocabOnly: 'Vocabulaire uniquement',

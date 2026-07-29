@@ -35,6 +35,11 @@ export interface Settings {
 	titleModel: string | null;
 	webSearchByDefault: boolean;
 	webSearchAuto: boolean;
+	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
+	webFetchEnabled: boolean;
+	webFetchByDefault: boolean;
+	webFetchMaxPages: number;
+	webFetchMaxChars: number;
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
@@ -90,6 +95,10 @@ export const DEFAULT_SETTINGS: Settings = {
 	titleModel: null,
 	webSearchByDefault: false,
 	webSearchAuto: false,
+	webFetchEnabled: true,
+	webFetchByDefault: true,
+	webFetchMaxPages: 3,
+	webFetchMaxChars: 20000,
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',

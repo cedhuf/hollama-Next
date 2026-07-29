@@ -18,6 +18,7 @@
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
+	import { webFetchConfig } from '$lib/webFetch';
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
@@ -81,6 +82,15 @@
 						label: 'Web search',
 						checked: !!editor.webSearch,
 						onChange: (v: boolean) => (editor.webSearch = v)
+					}
+				]
+			: []),
+		...($webFetchConfig.available
+			? [
+					{
+						label: 'Read linked pages',
+						checked: !!editor.webFetch,
+						onChange: (v: boolean) => (editor.webFetch = v)
 					}
 				]
 			: []),
