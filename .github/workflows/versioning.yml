@@ -40,3 +40,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
+
+  image:
+    name: Publish the release image
+    needs: version
+    # `main` rather than a fixed SHA: it resolves at checkout time, so it picks up
+    # the `chore(release)` commit semantic-release has just pushed — the one that
+    # carries the new version number into the image.
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: main
+    permissions:
+      contents: read
+      packages: write

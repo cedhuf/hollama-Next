@@ -30,17 +30,20 @@ export const updateStatusStore = writable<UpdateStatus>({
 	latestVersion: ''
 });
 
-// In development and test environments we append a '-dev' suffix to the version
-// to indicate that it's a development version. This function strips the suffix
-// so it can be compared using `semver`
-function isCurrentVersionLatest(currentVersion: string, latestVersion: string): boolean {
-	return (
-		currentVersion === latestVersion ||
-		semver.gt(
-			currentVersion.replace(HOLLAMA_DEV_VERSION_SUFFIX, ''),
-			latestVersion.replace(HOLLAMA_DEV_VERSION_SUFFIX, '')
-		)
-	);
+/**
+ * Whether `candidate` is a strictly newer version than `current`.
+ *
+ * Development builds carry a `-dev` suffix, and a release tag may not be a clean
+ * semver string, so both sides go through `coerce`. Anything it can't make sense
+ * of answers `false`: an unreadable tag must not be announced as an update, and
+ * `semver.gt` throws on invalid input rather than returning false.
+ */
+function isNewerVersion(candidate: string, current: string): boolean {
+	const parse = (value: string) =>
+		semver.valid(semver.coerce(value.replace(HOLLAMA_DEV_VERSION_SUFFIX, '')));
+	const a = parse(candidate ?? '');
+	const b = parse(current ?? '');
+	return !!a && !!b && semver.gt(a, b);
 }
 
 export async function checkForUpdates(isUserInitiated = false): Promise<void> {
@@ -53,53 +56,51 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 	if (!settings.lastUpdateCheck) settings.lastUpdateCheck = oneWeekAgoInSeconds - 1;
 	if (!isUserInitiated && settings.lastUpdateCheck > oneWeekAgoInSeconds) return;
 
-	const updateStatus = get(updateStatusStore);
-	updateStatus.isCheckingForUpdates = true;
+	// `get()` hands back the stored object itself, so mutating it in place never
+	// reaches a subscriber: the spinner and the disabled button both need a set().
+	// `couldntCheckForUpdates` is cleared here too, or one failure would stick to
+	// every later check.
+	updateStatusStore.update((current) => ({
+		...current,
+		isCheckingForUpdates: true,
+		couldntCheckForUpdates: false
+	}));
+	const status: UpdateStatus = { ...get(updateStatusStore) };
 
-	// The server may have been already updated, so we fetch the latest metadata
-	let hollamaMetadata: Response;
-
+	// The server may have been updated under a tab that stayed open, so start from
+	// what it reports rather than from what this build was compiled with.
 	try {
-		hollamaMetadata = await fetch(HOLLAMA_METADATA_ENDPOINT);
-		const metadata = (await hollamaMetadata.json()) as HollamaNextMetadata;
-		settings.hollamaMetadata = metadata;
+		const response = await fetch(HOLLAMA_METADATA_ENDPOINT);
+		settings.hollamaMetadata = (await response.json()) as HollamaNextMetadata;
 	} catch {
 		console.error('Failed to fetch Hollama Next server metadata');
-		updateStatus.couldntCheckForUpdates = true;
+		status.couldntCheckForUpdates = true;
 	}
 
-	// Determine if the server has been updated, and if so, which version is the latest
-	updateStatus.latestVersion = settings.hollamaMetadata.currentVersion;
-	updateStatus.isCurrentVersionLatest = isCurrentVersionLatest(version, updateStatus.latestVersion);
-	updateStatus.canRefreshToUpdate = !updateStatus.isCurrentVersionLatest;
-	updateStatus.showSidebarNotification = !updateStatus.isCurrentVersionLatest;
+	status.latestVersion = settings.hollamaMetadata.currentVersion;
+	status.canRefreshToUpdate = isNewerVersion(status.latestVersion, version);
 
-	if (updateStatus.canRefreshToUpdate) {
-		// The server has been updated, so we let the user know they can refresh to update
-		updateStatusStore.set(updateStatus);
-		updateStatus.isCheckingForUpdates = false;
-	} else {
-		// The server hasn't been updated, so we check if Github has a newer version
-		let githubReleases: Response;
-
+	if (!status.canRefreshToUpdate) {
+		// This build is what the server serves, so the only place left to look is
+		// the release list on GitHub.
 		try {
-			githubReleases = await fetch(GITHUB_RELEASES_API);
-			const releases = await githubReleases.json();
-			if (releases[0]?.tag_name && releases[0].tag_name !== '')
-				updateStatus.latestVersion = releases[0].tag_name;
+			const releases = await (await fetch(GITHUB_RELEASES_API)).json();
+			// Drafts and pre-releases come back in the same list, and the newest
+			// entry is not necessarily one we want to offer.
+			const release = Array.isArray(releases)
+				? releases.find((entry) => entry?.tag_name && !entry.draft && !entry.prerelease)
+				: undefined;
+			if (release) status.latestVersion = release.tag_name;
 		} catch {
 			console.error('Failed to fetch GitHub releases');
-			updateStatus.couldntCheckForUpdates = true;
+			status.couldntCheckForUpdates = true;
 		}
-
-		updateStatus.isCurrentVersionLatest = isCurrentVersionLatest(
-			settings.hollamaMetadata.currentVersion,
-			updateStatus.latestVersion
-		);
-		updateStatus.showSidebarNotification = !updateStatus.isCurrentVersionLatest;
-		updateStatus.isCheckingForUpdates = false;
-		updateStatusStore.set(updateStatus);
 	}
+
+	status.isCurrentVersionLatest = !isNewerVersion(status.latestVersion, version);
+	status.showSidebarNotification = !status.isCurrentVersionLatest;
+	status.isCheckingForUpdates = false;
+	updateStatusStore.set(status);
 
 	// Update the settings store with today's date so we don't check again for updates
 	settings.lastUpdateCheck = getUnixTime(new Date());

@@ -5,6 +5,16 @@ on:
     branches:
       - main
   workflow_dispatch:
+  # Called by `versioning.yml` once a release lands. A commit pushed by an Action
+  # using the default GITHUB_TOKEN never triggers another workflow, so the release
+  # commit would otherwise leave `:latest` on the previous version number.
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit, branch or tag to build. Defaults to the triggering ref.
+        type: string
+        required: false
+        default: ''
 
 jobs:
   docker:
@@ -19,6 +29,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # `inputs.ref` is only set when called from another workflow, where
+          # `github.sha` still points at the caller's commit — the one *before*
+          # the release bump.
+          ref: ${{ inputs.ref || github.ref }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
