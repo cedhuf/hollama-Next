@@ -14,6 +14,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
+	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Head from '$lib/components/Head.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
@@ -50,35 +51,24 @@
 		return ct !== undefined && supportsReasoningToggle(ct);
 	});
 
-	// Mirror the session composer's lightning dropdown so the home page can pre-set
-	// the same per-conversation switches; they ride along in `pendingMessage`.
-	const tools = $derived([
-		...(searchAvailable
-			? [{ label: 'Web search', checked: webSearch, onChange: (v: boolean) => (webSearch = v) }]
-			: []),
-		...($webFetchConfig.available
-			? [
-					{
-						label: 'Read linked pages',
-						checked: webFetch,
-						onChange: (v: boolean) => (webFetch = v)
-					}
-				]
-			: []),
-		{
-			label: 'Interactive choices',
-			checked: interactiveChoices,
-			onChange: (v: boolean) => (interactiveChoices = v)
-		},
-		{
-			label: 'Current date',
-			checked: sendCurrentDate,
-			onChange: (v: boolean) => (sendCurrentDate = v)
-		},
-		...(supportsReasoning
-			? [{ label: 'Reasoning', checked: thinking, onChange: (v: boolean) => (thinking = v) }]
-			: [])
-	]);
+	const tools = $derived(
+		buildChatTools(
+			{ webSearch, webFetch, interactiveChoices, sendCurrentDate, thinking },
+			(key, value) => {
+				if (key === 'webSearch') webSearch = value;
+				else if (key === 'webFetch') webFetch = value;
+				else if (key === 'interactiveChoices') interactiveChoices = value;
+				else if (key === 'sendCurrentDate') sendCurrentDate = value;
+				else thinking = value;
+			},
+			{
+				webSearch: searchAvailable,
+				webFetch: $webFetchConfig.available,
+				reasoning: supportsReasoning
+			},
+			toolLabels($LL)
+		)
+	);
 
 	const greeting = $derived.by(() => {
 		const hour = new Date().getHours();

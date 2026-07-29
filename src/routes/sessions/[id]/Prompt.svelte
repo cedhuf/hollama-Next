@@ -15,6 +15,7 @@
 		type ImageAttachment,
 		type KnowledgeAttachment
 	} from '$lib/promptAttachments';
+	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';
@@ -75,47 +76,25 @@
 	const isFloating = $derived(editor.view === 'messages' && !editor.isExpanded);
 
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
-	const tools = $derived([
-		...(searchAvailable
-			? [
-					{
-						label: 'Web search',
-						checked: !!editor.webSearch,
-						onChange: (v: boolean) => (editor.webSearch = v)
-					}
-				]
-			: []),
-		...($webFetchConfig.available
-			? [
-					{
-						label: 'Read linked pages',
-						checked: !!editor.webFetch,
-						onChange: (v: boolean) => (editor.webFetch = v)
-					}
-				]
-			: []),
-		{
-			label: 'Interactive choices',
-			checked: !!editor.interactiveChoices,
-			onChange: (v: boolean) => (editor.interactiveChoices = v)
-		},
-		{
-			label: 'Current date',
-			checked: !!editor.sendCurrentDate,
-			onChange: (v: boolean) => (editor.sendCurrentDate = v)
-		},
-		...(supportsReasoning
-			? [
-					{
-						// On = auto (Ollama enables thinking only when the model supports it).
-						// Off = never request reasoning.
-						label: 'Reasoning',
-						checked: editor.thinking !== false,
-						onChange: (v: boolean) => (editor.thinking = v)
-					}
-				]
-			: [])
-	]);
+	const tools = $derived(
+		buildChatTools(
+			{
+				webSearch: !!editor.webSearch,
+				webFetch: !!editor.webFetch,
+				interactiveChoices: !!editor.interactiveChoices,
+				sendCurrentDate: !!editor.sendCurrentDate,
+				// Off = never request reasoning; on = auto.
+				thinking: editor.thinking !== false
+			},
+			(key, value) => (editor[key] = value),
+			{
+				webSearch: searchAvailable,
+				webFetch: $webFetchConfig.available,
+				reasoning: supportsReasoning
+			},
+			toolLabels($LL)
+		)
+	);
 
 	function toggleControls() {
 		if (editor.view === 'controls') switchToMessages();
