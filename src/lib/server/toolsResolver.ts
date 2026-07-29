@@ -4,10 +4,10 @@ import type { Settings } from '$lib/settings';
 /**
  * Which tools a user may use, and with what limits.
  *
- * Unlike the shared models or the locked prompts, this one is enforced where it
- * is decided: `/api/fetch` calls `resolveTools` itself and refuses, so turning a
- * tool off is a real boundary rather than a hidden button. Everything else in
- * the admin tab is still GUI-level — see the roadmap.
+ * Enforced where it is decided: `/api/fetch` calls `resolveTools` itself and
+ * refuses, so turning a tool off is a real boundary rather than a hidden button.
+ * The shared models and the locked prompt are policed the same way, in
+ * `llmPolicy`.
  */
 
 export type ToolsSharing = 'off' | 'locked' | 'overridable';

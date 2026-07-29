@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
 import { getServer, getServerApiKey } from '$lib/server/db/servers';
+import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
 
 import type { RequestHandler } from './$types';
 
@@ -31,7 +32,17 @@ const proxy: RequestHandler = async (event) => {
 	const key = getServerApiKey(server);
 	if (key) headers.set('authorization', `Bearer ${key}`);
 
-	const body = event.request.method === 'POST' ? await event.request.text() : undefined;
+	let body = event.request.method === 'POST' ? await event.request.text() : undefined;
+
+	// The admin's rules are applied here rather than in the browser: this is the
+	// only path a request can take, so a hand-crafted one is policed too.
+	try {
+		body = applyChatPolicy(server, user.role === 'admin', event.params.path ?? '', body);
+	} catch (e) {
+		if (e instanceof PolicyError) throw error(e.status, e.message);
+		throw e;
+	}
+
 	const response = await fetch(url, { method: event.request.method, headers, body });
 
 	return new Response(response.body, {

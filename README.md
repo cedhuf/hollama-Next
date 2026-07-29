@@ -90,9 +90,9 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 
 - [ ] Tauri desktop builds (macOS / Windows / Linux)
 - [x] Auth.js & multi-user support
-- [ ] **Enforce sharing server-side** — "shared models" and "locked" prompts/search are still GUI-level only, not a real security boundary (a technical user can call any model on a system server, or send their own system prompt). Shared **tools** are already enforced in `/api/fetch`, which is the pattern to follow: resolve the admin policy in the endpoint and refuse there. Model allow-lists and locked prompts need the same treatment in the proxy.
+- [x] **Enforce sharing server-side** — shared tools, shared model allow-lists and locked instance prompts are applied in the endpoints (`/api/fetch`, `/api/llm`), not just in the interface: a hand-crafted request is policed too. A locked prompt is guaranteed _present_ rather than exclusive, which is what makes it survive a persona.
 - [ ] User groups — per-group default prompts / models
-- [ ] **Protect locked prompts from personas** — a persona's system prompt currently replaces the global one, so a modifiable shared persona can override a protective (e.g. child-safety) instance prompt. Enforce that locked instance prompts always apply, even under a persona
+- [x] **Protect locked prompts from personas** — a locked instance prompt is now prepended in the proxy, so a persona's own system prompt adds to it instead of replacing it
 - [ ] **Reusable playbooks** — write step-by-step instructions in Markdown once and reuse them in any conversation (a "how-to" the model follows, separate from a persona's system prompt)
 - [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording
 - [x] **Revisit translations** — English and French are complete (`pnpm run i18n:status`); other locales were dropped, and adding one back no longer means auditing every key
