@@ -572,7 +572,23 @@
 					// and let the model reply from the snippets it already has.
 				}
 				editor.isSearching = false;
-				if (!read) break;
+
+				// It asked and got nothing: say so, rather than let it answer from the
+				// one-line snippets as though it had read the pages.
+				if (!read) {
+					chatRequest = {
+						...chatRequest,
+						messages: [
+							...chatRequest.messages,
+							{
+								role: 'system',
+								content:
+									'The pages you asked to read could not be retrieved. Answer from the search snippets alone, and say plainly that you could not open the pages — do not present their contents as if you had read them.'
+							}
+						]
+					};
+					continue;
+				}
 
 				searchInfo = {
 					...searchInfo!,
