@@ -14,6 +14,8 @@ export interface ProviderView {
 	color?: string | null;
 	modelLabels?: Record<string, string>;
 	hasApiKey?: boolean;
+	/** ISO date of the last successful sync; null when it has never been synced. */
+	verifiedAt?: string | null;
 }
 
 export interface ProvidersResponse {

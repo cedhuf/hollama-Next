@@ -6,6 +6,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
 		ConnectionType,
 		getDefaultServer,
@@ -46,6 +47,12 @@
 
 	let allowUserKeys = $state(false);
 	let servers = $state<Server[]>([]);
+	/**
+	 * True until the first `load()` settles. Without it the tab renders its
+	 * "no permission" / empty state from the default values and then swaps it for
+	 * the real one — a wrong answer shown confidently for as long as the request takes.
+	 */
+	let loading = $state(true);
 	/** Which connections already hold a key, keyed by id (see `ApiServer.hasApiKey`). */
 	let storedKeys = $state<Record<string, boolean>>({});
 
@@ -98,14 +105,27 @@
 		return response.status === 204 ? null : ((await response.json()) as T);
 	}
 
-	async function load() {
-		const providers = await fetch('/api/providers').then((r) => r.json());
-		allowUserKeys = providers.allowUserKeys;
-		const list: ApiServer[] = isAdmin
-			? await fetch('/api/admin/servers').then((r) => r.json())
-			: providers.servers.filter((s: ApiServer) => s.scope === 'personal');
-		servers = list.map(toServer);
-		storedKeys = Object.fromEntries(list.map((v) => [v.id, !!v.hasApiKey]));
+	/**
+	 * `force` re-fetches after a mutation; otherwise the session-wide
+	 * `/api/providers` cache answers, which is usually already warm — the sessions
+	 * layout fills it at boot to build the model list.
+	 */
+	async function load(force = false) {
+		try {
+			// Admins never need `/api/providers` here: `allowUserKeys` only feeds
+			// `canManage`, which they satisfy on their own. Skipping it halves the
+			// round-trips on the tab they open most.
+			const list: ApiServer[] = isAdmin
+				? await fetch('/api/admin/servers').then((r) => r.json())
+				: await fetchProviders(force).then(({ servers: all, allowUserKeys: allowed }) => {
+						allowUserKeys = allowed;
+						return all.filter((provider) => provider.scope === 'personal') as ApiServer[];
+					});
+			servers = list.map(toServer);
+			storedKeys = Object.fromEntries(list.map((v) => [v.id, !!v.hasApiKey]));
+		} finally {
+			loading = false;
+		}
 	}
 
 	/**
@@ -188,7 +208,7 @@
 			color: ''
 		};
 		verified = false;
-		await load();
+		await load(true);
 		justAddedId = created?.id ?? null;
 		toast.success($LL.serverAdded());
 	}
@@ -242,7 +262,12 @@
 			title={isAdmin ? $LL.systemServers() : $LL.yourServers()}
 			description={isAdmin ? $LL.systemServersDescription() : $LL.yourServersDescription()}
 		>
-			{#if !canManage}
+			{#if loading}
+				<!-- Placeholders rather than an empty section: the list keeps its shape
+				     and nothing claims to be the final answer. `Skeleton` stays invisible
+				     unless the wait actually drags, so a warm cache shows nothing at all. -->
+				<Skeleton />
+			{:else if !canManage}
 				<div class="rounded-xl border border-shade-3">
 					<EmptyMessage>{$LL.providersManagedByAdmin()}</EmptyMessage>
 				</div>
@@ -261,7 +286,7 @@
 			{/if}
 		</SettingsSection>
 
-		{#if canManage}
+		{#if canManage && !loading}
 			<!-- Add a server: pick a provider, Verify, then Save. Dashed border so it
 			     reads as a slot to fill rather than another connection. -->
 			<SettingsSection title={$LL.addAServer()}>

@@ -8,6 +8,7 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import MultiSelect from '$lib/components/MultiSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
@@ -42,6 +43,8 @@
 	let allowUserPersonas = $state(true);
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
+	/** Until the first `load()` settles, the empty states below would be lies. */
+	let loading = $state(true);
 	let showCreateUser = $state(false);
 	let newUser = $state({ email: '', password: '', role: 'user' });
 
@@ -106,24 +109,28 @@
 	}
 
 	async function load() {
-		const [config, serverList, userList] = await Promise.all([
-			fetch('/api/admin/config').then((r) => r.json()),
-			fetch('/api/admin/servers').then((r) => r.json()),
-			fetch('/api/admin/users').then((r) => r.json())
-		]);
-		allowUserKeys = config.allowUserKeys;
-		allowUserPersonas = config.allowUserPersonas ?? true;
-		searchSharing = config.searchSharing ?? 'off';
-		shareEnabled = searchSharing !== 'off';
-		sharedUrl = config.searchUrl ?? '';
-		systemPromptsSharing = config.systemPromptsSharing ?? 'off';
-		promptsShareEnabled = systemPromptsSharing !== 'off';
-		defaultModelSharing = config.defaultModelSharing ?? 'off';
-		defaultModelValue = config.defaultModel ?? '';
-		titleSharing = config.titleSharing ?? 'off';
-		titleShareEnabled = titleSharing !== 'off';
-		servers = serverList as SystemServer[];
-		users = userList;
+		try {
+			const [config, serverList, userList] = await Promise.all([
+				fetch('/api/admin/config').then((r) => r.json()),
+				fetch('/api/admin/servers').then((r) => r.json()),
+				fetch('/api/admin/users').then((r) => r.json())
+			]);
+			allowUserKeys = config.allowUserKeys;
+			allowUserPersonas = config.allowUserPersonas ?? true;
+			searchSharing = config.searchSharing ?? 'off';
+			shareEnabled = searchSharing !== 'off';
+			sharedUrl = config.searchUrl ?? '';
+			systemPromptsSharing = config.systemPromptsSharing ?? 'off';
+			promptsShareEnabled = systemPromptsSharing !== 'off';
+			defaultModelSharing = config.defaultModelSharing ?? 'off';
+			defaultModelValue = config.defaultModel ?? '';
+			titleSharing = config.titleSharing ?? 'off';
+			titleShareEnabled = titleSharing !== 'off';
+			servers = serverList as SystemServer[];
+			users = userList;
+		} finally {
+			loading = false;
+		}
 	}
 
 	/**
@@ -318,7 +325,9 @@
 
 	<!-- Shared models -->
 	<SettingsSection title={$LL.sharedModels()} description={$LL.sharedModelsDescription()}>
-		{#if servers.length === 0}
+		{#if loading}
+			<Skeleton variant="row" count={2} />
+		{:else if servers.length === 0}
 			<span class="text-sm text-muted">{$LL.noSystemServers()}</span>
 		{/if}
 
@@ -374,6 +383,9 @@
 
 	<!-- Users -->
 	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
+		{#if loading}
+			<Skeleton variant="row" count={3} />
+		{/if}
 		{#each users as user (user.id)}
 			<div
 				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
