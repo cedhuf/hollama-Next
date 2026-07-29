@@ -60,11 +60,16 @@
 				</div>
 			{/if}
 
+			<!-- `Connection` mutates its `server` prop in place, so the store has to hand
+			     back a *new* object for that id: a keyed each matches on the key and
+			     skips the block when the value is the same reference, which left the
+			     card showing stale state after a sync flipped `isEnabled`. -->
 			{#each $serversStore as server (server.id)}
 				<Connection
 					{server}
 					startEditing={server.id === justAddedId}
-					onChange={() => serversStore.update((s) => [...s])}
+					onChange={() =>
+						serversStore.update((s) => s.map((x) => (x.id === server.id ? { ...server } : x)))}
 					onDelete={() => serversStore.update((s) => s.filter((x) => x.id !== server.id))}
 					onRenameModels={() => (renamingId = server.id)}
 				/>

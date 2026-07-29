@@ -363,6 +363,135 @@
 		--hsl-positive-muted: 120 100% 10%;
 	}
 
+	/* Gruvbox: warm, low-saturation retro palette. Its greys are tinted towards
+	   orange rather than blue, which is what distinguishes it from the two themes
+	   above — so the shade ramps carry a small hue/saturation rather than being
+	   neutral. */
+	[data-theme-style='gruvbox'] {
+		--hsl-primary: 24 88% 45%;
+		--hsl-shade-0: 48 87% 88%;
+		--hsl-shade-1: 46 68% 84%;
+		--hsl-shade-2: 43 59% 81%;
+		--hsl-shade-3: 43 47% 77%;
+		--hsl-shade-4: 40 38% 73%;
+		--hsl-shade-5: 41 33% 68%;
+		--hsl-shade-6: 39 24% 66%;
+		--hsl-text-shade-0: 0 0% 16%;
+		--hsl-text-shade-1: 22 7% 29%;
+		--hsl-text-shade-2: 28 11% 44%;
+		--hsl-negative: 0 71% 42%;
+		--hsl-negative-muted: 0 60% 90%;
+		--hsl-warning: 33 90% 38%;
+		--hsl-warning-muted: 40 70% 88%;
+		--hsl-positive: 100 39% 35%;
+		--hsl-positive-muted: 100 35% 88%;
+	}
+
+	[data-theme-style='gruvbox'][data-color-theme='dark'] {
+		--hsl-primary: 27 99% 55%;
+		--hsl-shade-0: 0 0% 16%;
+		--hsl-shade-1: 20 3% 19%;
+		--hsl-shade-2: 20 5% 22%;
+		--hsl-shade-3: 22 6% 25%;
+		--hsl-shade-4: 22 7% 29%;
+		--hsl-shade-5: 24 9% 33%;
+		--hsl-shade-6: 27 10% 36%;
+		--hsl-text-shade-0: 48 87% 88%;
+		--hsl-text-shade-1: 40 38% 73%;
+		--hsl-text-shade-2: 35 17% 59%;
+		--hsl-negative: 6 96% 59%;
+		--hsl-negative-muted: 0 50% 15%;
+		--hsl-warning: 42 95% 58%;
+		--hsl-warning-muted: 40 50% 15%;
+		--hsl-positive: 61 66% 44%;
+		--hsl-positive-muted: 90 40% 15%;
+	}
+
+	/* Nord: cool blue-grey. Polar Night for the dark ramp, Snow Storm for the light
+	   one, with Frost supplying the accent — bright enough on the dark background,
+	   deeper on the light one. */
+	[data-theme-style='nord'] {
+		--hsl-primary: 213 32% 52%;
+		--hsl-shade-0: 218 27% 94%;
+		--hsl-shade-1: 218 27% 92%;
+		--hsl-shade-2: 216 28% 90%;
+		--hsl-shade-3: 219 28% 88%;
+		--hsl-shade-4: 218 28% 85%;
+		--hsl-shade-5: 219 27% 81%;
+		--hsl-shade-6: 219 25% 78%;
+		--hsl-text-shade-0: 220 16% 22%;
+		--hsl-text-shade-1: 222 16% 28%;
+		--hsl-text-shade-2: 220 16% 36%;
+		--hsl-negative: 354 42% 56%;
+		--hsl-negative-muted: 354 45% 92%;
+		--hsl-warning: 14 51% 63%;
+		--hsl-warning-muted: 14 50% 92%;
+		--hsl-positive: 92 28% 65%;
+		--hsl-positive-muted: 92 30% 90%;
+	}
+
+	[data-theme-style='nord'][data-color-theme='dark'] {
+		--hsl-primary: 193 43% 67%;
+		--hsl-shade-0: 220 16% 22%;
+		--hsl-shade-1: 219 16% 24%;
+		--hsl-shade-2: 222 16% 28%;
+		--hsl-shade-3: 220 17% 31%;
+		--hsl-shade-4: 220 17% 32%;
+		--hsl-shade-5: 222 18% 35%;
+		--hsl-shade-6: 220 16% 36%;
+		--hsl-text-shade-0: 218 27% 94%;
+		--hsl-text-shade-1: 219 28% 88%;
+		--hsl-text-shade-2: 210 19% 63%;
+		--hsl-negative: 354 42% 56%;
+		--hsl-negative-muted: 354 30% 20%;
+		--hsl-warning: 14 51% 63%;
+		--hsl-warning-muted: 14 30% 20%;
+		--hsl-positive: 92 28% 65%;
+		--hsl-positive-muted: 92 25% 20%;
+	}
+
+	/* Solarized: the one palette designed as a matched light/dark pair, so each mode
+	   uses its own canonical base tones rather than an inverted approximation. */
+	[data-theme-style='solarized'] {
+		--hsl-primary: 205 69% 49%;
+		--hsl-shade-0: 44 87% 94%;
+		--hsl-shade-1: 44 63% 92%;
+		--hsl-shade-2: 46 42% 88%;
+		--hsl-shade-3: 45 34% 84%;
+		--hsl-shade-4: 45 27% 80%;
+		--hsl-shade-5: 45 22% 75%;
+		--hsl-shade-6: 45 19% 71%;
+		--hsl-text-shade-0: 192 81% 14%;
+		--hsl-text-shade-1: 194 14% 40%;
+		--hsl-text-shade-2: 186 8% 55%;
+		--hsl-negative: 1 71% 52%;
+		--hsl-negative-muted: 1 60% 92%;
+		--hsl-warning: 18 89% 44%;
+		--hsl-warning-muted: 18 70% 90%;
+		--hsl-positive: 68 100% 30%;
+		--hsl-positive-muted: 68 45% 88%;
+	}
+
+	[data-theme-style='solarized'][data-color-theme='dark'] {
+		--hsl-primary: 205 69% 49%;
+		--hsl-shade-0: 192 100% 11%;
+		--hsl-shade-1: 192 87% 12%;
+		--hsl-shade-2: 192 81% 14%;
+		--hsl-shade-3: 192 76% 16%;
+		--hsl-shade-4: 192 71% 19%;
+		--hsl-shade-5: 192 66% 22%;
+		--hsl-shade-6: 193 63% 25%;
+		--hsl-text-shade-0: 46 42% 88%;
+		--hsl-text-shade-1: 180 7% 60%;
+		--hsl-text-shade-2: 196 13% 45%;
+		--hsl-negative: 1 71% 52%;
+		--hsl-negative-muted: 1 50% 18%;
+		--hsl-warning: 18 89% 44%;
+		--hsl-warning-muted: 18 60% 18%;
+		--hsl-positive: 68 100% 30%;
+		--hsl-positive-muted: 68 50% 15%;
+	}
+
 	/* Syntax-highlighting (highlight.js) token colours, driven by colour mode so code
 	   stays legible on both the light and dark `shade-0` code background — across every
 	   theme style. Replaces highlight.js's bundled stylesheet, which was light-only and

@@ -107,7 +107,7 @@ test.describe('OpenAI Integration', () => {
 		await expect(page.getByText(MOCK_SESSION_1_RESPONSE_1.message.content)).toBeVisible();
 
 		// Check localStorage
-		const sessions = await page.evaluate(() => localStorage.getItem('hollama-sessions'));
+		const sessions = await page.evaluate(() => localStorage.getItem('hollamanext-sessions'));
 		expect(sessions).toContain('"name":"gpt-3.5-turbo"');
 	});
 

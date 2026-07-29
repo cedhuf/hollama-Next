@@ -427,8 +427,12 @@
 				</button>
 			</div>
 		{:else}
+			<!-- Labelled explicitly: otherwise the accessible name is whatever its
+			     children happen to concatenate to ("No server connected Settings
+			     Administrator"), which announces badly and is unusable as a handle. -->
 			<button
 				onclick={() => ($settingsModalOpen = true)}
+				aria-label={$LL.settings()}
 				class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-shade-0"
 			>
 				<span class="relative shrink-0">

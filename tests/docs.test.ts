@@ -3,60 +3,76 @@ import { expect, test } from '@playwright/test';
 import type { Model } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
 
-import {
-	MOCK_API_TAGS_RESPONSE,
-	MOCK_KNOWLEDGE,
-	mockOllamaModelsResponse,
-	seedKnowledgeAndReload
-} from './utils';
+import { MOCK_API_TAGS_RESPONSE, MOCK_KNOWLEDGE, mockOllamaModelsResponse } from './utils';
 
 test.beforeEach(async ({ page }) => {
 	await mockOllamaModelsResponse(page);
 });
 
+/**
+ * Produces the screenshots used in README.md. Everything is seeded through
+ * `localStorage`, so the app looks populated while staying offline: no provider
+ * is ever called.
+ */
 test('seed data and take screenshots for README.md', async ({ page }) => {
-	await page.goto('/settings');
-
-	// Wait for fonts to load
-	expect(await page.evaluate(() => document.fonts.size)).toBe(19);
-	expect(await page.evaluate(() => document.fonts.ready)).toBeTruthy();
-
-	await expect(page.getByTestId('server')).toHaveCount(1);
-	expect(await page.screenshot()).toMatchSnapshot({ name: 'settings.png' });
-
-	await page.goto('/sessions/ulxz6l'); // Visiting a fake session id so it doesn't change from test to test
-	await expect(page.getByText('No sessions')).toBeVisible();
-	await expect(page.locator('.prompt-editor__textarea')).toBeVisible();
-
-	await page.locator('.prompt-editor__toggle').click();
-	await expect(page.locator('.prompt-editor')).toHaveClass(/ prompt-editor--fullscreen/);
-	await expect(page.locator('.prompt-editor__textarea')).toBeVisible();
-	expect(await page.screenshot()).toMatchSnapshot({ name: 'session-new.png' });
-
-	// Stage 2 sessions
 	const models: Model[] = MOCK_API_TAGS_RESPONSE.models.map((model) => ({
 		name: model.name,
 		serverId: generateRandomId()
 	}));
+
 	await page.evaluate(
-		({ modelA, modelB }) =>
+		({ modelA, modelB, knowledge }) => {
+			// A named profile: the sidebar, the greeting and the avatar all read from
+			// it, and "?" initials in three places make for a poor screenshot.
+			const settingsKey = 'hollamanext-settings';
+			const settings = JSON.parse(window.localStorage.getItem(settingsKey) ?? '{}');
 			window.localStorage.setItem(
-				'hollama-sessions',
-				// FIXME: we use set a type here to make sure these are `Session[]`
+				settingsKey,
+				JSON.stringify({ ...settings, profileFirstName: 'John', profileLastName: 'Smith' })
+			);
+
+			window.localStorage.setItem('hollamanext-knowledge', JSON.stringify(knowledge));
+
+			// A second connection, so the Servers tab shows what multi-provider looks
+			// like: two cards, two colours, one of them never synced.
+			const serversKey = 'hollamanext-servers';
+			const servers = JSON.parse(window.localStorage.getItem(serversKey) ?? '[]');
+			window.localStorage.setItem(
+				serversKey,
+				JSON.stringify([
+					...servers,
+					{
+						id: 'openai-demo',
+						connectionType: 'openai',
+						baseUrl: 'https://api.openai.com/v1',
+						label: 'OpenAI',
+						modelFilter: 'gpt',
+						color: '#378ADD',
+						isVerified: null,
+						isEnabled: false
+					}
+				])
+			);
+
+			window.localStorage.setItem(
+				'hollamanext-sessions',
 				JSON.stringify([
 					{
 						id: 'u4pozr',
 						model: modelA,
+						title: 'Odds calculator in Python',
 						messages: [
 							{
 								role: 'user',
 								content:
-									'Write a Python function to calculate the odds of the winner in a fight between Emma Watson and Jessica Alba'
+									'Write a Python function that returns the odds of each fighter winning, from their age, height, weight and experience.',
+								createdAt: new Date().toISOString()
 							},
 							{
 								role: 'assistant',
 								content:
-									"Here's a basic function that takes the age, height, weight, and fighting experience of both individuals as input and returns the difference between their ages, heights, and weights.\n```python\ndef calculate_odds(emma_age, emma_height, emma_weight, emma_experience, jessica_age, jessica_height, jessica_weight, jessica_experience):\n    emma_stats = {'age': emma_age, 'height': emma_height, 'weight': emma_weight, 'experience': emma_experience}\n    jessica_stats = {'age': jessica_age, 'height': jessica_height, 'weight': jessica_weight, 'experience': jessica_experience}\n    \n    # Calculate the differences between their stats\n    age_difference = abs(emma_stats['age'] - jessica_stats['age'])\n    height_difference = abs(emma_stats['height'] - jessica_stats['height'])\n    weight_difference = abs(emma_stats['weight'] - jessica_stats['weight'])\n    \n    # Return the differences as a tuple\n    return (age_difference, height_difference, weight_difference)\n```\nYou can use this function to compare Emma Watson and Jessica Alba by providing their respective statistics as inputs."
+									"Here's a compact version. It scores each fighter, then normalises the two scores into probabilities.\n\n```python\ndef score(f):\n    return f['experience'] * 3 + f['height'] * 0.1 - f['age'] * 0.2\n\n\ndef odds(a, b):\n    sa, sb = score(a), score(b)\n    total = sa + sb\n    return {'a': round(sa / total, 3), 'b': round(sb / total, 3)}\n```\n\nThe weights are arbitrary — tune them against real fight data before trusting the output.",
+								createdAt: new Date().toISOString()
 							}
 						],
 						updatedAt: new Date().toISOString()
@@ -64,49 +80,82 @@ test('seed data and take screenshots for README.md', async ({ page }) => {
 					{
 						id: 'bbpz8o',
 						model: modelB,
+						title: 'The meaning of life',
 						messages: [
 							{
 								role: 'user',
-								content: 'What is the meaning of life?'
+								content: 'What is the meaning of life?',
+								createdAt: new Date().toISOString()
 							},
 							{
 								role: 'assistant',
 								content:
-									'**The meaning of life is a complex and multifaceted question that has been pondered by philosophers, theologians, and individuals throughout history.** Good luck with that.'
+									'**A question philosophers, theologians and a great many people have chewed on for a long time.** Good luck with that.',
+								createdAt: new Date().toISOString()
 							}
 						],
 						updatedAt: new Date().toISOString()
 					}
 				])
-			),
-		{
-			modelA: models[0],
-			modelB: models[1]
-		}
+			);
+		},
+		{ modelA: models[0], modelB: models[1], knowledge: MOCK_KNOWLEDGE }
 	);
 
-	await page.reload();
-	await expect(page.getByText('No sessions')).not.toBeVisible();
+	// --- Home ----------------------------------------------------------------
+	await page.goto('/sessions');
+
+	// Wait for fonts to load
+	expect(await page.evaluate(() => document.fonts.size)).toBe(19);
+	expect(await page.evaluate(() => document.fonts.ready)).toBeTruthy();
+
 	await expect(page.getByTestId('session-item')).toHaveCount(2);
+	await expect(page.getByText('John Smith')).toBeVisible();
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({ name: 'home.png' });
 
-	await page.getByText('Write a Python function').click();
-	await expect(page.getByText("Here's a basic function")).toBeVisible();
-	await expect(page.getByText('No knowledge', { exact: true })).not.toBeVisible();
-	await page.locator('article', { hasText: "Here's a basic function" }).hover();
-	expect(await page.screenshot()).toMatchSnapshot({ name: 'session.png' });
+	// --- Settings › Interface -------------------------------------------------
+	await page.getByLabel('Settings', { exact: true }).click();
+	await page.getByRole('tab', { name: 'Interface' }).click();
+	await expect(page.getByText('Theme style')).toBeVisible();
+	// The dialog animates in over 200ms; `animations: 'disabled'` fast-forwards it
+	// to its end state rather than freezing it half-way.
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({
+		name: 'settings.png'
+	});
 
-	await page.getByLabel('Controls').click();
-	await expect(page.getByText('System prompt')).toBeVisible();
-	expect(await page.screenshot()).toMatchSnapshot({ name: 'session-controls.png' });
+	// --- Settings › Servers ---------------------------------------------------
+	await page.getByRole('tab', { name: 'Servers' }).click();
+	await expect(page.getByTestId('server')).toHaveCount(2);
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({
+		name: 'servers.png'
+	});
+	await page.keyboard.press('Escape');
 
-	await page.getByRole('tab', { name: 'Knowledge' }).click();
-	await expect(page.getByText('No knowledge')).toBeVisible();
+	// --- A conversation -------------------------------------------------------
+	await page.goto('/sessions/u4pozr');
+	await expect(page.locator('.article--assistant')).toBeVisible();
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({
+		name: 'session.png'
+	});
 
-	await seedKnowledgeAndReload(page);
-	await expect(page.getByText('No knowledge')).not.toBeVisible();
-	await expect(page.getByTestId('knowledge-metadata')).not.toBeVisible();
+	// --- Library: personas + knowledge ----------------------------------------
+	await page.goto('/library');
+	await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
+	await expect(page.getByText(MOCK_KNOWLEDGE[0].name)).toBeVisible();
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({
+		name: 'library.png'
+	});
 
-	await page.getByText(MOCK_KNOWLEDGE[0].name).click();
-	await expect(page.getByTestId('knowledge-metadata')).toBeVisible();
-	expect(await page.screenshot()).toMatchSnapshot({ name: 'knowledge.png' });
+	// --- The same conversation, in dark mode ----------------------------------
+	await page.evaluate(() => {
+		const key = 'hollamanext-settings';
+		const settings = JSON.parse(window.localStorage.getItem(key) ?? '{}');
+		window.localStorage.setItem(key, JSON.stringify({ ...settings, themeMode: 'dark' }));
+	});
+	await page.goto('/sessions/u4pozr');
+	await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
+	await expect(page.locator('.article--assistant')).toBeVisible();
+	expect(await page.screenshot({ animations: 'disabled' })).toMatchSnapshot({
+		name: 'session-dark.png'
+	});
 });

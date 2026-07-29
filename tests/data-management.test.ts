@@ -10,7 +10,7 @@ test('deletes all preferences and resets to default values', async ({ page }) =>
 	await expect(page.getByText('Dark')).not.toBeVisible();
 
 	let localStorageSettings = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-settings')
+		window.localStorage.getItem('hollamanext-settings')
 	);
 	expect(localStorageSettings).toContain('"userTheme":"dark"');
 	await expect(page.getByText('Deleted successfully')).not.toBeVisible();
@@ -21,9 +21,11 @@ test('deletes all preferences and resets to default values', async ({ page }) =>
 	await expect(page.getByText('Deleted successfully')).toBeVisible();
 
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-settings') !== null;
+		return window.localStorage.getItem('hollamanext-settings') !== null;
 	});
-	localStorageSettings = await page.evaluate(() => window.localStorage.getItem('hollama-settings'));
+	localStorageSettings = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-settings')
+	);
 	expect(localStorageSettings).not.toContain('"userTheme":"dark"');
 	await expect(page.getByText('Dark')).toBeVisible();
 	await expect(page.getByText('Light')).not.toBeVisible();
@@ -34,7 +36,7 @@ test('deletes all servers and resets to default values', async ({ page }) => {
 	await expect(page.getByLabel('Base URL')).toHaveValue('http://localhost:11434');
 
 	let localStorageServers = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-servers')
+		window.localStorage.getItem('hollamanext-servers')
 	);
 	expect(localStorageServers).toContain('"baseUrl":"http://localhost:11434"');
 	await expect(page.getByText('Deleted successfully')).not.toBeVisible();
@@ -44,9 +46,11 @@ test('deletes all servers and resets to default values', async ({ page }) => {
 	await expect(page.getByText('Deleted successfully')).toBeVisible();
 
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-servers') !== null;
+		return window.localStorage.getItem('hollamanext-servers') !== null;
 	});
-	localStorageServers = await page.evaluate(() => window.localStorage.getItem('hollama-servers'));
+	localStorageServers = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-servers')
+	);
 	expect(localStorageServers).not.toContain('"baseUrl":"http://localhost:11434"');
 	await expect(page.getByText('Base URL')).not.toBeVisible();
 });
@@ -60,7 +64,7 @@ test('all sessions can be deleted', async ({ page }) => {
 	await page.evaluate(
 		({ modelA, modelB }) =>
 			window.localStorage.setItem(
-				'hollama-sessions',
+				'hollamanext-sessions',
 				JSON.stringify([
 					{
 						id: 'qbhc0q',
@@ -119,7 +123,7 @@ test('all sessions can be deleted', async ({ page }) => {
 	await page.getByRole('tab', { name: 'Sessions' }).click();
 	await expect(page.getByText('No sessions')).toBeVisible();
 	await expect(page.getByTestId('session-item')).toHaveCount(0);
-	expect(await page.evaluate(() => window.localStorage.getItem('hollama-sessions'))).toBe('[]');
+	expect(await page.evaluate(() => window.localStorage.getItem('hollamanext-sessions'))).toBe('[]');
 });
 
 test('all knowledge can be deleted', async ({ page }) => {
@@ -129,7 +133,7 @@ test('all knowledge can be deleted', async ({ page }) => {
 
 	await page.evaluate(
 		({ mockKnowledge }) =>
-			window.localStorage.setItem('hollama-knowledge', JSON.stringify(mockKnowledge)),
+			window.localStorage.setItem('hollamanext-knowledge', JSON.stringify(mockKnowledge)),
 		{ mockKnowledge: MOCK_KNOWLEDGE }
 	);
 
@@ -149,7 +153,9 @@ test('all knowledge can be deleted', async ({ page }) => {
 	await page.getByRole('tab', { name: 'Knowledge' }).click();
 	await expect(page.getByText('No knowledge')).toBeVisible();
 	await expect(page.getByTestId('knowledge-item')).toHaveCount(0);
-	expect(await page.evaluate(() => window.localStorage.getItem('hollama-knowledge'))).toBe('[]');
+	expect(await page.evaluate(() => window.localStorage.getItem('hollamanext-knowledge'))).toBe(
+		'[]'
+	);
 });
 
 test('exports server data to a JSON file', async ({ page }, testInfo) => {
@@ -158,7 +164,7 @@ test('exports server data to a JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByLabel('Base URL')).toHaveValue('http://localhost:11434');
 
 	const localStorageServers = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-servers')
+		window.localStorage.getItem('hollamanext-servers')
 	);
 	expect(localStorageServers).toContain('"baseUrl":"http://localhost:11434"');
 
@@ -181,7 +187,7 @@ test('exports preferences data to a JSON file', async ({ page }, testInfo) => {
 
 	// Verify we have preference data
 	const localStorageSettings = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-settings')
+		window.localStorage.getItem('hollamanext-settings')
 	);
 	expect(localStorageSettings).toContain('"userTheme":"dark"');
 
@@ -199,7 +205,9 @@ test('exports preferences data to a JSON file', async ({ page }, testInfo) => {
 test('imports server configuration from JSON file', async ({ page }, testInfo) => {
 	await page.goto('/');
 	await page.getByRole('link', { name: 'Settings' }).click();
-	const beforeServers = await page.evaluate(() => window.localStorage.getItem('hollama-servers'));
+	const beforeServers = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-servers')
+	);
 	expect(beforeServers === null || beforeServers === '[]').toBeTruthy();
 	await expect(page.getByTestId('server')).toHaveCount(0);
 
@@ -235,10 +243,10 @@ test('imports server configuration from JSON file', async ({ page }, testInfo) =
 	await expect(page.getByText('Import successful')).toBeVisible();
 
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-servers') !== null;
+		return window.localStorage.getItem('hollamanext-servers') !== null;
 	});
 	const serversConfigRaw = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-servers')
+		window.localStorage.getItem('hollamanext-servers')
 	);
 	const serversConfig = JSON.parse(serversConfigRaw || '[]');
 	expect(serversConfig).toHaveLength(2);
@@ -256,7 +264,9 @@ test('imports session data from JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByText('No sessions')).toBeVisible();
 	await expect(page.getByTestId('session-item')).toHaveCount(0);
 
-	const beforeSessions = await page.evaluate(() => window.localStorage.getItem('hollama-sessions'));
+	const beforeSessions = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-sessions')
+	);
 	expect(beforeSessions === null || beforeSessions === '[]').toBeTruthy();
 
 	await page.getByRole('link', { name: 'Settings' }).click();
@@ -286,7 +296,7 @@ test('imports session data from JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByText('Import successful')).toBeVisible();
 
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-sessions') !== null;
+		return window.localStorage.getItem('hollamanext-sessions') !== null;
 	});
 	await page.getByRole('tab', { name: 'Sessions' }).click();
 
@@ -297,7 +307,9 @@ test('imports session data from JSON file', async ({ page }, testInfo) => {
 	await page.getByTestId('session-item').first().click();
 	await expect(page.getByText('Test message')).toBeVisible();
 	await expect(page.getByText('Test response')).toBeVisible();
-	const afterSessions = await page.evaluate(() => window.localStorage.getItem('hollama-sessions'));
+	const afterSessions = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-sessions')
+	);
 	expect(afterSessions).toContain('Test message');
 });
 
@@ -308,7 +320,7 @@ test('imports knowledge data from JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByTestId('knowledge-item')).toHaveCount(0);
 
 	const beforeKnowledge = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-knowledge')
+		window.localStorage.getItem('hollamanext-knowledge')
 	);
 	expect(beforeKnowledge === null || beforeKnowledge === '[]').toBeTruthy();
 
@@ -336,7 +348,7 @@ test('imports knowledge data from JSON file', async ({ page }, testInfo) => {
 
 	// Handle the page reload
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-knowledge') !== null;
+		return window.localStorage.getItem('hollamanext-knowledge') !== null;
 	});
 
 	// Go back to Knowledge section to see imported data
@@ -348,7 +360,7 @@ test('imports knowledge data from JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByText('Tu nombre es Susan')).toBeVisible();
 
 	const afterKnowledge = await page.evaluate(() =>
-		window.localStorage.getItem('hollama-knowledge')
+		window.localStorage.getItem('hollamanext-knowledge')
 	);
 	expect(afterKnowledge).toContain('Susan');
 });
@@ -361,7 +373,9 @@ test('imports preferences data from JSON file', async ({ page }, testInfo) => {
 	await expect(page.getByLabel('Language')).toHaveValue('English');
 	await expect(page.getByText('Dark')).toBeVisible();
 	await expect(page.getByText('Claro')).not.toBeVisible();
-	const beforeSettings = await page.evaluate(() => window.localStorage.getItem('hollama-settings'));
+	const beforeSettings = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-settings')
+	);
 	expect(beforeSettings === null || !beforeSettings.includes('"userLanguage":"es"')).toBeTruthy();
 
 	// Create a file with test preferences data
@@ -383,11 +397,13 @@ test('imports preferences data from JSON file', async ({ page }, testInfo) => {
 
 	// Handle the page reload
 	await page.waitForFunction(() => {
-		return window.localStorage.getItem('hollama-settings') !== null;
+		return window.localStorage.getItem('hollamanext-settings') !== null;
 	});
 	await expect(page.getByLabel('Idioma')).toHaveValue('Español');
 
-	const afterSettings = await page.evaluate(() => window.localStorage.getItem('hollama-settings'));
+	const afterSettings = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-settings')
+	);
 	expect(afterSettings).toContain('"userLanguage":"es"');
 
 	await expect(page.getByText('Dark')).not.toBeVisible();

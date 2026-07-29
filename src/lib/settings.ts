@@ -62,7 +62,7 @@ export interface Settings {
 	/** Show the time each message was sent, next to its role badge. */
 	showMessageTimestamps: boolean;
 	themeMode: 'system' | 'light' | 'dark';
-	themeStyle: 'classic' | 'dracula' | 'catppuccin';
+	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
 	onboardingComplete: boolean;

@@ -25,7 +25,7 @@ test.describe('Locales', () => {
 		await expect(languageCombobox).not.toBeVisible();
 		await expect(langueCombobox).toHaveText('Français');
 		let localStorageValue = await page.evaluate(() =>
-			window.localStorage.getItem('hollama-settings')
+			window.localStorage.getItem('hollamanext-settings')
 		);
 		expect(localStorageValue).toContain('"userLanguage":"fr"');
 
@@ -35,7 +35,9 @@ test.describe('Locales', () => {
 		await langueCombobox.click();
 		await page.getByRole('option', { name: 'English' }).click();
 
-		localStorageValue = await page.evaluate(() => window.localStorage.getItem('hollama-settings'));
+		localStorageValue = await page.evaluate(() =>
+			window.localStorage.getItem('hollamanext-settings')
+		);
 		expect(localStorageValue).toContain('"userLanguage":"en"');
 		await expect(page.getByTestId('data-management-hollama-servers')).toContainText('Servers');
 	});
@@ -50,9 +52,9 @@ test.describe('Locales', () => {
 			await page.reload();
 			await expect(page.getByText('Servers')).not.toBeVisible();
 			await expect(page.getByTestId('data-management-hollama-servers')).toContainText('Serveurs');
-			expect(await page.evaluate(() => window.localStorage.getItem('hollama-settings'))).toContain(
-				'"userLanguage":"fr"'
-			);
+			expect(
+				await page.evaluate(() => window.localStorage.getItem('hollamanext-settings'))
+			).toContain('"userLanguage":"fr"');
 		});
 	});
 
@@ -65,9 +67,9 @@ test.describe('Locales', () => {
 
 			// German is no longer installed, so detection settles on English.
 			await expect(page.getByTestId('data-management-hollama-servers')).toContainText('Servers');
-			expect(await page.evaluate(() => window.localStorage.getItem('hollama-settings'))).toContain(
-				'"userLanguage":"en"'
-			);
+			expect(
+				await page.evaluate(() => window.localStorage.getItem('hollamanext-settings'))
+			).toContain('"userLanguage":"en"');
 		});
 	});
 });

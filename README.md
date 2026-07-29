@@ -1,9 +1,22 @@
+<div align="center">
+
+<!-- The mark is black ink on transparency, so it disappears on GitHub's dark
+     theme; `<picture>` swaps in the inverted copy there. -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="static/logo-mark-dark.png" />
+  <img src="static/logo-mark.png" alt="Hollama Next" width="96" />
+</picture>
+
 # Hollama Next
+
+**A (less) minimal LLM chat app that runs _entirely_ in your browser.**
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/cedhuf/hollama-Next)
 ![GitHub License](https://img.shields.io/github/license/cedhuf/hollama-Next)
 ![GitHub Discussions](https://img.shields.io/github/discussions/cedhuf/hollama-Next)
 ![Languages](https://img.shields.io/github/languages/top/cedhuf/hollama-Next?logo=github)
+
+</div>
 
 > [!WARNING]
 > **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
@@ -11,8 +24,6 @@
 > I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, you can check the original project instead or other forks, no hard feelings — just being transparent.
 >
 > Recent work has focused on the **server / multi-user** mode. The **standalone (local)** mode may have temporary inconsistencies that still need a verification pass.
-
-A (less) minimal LLM chat app that runs _entirely_ in your browser.
 
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
 
@@ -31,37 +42,43 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 ---
 
 > [!IMPORTANT]
-> Feel free to participate ! There are no bad intervention. Just one rule to let the project easy to manage : issues are for bug only. If you want ta ask for a feature or anything else, please use the discussion. If it is community validated, then it will find a way to issue. Thanks !
+> Feel free to participate — there is no bad contribution. One rule to keep the project manageable: **issues are for bugs only**. For a feature request or anything else, please open a discussion; if the community backs it, it will become an issue. Thanks!
 
 ### Features
 
-- Support for Ollama and OpenAI compatible servers
-- Multi-server support
-- Attach **knowledge** & **images** from the same composer — on the home screen and inside any session
-- Text & vision models
-- Large prompt fields
-- Support for reasoning models
-- Markdown rendering with syntax highlighting
-- KaTeX math notation
-- Code editor features
-- Customizable system prompts & advanced Ollama parameters
-- Copy code snippets, messages or entire sessions
-- Edit & retry messages
-- Stores data locally on your browser
-- Multi-language interface
+**Providers**
+
+- Ollama, OpenAI, Claude, Infomaniak, and any OpenAI-compatible server
+- One-click presets — pick a provider, paste an API key
+- Several connections at once, each with its own label and colour, shown wherever its models appear
+- Custom display names per model, so `mistral/Mistral_Small-24B-Instruct` can read as you like
+- Model name filter per connection
 - Download [Ollama models](https://ollama.ai/models) directly from the UI
 
-  #### New
-  - AI-generated session titles (with a dedicated, cheap model)
-  - **Web search** — built-in internet search ([degoog](https://github.com/degoog-org/degoog) / SearXNG), toggled per-message from the prompt, with an optional _let the model decide when to search_ auto mode and a live _searching… / N results found_ status. Configurable from the GUI (or locked instance-wide via env), and admin-shareable in server mode
-  - **System prompts** — global, per-model and per-conversation, editable from a conversation modal. In server mode an admin can share their prompts, default model and title settings (locked or overridable)
-  - **Personas & Library** — reusable characters (avatar, system prompt, model, greeting) created in a new **Library**, pinned to the sidebar and chatted with as one ongoing conversation. Import personas from a file (including OpenWebUI model exports). In server mode an admin can share personas for users to install, and choose whether users may create their own; three starter personas ship by default
-  - One-click provider presets — pick a provider, paste an API key
+**Chat**
 
-  #### Improved
-  - Responsive layout
-  - Light & dark original themes. More themes added (Dracula, Catpuccine)
-  - Import & export stored data, full backup & restore of all your data
+- Text, vision and reasoning models, with streamed replies
+- Markdown with syntax highlighting, KaTeX maths, and copyable code blocks
+- Attach **knowledge** and **images** from the composer, on the home screen and in any conversation
+- Edit and retry messages; copy a message, a code block, or a whole conversation (JSON or Markdown)
+- **Web search** — [degoog](https://github.com/degoog-org/degoog) or SearXNG, toggled per message, with an optional _let the model decide_ mode and a live status. Configurable from the GUI, lockable instance-wide via env, shareable by an admin
+- **Interactive choices** — when a request is ambiguous, the model can offer tappable options instead of guessing
+- **System prompts** — global, per-model and per-conversation
+- AI-generated conversation titles, using a dedicated (cheap) model
+- Advanced Ollama parameters
+
+**Personas & knowledge**
+
+- Reusable characters with their own avatar, system prompt, model, greeting and knowledge, created in the **Library** and pinned to the sidebar
+- Import personas from a file, including OpenWebUI model exports; three starter personas ship by default
+- Knowledge collections attachable to any conversation or persona
+
+**Interface**
+
+- Six themes — Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized — each with a light and a dark ramp, following the system by default
+- Responsive; dialogs go full screen on phones; installable as a PWA
+- English and French, with automatic English fallback for untranslated keys
+- Import and export each kind of data, or a full backup of everything
 
 ### Roadmap
 
@@ -72,8 +89,8 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 - [ ] **Protect locked prompts from personas** — a persona's system prompt currently replaces the global one, so a modifiable shared persona can override a protective (e.g. child-safety) instance prompt. Enforce that locked instance prompts always apply, even under a persona
 - [ ] **Reusable playbooks** — write step-by-step instructions in Markdown once and reuse them in any conversation (a "how-to" the model follows, separate from a persona's system prompt)
 - [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording
-- [ ] **Revisit translations** — recent features ship English-only strings; many UI strings still need translating across all locales
-- [ ] Finish the Svelte 5 migration (drop the remaining legacy `on:` event directives)
+- [x] **Revisit translations** — English and French are complete (`pnpm run i18n:status`); other locales were dropped, and adding one back no longer means auditing every key
+- [ ] Finish the Svelte 5 migration — four legacy `on:` directives remain, all in `FieldInput.svelte`
 - [ ] Testing & polish
 
 > For everything already done in this fork, see [CHANGES.md](CHANGES.md).
@@ -138,11 +155,18 @@ _Common (both modes):_
 | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
 | `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = any (lock down on public instances)                                                          |
+| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any** (see the warning below)                                                              |
 | `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
 | `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |
 | `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set, it's locked instance-wide; if unset, it's configurable from the GUI |
 | `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
+
+> [!WARNING]
+> **Set `PROXY_ALLOWED_ORIGINS` on any instance reachable from the internet.** The
+> provider proxy (`/api/proxy/…`) forwards to whatever origin it is given and does
+> not require a signed-in user, so with the default empty allowlist an instance is
+> an open proxy for anyone who can reach it. Restricting it to your providers'
+> origins closes that.
 
 _Server mode (`PUBLIC_MODE=server`):_
 
@@ -164,9 +188,11 @@ _Server mode (`PUBLIC_MODE=server`):_
 
 > OIDC redirect URI to register with your provider: `https://your-hollama-domain/auth/callback/oidc`
 
-| ![session](static/screenshots/session.png)         | ![settings](static/screenshots/settings.png)   |
-| -------------------------------------------------- | ---------------------------------------------- |
-| ![session-new](static/screenshots/session-new.png) | ![knowledge](static/screenshots/knowledge.png) |
+### Screenshots
+
+| ![Home](static/screenshots/home.png)                   | ![A conversation](static/screenshots/session.png)     | ![Library](static/screenshots/library.png)        |
+| ------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------- |
+| ![Interface settings](static/screenshots/settings.png) | ![Server connections](static/screenshots/servers.png) | ![Dark mode](static/screenshots/session-dark.png) |
 
 ### License
 

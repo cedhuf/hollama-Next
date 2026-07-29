@@ -230,7 +230,7 @@ export async function mockOllamaModelsResponse(page: Page) {
 
 	// Add the default server to the servers list
 	await page.evaluate(
-		(data) => window.localStorage.setItem('hollama-servers', JSON.stringify(data)),
+		(data) => window.localStorage.setItem('hollamanext-servers', JSON.stringify(data)),
 		[{ ...getDefaultServer(ConnectionType.Ollama) }]
 	);
 
@@ -243,20 +243,33 @@ export async function mockOllamaModelsResponse(page: Page) {
 		});
 	});
 
-	// Reload the page to load the servers list
-	await page.reload();
+	// Settings live in a modal now, so reaching the connection means opening it.
+	await openServersSettings(page);
 
-	// Fetch list of models
-	await expect(page.getByText('Verify')).toBeVisible();
 	await expect(
 		page.getByText('Connection has been verified and is ready to use')
 	).not.toBeVisible();
 	const useModelsFromThisServerCheckbox = page.getByLabel('Use models from this server');
 	await expect(useModelsFromThisServerCheckbox).not.toBeChecked();
 
-	await page.getByText('Verify').click();
+	// "Verify" and "Refresh models" were merged into a single "Sync" action.
+	await page.getByLabel('Sync').click();
 	await expect(page.getByText('Connection has been verified and is ready to use')).toBeVisible();
 	await expect(useModelsFromThisServerCheckbox).toBeChecked();
+}
+
+/**
+ * Opens Settings → Servers.
+ *
+ * Settings is a modal now, opened from the sidebar — `/settings` only exists to
+ * flip the store and redirect, which is not a reliable thing to drive a test with.
+ * The modal always mounts on the Profile tab, hence the explicit tab click.
+ */
+export async function openServersSettings(page: Page) {
+	await page.goto('/sessions');
+	await page.getByLabel('Settings', { exact: true }).click();
+	await page.getByRole('tab', { name: 'Servers' }).click();
+	await expect(page.getByTestId('server').first()).toBeVisible();
 }
 
 export async function mockCompletionResponse(page: Page, response: ChatResponse) {
@@ -475,7 +488,7 @@ export const MOCK_KNOWLEDGE: Knowledge[] = [
 export async function seedKnowledgeAndReload(page: Page) {
 	// To generate the knowledge we need to pass the mocked data to the browser context
 	await page.evaluate(
-		(data) => window.localStorage.setItem('hollama-knowledge', JSON.stringify(data)),
+		(data) => window.localStorage.setItem('hollamanext-knowledge', JSON.stringify(data)),
 		MOCK_KNOWLEDGE
 	);
 

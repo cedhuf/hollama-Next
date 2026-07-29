@@ -35,7 +35,7 @@ test('can navigate between session messages and controls', async ({ page }) => {
 		}
 	];
 	await page.evaluate(
-		(data) => window.localStorage.setItem('hollama-sessions', JSON.stringify(data)),
+		(data) => window.localStorage.setItem('hollamanext-sessions', JSON.stringify(data)),
 		MOCK_SESSION
 	);
 
@@ -353,7 +353,9 @@ test('can set ollama model and runtime options', async ({ page }) => {
 	await expect(page.getByLabel('Use MLOCK')).toBeChecked();
 
 	// Check the options were saved to localStorage
-	const savedSessions = await page.evaluate(() => window.localStorage.getItem('hollama-sessions'));
+	const savedSessions = await page.evaluate(() =>
+		window.localStorage.getItem('hollamanext-sessions')
+	);
 	const parsedSessions = JSON.parse(savedSessions || '[]');
 	const savedOptions = parsedSessions[0].options;
 
