@@ -4,6 +4,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
 	import { applyBackupToStores } from '$lib/data/applyBackup';
 	import { settingsStore } from '$lib/localStorage';
@@ -76,7 +77,7 @@
 >
 	{#if step === 0}
 		<div class="flex flex-col items-center gap-4 py-4 text-center">
-			<img class="logo-ink h-14 w-14" src="/logo-mark.png" alt="Hollama Next" />
+			<Logo class="h-14 w-14" />
 			<div class="flex flex-col gap-1">
 				<h2 class="text-lg font-semibold tracking-tight">Welcome to Hollama Next</h2>
 				<p class="text-sm text-muted">Let's set things up — it only takes a minute.</p>

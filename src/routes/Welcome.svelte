@@ -3,6 +3,7 @@
 	import { fly } from 'svelte/transition';
 
 	import Button from '$lib/components/Button.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
@@ -54,7 +55,7 @@
 	{#if step === 0}
 		<!-- 1. Who we are -->
 		<div class="flex flex-col items-center gap-4 py-6 text-center">
-			<img class="logo-ink h-16 w-16" src="/logo-mark.png" alt="Hollama Next" />
+			<Logo class="h-16 w-16" />
 			<div class="flex flex-col gap-1.5">
 				<h2 class="text-xl font-semibold tracking-tight">Hollama Next</h2>
 				<p class="mx-auto max-w-xs text-sm leading-relaxed text-muted">

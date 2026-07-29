@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import Logo from '$lib/components/Logo.svelte';
+
 	let { data } = $props();
 
 	let oidcForm: HTMLFormElement | undefined = $state();
@@ -24,7 +26,7 @@
 <div class="flex h-dvh w-screen items-center justify-center bg-shade-2 p-4">
 	<div class="flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-shade-1 p-6 shadow-xl">
 		<div class="flex flex-col items-center gap-2 text-center">
-			<img class="logo-ink h-12 w-12" src="/logo-mark.png" alt="Hollama Next" />
+			<Logo class="h-12 w-12" />
 			<h1 class="text-lg font-semibold tracking-tight">Sign in to Hollama Next</h1>
 		</div>
 

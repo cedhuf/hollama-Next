@@ -6,6 +6,7 @@
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 	import { GITHUB_URL } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
@@ -44,9 +45,9 @@
 
 <SettingsPanel>
 	<!-- Identity block, in the same spirit as the Profile tab's header card. -->
-	<div class="flex flex-col items-center gap-3 py-2">
-		<img class="logo-ink h-14 w-14" src="/logo-mark.png" alt="Hollama Next logo" />
-		<div class="flex items-center gap-3">
+	<div class="flex items-center justify-center gap-4 py-2">
+		<Logo class="h-20 w-20 shrink-0" />
+		<div class="flex flex-col items-start gap-1.5">
 			<h1 class="text-xl font-semibold tracking-tight">Hollama Next</h1>
 			<Badge>v{version}</Badge>
 		</div>
