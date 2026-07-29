@@ -386,7 +386,9 @@
 					<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
 						{groupLabel(group.key)}
 					</p>
-					<div class="flex flex-col">
+					<!-- A hair of space between rows: hovering the neighbour of the active
+					     session used to butt two rounded highlights against each other. -->
+					<div class="flex flex-col gap-0.5">
 						{#each group.sessions as session (session.id)}
 							<SectionListItem
 								sitemap={Sitemap.SESSIONS}
