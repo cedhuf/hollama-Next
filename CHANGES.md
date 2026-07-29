@@ -53,7 +53,8 @@ the [original Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://
 
 ## Infrastructure & tooling
 
-- **Rolling release** — every push to `main` publishes `ghcr.io/cedhuf/hollama:latest`
+- **Versioned releases** — `semantic-release` reads the commit log, tags, writes the release notes and publishes `ghcr.io/cedhuf/hollama:latest` plus a version tag
+- In-app **update check** against the GitHub releases, announced once per version by a dismissible notice (admins only, in server mode)
 - CI/CD migrated from `npm` to **pnpm**, Node 20 → **26**
 - Docker image uses `GITHUB_TOKEN` (no PAT/secrets to manage)
 - Added `docker-compose.yml` and `.env.example` (configurable port & allowed hosts)
