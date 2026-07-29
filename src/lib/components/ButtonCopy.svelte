@@ -7,6 +7,8 @@
 	import Button from './Button.svelte';
 
 	export let content: string;
+	/** Smaller footprint, for the row of actions under a message. */
+	export let compact = false;
 
 	function copyContent() {
 		if (navigator.clipboard && window.isSecureContext) {
@@ -32,19 +34,7 @@
 </script>
 
 <div class="copy-button">
-	<Button title={$LL.copy()} variant="icon" onclick={copyContent}>
-		<Files class="base-icon" />
+	<Button title={$LL.copy()} variant={compact ? 'icon-sm' : 'icon'} onclick={copyContent}>
+		<Files class={compact ? 'h-3.5 w-3.5' : 'base-icon'} />
 	</Button>
 </div>
-
-<style lang="postcss">
-	.copy-button {
-		/* Hiding the button by default because this functionality is not supported on mobile devices */
-		display: none;
-
-		@media (hover: hover) {
-			/* Show the button in devices that support hover (i.e. desktop) */
-			display: unset;
-		}
-	}
-</style>

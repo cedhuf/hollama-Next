@@ -53,7 +53,6 @@
 			<SettingsSlider
 				label={$LL.howManyToShow()}
 				bind:value={$settingsStore.homeRecentPersonasCount}
-				indented
 			/>
 		{/if}
 
@@ -65,9 +64,19 @@
 			<SettingsSlider
 				label={$LL.howManyToShow()}
 				bind:value={$settingsStore.homeRecentSessionsCount}
-				indented
 			/>
 		{/if}
+	</SettingsSection>
+
+	<SettingsSection title={$LL.messages()} card>
+		<FieldCheckbox
+			label={$LL.accentUserMessages()}
+			bind:checked={$settingsStore.accentUserMessages}
+		/>
+		<FieldCheckbox
+			label={$LL.showMessageTimestamps()}
+			bind:checked={$settingsStore.showMessageTimestamps}
+		/>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.personas()} card>

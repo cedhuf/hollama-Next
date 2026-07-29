@@ -3,7 +3,8 @@
 	import type { Snippet } from 'svelte';
 
 	interface Props {
-		variant?: 'default' | 'outline' | 'link' | 'icon';
+		/** `icon-sm` is `icon` at the scale of an inline, secondary action. */
+		variant?: 'default' | 'outline' | 'link' | 'icon' | 'icon-sm';
 		href?: string;
 		isLoading?: boolean;
 		isActive?: boolean;
@@ -43,6 +44,7 @@
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
 			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
+			{variant === 'icon-sm' ? 'px-1.5 py-1 text-muted hover:text-active' : ''}
 			{className}
 		"
 		{onclick}
@@ -64,6 +66,7 @@
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
 			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
+			{variant === 'icon-sm' ? 'px-1.5 py-1 text-muted hover:text-active' : ''}
 			{isActive ? 'text-active' : ''}
 			{className}
 		"

@@ -19,14 +19,12 @@
 		value: number;
 		min?: number;
 		max?: number;
-		/** Indent under the checkbox that reveals it. */
-		indented?: boolean;
 	}
 
-	let { label, value = $bindable(), min = 0, max = 10, indented = false }: Props = $props();
+	let { label, value = $bindable(), min = 0, max = 10 }: Props = $props();
 </script>
 
-<div class="flex items-center gap-3 {indented ? 'pl-11' : ''}">
+<div class="flex items-center gap-3">
 	<Slider.Root
 		type="single"
 		bind:value

@@ -59,6 +59,15 @@
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
 	const isUserRole = $derived(message.role === 'user' && !isKnowledgeAttachment);
+	/** Empty when turned off in Interface, or on messages written before it was recorded. */
+	const sentAt = $derived(
+		message.createdAt && $settingsStore.showMessageTimestamps
+			? new Date(message.createdAt).toLocaleTimeString(undefined, {
+					hour: '2-digit',
+					minute: '2-digit'
+				})
+			: ''
+	);
 	// URLs indexed by citation number, so the answer's inline [n] become links.
 	const citations = $derived(message.webSearch?.sources?.map((s) => s.url));
 	// Seed from the persisted value (initial only) so a restored-expanded panel doesn't
@@ -145,13 +154,21 @@
 		</div>
 	</article>
 {:else}
+	<!-- Two shapes, not one: the assistant answers as plain prose across the column,
+	     the user speaks in a bubble pushed to the right. Identical cards for both
+	     turned a long conversation into a wall of boxes where the eye couldn't find
+	     who said what. -->
 	<article
-		class="article article--{message.role} mx-auto mb-2 flex w-full max-w-[80ch] flex-col gap-y-2 rounded-md border border-shade-3 p-3 md:mb-4 md:gap-y-4 md:p-4 lg:mb-6 lg:p-6 last:mb-0 {message.role ===
-		'assistant'
-			? 'border-transparent bg-shade-0'
-			: ''}"
+		class="article article--{message.role} mx-auto mb-4 flex w-full max-w-[80ch] flex-col gap-y-2 last:mb-0 md:mb-6 {isUserRole
+			? 'items-end'
+			: ''} {message.role === 'system' ? 'rounded-md border border-shade-3 p-3 md:p-4' : ''}"
 	>
-		<nav class="article__nav flex items-center justify-between text-muted -mt-1">
+		<!-- Header carries identity only: who spoke and when. Mirrored for the user so
+		     the badge always hugs the message's outer edge and the time sits inward,
+		     on both sides of the thread. -->
+		<nav
+			class="article__nav flex items-center gap-2 text-muted {isUserRole ? 'flex-row-reverse' : ''}"
+		>
 			<div
 				data-testid="session-role"
 				class="article__role text-center text-xs font-bold uppercase leading-7"
@@ -166,28 +183,13 @@
 					{/if}
 				</Badge>
 			</div>
-			<div class="article__interactive -mr-2 md:-mr-3">
-				{#if retryIndex}
-					<Button
-						title={$LL.retry()}
-						variant="icon"
-						id="retry-index-{retryIndex}"
-						onclick={() => handleRetry && handleRetry(retryIndex)}
-					>
-						<RefreshCw class="base-icon" />
-					</Button>
-				{/if}
-				{#if isUserRole}
-					<Button
-						title={$LL.edit()}
-						variant="icon"
-						onclick={() => handleEditMessage && handleEditMessage(message)}
-					>
-						<Pencil class="base-icon" />
-					</Button>
-				{/if}
-				<ButtonCopy content={message.content} />
-			</div>
+			{#if sentAt}
+				<!-- Information, not an action: it stays put rather than hiding in the
+				     hover-only group, where it was invisible until you went looking. -->
+				<span class="shrink-0 text-[11px] tabular-nums text-muted" title={message.createdAt}>
+					{sentAt}
+				</span>
+			{/if}
 		</nav>
 
 		{#if isSearching}
@@ -206,24 +208,24 @@
 		{/if}
 
 		{#if message.reasoning}
-			<div
-				class="reasoning rounded bg-shade-1 text-xs"
-				transition:slide={{ easing: quadInOut, duration: 200 }}
-			>
+			<!-- Secondary content, so a left rule rather than a card: the old panel was
+			     a copy of the article's own class string with two competing `max-w`
+			     and three border resets bolted on — a box inside a box. -->
+			<div class="reasoning text-xs" transition:slide={{ easing: quadInOut, duration: 200 }}>
 				<button
-					class="reasoning__button flex w-full items-center justify-between gap-2 p-2"
+					class="reasoning__button flex items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
 					onclick={toggleReasoningVisibility}
 				>
 					{$LL.reasoning()}
 					{#if isReasoningVisible}
-						<ChevronUp class="base-icon" />
+						<ChevronUp class="h-3.5 w-3.5" />
 					{:else}
-						<ChevronDown class="base-icon" />
+						<ChevronDown class="h-3.5 w-3.5" />
 					{/if}
 				</button>
 				{#if isReasoningVisible}
 					<article
-						class="article article--reasoning mx-auto mb-2 flex w-full max-w-[80ch] flex-col gap-y-2 rounded-md border border-shade-3 p-3 md:mb-4 md:gap-y-4 md:p-4 lg:mb-6 lg:p-6 last:mb-0 max-w-full border-b-0 border-l-0 border-r-0"
+						class="article--reasoning mt-1 border-l-2 border-shade-3 pl-3 text-muted"
 						transition:slide={{ easing: quadInOut, duration: 200 }}
 					>
 						<Markdown markdown={message.reasoning} />
@@ -241,7 +243,20 @@
 				</div>
 			</div>
 		{:else if message.content}
-			<Markdown markdown={message.content} {citations} />
+			{#if isUserRole}
+				<!-- Tinted with the app's accent by default so your own turns are findable
+				     when scanning back through a long conversation; Interface can turn it
+				     off for a plainer, lower-contrast thread. -->
+				<div
+					class="max-w-[85%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 {$settingsStore.accentUserMessages
+						? 'bg-accent/10'
+						: 'bg-shade-2'}"
+				>
+					<Markdown markdown={message.content} />
+				</div>
+			{:else}
+				<Markdown markdown={message.content} {citations} />
+			{/if}
 		{:else if isStreamingArticle}
 			<!-- Streaming has started but no token has landed yet. -->
 			<ThinkingIndicator />
@@ -289,6 +304,35 @@
 				{#each message.images as img (img.filename)}
 					<AttachmentImage dataUrl={`data:image/png;base64,${img.data}`} name={img.filename} />
 				{/each}
+			</div>
+		{/if}
+
+		<!-- Actions hang under the message they act on, along its own edge — the same
+		     rule for both roles, so they read as belonging to that turn rather than
+		     sitting at some fixed corner of the thread. Small and muted: they are
+		     always secondary to the text. -->
+		{#if !isStreamingArticle}
+			<div class="article__interactive -mt-0.5 flex items-center gap-0.5">
+				{#if retryIndex !== undefined}
+					<Button
+						title={$LL.retry()}
+						variant="icon-sm"
+						id="retry-index-{retryIndex}"
+						onclick={() => handleRetry && handleRetry(retryIndex)}
+					>
+						<RefreshCw class="h-3.5 w-3.5" />
+					</Button>
+				{/if}
+				{#if isUserRole}
+					<Button
+						title={$LL.edit()}
+						variant="icon-sm"
+						onclick={() => handleEditMessage && handleEditMessage(message)}
+					>
+						<Pencil class="h-3.5 w-3.5" />
+					</Button>
+				{/if}
+				<ButtonCopy content={message.content} compact />
 			</div>
 		{/if}
 	</article>

@@ -49,6 +49,8 @@
 	}
 
 	const md: MarkdownIt = new MarkdownIt({
+		// Models emit bare URLs constantly; without this they render as dead text.
+		linkify: true,
 		highlight: function (str, lang) {
 			if (lang && hljs.getLanguage(lang)) {
 				try {
@@ -61,6 +63,53 @@
 			}
 
 			return renderCodeSnippet(md.utils.escapeHtml(str));
+		}
+	});
+
+	// Only turn explicit http(s) URLs into links. Fuzzy matching would linkify any
+	// `word.tld`, and plenty of prose about `main.py` or `config.sh` would become
+	// links to Paraguay.
+	md.linkify.set({ fuzzyLink: false, fuzzyEmail: false, fuzzyIP: false });
+
+	/**
+	 * A readable stand-in for a URL that is its own link text.
+	 *
+	 * A raw URL is often longer than a phone's column, so it wrapped across two or
+	 * three lines and buried the sentence around it. The host plus the last path
+	 * segment is what actually identifies a page; the rest is noise the `title`
+	 * (and the link itself) still carries.
+	 */
+	function shortenUrl(url: string, max = 44): string {
+		try {
+			const parsed = new URL(url);
+			const host = parsed.hostname.replace(/^www\./, '');
+			const path = parsed.pathname === '/' ? '' : parsed.pathname;
+			const plain = host + path + parsed.search;
+			if (plain.length <= max) return plain;
+
+			const tail = path.split('/').filter(Boolean).pop() ?? '';
+			const elided = tail ? `${host}/…/${tail}` : `${host}/…`;
+			return elided.length <= max ? elided : `${elided.slice(0, max - 1)}…`;
+		} catch {
+			return url.length > max ? `${url.slice(0, max - 1)}…` : url;
+		}
+	}
+
+	// Shorten the visible text of links that are just their own URL. Links with
+	// authored text are left alone — the author chose those words.
+	md.core.ruler.push('shorten-urls', (state) => {
+		for (const block of state.tokens) {
+			if (block.type !== 'inline' || !block.children) continue;
+			const children = block.children;
+			for (let i = 0; i < children.length; i++) {
+				if (children[i].type !== 'link_open') continue;
+				const href = children[i].attrGet('href');
+				const label = children[i + 1];
+				if (!href || label?.type !== 'text' || children[i + 2]?.type !== 'link_close') continue;
+				if (label.content !== href) continue;
+				children[i].attrSet('title', href);
+				label.content = shortenUrl(href);
+			}
 		}
 	});
 
@@ -264,6 +313,9 @@
 
 	.markdown :global(a) {
 		@apply text-link;
+		/* Belt and braces for the links we don't shorten (authored text, or a URL
+		   still long after eliding): break inside rather than push the bubble wide. */
+		overflow-wrap: anywhere;
 	}
 
 	/* Inline web-search citation badge, e.g. the small accent "1" after a claim. */
@@ -362,10 +414,19 @@
 	}
 
 	.markdown :global(pre > .copy-button) {
-		@apply bg-shade-1 absolute top-2 right-2 rounded-md opacity-0;
+		@apply bg-shade-1 absolute top-2 right-2 rounded-md;
 	}
 
-	.markdown :global(pre:hover > .copy-button) {
-		@apply opacity-100;
+	/* Fading it out until hover only makes sense where hovering exists. On touch it
+	   stays put — otherwise a code block or shell command can never be copied. */
+	@media (hover: hover) {
+		.markdown :global(pre > .copy-button) {
+			@apply opacity-0 transition-opacity;
+		}
+
+		.markdown :global(pre:hover > .copy-button),
+		.markdown :global(pre:focus-within > .copy-button) {
+			@apply opacity-100;
+		}
 	}
 </style>

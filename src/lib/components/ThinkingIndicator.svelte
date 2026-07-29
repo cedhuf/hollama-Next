@@ -8,12 +8,32 @@
 	 * built-ins (pulse/bounce/ping) can't stagger across siblings.
 	 */
 	let { label = 'Generating a reply' }: { label?: string } = $props();
+
+	/**
+	 * Elapsed seconds, shown only once the wait is long enough to worry about.
+	 * A reasoning model can spend half a minute before its first token, and three
+	 * bouncing dots say nothing about whether anything is still happening.
+	 *
+	 * The component mounts exactly when the wait starts and unmounts on the first
+	 * token, so mount time is the right origin.
+	 */
+	const SHOW_AFTER_SECONDS = 3;
+	let seconds = $state(0);
+
+	$effect(() => {
+		const started = Date.now();
+		const timer = setInterval(() => (seconds = Math.floor((Date.now() - started) / 1000)), 1000);
+		return () => clearInterval(timer);
+	});
 </script>
 
 <span class="thinking" role="status" aria-label={label} data-testid="thinking-indicator">
 	<span class="thinking__dot"></span>
 	<span class="thinking__dot"></span>
 	<span class="thinking__dot"></span>
+	{#if seconds >= SHOW_AFTER_SECONDS}
+		<span class="thinking__elapsed">{seconds}s</span>
+	{/if}
 </span>
 
 <style>
@@ -53,6 +73,13 @@
 			transform: translateY(-0.18rem) scale(1);
 			opacity: 1;
 		}
+	}
+
+	.thinking__elapsed {
+		margin-left: 0.15rem;
+		font-size: 0.75rem;
+		font-variant-numeric: tabular-nums;
+		color: var(--color-muted);
 	}
 
 	/* Motion is decorative here; the status role still announces the state. */

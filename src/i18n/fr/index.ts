@@ -160,6 +160,7 @@ const fr = extendDictionary(en, {
 	settings: 'Paramètres',
 	somethingWentWrong: 'Désolé, quelque chose s’est mal passé',
 	stop: 'Séquence d’arrêt',
+	scrollToBottom: 'Aller au dernier message',
 	stopCompletion: 'Arrêter la complétion',
 	stopResponse: 'Arrêter la réponse',
 	success: 'Succès',
@@ -369,6 +370,8 @@ const fr = extendDictionary(en, {
 	showRecentPersonas: 'Afficher les personas récents',
 	showRecentSessions: 'Afficher les sessions récentes',
 	howManyToShow: 'Combien en afficher',
+	accentUserMessages: 'Teinter mes messages avec la couleur d’accent',
+	showMessageTimestamps: 'Afficher l’heure sur chaque message',
 	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
 
 	// --- Paramètres › À propos -------------------------------------------------

@@ -34,6 +34,8 @@ export interface Message {
 	webSearch?: WebSearchInfo; // Set when web search context was injected
 	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
 	isReasoningVisible?: boolean;
+	/** ISO timestamp. Absent on messages written before this was recorded. */
+	createdAt?: string;
 }
 
 export interface Session {

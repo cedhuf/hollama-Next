@@ -623,6 +623,10 @@ type RootTranslation = {
 	 */
 	stop: string
 	/**
+	 * S​c​r​o​l​l​ ​t​o​ ​t​h​e​ ​l​a​t​e​s​t​ ​m​e​s​s​a​g​e
+	 */
+	scrollToBottom: string
+	/**
 	 * S​t​o​p​ ​c​o​m​p​l​e​t​i​o​n
 	 */
 	stopCompletion: string
@@ -1315,6 +1319,14 @@ type RootTranslation = {
 	 * H​o​w​ ​m​a​n​y​ ​t​o​ ​s​h​o​w
 	 */
 	howManyToShow: string
+	/**
+	 * T​i​n​t​ ​m​y​ ​m​e​s​s​a​g​e​s​ ​w​i​t​h​ ​t​h​e​ ​a​c​c​e​n​t​ ​c​o​l​o​u​r
+	 */
+	accentUserMessages: string
+	/**
+	 * S​h​o​w​ ​t​h​e​ ​t​i​m​e​ ​o​n​ ​e​a​c​h​ ​m​e​s​s​a​g​e
+	 */
+	showMessageTimestamps: string
 	/**
 	 * P​i​n​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​t​a​l​k​ ​t​o​ ​a​t​ ​t​h​e​ ​t​o​p​ ​o​f​ ​t​h​e​ ​s​i​d​e​b​a​r
 	 */
@@ -2114,6 +2126,10 @@ The completion in progress will stop
 	 */
 	stop: () => LocalizedString
 	/**
+	 * Scroll to the latest message
+	 */
+	scrollToBottom: () => LocalizedString
+	/**
 	 * Stop completion
 	 */
 	stopCompletion: () => LocalizedString
@@ -2797,6 +2813,14 @@ The completion in progress will stop
 	 * How many to show
 	 */
 	howManyToShow: () => LocalizedString
+	/**
+	 * Tint my messages with the accent colour
+	 */
+	accentUserMessages: () => LocalizedString
+	/**
+	 * Show the time on each message
+	 */
+	showMessageTimestamps: () => LocalizedString
 	/**
 	 * Pin personas you talk to at the top of the sidebar
 	 */

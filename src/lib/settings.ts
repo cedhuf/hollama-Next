@@ -57,6 +57,10 @@ export interface Settings {
 	homeRecentSessionsCount: number;
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
+	/** Tint your own messages with the app's accent so they stand out from replies. */
+	accentUserMessages: boolean;
+	/** Show the time each message was sent, next to its role badge. */
+	showMessageTimestamps: boolean;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin';
 	userLanguage: Locales | null;
@@ -100,6 +104,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
+	accentUserMessages: true,
+	showMessageTimestamps: true,
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

@@ -286,7 +286,9 @@
 			<div class="flex flex-col gap-2 rounded-md border border-negative/30 bg-shade-1 p-3">
 				<span class="text-sm font-medium text-negative">{$LL.confirmResetEverything()}</span>
 				<div class="flex gap-2">
-					<Button variant="default" class="!bg-negative !text-shade-0" onclick={resetEverything}>
+					<!-- Tailwind 4 puts the important modifier at the end; the old `!bg-…`
+					     form silently compiled to nothing, so this button was never red. -->
+					<Button variant="default" class="bg-negative! border-negative!" onclick={resetEverything}>
 						<TriangleAlert class="base-icon" />
 						{$LL.yesDeleteEverything()}
 					</Button>

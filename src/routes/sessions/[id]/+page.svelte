@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Settings2 } from '@lucide/svelte';
+	import { ArrowDown, Settings2 } from '@lucide/svelte';
 	import { onMount, tick, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { get } from 'svelte/store';
+	import { fly } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
@@ -246,7 +247,11 @@
 	}
 
 	async function handleSubmitNewMessage(images?: { data: string; filename: string }[]) {
-		const message: Message = { role: 'user', content: editor.prompt };
+		const message: Message = {
+			role: 'user',
+			content: editor.prompt,
+			createdAt: new Date().toISOString()
+		};
 		if (images && images.length) message.images = images;
 		session.messages = [...session.messages, message];
 		await scrollToBottom(true); // Force scroll after submitting prompt
@@ -511,7 +516,8 @@
 				choices,
 				// Stamped BEFORE the message is appended so the completed Article mounts
 				// with the panel already in the right state — no post-render re-open flash.
-				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning)
+				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
+				createdAt: new Date().toISOString()
 			};
 
 			session.messages = [...session.messages, message];
@@ -560,7 +566,8 @@
 				role: 'assistant',
 				content: editor.completion || '',
 				reasoning: editor.reasoning || '',
-				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning)
+				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
+				createdAt: new Date().toISOString()
 			};
 			session.messages = [...session.messages, message];
 			session.updatedAt = new Date().toISOString();
@@ -594,17 +601,33 @@
 		editor.shouldFocusTextarea = true;
 	}
 
+	/**
+	 * "Near enough to the bottom" needs slack: an exact comparison flips to
+	 * `userScrolledUp` on a single pixel of sub-pixel rounding — which happens
+	 * constantly while streamed content grows — and auto-follow silently stops.
+	 */
+	const SCROLL_BOTTOM_THRESHOLD = 32;
+
 	function handleScroll() {
 		if (!messagesWindow) return;
 		const { scrollTop, scrollHeight, clientHeight } = messagesWindow;
-		userScrolledUp = scrollTop + clientHeight < scrollHeight;
+		userScrolledUp = scrollTop + clientHeight < scrollHeight - SCROLL_BOTTOM_THRESHOLD;
 	}
 
-	async function scrollToBottom(shouldForceScroll = false) {
+	/**
+	 * `smooth` is for the deliberate jump back (the button): the animation shows
+	 * how far you travelled. Auto-follow during streaming stays instant — animating
+	 * a scroll that retriggers on every token would never settle.
+	 */
+	async function scrollToBottom(shouldForceScroll = false, smooth = false) {
 		if (!shouldForceScroll && (!messagesWindow || userScrolledUp)) return;
 		await tick();
 		requestAnimationFrame(() => {
-			if (messagesWindow) messagesWindow.scrollTop = messagesWindow.scrollHeight;
+			if (!messagesWindow) return;
+			messagesWindow.scrollTo({
+				top: messagesWindow.scrollHeight,
+				behavior: smooth ? 'smooth' : 'auto'
+			});
 		});
 	}
 </script>
@@ -702,6 +725,24 @@
 				assistantLabel={persona?.name}
 			/>
 		</div>
+
+		<!-- Scrolling up during a reply silently opts you out of auto-follow; without
+		     this there is nothing to say content is still arriving below, nor any way
+		     back short of dragging. Sits above the composer, which floats over the
+		     history. -->
+		{#if userScrolledUp}
+			<button
+				type="button"
+				transition:fly={{ y: 8, duration: 150 }}
+				onclick={() => scrollToBottom(true, true)}
+				aria-label={$LL.scrollToBottom()}
+				title={$LL.scrollToBottom()}
+				style={composerFloating ? `bottom: ${promptHeight + 16}px` : undefined}
+				class="scroll-to-bottom absolute bottom-4 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-0 text-muted shadow-md transition-colors hover:text-active"
+			>
+				<ArrowDown class="base-icon" />
+			</button>
+		{/if}
 	{/if}
 
 	<div

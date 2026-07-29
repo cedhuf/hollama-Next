@@ -156,6 +156,7 @@ const en = {
 	settings: 'Settings',
 	somethingWentWrong: 'Sorry, something went wrong',
 	stop: 'Stop sequence',
+	scrollToBottom: 'Scroll to the latest message',
 	stopCompletion: 'Stop completion',
 	stopResponse: 'Stop response',
 	success: 'Success',
@@ -353,6 +354,8 @@ const en = {
 	showRecentPersonas: 'Show recent personas',
 	showRecentSessions: 'Show recent sessions',
 	howManyToShow: 'How many to show',
+	accentUserMessages: 'Tint my messages with the accent colour',
+	showMessageTimestamps: 'Show the time on each message',
 	pinPersonasInSidebar: 'Pin personas you talk to at the top of the sidebar',
 
 	// --- Settings › About ------------------------------------------------------
