@@ -1,9 +1,10 @@
 name: Build & publish
 
+# Images are published per release, not per push: a multi-arch build takes ~20
+# minutes, and `:latest` is only meaningful if the version it carries is the one
+# `package.json` was tagged with. Use "Run workflow" to publish from `main`
+# without cutting a release.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
   # Called by `versioning.yml` once a release lands. A commit pushed by an Action
   # using the default GITHUB_TOKEN never triggers another workflow, so the release
@@ -15,6 +16,11 @@ on:
         type: string
         required: false
         default: ''
+
+# A second run supersedes the first rather than racing it to the registry.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   docker:
@@ -34,6 +40,14 @@ jobs:
           # `github.sha` still points at the caller's commit — the one *before*
           # the release bump.
           ref: ${{ inputs.ref || github.ref }}
+
+      # Read from the checkout rather than from the event: on a `workflow_call`,
+      # `github.sha` is the caller's commit, not the one being built.
+      - name: Read the build's identity
+        id: meta
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -56,4 +70,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/hollama:latest
-            ghcr.io/${{ github.repository_owner }}/hollama:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/hollama:${{ steps.meta.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/hollama:${{ steps.meta.outputs.sha }}

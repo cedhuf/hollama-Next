@@ -108,7 +108,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 
 ### Self-hosting
 
-Docker images are published to [`ghcr.io/cedhuf/hollama`](https://ghcr.io/cedhuf/hollama) as a **rolling release** — every push to `main` automatically updates the `:latest` tag.
+Docker images are published to [`ghcr.io/cedhuf/hollama`](https://ghcr.io/cedhuf/hollama) on every release. `:latest` always points at the newest one; each release is also tagged with its version (`:0.2.0`) if you'd rather pin.
 
 **Quick start with Docker Compose (recommended):**
 
