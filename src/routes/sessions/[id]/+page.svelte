@@ -202,6 +202,7 @@
 			}
 
 			editor.webSearch = pending.webSearch;
+			editor.webFetch = pending.webFetch;
 			// Carry over the composer tool switches set on the home page (undefined →
 			// keep the session defaults already assigned above).
 			if (pending.thinking !== undefined) editor.thinking = pending.thinking;

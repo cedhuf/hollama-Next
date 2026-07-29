@@ -26,6 +26,7 @@
 	import { getSessionTitle } from '$lib/sessions';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { generateRandomId } from '$lib/utils';
+	import { webFetchConfig } from '$lib/webFetch';
 
 	import PromptAttachments from './[id]/PromptAttachments.svelte';
 
@@ -34,6 +35,7 @@
 	let prompt = $state('');
 	let selectedModel = $state($chatDefaultsConfig.defaultModel.value || undefined);
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
+	let webFetch = $state($webFetchConfig.available && $settingsStore.webFetchByDefault);
 	let interactiveChoices = $state($settingsStore.interactiveChoices);
 	let sendCurrentDate = $state($settingsStore.sendCurrentDate);
 	let thinking = $state(true);
@@ -53,6 +55,15 @@
 	const tools = $derived([
 		...(searchAvailable
 			? [{ label: 'Web search', checked: webSearch, onChange: (v: boolean) => (webSearch = v) }]
+			: []),
+		...($webFetchConfig.available
+			? [
+					{
+						label: 'Read linked pages',
+						checked: webFetch,
+						onChange: (v: boolean) => (webFetch = v)
+					}
+				]
 			: []),
 		{
 			label: 'Interactive choices',
@@ -140,6 +151,7 @@
 			prompt: content,
 			model: selectedModel,
 			webSearch,
+			webFetch,
 			interactiveChoices,
 			sendCurrentDate,
 			thinking,

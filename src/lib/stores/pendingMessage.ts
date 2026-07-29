@@ -7,6 +7,7 @@ export interface PendingMessage {
 	prompt: string;
 	model?: string;
 	webSearch: boolean;
+	webFetch: boolean;
 	attachments: Attachment[];
 	/**
 	 * Composer tool switches carried over from the home page. Optional so older
