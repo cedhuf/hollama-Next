@@ -8,6 +8,7 @@
 export type PromptKey =
 	| 'currentDate'
 	| 'searchRouter'
+	| 'searchNone'
 	| 'searchContext'
 	| 'pageContext'
 	| 'searchRead'
@@ -44,7 +45,11 @@ The current date is {datetime} — use it to resolve "today/now/latest" and neve
 
 Output a query when the message involves: weather, news, prices, stocks, sports, schedules, opening hours; anything tied to "today/now/current/latest/aujourd'hui/actualités" or a recent or upcoming date; events, releases or facts that may have changed after your training; or an explicit request to search.
 
-Reply NONE for timeless requests you can fully answer yourself (definitions, explanations, math, translation, coding, writing).
+Output a query as well when the message asks for a specific fact about a NAMED thing — a game, film, book, product, company, person, place, API — and you are not certain of that fact. Unfamiliar or niche names are the strongest reason to search, not a reason to give up: a lookup costs little, a confident wrong answer costs the user. This holds even when the subject is timeless (game mechanics, plot details, specifications, discography): timeless is about the fact not changing, not about you knowing it.
+
+Search too when the conversation shows the previous answer fell short — the user pushes back, corrects, insists the thing exists, or repeats the question after an "I don't know" or a request for clarification. In that case write the query from the ORIGINAL question, not from the pushback.
+
+Reply NONE for requests you can genuinely answer yourself from general knowledge: definitions, explanations, math, translation, coding, writing, and messages that ask nothing factual (greetings, thanks, questions about you or this conversation).
 
 Write the query for the USER's information need — not your own beliefs:
 - Use neutral, factual keywords (the topic itself). Do NOT add words like "rumor", "leak", "fake" or "hoax" just because you doubt something exists or has been released yet.
@@ -56,9 +61,17 @@ Examples:
 "Qui a gagné le match hier soir ?" -> résultat match hier soir
 "Star Fox sur Switch 2 ?" -> Star Fox Switch 2 date de sortie
 "Qu'est-ce qu'on sait de l'iPhone 18 Pro ?" -> iPhone 18 Pro fuites specs rumeurs
+"Dans Ball x Pit, la boule fer évolue avec gel ou lumière ?" -> Ball x Pit boule fer évolution
+(after "I could not find that game") "Si c'est un jeu très connu !" -> Ball x Pit boule fer évolution
 "Explique-moi la photosynthèse" -> NONE
+"Tu as cherché sur internet ?" -> NONE
 
 Never answer the question yourself. Output only the query, or NONE.`
+	},
+	searchNone: {
+		label: 'Web search — not used',
+		hint: 'Tells the model when no search ran, so it cannot claim it searched.',
+		default: `No web search was run for this message: you are answering from your own knowledge alone, and you have not read anything online in this conversation turn. Never claim or imply otherwise — do not say you searched, looked it up, checked the web, or found nothing online, and do not narrate searching in your reasoning. If you do not know something, say plainly that you do not know it and that you have not looked it up.`
 	},
 	searchContext: {
 		label: 'Web search — results',
@@ -108,6 +121,7 @@ Rules:
 export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
 	'searchRouter',
+	'searchNone',
 	'searchContext',
 	'searchRead',
 	'pageContext',

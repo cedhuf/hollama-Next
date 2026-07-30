@@ -484,6 +484,15 @@
 				}
 				editor.isSearching = false;
 				editor.webSearchInfo = searchInfo;
+			} else {
+				// The router declined. Without this note nothing in the context tells the
+				// model apart "I searched and found nothing" from "I never searched" —
+				// and models fill that silence by claiming they looked it up, sometimes
+				// staging fake searches in their reasoning first.
+				chatMessages = [
+					{ role: 'system', content: resolvePrompt('searchNone', $settingsStore.promptOverrides) },
+					...chatMessages
+				];
 			}
 		}
 
