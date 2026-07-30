@@ -71,6 +71,14 @@
 	// links to Paraguay.
 	md.linkify.set({ fuzzyLink: false, fuzzyEmail: false, fuzzyIP: false });
 
+	// Indented code blocks off: in Markdown four leading spaces mean "code", and
+	// models indent constantly — nested bullets, sub-points, reasoning outlines.
+	// Prose was landing in a code block, which by design never wraps, so a
+	// paragraph became as wide as its longest line and had to be scrolled
+	// sideways to read. Fenced blocks (```) are unaffected, and they are how a
+	// model actually marks up code.
+	md.disable('code');
+
 	/**
 	 * A readable stand-in for a URL that is its own link text.
 	 *
@@ -260,6 +268,30 @@
 		@apply md:text-base;
 		/* Break long unbreakable strings (URLs, hashes) instead of overflowing. */
 		overflow-wrap: break-word;
+	}
+
+	/* Reasoning is an aside, not the answer, and has to read as one at a glance.
+	   The rules above set an absolute size, so the container's `text-xs` was
+	   overridden and the two ended up identical in size and weight — the left rule
+	   alone wasn't carrying the hierarchy. Stepped down a size and desaturated
+	   here, where the specificity is enough to win. */
+	:global(.article--reasoning) .markdown :global(p),
+	:global(.article--reasoning) .markdown :global(li),
+	:global(.article--reasoning) .markdown :global(strong) {
+		@apply text-xs;
+		@apply md:text-sm;
+		color: hsl(var(--hsl-text-shade-2));
+	}
+
+	:global(.article--reasoning) .markdown :global(strong) {
+		@apply font-medium;
+	}
+
+	:global(.article--reasoning) .markdown :global(h1),
+	:global(.article--reasoning) .markdown :global(h2),
+	:global(.article--reasoning) .markdown :global(h3),
+	:global(.article--reasoning) .markdown :global(h4) {
+		@apply text-muted mt-3 mb-0.5 text-xs font-medium;
 	}
 
 	/* Lists: indent with left padding (so markers sit in the gutter and nested

@@ -720,6 +720,9 @@
 		userScrolledUp = scrollTop + clientHeight < scrollHeight - SCROLL_BOTTOM_THRESHOLD;
 	}
 
+	/** One frame may hold at most one queued auto-follow, however many tokens land. */
+	let scrollQueued = false;
+
 	/**
 	 * `smooth` is for the deliberate jump back (the button): the animation shows
 	 * how far you travelled. Auto-follow during streaming stays instant — animating
@@ -727,9 +730,21 @@
 	 */
 	async function scrollToBottom(shouldForceScroll = false, smooth = false) {
 		if (!shouldForceScroll && (!messagesWindow || userScrolledUp)) return;
+		// Streaming calls this on every chunk. Without coalescing, each one queued
+		// its own frame and they piled up faster than they could run.
+		if (!shouldForceScroll) {
+			if (scrollQueued) return;
+			scrollQueued = true;
+		}
 		await tick();
 		requestAnimationFrame(() => {
+			if (!shouldForceScroll) scrollQueued = false;
 			if (!messagesWindow) return;
+			// Re-checked here, not only on the way in: the user may have started
+			// scrolling up between the call and this frame, and yanking them back
+			// then also cleared `userScrolledUp` — so auto-follow resumed and the
+			// page fought every attempt to read further up.
+			if (!shouldForceScroll && userScrolledUp) return;
 			messagesWindow.scrollTo({
 				top: messagesWindow.scrollHeight,
 				behavior: smooth ? 'smooth' : 'auto'
