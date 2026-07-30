@@ -38,6 +38,28 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 			parts.push(`🖼️ _${image.filename}_`);
 		}
 
+		// Earlier rounds first, so the transcript reads in the order it happened.
+		for (const step of message.reasoningTrace ?? []) {
+			if (step.type === 'read') {
+				parts.push(
+					step.pages?.length
+						? `🌐 _Read: ${step.pages.map((p) => `[${p.title || p.url}](${p.url})`).join(', ')}_`
+						: '🌐 _Pages could not be read_'
+				);
+			} else if (step.content?.trim()) {
+				parts.push(
+					[
+						'<details>',
+						'<summary>Reasoning</summary>',
+						'',
+						step.content.trim(),
+						'',
+						'</details>'
+					].join('\n')
+				);
+			}
+		}
+
 		if (message.reasoning?.trim()) {
 			// <details> keeps long chains of thought collapsed wherever the markdown
 			// is rendered, while staying plain text everywhere else.

@@ -336,6 +336,7 @@
 		editor.prompt = '';
 		editor.completion = '';
 		editor.reasoning = '';
+		editor.reasoningTrace = undefined;
 		editor.streamingReasoningExpanded = false;
 		editor.isSearching = false;
 		editor.searchQuery = undefined;
@@ -573,6 +574,14 @@
 				const urls = wanted.map((n) => sources[n - 1]?.url).filter((url): url is string => !!url);
 				if (!urls.length) break;
 
+				// From here the turn takes a second round, which overwrites the panel:
+				// keep this round's thinking, and the reading itself, as trace steps.
+				if (editor.reasoning?.trim())
+					editor.reasoningTrace = [
+						...(editor.reasoningTrace ?? []),
+						{ type: 'reasoning', content: editor.reasoning }
+					];
+
 				editor.isSearching = true;
 				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
 				try {
@@ -582,6 +591,11 @@
 					// and let the model reply from the snippets it already has.
 				}
 				editor.isSearching = false;
+
+				editor.reasoningTrace = [
+					...(editor.reasoningTrace ?? []),
+					{ type: 'read', pages: read?.pages.map((p) => ({ title: p.title, url: p.url })) ?? [] }
+				];
 
 				// It asked and got nothing: say so, rather than let it answer from the
 				// one-line snippets as though it had read the pages.
@@ -627,6 +641,7 @@
 				role: 'assistant',
 				content,
 				reasoning: editor.reasoning,
+				reasoningTrace: editor.reasoningTrace,
 				webSearch: searchInfo,
 				choices,
 				// Stamped BEFORE the message is appended so the completed Article mounts
@@ -641,6 +656,7 @@
 
 			editor.completion = '';
 			editor.reasoning = '';
+			editor.reasoningTrace = undefined;
 			editor.shouldFocusTextarea = true;
 			editor.isCompletionInProgress = false;
 			await scrollToBottom();

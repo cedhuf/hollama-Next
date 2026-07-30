@@ -140,6 +140,8 @@ const fr = extendDictionary(en, {
 	pullingModel: 'Téléchargement du modèle en cours',
 	random: 'Aléatoire',
 	reasoning: 'Raisonnement',
+	pagesRead: '{count:number} page{{s}} lue{{s}}',
+	pagesReadFailed: 'Pages illisibles',
 	refreshToUpdate: 'Actualiser pour mettre à jour',
 	releaseHistory: 'Historique des versions',
 	repeatLastN: 'Répéter les N derniers',

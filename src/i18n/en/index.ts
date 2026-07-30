@@ -136,6 +136,8 @@ const en = {
 	pullingModel: 'Pulling model',
 	random: 'Random',
 	reasoning: 'Reasoning',
+	pagesRead: 'Read {count:number} page{{s}}',
+	pagesReadFailed: 'Could not read the pages',
 	refreshToUpdate: 'Refresh to update',
 	releaseHistory: 'Release history',
 	repeatLastN: 'Repeat last N',

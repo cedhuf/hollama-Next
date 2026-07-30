@@ -79,6 +79,7 @@
 			role: 'assistant',
 			content: streamingContent,
 			reasoning: editor.reasoning,
+			reasoningTrace: editor.reasoningTrace,
 			webSearch: editor.webSearchInfo
 		}}
 		isStreamingArticle={true}

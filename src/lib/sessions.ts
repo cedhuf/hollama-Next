@@ -24,12 +24,31 @@ export interface WebSearchInfo {
 	sources?: SearchSource[];
 }
 
+/**
+ * One step of what happened before the answer's own reasoning.
+ *
+ * A turn can take two rounds: the model thinks, asks to read some results with a
+ * `<read>` block, and thinks again with the pages in hand. Only the last round's
+ * thinking used to survive — the first was overwritten and the reading was never
+ * shown at all, so the answer appeared to come from nowhere. These are the
+ * earlier steps, in order; the final reasoning stays in `reasoning`.
+ */
+export interface ReasoningStep {
+	type: 'reasoning' | 'read';
+	/** The thinking, for a `reasoning` step. */
+	content?: string;
+	/** The pages that were opened, for a `read` step. Empty when none could be. */
+	pages?: SearchSource[];
+}
+
 export interface Message {
 	role: 'user' | 'assistant' | 'system';
 	content: string;
 	knowledge?: Knowledge;
 	context?: number[];
 	reasoning?: string;
+	/** Set only on multi-round turns; `reasoning` remains the final round's. */
+	reasoningTrace?: ReasoningStep[];
 	images?: { data: string; filename: string }[]; // Store image data and filename
 	webSearch?: WebSearchInfo; // Set when web search context was injected
 	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
@@ -76,6 +95,8 @@ export interface Editor {
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];
 	completion?: string;
 	reasoning?: string;
+	/** Earlier rounds of the turn in progress, shown above the live reasoning. */
+	reasoningTrace?: ReasoningStep[];
 	/** Live reasoning-panel toggle on the streaming article; stamped onto the message at completion. */
 	streamingReasoningExpanded?: boolean;
 	promptTextarea?: HTMLTextAreaElement;

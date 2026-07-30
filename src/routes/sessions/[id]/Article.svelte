@@ -74,6 +74,9 @@
 	// play its intro animation on load; the effect below keeps it in sync afterwards.
 	let isReasoningVisible = $state(untrack(() => message.isReasoningVisible) ?? false);
 	let userHasInteractedWithToggle = $state(false);
+	// Earlier rounds start collapsed and aren't persisted: they're there to be
+	// checked after the fact, not to reopen with the conversation.
+	let visibleTraceSteps = $state<Record<number, boolean>>({});
 
 	function toggleReasoningVisibility() {
 		isReasoningVisible = !isReasoningVisible;
@@ -206,6 +209,55 @@
 				<span title={`Query: “${message.webSearch.query}”`}>No web results found</span>
 			</div>
 		{/if}
+
+		<!-- What came before the answer's own thinking, in order: an earlier round of
+		     reasoning, then the pages it stopped to read. Without this the panel showed
+		     only the last round and the reading left no trace at all. -->
+		{#each message.reasoningTrace ?? [] as step, i (i)}
+			{#if step.type === 'reasoning' && step.content}
+				<div class="reasoning text-xs">
+					<button
+						class="reasoning__button flex items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
+						onclick={() => (visibleTraceSteps[i] = !visibleTraceSteps[i])}
+					>
+						{$LL.reasoning()}
+						{#if visibleTraceSteps[i]}
+							<ChevronUp class="h-3.5 w-3.5" />
+						{:else}
+							<ChevronDown class="h-3.5 w-3.5" />
+						{/if}
+					</button>
+					{#if visibleTraceSteps[i]}
+						<article
+							class="article--reasoning mt-1 border-l-2 border-shade-3 pl-3 text-muted"
+							transition:slide={{ easing: quadInOut, duration: 200 }}
+						>
+							<Markdown markdown={step.content} />
+						</article>
+					{/if}
+				</div>
+			{:else if step.type === 'read'}
+				<div class="article__read flex flex-wrap items-center gap-1.5 text-xs text-muted">
+					<Globe class="h-3 w-3 shrink-0" />
+					{#if step.pages?.length}
+						<span>{$LL.pagesRead({ count: step.pages.length })}</span>
+						{#each step.pages as page, p (page.url + p)}
+							<a
+								href={page.url}
+								target="_blank"
+								rel="noreferrer external"
+								title={page.title || page.url}
+								class="max-w-[15rem] truncate rounded-full border border-shade-3 bg-shade-1 px-2 py-0.5 transition-colors hover:border-accent hover:text-active"
+							>
+								{domainOf(page.url)}
+							</a>
+						{/each}
+					{:else}
+						<span>{$LL.pagesReadFailed()}</span>
+					{/if}
+				</div>
+			{/if}
+		{/each}
 
 		{#if message.reasoning}
 			<!-- Secondary content, so a left rule rather than a card: the old panel was

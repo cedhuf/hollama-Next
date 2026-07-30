@@ -547,6 +547,15 @@ type RootTranslation = {
 	 */
 	reasoning: string
 	/**
+	 * R​e​a​d​ ​{​c​o​u​n​t​}​ ​p​a​g​e​{​{​s​}​}
+	 * @param {number} count
+	 */
+	pagesRead: RequiredParams<'count'>
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​r​e​a​d​ ​t​h​e​ ​p​a​g​e​s
+	 */
+	pagesReadFailed: string
+	/**
 	 * R​e​f​r​e​s​h​ ​t​o​ ​u​p​d​a​t​e
 	 */
 	refreshToUpdate: string
@@ -2112,6 +2121,14 @@ The completion in progress will stop
 	 * Reasoning
 	 */
 	reasoning: () => LocalizedString
+	/**
+	 * Read {count} page{{s}}
+	 */
+	pagesRead: (arg: { count: number }) => LocalizedString
+	/**
+	 * Could not read the pages
+	 */
+	pagesReadFailed: () => LocalizedString
 	/**
 	 * Refresh to update
 	 */
