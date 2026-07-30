@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Brain, ChevronDown, ChevronUp, Globe, Pencil, RefreshCw, Trash2 } from '@lucide/svelte';
+	import {
+		Brain,
+		ChevronDown,
+		ChevronUp,
+		FileText,
+		Globe,
+		Pencil,
+		RefreshCw,
+		Trash2
+	} from '@lucide/svelte';
 	import { untrack } from 'svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
@@ -27,6 +36,7 @@
 		onChoose = undefined,
 		isStreamingArticle = false,
 		isSearching = false,
+		searchActivity = undefined,
 		searchQuery = undefined,
 		preparingChoices = false,
 		assistantLabel = undefined,
@@ -44,6 +54,8 @@
 		onChoose?: (selected: string[][]) => void;
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
+		/** Whether the running lookup is a search or a page read — they read differently. */
+		searchActivity?: 'search' | 'read';
 		searchQuery?: string;
 		/** True while the model is streaming an <ask> block — show a choices skeleton. */
 		preparingChoices?: boolean;
@@ -74,9 +86,40 @@
 	// play its intro animation on load; the effect below keeps it in sync afterwards.
 	let isReasoningVisible = $state(untrack(() => message.isReasoningVisible) ?? false);
 	let userHasInteractedWithToggle = $state(false);
-	// Earlier rounds start collapsed and aren't persisted: they're there to be
-	// checked after the fact, not to reopen with the conversation.
-	let visibleTraceSteps = $state<Record<number, boolean>>({});
+
+	/**
+	 * The timeline, oldest first: the recorded steps, then the round still being
+	 * written. The last round lives in `reasoning` rather than in the trace — it is
+	 * still streaming — but it belongs at the end of the same list, which is what
+	 * keeps it from jumping when a second round pushes it into history.
+	 */
+	const steps = $derived([
+		// Messages written before the trace existed still know they searched.
+		...(message.reasoningTrace ??
+			(message.webSearch
+				? [
+						{
+							type: 'search' as const,
+							query: message.webSearch.query,
+							resultCount: message.webSearch.resultCount
+						}
+					]
+				: [])),
+		...(message.reasoning ? [{ type: 'reasoning' as const, content: message.reasoning }] : [])
+	]);
+
+	/** What it is doing, or — once done — what it did. */
+	const activityLabel = $derived.by(() => {
+		if (isSearching) return searchActivity === 'read' ? $LL.readingPages() : $LL.searchingTheWeb();
+		if (isStreamingArticle && message.reasoning && !currentRawCompletion?.trim())
+			return $LL.thinkingActivity();
+
+		const done: string[] = [];
+		if (steps.some((s) => s.type === 'search')) done.push($LL.searchedTheWeb());
+		const pages = steps.find((s) => s.type === 'read')?.pages?.length;
+		if (pages) done.push($LL.pagesRead({ count: pages }));
+		return done.length ? done.join(' · ') : $LL.reasoning();
+	});
 
 	function toggleReasoningVisibility() {
 		isReasoningVisible = !isReasoningVisible;
@@ -195,93 +238,93 @@
 			{/if}
 		</nav>
 
-		{#if isSearching}
-			<div class="article__search flex flex-wrap items-center gap-1.5 text-xs text-muted">
-				<Globe class="h-3 w-3 shrink-0 animate-pulse" />
-				<span class="animate-pulse">Searching the web</span>
-				{#if searchQuery}
-					<span class="rounded-full bg-shade-2 px-2 py-0.5 text-muted">{searchQuery}</span>
-				{/if}
-			</div>
-		{:else if message.webSearch && message.webSearch.resultCount === 0}
-			<div class="article__search flex items-center gap-1.5 text-xs text-muted">
-				<Globe class="h-3 w-3 shrink-0" />
-				<span title={`Query: “${message.webSearch.query}”`}>No web results found</span>
-			</div>
-		{/if}
-
-		<!-- What came before the answer's own thinking, in order: an earlier round of
-		     reasoning, then the pages it stopped to read. Without this the panel showed
-		     only the last round and the reading left no trace at all. -->
-		{#each message.reasoningTrace ?? [] as step, i (i)}
-			{#if step.type === 'reasoning' && step.content}
-				<div class="reasoning text-xs">
-					<button
-						class="reasoning__button flex items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
-						onclick={() => (visibleTraceSteps[i] = !visibleTraceSteps[i])}
-					>
-						{$LL.reasoning()}
-						{#if visibleTraceSteps[i]}
-							<ChevronUp class="h-3.5 w-3.5" />
-						{:else}
-							<ChevronDown class="h-3.5 w-3.5" />
-						{/if}
-					</button>
-					{#if visibleTraceSteps[i]}
-						<article
-							class="article--reasoning mt-1 border-l-2 border-shade-3 pl-3 text-muted"
-							transition:slide={{ easing: quadInOut, duration: 200 }}
-						>
-							<Markdown markdown={step.content} />
-						</article>
-					{/if}
-				</div>
-			{:else if step.type === 'read'}
-				<div class="article__read flex flex-wrap items-center gap-1.5 text-xs text-muted">
-					<Globe class="h-3 w-3 shrink-0" />
-					{#if step.pages?.length}
-						<span>{$LL.pagesRead({ count: step.pages.length })}</span>
-						{#each step.pages as page, p (page.url + p)}
-							<a
-								href={page.url}
-								target="_blank"
-								rel="noreferrer external"
-								title={page.title || page.url}
-								class="max-w-[15rem] truncate rounded-full border border-shade-3 bg-shade-1 px-2 py-0.5 transition-colors hover:border-accent hover:text-active"
-							>
-								{domainOf(page.url)}
-							</a>
-						{/each}
-					{:else}
-						<span>{$LL.pagesReadFailed()}</span>
-					{/if}
-				</div>
-			{/if}
-		{/each}
-
-		{#if message.reasoning}
-			<!-- Secondary content, so a left rule rather than a card: the old panel was
-			     a copy of the article's own class string with two competing `max-w`
-			     and three border resets bolted on — a box inside a box. -->
-			<div class="reasoning text-xs" transition:slide={{ easing: quadInOut, duration: 200 }}>
+		<!-- Everything the turn did before answering, under one heading: searching,
+		     thinking, reading, thinking again. Each of these used to be its own widget
+		     appearing and replacing the previous one, so the article flickered while it
+		     worked and only the last round survived. One list, appended to. -->
+		{#if steps.length || isSearching}
+			<div class="activity text-xs">
 				<button
-					class="reasoning__button flex items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
+					class="activity__button flex max-w-full items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
 					onclick={toggleReasoningVisibility}
+					aria-expanded={isReasoningVisible}
+					disabled={!steps.length}
 				>
-					{$LL.reasoning()}
-					{#if isReasoningVisible}
-						<ChevronUp class="h-3.5 w-3.5" />
-					{:else}
-						<ChevronDown class="h-3.5 w-3.5" />
+					<span class="truncate {isSearching ? 'animate-pulse' : ''}">{activityLabel}</span>
+					{#if isSearching && searchQuery}
+						<span class="truncate rounded-full bg-shade-2 px-2 py-0.5">{searchQuery}</span>
+					{/if}
+					{#if steps.length}
+						{#if isReasoningVisible}
+							<ChevronUp class="h-3.5 w-3.5 shrink-0" />
+						{:else}
+							<ChevronDown class="h-3.5 w-3.5 shrink-0" />
+						{/if}
 					{/if}
 				</button>
-				{#if isReasoningVisible}
-					<article
-						class="article--reasoning mt-1 border-l-2 border-shade-3 pl-3 text-muted"
+
+				{#if isReasoningVisible && steps.length}
+					<div
+						class="activity__timeline mt-0.5 flex flex-col"
 						transition:slide={{ easing: quadInOut, duration: 200 }}
 					>
-						<Markdown markdown={message.reasoning} />
-					</article>
+						{#each steps as step, i (i)}
+							<div class="flex gap-2">
+								<!-- Gutter: the icon says what the step is, the rule under it ties the
+								     steps together so they read as one sequence rather than as a stack. -->
+								<div class="flex w-4 shrink-0 flex-col items-center text-muted">
+									{#if step.type === 'reasoning'}
+										<Brain class="mt-1 h-3.5 w-3.5 shrink-0" />
+									{:else if step.type === 'search'}
+										<Globe class="mt-1 h-3.5 w-3.5 shrink-0" />
+									{:else}
+										<FileText class="mt-1 h-3.5 w-3.5 shrink-0" />
+									{/if}
+									{#if i < steps.length - 1}
+										<div class="my-1 w-px flex-1 bg-shade-3"></div>
+									{/if}
+								</div>
+
+								<div class="min-w-0 flex-1 {i < steps.length - 1 ? 'pb-2' : ''}">
+									{#if step.type === 'reasoning'}
+										<article class="article--reasoning text-muted">
+											<Markdown markdown={step.content ?? ''} />
+										</article>
+									{:else if step.type === 'search'}
+										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+											{#if step.query}
+												<span class="rounded-full bg-shade-2 px-2 py-0.5">{step.query}</span>
+											{/if}
+											<span>
+												{step.resultCount
+													? $LL.searchResults({ count: step.resultCount })
+													: $LL.noWebResults()}
+											</span>
+										</div>
+									{:else}
+										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+											{#if step.pages?.length}
+												<span>{$LL.pagesRead({ count: step.pages.length })}</span>
+												{#each step.pages as page, p (page.url + p)}
+													<a
+														href={page.url}
+														target="_blank"
+														rel="noreferrer external"
+														title={page.title || page.url}
+														class="max-w-[15rem] truncate rounded-full border border-shade-3 bg-shade-1 px-2 py-0.5 transition-colors hover:border-accent hover:text-active"
+													>
+														{domainOf(page.url)}
+													</a>
+												{/each}
+											{:else}
+												<span>{$LL.pagesReadFailed()}</span>
+											{/if}
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/each}
+					</div>
 				{/if}
 			</div>
 		{/if}

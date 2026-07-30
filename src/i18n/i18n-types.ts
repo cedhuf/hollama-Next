@@ -556,6 +556,31 @@ type RootTranslation = {
 	 */
 	pagesReadFailed: string
 	/**
+	 * S​e​a​r​c​h​i​n​g​ ​t​h​e​ ​w​e​b
+	 */
+	searchingTheWeb: string
+	/**
+	 * R​e​a​d​i​n​g​ ​t​h​e​ ​p​a​g​e​s
+	 */
+	readingPages: string
+	/**
+	 * T​h​i​n​k​i​n​g
+	 */
+	thinkingActivity: string
+	/**
+	 * {​c​o​u​n​t​}​ ​r​e​s​u​l​t​{​{​s​}​}
+	 * @param {number} count
+	 */
+	searchResults: RequiredParams<'count'>
+	/**
+	 * N​o​ ​r​e​s​u​l​t​s
+	 */
+	noWebResults: string
+	/**
+	 * S​e​a​r​c​h​e​d​ ​t​h​e​ ​w​e​b
+	 */
+	searchedTheWeb: string
+	/**
 	 * R​e​f​r​e​s​h​ ​t​o​ ​u​p​d​a​t​e
 	 */
 	refreshToUpdate: string
@@ -2129,6 +2154,30 @@ The completion in progress will stop
 	 * Could not read the pages
 	 */
 	pagesReadFailed: () => LocalizedString
+	/**
+	 * Searching the web
+	 */
+	searchingTheWeb: () => LocalizedString
+	/**
+	 * Reading the pages
+	 */
+	readingPages: () => LocalizedString
+	/**
+	 * Thinking
+	 */
+	thinkingActivity: () => LocalizedString
+	/**
+	 * {count} result{{s}}
+	 */
+	searchResults: (arg: { count: number }) => LocalizedString
+	/**
+	 * No results
+	 */
+	noWebResults: () => LocalizedString
+	/**
+	 * Searched the web
+	 */
+	searchedTheWeb: () => LocalizedString
 	/**
 	 * Refresh to update
 	 */

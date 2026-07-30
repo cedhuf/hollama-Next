@@ -2,6 +2,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { stripAskBlock } from '$lib/askChoice';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
+	import { stripReadBlock } from '$lib/readProtocol';
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
 	import Article from './Article.svelte';
@@ -28,7 +29,17 @@
 
 	// While the model is streaming an <ask> block the visible text is empty — show
 	// a choices skeleton instead of a bare "…".
-	const streamingContent = $derived(stripAskBlock(editor.completion || ''));
+	//
+	// A <read> block is protocol too, and its whole round is thrown away once the
+	// pages come back: showing it wrote an answer on screen that then vanished.
+	// Cut from the opening tag, so a half-streamed block never lands either.
+	const streamingContent = $derived(
+		stripAskBlock(
+			stripReadBlock(editor.completion || '')
+				.replace(/<read\b[\s\S]*$/i, '')
+				.trim()
+		)
+	);
 	const preparingChoices = $derived(
 		!!editor.isCompletionInProgress && !streamingContent && /<ask\b/i.test(editor.completion || '')
 	);
@@ -74,6 +85,8 @@
 {/each}
 
 {#if editor.isCompletionInProgress}
+	<!-- `currentRawCompletion` is the stripped text on purpose: a <read> round is
+	     not an answer, and treating it as one collapsed the timeline mid-turn. -->
 	<Article
 		message={{
 			role: 'assistant',
@@ -84,11 +97,12 @@
 		}}
 		isStreamingArticle={true}
 		isSearching={editor.isSearching}
+		searchActivity={editor.searchActivity}
 		searchQuery={editor.searchQuery}
 		{preparingChoices}
 		{assistantLabel}
 		currentRawReasoning={editor.reasoning}
-		currentRawCompletion={editor.completion}
+		currentRawCompletion={streamingContent}
 		bind:streamingReasoningExpanded={editor.streamingReasoningExpanded}
 	/>
 {/if}

@@ -40,7 +40,7 @@ test.describe('Session reasoning tag handling', () => {
 		await expect(page.getByText('</think>')).not.toBeVisible();
 
 		// Check that reasoning indicator exists but reasoning is not initially visible
-		await expect(page.locator('.reasoning')).toBeVisible();
+		await expect(page.locator('.activity')).toBeVisible();
 		await expect(page.locator('.article--reasoning')).not.toBeVisible();
 
 		// Check reasoning content and toggle
@@ -228,7 +228,7 @@ test.describe('Session reasoning tag handling', () => {
 		await expect(page.getByText('This is just a normal answer.')).toBeVisible();
 
 		// Assert that there are no visible reasoning components
-		await expect(page.locator('.reasoning')).toHaveCount(0);
+		await expect(page.locator('.activity')).toHaveCount(0);
 		await expect(page.locator('.article--reasoning')).toHaveCount(0);
 		await expect(page.getByRole('button', { name: 'Reasoning' })).toHaveCount(0);
 	});

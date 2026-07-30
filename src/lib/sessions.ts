@@ -25,18 +25,23 @@ export interface WebSearchInfo {
 }
 
 /**
- * One step of what happened before the answer's own reasoning.
+ * One step of what the turn did before writing its answer.
  *
  * A turn can take two rounds: the model thinks, asks to read some results with a
- * `<read>` block, and thinks again with the pages in hand. Only the last round's
- * thinking used to survive — the first was overwritten and the reading was never
- * shown at all, so the answer appeared to come from nowhere. These are the
- * earlier steps, in order; the final reasoning stays in `reasoning`.
+ * `<read>` block, and thinks again with the pages in hand. Shown as a single
+ * timeline — searching, thinking, reading, thinking — rather than as separate
+ * widgets appearing and replacing each other while it works.
+ *
+ * Holds every step but the last round of thinking, which stays in `reasoning`:
+ * that one is still streaming while the rest is already history.
  */
 export interface ReasoningStep {
-	type: 'reasoning' | 'read';
+	type: 'search' | 'reasoning' | 'read';
 	/** The thinking, for a `reasoning` step. */
 	content?: string;
+	/** What was searched, for a `search` step. */
+	query?: string;
+	resultCount?: number;
 	/** The pages that were opened, for a `read` step. Empty when none could be. */
 	pages?: SearchSource[];
 }
@@ -90,6 +95,8 @@ export interface Editor {
 	/** Allow native model reasoning (Ollama). Default on (auto-detected); off never requests it. */
 	thinking?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
+	/** Which of the two the live status is about — they read very differently. */
+	searchActivity?: 'search' | 'read';
 	searchQuery?: string; // The query being searched, shown live while isSearching
 	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];

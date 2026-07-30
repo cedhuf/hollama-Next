@@ -40,7 +40,9 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 
 		// Earlier rounds first, so the transcript reads in the order it happened.
 		for (const step of message.reasoningTrace ?? []) {
-			if (step.type === 'read') {
+			if (step.type === 'search') {
+				parts.push(`🌐 _Searched: ${step.query} — ${step.resultCount ?? 0} results_`);
+			} else if (step.type === 'read') {
 				parts.push(
 					step.pages?.length
 						? `🌐 _Read: ${step.pages.map((p) => `[${p.title || p.url}](${p.url})`).join(', ')}_`

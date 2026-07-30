@@ -339,6 +339,7 @@
 		editor.reasoningTrace = undefined;
 		editor.streamingReasoningExpanded = false;
 		editor.isSearching = false;
+		editor.searchActivity = undefined;
 		editor.searchQuery = undefined;
 		editor.webSearchInfo = undefined;
 
@@ -461,6 +462,7 @@
 				// In auto mode the query is a concise model-written reformulation worth
 				// showing; in explicit mode it's the raw (often long) user message, so hide it.
 				if ($settingsStore.webSearchAuto) editor.searchQuery = query;
+				editor.searchActivity = 'search';
 				editor.isSearching = true;
 				try {
 					const search = await buildSearchContext(query);
@@ -485,6 +487,11 @@
 				}
 				editor.isSearching = false;
 				editor.webSearchInfo = searchInfo;
+				// Opens the timeline: everything the turn does afterwards lines up below it.
+				editor.reasoningTrace = [
+					...(editor.reasoningTrace ?? []),
+					{ type: 'search', query: searchInfo.query, resultCount: searchInfo.resultCount }
+				];
 			} else {
 				// The router declined. Without this note nothing in the context tells the
 				// model apart "I searched and found nothing" from "I never searched" —
@@ -574,14 +581,16 @@
 				const urls = wanted.map((n) => sources[n - 1]?.url).filter((url): url is string => !!url);
 				if (!urls.length) break;
 
-				// From here the turn takes a second round, which overwrites the panel:
-				// keep this round's thinking, and the reading itself, as trace steps.
+				// From here the turn takes a second round, which overwrites the live
+				// reasoning: this round's thinking joins the timeline as a step, in the
+				// same position it already occupied, so nothing moves on screen.
 				if (editor.reasoning?.trim())
 					editor.reasoningTrace = [
 						...(editor.reasoningTrace ?? []),
 						{ type: 'reasoning', content: editor.reasoning }
 					];
 
+				editor.searchActivity = 'read';
 				editor.isSearching = true;
 				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
 				try {
