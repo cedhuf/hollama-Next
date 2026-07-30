@@ -144,6 +144,7 @@ const en = {
 	searchResults: '{count:number} result{{s}}',
 	noWebResults: 'No results',
 	searchedTheWeb: 'Searched the web',
+	activityDone: 'Done',
 	refreshToUpdate: 'Refresh to update',
 	releaseHistory: 'Release history',
 	repeatLastN: 'Repeat last N',
@@ -287,8 +288,9 @@ const en = {
 	otherChoicePlaceholder: 'Type your answer',
 	multipleAllowed: 'Choose one or more',
 	preparingOptions: 'Preparing options',
-	autoExpandReasoningBlocks: 'Automatically expand and collapse reasoning',
-	autoExpandReasoningBlocksHelp: 'Reasoning expands while streaming and collapses when complete',
+	autoExpandReasoningBlocks: 'Follow the model while it works',
+	autoExpandReasoningBlocksHelp:
+		'Unfolds the steps as they happen and folds them away when the answer starts. Off, they stay folded under a single line.',
 
 	// --- Settings › Chat -------------------------------------------------------
 	defaults: 'Defaults',

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		Brain,
+		Check,
 		ChevronDown,
 		ChevronUp,
 		FileText,
@@ -108,6 +109,9 @@
 		...(message.reasoning ? [{ type: 'reasoning' as const, content: message.reasoning }] : [])
 	]);
 
+	/** Closes the timeline, but only once there is nothing left to add to it. */
+	const showDone = $derived(!isStreamingArticle && steps.length > 0);
+
 	/** What it is doing, or — once done — what it did. */
 	const activityLabel = $derived.by(() => {
 		if (isSearching) return searchActivity === 'read' ? $LL.readingPages() : $LL.searchingTheWeb();
@@ -134,12 +138,15 @@
 		}
 	}
 
-	// While streaming, auto-expand the reasoning panel — but only when the setting is on
-	// and the user hasn't manually overridden the toggle this turn.
+	// Follow-along mode: the timeline unfolds as the steps land and folds away once
+	// the answer starts. Off (the default) it stays folded under its one line. Only
+	// while streaming, and only until the user works the toggle themselves.
 	$effect(() => {
 		if (!$settingsStore.autoExpandReasoningBlocks) return;
 		if (isStreamingArticle && !userHasInteractedWithToggle) {
-			const hasReasoning = !!currentRawReasoning?.trim();
+			// Any step counts, not just thinking: a search is the first thing that
+			// happens in a turn, and it's worth watching too.
+			const hasReasoning = steps.length > 0 || !!currentRawReasoning?.trim();
 			const hasCompletion = !!currentRawCompletion?.trim();
 
 			if (hasReasoning && !hasCompletion) {
@@ -280,12 +287,12 @@
 									{:else}
 										<FileText class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{/if}
-									{#if i < steps.length - 1}
+									{#if i < steps.length - 1 || showDone}
 										<div class="my-1 w-px flex-1 bg-shade-3"></div>
 									{/if}
 								</div>
 
-								<div class="min-w-0 flex-1 {i < steps.length - 1 ? 'pb-2' : ''}">
+								<div class="min-w-0 flex-1 {i < steps.length - 1 || showDone ? 'pb-2' : ''}">
 									{#if step.type === 'reasoning'}
 										<article class="article--reasoning text-muted">
 											<Markdown markdown={step.content ?? ''} />
@@ -324,6 +331,17 @@
 								</div>
 							</div>
 						{/each}
+
+						<!-- The timeline needs an end, otherwise the last step reads as one that
+						     was cut short — especially when it's a page read with no thinking after. -->
+						{#if showDone}
+							<div class="flex gap-2">
+								<div class="flex w-4 shrink-0 flex-col items-center text-muted">
+									<Check class="mt-1 h-3.5 w-3.5 shrink-0" />
+								</div>
+								<div class="min-w-0 flex-1 py-0.5 text-muted">{$LL.activityDone()}</div>
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</div>

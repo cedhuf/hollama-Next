@@ -108,11 +108,6 @@
 				/>
 			</SettingsField>
 		{/if}
-		<FieldCheckbox
-			label={$LL.autoExpandReasoningBlocks()}
-			bind:checked={$settingsStore.autoExpandReasoningBlocks}
-		/>
-		<SettingsHint>{$LL.autoExpandReasoningBlocksHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.systemPromptsTitle()} description={$LL.systemPromptsDescription()}>

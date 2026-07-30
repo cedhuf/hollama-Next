@@ -581,6 +581,10 @@ type RootTranslation = {
 	 */
 	searchedTheWeb: string
 	/**
+	 * D​o​n​e
+	 */
+	activityDone: string
+	/**
 	 * R​e​f​r​e​s​h​ ​t​o​ ​u​p​d​a​t​e
 	 */
 	refreshToUpdate: string
@@ -1121,11 +1125,11 @@ type RootTranslation = {
 	 */
 	preparingOptions: string
 	/**
-	 * A​u​t​o​m​a​t​i​c​a​l​l​y​ ​e​x​p​a​n​d​ ​a​n​d​ ​c​o​l​l​a​p​s​e​ ​r​e​a​s​o​n​i​n​g
+	 * F​o​l​l​o​w​ ​t​h​e​ ​m​o​d​e​l​ ​w​h​i​l​e​ ​i​t​ ​w​o​r​k​s
 	 */
 	autoExpandReasoningBlocks: string
 	/**
-	 * R​e​a​s​o​n​i​n​g​ ​e​x​p​a​n​d​s​ ​w​h​i​l​e​ ​s​t​r​e​a​m​i​n​g​ ​a​n​d​ ​c​o​l​l​a​p​s​e​s​ ​w​h​e​n​ ​c​o​m​p​l​e​t​e
+	 * U​n​f​o​l​d​s​ ​t​h​e​ ​s​t​e​p​s​ ​a​s​ ​t​h​e​y​ ​h​a​p​p​e​n​ ​a​n​d​ ​f​o​l​d​s​ ​t​h​e​m​ ​a​w​a​y​ ​w​h​e​n​ ​t​h​e​ ​a​n​s​w​e​r​ ​s​t​a​r​t​s​.​ ​O​f​f​,​ ​t​h​e​y​ ​s​t​a​y​ ​f​o​l​d​e​d​ ​u​n​d​e​r​ ​a​ ​s​i​n​g​l​e​ ​l​i​n​e​.
 	 */
 	autoExpandReasoningBlocksHelp: string
 	/**
@@ -2179,6 +2183,10 @@ The completion in progress will stop
 	 */
 	searchedTheWeb: () => LocalizedString
 	/**
+	 * Done
+	 */
+	activityDone: () => LocalizedString
+	/**
 	 * Refresh to update
 	 */
 	refreshToUpdate: () => LocalizedString
@@ -2711,11 +2719,11 @@ The completion in progress will stop
 	 */
 	preparingOptions: () => LocalizedString
 	/**
-	 * Automatically expand and collapse reasoning
+	 * Follow the model while it works
 	 */
 	autoExpandReasoningBlocks: () => LocalizedString
 	/**
-	 * Reasoning expands while streaming and collapses when complete
+	 * Unfolds the steps as they happen and folds them away when the answer starts. Off, they stay folded under a single line.
 	 */
 	autoExpandReasoningBlocksHelp: () => LocalizedString
 	/**
