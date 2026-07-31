@@ -149,6 +149,8 @@ const fr = extendDictionary(en, {
 	noWebResults: 'Aucun résultat',
 	searchedTheWeb: 'Recherche web',
 	activityDone: 'Terminé',
+	showMore: 'Afficher plus',
+	showLess: 'Afficher moins',
 	refreshToUpdate: 'Actualiser pour mettre à jour',
 	releaseHistory: 'Historique des versions',
 	repeatLastN: 'Répéter les N derniers',

@@ -585,6 +585,14 @@ type RootTranslation = {
 	 */
 	activityDone: string
 	/**
+	 * S​h​o​w​ ​m​o​r​e
+	 */
+	showMore: string
+	/**
+	 * S​h​o​w​ ​l​e​s​s
+	 */
+	showLess: string
+	/**
 	 * R​e​f​r​e​s​h​ ​t​o​ ​u​p​d​a​t​e
 	 */
 	refreshToUpdate: string
@@ -2186,6 +2194,14 @@ The completion in progress will stop
 	 * Done
 	 */
 	activityDone: () => LocalizedString
+	/**
+	 * Show more
+	 */
+	showMore: () => LocalizedString
+	/**
+	 * Show less
+	 */
+	showLess: () => LocalizedString
 	/**
 	 * Refresh to update
 	 */

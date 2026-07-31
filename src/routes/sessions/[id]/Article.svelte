@@ -25,6 +25,7 @@
 	import { type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
+	import ActivityText from './ActivityText.svelte';
 	import AskChoices from './AskChoices.svelte';
 	import AttachmentImage from './AttachmentImage.svelte';
 
@@ -294,9 +295,13 @@
 
 								<div class="min-w-0 flex-1 {i < steps.length - 1 || showDone ? 'pb-2' : ''}">
 									{#if step.type === 'reasoning'}
-										<article class="article--reasoning text-muted">
-											<Markdown markdown={step.content ?? ''} />
-										</article>
+										<!-- The step being written is left unclamped: its newest text is at
+										     the bottom, which is exactly what a clamp would hide. -->
+										<ActivityText clamp={!(isStreamingArticle && i === steps.length - 1)}>
+											<article class="article--reasoning text-muted">
+												<Markdown markdown={step.content ?? ''} />
+											</article>
+										</ActivityText>
 									{:else if step.type === 'search'}
 										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
 											{#if step.query}

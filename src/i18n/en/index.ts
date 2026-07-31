@@ -145,6 +145,8 @@ const en = {
 	noWebResults: 'No results',
 	searchedTheWeb: 'Searched the web',
 	activityDone: 'Done',
+	showMore: 'Show more',
+	showLess: 'Show less',
 	refreshToUpdate: 'Refresh to update',
 	releaseHistory: 'Release history',
 	repeatLastN: 'Repeat last N',
