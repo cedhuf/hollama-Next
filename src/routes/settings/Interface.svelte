@@ -9,7 +9,6 @@
 	import { settingsStore } from '$lib/localStorage';
 
 	import SettingsField from './SettingsField.svelte';
-	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsSlider from './SettingsSlider.svelte';
@@ -78,11 +77,6 @@
 			label={$LL.showMessageTimestamps()}
 			bind:checked={$settingsStore.showMessageTimestamps}
 		/>
-		<FieldCheckbox
-			label={$LL.autoExpandReasoningBlocks()}
-			bind:checked={$settingsStore.autoExpandReasoningBlocks}
-		/>
-		<SettingsHint>{$LL.autoExpandReasoningBlocksHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.personas()} card>

@@ -110,14 +110,20 @@
 		...(message.reasoning ? [{ type: 'reasoning' as const, content: message.reasoning }] : [])
 	]);
 
-	/** Closes the timeline, but only once there is nothing left to add to it. */
-	const showDone = $derived(!isStreamingArticle && steps.length > 0);
+	/** The steps are still running: the answer itself hasn't started yet. */
+	const isThinking = $derived(isStreamingArticle && !currentRawCompletion?.trim());
+
+	/**
+	 * Closes the timeline as soon as the answer starts, not when the whole stream
+	 * ends: the first token of the real text is the moment the steps are over, and
+	 * waiting past it leaves the sequence hanging open under a finished answer.
+	 */
+	const showDone = $derived(steps.length > 0 && !isThinking);
 
 	/** What it is doing, or — once done — what it did. */
 	const activityLabel = $derived.by(() => {
 		if (isSearching) return searchActivity === 'read' ? $LL.readingPages() : $LL.searchingTheWeb();
-		if (isStreamingArticle && message.reasoning && !currentRawCompletion?.trim())
-			return $LL.thinkingActivity();
+		if (isThinking && message.reasoning) return $LL.thinkingActivity();
 
 		const done: string[] = [];
 		if (steps.some((s) => s.type === 'search')) done.push($LL.searchedTheWeb());
@@ -296,8 +302,9 @@
 								<div class="min-w-0 flex-1 {i < steps.length - 1 || showDone ? 'pb-2' : ''}">
 									{#if step.type === 'reasoning'}
 										<!-- The step being written is left unclamped: its newest text is at
-										     the bottom, which is exactly what a clamp would hide. -->
-										<ActivityText clamp={!(isStreamingArticle && i === steps.length - 1)}>
+										     the bottom, which is exactly what a clamp would hide. It clamps
+										     once the answer starts and it stops moving. -->
+										<ActivityText clamp={!(isThinking && i === steps.length - 1)}>
 											<article class="article--reasoning text-muted">
 												<Markdown markdown={step.content ?? ''} />
 											</article>
