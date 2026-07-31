@@ -51,6 +51,8 @@ Search too when the conversation shows the previous answer fell short — the us
 
 Reply NONE for requests you can genuinely answer yourself from general knowledge: definitions, explanations, math, translation, coding, writing, and messages that ask nothing factual (greetings, thanks, questions about you or this conversation).
 
+Reply NONE too when the user is asking you to PRODUCE something — a recipe, a plan, a text, code, a suggestion — even when it has a name and even when they name a specific one. Naming what they want made is not asking for a fact about it.
+
 Write the query for the USER's information need — not your own beliefs:
 - Use neutral, factual keywords (the topic itself). Do NOT add words like "rumor", "leak", "fake" or "hoax" just because you doubt something exists or has been released yet.
 - Keep speculative terms ONLY when the user actually wants them — e.g. they ask what is rumored/leaked, or about an unannounced or unreleased product.
@@ -65,6 +67,7 @@ Examples:
 (after "I could not find that game") "Si c'est un jeu très connu !" -> Ball x Pit boule fer évolution
 "Explique-moi la photosynthèse" -> NONE
 "Tu as cherché sur internet ?" -> NONE
+"Bowl de quinoa aux légumes rôtis, ça me tente !" -> NONE
 
 Never answer the question yourself. Output only the query, or NONE.`
 	},

@@ -109,6 +109,34 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
 	}
 }
 
+/**
+ * The query the router asked for — or nothing, when it didn't route.
+ *
+ * The router is the chat model itself, told to answer with a query or with NONE.
+ * A small model handed the recent turns sometimes forgets the job and simply
+ * carries on the conversation, and its reply was being searched verbatim: an
+ * instance of this turned "Excellent choix ! C'est un plat complet…" into a web
+ * search. Anything that doesn't look like a query is treated as NONE, because a
+ * search on prose is worse than no search at all — it feeds the model five
+ * irrelevant results and invites it to use them.
+ */
+export function parseRouterDecision(raw: string | undefined): string | null {
+	// Only the first line: a model that explains itself does so underneath.
+	const first = (raw ?? '')
+		.split('\n')[0]
+		.trim()
+		.replace(/^["']+|["']+$/g, '');
+	if (!first || /^none\b/i.test(first)) return null;
+
+	// Prose tells: it was written for a reader, not for a search engine.
+	if (first.length > 120) return null;
+	if (first.split(/\s+/).length > 15) return null;
+	if (/[*_`#|<>]|\.\.\.|…/.test(first)) return null;
+	if (/[.!?:;]$/.test(first)) return null;
+
+	return first;
+}
+
 export interface SearchContext {
 	context: string;
 	query: string;

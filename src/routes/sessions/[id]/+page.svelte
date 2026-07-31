@@ -30,7 +30,7 @@
 		type KnowledgeAttachment
 	} from '$lib/promptAttachments';
 	import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
-	import { buildSearchContext, searchConfig } from '$lib/search';
+	import { buildSearchContext, parseRouterDecision, searchConfig } from '$lib/search';
 	import {
 		getSessionTitle,
 		loadSession,
@@ -439,20 +439,15 @@
 					}));
 
 				try {
-					let decision = (
-						await decider.complete?.({
-							model: session.model.name,
-							options: { temperature: 0 },
-							messages: [{ role: 'system' as const, content: routerInstruction }, ...recentTurns]
-						})
-					)?.trim();
-					// Keep only the first line and strip any surrounding quotes.
-					if (decision)
-						decision = decision
-							.split('\n')[0]
-							.trim()
-							.replace(/^["']+|["']+$/g, '');
-					query = decision && !/^none\b/i.test(decision) ? decision : null;
+					const decision = await decider.complete?.({
+						model: session.model.name,
+						options: { temperature: 0 },
+						messages: [{ role: 'system' as const, content: routerInstruction }, ...recentTurns]
+					});
+					// Anything that doesn't look like a query counts as NONE: a router that
+					// answers the conversation instead of routing must not have its sentence
+					// handed to a search engine.
+					query = parseRouterDecision(decision);
 				} catch {
 					// Router failed — fall back to searching the raw user message.
 				}
