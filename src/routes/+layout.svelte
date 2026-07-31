@@ -15,7 +15,7 @@
 	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page, updated } from '$app/stores';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
@@ -26,6 +26,7 @@
 		hydrateStores,
 		knowledgeStore,
 		personasStore,
+		refreshStores,
 		serversStore,
 		sessionsStore,
 		settingsStore,
@@ -56,6 +57,17 @@
 		currentUser.set(data.user);
 	});
 
+	const updateToastClasses = {
+		toast: 'flex-col items-start gap-y-1 bg-shade-1 text-active border border-shade-3 pr-8',
+		description: 'text-muted',
+		actionButton: 'text-accent font-medium hover:underline',
+		// The close button is the toast's first child, so the `flex-col` above would
+		// stack it on top of the title. Taking it out of the flow puts it back in the
+		// corner every other dialog in the app closes from.
+		closeButton:
+			'absolute! left-auto! right-1! top-1! translate-x-0! translate-y-0! border-0! bg-transparent! text-muted hover:text-active'
+	};
+
 	$effect(() => {
 		const { latestVersion, isCurrentVersionLatest, isCheckingForUpdates } = $updateStatusStore;
 		if (isCheckingForUpdates || isCurrentVersionLatest || !latestVersion) return;
@@ -81,16 +93,33 @@
 				label: $LL.viewRelease(),
 				onClick: () => window.open(releaseUrl(latestVersion), '_blank', 'noopener,noreferrer')
 			},
-			classes: {
-				toast: 'flex-col items-start gap-y-1 bg-shade-1 text-active border border-shade-3 pr-8',
-				description: 'text-muted',
-				actionButton: 'text-accent font-medium hover:underline',
-				// The close button is the toast's first child, so the `flex-col` above
-				// would stack it on top of the title. Taking it out of the flow puts it
-				// back in the corner every other dialog in the app closes from.
-				closeButton:
-					'absolute! left-auto! right-1! top-1! translate-x-0! translate-y-0! border-0! bg-transparent! text-muted hover:text-active'
-			}
+			classes: updateToastClasses
+		});
+	});
+
+	/**
+	 * The server is now serving a build this client isn't running.
+	 *
+	 * Distinct from the release notice above: that one says a newer version exists
+	 * somewhere, this one says the instance in front of you has already moved —
+	 * after a `podman auto-update`, say — and everyone's tab is running yesterday's
+	 * code until it reloads. It notifies rather than reloading on its own: a reload
+	 * would take an unsent message or a running generation with it.
+	 */
+	let notifiedReload = false;
+	$effect(() => {
+		if (!$updated || notifiedReload) return;
+		notifiedReload = true;
+
+		toast($LL.isLatestVersion(), {
+			position: 'bottom-right',
+			duration: Number.POSITIVE_INFINITY,
+			closeButton: true,
+			action: {
+				label: $LL.refreshToUpdate(),
+				onClick: () => location.reload()
+			},
+			classes: updateToastClasses
 		});
 	});
 
@@ -100,6 +129,27 @@
 
 		// Close the mobile drawer on every navigation (standard drawer behaviour).
 		mobileDrawerOpen.set(false);
+	});
+
+	/**
+	 * Coming back to an app that never went away.
+	 *
+	 * A browser tab is opened, used and closed; an installed PWA is suspended and
+	 * resumed for days without ever re-running its boot. Both things it reads once
+	 * at startup — the stored conversations and the running build — can have moved
+	 * on in the meantime, so both are checked here, on the way back in.
+	 */
+	$effect(() => {
+		if (!browser) return;
+
+		const onVisible = () => {
+			if (document.visibilityState !== 'visible') return;
+			void refreshStores();
+			void updated.check();
+		};
+
+		document.addEventListener('visibilitychange', onVisible);
+		return () => document.removeEventListener('visibilitychange', onVisible);
 	});
 
 	// Native drawer gestures: edge-swipe right to open, swipe left to close.

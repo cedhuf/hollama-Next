@@ -105,21 +105,67 @@ export async function hydrateStores(): Promise<void> {
 	if (repository.hydrate) return; // local mode: already seeded synchronously, ready
 
 	try {
-		const [settings, servers, sessions, knowledge, personas] = await Promise.all([
-			repository.loadSettings(),
-			repository.loadServers(),
-			repository.loadSessions(),
-			repository.loadKnowledge(),
-			repository.loadPersonas()
-		]);
-
-		if (settings) settingsStore.setQuiet(settings);
-		serversStore.setQuiet(servers);
-		sessionsStore.setQuiet(sessions);
-		knowledgeStore.setQuiet(knowledge);
-		personasStore.setQuiet(personas);
+		await loadIntoStores();
 	} finally {
 		// Only now may writes reach the server — the stores hold real data.
 		persistenceReady = true;
 	}
+}
+
+/**
+ * Re-read everything, for an app that has been running while the data moved.
+ *
+ * The stores are filled once at boot and never again, which is right for a page
+ * that lives as long as its data. A PWA doesn't: it is suspended and resumed for
+ * days, so conversations written from the browser — or from another device
+ * against the same server — never appeared until it was force-quit. Called when
+ * the app comes back to the foreground.
+ *
+ * Unlike `hydrateStores` this also refreshes local mode, where a second window
+ * writing to the same localStorage leaves the first one just as stale.
+ *
+ * Settings and servers are deliberately left alone: they are edited in place in
+ * the Settings modal, and replacing them under an open field would throw away
+ * what is being typed. Only the collections the user browses are re-read.
+ */
+export async function refreshStores(): Promise<void> {
+	if (!browser) return;
+
+	const local = repository.hydrate?.();
+	if (local) {
+		sessionsStore.setQuiet(local.sessions);
+		knowledgeStore.setQuiet(local.knowledge);
+		personasStore.setQuiet(local.personas);
+		return;
+	}
+
+	// Never before the boot hydration has completed: the stores would be filled
+	// with data the app isn't yet allowed to write back.
+	if (!persistenceReady) return;
+
+	const [sessions, knowledge, personas] = await Promise.all([
+		repository.loadSessions(),
+		repository.loadKnowledge(),
+		repository.loadPersonas()
+	]);
+	sessionsStore.setQuiet(sessions);
+	knowledgeStore.setQuiet(knowledge);
+	personasStore.setQuiet(personas);
+}
+
+/** The network load shared by the boot and the refresh. */
+async function loadIntoStores(): Promise<void> {
+	const [settings, servers, sessions, knowledge, personas] = await Promise.all([
+		repository.loadSettings(),
+		repository.loadServers(),
+		repository.loadSessions(),
+		repository.loadKnowledge(),
+		repository.loadPersonas()
+	]);
+
+	if (settings) settingsStore.setQuiet(settings);
+	serversStore.setQuiet(servers);
+	sessionsStore.setQuiet(sessions);
+	knowledgeStore.setQuiet(knowledge);
+	personasStore.setQuiet(personas);
 }
