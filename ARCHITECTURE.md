@@ -167,8 +167,9 @@ on peut en activer un, l'autre, ou les deux :
   n'existe, on crée l'admin depuis `ADMIN_EMAIL` / `ADMIN_PASSWORD` (env).
   Premier compte = `role: admin`. (En OIDC pur, `ADMIN_EMAIL` désigne aussi quel
   sujet OIDC devient admin.)
-- Les endpoints `/api/data/*` et `/api/proxy` **vérifient la session**. Pas de
-  session → 401.
+- Les endpoints `/api/data/*` et `/api/llm/*` **vérifient la session**. Pas de
+  session → 401. `/api/proxy` n'est **pas** authentifié : il est désactivé en
+  mode serveur (404), où plus rien ne l'appelle (§6).
 
 ## 5. Providers & clés — le modèle admin-centré
 
@@ -218,7 +219,12 @@ quelle** clé → _open relay / SSRF_ sur une instance publique.
   pour rester frictionless ; renseignée = seules ces origines passent, avec
   `redirect: manual` pour qu'aucune redirection ne fasse fuiter l'`Authorization`
   hors allowlist). On ne bloque **pas** les IP privées en dur, car `localhost`
-  est légitime (Ollama).
+  est légitime (Ollama) — contrairement à `fetchPage`, qui lui les bloque.
+- **Mode serveur — la route est fermée (404)** : le navigateur passe par
+  `/api/llm/[serverId]`, donc `/api/proxy` n'y sert plus à rien. Laissée
+  ouverte, elle était un relais **non authentifié** devant une instance
+  multi-user (la garde d'auth exempte tout `/api`), avec `redirect: follow` par
+  défaut. Le refus est dans le handler lui-même.
 - **Mode serveur — fait (étape 6)** : `/api/llm/[serverId]/[...path]` est
   **authentifié**. Le client envoie un `serverId` (pas une URL ni une clé). Le
   serveur :

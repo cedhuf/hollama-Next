@@ -178,11 +178,14 @@ _Common (both modes):_
 > enforced by the endpoint itself, not just hidden in the interface.
 
 > [!WARNING]
-> **Set `PROXY_ALLOWED_ORIGINS` on any instance reachable from the internet.** The
-> provider proxy (`/api/proxy/…`) forwards to whatever origin it is given and does
-> not require a signed-in user, so with the default empty allowlist an instance is
-> an open proxy for anyone who can reach it. Restricting it to your providers'
-> origins closes that.
+> **Set `PROXY_ALLOWED_ORIGINS` on a local-mode instance reachable from the
+> network.** The provider proxy (`/api/proxy/…`) forwards to whatever origin it is
+> given and requires no signed-in user — with the default empty allowlist it is an
+> open proxy for anyone who can reach it. It cannot refuse private addresses the
+> way the fetch tool does, because reaching Ollama on `localhost` is the point.
+> Restricting it to your providers' origins closes that. In server mode the route
+> is disabled outright (404): the browser goes through the authenticated
+> `/api/llm/…` proxy instead.
 
 _Server mode (`PUBLIC_MODE=server`):_
 

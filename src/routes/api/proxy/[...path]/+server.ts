@@ -1,14 +1,16 @@
 import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 /**
  * Allowed target origins, comma-separated, e.g.
  *   PROXY_ALLOWED_ORIGINS="https://api.openai.com,http://localhost:11434"
  *
- * Empty (the default) means the proxy forwards anywhere — acceptable for a
- * personal/local instance, but operators of a shared/public instance should
- * lock this down to close the open-relay/SSRF surface. Per-user authorization
- * (forwarding by serverId, with keys held server-side) arrives with the server
- * mode; see ARCHITECTURE.md §6.
+ * Empty (the default) means the proxy forwards anywhere. That is the price of a
+ * frictionless local instance — the browser has to reach Ollama on localhost and
+ * whatever endpoint the user typed, so no address range can be blocked here the
+ * way `fetchPage` blocks them. Local mode has a single user and no session to
+ * check, so this is only ever as exposed as the instance itself; an instance put
+ * on a network should set the allowlist.
  */
 const allowedOrigins = (env.PROXY_ALLOWED_ORIGINS ?? '')
 	.split(',')
@@ -24,6 +26,14 @@ export async function POST({ request, params }) {
 }
 
 async function proxy(request: Request, path: string | undefined) {
+	// Server mode never uses this route — the browser talks to `/api/llm/<id>`,
+	// which checks the session and injects the key server-side. Left reachable it
+	// would be an unauthenticated relay in front of a multi-user instance, and the
+	// auth guard exempts every `/api` path, so the refusal has to live here.
+	if (publicEnv.PUBLIC_MODE === 'server') {
+		return new Response('Not found', { status: 404 });
+	}
+
 	const targetBaseUrl = request.headers.get('X-Target-Base-Url');
 	if (!targetBaseUrl) {
 		return new Response('Missing X-Target-Base-Url header', { status: 400 });
