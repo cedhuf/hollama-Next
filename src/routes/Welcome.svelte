@@ -2,6 +2,7 @@
 	import { ArrowLeft, ArrowRight, MessagesSquare, Palette, Sparkles } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
 
+	import { APP_NAME } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
@@ -57,7 +58,7 @@
 		<div class="flex flex-col items-center gap-4 py-6 text-center">
 			<Logo class="h-16 w-16" />
 			<div class="flex flex-col gap-1.5">
-				<h2 class="text-xl font-semibold tracking-tight">Hollama Next</h2>
+				<h2 class="text-xl font-semibold tracking-tight">{APP_NAME}</h2>
 				<p class="mx-auto max-w-xs text-sm leading-relaxed text-muted">
 					Your own space to think out loud with AI — private, fast, and shaped the way you like it.
 				</p>

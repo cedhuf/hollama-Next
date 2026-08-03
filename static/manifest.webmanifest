@@ -1,6 +1,6 @@
 {
-	"name": "Hollama Next",
-	"short_name": "Hollama",
+	"name": "Llooma",
+	"short_name": "Llooma",
 	"description": "A (less) minimal LLM chat app that runs in your browser.",
 	"start_url": "/",
 	"scope": "/",

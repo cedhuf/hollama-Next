@@ -1,7 +1,7 @@
 import type { Locales } from '$i18n/i18n-types';
 import { version } from '$app/environment';
 
-import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
+import type { LloomaMetadata } from '../routes/api/metadata/+server';
 import type { PromptKey } from './defaultPrompts';
 
 export interface Model {
@@ -74,7 +74,7 @@ export interface Settings {
 	onboardingComplete: boolean;
 	/** Server mode: the new-user welcome tour (app intro, theme, personas) has been seen. */
 	welcomeComplete: boolean;
-	hollamaMetadata: HollamaNextMetadata;
+	lloomaMetadata: LloomaMetadata;
 	profileFirstName: string;
 	profileLastName: string;
 	profileEmail: string;
@@ -123,7 +123,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	sidebarExpanded: true,
 	onboardingComplete: false,
 	welcomeComplete: false,
-	hollamaMetadata: { currentVersion: version },
+	lloomaMetadata: { currentVersion: version },
 	profileFirstName: '',
 	profileLastName: '',
 	profileEmail: '',

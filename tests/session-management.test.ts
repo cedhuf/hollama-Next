@@ -246,7 +246,7 @@ test.describe('Session management', () => {
 		await chooseModel(page, MOCK_API_TAGS_RESPONSE.models[0].name);
 
 		// Check initial title
-		await expect(page).toHaveTitle('New session • Sessions • Hollama');
+		await expect(page).toHaveTitle('New session • Sessions • Llooma');
 		await expect(page.getByTestId('session-item')).not.toBeVisible();
 
 		// Submit prompt and verify truncation
@@ -254,7 +254,7 @@ test.describe('Session management', () => {
 		await page.getByText('Run').click();
 
 		// Verify page title is truncated
-		await expect(page).toHaveTitle(`${truncatedPrompt} • Sessions • Hollama`);
+		await expect(page).toHaveTitle(`${truncatedPrompt} • Sessions • Llooma`);
 
 		// Verify sidebar list item is truncated
 		await expect(page.getByTestId('session-item')).toBeVisible();

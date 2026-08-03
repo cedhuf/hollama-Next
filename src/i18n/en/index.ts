@@ -340,7 +340,7 @@ const en = {
 	currentDateToggle: "Tell the model today's date and time",
 	systemInstructionsTitle: 'System instructions',
 	systemInstructionsDescription:
-		'The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.',
+		'The behind-the-scenes prompts {app:string} injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.',
 	placeholders: 'Placeholders',
 	resetToDefault: 'Reset to default',
 
@@ -450,14 +450,16 @@ const en = {
 	searchClose: 'Close',
 	searchStart: 'Type to search the content of your conversations',
 	keyboardShortcuts: 'Keyboard shortcuts',
-	keyboardShortcutsDescription: 'What the app already listens for. Customising them will come later.',
+	keyboardShortcutsDescription:
+		'What the app already listens for. Customising them will come later.',
 	shortcutsGlobal: 'Anywhere',
 	shortcutsComposer: 'Writing a message',
 	shortcutsSearch: 'Search dialog',
 	shortcutsDialogs: 'Dialogs',
 	shortcutSendMessage: 'Send',
 	shortcutNewLine: 'New line',
-	shortcutExpandedNote: 'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.',
+	shortcutExpandedNote:
+		'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.',
 	shortcutMoveBetweenTabs: 'Move between tabs',
 	close: 'Close'
 } satisfies BaseTranslation;

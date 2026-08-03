@@ -3,10 +3,12 @@
 
 import { build, files, version } from '$service-worker';
 
+import { APP_SLUG } from '$lib/brand';
+
 // `self` is the worker global; cast it so we get the worker-scoped API.
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
-const CACHE = `hollama-cache-${version}`;
+const CACHE = `${APP_SLUG}-cache-${version}`;
 // Immutable, hashed build output + everything under static/.
 const ASSETS = [...build, ...files];
 

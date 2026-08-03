@@ -1,6 +1,8 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
+import { APP_NAME } from '$lib/brand';
+
 /**
  * Reads a web page server-side and returns its text.
  *
@@ -177,7 +179,7 @@ export async function fetchPage(
 				signal: controller.signal,
 				headers: {
 					// Some sites serve a stub to unknown agents; identify honestly anyway.
-					'user-agent': 'HollamaNext/1.0 (+https://github.com/cedhuf/hollama-Next)',
+					'user-agent': `${APP_NAME}/1.0 (+https://github.com/cedhuf/hollama-Next)`,
 					accept: 'text/html,text/plain,text/markdown;q=0.9,*/*;q=0.1'
 				}
 			});

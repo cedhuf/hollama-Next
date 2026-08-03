@@ -6,11 +6,11 @@ import { version } from '$app/environment';
  * What the running server is, as opposed to what the loaded tab was built from.
  * The two drift apart when an instance is updated under an open tab.
  */
-export interface HollamaNextMetadata {
+export interface LloomaMetadata {
 	currentVersion: string;
 }
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET() {
-	return json({ currentVersion: version } as HollamaNextMetadata);
+	return json({ currentVersion: version } as LloomaMetadata);
 }

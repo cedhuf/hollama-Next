@@ -10,6 +10,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { APP_SLUG } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
 	import type { Server } from '$lib/connections';
 	import { repository } from '$lib/data';
@@ -69,31 +70,31 @@
 	const dataSources = $derived<DataSource[]>([
 		{
 			storageKey: StorageKey.HollamaNextServers,
-			fileName: `hollama-servers.json`,
+			fileName: `${APP_SLUG}-servers.json`,
 			label: $LL.servers(),
 			description: $LL.serversDescription()
 		},
 		{
 			storageKey: StorageKey.HollamaNextPreferences,
-			fileName: `hollama-preferences.json`,
+			fileName: `${APP_SLUG}-preferences.json`,
 			label: $LL.preferences(),
 			description: $LL.preferencesDescription()
 		},
 		{
 			storageKey: StorageKey.HollamaNextSessions,
-			fileName: `hollama-sessions.json`,
+			fileName: `${APP_SLUG}-sessions.json`,
 			label: $LL.sessions(),
 			description: $LL.sessionsDescription()
 		},
 		{
 			storageKey: StorageKey.HollamaNextKnowledge,
-			fileName: `hollama-knowledge.json`,
+			fileName: `${APP_SLUG}-knowledge.json`,
 			label: $LL.knowledge(),
 			description: $LL.knowledgeDescription()
 		},
 		{
 			storageKey: StorageKey.HollamaNextPersonas,
-			fileName: `hollama-personas.json`,
+			fileName: `${APP_SLUG}-personas.json`,
 			label: $LL.personas(),
 			description: $LL.personasDescription()
 		}
@@ -150,7 +151,7 @@
 		const backup = await repository.exportBackup();
 		download(
 			JSON.stringify(backup, null, 2),
-			`hollama-backup-${new Date().toISOString().slice(0, 10)}.json`
+			`${APP_SLUG}-backup-${new Date().toISOString().slice(0, 10)}.json`
 		);
 	}
 

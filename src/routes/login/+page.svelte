@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { APP_NAME } from '$lib/brand';
 	import Logo from '$lib/components/Logo.svelte';
 
 	let { data } = $props();
@@ -27,7 +28,7 @@
 	<div class="flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-shade-1 p-6 shadow-xl">
 		<div class="flex flex-col items-center gap-2 text-center">
 			<Logo class="h-12 w-12" />
-			<h1 class="text-lg font-semibold tracking-tight">Sign in to Hollama Next</h1>
+			<h1 class="text-lg font-semibold tracking-tight">Sign in to {APP_NAME}</h1>
 		</div>
 
 		{#if errorMessage}

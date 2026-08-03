@@ -1,4 +1,4 @@
-# Architecture — Hollama Next
+# Architecture — Llooma
 
 > Plan de référence avant le chantier « modes local / serveur ».
 > Objectif : un code propre et léger, deux modes de fonctionnement à partir
@@ -160,7 +160,7 @@ on peut en activer un, l'autre, ou les deux :
   ```
   OIDC_AUTO_PROVISION=true               # créer le user au 1er login (défaut)
   OIDC_ROLE_CLAIM=groups                 # claim porteur des rôles
-  OIDC_ADMIN_VALUE=hollama-admin         # valeur => role admin
+  OIDC_ADMIN_VALUE=llooma-admin          # valeur => role admin
   ```
 
 - **Bootstrap admin** : au premier démarrage en mode serveur, si aucun user

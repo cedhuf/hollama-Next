@@ -2,7 +2,7 @@
 	"version": "0.0.1",
 	"configurations": [
 		{
-			"name": "hollama",
+			"name": "llooma",
 			"runtimeExecutable": "pnpm",
 			"runtimeArgs": ["dev"],
 			"port": 5173

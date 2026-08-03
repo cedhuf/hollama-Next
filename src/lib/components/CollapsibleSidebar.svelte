@@ -16,6 +16,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { APP_NAME } from '$lib/brand';
 	import Logo from '$lib/components/Logo.svelte';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
@@ -203,7 +204,7 @@
 		{:else}
 			<a href={resolve('/sessions')} class="flex items-center gap-2">
 				<Logo class="h-8 w-8 shrink-0" />
-				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">Hollama Next</span>
+				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">{APP_NAME}</span>
 			</a>
 			<button
 				onclick={collapseOrClose}

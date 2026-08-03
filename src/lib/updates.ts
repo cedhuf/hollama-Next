@@ -3,13 +3,14 @@ import semver from 'semver';
 import { get, writable } from 'svelte/store';
 
 import { version } from '$app/environment';
+import { APP_NAME } from '$lib/brand';
 import { settingsStore } from '$lib/localStorage';
 
-import type { HollamaNextMetadata } from '../routes/api/metadata/+server';
+import type { LloomaMetadata } from '../routes/api/metadata/+server';
 import { GITHUB_RELEASES_API } from './github';
 
-const HOLLAMA_DEV_VERSION_SUFFIX = '-dev';
-const HOLLAMA_METADATA_ENDPOINT = '/api/metadata';
+const DEV_VERSION_SUFFIX = '-dev';
+const METADATA_ENDPOINT = '/api/metadata';
 const ONE_WEEK_IN_SECONDS = 604800;
 
 export interface UpdateStatus {
@@ -37,7 +38,7 @@ export const updateStatusStore = writable<UpdateStatus>({
  */
 function isNewerVersion(candidate: string, current: string): boolean {
 	const parse = (value: string) =>
-		semver.valid(semver.coerce(value.replace(HOLLAMA_DEV_VERSION_SUFFIX, '')));
+		semver.valid(semver.coerce(value.replace(DEV_VERSION_SUFFIX, '')));
 	const a = parse(candidate ?? '');
 	const b = parse(current ?? '');
 	return !!a && !!b && semver.gt(a, b);
@@ -67,14 +68,14 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 	// The server may have been updated under a tab that stayed open, so start from
 	// what it reports rather than from what this build was compiled with.
 	try {
-		const response = await fetch(HOLLAMA_METADATA_ENDPOINT);
-		settings.hollamaMetadata = (await response.json()) as HollamaNextMetadata;
+		const response = await fetch(METADATA_ENDPOINT);
+		settings.lloomaMetadata = (await response.json()) as LloomaMetadata;
 	} catch {
-		console.error('Failed to fetch Hollama Next server metadata');
+		console.error(`Failed to fetch ${APP_NAME} server metadata`);
 		status.couldntCheckForUpdates = true;
 	}
 
-	status.latestVersion = settings.hollamaMetadata.currentVersion;
+	status.latestVersion = settings.lloomaMetadata.currentVersion;
 	// The running server is already ahead of the code this tab loaded: a reload is
 	// enough, no need to ask GitHub anything.
 	const serverIsAhead = isNewerVersion(status.latestVersion, version);

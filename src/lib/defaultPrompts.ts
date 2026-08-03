@@ -1,4 +1,4 @@
-// The behind-the-scenes instructions Hollama injects into a request, in one place.
+// The behind-the-scenes instructions Llooma injects into a request, in one place.
 //
 // Each has a built-in default (the single source of truth) and can be overridden by
 // the user in Settings → Tools → System instructions. Dynamic bits are filled in at

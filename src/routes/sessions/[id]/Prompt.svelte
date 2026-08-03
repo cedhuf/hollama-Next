@@ -4,6 +4,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
@@ -15,7 +16,6 @@
 		type ImageAttachment,
 		type KnowledgeAttachment
 	} from '$lib/promptAttachments';
-	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
 	import { generateRandomId } from '$lib/utils';

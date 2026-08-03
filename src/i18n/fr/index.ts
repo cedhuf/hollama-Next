@@ -355,7 +355,7 @@ const fr = extendDictionary(en, {
 	currentDateToggle: "Indiquer au modèle la date et l'heure du jour",
 	systemInstructionsTitle: 'Instructions système',
 	systemInstructionsDescription:
-		"Les invites en coulisses qu'Hollama injecte pour les fonctions ci-dessus. Choisissez-en une pour la consulter ou l'ajuster — laissez la valeur par défaut sauf si vous savez ce que vous changez.",
+		"Les invites en coulisses que {app} injecte pour les fonctions ci-dessus. Choisissez-en une pour la consulter ou l'ajuster — laissez la valeur par défaut sauf si vous savez ce que vous changez.",
 	placeholders: 'Variables',
 	resetToDefault: 'Rétablir la valeur par défaut',
 
@@ -468,14 +468,16 @@ const fr = extendDictionary(en, {
 	searchClose: 'Fermer',
 	searchStart: 'Tapez pour rechercher dans le contenu de vos conversations',
 	keyboardShortcuts: 'Raccourcis clavier',
-	keyboardShortcutsDescription: 'Ce que l\'application écoute déjà. La personnalisation viendra plus tard.',
+	keyboardShortcutsDescription:
+		"Ce que l'application écoute déjà. La personnalisation viendra plus tard.",
 	shortcutsGlobal: 'Partout',
-	shortcutsComposer: 'Rédaction d\'un message',
+	shortcutsComposer: "Rédaction d'un message",
 	shortcutsSearch: 'Fenêtre de recherche',
 	shortcutsDialogs: 'Fenêtres',
 	shortcutSendMessage: 'Envoyer',
 	shortcutNewLine: 'Nouvelle ligne',
-	shortcutExpandedNote: 'Dans l\'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne — pour écrire un long message sans qu\'il parte à chaque retour.',
+	shortcutExpandedNote:
+		"Dans l'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne — pour écrire un long message sans qu'il parte à chaque retour.",
 	shortcutMoveBetweenTabs: 'Naviguer entre les onglets',
 	close: 'Fermer'
 });

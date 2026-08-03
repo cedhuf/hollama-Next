@@ -1,6 +1,6 @@
 services:
-  hollama:
-    image: ghcr.io/cedhuf/hollama:latest
+  llooma:
+    image: ghcr.io/cedhuf/llooma:latest
     restart: unless-stopped
     ports:
       - '${HOST_PORT:-4173}:4173'

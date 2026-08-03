@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
+	import { APP_NAME } from '$lib/brand';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
@@ -169,7 +170,7 @@
 
 	<SettingsSection
 		title={$LL.systemInstructionsTitle()}
-		description={$LL.systemInstructionsDescription()}
+		description={$LL.systemInstructionsDescription({ app: APP_NAME })}
 		card
 	>
 		<Select

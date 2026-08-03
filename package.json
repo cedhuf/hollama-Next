@@ -1,8 +1,8 @@
 {
-	"name": "hollama",
+	"name": "llooma",
 	"version": "0.5.0",
 	"private": true,
-	"homepage": "https://hollama.fernando.is",
+	"homepage": "https://github.com/cedhuf/hollama-Next",
 	"description": "A minimal LLM chat app that runs entirely in your browser",
 	"packageManager": "pnpm@11.5.2",
 	"scripts": {

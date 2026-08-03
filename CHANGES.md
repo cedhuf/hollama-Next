@@ -1,6 +1,6 @@
 # Changes from the original Hollama
 
-This file tracks everything done, added or reworked in **Hollama Next** compared to
+This file tracks everything done, added or reworked in **Llooma** compared to
 the [original Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen).
 
 ## Providers & connections
@@ -53,7 +53,7 @@ the [original Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://
 
 ## Infrastructure & tooling
 
-- **Versioned releases** — `semantic-release` reads the commit log, tags, writes the release notes and publishes `ghcr.io/cedhuf/hollama:latest` plus a version tag
+- **Versioned releases** — `semantic-release` reads the commit log, tags, writes the release notes and publishes `ghcr.io/cedhuf/llooma:latest` plus a version tag
 - In-app **update check** against the GitHub releases, announced once per version by a dismissible notice (admins only, in server mode)
 - CI/CD migrated from `npm` to **pnpm**, Node 20 → **26**
 - Docker image uses `GITHUB_TOKEN` (no PAT/secrets to manage)

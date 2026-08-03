@@ -3,6 +3,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { version } from '$app/environment';
+	import { APP_NAME } from '$lib/brand';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
@@ -50,7 +51,7 @@
 	<div class="flex items-center justify-center gap-4 py-2">
 		<Logo class="h-20 w-20 shrink-0" />
 		<div class="flex flex-col items-start gap-1.5">
-			<h1 class="text-xl font-semibold tracking-tight">Hollama Next</h1>
+			<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
 			<Badge>v{version}</Badge>
 		</div>
 	</div>

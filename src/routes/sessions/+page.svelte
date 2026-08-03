@@ -287,7 +287,9 @@
 								class="flex items-center gap-3 px-4 py-3 text-sm text-base transition-colors hover:bg-shade-1 first:rounded-t-xl last:rounded-b-xl"
 							>
 								<MessageSquareText class="h-4 w-4 flex-shrink-0 text-muted" />
-								<span class="flex-1 truncate">{resolveSessionTitle(session) || $LL.newSession()}</span>
+								<span class="flex-1 truncate"
+									>{resolveSessionTitle(session) || $LL.newSession()}</span
+								>
 								<span class="flex-shrink-0 text-xs text-muted">
 									{session.updatedAt
 										? new Date(session.updatedAt).toLocaleDateString(undefined, {

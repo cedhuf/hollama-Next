@@ -3,6 +3,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { APP_NAME } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
@@ -79,7 +80,7 @@
 		<div class="flex flex-col items-center gap-4 py-4 text-center">
 			<Logo class="h-14 w-14" />
 			<div class="flex flex-col gap-1">
-				<h2 class="text-lg font-semibold tracking-tight">Welcome to Hollama Next</h2>
+				<h2 class="text-lg font-semibold tracking-tight">Welcome to {APP_NAME}</h2>
 				<p class="text-sm text-muted">Let's set things up — it only takes a minute.</p>
 			</div>
 			<div class="flex w-full flex-col gap-2 pt-2">
@@ -117,7 +118,7 @@
 				<h2 class="text-lg font-semibold tracking-tight">You're all set</h2>
 				<p class="text-sm text-muted">You can change any of this later in Settings.</p>
 			</div>
-			<Button onclick={finish}>Enter Hollama</Button>
+			<Button onclick={finish}>Enter {APP_NAME}</Button>
 		</div>
 	{/if}
 </OnboardingDialog>

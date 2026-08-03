@@ -4,10 +4,12 @@
      theme; `<picture>` swaps in the inverted copy there. -->
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="static/logo-mark-dark.png" />
-  <img src="static/logo-mark.png" alt="Hollama Next" width="96" />
+  <img src="static/logo-mark.png" alt="Llooma" width="96" />
 </picture>
 
-# Hollama Next
+# Llooma
+
+<sub>/ˈluː.mə/ · _LOO-muh_</sub>
 
 **A (less) minimal LLM chat app that runs _entirely_ in your browser.**
 
@@ -109,7 +111,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 
 ### Self-hosting
 
-Docker images are published to [`ghcr.io/cedhuf/hollama`](https://ghcr.io/cedhuf/hollama) on every release. `:latest` always points at the newest one; each release is also tagged with its version (`:0.2.0`) if you'd rather pin.
+Docker images are published to [`ghcr.io/cedhuf/llooma`](https://ghcr.io/cedhuf/llooma) on every release. `:latest` always points at the newest one; each release is also tagged with its version (`:0.2.0`) if you'd rather pin.
 
 **Quick start with Docker Compose (recommended):**
 
@@ -123,7 +125,7 @@ Then open [http://localhost:4173](http://localhost:4173).
 **Or with Docker directly:**
 
 ```shell
-docker run --rm -d -p 4173:4173 --name hollama ghcr.io/cedhuf/hollama:latest
+docker run --rm -d -p 4173:4173 --name llooma ghcr.io/cedhuf/llooma:latest
 ```
 
 **Update to the latest version:**
@@ -132,13 +134,13 @@ docker run --rm -d -p 4173:4173 --name hollama ghcr.io/cedhuf/hollama:latest
 docker compose pull && docker compose up -d
 ```
 
-**Connecting to an Ollama server on a different device** — if your Ollama server is running on a separate machine, you need to allow your Hollama instance's domain in `OLLAMA_ORIGINS`. [Learn more in Ollama's docs](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server).
+**Connecting to an Ollama server on a different device** — if your Ollama server is running on a separate machine, you need to allow your Llooma instance's domain in `OLLAMA_ORIGINS`. [Learn more in Ollama's docs](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server).
 
 ```shell
-OLLAMA_ORIGINS=https://your-hollama-domain.com ollama serve
+OLLAMA_ORIGINS=https://your-llooma-domain.com ollama serve
 ```
 
-**Running modes** — Hollama runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
+**Running modes** — Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
 
 > [!NOTE]
 > Why ?
@@ -205,7 +207,7 @@ _Server mode (`PUBLIC_MODE=server`):_
 | `OIDC_AUTO_PROVISION`                   | `true`                 | Create a user on first OIDC login (`false` requires a pre-created account)          |
 | `OIDC_AUTO_REDIRECT`                    | —                      | `true` skips the login page and goes straight to the IdP (OIDC-only)                |
 
-> OIDC redirect URI to register with your provider: `https://your-hollama-domain/auth/callback/oidc`
+> OIDC redirect URI to register with your provider: `https://your-llooma-domain/auth/callback/oidc`
 
 ### Screenshots
 

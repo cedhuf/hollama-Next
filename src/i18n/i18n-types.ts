@@ -1287,9 +1287,10 @@ type RootTranslation = {
 	 */
 	systemInstructionsTitle: string
 	/**
-	 * T​h​e​ ​b​e​h​i​n​d​-​t​h​e​-​s​c​e​n​e​s​ ​p​r​o​m​p​t​s​ ​H​o​l​l​a​m​a​ ​i​n​j​e​c​t​s​ ​f​o​r​ ​t​h​e​ ​f​e​a​t​u​r​e​s​ ​a​b​o​v​e​.​ ​P​i​c​k​ ​o​n​e​ ​t​o​ ​v​i​e​w​ ​o​r​ ​t​w​e​a​k​ ​i​t​ ​—​ ​l​e​a​v​e​ ​i​t​ ​o​n​ ​t​h​e​ ​d​e​f​a​u​l​t​ ​u​n​l​e​s​s​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​y​o​u​ ​a​r​e​ ​c​h​a​n​g​i​n​g​.
+	 * T​h​e​ ​b​e​h​i​n​d​-​t​h​e​-​s​c​e​n​e​s​ ​p​r​o​m​p​t​s​ ​{​a​p​p​}​ ​i​n​j​e​c​t​s​ ​f​o​r​ ​t​h​e​ ​f​e​a​t​u​r​e​s​ ​a​b​o​v​e​.​ ​P​i​c​k​ ​o​n​e​ ​t​o​ ​v​i​e​w​ ​o​r​ ​t​w​e​a​k​ ​i​t​ ​—​ ​l​e​a​v​e​ ​i​t​ ​o​n​ ​t​h​e​ ​d​e​f​a​u​l​t​ ​u​n​l​e​s​s​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​y​o​u​ ​a​r​e​ ​c​h​a​n​g​i​n​g​.
+	 * @param {string} app
 	 */
-	systemInstructionsDescription: string
+	systemInstructionsDescription: RequiredParams<'app'>
 	/**
 	 * P​l​a​c​e​h​o​l​d​e​r​s
 	 */
@@ -2962,9 +2963,9 @@ The completion in progress will stop
 	 */
 	systemInstructionsTitle: () => LocalizedString
 	/**
-	 * The behind-the-scenes prompts Hollama injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.
+	 * The behind-the-scenes prompts {app} injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.
 	 */
-	systemInstructionsDescription: () => LocalizedString
+	systemInstructionsDescription: (arg: { app: string }) => LocalizedString
 	/**
 	 * Placeholders
 	 */
