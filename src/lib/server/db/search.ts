@@ -1,5 +1,6 @@
 import { MATCH_CLOSE, MATCH_OPEN } from '$lib/conversationSearch';
-import { resolveSessionTitle, type Session } from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { resolveSessionTitle } from '$lib/sessionShape';
 
 import { getDb } from './index';
 

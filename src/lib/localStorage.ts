@@ -5,7 +5,8 @@ import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import { summarizeSession, type Session, type SessionSummary } from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { repository } from './data';

@@ -1,6 +1,7 @@
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import { summarizeSession, type Session, type SessionSummary } from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import type { Settings } from '$lib/settings';
 
 import { getDb } from './index';

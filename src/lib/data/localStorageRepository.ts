@@ -5,12 +5,8 @@ import type { Server } from '$lib/connections';
 import { searchSessionsLocally, type ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import {
-	normalizeSession,
-	summarizeSession,
-	type Session,
-	type SessionSummary
-} from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { normalizeSession, summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { StorageKey } from './keys';

@@ -1,4 +1,5 @@
-import { resolveSessionTitle, type Session } from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { resolveSessionTitle } from '$lib/sessionShape';
 
 /**
  * Searching your own conversations, by content.

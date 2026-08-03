@@ -9,8 +9,15 @@ import { sessionsStore, settingsStore } from '$lib/localStorage';
 import type { AskChoices } from './askChoice';
 import { getLastUsedModels } from './chat';
 import type { Knowledge } from './knowledge';
+import { defaultSystemPrompt, type SessionSummary } from './sessionShape';
 import type { Model } from './settings';
 import { formatTimestampToNow } from './utils';
+
+// Re-exported so the components that already import these from here keep
+// working. `sessionShape` deliberately depends on nothing, which is what stops
+// the store layer and this module from initialising each other.
+export type { SessionSummary };
+export { normalizeSession, resolveSessionTitle, summarizeSession } from './sessionShape';
 
 /** A single cited web source (title + url; snippets are dropped to keep storage small). */
 export interface SearchSource {
@@ -79,50 +86,6 @@ export interface Session {
 	pinned?: boolean;
 }
 
-/**
- * A conversation as the lists know it: everything but what was said.
- *
- * The sidebar, the home page and the model history need a title, a date, a model
- * and a couple of flags. They never needed the messages — but the store held
- * them anyway, so every boot and every refresh shipped the whole history to the
- * browser and kept it in memory. A distinct type rather than a `Session` with an
- * empty `messages`: that shape would be indistinguishable from a conversation
- * whose messages were genuinely lost, and saving one would destroy the real one.
- * Here it cannot be saved as a session at all.
- */
-export interface SessionSummary {
-	id: string;
-	/** Already resolved: an explicit title, or the fallback below. */
-	title: string;
-	updatedAt?: string;
-	model?: Model;
-	pinned?: boolean;
-	personaId?: string;
-}
-
-/** Longest title derived from a first message. */
-export const MAX_TITLE_LENGTH = 56;
-
-/** The title a conversation shows in a list: its own, or its first words. */
-export function resolveSessionTitle(session: { title?: string; messages?: Message[] }): string {
-	if (session.title) return session.title;
-	const firstUserMessage = session.messages?.find(
-		(m) => m.role === 'user' && m.content && !m.knowledge
-	);
-	return (firstUserMessage?.content ?? '').slice(0, MAX_TITLE_LENGTH);
-}
-
-export function summarizeSession(session: Session): SessionSummary {
-	return {
-		id: session.id,
-		title: resolveSessionTitle(session),
-		updatedAt: session.updatedAt,
-		model: session.model,
-		pinned: session.pinned,
-		personaId: session.personaId
-	};
-}
-
 export interface Editor {
 	prompt: string;
 	view: 'messages' | 'controls';
@@ -155,8 +118,6 @@ export interface Editor {
 	abortController?: AbortController;
 }
 
-const defaultSystemPrompt = (): Message => ({ role: 'system', content: '' });
-
 /**
  * A conversation that doesn't exist yet.
  *
@@ -182,16 +143,6 @@ export const newSession = (id: string): Session => {
 		options: {}
 	};
 };
-
-/**
- * Fill in fields that conversations written before they existed don't carry.
- * Applied on the way out of storage, so the rest of the app can assume them.
- */
-export const normalizeSession = (session: Session): Session => ({
-	...session,
-	options: session.options || {},
-	systemPrompt: session.systemPrompt || defaultSystemPrompt()
-});
 
 export const saveSession = (session: Session): void => {
 	// The store keeps the summary, the repository stores the conversation.

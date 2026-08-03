@@ -6,7 +6,8 @@ import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
 import { fetchProviders, providerToServer } from '$lib/providers';
-import { normalizeSession, type Session, type SessionSummary } from '$lib/sessions';
+import type { Session } from '$lib/sessions';
+import { normalizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import type { Backup, DataRepository } from './repository';
