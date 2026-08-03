@@ -2,6 +2,7 @@ import { toast } from 'svelte-sonner';
 
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
+import { type ConversationResult, searchSessionsLocally } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
@@ -98,6 +99,10 @@ export class LocalStorageRepository implements DataRepository {
 			key,
 			this.#read<{ id: string }[]>(key, []).filter((item) => item.id !== id)
 		);
+	}
+
+	async searchSessions(query: string): Promise<ConversationResult[]> {
+		return searchSessionsLocally(this.#read<Session[]>(StorageKey.HollamaNextSessions, []), query);
 	}
 
 	async exportBackup(): Promise<Backup> {

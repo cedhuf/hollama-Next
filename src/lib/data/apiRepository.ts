@@ -2,6 +2,7 @@ import { toast } from 'svelte-sonner';
 
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
+import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
 import { fetchProviders, providerToServer } from '$lib/providers';
@@ -92,6 +93,12 @@ export class ApiRepository implements DataRepository {
 
 	async saveServers(): Promise<void> {
 		// TODO (step 5): persist a user's personal servers.
+	}
+
+	async searchSessions(query: string): Promise<ConversationResult[]> {
+		const response = await fetch(`/api/search/sessions?q=${encodeURIComponent(query)}`);
+		if (!response.ok) throw new Error(`Search failed: HTTP ${response.status}`);
+		return response.json();
 	}
 
 	async exportBackup(): Promise<Backup> {

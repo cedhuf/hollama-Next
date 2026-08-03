@@ -19,6 +19,7 @@
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
+	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { buildDefaultPersonas } from '$lib/defaultPersonas';
 	import { releaseUrl } from '$lib/github';
@@ -35,7 +36,13 @@
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentRole, currentUser } from '$lib/stores/auth';
-	import { onboardingOpen, welcomeOpen } from '$lib/stores/modal';
+	import {
+		onboardingOpen,
+		openSearch,
+		searchModalOpen,
+		searchModalQuery,
+		welcomeOpen
+	} from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
@@ -139,6 +146,25 @@
 	 * at startup — the stored conversations and the running build — can have moved
 	 * on in the meantime, so both are checked here, on the way back in.
 	 */
+	/**
+	 * ⌘K / Ctrl+K opens conversation search from anywhere.
+	 *
+	 * Ignored while typing: the shortcut belongs to the app, but a message being
+	 * composed owns the keyboard first.
+	 */
+	$effect(() => {
+		if (!browser) return;
+
+		const onKeydown = (event: KeyboardEvent) => {
+			if (event.key !== 'k' || !(event.metaKey || event.ctrlKey)) return;
+			event.preventDefault();
+			openSearch();
+		};
+
+		window.addEventListener('keydown', onKeydown);
+		return () => window.removeEventListener('keydown', onKeydown);
+	});
+
 	$effect(() => {
 		if (!browser) return;
 
@@ -394,6 +420,7 @@
 	</div>
 {:else}
 	<SettingsModal />
+	<SearchModal bind:open={$searchModalOpen} initialQuery={$searchModalQuery} />
 	<Onboarding />
 	<Welcome />
 

@@ -45,7 +45,8 @@
 		currentRawReasoning,
 		currentRawCompletion,
 		streamingReasoningExpanded = $bindable(false),
-		onToggleReasoning = undefined
+		onToggleReasoning = undefined,
+		anchorId = undefined
 	}: {
 		message: Message;
 		retryIndex?: number;
@@ -69,6 +70,8 @@
 		streamingReasoningExpanded?: boolean;
 		/** Called after the user toggles a completed message, so the parent can persist. */
 		onToggleReasoning?: () => void;
+		/** DOM id, so search results can scroll to this exact message. */
+		anchorId?: string;
 	} = $props();
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
@@ -219,6 +222,7 @@
 	     turned a long conversation into a wall of boxes where the eye couldn't find
 	     who said what. -->
 	<article
+		id={anchorId}
 		class="article article--{message.role} mx-auto mb-4 flex w-full max-w-[80ch] flex-col gap-y-2 last:mb-0 md:mb-6 {isUserRole
 			? 'items-end'
 			: ''} {message.role === 'system' ? 'rounded-md border border-shade-3 p-3 md:p-4' : ''}"

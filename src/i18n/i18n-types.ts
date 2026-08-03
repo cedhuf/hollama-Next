@@ -1623,6 +1623,40 @@ type RootTranslation = {
 	 */
 	launch: string
 	/**
+	 * S​e​a​r​c​h​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
+	 */
+	searchConversations: string
+	/**
+	 * S​e​a​r​c​h​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​…
+	 */
+	searchConversationsPlaceholder: string
+	/**
+	 * S​e​a​r​c​h​ ​"​{​q​u​e​r​y​}​"​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 * @param {string} query
+	 */
+	searchAllConversations: RequiredParams<'query'>
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​m​a​t​c​h​|​m​a​t​c​h​e​s​}​}
+	 * @param {number} count
+	 */
+	searchMatches: RequiredParams<'count'>
+	/**
+	 * N​a​v​i​g​a​t​e
+	 */
+	searchNavigate: string
+	/**
+	 * O​p​e​n
+	 */
+	searchOpen: string
+	/**
+	 * C​l​o​s​e
+	 */
+	searchClose: string
+	/**
+	 * T​y​p​e​ ​t​o​ ​s​e​a​r​c​h​ ​t​h​e​ ​c​o​n​t​e​n​t​ ​o​f​ ​y​o​u​r​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
+	 */
+	searchStart: string
+	/**
 	 * C​l​o​s​e
 	 */
 	close: string
@@ -3218,6 +3252,38 @@ The completion in progress will stop
 	 * Launch
 	 */
 	launch: () => LocalizedString
+	/**
+	 * Search conversations
+	 */
+	searchConversations: () => LocalizedString
+	/**
+	 * Search in every conversation…
+	 */
+	searchConversationsPlaceholder: () => LocalizedString
+	/**
+	 * Search "{query}" in every conversation
+	 */
+	searchAllConversations: (arg: { query: string }) => LocalizedString
+	/**
+	 * {count} {{match|matches}}
+	 */
+	searchMatches: (arg: { count: number }) => LocalizedString
+	/**
+	 * Navigate
+	 */
+	searchNavigate: () => LocalizedString
+	/**
+	 * Open
+	 */
+	searchOpen: () => LocalizedString
+	/**
+	 * Close
+	 */
+	searchClose: () => LocalizedString
+	/**
+	 * Type to search the content of your conversations
+	 */
+	searchStart: () => LocalizedString
 	/**
 	 * Close
 	 */

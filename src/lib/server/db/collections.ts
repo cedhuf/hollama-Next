@@ -4,6 +4,7 @@ import type { Session } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
 import { getDb } from './index';
+import { dropSessionFromIndex, reindexAllSessions, reindexSession } from './search';
 
 type CollectionTable = 'sessions' | 'knowledge' | 'personas';
 
@@ -31,12 +32,16 @@ export function upsertItem(
 			 WHERE ${table}.user_id = excluded.user_id`
 		)
 		.run(item.id, userId, JSON.stringify(item), item.updatedAt ?? new Date().toISOString());
+
+	if (table === 'sessions') reindexSession(userId, item.id);
 }
 
 /** Delete one row, scoped to its owner so an id alone can't reach another user's. */
 export function deleteItem(table: CollectionTable, userId: string, id: string): void {
 	getDb().prepare(`DELETE FROM ${table} WHERE id = ? AND user_id = ?`).run(id, userId);
+	if (table === 'sessions') dropSessionFromIndex(id);
 }
+
 
 /** Replace every row of a per-user JSON collection in one transaction. */
 function replaceCollection(
@@ -59,6 +64,10 @@ function replaceCollection(
 		db.exec('ROLLBACK');
 		throw error;
 	}
+
+	// Restoring a backup swaps out every conversation at once; the index has to
+	// follow, or search would keep answering with what was there before.
+	if (table === 'sessions') reindexAllSessions(userId);
 }
 
 function readCollection<T>(table: 'sessions' | 'knowledge' | 'personas', userId: string): T[] {
@@ -105,6 +114,7 @@ export function resetUserData(userId: string): void {
 	db.exec('BEGIN');
 	try {
 		db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+		db.prepare('DELETE FROM sessions_fts WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM knowledge WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM personas WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);

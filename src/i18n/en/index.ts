@@ -441,6 +441,14 @@ const en = {
 	newUserOnboardingDescription:
 		'Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.',
 	launch: 'Launch',
+	searchConversations: 'Search conversations',
+	searchConversationsPlaceholder: 'Search in every conversation…',
+	searchAllConversations: 'Search "{query:string}" in every conversation',
+	searchMatches: '{count:number} {{match|matches}}',
+	searchNavigate: 'Navigate',
+	searchOpen: 'Open',
+	searchClose: 'Close',
+	searchStart: 'Type to search the content of your conversations',
 	close: 'Close'
 } satisfies BaseTranslation;
 

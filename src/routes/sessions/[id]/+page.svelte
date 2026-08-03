@@ -136,9 +136,30 @@
 		}
 	});
 
+	/**
+	 * Arriving from a search result: `?m=<index>` names the passage that was
+	 * chosen, so land on it rather than at the bottom of the conversation. The
+	 * highlight fades on its own — it says "here", it isn't a state to dismiss.
+	 */
+	async function scrollToSearchMatch(): Promise<boolean> {
+		const raw = page.url.searchParams.get('m');
+		if (raw === null) return false;
+		const index = Number(raw);
+		if (!Number.isInteger(index) || index < 0) return false;
+
+		await tick();
+		const target = document.getElementById(`message-${index}`);
+		if (!target) return false;
+
+		target.scrollIntoView({ block: 'center' });
+		target.classList.add('message--found');
+		setTimeout(() => target.classList.remove('message--found'), 2000);
+		return true;
+	}
+
 	onMount(async () => {
 		handleSessionChange();
-		await scrollToBottom();
+		if (!(await scrollToSearchMatch())) await scrollToBottom();
 		messagesWindow?.addEventListener('scroll', handleScroll);
 	});
 

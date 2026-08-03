@@ -107,6 +107,35 @@ const migrations: Migration[] = [
 				PRIMARY KEY (server_id, model_name)
 			);
 		`
+	},
+	{
+		version: 6,
+		up: `
+			-- Full-text index over message content: one row per message, so a
+			-- conversation that mentions a term eight times yields eight entry points
+			-- rather than one. Only 'content' is indexed; the rest is carried along to
+			-- avoid a join back for the common case.
+			CREATE VIRTUAL TABLE sessions_fts USING fts5(
+				content,
+				session_id    UNINDEXED,
+				user_id       UNINDEXED,
+				message_index UNINDEXED,
+				role          UNINDEXED
+			);
+
+			-- Backfill what already exists. json_each walks the messages array inside
+			-- the stored JSON, so the extraction is expressed once, in SQL, and the
+			-- incremental reindex below reuses the very same statement.
+			INSERT INTO sessions_fts (content, session_id, user_id, message_index, role)
+			SELECT json_extract(m.value, '$.content'),
+			       s.id,
+			       s.user_id,
+			       m.key,
+			       json_extract(m.value, '$.role')
+			FROM sessions s, json_each(s.data, '$.messages') m
+			WHERE json_extract(m.value, '$.content') IS NOT NULL
+			  AND json_extract(m.value, '$.content') <> '';
+		`
 	}
 ];
 

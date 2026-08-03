@@ -28,7 +28,7 @@
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
-	import { settingsModalOpen } from '$lib/stores/modal';
+	import { openSearch, settingsModalOpen } from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
 	import { generateNewUrl } from './ButtonNew';
@@ -404,6 +404,20 @@
 
 			{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
 				<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
+			{/if}
+
+			<!-- The field above filters titles; this is the way out to the content of
+			     every conversation. Offered rather than configured: the choice belongs
+			     to the moment, not to a setting. -->
+			{#if q}
+				<button
+					type="button"
+					onclick={() => openSearch(query)}
+					class="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+				>
+					<Search class="h-4 w-4 shrink-0" />
+					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
+				</button>
 			{/if}
 		</div>
 	{/if}

@@ -1,4 +1,5 @@
 import type { Server } from '$lib/connections';
+import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
 import type { Session } from '$lib/sessions';
@@ -76,6 +77,15 @@ export interface DataRepository {
 	replaceSessions(sessions: Session[]): Promise<void>;
 	replaceKnowledge(knowledge: Knowledge[]): Promise<void>;
 	replacePersonas(personas: Persona[]): Promise<void>;
+
+	/**
+	 * Conversations matching a content search, best first.
+	 *
+	 * Server mode asks SQLite's full-text index; local mode scans what is already
+	 * in memory. Same result shape either way — the caller doesn't get to know
+	 * which, and the modal renders one thing.
+	 */
+	searchSessions(query: string): Promise<ConversationResult[]>;
 
 	exportBackup(): Promise<Backup>;
 	importBackup(backup: Backup): Promise<void>;

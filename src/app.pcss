@@ -568,3 +568,20 @@
 .hljs-strong {
 	font-weight: 600;
 }
+
+/* Landing on a message chosen from search: a brief wash of the accent, then
+   gone. It answers "which one" and then stops asking for attention. */
+.message--found {
+	animation: message-found 2s ease-out;
+	border-radius: 0.5rem;
+}
+
+@keyframes message-found {
+	0%,
+	40% {
+		background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+	}
+	100% {
+		background-color: transparent;
+	}
+}

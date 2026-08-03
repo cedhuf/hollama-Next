@@ -72,6 +72,7 @@
 		{#key message.role}
 			<Article
 				{message}
+				anchorId="message-{i}"
 				retryIndex={['assistant', 'system'].includes(message.role) ? i : undefined}
 				{handleRetry}
 				{assistantLabel}

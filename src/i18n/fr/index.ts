@@ -459,6 +459,14 @@ const fr = extendDictionary(en, {
 	newUserOnboardingDescription:
 		"Rejoue la visite de bienvenue. Ferme cette fenêtre ; la terminer remet la visite à l'état « vue ».",
 	launch: 'Lancer',
+	searchConversations: 'Rechercher dans les conversations',
+	searchConversationsPlaceholder: 'Rechercher dans toutes les conversations…',
+	searchAllConversations: 'Rechercher « {query:string} » dans toutes les conversations',
+	searchMatches: '{count:number} {{occurrence|occurrences}}',
+	searchNavigate: 'Parcourir',
+	searchOpen: 'Ouvrir',
+	searchClose: 'Fermer',
+	searchStart: 'Tapez pour rechercher dans le contenu de vos conversations',
 	close: 'Fermer'
 });
 
