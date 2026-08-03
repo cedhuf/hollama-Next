@@ -8,7 +8,6 @@
 		TriangleAlert
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { get, type Readable } from 'svelte/store';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -32,35 +31,18 @@
 	import SettingsSection from './SettingsSection.svelte';
 
 	/**
-	 * Each storage key, as this panel needs it: something to read for the export,
-	 * and one deliberate wholesale write for "delete this whole category". The
-	 * collections take `replaceAll` rather than `set` — emptying them here is a
-	 * real instruction, not the accident their per-item writes now prevent.
+	 * How each category is emptied by "delete all of this".
+	 *
+	 * The collections take `replaceAll` rather than `set`: wiping a category here
+	 * is a deliberate instruction, unlike the accidental wholesale writes their
+	 * per-item persistence now rules out.
 	 */
-	const stores: Record<
-		StorageKey,
-		{ subscribe: Readable<unknown>['subscribe']; replace: (value: unknown) => void }
-	> = {
-		[StorageKey.HollamaNextPreferences]: {
-			subscribe: settingsStore.subscribe,
-			replace: (value) => settingsStore.set(value as Settings)
-		},
-		[StorageKey.HollamaNextServers]: {
-			subscribe: serversStore.subscribe,
-			replace: (value) => serversStore.set(value as Server[])
-		},
-		[StorageKey.HollamaNextSessions]: {
-			subscribe: sessionsStore.subscribe,
-			replace: (value) => sessionsStore.replaceAll(value as Session[])
-		},
-		[StorageKey.HollamaNextKnowledge]: {
-			subscribe: knowledgeStore.subscribe,
-			replace: (value) => knowledgeStore.replaceAll(value as Knowledge[])
-		},
-		[StorageKey.HollamaNextPersonas]: {
-			subscribe: personasStore.subscribe,
-			replace: (value) => personasStore.replaceAll(value as Persona[])
-		}
+	const replaceStore: Record<StorageKey, (value: unknown) => void> = {
+		[StorageKey.HollamaNextPreferences]: (value) => settingsStore.set(value as Settings),
+		[StorageKey.HollamaNextServers]: (value) => serversStore.set(value as Server[]),
+		[StorageKey.HollamaNextSessions]: (value) => sessionsStore.replaceAll(value as Session[]),
+		[StorageKey.HollamaNextKnowledge]: (value) => knowledgeStore.replaceAll(value as Knowledge[]),
+		[StorageKey.HollamaNextPersonas]: (value) => personasStore.replaceAll(value as Persona[])
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -126,8 +108,16 @@
 		[StorageKey.HollamaNextPersonas]: []
 	};
 
-	function exportData(storageKey: StorageKey, fileName: string) {
-		download(JSON.stringify(get(stores[storageKey])), fileName);
+	/**
+	 * Exported from storage, not from the store.
+	 *
+	 * The conversation store holds summaries — titles and dates, no messages — so
+	 * reading it here would have written a backup file that looked complete and
+	 * restored empty conversations.
+	 */
+	async function exportData(storageKey: StorageKey, fileName: string) {
+		const backup = await repository.exportBackup();
+		download(JSON.stringify(backup[storageKey] ?? defaults[storageKey]), fileName);
 	}
 
 	function importData(event: Event, storageKey: StorageKey) {
@@ -200,7 +190,7 @@
 		};
 
 		if (confirm(confirmMessages[storageKey])) {
-			stores[storageKey].replace(defaults[storageKey]);
+			replaceStore[storageKey](defaults[storageKey]);
 			toast.info($LL.deleteSuccess());
 		}
 	}

@@ -1,7 +1,7 @@
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
-import { deleteItem, upsertItem } from '$lib/server/db/collections';
+import { deleteItem, getItem, upsertItem } from '$lib/server/db/collections';
 
 /**
  * One item of a collection.
@@ -17,6 +17,15 @@ function tableFor(collection: string | undefined): Table {
 	const table = TABLES.find((candidate) => candidate === collection);
 	if (!table) throw error(404, 'Unknown collection');
 	return table;
+}
+
+export async function GET(event) {
+	const user = await requireUser(event);
+	const table = tableFor(event.params.collection);
+
+	const item = getItem(table, user.id, event.params.id);
+	if (!item) throw error(404, 'Not found');
+	return json(item);
 }
 
 export async function PUT(event) {

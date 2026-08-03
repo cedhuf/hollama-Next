@@ -3,6 +3,7 @@ import { get } from 'svelte/store';
 import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { modelLabel, type Server } from '$lib/connections';
+import { repository } from '$lib/data';
 import { sessionsStore, settingsStore } from '$lib/localStorage';
 
 import type { AskChoices } from './askChoice';
@@ -78,6 +79,50 @@ export interface Session {
 	pinned?: boolean;
 }
 
+/**
+ * A conversation as the lists know it: everything but what was said.
+ *
+ * The sidebar, the home page and the model history need a title, a date, a model
+ * and a couple of flags. They never needed the messages — but the store held
+ * them anyway, so every boot and every refresh shipped the whole history to the
+ * browser and kept it in memory. A distinct type rather than a `Session` with an
+ * empty `messages`: that shape would be indistinguishable from a conversation
+ * whose messages were genuinely lost, and saving one would destroy the real one.
+ * Here it cannot be saved as a session at all.
+ */
+export interface SessionSummary {
+	id: string;
+	/** Already resolved: an explicit title, or the fallback below. */
+	title: string;
+	updatedAt?: string;
+	model?: Model;
+	pinned?: boolean;
+	personaId?: string;
+}
+
+/** Longest title derived from a first message. */
+export const MAX_TITLE_LENGTH = 56;
+
+/** The title a conversation shows in a list: its own, or its first words. */
+export function resolveSessionTitle(session: { title?: string; messages?: Message[] }): string {
+	if (session.title) return session.title;
+	const firstUserMessage = session.messages?.find(
+		(m) => m.role === 'user' && m.content && !m.knowledge
+	);
+	return (firstUserMessage?.content ?? '').slice(0, MAX_TITLE_LENGTH);
+}
+
+export function summarizeSession(session: Session): SessionSummary {
+	return {
+		id: session.id,
+		title: resolveSessionTitle(session),
+		updatedAt: session.updatedAt,
+		model: session.model,
+		pinned: session.pinned,
+		personaId: session.personaId
+	};
+}
+
 export interface Editor {
 	prompt: string;
 	view: 'messages' | 'controls';
@@ -110,57 +155,46 @@ export interface Editor {
 	abortController?: AbortController;
 }
 
-export const loadSession = (id: string): Session => {
-	let session: Session | null = null;
+const defaultSystemPrompt = (): Message => ({ role: 'system', content: '' });
 
-	// Retrieve the current sessions
-	const currentSessions = get(sessionsStore);
+/**
+ * A conversation that doesn't exist yet.
+ *
+ * Opening an unknown id is how a new chat starts, so this is the normal path,
+ * not an error one. Kept synchronous: it reads the settings already in memory
+ * and nothing else.
+ */
+export const newSession = (id: string): Session => {
+	// Use the default model (resolved: an admin-shared default may apply), or
+	// fall back to the last used.
+	const settings = get(settingsStore);
+	const defaultModelName = get(chatDefaultsConfig).defaultModel.value || settings.defaultModel;
+	const model = defaultModelName
+		? settings.models?.find((m) => m.name === defaultModelName)
+		: undefined;
 
-	const defaultSystemPrompt: Message = {
-		role: 'system',
-		content: ''
+	return {
+		id,
+		model: model || getLastUsedModels()[0],
+		systemPrompt: defaultSystemPrompt(),
+		updatedAt: new Date().toISOString(),
+		messages: [],
+		options: {}
 	};
-
-	// Find the session with the given id
-	if (currentSessions) {
-		const existingSession = currentSessions.find((s) => s.id === id);
-		if (existingSession) {
-			session = {
-				...existingSession,
-				// NOTE: `options` and `systemPrompt` are required fields but `existingSessions`
-				// created before this feature was implemented need to be set to the defaults.
-				// Over time we can probably remove them.
-				options: existingSession.options || {},
-				systemPrompt: existingSession.systemPrompt || defaultSystemPrompt
-			};
-		}
-	}
-
-	if (!session) {
-		// Use the default model (resolved: an admin-shared default may apply), or
-		// fall back to the last used.
-		const settings = get(settingsStore);
-		const defaultModelName = get(chatDefaultsConfig).defaultModel.value || settings.defaultModel;
-		const model = defaultModelName
-			? settings.models?.find((m) => m.name === defaultModelName)
-			: undefined;
-		const fallbackModel = model || getLastUsedModels()[0];
-
-		// Create a new session
-		session = {
-			id,
-			model: fallbackModel,
-			systemPrompt: defaultSystemPrompt,
-			updatedAt: new Date().toISOString(),
-			messages: [],
-			options: {}
-		};
-	}
-
-	return session;
 };
 
+/**
+ * Fill in fields that conversations written before they existed don't carry.
+ * Applied on the way out of storage, so the rest of the app can assume them.
+ */
+export const normalizeSession = (session: Session): Session => ({
+	...session,
+	options: session.options || {},
+	systemPrompt: session.systemPrompt || defaultSystemPrompt()
+});
+
 export const saveSession = (session: Session): void => {
+	// The store keeps the summary, the repository stores the conversation.
 	sessionsStore.upsert(session);
 
 	// Update the last used models
@@ -174,7 +208,7 @@ export const saveSession = (session: Session): void => {
  * `servers` is passed in rather than read from the store so the caller's template
  * re-renders when a connection's display names change.
  */
-export function formatSessionMetadata(session: Session, servers: Server[] = []) {
+export function formatSessionMetadata(session: SessionSummary, servers: Server[] = []) {
 	const subtitles: string[] = [];
 	if (session.updatedAt) subtitles.push(formatTimestampToNow(session.updatedAt));
 	if (session.model) {
@@ -184,11 +218,21 @@ export function formatSessionMetadata(session: Session, servers: Server[] = []) 
 	return subtitles.join(' • ');
 }
 
-/** Toggle a session's pinned state (pinned sessions sort to the top). */
-export function toggleSessionPin(id: string): void {
-	const session = (get(sessionsStore) || []).find((s) => s.id === id);
+/**
+ * Toggle a session's pinned state (pinned sessions sort to the top).
+ *
+ * Asynchronous because the list only holds summaries: pinning changes the
+ * conversation, so the conversation is what has to be read and written back —
+ * saving the summary would be saving a conversation with no messages.
+ */
+export async function toggleSessionPin(id: string): Promise<void> {
+	const summary = (get(sessionsStore) || []).find((s) => s.id === id);
+	if (!summary) return;
+
+	const session = await repository.loadSession(id);
 	if (!session) return;
-	sessionsStore.upsert({ ...session, pinned: !session.pinned });
+
+	saveSession({ ...session, pinned: !summary.pinned });
 }
 
 export type SessionGroupKey =
@@ -202,7 +246,7 @@ export type SessionGroupKey =
 export interface SessionGroup {
 	/** i18n key — the component resolves it via $LL (e.g. groupToday). */
 	key: SessionGroupKey;
-	sessions: Session[];
+	sessions: SessionSummary[];
 }
 
 /**
@@ -210,7 +254,7 @@ export interface SessionGroup {
  * (Today / Yesterday / Previous 7 days / …). Input is assumed already sorted by
  * `updatedAt` descending (as `sortStore` keeps it).
  */
-export function groupSessions(sessions: Session[]): SessionGroup[] {
+export function groupSessions(sessions: SessionSummary[]): SessionGroup[] {
 	const pinned = sessions.filter((s) => s.pinned);
 	const rest = sessions.filter((s) => !s.pinned);
 
@@ -220,7 +264,7 @@ export function groupSessions(sessions: Session[]): SessionGroup[] {
 
 	const buckets = { today: [], yesterday: [], week: [], month: [], older: [] } as Record<
 		string,
-		Session[]
+		SessionSummary[]
 	>;
 	for (const s of rest) {
 		const t = s.updatedAt ? new Date(s.updatedAt).getTime() : 0;
@@ -239,19 +283,4 @@ export function groupSessions(sessions: Session[]): SessionGroup[] {
 	if (buckets.month.length) groups.push({ key: 'previous30Days', sessions: buckets.month });
 	if (buckets.older.length) groups.push({ key: 'older', sessions: buckets.older });
 	return groups;
-}
-
-export function getSessionTitle(session: Session) {
-	if (session.title) return session.title;
-
-	const firstUserMessage = session.messages.find(
-		(m) => m.role === 'user' && m.content && !m.knowledge
-	);
-
-	if (firstUserMessage?.content) {
-		const MAX_TITLE_LENGTH = 56;
-		return firstUserMessage.content.slice(0, MAX_TITLE_LENGTH);
-	}
-
-	return '';
 }

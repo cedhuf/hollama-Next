@@ -5,7 +5,7 @@ import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import type { Session } from '$lib/sessions';
+import { summarizeSession, type Session, type SessionSummary } from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { repository } from './data';
@@ -73,24 +73,34 @@ function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise
  * `setQuiet` fills the store from storage without writing anything back;
  * `replaceAll` is the deliberate wholesale write, used when restoring a backup.
  */
-function collectionStore<T extends { id: string; updatedAt?: string }>(
-	seed: T[],
+function collectionStore<
+	T extends { id: string },
+	S extends { id: string; updatedAt?: string } = T & { updatedAt?: string }
+>(
+	seed: S[],
 	ops: {
 		save: (item: T) => Promise<void>;
 		remove: (id: string) => Promise<void>;
 		replaceAll: (items: T[]) => Promise<void>;
+		/**
+		 * What the store keeps of an item. Identity for most collections; for
+		 * conversations it drops the messages, which the lists never read and which
+		 * would otherwise sit in memory in their entirety.
+		 */
+		summarize: (item: T) => S;
 	}
 ) {
-	const store = writable<T[]>(seed);
+	const store = writable<S[]>(seed);
 
 	return {
 		subscribe: store.subscribe,
-		setQuiet: (items: T[]) => store.set(items),
+		setQuiet: (items: S[]) => store.set(items),
 
 		upsert: (item: T) => {
+			const summary = ops.summarize(item);
 			store.update((items) => {
-				const index = items.findIndex((existing) => existing.id === item.id);
-				const next = index === -1 ? [...items, item] : items.with(index, item);
+				const index = items.findIndex((existing) => existing.id === summary.id);
+				const next = index === -1 ? [...items, summary] : items.with(index, summary);
 				return sortStore(next);
 			});
 			if (persistenceReady) void ops.save(item);
@@ -102,7 +112,7 @@ function collectionStore<T extends { id: string; updatedAt?: string }>(
 		},
 
 		replaceAll: (items: T[]) => {
-			store.set(items);
+			store.set(items.map(ops.summarize));
 			if (persistenceReady) void ops.replaceAll(items);
 		},
 
@@ -125,7 +135,7 @@ export function sortStore<T extends { updatedAt?: string }>(store: T[]) {
 const seed = repository.hydrate?.() ?? {
 	settings: DEFAULT_SETTINGS,
 	servers: [] as Server[],
-	sessions: [] as Session[],
+	sessions: [] as SessionSummary[],
 	knowledge: [] as Knowledge[],
 	personas: [] as Persona[]
 };
@@ -136,20 +146,23 @@ export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SET
 export const serversStore = persistedStore<Server[]>(seed.servers, [], (v) =>
 	repository.saveServers(v)
 );
-export const sessionsStore = collectionStore<Session>(seed.sessions, {
+export const sessionsStore = collectionStore<Session, SessionSummary>(seed.sessions, {
 	save: (session) => repository.saveSession(session),
 	remove: (id) => repository.deleteSession(id),
-	replaceAll: (sessions) => repository.replaceSessions(sessions)
+	replaceAll: (sessions) => repository.replaceSessions(sessions),
+	summarize: summarizeSession
 });
 export const knowledgeStore = collectionStore<Knowledge>(seed.knowledge, {
 	save: (knowledge) => repository.saveKnowledgeItem(knowledge),
 	remove: (id) => repository.deleteKnowledgeItem(id),
-	replaceAll: (knowledge) => repository.replaceKnowledge(knowledge)
+	replaceAll: (knowledge) => repository.replaceKnowledge(knowledge),
+	summarize: (knowledge) => knowledge
 });
 export const personasStore = collectionStore<Persona>(seed.personas, {
 	save: (persona) => repository.savePersona(persona),
 	remove: (id) => repository.deletePersona(id),
-	replaceAll: (personas) => repository.replacePersonas(personas)
+	replaceAll: (personas) => repository.replacePersonas(personas),
+	summarize: (persona) => persona
 });
 
 /**
@@ -209,7 +222,7 @@ export async function refreshStores(): Promise<void> {
 	// the read failing is the expected case, not the exotic one. Emptying the
 	// stores here would arm the next `saveSession` to replace every stored session
 	// with the single one still open on screen.
-	let sessions: Session[], knowledge: Knowledge[], personas: Persona[];
+	let sessions: SessionSummary[], knowledge: Knowledge[], personas: Persona[];
 	try {
 		[sessions, knowledge, personas] = await Promise.all([
 			repository.loadSessions(),

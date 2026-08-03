@@ -4,7 +4,7 @@ import { requireUser } from '$lib/server/api';
 import {
 	getKnowledge,
 	getPersonas,
-	getSessions,
+	getSessionSummaries,
 	getSettings,
 	replaceKnowledge,
 	replacePersonas,
@@ -17,7 +17,7 @@ export async function GET(event) {
 
 	switch (event.params.collection) {
 		case 'sessions':
-			return json(getSessions(user.id));
+			return json(getSessionSummaries(user.id));
 		case 'knowledge':
 			return json(getKnowledge(user.id));
 		case 'personas':

@@ -1,4 +1,4 @@
-import { getSessionTitle, type Message, type Session } from '$lib/sessions';
+import { resolveSessionTitle, type Message, type Session } from '$lib/sessions';
 
 export type ExportFormat = 'json' | 'markdown';
 
@@ -20,7 +20,7 @@ function speaker(message: Message, assistantLabel?: string): string {
 export function sessionToMarkdown(session: Session, assistantLabel?: string): string {
 	const parts: string[] = [];
 
-	const title = getSessionTitle(session);
+	const title = resolveSessionTitle(session);
 	parts.push(`# ${title || `Session #${session.id}`}`);
 	if (session.updatedAt) parts.push(`_${new Date(session.updatedAt).toLocaleString()}_`);
 

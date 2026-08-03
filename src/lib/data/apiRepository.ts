@@ -6,7 +6,7 @@ import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
 import { fetchProviders, providerToServer } from '$lib/providers';
-import type { Session } from '$lib/sessions';
+import { normalizeSession, type Session, type SessionSummary } from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import type { Backup, DataRepository } from './repository';
@@ -40,8 +40,20 @@ export class ApiRepository implements DataRepository {
 		// Backfill any keys added since these settings were last saved (e.g. systemPrompts).
 		return stored ? { ...DEFAULT_SETTINGS, ...stored } : null;
 	}
-	async loadSessions(): Promise<Session[]> {
-		return this.#get<Session[]>('sessions', []);
+	async loadSessions(): Promise<SessionSummary[]> {
+		return this.#get<SessionSummary[]>('sessions', []);
+	}
+
+	/**
+	 * A 404 means "no such conversation yet" — opening an unknown id is how a new
+	 * chat begins. Anything else throws, so a server that is merely unreachable is
+	 * never mistaken for an empty conversation.
+	 */
+	async loadSession(id: string): Promise<Session | null> {
+		const response = await fetch(`/api/data/sessions/${id}`);
+		if (response.status === 404) return null;
+		if (!response.ok) throw new Error(`GET /api/data/sessions/${id}: HTTP ${response.status}`);
+		return normalizeSession((await response.json()) as Session);
 	}
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#get<Knowledge[]>('knowledge', []);

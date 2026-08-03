@@ -1,4 +1,4 @@
-import type { Session } from '$lib/sessions';
+import { resolveSessionTitle, type Session } from '$lib/sessions';
 
 /**
  * Searching your own conversations, by content.
@@ -126,7 +126,7 @@ export function searchSessionsLocally(sessions: Session[], query: string): Conve
 		if (matches.length) {
 			results.push({
 				sessionId: session.id,
-				title: session.title || (firstUserContent(session) ?? '').slice(0, 56),
+				title: resolveSessionTitle(session),
 				updatedAt: session.updatedAt,
 				matches
 			});
@@ -137,8 +137,4 @@ export function searchSessionsLocally(sessions: Session[], query: string): Conve
 		(a, b) =>
 			b.matches.length - a.matches.length || (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')
 	);
-}
-
-function firstUserContent(session: Session): string | undefined {
-	return session.messages?.find((m) => m.role === 'user' && m.content && !m.knowledge)?.content;
 }

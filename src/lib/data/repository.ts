@@ -2,7 +2,7 @@ import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import type { Session } from '$lib/sessions';
+import type { Session, SessionSummary } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
 import type { StorageKey } from './keys';
@@ -15,7 +15,7 @@ import type { StorageKey } from './keys';
 export interface AppData {
 	settings: Settings;
 	servers: Server[];
-	sessions: Session[];
+	sessions: SessionSummary[];
 	knowledge: Knowledge[];
 	personas: Persona[];
 }
@@ -45,7 +45,10 @@ export interface DataRepository {
 
 	loadSettings(): Promise<Settings | null>;
 	loadServers(): Promise<Server[]>;
-	loadSessions(): Promise<Session[]>;
+	/** The conversation list: titles, dates and models — never the messages. */
+	loadSessions(): Promise<SessionSummary[]>;
+	/** One whole conversation, or `null` if there is no such conversation yet. */
+	loadSession(id: string): Promise<Session | null>;
 	loadKnowledge(): Promise<Knowledge[]>;
 	loadPersonas(): Promise<Persona[]>;
 

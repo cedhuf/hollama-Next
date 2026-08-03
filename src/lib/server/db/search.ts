@@ -1,4 +1,5 @@
 import { MATCH_CLOSE, MATCH_OPEN } from '$lib/conversationSearch';
+import { resolveSessionTitle, type Session } from '$lib/sessions';
 
 import { getDb } from './index';
 
@@ -114,9 +115,6 @@ export function searchSessions(userId: string, query: string, limit = 100): Sear
 	}));
 }
 
-/** Longest title derived from a first message. Mirrors `getSessionTitle`. */
-const MAX_TITLE_LENGTH = 56;
-
 export interface SessionHeader {
 	title: string;
 	updatedAt?: string;
@@ -126,7 +124,7 @@ export interface SessionHeader {
  * Titles and dates for the conversations a search matched.
  *
  * Resolved here rather than left to the client: the same fallback to the first
- * user message that `getSessionTitle` applies has to happen somewhere, and once
+ * user message that `resolveSessionTitle` applies has to happen somewhere, and once
  * conversations load lazily the client no longer holds the messages to derive it
  * from.
  */
@@ -142,16 +140,9 @@ export function getSessionHeaders(userId: string, ids: string[]): Map<string, Se
 		.all(userId, ...ids) as { id: string; data: string }[];
 
 	for (const row of rows) {
-		const session = JSON.parse(row.data) as {
-			title?: string;
-			updatedAt?: string;
-			messages?: { role: string; content?: string; knowledge?: unknown }[];
-		};
-		const firstUserMessage = session.messages?.find(
-			(message) => message.role === 'user' && message.content && !message.knowledge
-		);
+		const session = JSON.parse(row.data) as Session;
 		headers.set(row.id, {
-			title: session.title || (firstUserMessage?.content ?? '').slice(0, MAX_TITLE_LENGTH),
+			title: resolveSessionTitle(session),
 			updatedAt: session.updatedAt
 		});
 	}

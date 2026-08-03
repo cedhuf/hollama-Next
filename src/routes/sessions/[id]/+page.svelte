@@ -32,8 +32,7 @@
 	import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 	import { buildSearchContext, parseRouterDecision, searchConfig } from '$lib/search';
 	import {
-		getSessionTitle,
-		loadSession,
+		resolveSessionTitle,
 		saveSession,
 		type Editor,
 		type Message,
@@ -62,7 +61,7 @@
 	const searchAvailable = $derived($searchConfig.available);
 
 	// svelte-ignore state_referenced_locally
-	let session = $state(loadSession(data.id));
+	let session = $state(data.session);
 	// svelte-ignore state_referenced_locally
 	let editor = $state<Editor>({
 		prompt: '',
@@ -96,7 +95,7 @@
 
 	// Empty until the conversation has a real title (or a first user message to
 	// derive one from) — the header falls back to "Session #id" until then.
-	const sessionTitle = $derived(editor.isNewSession ? '' : getSessionTitle(session));
+	const sessionTitle = $derived(editor.isNewSession ? '' : resolveSessionTitle(session));
 
 	$effect(() => {
 		if (data.id !== session.id) handleSessionChange();
@@ -188,7 +187,7 @@
 	});
 
 	async function handleSessionChange() {
-		session = loadSession(data.id);
+		session = data.session;
 		modelName = session.model?.name || '';
 		editor.view = 'messages';
 		editor.isNewSession = !session?.messages?.length;
@@ -805,7 +804,7 @@
 
 <div class="session relative flex h-full w-full flex-col overflow-hidden">
 	<Head
-		title={[editor.isNewSession ? $LL.newSession() : getSessionTitle(session), $LL.sessions()]}
+		title={[editor.isNewSession ? $LL.newSession() : resolveSessionTitle(session), $LL.sessions()]}
 	/>
 	<Header confirmDeletion={shouldConfirmDeletion}>
 		{#snippet headline()}

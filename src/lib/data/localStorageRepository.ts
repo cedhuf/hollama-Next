@@ -2,10 +2,15 @@ import { toast } from 'svelte-sonner';
 
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
-import { type ConversationResult, searchSessionsLocally } from '$lib/conversationSearch';
+import { searchSessionsLocally, type ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import type { Session } from '$lib/sessions';
+import {
+	normalizeSession,
+	summarizeSession,
+	type Session,
+	type SessionSummary
+} from '$lib/sessions';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { StorageKey } from './keys';
@@ -21,7 +26,7 @@ export class LocalStorageRepository implements DataRepository {
 		return {
 			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.HollamaNextPreferences, {}) },
 			servers: this.#read<Server[]>(StorageKey.HollamaNextServers, []),
-			sessions: this.#read<Session[]>(StorageKey.HollamaNextSessions, []),
+			sessions: this.#readSummaries(),
 			knowledge: this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []),
 			personas: this.#read<Persona[]>(StorageKey.HollamaNextPersonas, [])
 		};
@@ -35,8 +40,23 @@ export class LocalStorageRepository implements DataRepository {
 	async loadServers(): Promise<Server[]> {
 		return this.#read<Server[]>(StorageKey.HollamaNextServers, []);
 	}
-	async loadSessions(): Promise<Session[]> {
-		return this.#read<Session[]>(StorageKey.HollamaNextSessions, []);
+	async loadSessions(): Promise<SessionSummary[]> {
+		return this.#readSummaries();
+	}
+	async loadSession(id: string): Promise<Session | null> {
+		const session = this.#read<Session[]>(StorageKey.HollamaNextSessions, []).find(
+			(candidate) => candidate.id === id
+		);
+		return session ? normalizeSession(session) : null;
+	}
+
+	/**
+	 * localStorage holds one blob, so the messages are read either way — but they
+	 * are dropped here rather than kept in the store, so both modes present the
+	 * lists with the same shape and nothing can save a summary as a conversation.
+	 */
+	#readSummaries(): SessionSummary[] {
+		return this.#read<Session[]>(StorageKey.HollamaNextSessions, []).map(summarizeSession);
 	}
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []);

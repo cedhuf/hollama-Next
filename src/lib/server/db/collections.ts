@@ -1,6 +1,6 @@
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
-import type { Session } from '$lib/sessions';
+import { summarizeSession, type Session, type SessionSummary } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
 import { getDb } from './index';
@@ -42,7 +42,6 @@ export function deleteItem(table: CollectionTable, userId: string, id: string): 
 	if (table === 'sessions') dropSessionFromIndex(id);
 }
 
-
 /** Replace every row of a per-user JSON collection in one transaction. */
 function replaceCollection(
 	table: 'sessions' | 'knowledge' | 'personas',
@@ -68,6 +67,25 @@ function replaceCollection(
 	// Restoring a backup swaps out every conversation at once; the index has to
 	// follow, or search would keep answering with what was there before.
 	if (table === 'sessions') reindexAllSessions(userId);
+}
+
+/** One item, scoped to its owner. `null` when it doesn't exist — or isn't theirs. */
+export function getItem<T>(table: CollectionTable, userId: string, id: string): T | null {
+	const row = getDb()
+		.prepare(`SELECT data FROM ${table} WHERE id = ? AND user_id = ?`)
+		.get(id, userId) as { data: string } | undefined;
+	return row ? (JSON.parse(row.data) as T) : null;
+}
+
+/**
+ * The conversation list, without the conversations.
+ *
+ * Every field the sidebar and the home page read, and none of the messages —
+ * which is the whole point: this response used to carry the entire history on
+ * every boot and every return to the foreground.
+ */
+export function getSessionSummaries(userId: string): SessionSummary[] {
+	return readCollection<Session>('sessions', userId).map(summarizeSession);
 }
 
 function readCollection<T>(table: 'sessions' | 'knowledge' | 'personas', userId: string): T[] {

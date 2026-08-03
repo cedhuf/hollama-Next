@@ -3,7 +3,7 @@
 
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import { getSessionTitle, saveSession, type Session } from '$lib/sessions';
+	import { resolveSessionTitle, saveSession, type Session } from '$lib/sessions';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 
 	import SettingsBadge from '../../settings/SettingsBadge.svelte';
@@ -49,7 +49,7 @@
 		<!-- Header: live title + close, aligned with the persona and settings modals -->
 		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
 			<span class="truncate text-sm font-semibold text-active">
-				{session.title?.trim() || getSessionTitle(session) || 'Conversation settings'}
+				{session.title?.trim() || resolveSessionTitle(session) || 'Conversation settings'}
 			</span>
 			<button
 				type="button"
@@ -70,7 +70,7 @@
 							class="settings-field"
 							bind:value={session.title}
 							oninput={onTitleInput}
-							placeholder={getSessionTitle(session) || 'Untitled'}
+							placeholder={resolveSessionTitle(session) || 'Untitled'}
 						/>
 					</SettingsField>
 

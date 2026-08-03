@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 
 import { personasStore, sessionsStore } from '$lib/localStorage';
-import { saveSession, type Session } from '$lib/sessions';
+import { saveSession, type Session, type SessionSummary } from '$lib/sessions';
 import type { Model } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
 
@@ -140,7 +140,7 @@ export function launchPersona(persona: Persona, models: Model[]): string {
  * "recent personas" row. A persona leaves this list when its conversation is
  * deleted (see `unbindPersonaSession`).
  */
-export function conversedPersonas(personas: Persona[], sessions: Session[]): Persona[] {
+export function conversedPersonas(personas: Persona[], sessions: SessionSummary[]): Persona[] {
 	const updatedAt: Record<string, string> = {};
 	for (const s of sessions) updatedAt[s.id] = s.updatedAt ?? '';
 	return personas

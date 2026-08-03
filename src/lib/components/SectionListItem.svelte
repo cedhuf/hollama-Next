@@ -48,7 +48,7 @@
 			{#if isSession && !isDeleting}
 				<button
 					type="button"
-					onclick={() => toggleSessionPin(id)}
+					onclick={() => void toggleSessionPin(id)}
 					title={pinned ? $LL.unpin() : $LL.pin()}
 					aria-label={pinned ? $LL.unpin() : $LL.pin()}
 					class="rounded p-1 text-muted transition-colors hover:text-active {pinned

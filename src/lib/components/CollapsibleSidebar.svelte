@@ -21,10 +21,10 @@
 	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import {
 		formatSessionMetadata,
-		getSessionTitle,
+		resolveSessionTitle,
 		groupSessions,
-		type Session,
-		type SessionGroupKey
+		type SessionGroupKey,
+		type SessionSummary
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { currentRole } from '$lib/stores/auth';
@@ -61,7 +61,7 @@
 	);
 	const filteredSessions = $derived(
 		q
-			? visibleSessions.filter((s) => getSessionTitle(s).toLowerCase().includes(q))
+			? visibleSessions.filter((s) => resolveSessionTitle(s).toLowerCase().includes(q))
 			: visibleSessions
 	);
 	const sessionGroups = $derived(groupSessions(filteredSessions));
@@ -118,8 +118,8 @@
 		return f + l || '?';
 	}
 
-	function sessionInitial(s: Session): string {
-		return (getSessionTitle(s).trim().charAt(0) || '#').toUpperCase();
+	function sessionInitial(s: SessionSummary): string {
+		return (resolveSessionTitle(s).trim().charAt(0) || '#').toUpperCase();
 	}
 
 	function groupLabel(key: SessionGroupKey): string {
@@ -271,8 +271,8 @@
 					<button
 						type="button"
 						onclick={() => goto(resolve('/sessions/[id]', { id: session.id }))}
-						title={getSessionTitle(session) || $LL.untitled()}
-						aria-label={getSessionTitle(session) || $LL.untitled()}
+						title={resolveSessionTitle(session) || $LL.untitled()}
+						aria-label={resolveSessionTitle(session) || $LL.untitled()}
 						class="flex h-8 w-8 items-center justify-center rounded-md border text-xs font-medium transition-colors {pathname.includes(
 							session.id
 						)
@@ -393,7 +393,7 @@
 							<SectionListItem
 								sitemap={Sitemap.SESSIONS}
 								id={session.id}
-								title={getSessionTitle(session)}
+								title={resolveSessionTitle(session)}
 								subtitle={formatSessionMetadata(session, $serversStore)}
 								pinned={session.pinned}
 							/>
