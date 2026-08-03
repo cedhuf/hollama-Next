@@ -21,8 +21,8 @@
 	import { conversedPersonas, launchPersona } from '$lib/personas';
 	import {
 		formatSessionMetadata,
-		resolveSessionTitle,
 		groupSessions,
+		resolveSessionTitle,
 		type SessionGroupKey,
 		type SessionSummary
 	} from '$lib/sessions';
@@ -307,6 +307,20 @@
 				/>
 			</div>
 
+			<!-- The field above filters titles; this is the way out to the content of
+			     every conversation. Offered rather than configured: the choice belongs
+			     to the moment, not to a setting. -->
+			{#if q}
+				<button
+					type="button"
+					onclick={() => openSearch(query)}
+					class="flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+				>
+					<Search class="h-4 w-4 shrink-0" />
+					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
+				</button>
+			{/if}
+
 			<div class="flex gap-1.5">
 				<a
 					href={resolve('/sessions')}
@@ -404,20 +418,6 @@
 
 			{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
 				<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
-			{/if}
-
-			<!-- The field above filters titles; this is the way out to the content of
-			     every conversation. Offered rather than configured: the choice belongs
-			     to the moment, not to a setting. -->
-			{#if q}
-				<button
-					type="button"
-					onclick={() => openSearch(query)}
-					class="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
-				>
-					<Search class="h-4 w-4 shrink-0" />
-					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
-				</button>
 			{/if}
 		</div>
 	{/if}
