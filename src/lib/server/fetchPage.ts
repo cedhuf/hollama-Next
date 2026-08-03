@@ -179,7 +179,7 @@ export async function fetchPage(
 				signal: controller.signal,
 				headers: {
 					// Some sites serve a stub to unknown agents; identify honestly anyway.
-					'user-agent': `${APP_NAME}/1.0 (+https://github.com/cedhuf/hollama-Next)`,
+					'user-agent': `${APP_NAME}/1.0 (+https://github.com/cedhuf/llooma)`,
 					accept: 'text/html,text/plain,text/markdown;q=0.9,*/*;q=0.1'
 				}
 			});

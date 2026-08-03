@@ -41,7 +41,7 @@
 	);
 
 	const links = [
-		{ href: GITHUB_URL, icon: CodeXml, title: 'GitHub', subtitle: 'cedhuf/hollama-Next' },
+		{ href: GITHUB_URL, icon: CodeXml, title: 'GitHub', subtitle: 'cedhuf/llooma' },
 		{ href: UPSTREAM_URL, icon: GitFork, title: 'Forked from', subtitle: 'fmaclen/hollama' }
 	];
 </script>

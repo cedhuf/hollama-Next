@@ -3,10 +3,10 @@
 Here's ways in which you can contribute:
 
 - Found a **bug**
-  1. Search for it in the [existing issues](https://github.com/cedhuf/hollama-Next/issues)
-  2. Open a [new issue](https://github.com/cedhuf/hollama-Next/issues/new) if it doesn't yet exist
-- Comment or upvote [existing issues](https://github.com/cedhuf/hollama-Next/issues) _(active issues will likely be prioritized)_
-- Submit a [pull request](https://github.com/cedhuf/hollama-Next/pulls) _(please discuss in an issue first)_
+  1. Search for it in the [existing issues](https://github.com/cedhuf/llooma/issues)
+  2. Open a [new issue](https://github.com/cedhuf/llooma/issues/new) if it doesn't yet exist
+- Comment or upvote [existing issues](https://github.com/cedhuf/llooma/issues) _(active issues will likely be prioritized)_
+- Submit a [pull request](https://github.com/cedhuf/llooma/pulls) _(please discuss in an issue first)_
 
 - Have a **feature request**?
   - Start a new discussion for the community to decide.

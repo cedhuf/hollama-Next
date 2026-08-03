@@ -1,6 +1,6 @@
-export const GITHUB_RELEASES_API = 'https://api.github.com/repos/cedhuf/hollama-Next/releases';
-export const GITHUB_RELEASES_URL = 'https://github.com/cedhuf/hollama-Next/releases';
-export const GITHUB_URL = 'https://github.com/cedhuf/hollama-Next';
+export const GITHUB_RELEASES_API = 'https://api.github.com/repos/cedhuf/llooma/releases';
+export const GITHUB_RELEASES_URL = 'https://github.com/cedhuf/llooma/releases';
+export const GITHUB_URL = 'https://github.com/cedhuf/llooma';
 
 /** The page for one release, so an update points at its own notes. */
 export function releaseUrl(version: string): string {
