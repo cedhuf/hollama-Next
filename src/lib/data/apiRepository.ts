@@ -88,14 +88,19 @@ export class ApiRepository implements DataRepository {
 		await fetch('/api/data/reset', { method: 'POST' });
 	}
 
+	/**
+	 * Reads a collection, or throws.
+	 *
+	 * It must never answer "empty" for "I could not tell". The stores persist the
+	 * whole collection at once, so a failed read that returned `[]` would leave the
+	 * store empty and the next save would replace every stored row with nothing —
+	 * the caller has to be able to distinguish the two and leave the data alone.
+	 * `null`/absent from the server is a genuine empty, and keeps the fallback.
+	 */
 	async #get<T>(collection: Collection, fallback: T): Promise<T> {
-		try {
-			const response = await fetch(`/api/data/${collection}`);
-			if (!response.ok) return fallback;
-			return ((await response.json()) as T) ?? fallback;
-		} catch {
-			return fallback;
-		}
+		const response = await fetch(`/api/data/${collection}`);
+		if (!response.ok) throw new Error(`GET /api/data/${collection}: HTTP ${response.status}`);
+		return ((await response.json()) as T) ?? fallback;
 	}
 
 	#schedule(collection: Collection, value: unknown): void {

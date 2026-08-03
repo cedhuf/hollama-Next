@@ -1,3 +1,4 @@
+import { toast } from 'svelte-sonner';
 import { writable } from 'svelte/store';
 
 import { browser } from '$app/environment';
@@ -106,10 +107,15 @@ export async function hydrateStores(): Promise<void> {
 
 	try {
 		await loadIntoStores();
-	} finally {
-		// Only now may writes reach the server — the stores hold real data.
-		persistenceReady = true;
+	} catch (error) {
+		// Persistence stays suspended. The stores still hold their empty seed, and
+		// letting a write out now would replace the user's stored collections with
+		// it — the boot equivalent of the refresh wipe guarded against below.
+		reportLoadFailure(error);
+		return;
 	}
+	// Only now may writes reach the server — the stores hold real data.
+	persistenceReady = true;
 }
 
 /**
@@ -143,14 +149,41 @@ export async function refreshStores(): Promise<void> {
 	// with data the app isn't yet allowed to write back.
 	if (!persistenceReady) return;
 
-	const [sessions, knowledge, personas] = await Promise.all([
-		repository.loadSessions(),
-		repository.loadKnowledge(),
-		repository.loadPersonas()
-	]);
+	// A refresh that fails must change nothing. This runs when the app comes back
+	// to the foreground — typically right after the server restarted under it, so
+	// the read failing is the expected case, not the exotic one. Emptying the
+	// stores here would arm the next `saveSession` to replace every stored session
+	// with the single one still open on screen.
+	let sessions: Session[], knowledge: Knowledge[], personas: Persona[];
+	try {
+		[sessions, knowledge, personas] = await Promise.all([
+			repository.loadSessions(),
+			repository.loadKnowledge(),
+			repository.loadPersonas()
+		]);
+	} catch (error) {
+		reportLoadFailure(error);
+		return;
+	}
+
 	sessionsStore.setQuiet(sessions);
 	knowledgeStore.setQuiet(knowledge);
 	personasStore.setQuiet(personas);
+}
+
+/**
+ * Tell the user their data could not be read.
+ *
+ * Silence here is what makes the failure dangerous: an empty sidebar looks like
+ * an empty account, and the natural reaction — carry on typing — is what used to
+ * destroy the rest. Saving is off until a load succeeds, so say so.
+ */
+function reportLoadFailure(error: unknown): void {
+	toast.error('Could not load your data', {
+		id: 'data-load-error',
+		description: `${error instanceof Error ? error.message : 'Unknown error'} — saving is paused; reload once the server is back.`,
+		duration: Number.POSITIVE_INFINITY
+	});
 }
 
 /** The network load shared by the boot and the refresh. */
