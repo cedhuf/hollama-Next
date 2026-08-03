@@ -60,6 +60,59 @@ function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise
 	};
 }
 
+/**
+ * A collection of identified items, persisted one item at a time.
+ *
+ * `persistedStore` above persists whatever the store now holds, which is right
+ * for a single value (the settings) and wrong for a collection: the array is all
+ * the repository ever sees, so "this session changed" and "these are the only
+ * sessions left" become the same write. Here the operation is explicit —
+ * `upsert` saves one item, `remove` deletes one item — and the in-memory array
+ * is kept in step for the components reading it.
+ *
+ * `setQuiet` fills the store from storage without writing anything back;
+ * `replaceAll` is the deliberate wholesale write, used when restoring a backup.
+ */
+function collectionStore<T extends { id: string; updatedAt?: string }>(
+	seed: T[],
+	ops: {
+		save: (item: T) => Promise<void>;
+		remove: (id: string) => Promise<void>;
+		replaceAll: (items: T[]) => Promise<void>;
+	}
+) {
+	const store = writable<T[]>(seed);
+
+	return {
+		subscribe: store.subscribe,
+		setQuiet: (items: T[]) => store.set(items),
+
+		upsert: (item: T) => {
+			store.update((items) => {
+				const index = items.findIndex((existing) => existing.id === item.id);
+				const next = index === -1 ? [...items, item] : items.with(index, item);
+				return sortStore(next);
+			});
+			if (persistenceReady) void ops.save(item);
+		},
+
+		remove: (id: string) => {
+			store.update((items) => items.filter((item) => item.id !== id));
+			if (persistenceReady) void ops.remove(id);
+		},
+
+		replaceAll: (items: T[]) => {
+			store.set(items);
+			if (persistenceReady) void ops.replaceAll(items);
+		},
+
+		reset: () => {
+			store.set([]);
+			if (persistenceReady) void ops.replaceAll([]);
+		}
+	};
+}
+
 export function sortStore<T extends { updatedAt?: string }>(store: T[]) {
 	return store.sort((a, b) => {
 		if (!a.updatedAt && !b.updatedAt) return 0;
@@ -67,10 +120,6 @@ export function sortStore<T extends { updatedAt?: string }>(store: T[]) {
 		if (!b.updatedAt) return -1;
 		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
 	});
-}
-
-export function deleteStoreItem<T extends { id: string }>(store: T[], id: string) {
-	return store.filter((s) => s.id !== id);
 }
 
 const seed = repository.hydrate?.() ?? {
@@ -87,15 +136,21 @@ export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SET
 export const serversStore = persistedStore<Server[]>(seed.servers, [], (v) =>
 	repository.saveServers(v)
 );
-export const sessionsStore = persistedStore<Session[]>(seed.sessions, [], (v) =>
-	repository.saveSessions(v)
-);
-export const knowledgeStore = persistedStore<Knowledge[]>(seed.knowledge, [], (v) =>
-	repository.saveKnowledge(v)
-);
-export const personasStore = persistedStore<Persona[]>(seed.personas, [], (v) =>
-	repository.savePersonas(v)
-);
+export const sessionsStore = collectionStore<Session>(seed.sessions, {
+	save: (session) => repository.saveSession(session),
+	remove: (id) => repository.deleteSession(id),
+	replaceAll: (sessions) => repository.replaceSessions(sessions)
+});
+export const knowledgeStore = collectionStore<Knowledge>(seed.knowledge, {
+	save: (knowledge) => repository.saveKnowledgeItem(knowledge),
+	remove: (id) => repository.deleteKnowledgeItem(id),
+	replaceAll: (knowledge) => repository.replaceKnowledge(knowledge)
+});
+export const personasStore = collectionStore<Persona>(seed.personas, {
+	save: (persona) => repository.savePersona(persona),
+	remove: (id) => repository.deletePersona(id),
+	replaceAll: (personas) => repository.replacePersonas(personas)
+});
 
 /**
  * Fill the stores from the repository at boot. A no-op in local mode (the seed

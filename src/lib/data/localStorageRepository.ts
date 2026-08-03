@@ -50,14 +50,54 @@ export class LocalStorageRepository implements DataRepository {
 	async saveServers(value: Server[]): Promise<void> {
 		this.#write(StorageKey.HollamaNextServers, value);
 	}
-	async saveSessions(value: Session[]): Promise<void> {
+	async saveSession(session: Session): Promise<void> {
+		this.#upsert(StorageKey.HollamaNextSessions, session);
+	}
+	async deleteSession(id: string): Promise<void> {
+		this.#remove(StorageKey.HollamaNextSessions, id);
+	}
+	async saveKnowledgeItem(knowledge: Knowledge): Promise<void> {
+		this.#upsert(StorageKey.HollamaNextKnowledge, knowledge);
+	}
+	async deleteKnowledgeItem(id: string): Promise<void> {
+		this.#remove(StorageKey.HollamaNextKnowledge, id);
+	}
+	async savePersona(persona: Persona): Promise<void> {
+		this.#upsert(StorageKey.HollamaNextPersonas, persona);
+	}
+	async deletePersona(id: string): Promise<void> {
+		this.#remove(StorageKey.HollamaNextPersonas, id);
+	}
+
+	async replaceSessions(value: Session[]): Promise<void> {
 		this.#write(StorageKey.HollamaNextSessions, value);
 	}
-	async saveKnowledge(value: Knowledge[]): Promise<void> {
+	async replaceKnowledge(value: Knowledge[]): Promise<void> {
 		this.#write(StorageKey.HollamaNextKnowledge, value);
 	}
-	async savePersonas(value: Persona[]): Promise<void> {
+	async replacePersonas(value: Persona[]): Promise<void> {
 		this.#write(StorageKey.HollamaNextPersonas, value);
+	}
+
+	/**
+	 * localStorage has no notion of a row, so an item write is read-modify-write of
+	 * the blob. Re-reading rather than trusting a caller-held array is the point:
+	 * whatever another tab wrote in the meantime survives, which is exactly the
+	 * guarantee the whole-collection write did not give.
+	 */
+	#upsert<T extends { id: string }>(key: StorageKey, item: T): void {
+		const items = this.#read<T[]>(key, []);
+		const index = items.findIndex((existing) => existing.id === item.id);
+		if (index === -1) items.push(item);
+		else items[index] = item;
+		this.#write(key, items);
+	}
+
+	#remove(key: StorageKey, id: string): void {
+		this.#write(
+			key,
+			this.#read<{ id: string }[]>(key, []).filter((item) => item.id !== id)
+		);
 	}
 
 	async exportBackup(): Promise<Backup> {

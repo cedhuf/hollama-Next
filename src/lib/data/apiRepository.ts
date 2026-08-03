@@ -26,8 +26,9 @@ const DEBOUNCE_MS = 800;
  * the async `load*()` methods at boot.
  */
 export class ApiRepository implements DataRepository {
-	#timers = new Map<Collection, ReturnType<typeof setTimeout>>();
-	#pending = new Map<Collection, unknown>();
+	/** Keyed by request URL, so each item debounces on its own. */
+	#timers = new Map<string, ReturnType<typeof setTimeout>>();
+	#pending = new Map<string, unknown>();
 
 	constructor() {
 		if (browser) window.addEventListener('pagehide', () => this.#flush());
@@ -53,17 +54,42 @@ export class ApiRepository implements DataRepository {
 	}
 
 	async saveSettings(value: Settings): Promise<void> {
-		this.#schedule('settings', value);
+		this.#schedule('/api/data/settings', value);
 	}
-	async saveSessions(value: Session[]): Promise<void> {
-		this.#schedule('sessions', value);
+	async saveSession(session: Session): Promise<void> {
+		this.#schedule(`/api/data/sessions/${session.id}`, session);
 	}
-	async saveKnowledge(value: Knowledge[]): Promise<void> {
-		this.#schedule('knowledge', value);
+	async saveKnowledgeItem(knowledge: Knowledge): Promise<void> {
+		this.#schedule(`/api/data/knowledge/${knowledge.id}`, knowledge);
 	}
-	async savePersonas(value: Persona[]): Promise<void> {
-		this.#schedule('personas', value);
+	async savePersona(persona: Persona): Promise<void> {
+		this.#schedule(`/api/data/personas/${persona.id}`, persona);
 	}
+
+	/**
+	 * Deletions are sent immediately, and cancel any write still queued for that
+	 * item — a debounced save landing after its own delete would resurrect it.
+	 */
+	async deleteSession(id: string): Promise<void> {
+		await this.#delete(`/api/data/sessions/${id}`);
+	}
+	async deleteKnowledgeItem(id: string): Promise<void> {
+		await this.#delete(`/api/data/knowledge/${id}`);
+	}
+	async deletePersona(id: string): Promise<void> {
+		await this.#delete(`/api/data/personas/${id}`);
+	}
+
+	async replaceSessions(value: Session[]): Promise<void> {
+		await this.#put('/api/data/sessions', value);
+	}
+	async replaceKnowledge(value: Knowledge[]): Promise<void> {
+		await this.#put('/api/data/knowledge', value);
+	}
+	async replacePersonas(value: Persona[]): Promise<void> {
+		await this.#put('/api/data/personas', value);
+	}
+
 	async saveServers(): Promise<void> {
 		// TODO (step 5): persist a user's personal servers.
 	}
@@ -103,25 +129,45 @@ export class ApiRepository implements DataRepository {
 		return ((await response.json()) as T) ?? fallback;
 	}
 
-	#schedule(collection: Collection, value: unknown): void {
-		this.#pending.set(collection, value);
-		clearTimeout(this.#timers.get(collection));
+	/**
+	 * Coalesce writes per item, not per collection.
+	 *
+	 * A streaming answer saves its session on every chunk, so the debounce still
+	 * earns its keep. Keying on the item's own URL means a burst on the open
+	 * conversation is no longer merged with — or delayed by — an unrelated edit to
+	 * another one.
+	 */
+	#schedule(url: string, value: unknown): void {
+		this.#pending.set(url, value);
+		clearTimeout(this.#timers.get(url));
 		this.#timers.set(
-			collection,
+			url,
 			setTimeout(() => {
-				this.#timers.delete(collection);
-				this.#pending.delete(collection);
-				void this.#put(collection, value);
+				this.#timers.delete(url);
+				this.#pending.delete(url);
+				void this.#put(url, value);
 			}, DEBOUNCE_MS)
 		);
 	}
 
-	async #put(collection: Collection, value: unknown, keepalive = false): Promise<void> {
+	async #put(url: string, value: unknown, keepalive = false): Promise<void> {
+		await this.#send(url, 'PUT', JSON.stringify(value), keepalive);
+	}
+
+	/** Sent straight away, cancelling any queued write that would resurrect the item. */
+	async #delete(url: string): Promise<void> {
+		clearTimeout(this.#timers.get(url));
+		this.#timers.delete(url);
+		this.#pending.delete(url);
+		await this.#send(url, 'DELETE');
+	}
+
+	async #send(url: string, method: string, body?: string, keepalive = false): Promise<void> {
 		try {
-			const response = await fetch(`/api/data/${collection}`, {
-				method: 'PUT',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(value),
+			const response = await fetch(url, {
+				method,
+				headers: body ? { 'content-type': 'application/json' } : undefined,
+				body,
 				keepalive
 			});
 			// 401 = not authenticated (e.g. a boot write while on /login). Benign;
@@ -130,7 +176,7 @@ export class ApiRepository implements DataRepository {
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 		} catch (error) {
 			toast.error('Failed to save', {
-				id: `save-${collection}-error`,
+				id: `save-error-${url}`,
 				description: error instanceof Error ? error.message : 'Unknown error'
 			});
 		}
@@ -138,9 +184,9 @@ export class ApiRepository implements DataRepository {
 
 	/** Flush any pending writes immediately (on page unload). */
 	#flush(): void {
-		for (const [collection, timer] of this.#timers) {
+		for (const [url, timer] of this.#timers) {
 			clearTimeout(timer);
-			void this.#put(collection, this.#pending.get(collection), true);
+			void this.#put(url, this.#pending.get(url), true);
 		}
 		this.#timers.clear();
 		this.#pending.clear();

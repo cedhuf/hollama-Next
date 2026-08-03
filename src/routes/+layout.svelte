@@ -246,7 +246,7 @@
 			const model = $settingsStore.defaultModel || $settingsStore.models[0]?.name || '';
 			const allDefaults = buildDefaultPersonas(model);
 			const missing = allDefaults.filter((p) => !seeded.includes(p.name));
-			if (missing.length) personasStore.set([...($personasStore ?? []), ...missing]);
+			for (const persona of missing) personasStore.upsert(persona);
 			for (const p of allDefaults) if (!seeded.includes(p.name)) seeded.push(p.name);
 			$settingsStore.seededPersonaNames = seeded;
 			$settingsStore.defaultPersonasSeeded = true;

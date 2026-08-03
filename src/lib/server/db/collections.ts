@@ -5,6 +5,39 @@ import type { Settings } from '$lib/settings';
 
 import { getDb } from './index';
 
+type CollectionTable = 'sessions' | 'knowledge' | 'personas';
+
+/**
+ * Write one row, leaving every other row alone.
+ *
+ * This is what a save actually is. Replacing the whole collection made the cost
+ * of writing a message grow with the entire history, and let any client holding
+ * a stale list delete what the others had added — the wholesale path below is
+ * now reserved for restoring a backup.
+ */
+export function upsertItem(
+	table: CollectionTable,
+	userId: string,
+	item: { id: string; updatedAt?: string }
+): void {
+	// `id` is a global primary key, not scoped per user, so the conflict clause has
+	// to check the owner: without it, writing a guessed id would overwrite another
+	// user's row. A mismatch updates nothing rather than raising — the caller has
+	// no business knowing whether that id exists elsewhere.
+	getDb()
+		.prepare(
+			`INSERT INTO ${table} (id, user_id, data, updated_at) VALUES (?, ?, ?, ?)
+			 ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
+			 WHERE ${table}.user_id = excluded.user_id`
+		)
+		.run(item.id, userId, JSON.stringify(item), item.updatedAt ?? new Date().toISOString());
+}
+
+/** Delete one row, scoped to its owner so an id alone can't reach another user's. */
+export function deleteItem(table: CollectionTable, userId: string, id: string): void {
+	getDb().prepare(`DELETE FROM ${table} WHERE id = ? AND user_id = ?`).run(id, userId);
+}
+
 /** Replace every row of a per-user JSON collection in one transaction. */
 function replaceCollection(
 	table: 'sessions' | 'knowledge' | 'personas',

@@ -8,12 +8,14 @@
 		TriangleAlert
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { get, type Writable } from 'svelte/store';
+	import { get, type Readable } from 'svelte/store';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import type { Server } from '$lib/connections';
 	import { repository } from '$lib/data';
 	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
+	import type { Knowledge } from '$lib/knowledge';
 	import {
 		knowledgeStore,
 		personasStore,
@@ -22,18 +24,43 @@
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
-	import { DEFAULT_SETTINGS } from '$lib/settings';
+	import type { Persona } from '$lib/personas';
+	import type { Session } from '$lib/sessions';
+	import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
-	// Maps each storage key to its reactive store, for generic per-category ops.
-	const stores: Record<StorageKey, Writable<unknown>> = {
-		[StorageKey.HollamaNextPreferences]: settingsStore,
-		[StorageKey.HollamaNextServers]: serversStore,
-		[StorageKey.HollamaNextSessions]: sessionsStore,
-		[StorageKey.HollamaNextKnowledge]: knowledgeStore,
-		[StorageKey.HollamaNextPersonas]: personasStore
+	/**
+	 * Each storage key, as this panel needs it: something to read for the export,
+	 * and one deliberate wholesale write for "delete this whole category". The
+	 * collections take `replaceAll` rather than `set` — emptying them here is a
+	 * real instruction, not the accident their per-item writes now prevent.
+	 */
+	const stores: Record<
+		StorageKey,
+		{ subscribe: Readable<unknown>['subscribe']; replace: (value: unknown) => void }
+	> = {
+		[StorageKey.HollamaNextPreferences]: {
+			subscribe: settingsStore.subscribe,
+			replace: (value) => settingsStore.set(value as Settings)
+		},
+		[StorageKey.HollamaNextServers]: {
+			subscribe: serversStore.subscribe,
+			replace: (value) => serversStore.set(value as Server[])
+		},
+		[StorageKey.HollamaNextSessions]: {
+			subscribe: sessionsStore.subscribe,
+			replace: (value) => sessionsStore.replaceAll(value as Session[])
+		},
+		[StorageKey.HollamaNextKnowledge]: {
+			subscribe: knowledgeStore.subscribe,
+			replace: (value) => knowledgeStore.replaceAll(value as Knowledge[])
+		},
+		[StorageKey.HollamaNextPersonas]: {
+			subscribe: personasStore.subscribe,
+			replace: (value) => personasStore.replaceAll(value as Persona[])
+		}
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -173,7 +200,7 @@
 		};
 
 		if (confirm(confirmMessages[storageKey])) {
-			stores[storageKey].set(defaults[storageKey]);
+			stores[storageKey].replace(defaults[storageKey]);
 			toast.info($LL.deleteSuccess());
 		}
 	}

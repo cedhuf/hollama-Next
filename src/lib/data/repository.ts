@@ -50,9 +50,32 @@ export interface DataRepository {
 
 	saveSettings(value: Settings): Promise<void>;
 	saveServers(value: Server[]): Promise<void>;
-	saveSessions(value: Session[]): Promise<void>;
-	saveKnowledge(value: Knowledge[]): Promise<void>;
-	savePersonas(value: Persona[]): Promise<void>;
+
+	/**
+	 * Collections are written one item at a time.
+	 *
+	 * Handing over the whole array instead would describe a *value* ("here is the
+	 * state of the world") where what happened is an *operation* ("this session
+	 * changed"). A server given only the value has to infer removals from absence,
+	 * so every save becomes delete-everything-and-reinsert: the cost of a write
+	 * grows with the whole history, and any client holding a stale or partial list
+	 * silently erases what the others added. Saying what actually changed costs the
+	 * same in localStorage and is the only thing a database can implement safely.
+	 */
+	saveSession(session: Session): Promise<void>;
+	deleteSession(id: string): Promise<void>;
+	saveKnowledgeItem(knowledge: Knowledge): Promise<void>;
+	deleteKnowledgeItem(id: string): Promise<void>;
+	savePersona(persona: Persona): Promise<void>;
+	deletePersona(id: string): Promise<void>;
+
+	/**
+	 * Wholesale replacement, for restoring a backup — the one case where the
+	 * caller really does mean "this is now the entire collection".
+	 */
+	replaceSessions(sessions: Session[]): Promise<void>;
+	replaceKnowledge(knowledge: Knowledge[]): Promise<void>;
+	replacePersonas(personas: Persona[]): Promise<void>;
 
 	exportBackup(): Promise<Backup>;
 	importBackup(backup: Backup): Promise<void>;

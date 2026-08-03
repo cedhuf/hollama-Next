@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 
-import { deleteStoreItem, personasStore, sessionsStore, sortStore } from '$lib/localStorage';
+import { personasStore, sessionsStore } from '$lib/localStorage';
 import { saveSession, type Session } from '$lib/sessions';
 import type { Model } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
@@ -96,16 +96,11 @@ export const loadPersona = (id: string): Persona => {
 };
 
 export const savePersona = (persona: Persona): void => {
-	const current = get(personasStore) || [];
-	const next = { ...persona, updatedAt: new Date().toISOString() };
-	const index = current.findIndex((p) => p.id === persona.id);
-	if (index !== -1) current[index] = next;
-	else current.push(next);
-	personasStore.set(sortStore(current));
+	personasStore.upsert({ ...persona, updatedAt: new Date().toISOString() });
 };
 
 export const deletePersona = (id: string): void => {
-	personasStore.set(deleteStoreItem(get(personasStore) || [], id));
+	personasStore.remove(id);
 };
 
 /**

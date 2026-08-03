@@ -22,14 +22,16 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 		case StorageKey.HollamaNextServers:
 			serversStore.set(data as Parameters<typeof serversStore.set>[0]);
 			break;
+		// Restoring really does mean "this is now the whole collection" — the one
+		// place the wholesale write is the correct operation.
 		case StorageKey.HollamaNextSessions:
-			sessionsStore.set(data as Parameters<typeof sessionsStore.set>[0]);
+			sessionsStore.replaceAll(data as Parameters<typeof sessionsStore.replaceAll>[0]);
 			break;
 		case StorageKey.HollamaNextKnowledge:
-			knowledgeStore.set(data as Parameters<typeof knowledgeStore.set>[0]);
+			knowledgeStore.replaceAll(data as Parameters<typeof knowledgeStore.replaceAll>[0]);
 			break;
 		case StorageKey.HollamaNextPersonas:
-			personasStore.set(data as Parameters<typeof personasStore.set>[0]);
+			personasStore.replaceAll(data as Parameters<typeof personasStore.replaceAll>[0]);
 			break;
 	}
 }

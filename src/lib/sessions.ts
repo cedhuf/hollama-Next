@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { modelLabel, type Server } from '$lib/connections';
-import { sessionsStore, settingsStore, sortStore } from '$lib/localStorage';
+import { sessionsStore, settingsStore } from '$lib/localStorage';
 
 import type { AskChoices } from './askChoice';
 import { getLastUsedModels } from './chat';
@@ -161,25 +161,7 @@ export const loadSession = (id: string): Session => {
 };
 
 export const saveSession = (session: Session): void => {
-	// Retrieve the current sessions
-	const currentSessions = get(sessionsStore) || [];
-
-	// Find the index of the session with the same id, if it exists
-	const existingIndex = currentSessions.findIndex((k) => k.id === session.id);
-
-	if (existingIndex !== -1) {
-		// Update the existing session
-		currentSessions[existingIndex] = session;
-	} else {
-		// Add the new session if it doesn't exist
-		currentSessions.push(session);
-	}
-
-	// Sort the sessions by updatedAt in descending order (most recent first)
-	const sortedSessions = sortStore(currentSessions);
-
-	// Update the store with the sorted sessions
-	sessionsStore.set(sortedSessions);
+	sessionsStore.upsert(session);
 
 	// Update the last used models
 	const lastUsedModels = getLastUsedModels();
@@ -204,11 +186,9 @@ export function formatSessionMetadata(session: Session, servers: Server[] = []) 
 
 /** Toggle a session's pinned state (pinned sessions sort to the top). */
 export function toggleSessionPin(id: string): void {
-	const sessions = get(sessionsStore) || [];
-	const session = sessions.find((s) => s.id === id);
+	const session = (get(sessionsStore) || []).find((s) => s.id === id);
 	if (!session) return;
-	session.pinned = !session.pinned;
-	sessionsStore.set([...sessions]);
+	sessionsStore.upsert({ ...session, pinned: !session.pinned });
 }
 
 export type SessionGroupKey =
