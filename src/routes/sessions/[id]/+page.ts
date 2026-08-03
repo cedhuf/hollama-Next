@@ -18,8 +18,8 @@ import type { PageLoad } from './$types';
  * `null` is different — it means no such conversation yet, which is how a new
  * chat begins.
  */
-export const load = (async ({ params }) => {
-	const stored = await repository.loadSession(params.id);
+export const load = (async ({ params, fetch }) => {
+	const stored = await repository.loadSession(params.id, fetch);
 	return { id: params.id, session: stored ?? newSession(params.id) };
 }) satisfies PageLoad;
 

@@ -137,28 +137,57 @@
 
 	/**
 	 * Arriving from a search result: `?m=<index>` names the passage that was
-	 * chosen, so land on it rather than at the bottom of the conversation. The
-	 * highlight fades on its own — it says "here", it isn't a state to dismiss.
+	 * chosen, so land on it rather than at the bottom of the conversation.
 	 */
-	async function scrollToSearchMatch(): Promise<boolean> {
+	const searchMatchIndex = $derived.by(() => {
 		const raw = page.url.searchParams.get('m');
-		if (raw === null) return false;
+		if (raw === null) return null;
 		const index = Number(raw);
-		if (!Number.isInteger(index) || index < 0) return false;
+		return Number.isInteger(index) && index >= 0 ? index : null;
+	});
 
+	/**
+	 * Watched rather than run once on mount.
+	 *
+	 * Opening a result from the search dialog is a client-side navigation: the
+	 * component is reused, so `onMount` never fires again and the jump only ever
+	 * worked on a full reload. Following the URL means it also works when the
+	 * dialog is used twice in a row on the same conversation.
+	 */
+	$effect(() => {
+		const index = searchMatchIndex;
+		if (index === null) return;
+		void highlightMessage(index);
+	});
+
+	/**
+	 * The message may not be in the DOM yet — the conversation has just been
+	 * swapped in and its articles render over the following frames — so wait for
+	 * it rather than giving up on the first miss.
+	 */
+	async function highlightMessage(index: number): Promise<void> {
 		await tick();
-		const target = document.getElementById(`message-${index}`);
-		if (!target) return false;
+
+		let target: HTMLElement | null = null;
+		for (let attempt = 0; attempt < 20 && !target; attempt++) {
+			target = document.getElementById(`message-${index}`);
+			if (!target) await new Promise((resolve) => requestAnimationFrame(resolve));
+		}
+		if (!target) return;
 
 		target.scrollIntoView({ block: 'center' });
+
+		// Restart the animation even when the same message is chosen twice: removing
+		// the class isn't enough on its own, the reflow in between is what makes the
+		// browser treat it as a new animation.
+		target.classList.remove('message--found');
+		void target.offsetWidth;
 		target.classList.add('message--found');
-		setTimeout(() => target.classList.remove('message--found'), 2000);
-		return true;
+		setTimeout(() => target?.classList.remove('message--found'), 2000);
 	}
 
 	onMount(async () => {
 		handleSessionChange();
-		if (!(await scrollToSearchMatch())) await scrollToBottom();
 		messagesWindow?.addEventListener('scroll', handleScroll);
 	});
 
@@ -194,7 +223,7 @@
 		editor.interactiveChoices = $settingsStore.interactiveChoices;
 		editor.sendCurrentDate = $settingsStore.sendCurrentDate;
 		editor.thinking = true;
-		scrollToBottom();
+		if (searchMatchIndex === null) scrollToBottom();
 
 		// A persona conversation carries its own web-search preference.
 		const boundPersona = session.personaId

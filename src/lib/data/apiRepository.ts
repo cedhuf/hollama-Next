@@ -50,8 +50,8 @@ export class ApiRepository implements DataRepository {
 	 * chat begins. Anything else throws, so a server that is merely unreachable is
 	 * never mistaken for an empty conversation.
 	 */
-	async loadSession(id: string): Promise<Session | null> {
-		const response = await fetch(`/api/data/sessions/${id}`);
+	async loadSession(id: string, fetchFn: typeof fetch = fetch): Promise<Session | null> {
+		const response = await fetchFn(`/api/data/sessions/${id}`);
 		if (response.status === 404) return null;
 		if (!response.ok) throw new Error(`GET /api/data/sessions/${id}: HTTP ${response.status}`);
 		return normalizeSession((await response.json()) as Session);

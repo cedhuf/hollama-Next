@@ -47,8 +47,14 @@ export interface DataRepository {
 	loadServers(): Promise<Server[]>;
 	/** The conversation list: titles, dates and models — never the messages. */
 	loadSessions(): Promise<SessionSummary[]>;
-	/** One whole conversation, or `null` if there is no such conversation yet. */
-	loadSession(id: string): Promise<Session | null>;
+	/**
+	 * One whole conversation, or `null` if there is no such conversation yet.
+	 *
+	 * Takes an optional `fetch` so a SvelteKit `load` can hand over its own: that
+	 * one carries the request's cookies, is recorded for hydration, and doesn't
+	 * make the browser repeat the call the server already made.
+	 */
+	loadSession(id: string, fetchFn?: typeof fetch): Promise<Session | null>;
 	loadKnowledge(): Promise<Knowledge[]>;
 	loadPersonas(): Promise<Persona[]>;
 

@@ -39,6 +39,7 @@ export class LocalStorageRepository implements DataRepository {
 	async loadSessions(): Promise<SessionSummary[]> {
 		return this.#readSummaries();
 	}
+	// `fetchFn` is part of the shared contract; localStorage has nothing to fetch.
 	async loadSession(id: string): Promise<Session | null> {
 		const session = this.#read<Session[]>(StorageKey.HollamaNextSessions, []).find(
 			(candidate) => candidate.id === id
