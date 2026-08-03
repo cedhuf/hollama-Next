@@ -32,7 +32,7 @@
 		"@semantic-release/release-notes-generator": "^12.1.0",
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/adapter-node": "^5.2.9",
-		"@sveltejs/kit": "^2.20.2",
+		"@sveltejs/kit": "^2.70.2",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@tailwindcss/postcss": "^4.3.3",
 		"@types/markdown-it": "^14.0.0",
@@ -85,6 +85,6 @@
 		"url": "https://fernando.is"
 	},
 	"dependencies": {
-		"@auth/sveltekit": "^1.11.2"
+		"@auth/sveltekit": "^1.11.3"
 	}
 }
