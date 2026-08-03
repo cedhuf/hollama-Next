@@ -308,4 +308,5 @@ Pour pouvoir valider à chaque étape sans tout casser :
 Toute la configuration mutable (DB SQLite + secrets dérivés éventuels) vit sous
 **un seul répertoire** (ex. `./data/`, surchargé par `DATA_DIR`), pour permettre
 un **bind mount unique** de toute la conf en Docker/Nix. Fichier par défaut :
-`${DATA_DIR}/hollama.db`.
+`${DATA_DIR}/llooma.db`. Une base nommée `hollama.db` (avant le renommage) est
+renommée automatiquement au premier démarrage, `-wal` et `-shm` compris.

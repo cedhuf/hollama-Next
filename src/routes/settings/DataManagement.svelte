@@ -39,11 +39,11 @@
 	 * per-item persistence now rules out.
 	 */
 	const replaceStore: Record<StorageKey, (value: unknown) => void> = {
-		[StorageKey.HollamaNextPreferences]: (value) => settingsStore.set(value as Settings),
-		[StorageKey.HollamaNextServers]: (value) => serversStore.set(value as Server[]),
-		[StorageKey.HollamaNextSessions]: (value) => sessionsStore.replaceAll(value as Session[]),
-		[StorageKey.HollamaNextKnowledge]: (value) => knowledgeStore.replaceAll(value as Knowledge[]),
-		[StorageKey.HollamaNextPersonas]: (value) => personasStore.replaceAll(value as Persona[])
+		[StorageKey.Preferences]: (value) => settingsStore.set(value as Settings),
+		[StorageKey.Servers]: (value) => serversStore.set(value as Server[]),
+		[StorageKey.Sessions]: (value) => sessionsStore.replaceAll(value as Session[]),
+		[StorageKey.Knowledge]: (value) => knowledgeStore.replaceAll(value as Knowledge[]),
+		[StorageKey.Personas]: (value) => personasStore.replaceAll(value as Persona[])
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -69,31 +69,31 @@
 	// Reactive (labels come from $LL) — one source of truth for the per-category rows.
 	const dataSources = $derived<DataSource[]>([
 		{
-			storageKey: StorageKey.HollamaNextServers,
+			storageKey: StorageKey.Servers,
 			fileName: `${APP_SLUG}-servers.json`,
 			label: $LL.servers(),
 			description: $LL.serversDescription()
 		},
 		{
-			storageKey: StorageKey.HollamaNextPreferences,
+			storageKey: StorageKey.Preferences,
 			fileName: `${APP_SLUG}-preferences.json`,
 			label: $LL.preferences(),
 			description: $LL.preferencesDescription()
 		},
 		{
-			storageKey: StorageKey.HollamaNextSessions,
+			storageKey: StorageKey.Sessions,
 			fileName: `${APP_SLUG}-sessions.json`,
 			label: $LL.sessions(),
 			description: $LL.sessionsDescription()
 		},
 		{
-			storageKey: StorageKey.HollamaNextKnowledge,
+			storageKey: StorageKey.Knowledge,
 			fileName: `${APP_SLUG}-knowledge.json`,
 			label: $LL.knowledge(),
 			description: $LL.knowledgeDescription()
 		},
 		{
-			storageKey: StorageKey.HollamaNextPersonas,
+			storageKey: StorageKey.Personas,
 			fileName: `${APP_SLUG}-personas.json`,
 			label: $LL.personas(),
 			description: $LL.personasDescription()
@@ -102,11 +102,11 @@
 
 	// The value a category resets to when deleted.
 	const defaults: Record<StorageKey, unknown> = {
-		[StorageKey.HollamaNextPreferences]: DEFAULT_SETTINGS,
-		[StorageKey.HollamaNextServers]: [],
-		[StorageKey.HollamaNextSessions]: [],
-		[StorageKey.HollamaNextKnowledge]: [],
-		[StorageKey.HollamaNextPersonas]: []
+		[StorageKey.Preferences]: DEFAULT_SETTINGS,
+		[StorageKey.Servers]: [],
+		[StorageKey.Sessions]: [],
+		[StorageKey.Knowledge]: [],
+		[StorageKey.Personas]: []
 	};
 
 	/**
@@ -183,11 +183,11 @@
 
 	function deleteData(storageKey: StorageKey) {
 		const confirmMessages: Record<StorageKey, string> = {
-			[StorageKey.HollamaNextPreferences]: $LL.areYouSureYouWantToDeleteAllPreferences(),
-			[StorageKey.HollamaNextServers]: $LL.areYouSureYouWantToDeleteAllServers(),
-			[StorageKey.HollamaNextSessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
-			[StorageKey.HollamaNextKnowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
-			[StorageKey.HollamaNextPersonas]: $LL.areYouSureYouWantToDeleteAllPersonas()
+			[StorageKey.Preferences]: $LL.areYouSureYouWantToDeleteAllPreferences(),
+			[StorageKey.Servers]: $LL.areYouSureYouWantToDeleteAllServers(),
+			[StorageKey.Sessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
+			[StorageKey.Knowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
+			[StorageKey.Personas]: $LL.areYouSureYouWantToDeleteAllPersonas()
 		};
 
 		if (confirm(confirmMessages[storageKey])) {

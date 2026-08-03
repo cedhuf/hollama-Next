@@ -1,12 +1,38 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 import { env } from '$env/dynamic/private';
+import { APP_SLUG } from '$lib/brand';
 
 import { runMigrations } from './migrations';
 
 let db: DatabaseSync | null = null;
+
+const DB_FILE = `${APP_SLUG}.db`;
+const LEGACY_DB_FILE = 'hollama.db';
+
+/**
+ * Carry the database over from the name it had before the app was renamed.
+ *
+ * Without this, the rename would silently start a brand-new, empty database
+ * beside the real one — every conversation still on disk, and none of them
+ * visible. Runs once: after the rename the legacy file no longer exists.
+ *
+ * The `-wal` and `-shm` companions are moved too. SQLite can rebuild them, but
+ * only from a matching database name; left behind next to a renamed file they
+ * are at best confusing and at worst a lost final transaction.
+ */
+function adoptLegacyDatabase(dataDir: string): void {
+	if (existsSync(join(dataDir, DB_FILE))) return;
+	if (!existsSync(join(dataDir, LEGACY_DB_FILE))) return;
+
+	for (const suffix of ['', '-wal', '-shm']) {
+		const from = join(dataDir, LEGACY_DB_FILE + suffix);
+		if (existsSync(from)) renameSync(from, join(dataDir, DB_FILE + suffix));
+	}
+	console.info(`Migrated ${LEGACY_DB_FILE} to ${DB_FILE}`);
+}
 
 /**
  * Lazily opens the SQLite database and applies migrations on first use, so
@@ -21,8 +47,9 @@ export function getDb(): DatabaseSync {
 
 	const dataDir = env.DATA_DIR?.trim() || './data';
 	mkdirSync(dataDir, { recursive: true });
+	adoptLegacyDatabase(dataDir);
 
-	const instance = new DatabaseSync(join(dataDir, 'hollama.db'));
+	const instance = new DatabaseSync(join(dataDir, DB_FILE));
 	instance.exec('PRAGMA journal_mode = WAL');
 	instance.exec('PRAGMA foreign_keys = ON');
 	runMigrations(instance);

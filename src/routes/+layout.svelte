@@ -291,7 +291,7 @@
 
 		// Migrate old server settings to new format (local mode only — legacy localStorage data)
 		const settingsLocalStorage =
-			env.PUBLIC_MODE !== 'server' ? localStorage.getItem(StorageKey.HollamaNextPreferences) : null;
+			env.PUBLIC_MODE !== 'server' ? localStorage.getItem(StorageKey.Preferences) : null;
 		if (settingsLocalStorage) {
 			const settings = JSON.parse(settingsLocalStorage);
 
@@ -330,7 +330,7 @@
 				}
 
 				// Reset the settings store with the removed keys
-				localStorage.removeItem(StorageKey.HollamaNextPreferences);
+				localStorage.removeItem(StorageKey.Preferences);
 				settingsStore.set(settings);
 
 				// Ask the user to re-verify the server connections

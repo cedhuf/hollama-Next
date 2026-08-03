@@ -9,7 +9,7 @@ import type { Session } from '$lib/sessions';
 import { normalizeSession, summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
-import { StorageKey } from './keys';
+import { LEGACY_STORAGE_KEYS, StorageKey } from './keys';
 import type { AppData, Backup, DataRepository } from './repository';
 
 /**
@@ -18,30 +18,55 @@ import type { AppData, Backup, DataRepository } from './repository';
  * satisfy the shared `DataRepository` contract (the server repo needs them).
  */
 export class LocalStorageRepository implements DataRepository {
+	constructor() {
+		this.#migrateLegacyKeys();
+	}
+
+	/**
+	 * Move data written under the pre-rename keys, once.
+	 *
+	 * Runs in the constructor, so it is done before `hydrate()` reads anything.
+	 * Only ever copies into a key that doesn't exist yet: if both are present —
+	 * an old tab still writing the legacy key while a new one writes the current
+	 * one — the current data wins and nothing is overwritten.
+	 */
+	#migrateLegacyKeys(): void {
+		if (!browser) return;
+
+		for (const key of Object.values(StorageKey)) {
+			const legacyKey = LEGACY_STORAGE_KEYS[key];
+			const legacy = localStorage.getItem(legacyKey);
+			if (legacy === null) continue;
+
+			if (localStorage.getItem(key) === null) localStorage.setItem(key, legacy);
+			localStorage.removeItem(legacyKey);
+		}
+	}
+
 	hydrate(): AppData {
 		return {
-			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.HollamaNextPreferences, {}) },
-			servers: this.#read<Server[]>(StorageKey.HollamaNextServers, []),
+			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.Preferences, {}) },
+			servers: this.#read<Server[]>(StorageKey.Servers, []),
 			sessions: this.#readSummaries(),
-			knowledge: this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []),
-			personas: this.#read<Persona[]>(StorageKey.HollamaNextPersonas, [])
+			knowledge: this.#read<Knowledge[]>(StorageKey.Knowledge, []),
+			personas: this.#read<Persona[]>(StorageKey.Personas, [])
 		};
 	}
 
 	async loadSettings(): Promise<Settings | null> {
-		const stored = this.#read<Partial<Settings> | null>(StorageKey.HollamaNextPreferences, null);
+		const stored = this.#read<Partial<Settings> | null>(StorageKey.Preferences, null);
 		// Backfill any keys added since these settings were last saved (e.g. systemPrompts).
 		return stored ? { ...DEFAULT_SETTINGS, ...stored } : null;
 	}
 	async loadServers(): Promise<Server[]> {
-		return this.#read<Server[]>(StorageKey.HollamaNextServers, []);
+		return this.#read<Server[]>(StorageKey.Servers, []);
 	}
 	async loadSessions(): Promise<SessionSummary[]> {
 		return this.#readSummaries();
 	}
 	// `fetchFn` is part of the shared contract; localStorage has nothing to fetch.
 	async loadSession(id: string): Promise<Session | null> {
-		const session = this.#read<Session[]>(StorageKey.HollamaNextSessions, []).find(
+		const session = this.#read<Session[]>(StorageKey.Sessions, []).find(
 			(candidate) => candidate.id === id
 		);
 		return session ? normalizeSession(session) : null;
@@ -53,48 +78,48 @@ export class LocalStorageRepository implements DataRepository {
 	 * lists with the same shape and nothing can save a summary as a conversation.
 	 */
 	#readSummaries(): SessionSummary[] {
-		return this.#read<Session[]>(StorageKey.HollamaNextSessions, []).map(summarizeSession);
+		return this.#read<Session[]>(StorageKey.Sessions, []).map(summarizeSession);
 	}
 	async loadKnowledge(): Promise<Knowledge[]> {
-		return this.#read<Knowledge[]>(StorageKey.HollamaNextKnowledge, []);
+		return this.#read<Knowledge[]>(StorageKey.Knowledge, []);
 	}
 	async loadPersonas(): Promise<Persona[]> {
-		return this.#read<Persona[]>(StorageKey.HollamaNextPersonas, []);
+		return this.#read<Persona[]>(StorageKey.Personas, []);
 	}
 
 	async saveSettings(value: Settings): Promise<void> {
-		this.#write(StorageKey.HollamaNextPreferences, value);
+		this.#write(StorageKey.Preferences, value);
 	}
 	async saveServers(value: Server[]): Promise<void> {
-		this.#write(StorageKey.HollamaNextServers, value);
+		this.#write(StorageKey.Servers, value);
 	}
 	async saveSession(session: Session): Promise<void> {
-		this.#upsert(StorageKey.HollamaNextSessions, session);
+		this.#upsert(StorageKey.Sessions, session);
 	}
 	async deleteSession(id: string): Promise<void> {
-		this.#remove(StorageKey.HollamaNextSessions, id);
+		this.#remove(StorageKey.Sessions, id);
 	}
 	async saveKnowledgeItem(knowledge: Knowledge): Promise<void> {
-		this.#upsert(StorageKey.HollamaNextKnowledge, knowledge);
+		this.#upsert(StorageKey.Knowledge, knowledge);
 	}
 	async deleteKnowledgeItem(id: string): Promise<void> {
-		this.#remove(StorageKey.HollamaNextKnowledge, id);
+		this.#remove(StorageKey.Knowledge, id);
 	}
 	async savePersona(persona: Persona): Promise<void> {
-		this.#upsert(StorageKey.HollamaNextPersonas, persona);
+		this.#upsert(StorageKey.Personas, persona);
 	}
 	async deletePersona(id: string): Promise<void> {
-		this.#remove(StorageKey.HollamaNextPersonas, id);
+		this.#remove(StorageKey.Personas, id);
 	}
 
 	async replaceSessions(value: Session[]): Promise<void> {
-		this.#write(StorageKey.HollamaNextSessions, value);
+		this.#write(StorageKey.Sessions, value);
 	}
 	async replaceKnowledge(value: Knowledge[]): Promise<void> {
-		this.#write(StorageKey.HollamaNextKnowledge, value);
+		this.#write(StorageKey.Knowledge, value);
 	}
 	async replacePersonas(value: Persona[]): Promise<void> {
-		this.#write(StorageKey.HollamaNextPersonas, value);
+		this.#write(StorageKey.Personas, value);
 	}
 
 	/**
@@ -119,7 +144,7 @@ export class LocalStorageRepository implements DataRepository {
 	}
 
 	async searchSessions(query: string): Promise<ConversationResult[]> {
-		return searchSessionsLocally(this.#read<Session[]>(StorageKey.HollamaNextSessions, []), query);
+		return searchSessionsLocally(this.#read<Session[]>(StorageKey.Sessions, []), query);
 	}
 
 	async exportBackup(): Promise<Backup> {
