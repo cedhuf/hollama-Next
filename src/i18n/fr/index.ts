@@ -467,6 +467,16 @@ const fr = extendDictionary(en, {
 	searchOpen: 'Ouvrir',
 	searchClose: 'Fermer',
 	searchStart: 'Tapez pour rechercher dans le contenu de vos conversations',
+	keyboardShortcuts: 'Raccourcis clavier',
+	keyboardShortcutsDescription: 'Ce que l\'application écoute déjà. La personnalisation viendra plus tard.',
+	shortcutsGlobal: 'Partout',
+	shortcutsComposer: 'Rédaction d\'un message',
+	shortcutsSearch: 'Fenêtre de recherche',
+	shortcutsDialogs: 'Fenêtres',
+	shortcutSendMessage: 'Envoyer',
+	shortcutNewLine: 'Nouvelle ligne',
+	shortcutExpandedNote: 'Dans l\'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne — pour écrire un long message sans qu\'il parte à chaque retour.',
+	shortcutMoveBetweenTabs: 'Naviguer entre les onglets',
 	close: 'Fermer'
 });
 

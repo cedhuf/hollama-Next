@@ -12,6 +12,7 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsSlider from './SettingsSlider.svelte';
+	import Shortcuts from './Shortcuts.svelte';
 
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
@@ -85,4 +86,6 @@
 			bind:checked={$settingsStore.showPinnedPersonas}
 		/>
 	</SettingsSection>
+
+	<Shortcuts />
 </SettingsPanel>

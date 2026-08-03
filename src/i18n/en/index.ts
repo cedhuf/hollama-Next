@@ -449,6 +449,16 @@ const en = {
 	searchOpen: 'Open',
 	searchClose: 'Close',
 	searchStart: 'Type to search the content of your conversations',
+	keyboardShortcuts: 'Keyboard shortcuts',
+	keyboardShortcutsDescription: 'What the app already listens for. Customising them will come later.',
+	shortcutsGlobal: 'Anywhere',
+	shortcutsComposer: 'Writing a message',
+	shortcutsSearch: 'Search dialog',
+	shortcutsDialogs: 'Dialogs',
+	shortcutSendMessage: 'Send',
+	shortcutNewLine: 'New line',
+	shortcutExpandedNote: 'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.',
+	shortcutMoveBetweenTabs: 'Move between tabs',
 	close: 'Close'
 } satisfies BaseTranslation;
 

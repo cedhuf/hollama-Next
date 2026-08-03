@@ -5,6 +5,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import Kbd from '$lib/components/Kbd.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { splitExcerpt, type ConversationResult } from '$lib/conversationSearch';
 	import { repository } from '$lib/data';
@@ -119,8 +120,6 @@
 		void goto(target);
 	}
 
-	const kbdClass = 'rounded border border-shade-3 px-1 py-px font-sans text-[10px] leading-none';
-
 	function onKeydown(event: KeyboardEvent) {
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
@@ -221,15 +220,12 @@
 			class="flex items-center gap-4 border-t border-shade-3 px-4 py-2 text-[11px] text-muted"
 			aria-hidden="true"
 		>
-			<span class="flex items-center gap-1"
-				><kbd class={kbdClass}>↑</kbd><kbd class={kbdClass}>↓</kbd>{$LL.searchNavigate()}</span
-			>
+			<span class="flex items-center gap-1"><Kbd>↑</Kbd><Kbd>↓</Kbd>{$LL.searchNavigate()}</span>
 			<span class="flex items-center gap-1">
-				<kbd class={kbdClass}><CornerDownLeft class="h-3 w-3" /></kbd>
+				<Kbd><CornerDownLeft class="h-3 w-3" /></Kbd>
 				{$LL.searchOpen()}
 			</span>
-			<span class="flex items-center gap-1"><kbd class={kbdClass}>esc</kbd>{$LL.searchClose()}</span
-			>
+			<span class="flex items-center gap-1"><Kbd>esc</Kbd>{$LL.searchClose()}</span>
 		</div>
 	</div>
 </Modal>

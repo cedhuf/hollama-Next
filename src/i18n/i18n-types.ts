@@ -1657,6 +1657,47 @@ type RootTranslation = {
 	 */
 	searchStart: string
 	/**
+	 * K​e​y​b​o​a​r​d​ ​s​h​o​r​t​c​u​t​s
+	 */
+	keyboardShortcuts: string
+	/**
+	 * W​h​a​t​ ​t​h​e​ ​a​p​p​ ​a​l​r​e​a​d​y​ ​l​i​s​t​e​n​s​ ​f​o​r​.​ ​C​u​s​t​o​m​i​s​i​n​g​ ​t​h​e​m​ ​w​i​l​l​ ​c​o​m​e​ ​l​a​t​e​r​.
+	 */
+	keyboardShortcutsDescription: string
+	/**
+	 * A​n​y​w​h​e​r​e
+	 */
+	shortcutsGlobal: string
+	/**
+	 * W​r​i​t​i​n​g​ ​a​ ​m​e​s​s​a​g​e
+	 */
+	shortcutsComposer: string
+	/**
+	 * S​e​a​r​c​h​ ​d​i​a​l​o​g
+	 */
+	shortcutsSearch: string
+	/**
+	 * D​i​a​l​o​g​s
+	 */
+	shortcutsDialogs: string
+	/**
+	 * S​e​n​d
+	 */
+	shortcutSendMessage: string
+	/**
+	 * N​e​w​ ​l​i​n​e
+	 */
+	shortcutNewLine: string
+	/**
+	 * I​n​ ​t​h​e​ ​e​x​p​a​n​d​e​d​ ​c​o​m​p​o​s​e​r​,​ ​{​m​o​d​}​↵​ ​s​e​n​d​s​ ​a​n​d​ ​↵​ ​i​n​s​e​r​t​s​ ​a​ ​l​i​n​e​ ​—​ ​s​o​ ​a​ ​l​o​n​g​ ​m​e​s​s​a​g​e​ ​c​a​n​ ​b​e​ ​w​r​i​t​t​e​n​ ​w​i​t​h​o​u​t​ ​f​i​r​i​n​g​ ​o​n​ ​e​v​e​r​y​ ​r​e​t​u​r​n​.
+	 * @param {string} mod
+	 */
+	shortcutExpandedNote: RequiredParams<'mod'>
+	/**
+	 * M​o​v​e​ ​b​e​t​w​e​e​n​ ​t​a​b​s
+	 */
+	shortcutMoveBetweenTabs: string
+	/**
 	 * C​l​o​s​e
 	 */
 	close: string
@@ -3284,6 +3325,46 @@ The completion in progress will stop
 	 * Type to search the content of your conversations
 	 */
 	searchStart: () => LocalizedString
+	/**
+	 * Keyboard shortcuts
+	 */
+	keyboardShortcuts: () => LocalizedString
+	/**
+	 * What the app already listens for. Customising them will come later.
+	 */
+	keyboardShortcutsDescription: () => LocalizedString
+	/**
+	 * Anywhere
+	 */
+	shortcutsGlobal: () => LocalizedString
+	/**
+	 * Writing a message
+	 */
+	shortcutsComposer: () => LocalizedString
+	/**
+	 * Search dialog
+	 */
+	shortcutsSearch: () => LocalizedString
+	/**
+	 * Dialogs
+	 */
+	shortcutsDialogs: () => LocalizedString
+	/**
+	 * Send
+	 */
+	shortcutSendMessage: () => LocalizedString
+	/**
+	 * New line
+	 */
+	shortcutNewLine: () => LocalizedString
+	/**
+	 * In the expanded composer, {mod}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.
+	 */
+	shortcutExpandedNote: (arg: { mod: string }) => LocalizedString
+	/**
+	 * Move between tabs
+	 */
+	shortcutMoveBetweenTabs: () => LocalizedString
 	/**
 	 * Close
 	 */
