@@ -22,6 +22,15 @@ const LEGACY_DB_FILE = 'hollama.db';
  * The `-wal` and `-shm` companions are moved too. SQLite can rebuild them, but
  * only from a matching database name; left behind next to a renamed file they
  * are at best confusing and at worst a lost final transaction.
+ *
+ * TODO (rename cleanup) — remove this once the Llooma rename release has been
+ * out long enough that nobody upgrades across it any more. The three one-shot
+ * migrations go together: this one, `#migrateLegacyKeys` in
+ * `LocalStorageRepository`, and the legacy-key fallback in `src/app.html`. The
+ * release that drops them MUST say in its notes which version to pin first, so
+ * anyone still on an older build can pass through it before updating further.
+ * The legacy *backup* keys in `data/keys.ts` are NOT part of this: an exported
+ * file never ages out, so reading them stays forever.
  */
 function adoptLegacyDatabase(dataDir: string): void {
 	if (existsSync(join(dataDir, DB_FILE))) return;

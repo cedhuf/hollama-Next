@@ -99,6 +99,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 - [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording
 - [x] **Revisit translations** — English and French are complete (`pnpm run i18n:status`); other locales were dropped, and adding one back no longer means auditing every key
 - [ ] Finish the Svelte 5 migration — four legacy `on:` directives remain, all in `FieldInput.svelte`
+- [ ] **Drop the rename migrations** — the one-shot carry-overs from the Hollama Next → Llooma rename (database file, `localStorage` keys, theme-script fallback). The release that removes them must name the version to pin first, so anyone on an older build can pass through it before updating further. Reading legacy _backup_ keys stays regardless.
 - [ ] Testing & polish
 
 > For everything already done in this fork, see [CHANGES.md](CHANGES.md).

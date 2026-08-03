@@ -29,6 +29,10 @@ export class LocalStorageRepository implements DataRepository {
 	 * Only ever copies into a key that doesn't exist yet: if both are present —
 	 * an old tab still writing the legacy key while a new one writes the current
 	 * one — the current data wins and nothing is overwritten.
+	 *
+	 * TODO (rename cleanup) — removable with the other one-shot migrations; see
+	 * `adoptLegacyDatabase` in `src/lib/server/db/index.ts` for the full list and
+	 * the note each release must carry when they go.
 	 */
 	#migrateLegacyKeys(): void {
 		if (!browser) return;
