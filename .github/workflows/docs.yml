@@ -34,9 +34,18 @@ jobs:
         with:
           node-version: '26'
 
+      # The app's own dependencies, for one reason: its `prepare` script runs
+      # `svelte-kit sync`, which generates `.svelte-kit/tsconfig.json`. The root
+      # `tsconfig.json` extends that generated file, and Astro's resolver reads
+      # the root config on its way up — so without this the docs build fails on a
+      # clean checkout with "Tsconfig not found", while working on any machine
+      # where the app has been built once.
+      - name: Install the app (generates .svelte-kit/tsconfig.json)
+        run: pnpm install --frozen-lockfile
+
       # `docs/` is its own pnpm project with its own lockfile — see
       # `docs/pnpm-workspace.yaml` for why it is kept out of the app's workspace.
-      - name: Install
+      - name: Install the docs
         run: pnpm --dir docs install --frozen-lockfile
 
       - name: Build

@@ -6,6 +6,7 @@
 	"description": "A minimal LLM chat app that runs entirely in your browser",
 	"packageManager": "pnpm@11.5.2",
 	"scripts": {
+		"prepare": "svelte-kit sync",
 		"dev": "concurrently \"typesafe-i18n\" \"vite dev --host\"",
 		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
