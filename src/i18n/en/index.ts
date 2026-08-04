@@ -389,6 +389,7 @@ const en = {
 
 	// --- Settings › About ------------------------------------------------------
 	source: 'Source',
+	documentation: 'Documentation',
 	buyMeACoffee: 'Buy me a coffee',
 	madeWithLoveBy: 'Made with',
 	byAuthor: 'by cedhuf',

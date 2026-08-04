@@ -1446,6 +1446,10 @@ type RootTranslation = {
 	 */
 	source: string
 	/**
+	 * D​o​c​u​m​e​n​t​a​t​i​o​n
+	 */
+	documentation: string
+	/**
 	 * B​u​y​ ​m​e​ ​a​ ​c​o​f​f​e​e
 	 */
 	buyMeACoffee: string
@@ -3261,6 +3265,10 @@ The completion in progress will stop
 	 * Source
 	 */
 	source: () => LocalizedString
+	/**
+	 * Documentation
+	 */
+	documentation: () => LocalizedString
 	/**
 	 * Buy me a coffee
 	 */

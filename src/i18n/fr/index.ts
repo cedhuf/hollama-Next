@@ -405,6 +405,7 @@ const fr = extendDictionary(en, {
 
 	// --- Paramètres › À propos -------------------------------------------------
 	source: 'Source',
+	documentation: 'Documentation',
 	buyMeACoffee: 'Offrez-moi un café',
 	madeWithLoveBy: 'Fait avec',
 	byAuthor: 'par cedhuf',

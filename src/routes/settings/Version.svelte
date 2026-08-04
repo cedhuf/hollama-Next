@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { CodeXml, Coffee, ExternalLink, GitFork, Heart } from '@lucide/svelte';
+	import { BookOpen, CodeXml, Coffee, ExternalLink, GitFork, Heart } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { version } from '$app/environment';
-	import { APP_NAME } from '$lib/brand';
+	import { APP_NAME, APP_PRONUNCIATION } from '$lib/brand';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-	import { GITHUB_URL, releaseUrl } from '$lib/github';
+	import { AUTHOR_URL, DOCS_URL, GITHUB_URL, releaseUrl } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 
@@ -51,8 +51,26 @@
 	<div class="flex items-center justify-center gap-4 py-2">
 		<Logo class="h-20 w-20 shrink-0" />
 		<div class="flex flex-col items-start gap-1.5">
-			<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
-			<Badge>v{version}</Badge>
+			<!-- Name, how to say it, and which build — one line, because they are one
+			     thought. The pronunciation is a phonemic transcription (IPA), muted so
+			     it reads as a gloss on the name rather than part of it. -->
+			<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+				<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
+				<span class="text-sm text-muted" lang="en">{APP_PRONUNCIATION}</span>
+				<Badge>v{version}</Badge>
+			</div>
+			<!-- Tucked into the identity block rather than added as a third card: the
+			     logo is taller than the lines beside it, so this fills whitespace that
+			     already existed and the panel keeps its height. -->
+			<a
+				href={DOCS_URL}
+				target="_blank"
+				rel="noopener noreferrer external"
+				class="flex items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+			>
+				<BookOpen class="h-3.5 w-3.5 shrink-0" />
+				{$LL.documentation()}
+			</a>
 		</div>
 	</div>
 
@@ -131,6 +149,13 @@
 	<p class="flex items-center justify-center gap-1 pb-2 text-xs text-muted">
 		{$LL.madeWithLoveBy()}
 		<Heart class="inline h-3.5 w-3.5 text-negative" />
-		{$LL.byAuthor()}
+		<a
+			href={AUTHOR_URL}
+			target="_blank"
+			rel="noopener noreferrer external"
+			class="transition-colors hover:text-active"
+		>
+			{$LL.byAuthor()}
+		</a>
 	</p>
 </SettingsPanel>

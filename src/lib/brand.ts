@@ -13,3 +13,13 @@ export const APP_NAME = 'Llooma';
 
 /** Lowercase, for cache keys, image paths and anything else machine-facing. */
 export const APP_SLUG = APP_NAME.toLowerCase();
+
+/**
+ * How to say it: a phonemic transcription in the International Phonetic
+ * Alphabet. Slashes rather than brackets on purpose — this is the idealised
+ * pronunciation, not a narrow rendering of one accent.
+ *
+ * Not translated, for the same reason the name is not: the notation is the same
+ * in every language, and a second copy would only be a second place to forget.
+ */
+export const APP_PRONUNCIATION = '/ˈluː.mə/';
