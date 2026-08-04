@@ -27,7 +27,7 @@
 
 	import ActivityText from './ActivityText.svelte';
 	import AskChoices from './AskChoices.svelte';
-	import AttachmentImage from './AttachmentImage.svelte';
+	import AttachmentPill from './AttachmentPill.svelte';
 
 	let {
 		message,
@@ -440,7 +440,16 @@
 		{#if message.images && message.images.length}
 			<div class="article__images mt-2 flex flex-wrap gap-1">
 				{#each message.images as img (img.filename)}
-					<AttachmentImage dataUrl={`data:image/png;base64,${img.data}`} name={img.filename} />
+					<!-- The same pill it was attached as, minus the way to take it back:
+					     what was sent should look like what was composed. -->
+					<AttachmentPill
+						attachment={{
+							type: 'image',
+							id: img.filename,
+							name: img.filename,
+							dataUrl: `data:image/png;base64,${img.data}`
+						}}
+					/>
 				{/each}
 			</div>
 		{/if}

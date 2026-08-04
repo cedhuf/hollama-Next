@@ -1,20 +1,17 @@
 <script lang="ts">
-	import { Brain, Image, Zap } from '@lucide/svelte';
-	import Trash_2 from '@lucide/svelte/icons/trash-2';
+	import { Zap } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
-	import LL from '$i18n/i18n-svelte';
-	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Menu from '$lib/components/Menu.svelte';
-	import { loadKnowledge } from '$lib/knowledge';
+	import type { Knowledge } from '$lib/knowledge';
 	import { knowledgeStore } from '$lib/localStorage';
 	import type { Attachment, ImageAttachment } from '$lib/promptAttachments';
 	import { generateRandomId } from '$lib/utils';
 
-	import AttachmentImage from './AttachmentImage.svelte';
-	import KnowledgeSelect from './KnowledgeSelect.svelte';
+	import AddContextMenu from './AddContextMenu.svelte';
+	import AttachmentPill from './AttachmentPill.svelte';
 
 	type ToolToggle = { label: string; checked: boolean; onChange: (value: boolean) => void };
 
@@ -29,23 +26,23 @@
 
 	const anyToolOn = $derived(tools.some((t) => t.checked));
 
-	function addKnowledge() {
-		attachments = [...attachments, { type: 'knowledge', fieldId: generateRandomId() }];
+	// Anything already attached drops out of the menu: a second copy of the same
+	// collection is never what was meant, and it used to be possible.
+	const availableKnowledge = $derived(
+		($knowledgeStore ?? []).filter(
+			(k) => !attachments.some((a) => a.type === 'knowledge' && a.knowledge.id === k.id)
+		)
+	);
+
+	function addKnowledge(knowledge: Knowledge) {
+		attachments = [...attachments, { type: 'knowledge', id: generateRandomId(), knowledge }];
 	}
 
-	function handleSelectKnowledge(fieldId: string, knowledgeId: string) {
-		attachments = attachments.map((a) =>
-			a.type === 'knowledge' && a.fieldId === fieldId
-				? { ...a, knowledge: loadKnowledge(knowledgeId) }
-				: a
-		);
+	function removeAttachment(id: string) {
+		attachments = attachments.filter((a) => a.id !== id);
 	}
 
-	function handleDeleteAttachment(id: string) {
-		attachments = attachments.filter((a) => (a.type === 'knowledge' ? a.fieldId : a.id) !== id);
-	}
-
-	function handleImageUploadClick() {
+	function pickImages() {
 		const input = document.createElement('input');
 		input.type = 'file';
 		input.accept = '.png,.jpg,.jpeg,image/png,image/jpeg';
@@ -95,60 +92,26 @@
 </script>
 
 {#if attachments.length}
-	<div class="overflow-scrollbar flex max-h-48 flex-col gap-y-1 px-3 pb-1">
-		{#each attachments as attachment (attachment.type === 'knowledge' ? attachment.fieldId : attachment.id)}
-			<div class="flex w-full justify-between">
-				{#if attachment.type === 'knowledge'}
-					<div class="w-full">
-						<KnowledgeSelect
-							value={attachment.knowledge?.id}
-							options={$knowledgeStore?.filter(
-								(k) =>
-									!attachments.find(
-										(a) =>
-											a.type === 'knowledge' &&
-											a.fieldId !== attachment.fieldId &&
-											a.knowledge?.id === k.id
-									)
-							)}
-							showLabel={false}
-							fieldId={`attachment-${attachment.fieldId}`}
-							onChange={(knowledgeId) =>
-								knowledgeId && handleSelectKnowledge(attachment.fieldId, knowledgeId)}
-							allowClear={false}
-						/>
-					</div>
-				{:else if attachment.type === 'image'}
-					<AttachmentImage dataUrl={attachment.dataUrl} name={attachment.name} />
-				{/if}
-				<Button
-					variant="outline"
-					onclick={() =>
-						handleDeleteAttachment(
-							attachment.type === 'knowledge' ? attachment.fieldId : attachment.id
-						)}
-					data-testid="attachment-delete"
-				>
-					<Trash_2 class="base-icon" />
-				</Button>
-			</div>
+	<!-- One row of pills, wrapping, whatever the kinds. It used to be one full-width
+	     control per attachment stacked in a scroller, which made two images look like
+	     a form to fill in. -->
+	<div class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto px-3 pb-2">
+		{#each attachments as attachment (attachment.id)}
+			<AttachmentPill {attachment} onRemove={() => removeAttachment(attachment.id)} />
 		{/each}
 	</div>
 {/if}
 
 <div class="flex items-center justify-between px-2 pb-2 pt-0.5">
 	<div class="flex items-center gap-x-0.5">
-		<Button variant="icon" onclick={addKnowledge} data-testid="knowledge-attachment">
-			<Brain class="base-icon" />
-		</Button>
-		<Button
-			variant="icon"
-			onclick={handleImageUploadClick}
-			data-testid="image-attachment"
-			title={$LL.attachImage()}
-		>
-			<Image class="base-icon" />
-		</Button>
+		<!-- One way in for every kind of context, and the picking happens inside it
+		     rather than in a select that appeared in the composer. -->
+		<AddContextMenu
+			knowledge={availableKnowledge}
+			onPickKnowledge={addKnowledge}
+			onPickImages={pickImages}
+		/>
+
 		{#if tools.length}
 			<!-- Toggles, not one-shot actions: the rows stay plain checkboxes so the menu
 			     survives each click, but the panel itself is the shared portalled one. -->

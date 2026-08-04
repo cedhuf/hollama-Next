@@ -280,6 +280,18 @@ type RootTranslation = {
 	 */
 	'delete': string
 	/**
+	 * R​e​m​o​v​e
+	 */
+	remove: string
+	/**
+	 * B​a​c​k
+	 */
+	back: string
+	/**
+	 * A​d​d​ ​c​o​n​t​e​x​t
+	 */
+	addContext: string
+	/**
 	 * D​e​l​e​t​e​ ​k​n​o​w​l​e​d​g​e
 	 */
 	deleteKnowledge: string
@@ -2151,6 +2163,18 @@ The completion in progress will stop
 	 * Delete
 	 */
 	'delete': () => LocalizedString
+	/**
+	 * Remove
+	 */
+	remove: () => LocalizedString
+	/**
+	 * Back
+	 */
+	back: () => LocalizedString
+	/**
+	 * Add context
+	 */
+	addContext: () => LocalizedString
 	/**
 	 * Delete knowledge
 	 */
