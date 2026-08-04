@@ -117,3 +117,30 @@ conversation runs long.
 One consequence worth stating plainly, because it surprises people: attaching a spreadsheet gives
 the model the numbers as text. It does not give it a calculator. Ask a model to total ten thousand
 rows and it will produce a number that looks right. Verify anything that matters.
+
+## Why there is no retrieval
+
+Most chat apps in this space answer documents with a full retrieval pipeline: chunking, an
+embedding model, a vector database, and the settings that come with them. Chunk size, overlap,
+top-k, similarity threshold. Llooma does none of that, on purpose.
+
+For the common case, reading a contract, summarising a report, comparing two files, retrieval is
+the wrong tool. It hands the model fragments it guessed were relevant and hides the rest. Putting
+the whole document in the context gives better answers, needs no configuration, and cannot silently
+drop the paragraph that mattered. It is telling that apps built around retrieval have all ended up
+adding a "send the whole document" mode.
+
+Retrieval earns its keep on a corpus, not on a document: hundreds of files, asked a question
+without knowing which file holds the answer. That is a different feature, and Llooma does not
+pretend to offer it today.
+
+If enough people want it, the shape it would take is deliberately modest. Keyword search over the
+attached documents, ranked, no embedding model to pick and no vector store to run, which means it
+keeps working offline and needs no setup. The parser already emits chunks with their headings, so
+the groundwork exists. Vector search would only follow if that proved genuinely insufficient.
+
+Until then, the honest boundary is the one above: a document too large for the model's window is
+too large. The [load meter](/llooma/features/compaction/) shows the cost before you send, and
+[compaction](/llooma/features/compaction/) buys room back as the conversation runs long. If you
+have a use case this does not cover, open a discussion: that is exactly the demand worth measuring
+before building anything heavier.
