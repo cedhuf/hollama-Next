@@ -222,9 +222,31 @@ type RootTranslation = {
 	 */
 	copy: string
 	/**
-	 * C​o​u​l​d​n​'​t​ ​c​h​e​c​k​ ​f​o​r​ ​u​p​d​a​t​e​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 * C​o​u​l​d​n​'​t​ ​r​e​a​c​h​ ​t​h​e​ ​s​e​r​v​e​r
 	 */
-	couldntCheckForUpdates: string
+	couldntReachServer: string
+	/**
+	 * C​o​u​l​d​n​'​t​ ​r​e​a​c​h​ ​G​i​t​H​u​b​ ​r​e​l​e​a​s​e​s
+	 */
+	couldntReachReleases: string
+	/**
+	 * N​e​v​e​r​ ​c​h​e​c​k​e​d
+	 */
+	neverChecked: string
+	/**
+	 * {​v​e​r​s​i​o​n​}​ ​a​v​a​i​l​a​b​l​e
+	 * @param {string} version
+	 */
+	versionAvailable: RequiredParams<'version'>
+	/**
+	 * C​h​e​c​k​e​d​ ​{​w​h​e​n​}
+	 * @param {string} when
+	 */
+	lastChecked: RequiredParams<'when'>
+	/**
+	 * R​e​l​e​a​s​e​ ​n​o​t​e​s
+	 */
+	releaseNotes: string
 	/**
 	 * C​o​u​l​d​n​'​t​ ​c​o​n​n​e​c​t​ ​t​o​ ​O​l​l​a​m​a​ ​s​e​r​v​e​r
 	 */
@@ -2058,9 +2080,29 @@ The completion in progress will stop
 	 */
 	copy: () => LocalizedString
 	/**
-	 * Couldn't check for updates automatically
+	 * Couldn't reach the server
 	 */
-	couldntCheckForUpdates: () => LocalizedString
+	couldntReachServer: () => LocalizedString
+	/**
+	 * Couldn't reach GitHub releases
+	 */
+	couldntReachReleases: () => LocalizedString
+	/**
+	 * Never checked
+	 */
+	neverChecked: () => LocalizedString
+	/**
+	 * {version} available
+	 */
+	versionAvailable: (arg: { version: string }) => LocalizedString
+	/**
+	 * Checked {when}
+	 */
+	lastChecked: (arg: { when: string }) => LocalizedString
+	/**
+	 * Release notes
+	 */
+	releaseNotes: () => LocalizedString
 	/**
 	 * Couldn't connect to Ollama server
 	 */

@@ -27,6 +27,14 @@ export interface Settings {
 	models: Model[];
 	lastUsedModels: Model[];
 	lastUpdateCheck: number | null;
+	/**
+	 * Newest version seen by the last successful check.
+	 *
+	 * Persisted so the About panel can report a result next to the timestamp it
+	 * shows, instead of going blank on every reload while claiming a check ran an
+	 * hour ago.
+	 */
+	lastKnownVersion: string;
 	autoCheckForUpdates: boolean;
 	/** The version already announced by a toast, so it is only announced once. */
 	notifiedUpdateVersion: string;
@@ -100,6 +108,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	models: [],
 	lastUsedModels: [],
 	lastUpdateCheck: null,
+	lastKnownVersion: '',
 	autoCheckForUpdates: false,
 	notifiedUpdateVersion: '',
 	defaultModel: null,

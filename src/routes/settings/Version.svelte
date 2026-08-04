@@ -10,7 +10,8 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import { AUTHOR_URL, DOCS_URL, GITHUB_URL, releaseUrl } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
-	import { checkForUpdates, updateStatusStore } from '$lib/updates';
+	import { checkForUpdates, isNewerVersion, updateStatusStore } from '$lib/updates';
+	import { formatTimestampToNow } from '$lib/utils';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -18,26 +19,61 @@
 	const UPSTREAM_URL = 'https://github.com/fmaclen/hollama';
 	const KOFI_URL = 'https://ko-fi.com/cedric52222';
 
-	const statusText = $derived(
-		$updateStatusStore.isCheckingForUpdates
-			? $LL.checkingForUpdates()
-			: $updateStatusStore.couldntCheckForUpdates
-				? $LL.couldntCheckForUpdates()
-				: $updateStatusStore.isCurrentVersionLatest
-					? $LL.isCurrentVersionLatest()
-					: $updateStatusStore.latestVersion
-						? `${$LL.isLatestVersion()} ${$updateStatusStore.latestVersion}`
-						: ''
+	/**
+	 * The newest version we know of, whether this session checked or a previous
+	 * one did. The store is in memory, so after a reload only the persisted answer
+	 * is left, and reporting nothing beside "checked an hour ago" would be worse
+	 * than reporting what that check found.
+	 */
+	const knownLatest = $derived(
+		$updateStatusStore.latestVersion || $settingsStore.lastKnownVersion || ''
 	);
+	const hasEverChecked = $derived(!!$settingsStore.lastUpdateCheck || !!knownLatest);
+	// Semver, not string equality: a development build is `0.6.0-dev`, which is not
+	// literally `0.6.0` and would otherwise announce itself as out of date.
+	const isOutdated = $derived(!!knownLatest && isNewerVersion(knownLatest, version));
 
-	/** Only the "a newer version is available" wording leads anywhere. */
-	const updateHref = $derived(
-		!$updateStatusStore.isCheckingForUpdates &&
-			!$updateStatusStore.couldntCheckForUpdates &&
-			!$updateStatusStore.isCurrentVersionLatest &&
-			$updateStatusStore.latestVersion
-			? releaseUrl($updateStatusStore.latestVersion)
-			: null
+	/** One state, so the pill, its colour and its link cannot disagree. */
+	const status = $derived.by<{
+		label: string;
+		variant: 'positive' | 'warning' | undefined;
+		href: string | undefined;
+	}>(() => {
+		if ($updateStatusStore.isCheckingForUpdates) {
+			return { label: $LL.checkingForUpdates(), variant: undefined, href: undefined };
+		}
+		if ($updateStatusStore.failure === 'server') {
+			return { label: $LL.couldntReachServer(), variant: 'warning', href: undefined };
+		}
+		if ($updateStatusStore.failure === 'releases') {
+			return { label: $LL.couldntReachReleases(), variant: 'warning', href: undefined };
+		}
+		if (!hasEverChecked) {
+			return { label: $LL.neverChecked(), variant: undefined, href: undefined };
+		}
+		if (isOutdated) {
+			// The version is the message: "0.7.0 available" says more than "outdated",
+			// and it is the thing worth clicking through to.
+			return {
+				label: $LL.versionAvailable({ version: knownLatest }),
+				variant: 'warning',
+				href: releaseUrl(knownLatest)
+			};
+		}
+		return { label: $LL.isCurrentVersionLatest(), variant: 'positive', href: undefined };
+	});
+
+	/**
+	 * Relative, because "3 days ago" is the question being asked, not the date.
+	 * Empty when no check has ever run: the pill already says so, and repeating it
+	 * on the line below reads like two different facts.
+	 */
+	const lastCheckedText = $derived(
+		$settingsStore.lastUpdateCheck
+			? $LL.lastChecked({
+					when: formatTimestampToNow(new Date($settingsStore.lastUpdateCheck * 1000).toISOString())
+				})
+			: ''
 	);
 
 	const links = [
@@ -75,35 +111,49 @@
 	</div>
 
 	<SettingsSection title={$LL.version()} card>
-		<div class="flex items-center justify-between gap-3 text-sm">
-			<span class="text-muted">{$LL.currentVersion()}</span>
-			{#if updateHref}
+		<!-- What you run on the left, what we know about it on the right, and the
+		     action beside its own result. The button used to own a full-width row of
+		     its own, which cost height on a panel that should not scroll. -->
+		<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+			<div class="flex min-w-0 flex-col gap-0.5">
 				<a
-					href={updateHref}
+					href={releaseUrl(version)}
 					target="_blank"
 					rel="noopener noreferrer external"
-					class="text-link font-medium text-accent"
+					class="w-fit text-sm font-medium text-active transition-colors hover:text-accent"
+					title={$LL.releaseNotes()}
 				>
-					{statusText}
+					v{version}
 				</a>
-			{:else}
-				<span class="font-medium text-active">{statusText || '—'}</span>
-			{/if}
+				{#if lastCheckedText}
+					<span class="text-xs text-muted">{lastCheckedText}</span>
+				{/if}
+			</div>
+
+			<div class="flex shrink-0 items-center gap-2">
+				<!-- `Badge` takes an `href` but cannot carry `target`/`rel`, and this one
+				     leaves the app, so the anchor is outside it. -->
+				{#if status.href}
+					<a href={status.href} target="_blank" rel="noopener noreferrer external">
+						<Badge variant={status.variant}>{status.label}</Badge>
+					</a>
+				{:else}
+					<Badge variant={status.variant}>{status.label}</Badge>
+				{/if}
+				<Button
+					variant="outline"
+					disabled={$updateStatusStore.isCheckingForUpdates}
+					onclick={async () => await checkForUpdates(true)}
+				>
+					{$LL.checkNow()}
+				</Button>
+			</div>
 		</div>
 
 		<FieldCheckbox
 			label={$LL.automaticallyCheckForUpdates()}
 			bind:checked={$settingsStore.autoCheckForUpdates}
 		/>
-
-		<Button
-			variant="outline"
-			class="w-full"
-			disabled={$updateStatusStore.isCheckingForUpdates}
-			onclick={async () => await checkForUpdates(true)}
-		>
-			{$LL.checkNow()}
-		</Button>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.source()}>

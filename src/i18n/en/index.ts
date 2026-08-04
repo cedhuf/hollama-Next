@@ -55,7 +55,12 @@ const en = {
 	controlsOnlyAvailableForOllama:
 		'Advanced controls are currently only available for Ollama models',
 	copy: 'Copy',
-	couldntCheckForUpdates: "Couldn't check for updates automatically",
+	couldntReachServer: "Couldn't reach the server",
+	couldntReachReleases: "Couldn't reach GitHub releases",
+	neverChecked: 'Never checked',
+	versionAvailable: '{version:string} available',
+	lastChecked: 'Checked {when:string}',
+	releaseNotes: 'Release notes',
 	couldntConnectToOllamaServer: "Couldn't connect to Ollama server",
 	creatingTunnel: 'Creating a tunnel',
 	currentVersion: 'Current version',

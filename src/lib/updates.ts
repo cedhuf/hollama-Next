@@ -13,10 +13,21 @@ const DEV_VERSION_SUFFIX = '-dev';
 const METADATA_ENDPOINT = '/api/metadata';
 const ONE_WEEK_IN_SECONDS = 604800;
 
+/**
+ * Which half of the check failed.
+ *
+ * A check asks two different things: this instance's own `/api/metadata`, and
+ * the release list on GitHub. They fail for unrelated reasons and call for
+ * unrelated answers, so reporting a single "couldn't check" told the user the
+ * one thing they already knew. `server` takes precedence when both fail: a
+ * server that cannot be reached is the more immediate problem.
+ */
+export type UpdateFailure = 'server' | 'releases' | null;
+
 export interface UpdateStatus {
 	isCurrentVersionLatest: boolean;
 	isCheckingForUpdates: boolean;
-	couldntCheckForUpdates: boolean;
+	failure: UpdateFailure;
 	/** Empty until a check has run, so nothing is announced on a cold start. */
 	latestVersion: string;
 }
@@ -24,7 +35,7 @@ export interface UpdateStatus {
 export const updateStatusStore = writable<UpdateStatus>({
 	isCurrentVersionLatest: false,
 	isCheckingForUpdates: false,
-	couldntCheckForUpdates: false,
+	failure: null,
 	latestVersion: ''
 });
 
@@ -36,7 +47,7 @@ export const updateStatusStore = writable<UpdateStatus>({
  * of answers `false`: an unreadable tag must not be announced as an update, and
  * `semver.gt` throws on invalid input rather than returning false.
  */
-function isNewerVersion(candidate: string, current: string): boolean {
+export function isNewerVersion(candidate: string, current: string): boolean {
 	const parse = (value: string) =>
 		semver.valid(semver.coerce(value.replace(DEV_VERSION_SUFFIX, '')));
 	const a = parse(candidate ?? '');
@@ -56,12 +67,12 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 
 	// `get()` hands back the stored object itself, so mutating it in place never
 	// reaches a subscriber: the spinner and the disabled button both need a set().
-	// `couldntCheckForUpdates` is cleared here too, or one failure would stick to
-	// every later check.
+	// `failure` is cleared here too, or one failure would stick to every later
+	// check.
 	updateStatusStore.update((current) => ({
 		...current,
 		isCheckingForUpdates: true,
-		couldntCheckForUpdates: false
+		failure: null
 	}));
 	const status: UpdateStatus = { ...get(updateStatusStore) };
 
@@ -72,7 +83,7 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 		settings.lloomaMetadata = (await response.json()) as LloomaMetadata;
 	} catch {
 		console.error(`Failed to fetch ${APP_NAME} server metadata`);
-		status.couldntCheckForUpdates = true;
+		status.failure = 'server';
 	}
 
 	status.latestVersion = settings.lloomaMetadata.currentVersion;
@@ -92,8 +103,10 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 				: undefined;
 			if (release) status.latestVersion = release.tag_name;
 		} catch {
+			// The release list is public but rate limited per IP, so a shared
+			// instance behind one address can be refused while everything else works.
 			console.error('Failed to fetch GitHub releases');
-			status.couldntCheckForUpdates = true;
+			status.failure ??= 'releases';
 		}
 	}
 
@@ -103,5 +116,9 @@ export async function checkForUpdates(isUserInitiated = false): Promise<void> {
 
 	// Update the settings store with today's date so we don't check again for updates
 	settings.lastUpdateCheck = getUnixTime(new Date());
+	// The store is in memory, so a reload would leave the panel with nothing to
+	// report next to the timestamp it just showed. Only a clean check is recorded:
+	// a failed one must not overwrite an answer that was known to be good.
+	if (!status.failure) settings.lastKnownVersion = status.latestVersion;
 	settingsStore.set(settings);
 }

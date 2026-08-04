@@ -64,7 +64,12 @@ const fr = extendDictionary(en, {
 	controlsOnlyAvailableForOllama:
 		'Les contrôles avancés sont actuellement uniquement disponibles pour les modèles Ollama',
 	copy: 'Copier',
-	couldntCheckForUpdates: 'Impossible de vérifier automatiquement la présence de mises à jour',
+	couldntReachServer: 'Serveur injoignable',
+	couldntReachReleases: 'Versions GitHub injoignables',
+	neverChecked: 'Jamais vérifié',
+	versionAvailable: '{version:string} disponible',
+	lastChecked: 'Vérifié {when:string}',
+	releaseNotes: 'Notes de version',
 	couldntConnectToOllamaServer: 'Impossible de se connecter au serveur Ollama',
 	creatingTunnel: 'Création d’un tunnel',
 	currentVersion: 'Version actuelle',
