@@ -1,0 +1,46 @@
+/*
+ * Site-specific styling, on top of Starlight's theme.
+ *
+ * Kept deliberately small: everything here is a deviation from a theme that is
+ * already consistent and accessible, so each rule should earn its place.
+ * Colours come from Starlight's own custom properties so both light and dark
+ * ramps follow automatically.
+ */
+
+/* The attribution line under the hero: present and readable, but clearly not
+   part of the pitch — it sits between the call to action and the cards, so it
+   has to give way to both. */
+.fork-note {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	width: fit-content;
+	margin: -0.5rem auto 2.5rem;
+	padding: 0.45rem 1rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 999px;
+	background: var(--sl-color-gray-6);
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-sm);
+	line-height: 1.4;
+	text-align: center;
+	text-wrap: balance;
+}
+
+/* MDX wraps the block's children in a paragraph; the pill is the container, so
+   that paragraph must not add spacing of its own. */
+.fork-note p {
+	margin: 0;
+}
+
+.fork-note a {
+	color: var(--sl-color-white);
+	text-decoration-color: var(--sl-color-gray-4);
+	text-underline-offset: 0.2em;
+}
+
+.fork-note a:hover {
+	color: var(--sl-color-text-accent);
+}

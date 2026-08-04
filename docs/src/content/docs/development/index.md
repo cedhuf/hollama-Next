@@ -24,9 +24,10 @@ Everything above it — components, stores, features — is written once against
 you find yourself branching on the mode outside `src/lib/data/` or `src/lib/server/`, that is the
 signal you are about to duplicate the interface.
 
-The French [architecture note](/llooma/fr/development/architecture/) is the original design
-document for that split. It is a plan rather than a description, so treat it as intent; the code
-is the reference.
+[`ARCHITECTURE.md`](https://github.com/cedhuf/llooma/blob/main/ARCHITECTURE.md) is the original
+design document for that split. It stays in the repository rather than on this site: it is written
+in French, and it is a plan rather than a description — treat it as intent, and the code as the
+reference.
 
 ## Layout
 

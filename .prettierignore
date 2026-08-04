@@ -23,3 +23,8 @@ src/i18n/i18n-util.ts
 # built from `docs/`, not from here.
 /docs/dist
 /docs/.astro
+
+# MDX: indentation carries meaning (four spaces inside a component is an
+# indented code block), and Prettier reformats it into exactly that. It broke the
+# home page cards once; formatting these by hand is the cheaper trade.
+docs/**/*.mdx

@@ -26,14 +26,10 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/cedhuf/llooma/edit/main/docs/'
 			},
-			// English is the base, French is a translation: any page without a French
-			// version falls back to English rather than 404ing — the same contract as
-			// the app's own `typesafe-i18n` setup, so a half-translated site is fine.
-			defaultLocale: 'root',
-			locales: {
-				root: { label: 'English', lang: 'en' },
-				fr: { label: 'Français', lang: 'fr' }
-			},
+			customCss: ['./src/styles/custom.css'],
+			// English only. The app's interface is translated, its documentation is
+			// not: a second copy of every page is a standing maintenance cost, and a
+			// half-translated site tells readers less than a complete English one.
 			plugins: [
 				starlightOpenAPI([
 					{
@@ -50,23 +46,19 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Start here',
-					translations: { fr: 'Commencer' },
 					items: [{ autogenerate: { directory: 'guides' } }]
 				},
 				{
 					label: 'Features',
-					translations: { fr: 'Fonctionnalités' },
 					items: [{ autogenerate: { directory: 'features' } }]
 				},
 				{
 					label: 'Reference',
-					translations: { fr: 'Référence' },
 					items: [{ autogenerate: { directory: 'reference' } }]
 				},
 				...openAPISidebarGroups,
 				{
 					label: 'Development',
-					translations: { fr: 'Développement' },
 					items: [{ autogenerate: { directory: 'development' } }]
 				}
 			]
