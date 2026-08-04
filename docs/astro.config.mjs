@@ -20,7 +20,14 @@ export default defineConfig({
 		starlight({
 			title: 'Llooma',
 			description: 'Documentation for Llooma, a (less) minimal LLM chat app.',
-			logo: { src: './src/assets/logo-mark.png', alt: 'Llooma' },
+			// The mark is black ink on transparency, so it vanishes on a dark
+			// background; `dark` swaps in the inverted copy, the same pairing the
+			// README does with `<picture>`.
+			logo: {
+				light: './src/assets/logo-mark.png',
+				dark: './src/assets/logo-mark-dark.png',
+				alt: 'Llooma'
+			},
 			favicon: '/favicon.png',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/cedhuf/llooma' }],
 			editLink: {
