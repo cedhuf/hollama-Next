@@ -11,6 +11,8 @@
 
 **A (less) minimal LLM chat app that runs _entirely_ in your browser.**
 
+Built by [cedhuf](https://github.com/cedhuf) · [Documentation](https://cedhuf.github.io/llooma)
+
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
 
 </div>
