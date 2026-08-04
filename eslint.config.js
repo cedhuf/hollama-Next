@@ -11,6 +11,12 @@ export default ts.config(
 		// Global ignores translated from .eslintignore
 		ignores: [
 			'**/node_modules/**',
+			// The docs site is a separate project with its own toolchain and its own
+			// conventions (Astro components, MDX); linting it with the app's rules
+			// reports on code this config was never written for.
+			'docs/**',
+			// Gitignored scratch space — throwaway scripts and reports, not source.
+			'_local/**',
 			'build/**',
 			'.svelte-kit/**',
 			'package/**',

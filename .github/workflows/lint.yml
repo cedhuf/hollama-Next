@@ -20,3 +20,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
+
+      # Fails when an API route exists that `docs/openapi.yaml` does not describe,
+      # or the reverse. Catches the endpoint nobody documented, which is the drift
+      # that actually happens.
+      - name: Check the API documentation is in step with the routes
+        run: pnpm run check:api

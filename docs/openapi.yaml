@@ -1,0 +1,331 @@
+openapi: 3.1.0
+
+info:
+  title: Llooma HTTP API
+  version: 0.6.0
+  summary: The endpoints Llooma's own interface talks to in server mode.
+  description: |
+    This API exists to serve the Llooma web client. It is documented so the
+    behaviour is auditable and so a self-hosted instance can be scripted, not
+    because it is a stable public contract — it changes with the interface.
+
+    Everything here requires an authenticated session unless a path says
+    otherwise, and `/api` is exempt from the page-level auth guard, so each
+    endpoint checks the session itself.
+
+    Endpoints are marked `x-status: todo` until their request and response
+    shapes have been written down. The surface itself (paths and methods) is
+    checked against the routes in CI by `scripts/check-api-docs.mjs`.
+servers:
+  - url: http://localhost:5173
+    description: Development server
+  - url: https://your-llooma-instance
+    description: Your instance
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: authjs.session-token
+      description: Session cookie issued by Auth.js on sign-in.
+security:
+  - session: []
+paths:
+  /api/admin/config:
+    get:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    put:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/personas:
+    put:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/servers:
+    get:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    post:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/servers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    delete:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/servers/{id}/models:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/users:
+    get:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    post:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [admin]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/chat-defaults/config:
+    get:
+      tags: [chat-defaults]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/data/{collection}:
+    parameters:
+      - name: collection
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    put:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/data/{collection}/{id}:
+    parameters:
+      - name: collection
+        in: path
+        required: true
+        schema: { type: string }
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    put:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    delete:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/data/backup:
+    get:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    post:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/data/reset:
+    post:
+      tags: [data]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/fetch:
+    post:
+      tags: [fetch]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/fetch/config:
+    get:
+      tags: [fetch]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/llm/{serverId}/{path}:
+    parameters:
+      - name: serverId
+        in: path
+        required: true
+        schema: { type: string }
+      - name: path
+        in: path
+        required: true
+        schema: { type: string }
+        description: Catch-all segment; may contain slashes.
+    get:
+      tags: [llm]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    post:
+      tags: [llm]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/metadata:
+    get:
+      tags: [metadata]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/personas/config:
+    get:
+      tags: [personas]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/providers:
+    get:
+      tags: [providers]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/proxy/{path}:
+    parameters:
+      - name: path
+        in: path
+        required: true
+        schema: { type: string }
+        description: Catch-all segment; may contain slashes.
+    get:
+      tags: [proxy]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    post:
+      tags: [proxy]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/search:
+    get:
+      tags: [search]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/search/config:
+    get:
+      tags: [search]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/search/sessions:
+    get:
+      tags: [search]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/servers:
+    post:
+      tags: [servers]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/servers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [servers]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+    delete:
+      tags: [servers]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/servers/verify:
+    post:
+      tags: [servers]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }
+  /api/system-prompts/config:
+    get:
+      tags: [system-prompts]
+      summary: TODO
+      x-status: todo
+      responses:
+        '200': { description: TODO }

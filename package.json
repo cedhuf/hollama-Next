@@ -15,7 +15,10 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"typesafe-i18n": "typesafe-i18n",
-		"i18n:status": "node scripts/i18n-status.mjs"
+		"i18n:status": "node scripts/i18n-status.mjs",
+		"check:api": "node scripts/check-api-docs.mjs",
+		"docs:dev": "pnpm --dir docs run dev",
+		"docs:build": "pnpm --dir docs run build"
 	},
 	"devDependencies": {
 		"@codemirror/state": "^6.6.0",
@@ -71,7 +74,8 @@
 		"typescript": "^5.5.0",
 		"typescript-eslint": "^8.61.0",
 		"vite": "^6.2.3",
-		"vite-node": "^3.0.9"
+		"vite-node": "^3.0.9",
+		"yaml": "^2.9.0"
 	},
 	"optionalDependencies": {
 		"@esbuild/darwin-x64": "^0.24.0",

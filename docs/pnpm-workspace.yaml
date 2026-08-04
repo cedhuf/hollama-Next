@@ -1,0 +1,21 @@
+# `docs/` is a standalone project, deliberately not a member of the app's
+# workspace: the Docker build copies only the app's manifests, so a docs package
+# in the same lockfile would break `pnpm install --frozen-lockfile` there, and
+# the runtime image has no business carrying an Astro toolchain.
+#
+# This file exists to make that isolation real — with it, pnpm stops walking up
+# and treats `docs/` as its own root, with its own lockfile and node_modules.
+packages:
+  - .
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+# `@astrojs/mdx@7.0.5` imports `satteri` without declaring it, so pnpm's strict
+# resolution cannot find it from the package's own directory. Grafting the
+# dependency on is the fix until the upstream release is corrected.
+packageExtensions:
+  '@astrojs/mdx':
+    dependencies:
+      satteri: ^0.9.5

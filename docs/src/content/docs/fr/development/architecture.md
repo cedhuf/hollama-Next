@@ -1,4 +1,9 @@
-# Architecture — Llooma
+---
+title: Architecture
+description: Plan de référence du découpage local / serveur.
+sidebar:
+  order: 2
+---
 
 > Plan de référence avant le chantier « modes local / serveur ».
 > Objectif : un code propre et léger, deux modes de fonctionnement à partir

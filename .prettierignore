@@ -18,3 +18,8 @@ src/i18n/i18n-types.ts
 src/i18n/i18n-util.async.ts
 src/i18n/i18n-util.sync.ts
 src/i18n/i18n-util.ts
+
+# The docs site is its own project with its own toolchain; it is formatted and
+# built from `docs/`, not from here.
+/docs/dist
+/docs/.astro

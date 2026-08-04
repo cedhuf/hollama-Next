@@ -109,15 +109,14 @@ Build characters, a coach, a tutor, a companion, each with its own avatar, perso
 
 ### Get started
 
+- 📚 **[Documentation](https://cedhuf.github.io/llooma)** — install, configure, and how each feature works
 - ⚡️ Live demo — _coming soon_
 - 🖥️ Download — _coming soon_ (will be replaced by Tauri)
 - 🐞 [Contribute](CONTRIBUTING.md)
 
 ### Self-hosting
 
-Docker images are published to [`ghcr.io/cedhuf/llooma`](https://ghcr.io/cedhuf/llooma) on every release. `:latest` always points at the newest one; each release is also tagged with its version (`:0.2.0`) if you'd rather pin.
-
-**Quick start with Docker Compose (recommended):**
+Docker images are published to [`ghcr.io/cedhuf/llooma`](https://ghcr.io/cedhuf/llooma) on every release.
 
 ```shell
 cp .env.example .env
@@ -126,92 +125,13 @@ docker compose up -d
 
 Then open [http://localhost:4173](http://localhost:4173).
 
-**Or with Docker directly:**
+Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`: **`local`** keeps everything in the browser, **`server`** signs users in and keeps provider keys on the server. The full picture, every environment variable, and the security notes that matter before exposing an instance are in the documentation:
 
-```shell
-docker run --rm -d -p 4173:4173 --name llooma ghcr.io/cedhuf/llooma:latest
-```
-
-**Update to the latest version:**
-
-```shell
-docker compose pull && docker compose up -d
-```
-
-**Connecting to an Ollama server on a different device** — if your Ollama server is running on a separate machine, you need to allow your Llooma instance's domain in `OLLAMA_ORIGINS`. [Learn more in Ollama's docs](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server).
-
-```shell
-OLLAMA_ORIGINS=https://your-llooma-domain.com ollama serve
-```
-
-**Running modes**, Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
-
-> [!NOTE]
-> Why ?
->
-> - This allow device synchronization, which was not possible before.
-> - This also allow multiple user instance.
-
----
-
-- **`local`** (default), single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
-- **`server`**, multi-user, self-hosted. Users sign in (email + password and/or OIDC), data is stored server-side in SQLite **per user**, and **provider API keys never leave the server** (encrypted at rest). An admin configures shared providers and which models to expose; optionally, users may add their own keys (`allowUserKeys`).
-
-Set `PUBLIC_MODE=server` to enable server mode. All server-mode state lives under `DATA_DIR` — a single directory you can bind-mount to persist everything.
-
-**Configuration**, copy `.env.example` to `.env` and adjust as needed.
-
-_Common (both modes):_
-
-| Variable                    | Default     | Description                                                                                                                                                  |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
-| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any** (see the warning below)                                                              |
-| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the **web fetch** tool may read; empty = any public host                                                                                |
-| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
-| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |
-| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set, it's locked instance-wide; if unset, it's configurable from the GUI |
-| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
-
-> [!WARNING]
-> **The web fetch tool makes requests leave your server.** It reads the URL a user
-> pastes, from inside your network. Private, loopback and link-local addresses are
-> refused — including the cloud metadata endpoint — and redirects are re-checked at
-> every hop, but an instance open to untrusted users is still letting them choose
-> what your server connects to. Restrict it with `FETCH_ALLOWED_ORIGINS`, or turn
-> the tool off for everyone under _Settings → Admin → Shared tools_. That switch is
-> enforced by the endpoint itself, not just hidden in the interface.
-
-> [!WARNING]
-> **Set `PROXY_ALLOWED_ORIGINS` on a local-mode instance reachable from the
-> network.** The provider proxy (`/api/proxy/…`) forwards to whatever origin it is
-> given and requires no signed-in user — with the default empty allowlist it is an
-> open proxy for anyone who can reach it. It cannot refuse private addresses the
-> way the fetch tool does, because reaching Ollama on `localhost` is the point.
-> Restricting it to your providers' origins closes that. In server mode the route
-> is disabled outright (404): the browser goes through the authenticated
-> `/api/llm/…` proxy instead.
-
-_Server mode (`PUBLIC_MODE=server`):_
-
-| Variable                                | Default                | Description                                                                         |
-| --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------- |
-| `PUBLIC_MODE`                           | `local`                | Set `server` for multi-user mode                                                    |
-| `DATA_DIR`                              | `./data`               | Directory for the SQLite DB and server state (bind-mount this)                      |
-| `AUTH_SECRET`                           | —                      | **Required.** Signs sessions and encrypts provider keys (`openssl rand -base64 32`) |
-| `ADMIN_EMAIL`                           | —                      | Bootstraps the first admin; also marks this email as admin for OIDC                 |
-| `ADMIN_PASSWORD`                        | —                      | Initial admin password (omit for an OIDC-only admin)                                |
-| `AUTH_CREDENTIALS`                      | —                      | `true` to enable email + password login                                             |
-| `OIDC_ISSUER`                           | —                      | OIDC provider URL (e.g. PocketID); its presence enables OIDC login                  |
-| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | —                      | OIDC client credentials                                                             |
-| `OIDC_NAME`                             | `SSO`                  | Label for the OIDC sign-in button                                                   |
-| `OIDC_SCOPE`                            | `openid profile email` | Requested scopes (add your groups scope to expose roles)                            |
-| `OIDC_ROLE_CLAIM` / `OIDC_ADMIN_VALUE`  | —                      | Claim and value that grant the admin role                                           |
-| `OIDC_AUTO_PROVISION`                   | `true`                 | Create a user on first OIDC login (`false` requires a pre-created account)          |
-| `OIDC_AUTO_REDIRECT`                    | —                      | `true` skips the login page and goes straight to the IdP (OIDC-only)                |
-
-> OIDC redirect URI to register with your provider: `https://your-llooma-domain/auth/callback/oidc`
+- [Installation](https://cedhuf.github.io/llooma/guides/installation/)
+- [Running modes](https://cedhuf.github.io/llooma/guides/running-modes/)
+- [Configuration](https://cedhuf.github.io/llooma/reference/configuration/)
+- [Security](https://cedhuf.github.io/llooma/guides/security/)
+- [HTTP API](https://cedhuf.github.io/llooma/reference/api/)
 
 ### Screenshots
 

@@ -1,0 +1,55 @@
+---
+title: Llooma
+description: A (less) minimal LLM chat app that runs entirely in your browser.
+template: splash
+hero:
+  tagline: A (less) minimal LLM chat app. Run it in your browser alone, or host it for your team.
+  image:
+    file: ../../assets/logo-mark.png
+  actions:
+    - text: Install it
+      link: /llooma/guides/installation/
+      icon: right-arrow
+    - text: Source on GitHub
+      link: https://github.com/cedhuf/llooma
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+	<Card title="Two ways to run it" icon="laptop">
+		**Local** keeps everything in your browser, with your own provider keys. **Server** signs
+		users in, stores their data per account, and keeps the API keys on the server where the
+		browser can never read them.
+
+    	[Choose a mode →](/llooma/guides/running-modes/)
+    </Card>
+    <Card title="Bring your own models" icon="puzzle">
+    	Ollama, OpenAI, Claude, Infomaniak and anything OpenAI-compatible — several at once, each
+    	with its own label and colour.
+    </Card>
+    <Card title="More than a chat box" icon="magnifier">
+    	Web search and page reading, personas, knowledge collections, full-text search across every
+    	conversation, and compaction when one gets too long.
+
+    	[See what it does →](/llooma/features/)
+    </Card>
+    <Card title="Auditable" icon="approve-check">
+    	The HTTP API is documented endpoint by endpoint, and CI fails if a route is added without
+    	documenting it.
+
+    	[Read the API →](/llooma/reference/api/)
+    </Card>
+
+</CardGrid>
+
+:::caution[Early preview]
+Llooma is not made for production use. Expect breaking changes, unfinished features and rough
+edges. Recent work has focused on server mode; local mode may have inconsistencies that still
+need a verification pass.
+:::
+
+Llooma is a fork of [Hollama](https://github.com/fmaclen/hollama) by
+[fmaclen](https://github.com/fmaclen) — many thanks for the original work.
