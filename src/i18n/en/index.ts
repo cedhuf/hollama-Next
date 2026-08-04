@@ -73,6 +73,12 @@ const en = {
 	back: 'Back',
 	addContext: 'Add context',
 	attachDocument: 'Attach document',
+	sidebar: 'Sidebar',
+	showListQuickActions: 'Show pin and delete on each row',
+	showListQuickActionsHelp:
+		'Off, both stay in the right-click menu, where they cannot cover a title or be clicked by mistake. The menu also keeps a conversation as knowledge.',
+	saveAsKnowledge: 'Save as knowledge',
+	savedAsKnowledge: '{name:string} saved as knowledge',
 	pageCount: '{count:number} {{page|pages}}',
 	documentFailed: '{name:string} could not be read',
 	documentEmpty: 'No text could be read from {name:string}',

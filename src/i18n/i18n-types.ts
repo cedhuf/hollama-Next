@@ -296,6 +296,27 @@ type RootTranslation = {
 	 */
 	attachDocument: string
 	/**
+	 * S​i​d​e​b​a​r
+	 */
+	sidebar: string
+	/**
+	 * S​h​o​w​ ​p​i​n​ ​a​n​d​ ​d​e​l​e​t​e​ ​o​n​ ​e​a​c​h​ ​r​o​w
+	 */
+	showListQuickActions: string
+	/**
+	 * O​f​f​,​ ​b​o​t​h​ ​s​t​a​y​ ​i​n​ ​t​h​e​ ​r​i​g​h​t​-​c​l​i​c​k​ ​m​e​n​u​,​ ​w​h​e​r​e​ ​t​h​e​y​ ​c​a​n​n​o​t​ ​c​o​v​e​r​ ​a​ ​t​i​t​l​e​ ​o​r​ ​b​e​ ​c​l​i​c​k​e​d​ ​b​y​ ​m​i​s​t​a​k​e​.​ ​T​h​e​ ​m​e​n​u​ ​a​l​s​o​ ​k​e​e​p​s​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​a​s​ ​k​n​o​w​l​e​d​g​e​.
+	 */
+	showListQuickActionsHelp: string
+	/**
+	 * S​a​v​e​ ​a​s​ ​k​n​o​w​l​e​d​g​e
+	 */
+	saveAsKnowledge: string
+	/**
+	 * {​n​a​m​e​}​ ​s​a​v​e​d​ ​a​s​ ​k​n​o​w​l​e​d​g​e
+	 * @param {string} name
+	 */
+	savedAsKnowledge: RequiredParams<'name'>
+	/**
 	 * {​c​o​u​n​t​}​ ​{​{​p​a​g​e​|​p​a​g​e​s​}​}
 	 * @param {number} count
 	 */
@@ -2253,6 +2274,26 @@ The completion in progress will stop
 	 * Attach document
 	 */
 	attachDocument: () => LocalizedString
+	/**
+	 * Sidebar
+	 */
+	sidebar: () => LocalizedString
+	/**
+	 * Show pin and delete on each row
+	 */
+	showListQuickActions: () => LocalizedString
+	/**
+	 * Off, both stay in the right-click menu, where they cannot cover a title or be clicked by mistake. The menu also keeps a conversation as knowledge.
+	 */
+	showListQuickActionsHelp: () => LocalizedString
+	/**
+	 * Save as knowledge
+	 */
+	saveAsKnowledge: () => LocalizedString
+	/**
+	 * {name} saved as knowledge
+	 */
+	savedAsKnowledge: (arg: { name: string }) => LocalizedString
 	/**
 	 * {count} {{page|pages}}
 	 */

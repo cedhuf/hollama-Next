@@ -83,6 +83,12 @@ export interface Settings {
 	homeRecentSessionsCount: number;
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
+	/**
+	 * Show pin and delete buttons on the rows of the sidebar lists. Off by
+	 * default: both live in the right-click menu, where they cannot cover a title
+	 * or be hit by accident.
+	 */
+	showListQuickActions: boolean;
 	/** Tint your own messages with the app's accent so they stand out from replies. */
 	accentUserMessages: boolean;
 	/** Show the time each message was sent, next to its role badge. */
@@ -147,6 +153,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
+	showListQuickActions: false,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
 	fadeCompactedMessages: true,

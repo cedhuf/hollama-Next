@@ -86,11 +86,16 @@
 		<SettingsHint>{$LL.fadeCompactedMessagesHelp()}</SettingsHint>
 	</SettingsSection>
 
-	<SettingsSection title={$LL.personas()} card>
+	<SettingsSection title={$LL.sidebar()} card>
 		<FieldCheckbox
 			label={$LL.pinPersonasInSidebar()}
 			bind:checked={$settingsStore.showPinnedPersonas}
 		/>
+		<FieldCheckbox
+			label={$LL.showListQuickActions()}
+			bind:checked={$settingsStore.showListQuickActions}
+		/>
+		<SettingsHint>{$LL.showListQuickActionsHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<Shortcuts />

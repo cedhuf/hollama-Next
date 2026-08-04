@@ -1,4 +1,7 @@
+import { repository } from '$lib/data';
+import { saveKnowledge, type Knowledge } from '$lib/knowledge';
 import { resolveSessionTitle, type Message, type Session } from '$lib/sessions';
+import { generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
 export type ExportFormat = 'json' | 'markdown';
 
@@ -98,4 +101,29 @@ export function serializeSession(
 	assistantLabel?: string
 ): string {
 	return format === 'json' ? sessionToJson(session) : sessionToMarkdown(session, assistantLabel);
+}
+
+/**
+ * Keep a conversation as a knowledge collection.
+ *
+ * What was worked out in a conversation is often what you want to hand to the
+ * next one, and copying the transcript by hand to paste it into a new knowledge
+ * item was the only way to do it. Same transcript as the Markdown export, so
+ * there is one idea of what a conversation reads like.
+ *
+ * The conversation is left alone: this is a copy, taken at this moment, and it
+ * does not follow the conversation if it continues.
+ */
+export async function saveSessionAsKnowledge(id: string): Promise<Knowledge | null> {
+	const session = await repository.loadSession(id);
+	if (!session) return null;
+
+	const knowledge: Knowledge = {
+		id: generateRandomId(),
+		name: resolveSessionTitle(session) || `Session #${session.id}`,
+		content: sessionToMarkdown(session),
+		updatedAt: getUpdatedAtDate()
+	};
+	saveKnowledge(knowledge);
+	return knowledge;
 }

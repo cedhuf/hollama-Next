@@ -48,3 +48,11 @@ in context. Server mode indexes with SQLite FTS5; local mode scans in the browse
 Six themes, each with a light and a dark ramp, following the system by default. Responsive,
 installable as a PWA, English and French with automatic fallback. Import and export each kind of
 data, or a full backup.
+
+Right-click a conversation in the sidebar to pin it, keep it as a knowledge collection, or delete
+it. Deleting still asks on the row itself. The same pin and delete can sit on every row instead,
+one click closer: _Settings → Interface → Sidebar_. They are off by default, since they hover over
+the title on a narrow sidebar and put delete next to the conversation you meant to open.
+
+Keeping a conversation as knowledge takes the same transcript as the Markdown export, as a copy: it
+does not keep following the conversation afterwards.

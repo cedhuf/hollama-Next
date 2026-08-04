@@ -86,6 +86,12 @@ const fr = extendDictionary(en, {
 	back: 'Retour',
 	addContext: 'Ajouter du contexte',
 	attachDocument: 'Joindre un document',
+	sidebar: 'Barre latérale',
+	showListQuickActions: 'Afficher épingler et supprimer sur chaque ligne',
+	showListQuickActionsHelp:
+		'Désactivé, les deux restent dans le menu contextuel, où ils ne recouvrent aucun titre et ne se cliquent pas par erreur. Ce menu permet aussi de garder une conversation en connaissance.',
+	saveAsKnowledge: 'Garder en connaissance',
+	savedAsKnowledge: '{name:string} enregistré en connaissance',
 	pageCount: '{count:number} page{{s}}',
 	documentFailed: '{name:string} n’a pas pu être lu',
 	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',

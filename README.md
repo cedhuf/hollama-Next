@@ -78,6 +78,7 @@ Build characters, a coach, a tutor, a companion, each with its own avatar, perso
 
 - Six themes — Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized (each with a light and a dark ramp), following the system by default
 - Responsive; dialogs go full screen on phones; installable as a PWA
+- Right-click a conversation in the sidebar to pin it, keep it as a **knowledge** collection, or delete it; the same pin and delete can be put on every row from the settings
 - English and French, with automatic English fallback for untranslated keys
 - Import and export each kind of data, or a full backup of everything
 
