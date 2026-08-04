@@ -222,17 +222,25 @@ type RootTranslation = {
 	 */
 	copy: string
 	/**
-	 * C​o​u​l​d​n​'​t​ ​r​e​a​c​h​ ​t​h​e​ ​s​e​r​v​e​r
+	 * S​e​r​v​e​r​ ​u​n​r​e​a​c​h​a​b​l​e
 	 */
 	couldntReachServer: string
 	/**
-	 * C​o​u​l​d​n​'​t​ ​r​e​a​c​h​ ​G​i​t​H​u​b​ ​r​e​l​e​a​s​e​s
+	 * G​i​t​H​u​b​ ​u​n​r​e​a​c​h​a​b​l​e
 	 */
 	couldntReachReleases: string
 	/**
 	 * N​e​v​e​r​ ​c​h​e​c​k​e​d
 	 */
 	neverChecked: string
+	/**
+	 * U​p​ ​t​o​ ​d​a​t​e
+	 */
+	upToDate: string
+	/**
+	 * j​u​s​t​ ​n​o​w
+	 */
+	justNow: string
 	/**
 	 * {​v​e​r​s​i​o​n​}​ ​a​v​a​i​l​a​b​l​e
 	 * @param {string} version
@@ -2080,17 +2088,25 @@ The completion in progress will stop
 	 */
 	copy: () => LocalizedString
 	/**
-	 * Couldn't reach the server
+	 * Server unreachable
 	 */
 	couldntReachServer: () => LocalizedString
 	/**
-	 * Couldn't reach GitHub releases
+	 * GitHub unreachable
 	 */
 	couldntReachReleases: () => LocalizedString
 	/**
 	 * Never checked
 	 */
 	neverChecked: () => LocalizedString
+	/**
+	 * Up to date
+	 */
+	upToDate: () => LocalizedString
+	/**
+	 * just now
+	 */
+	justNow: () => LocalizedString
 	/**
 	 * {version} available
 	 */
