@@ -87,6 +87,8 @@ export interface Settings {
 	accentUserMessages: boolean;
 	/** Show the time each message was sent, next to its role badge. */
 	showMessageTimestamps: boolean;
+	/** Fade the messages a compaction has summarised, so the live context reads apart. */
+	fadeCompactedMessages: boolean;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
 	userLanguage: Locales | null;
@@ -141,6 +143,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	showPinnedPersonas: true,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
+	fadeCompactedMessages: true,
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

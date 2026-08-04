@@ -21,6 +21,15 @@
 		align?: 'start' | 'center' | 'end';
 		/** Extra classes for the panel (usually a width). */
 		class?: string;
+		/**
+		 * Tapping the trigger opens the panel instead of closing it.
+		 *
+		 * A touch screen has no hover, so a tooltip that only answers the pointer is
+		 * simply not reachable on a phone. Set this where the tooltip carries the
+		 * content rather than a hint about it, and toggle `open` from the trigger.
+		 */
+		open?: boolean;
+		keepOpenOnTriggerClick?: boolean;
 	}
 
 	let {
@@ -28,12 +37,14 @@
 		children,
 		side = 'top',
 		align = 'center',
-		class: className = ''
+		class: className = '',
+		open = $bindable(false),
+		keepOpenOnTriggerClick = false
 	}: Props = $props();
 </script>
 
 <Tooltip.Provider>
-	<Tooltip.Root delayDuration={200}>
+	<Tooltip.Root delayDuration={200} bind:open disableCloseOnTriggerClick={keepOpenOnTriggerClick}>
 		<Tooltip.Trigger>
 			{#snippet child({ props })}
 				{@render trigger({ props })}

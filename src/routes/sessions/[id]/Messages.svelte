@@ -1,7 +1,9 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { stripAskBlock } from '$lib/askChoice';
+	import { compactionSavings, lastCompactionIndex } from '$lib/chat/context';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
+	import { settingsStore } from '$lib/localStorage';
 	import { stripReadBlock } from '$lib/readProtocol';
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
@@ -17,6 +19,10 @@
 		/** The pending quick-choice (shown docked above the composer, so it's skipped inline). */
 		pendingChoice?: Message | null;
 		assistantLabel?: string;
+		/** A summary is being written right now: the boundary is drawn before it lands. */
+		isCompacting?: boolean;
+		/** Abandon that summary. Absent when there is nothing to abandon. */
+		onCancelCompaction?: () => void;
 	}
 
 	let {
@@ -25,8 +31,22 @@
 		handleRetry,
 		chooseAnswer,
 		pendingChoice = null,
-		assistantLabel = undefined
+		assistantLabel = undefined,
+		isCompacting = false,
+		onCancelCompaction = undefined
 	}: Props = $props();
+
+	/**
+	 * Everything before the last marker is out of context: on screen, but not sent.
+	 *
+	 * While a compaction runs, every message qualifies in advance — the summary
+	 * covers all of them — so the fade lands with the pending pill rather than
+	 * after it, and the two read as one action.
+	 */
+	const foldedBefore = $derived(
+		isCompacting ? session.messages.length : lastCompactionIndex(session.messages)
+	);
+	const fade = $derived($settingsStore.fadeCompactedMessages);
 
 	// While the model is streaming an <ask> block the visible text is empty — show
 	// a choices skeleton instead of a bare "…".
@@ -80,7 +100,11 @@
 {#each session.messages as message, i (session.id + i)}
 	{#if message.compaction}
 		<!-- Not a turn: the boundary where the context above was summarised away. -->
-		<CompactionDivider {message} onUndo={() => handleUndoCompaction(message)} />
+		<CompactionDivider
+			{message}
+			savings={compactionSavings(session.messages, i)}
+			onUndo={() => handleUndoCompaction(message)}
+		/>
 	{:else if message !== pendingChoice}
 		{#key message.role}
 			<Article
@@ -93,10 +117,17 @@
 				handleEditMessage={() => handleEditMessage(message)}
 				handleDeleteAttachment={() => handleDeleteAttachment(message)}
 				onToggleReasoning={() => saveSession(session)}
+				folded={fade && i < foldedBefore}
 			/>
 		{/key}
 	{/if}
 {/each}
+
+{#if isCompacting}
+	<!-- The boundary, drawn where it will settle: the marker is appended, so the
+	     pill that waits is already standing in the pill that reports. -->
+	<CompactionDivider pending onCancel={onCancelCompaction} />
+{/if}
 
 {#if editor.isCompletionInProgress}
 	<!-- `currentRawCompletion` is the stripped text on purpose: a <read> round is

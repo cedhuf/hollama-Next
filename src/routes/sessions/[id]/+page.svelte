@@ -767,6 +767,7 @@
 
 	const compactConfig = $derived($chatDefaultsConfig.compact);
 	let isCompacting = $state(false);
+	let compactAbort: AbortController | null = null;
 
 	/**
 	 * There has to be enough conversation for a summary to be worth a request —
@@ -781,30 +782,48 @@
 	/**
 	 * Compact now, and say what happened.
 	 *
-	 * Loud on failure on purpose: the user asked for the context to be shortened,
-	 * and if it was not, the next message goes out full-length — silently letting
-	 * them believe otherwise is how a conversation hits a provider's wall.
+	 * The waiting and the result are both drawn in the conversation, at the spot
+	 * the boundary will land, so there is no success toast: the divider appearing
+	 * is the confirmation. Failure still goes to a toast, because the user asked
+	 * for the context to be shortened and if it was not, the next message goes out
+	 * full-length — silently letting them believe otherwise is how a conversation
+	 * hits a provider's wall.
 	 */
 	async function runCompaction(automatic = false): Promise<boolean> {
 		if (isCompacting) return false;
 		isCompacting = true;
-		const toastId = toast.loading($LL.compacting());
+		compactAbort = new AbortController();
+		const signal = compactAbort.signal;
+		// The pill is the whole feedback now, so bring it into view before the wait
+		// starts rather than after it ends.
+		await scrollToBottom(true, true);
 
 		try {
-			const { marker, replacedCount } = await compactSession(session, { automatic });
+			const { marker } = await compactSession(session, { automatic, signal });
 			session.messages = [...session.messages, marker];
 			session.updatedAt = new Date().toISOString();
 			saveSession(session);
+			// Cleared in the same flush as the marker landing, so the pending pill and
+			// the real one hand over to each other instead of one following the other.
+			isCompacting = false;
 			await scrollToBottom(true);
-			toast.success($LL.compactedToast({ count: replacedCount }), { id: toastId });
 			return true;
 		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			toast.error($LL.compactFailed(), { id: toastId, description: message });
+			// An abandoned summary is not a failure: the user said stop, and the
+			// conversation is exactly as they left it.
+			if (!signal.aborted) {
+				const message = error instanceof Error ? error.message : String(error);
+				toast.error($LL.compactFailed(), { description: message });
+			}
 			return false;
 		} finally {
 			isCompacting = false;
+			compactAbort = null;
 		}
+	}
+
+	function cancelCompaction() {
+		compactAbort?.abort();
 	}
 
 	/**
@@ -1015,6 +1034,8 @@
 				{chooseAnswer}
 				{pendingChoice}
 				assistantLabel={persona?.name}
+				{isCompacting}
+				onCancelCompaction={cancelCompaction}
 			/>
 		</div>
 

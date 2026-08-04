@@ -1468,6 +1468,14 @@ type RootTranslation = {
 	 */
 	showMessageTimestamps: string
 	/**
+	 * F​a​d​e​ ​m​e​s​s​a​g​e​s​ ​a​ ​s​u​m​m​a​r​y​ ​h​a​s​ ​r​e​p​l​a​c​e​d
+	 */
+	fadeCompactedMessages: string
+	/**
+	 * C​o​m​p​a​c​t​e​d​ ​m​e​s​s​a​g​e​s​ ​s​t​a​y​ ​o​n​ ​s​c​r​e​e​n​ ​b​u​t​ ​a​r​e​ ​n​o​ ​l​o​n​g​e​r​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​.​ ​F​a​d​i​n​g​ ​t​h​e​m​ ​s​h​o​w​s​ ​w​h​e​r​e​ ​t​h​e​ ​l​i​v​e​ ​c​o​n​t​e​x​t​ ​b​e​g​i​n​s​;​ ​h​o​v​e​r​ ​o​n​e​ ​t​o​ ​r​e​a​d​ ​i​t​ ​a​t​ ​f​u​l​l​ ​s​t​r​e​n​g​t​h​.
+	 */
+	fadeCompactedMessagesHelp: string
+	/**
 	 * P​i​n​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​t​a​l​k​ ​t​o​ ​a​t​ ​t​h​e​ ​t​o​p​ ​o​f​ ​t​h​e​ ​s​i​d​e​b​a​r
 	 */
 	pinPersonasInSidebar: string
@@ -1795,10 +1803,10 @@ type RootTranslation = {
 	 */
 	compacting: string
 	/**
-	 * C​o​n​t​e​x​t​ ​c​o​m​p​a​c​t​e​d​ ​—​ ​{​c​o​u​n​t​}​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​s​u​m​m​a​r​i​s​e​d
-	 * @param {number} count
+	 * ~​{​t​o​k​e​n​s​}​ ​t​o​k​e​n​s​ ​f​r​e​e​d
+	 * @param {string} tokens
 	 */
-	compactedToast: RequiredParams<'count'>
+	tokensFreed: RequiredParams<'tokens'>
 	/**
 	 * T​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​c​o​m​p​a​c​t​e​d
 	 */
@@ -3316,6 +3324,14 @@ The completion in progress will stop
 	 */
 	showMessageTimestamps: () => LocalizedString
 	/**
+	 * Fade messages a summary has replaced
+	 */
+	fadeCompactedMessages: () => LocalizedString
+	/**
+	 * Compacted messages stay on screen but are no longer sent to the model. Fading them shows where the live context begins; hover one to read it at full strength.
+	 */
+	fadeCompactedMessagesHelp: () => LocalizedString
+	/**
 	 * Pin personas you talk to at the top of the sidebar
 	 */
 	pinPersonasInSidebar: () => LocalizedString
@@ -3632,9 +3648,9 @@ The completion in progress will stop
 	 */
 	compacting: () => LocalizedString
 	/**
-	 * Context compacted — {count} {{message|messages}} summarised
+	 * ~{tokens} tokens freed
 	 */
-	compactedToast: (arg: { count: number }) => LocalizedString
+	tokensFreed: (arg: { tokens: string }) => LocalizedString
 	/**
 	 * The conversation could not be compacted
 	 */

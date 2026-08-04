@@ -46,7 +46,8 @@
 		currentRawCompletion,
 		streamingReasoningExpanded = $bindable(false),
 		onToggleReasoning = undefined,
-		anchorId = undefined
+		anchorId = undefined,
+		folded = false
 	}: {
 		message: Message;
 		retryIndex?: number;
@@ -72,6 +73,8 @@
 		onToggleReasoning?: () => void;
 		/** DOM id, so search results can scroll to this exact message. */
 		anchorId?: string;
+		/** Summarised away by a compaction: still readable, no longer sent. */
+		folded?: boolean;
 	} = $props();
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
@@ -196,6 +199,7 @@
 {#if isKnowledgeAttachment}
 	<article
 		class="attachment mx-auto mb-2 flex w-full max-w-[80ch] gap-2 rounded-md border border-shade-3 flex items-center justify-between px-3 py-1 md:px-4 lg:px-6"
+		class:folded
 	>
 		<div class="attachment__content flex items-center gap-2">
 			<div class="attachment__icon text-muted">
@@ -223,6 +227,7 @@
 	     who said what. -->
 	<article
 		id={anchorId}
+		class:folded
 		class="article article--{message.role} mx-auto mb-4 flex w-full max-w-[80ch] flex-col gap-y-2 last:mb-0 md:mb-6 {isUserRole
 			? 'items-end'
 			: ''} {message.role === 'system' ? 'rounded-md border border-shade-3 p-3 md:p-4' : ''}"
@@ -248,9 +253,13 @@
 				</Badge>
 			</div>
 			{#if sentAt}
-				<!-- Information, not an action: it stays put rather than hiding in the
-				     hover-only group, where it was invisible until you went looking. -->
-				<span class="shrink-0 text-[11px] tabular-nums text-muted" title={message.createdAt}>
+				<!-- Revealed on hover, like the message's own actions: worth having, not
+				     worth carrying on every line of a long conversation. Stays visible
+				     where there is no hover to reveal it with. -->
+				<span
+					class="article__sent-at shrink-0 text-[11px] tabular-nums text-muted"
+					title={message.createdAt}
+				>
 					{sentAt}
 				</span>
 			{/if}
@@ -468,15 +477,34 @@
 {/if}
 
 <style lang="postcss">
+	/**
+	 * A message a summary now stands in for. It is still part of the conversation
+	 * and still readable, it is simply no longer what the model is answering from,
+	 * so it steps back rather than leaving. Full strength on hover, because the
+	 * one time it matters is when you go back to read it.
+	 */
+	.folded {
+		opacity: 0.45;
+		transition: opacity 0.25s ease;
+	}
+
+	.folded:hover,
+	.folded:focus-within {
+		opacity: 1;
+	}
+
 	@media (hover: hover) {
 		.article__interactive,
-		.attachment__interactive {
+		.attachment__interactive,
+		.article__sent-at {
 			opacity: 0;
 			transition: opacity 0.15s ease;
 		}
 
 		.article:hover .article__interactive,
-		.attachment:hover .attachment__interactive {
+		.attachment:hover .attachment__interactive,
+		.article:hover .article__sent-at,
+		.article:focus-within .article__sent-at {
 			opacity: 1;
 		}
 	}

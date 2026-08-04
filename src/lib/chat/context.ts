@@ -69,6 +69,51 @@ export function messagesInContext(messages: Message[]): Message[] {
 	return marker === -1 ? messages : messages.slice(marker);
 }
 
+export interface CompactionSavings {
+	/** Estimated tokens the replaced stretch of conversation was worth. */
+	before: number;
+	/** What the summary standing in for it costs. */
+	after: number;
+	/** `before - after`, negative when the summary is the more expensive of the two. */
+	saved: number;
+	/** Share of the original weight removed, 0 to 1. */
+	ratio: number;
+}
+
+/**
+ * What a given compaction actually bought, computed from the messages rather
+ * than stored on the marker.
+ *
+ * It can be computed because nothing is deleted: the stretch a marker replaced
+ * is still sitting above it. Which also means summaries written before this was
+ * shown report their figures too, instead of only new ones.
+ */
+export function compactionSavings(messages: Message[], markerIndex: number): CompactionSavings {
+	const marker = messages[markerIndex];
+	if (!marker?.compaction) return { before: 0, after: 0, saved: 0, ratio: 0 };
+
+	// Back to the previous marker, inclusive: an earlier summary was part of what
+	// this compaction was handed, so it is part of what this one replaced.
+	let start = 0;
+	for (let i = markerIndex - 1; i >= 0; i--) {
+		if (messages[i].compaction) {
+			start = i;
+			break;
+		}
+	}
+
+	let before = 0;
+	for (let i = start; i < markerIndex; i++) before += estimateMessageTokens(messages[i]);
+	const after = estimateMessageTokens(marker);
+
+	return {
+		before,
+		after,
+		saved: before - after,
+		ratio: before > 0 ? Math.max(0, (before - after) / before) : 0
+	};
+}
+
 export type ContextLevel = 'ok' | 'warn' | 'high';
 
 export interface ContextUsage {

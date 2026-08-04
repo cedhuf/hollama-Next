@@ -408,6 +408,9 @@ const fr = extendDictionary(en, {
 	howManyToShow: 'Combien en afficher',
 	accentUserMessages: 'Teinter mes messages avec la couleur d’accent',
 	showMessageTimestamps: 'Afficher l’heure sur chaque message',
+	fadeCompactedMessages: 'Estomper les messages remplacés par un résumé',
+	fadeCompactedMessagesHelp:
+		'Les messages compactés restent affichés mais ne sont plus envoyés au modèle. Les estomper montre où commence le contexte actif ; survolez-en un pour le lire normalement.',
 	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
 
 	// --- Paramètres › À propos -------------------------------------------------
@@ -503,7 +506,7 @@ const fr = extendDictionary(en, {
 	undoCompaction: 'Annuler',
 	undoCompactionHelp: 'Retirer ce résumé et rendre tout l’historique au modèle',
 	compacting: 'Résumé de la conversation…',
-	compactedToast: 'Contexte compacté — {count:number} {{message|messages}} résumé{{s}}',
+	tokensFreed: '~{tokens:string} tokens libérés',
 	compactFailed: 'La conversation n’a pas pu être compactée',
 	slashCommands: 'Commandes',
 	slashRun: 'Lancer',

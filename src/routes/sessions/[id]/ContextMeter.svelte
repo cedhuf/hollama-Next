@@ -11,18 +11,19 @@
 	 * only earns attention as it fills: the colour warms past 60%, and the token
 	 * count appears next to it past that, because by then the number is the point.
 	 *
-	 * Clicking it types `/compact` into the composer without sending. Compaction
-	 * costs a request and rewrites what the model can see, so the last step stays
-	 * the user's — the meter offers the command, it does not run it.
+	 * Clicking it opens the figures, nothing more. It used to put `/compact` in the
+	 * composer, which meant the one way to read the numbers on a phone was to also
+	 * be handed a command you had not asked for — there is no hover on a touch
+	 * screen, so the tap has to be what opens the panel.
 	 */
 	interface Props {
 		session: Session;
 		threshold: number;
-		/** Puts `/compact` in the composer, ready to send. */
-		onPrepareCompact: () => void;
 	}
 
-	let { session, threshold, onPrepareCompact }: Props = $props();
+	let { session, threshold }: Props = $props();
+
+	let tipOpen = $state(false);
 
 	const usage = $derived<ContextUsage>(contextUsage(session, threshold));
 	const percent = $derived(Math.round(usage.ratio * 100));
@@ -42,12 +43,12 @@
 	);
 </script>
 
-<Tooltip side="top" align="start" class="w-64">
+<Tooltip side="top" align="start" class="w-64" bind:open={tipOpen} keepOpenOnTriggerClick>
 	{#snippet trigger({ props })}
 		<button
 			{...props}
 			type="button"
-			onclick={onPrepareCompact}
+			onclick={() => (tipOpen = !tipOpen)}
 			aria-label={$LL.contextLoad()}
 			data-testid="context-meter"
 			class="flex items-center gap-1.5 rounded-md px-2 py-2 transition-colors hover:bg-shade-1 hover:text-active {colour}"

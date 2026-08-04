@@ -35,7 +35,7 @@
 		{...rest}
 		{href}
 		class="
-			inline-flex items-center justify-center gap-2 rounded-md
+			inline-flex items-center justify-center gap-2 rounded-md transition-colors duration-150
 			button--{variant}
 			{variant === 'default' || variant === 'outline'
 			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
@@ -57,7 +57,7 @@
 		{...rest}
 		class="
 			{isLoading ? 'relative' : ''}
-			inline-flex items-center justify-center gap-2 rounded-md
+			inline-flex items-center justify-center gap-2 rounded-md transition-colors duration-150
 			button--{variant}
 			{variant === 'default' || variant === 'outline'
 			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
@@ -87,5 +87,20 @@
 <style lang="postcss">
 	.button--link[target='_blank']:after {
 		content: ' ↗';
+	}
+
+	/**
+	 * The primary button had no hover state at all: the one control people press
+	 * most often was the only one that never answered the pointer.
+	 *
+	 * The shift is towards `--color-active`, the strongest foreground in the
+	 * theme, which reads as slightly darker on a light ramp and slightly lighter
+	 * on a dark one. Always a step further from the background, whichever of the
+	 * twelve ramps is on, and small enough (12%) to feel like a response rather
+	 * than a second colour.
+	 */
+	.button--default:hover:not(:disabled) {
+		background-color: color-mix(in srgb, var(--color-accent) 88%, var(--color-active));
+		border-color: color-mix(in srgb, var(--color-accent) 88%, var(--color-active));
 	}
 </style>

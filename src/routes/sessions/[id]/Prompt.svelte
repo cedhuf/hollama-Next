@@ -383,14 +383,7 @@
 					{#snippet actions()}
 						<div class="flex items-center gap-x-1">
 							{#if session.messages.length}
-								<ContextMeter
-									{session}
-									threshold={contextThreshold}
-									onPrepareCompact={() => {
-										editor.prompt = '/compact';
-										editor.promptTextarea?.focus();
-									}}
-								/>
+								<ContextMeter {session} threshold={contextThreshold} />
 							{/if}
 							{#if !isPersona}
 								<Button

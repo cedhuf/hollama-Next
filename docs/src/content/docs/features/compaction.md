@@ -29,11 +29,28 @@ message that really does begin with a slash, start it with `//`.
 If the conversation is too short to be worth compacting, `/compact` stays listed but greyed out,
 with the reason.
 
+## While it runs
+
+The wait is drawn in the conversation, not in a corner of the screen. A divider appears at the
+bottom of the thread, exactly where the finished one will sit, and says it is summarising. Once
+the summary lands, that same divider fills in with the result rather than being replaced. You can
+abandon a summary in progress from the cross on the divider: nothing is written and the
+conversation is left as it was.
+
+Unfold a finished summary and it also reports what the compaction bought: roughly how many tokens
+it freed, the weight before and after, and the share removed. Those figures are computed from the
+messages still on screen, so summaries written before this existed report them too.
+
+Messages a summary now stands in for stay on screen, faded, so it is clear at a glance where the
+live context begins. Hover one to read it at full strength. If you would rather they did not fade,
+turn off _Fade messages a summary has replaced_ under _Settings → Interface → Messages_.
+
 ## The load indicator
 
 A small ring sits in the composer and fills as the context does. It stays a quiet grey outline
 until 60%, warms to amber, then to red, and shows the token count from amber onwards. Hover it for
-the exact figures; click it to put `/compact` in the composer, ready to send.
+the exact figures, or tap it: it reads out the same panel on a touch screen, where there is no
+hover to reveal it with. It only ever shows figures, it never runs anything.
 
 :::caution[The token count is an estimate]
 There is no tokenizer in the browser — shipping one would mean a megabyte of vocabulary per model

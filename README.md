@@ -18,8 +18,6 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 ![The sidebar, a conversation, the Library, and the Interface and Servers settings](static/screenshots/sections.png)
 
 > [!WARNING]
-> **Disclaimer**
->
 > This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
 >
 > I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR is more than welcome. If AI is not your thing, you can check the original project instead or other forks, no hard feelings, just being transparent.
@@ -65,8 +63,8 @@ Build characters, a coach, a tutor, a companion, each with its own avatar, perso
 - **Interactive choices** when a request is ambiguous, the model can offer tappable options instead of guessing
 - **System prompts** global, per-model and per-conversation
 - AI-generated conversation titles, using a dedicated (cheap) model
-- **Compaction** when a conversation gets too long, `/compact` in the composer replaces everything said so far with a structured summary, so it keeps fitting in the context window. Nothing is deleted: the summary only changes what is _sent_, the full transcript stays on screen, and one click on the divider puts the whole history back. Runs on the conversation's own model by default, or a dedicated one, and can fire on its own at a threshold you set. An admin can share both
-- **Conversation load** a small ring in the composer fills as the context does, warming from grey to amber to red, with the exact figures on hover. Click it to prepare `/compact`
+- **Compaction** when a conversation gets too long, `/compact` in the composer replaces everything said so far with a structured summary, so it keeps fitting in the context window. Nothing is deleted: the summary only changes what is _sent_, the full transcript stays on screen (faded past the boundary, which you can turn off), and one click on the divider puts the whole history back. Runs on the conversation's own model by default, or a dedicated one, and can fire on its own at a threshold you set. An admin can share both
+- **Conversation load** a small ring in the composer fills as the context does, warming from grey to amber to red, with the exact figures on hover, or on tap where there is no hover
 - Advanced Ollama parameters
 
 **Personas & knowledge**

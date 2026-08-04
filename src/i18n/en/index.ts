@@ -392,6 +392,9 @@ const en = {
 	howManyToShow: 'How many to show',
 	accentUserMessages: 'Tint my messages with the accent colour',
 	showMessageTimestamps: 'Show the time on each message',
+	fadeCompactedMessages: 'Fade messages a summary has replaced',
+	fadeCompactedMessagesHelp:
+		'Compacted messages stay on screen but are no longer sent to the model. Fading them shows where the live context begins; hover one to read it at full strength.',
 	pinPersonasInSidebar: 'Pin personas you talk to at the top of the sidebar',
 
 	// --- Settings › About ------------------------------------------------------
@@ -485,7 +488,7 @@ const en = {
 	undoCompaction: 'Undo',
 	undoCompactionHelp: 'Remove this summary and give the model the full history back',
 	compacting: 'Summarising the conversation…',
-	compactedToast: 'Context compacted — {count:number} {{message|messages}} summarised',
+	tokensFreed: '~{tokens:string} tokens freed',
 	compactFailed: 'The conversation could not be compacted',
 	slashCommands: 'Commands',
 	slashRun: 'Run',
