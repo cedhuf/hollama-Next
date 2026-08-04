@@ -78,7 +78,10 @@
 	} = $props();
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
-	const isUserRole = $derived(message.role === 'user' && !isKnowledgeAttachment);
+	const isDocumentAttachment = $derived(!!message.document);
+	const isUserRole = $derived(
+		message.role === 'user' && !isKnowledgeAttachment && !isDocumentAttachment
+	);
 	/** Empty when turned off in Interface, or on messages written before it was recorded. */
 	const sentAt = $derived(
 		message.createdAt && $settingsStore.showMessageTimestamps
@@ -196,7 +199,23 @@
 	}
 </script>
 
-{#if isKnowledgeAttachment}
+{#if isDocumentAttachment && message.document}
+	<!-- The document as it was attached, not as the model reads it: a hundred pages
+	     of Markdown unrolled in the thread would bury the conversation it belongs to.
+	     The text is still in the message, still searchable, still exported. -->
+	<div class="mx-auto mb-2 flex w-full max-w-[80ch] justify-end px-3 md:px-4 lg:px-6">
+		<AttachmentPill
+			attachment={{
+				type: 'document',
+				id: anchorId ?? message.document.name,
+				name: message.document.name,
+				markdown: '',
+				tokens: 0,
+				pages: message.document.pages
+			}}
+		/>
+	</div>
+{:else if isKnowledgeAttachment}
 	<article
 		class="attachment mx-auto mb-2 flex w-full max-w-[80ch] gap-2 rounded-md border border-shade-3 flex items-center justify-between px-3 py-1 md:px-4 lg:px-6"
 		class:folded

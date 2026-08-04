@@ -63,6 +63,14 @@ export interface Message {
 	/** Set only on multi-round turns; `reasoning` remains the final round's. */
 	reasoningTrace?: ReasoningStep[];
 	images?: { data: string; filename: string }[]; // Store image data and filename
+	/**
+	 * Set on a message carrying an attached document: the file it was read from.
+	 *
+	 * The text itself is in `content`, where the model reads it. This is only what
+	 * the conversation shows in its place, so a hundred pages of Markdown do not
+	 * unroll in the middle of the thread.
+	 */
+	document?: { name: string; pages?: number };
 	webSearch?: WebSearchInfo; // Set when web search context was injected
 	choices?: AskChoices; // Set when the assistant asked for a quick choice (interactive buttons)
 	isReasoningVisible?: boolean;

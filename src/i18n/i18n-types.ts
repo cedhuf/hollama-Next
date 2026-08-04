@@ -292,6 +292,74 @@ type RootTranslation = {
 	 */
 	addContext: string
 	/**
+	 * A​t​t​a​c​h​ ​d​o​c​u​m​e​n​t
+	 */
+	attachDocument: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​p​a​g​e​|​p​a​g​e​s​}​}
+	 * @param {number} count
+	 */
+	pageCount: RequiredParams<'count'>
+	/**
+	 * {​n​a​m​e​}​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​r​e​a​d
+	 * @param {string} name
+	 */
+	documentFailed: RequiredParams<'name'>
+	/**
+	 * N​o​ ​t​e​x​t​ ​c​o​u​l​d​ ​b​e​ ​r​e​a​d​ ​f​r​o​m​ ​{​n​a​m​e​}
+	 * @param {string} name
+	 */
+	documentEmpty: RequiredParams<'name'>
+	/**
+	 * T​h​i​s​ ​P​D​F​ ​l​o​o​k​s​ ​s​c​a​n​n​e​d
+	 */
+	documentLooksScanned: string
+	/**
+	 * M​o​s​t​ ​o​f​ ​t​h​i​s​ ​P​D​F​ ​i​s​ ​i​m​a​g​e​s
+	 */
+	documentMostlyImages: string
+	/**
+	 * S​e​n​d​ ​t​h​e​ ​p​a​g​e​s​ ​a​s​ ​i​m​a​g​e​s
+	 */
+	documentPagesAsImages: string
+	/**
+	 * T​h​e​r​e​ ​i​s​ ​n​o​ ​t​e​x​t​ ​t​o​ ​e​x​t​r​a​c​t​,​ ​o​n​l​y​ ​p​i​c​t​u​r​e​s​ ​o​f​ ​i​t​.​ ​A​ ​v​i​s​i​o​n​ ​m​o​d​e​l​ ​c​a​n​ ​r​e​a​d​ ​t​h​e​ ​p​a​g​e​s​ ​d​i​r​e​c​t​l​y​,​ ​u​p​ ​t​o​ ​{​m​a​x​}​ ​o​f​ ​t​h​e​m​.​ ​T​u​r​n​ ​o​n​ ​O​C​R​ ​i​n​ ​S​e​t​t​i​n​g​s​ ​t​o​ ​r​e​a​d​ ​t​h​e​m​ ​a​s​ ​t​e​x​t​ ​i​n​s​t​e​a​d​.
+	 * @param {number} max
+	 */
+	documentPagesAsImagesHelp: RequiredParams<'max'>
+	/**
+	 * D​o​c​u​m​e​n​t​s
+	 */
+	documentsTitle: string
+	/**
+	 * A​t​t​a​c​h​ ​a​ ​P​D​F​,​ ​a​ ​W​o​r​d​ ​f​i​l​e​ ​o​r​ ​a​ ​s​p​r​e​a​d​s​h​e​e​t​ ​a​n​d​ ​i​t​s​ ​t​e​x​t​ ​g​o​e​s​ ​i​n​t​o​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​ ​F​i​l​e​s​ ​a​r​e​ ​r​e​a​d​ ​i​n​ ​y​o​u​r​ ​b​r​o​w​s​e​r​ ​a​n​d​ ​n​e​v​e​r​ ​u​p​l​o​a​d​e​d​.
+	 */
+	documentsDescription: string
+	/**
+	 * R​e​a​d​ ​a​t​t​a​c​h​e​d​ ​d​o​c​u​m​e​n​t​s
+	 */
+	documentsToggle: string
+	/**
+	 * S​u​p​p​o​r​t​s​ ​P​D​F​,​ ​D​O​C​X​,​ ​P​P​T​X​,​ ​X​L​S​X​,​ ​O​D​T​,​ ​O​D​P​,​ ​O​D​S​,​ ​R​T​F​,​ ​E​P​U​B​,​ ​C​S​V​,​ ​H​T​M​L​,​ ​M​a​r​k​d​o​w​n​ ​a​n​d​ ​p​l​a​i​n​ ​t​e​x​t​.​ ​T​u​r​n​e​d​ ​o​f​f​,​ ​t​h​e​ ​r​e​a​d​e​r​ ​i​s​ ​n​e​v​e​r​ ​d​o​w​n​l​o​a​d​e​d​ ​a​n​d​ ​d​o​c​u​m​e​n​t​s​ ​c​a​n​n​o​t​ ​b​e​ ​a​t​t​a​c​h​e​d​.
+	 */
+	documentsHelp: string
+	/**
+	 * R​e​a​d​ ​t​e​x​t​ ​i​n​s​i​d​e​ ​i​m​a​g​e​s​ ​(​O​C​R​)
+	 */
+	documentOcrToggle: string
+	/**
+	 * F​o​r​ ​s​c​a​n​s​ ​a​n​d​ ​p​i​c​t​u​r​e​s​ ​o​f​ ​t​e​x​t​.​ ​I​t​ ​i​s​ ​s​l​o​w​,​ ​a​ ​f​e​w​ ​s​e​c​o​n​d​s​ ​p​e​r​ ​p​a​g​e​,​ ​a​n​d​ ​t​h​e​ ​r​e​s​u​l​t​ ​i​s​ ​a​p​p​r​o​x​i​m​a​t​e​:​ ​e​x​p​e​c​t​ ​t​a​b​l​e​s​ ​a​n​d​ ​c​o​l​u​m​n​s​ ​t​o​ ​c​o​m​e​ ​o​u​t​ ​f​l​a​t​t​e​n​e​d​.​ ​O​n​ ​f​i​r​s​t​ ​u​s​e​ ​i​t​ ​d​o​w​n​l​o​a​d​s​ ​a​n​ ​O​C​R​ ​e​n​g​i​n​e​ ​a​n​d​ ​i​t​s​ ​l​a​n​g​u​a​g​e​ ​d​a​t​a​,​ ​f​r​o​m​ ​a​ ​p​u​b​l​i​c​ ​C​D​N​ ​u​n​l​e​s​s​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​h​o​s​t​s​ ​t​h​e​m​ ​i​t​s​e​l​f​.
+	 */
+	documentOcrHelp: string
+	/**
+	 * O​C​R​ ​l​a​n​g​u​a​g​e
+	 */
+	documentOcrLanguage: string
+	/**
+	 * T​e​s​s​e​r​a​c​t​ ​l​a​n​g​u​a​g​e​ ​c​o​d​e​s​,​ ​f​o​r​ ​e​x​a​m​p​l​e​ ​e​n​g​,​ ​f​r​a​,​ ​d​e​u​.​ ​C​o​m​b​i​n​e​ ​t​h​e​m​ ​w​i​t​h​ ​a​ ​p​l​u​s​ ​s​i​g​n​:​ ​e​n​g​+​f​r​a​.​ ​E​a​c​h​ ​l​a​n​g​u​a​g​e​ ​i​s​ ​a​ ​s​e​p​a​r​a​t​e​ ​d​o​w​n​l​o​a​d​.
+	 */
+	documentOcrLanguageHelp: string
+	/**
 	 * D​e​l​e​t​e​ ​k​n​o​w​l​e​d​g​e
 	 */
 	deleteKnowledge: string
@@ -2181,6 +2249,70 @@ The completion in progress will stop
 	 * Add context
 	 */
 	addContext: () => LocalizedString
+	/**
+	 * Attach document
+	 */
+	attachDocument: () => LocalizedString
+	/**
+	 * {count} {{page|pages}}
+	 */
+	pageCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * {name} could not be read
+	 */
+	documentFailed: (arg: { name: string }) => LocalizedString
+	/**
+	 * No text could be read from {name}
+	 */
+	documentEmpty: (arg: { name: string }) => LocalizedString
+	/**
+	 * This PDF looks scanned
+	 */
+	documentLooksScanned: () => LocalizedString
+	/**
+	 * Most of this PDF is images
+	 */
+	documentMostlyImages: () => LocalizedString
+	/**
+	 * Send the pages as images
+	 */
+	documentPagesAsImages: () => LocalizedString
+	/**
+	 * There is no text to extract, only pictures of it. A vision model can read the pages directly, up to {max} of them. Turn on OCR in Settings to read them as text instead.
+	 */
+	documentPagesAsImagesHelp: (arg: { max: number }) => LocalizedString
+	/**
+	 * Documents
+	 */
+	documentsTitle: () => LocalizedString
+	/**
+	 * Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation. Files are read in your browser and never uploaded.
+	 */
+	documentsDescription: () => LocalizedString
+	/**
+	 * Read attached documents
+	 */
+	documentsToggle: () => LocalizedString
+	/**
+	 * Supports PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text. Turned off, the reader is never downloaded and documents cannot be attached.
+	 */
+	documentsHelp: () => LocalizedString
+	/**
+	 * Read text inside images (OCR)
+	 */
+	documentOcrToggle: () => LocalizedString
+	/**
+	 * For scans and pictures of text. It is slow, a few seconds per page, and the result is approximate: expect tables and columns to come out flattened. On first use it downloads an OCR engine and its language data, from a public CDN unless this instance hosts them itself.
+	 */
+	documentOcrHelp: () => LocalizedString
+	/**
+	 * OCR language
+	 */
+	documentOcrLanguage: () => LocalizedString
+	/**
+	 * Tesseract language codes, for example eng, fra, deu. Combine them with a plus sign: eng+fra. Each language is a separate download.
+	 */
+	documentOcrLanguageHelp: () => LocalizedString
 	/**
 	 * Delete knowledge
 	 */

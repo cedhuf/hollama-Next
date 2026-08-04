@@ -4,6 +4,7 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
+	import { documentsDisabledByInstance } from '$lib/documents';
 	import { settingsStore } from '$lib/localStorage';
 	import { searchConfig } from '$lib/search';
 	import { webFetchConfig } from '$lib/webFetch';
@@ -163,6 +164,32 @@
 			bind:checked={$settingsStore.interactiveChoices}
 		/>
 	</SettingsSection>
+
+	{#if !documentsDisabledByInstance}
+		<SettingsSection title={$LL.documentsTitle()} description={$LL.documentsDescription()} card>
+			<FieldCheckbox label={$LL.documentsToggle()} bind:checked={$settingsStore.documentsEnabled} />
+			<SettingsHint>{$LL.documentsHelp()}</SettingsHint>
+
+			{#if $settingsStore.documentsEnabled}
+				<FieldCheckbox label={$LL.documentOcrToggle()} bind:checked={$settingsStore.documentOcr} />
+				<!-- The disclaimer is the point of this block: OCR is the one part of
+				     document reading that is slow, approximate, and, unless the instance
+				     hosts the engine itself, fetched from elsewhere on first use. -->
+				<SettingsHint>{$LL.documentOcrHelp()}</SettingsHint>
+
+				{#if $settingsStore.documentOcr}
+					<SettingsField label={$LL.documentOcrLanguage()} hint={$LL.documentOcrLanguageHelp()}>
+						<input
+							class="settings-field"
+							bind:value={$settingsStore.documentOcrLanguage}
+							placeholder="eng"
+							spellcheck="false"
+						/>
+					</SettingsField>
+				{/if}
+			{/if}
+		</SettingsSection>
+	{/if}
 
 	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()} card>
 		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />

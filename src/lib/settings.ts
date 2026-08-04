@@ -89,6 +89,12 @@ export interface Settings {
 	showMessageTimestamps: boolean;
 	/** Fade the messages a compaction has summarised, so the live context reads apart. */
 	fadeCompactedMessages: boolean;
+	/** Read attached files (PDF, Word, spreadsheets) into the conversation. */
+	documentsEnabled: boolean;
+	/** Run OCR on the pictures inside those files. Off: it is slow and fetches an engine. */
+	documentOcr: boolean;
+	/** Tesseract language code(s) for OCR, e.g. `eng` or `eng+fra`. */
+	documentOcrLanguage: string;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
 	userLanguage: Locales | null;
@@ -144,6 +150,9 @@ export const DEFAULT_SETTINGS: Settings = {
 	accentUserMessages: true,
 	showMessageTimestamps: true,
 	fadeCompactedMessages: true,
+	documentsEnabled: true,
+	documentOcr: false,
+	documentOcrLanguage: 'eng',
 	themeMode: 'system',
 	themeStyle: 'classic',
 	userLanguage: null,

@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Brain, ChevronLeft, ChevronRight, Image, Paperclip, Plus, Search } from '@lucide/svelte';
+	import {
+		Brain,
+		ChevronLeft,
+		ChevronRight,
+		FileText,
+		Image,
+		Paperclip,
+		Plus,
+		Search
+	} from '@lucide/svelte';
 	import { Command } from 'bits-ui';
 	import { tick } from 'svelte';
 
@@ -27,11 +36,20 @@
 	interface Props {
 		/** Knowledge not already attached. */
 		knowledge: Knowledge[];
+		/** False when the instance or the user has turned document reading off. */
+		documentsAvailable?: boolean;
 		onPickKnowledge: (knowledge: Knowledge) => void;
 		onPickImages: () => void;
+		onPickDocuments: () => void;
 	}
 
-	let { knowledge, onPickKnowledge, onPickImages }: Props = $props();
+	let {
+		knowledge,
+		documentsAvailable = true,
+		onPickKnowledge,
+		onPickImages,
+		onPickDocuments
+	}: Props = $props();
 
 	let open = $state(false);
 	let view = $state<'root' | 'knowledge'>('root');
@@ -60,6 +78,11 @@
 	function pickImages() {
 		open = false;
 		onPickImages();
+	}
+
+	function pickDocuments() {
+		open = false;
+		onPickDocuments();
 	}
 
 	function newKnowledge() {
@@ -91,6 +114,18 @@
 			<Image class="h-4 w-4 shrink-0 text-muted" />
 			{$LL.attachImage()}
 		</button>
+
+		{#if documentsAvailable}
+			<button
+				type="button"
+				onclick={pickDocuments}
+				data-testid="add-document"
+				class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+			>
+				<FileText class="h-4 w-4 shrink-0 text-muted" />
+				{$LL.attachDocument()}
+			</button>
+		{/if}
 
 		<button
 			type="button"

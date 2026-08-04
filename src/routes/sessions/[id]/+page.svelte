@@ -27,11 +27,7 @@
 	import { formatCurrentDateTime } from '$lib/currentDate';
 	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
-	import {
-		imagesPayload,
-		knowledgeContextMessage,
-		type KnowledgeAttachment
-	} from '$lib/promptAttachments';
+	import { contextMessages, imagesPayload } from '$lib/promptAttachments';
 	import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 	import { buildSearchContext, parseRouterDecision, searchConfig } from '$lib/search';
 	import {
@@ -262,12 +258,8 @@
 				editor.interactiveChoices = pending.interactiveChoices;
 			if (pending.sendCurrentDate !== undefined) editor.sendCurrentDate = pending.sendCurrentDate;
 
-			const knowledgeMessages = pending.attachments
-				.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
-				.map((a) => knowledgeContextMessage(a.knowledge!));
-			if (knowledgeMessages.length) {
-				session.messages = [...session.messages, ...knowledgeMessages];
-			}
+			const context = contextMessages(pending.attachments);
+			if (context.length) session.messages = [...session.messages, ...context];
 
 			const images = imagesPayload(pending.attachments);
 			await tick();

@@ -12,8 +12,8 @@ otherwise. Anything an admin can share or lock is noted on the page for that fea
 ## Chat
 
 Text, vision and reasoning models with streamed replies. Markdown with syntax highlighting,
-KaTeX maths and copyable code blocks. Attach knowledge and images from the composer's _Add
-context_ menu, each shown as a removable pill. Edit and
+KaTeX maths and copyable code blocks. Attach knowledge, images and documents from the composer's
+_Add context_ menu, each shown as a removable pill. Edit and
 retry messages; copy a message, a code block or a whole conversation as JSON or Markdown.
 
 ## Tools

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, X } from '@lucide/svelte';
+	import { Brain, FileText, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { attachmentLabel, type Attachment } from '$lib/promptAttachments';
@@ -40,11 +40,23 @@
 			class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-shade-2 text-muted"
 			aria-hidden="true"
 		>
-			<Brain class="h-3 w-3" />
+			{#if attachment.type === 'document'}
+				<FileText class="h-3 w-3" />
+			{:else}
+				<Brain class="h-3 w-3" />
+			{/if}
 		</span>
 	{/if}
 
 	<span class="truncate" data-testid="attachment-name">{attachmentLabel(attachment)}</span>
+
+	{#if attachment.type === 'document' && attachment.pages}
+		<!-- The one number worth carrying: how much of the context this will take is
+		     the question people actually have about an attached document. -->
+		<span class="shrink-0 tabular-nums text-muted">
+			{$LL.pageCount({ count: attachment.pages })}
+		</span>
+	{/if}
 
 	{#if onRemove}
 		<button

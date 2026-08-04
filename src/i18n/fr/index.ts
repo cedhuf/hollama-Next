@@ -85,6 +85,27 @@ const fr = extendDictionary(en, {
 	remove: 'Retirer',
 	back: 'Retour',
 	addContext: 'Ajouter du contexte',
+	attachDocument: 'Joindre un document',
+	pageCount: '{count:number} page{{s}}',
+	documentFailed: '{name:string} n’a pas pu être lu',
+	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',
+	documentLooksScanned: 'Ce PDF semble être un scan',
+	documentMostlyImages: 'Ce PDF est presque entièrement en images',
+	documentPagesAsImages: 'Envoyer les pages en images',
+	documentPagesAsImagesHelp:
+		'Il n’y a pas de texte à extraire, seulement des images de texte. Un modèle de vision peut lire les pages directement, jusqu’à {max:number}. Activez l’OCR dans les réglages pour les lire en texte à la place.',
+	documentsTitle: 'Documents',
+	documentsDescription:
+		'Joignez un PDF, un fichier Word ou un tableur et son texte rejoint la conversation. Les fichiers sont lus dans votre navigateur et ne sont jamais téléversés.',
+	documentsToggle: 'Lire les documents joints',
+	documentsHelp:
+		'Prend en charge PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown et texte brut. Désactivé, le lecteur n’est jamais téléchargé et les documents ne peuvent pas être joints.',
+	documentOcrToggle: 'Lire le texte dans les images (OCR)',
+	documentOcrHelp:
+		'Pour les scans et les images de texte. C’est lent, quelques secondes par page, et le résultat est approximatif : les tableaux et les colonnes ressortent aplatis. Au premier usage, un moteur OCR et ses données de langue sont téléchargés, depuis un CDN public sauf si cette instance les héberge elle-même.',
+	documentOcrLanguage: 'Langue de l’OCR',
+	documentOcrLanguageHelp:
+		'Codes de langue Tesseract, par exemple eng, fra, deu. Combinez-les avec un plus : eng+fra. Chaque langue est un téléchargement distinct.',
 	downloadModel: 'Télécharger le modèle',
 	edit: 'Éditer',
 	emptyKnowledge: 'Aucune connaissance',

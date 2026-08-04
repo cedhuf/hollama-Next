@@ -17,11 +17,10 @@
 	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
 	import { serversStore } from '$lib/localStorage';
 	import {
+		contextMessages,
 		imagesPayload,
-		knowledgeContextMessage,
 		type Attachment,
-		type ImageAttachment,
-		type KnowledgeAttachment
+		type ImageAttachment
 	} from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
@@ -316,12 +315,8 @@
 		}
 		editor.prompt = unescapeSlash(editor.prompt ?? '');
 
-		const knowledgeMessages = attachments
-			.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
-			.map((a) => knowledgeContextMessage(a.knowledge!));
-		if (knowledgeMessages.length) {
-			session.messages = [...session.messages, ...knowledgeMessages];
-		}
+		const context = contextMessages(attachments);
+		if (context.length) session.messages = [...session.messages, ...context];
 
 		const images = imagesPayload(attachments);
 		handleSubmit(images.length ? images : undefined);

@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+  # Its install script fetches the Node-side OCR core, which we never use: the
+  # only Tesseract here is the WebAssembly one, and it runs in the browser.
+  tesseract.js: false

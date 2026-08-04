@@ -56,7 +56,8 @@ Build characters, a coach, a tutor, a companion, each with its own avatar, perso
 
 - Text, vision and reasoning models, with streamed replies
 - Markdown with syntax highlighting, KaTeX maths, and copyable code blocks
-- Attach **knowledge** and **images** from one _Add context_ menu in the composer, on the home screen and in any conversation. Whatever you attach shows up as the same removable pill
+- Attach **knowledge**, **images** and **documents** from one _Add context_ menu in the composer, on the home screen and in any conversation. Whatever you attach shows up as the same removable pill
+- **Documents** PDF, Word, PowerPoint, spreadsheets, OpenDocument, EPUB, RTF and the plain text formats, read **in your browser** and never uploaded, even in server mode. Optional OCR for scans, off by default and hostable offline, and a fallback that sends a scanned PDF's pages to a vision model instead. Removable instance-wide with one variable
 - Edit and retry messages; copy a message, a code block, or a whole conversation (JSON or Markdown)
 - **Web search** [degoog](https://github.com/degoog-org/degoog) or SearXNG, toggled per message, with an optional _let the model decide_ mode and a live status. Configurable from the GUI, lockable instance-wide via env, shareable by an admin
 - **Web fetch** paste a link and the model reads the page itself, in full, rather than answering from search snippets. Toggled per message, capped in pages and characters, and switchable instance-wide by an admin

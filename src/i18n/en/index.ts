@@ -72,6 +72,27 @@ const en = {
 	remove: 'Remove',
 	back: 'Back',
 	addContext: 'Add context',
+	attachDocument: 'Attach document',
+	pageCount: '{count:number} {{page|pages}}',
+	documentFailed: '{name:string} could not be read',
+	documentEmpty: 'No text could be read from {name:string}',
+	documentLooksScanned: 'This PDF looks scanned',
+	documentMostlyImages: 'Most of this PDF is images',
+	documentPagesAsImages: 'Send the pages as images',
+	documentPagesAsImagesHelp:
+		'There is no text to extract, only pictures of it. A vision model can read the pages directly, up to {max:number} of them. Turn on OCR in Settings to read them as text instead.',
+	documentsTitle: 'Documents',
+	documentsDescription:
+		'Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation. Files are read in your browser and never uploaded.',
+	documentsToggle: 'Read attached documents',
+	documentsHelp:
+		'Supports PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text. Turned off, the reader is never downloaded and documents cannot be attached.',
+	documentOcrToggle: 'Read text inside images (OCR)',
+	documentOcrHelp:
+		'For scans and pictures of text. It is slow, a few seconds per page, and the result is approximate: expect tables and columns to come out flattened. On first use it downloads an OCR engine and its language data, from a public CDN unless this instance hosts them itself.',
+	documentOcrLanguage: 'OCR language',
+	documentOcrLanguageHelp:
+		'Tesseract language codes, for example eng, fra, deu. Combine them with a plus sign: eng+fra. Each language is a separate download.',
 	deleteKnowledge: 'Delete knowledge',
 	deleteServer: 'Delete server',
 	deleteSession: 'Delete session',

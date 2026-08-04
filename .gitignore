@@ -16,5 +16,9 @@ tests/*-snapshots/
 /ai/models
 /sessions/*.json
 
+# Copied out of node_modules by `prepare`, so the pdf.js worker is served from
+# our own origin instead of a CDN. A build artifact, not source.
+/static/vendor
+
 # Local-only, kept out of the repo (editor configs, personal infra, wrangler cache)
 /_local

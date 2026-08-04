@@ -6,7 +6,7 @@
 	"description": "A minimal LLM chat app that runs entirely in your browser",
 	"packageManager": "pnpm@11.5.2",
 	"scripts": {
-		"prepare": "svelte-kit sync",
+		"prepare": "svelte-kit sync && node scripts/copy-pdf-worker.mjs",
 		"dev": "concurrently \"typesafe-i18n\" \"vite dev --host\"",
 		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
@@ -90,6 +90,8 @@
 		"url": "https://fernando.is"
 	},
 	"dependencies": {
-		"@auth/sveltekit": "^1.11.3"
+		"@auth/sveltekit": "^1.11.3",
+		"officeparser": "7.5.1",
+		"pdfjs-dist": "6.1.200"
 	}
 }
