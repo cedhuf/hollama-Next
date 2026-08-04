@@ -2,6 +2,7 @@ import { derived, writable } from 'svelte/store';
 
 import { env } from '$env/dynamic/public';
 import { settingsStore } from '$lib/localStorage';
+import { DEFAULT_SETTINGS } from '$lib/settings';
 
 const isServer = env.PUBLIC_MODE === 'server';
 
@@ -14,6 +15,20 @@ export interface ChatDefaultsView {
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: { generateTitlesWithAI: boolean; titleModel: string; titleServerId: string };
+	};
+	compact: {
+		compactModel: string;
+		compactServerId: string;
+		autoCompact: boolean;
+		compactThreshold: number;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: {
+			compactModel: string;
+			compactServerId: string;
+			autoCompact: boolean;
+			compactThreshold: number;
+		};
 	};
 }
 
@@ -47,6 +62,20 @@ export const chatDefaultsConfig = derived(
 				editable: true,
 				source: 'user',
 				admin: { generateTitlesWithAI: false, titleModel: '', titleServerId: '' }
+			},
+			compact: {
+				compactModel: $s.compactModel ?? '',
+				compactServerId: '',
+				autoCompact: $s.autoCompact,
+				compactThreshold: $s.compactThreshold,
+				editable: true,
+				source: 'user',
+				admin: {
+					compactModel: '',
+					compactServerId: '',
+					autoCompact: false,
+					compactThreshold: DEFAULT_SETTINGS.compactThreshold
+				}
 			}
 		};
 
@@ -72,6 +101,22 @@ export const chatDefaultsConfig = derived(
 					}
 				: { ...$srv.title, ...$srv.title.admin };
 
-		return { defaultModel: dm, title: t };
+		// Compaction: same three states. "Own" here means the user picked a model of
+		// their own — the threshold and the auto toggle stay theirs either way once
+		// sharing is overridable, since those are about their patience, not policy.
+		const c = !$srv.compact.editable
+			? $srv.compact
+			: $s.compactModel
+				? {
+						...$srv.compact,
+						compactModel: $s.compactModel,
+						compactServerId: '',
+						autoCompact: $s.autoCompact,
+						compactThreshold: $s.compactThreshold,
+						source: 'user' as const
+					}
+				: { ...$srv.compact, ...$srv.compact.admin };
+
+		return { defaultModel: dm, title: t, compact: c };
 	}
 );

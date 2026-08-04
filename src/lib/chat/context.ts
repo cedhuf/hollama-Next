@@ -1,0 +1,134 @@
+import type { Message, Session } from '$lib/sessions';
+
+/**
+ * How heavy a conversation is, and how much of the model's context it uses.
+ *
+ * There is no tokenizer in the browser — shipping one would mean a megabyte of
+ * vocabulary per model family, for a number that only has to be right enough to
+ * colour an icon and to decide when to compact. So this estimates from character
+ * counts and says so everywhere it is shown: the tooltip labels the figure as an
+ * estimate rather than presenting it as what the provider will bill.
+ */
+
+/**
+ * Characters per token.
+ *
+ * ~4 for English, ~3 for French and other accented languages (accents and
+ * agglutinated words split more). 3.7 sits between the two: it overestimates a
+ * little on English prose, which is the safe direction — compacting slightly
+ * early costs one summary, compacting late costs a refused request.
+ */
+const CHARS_PER_TOKEN = 3.7;
+
+/** Role framing, separators and the message envelope every provider adds. */
+const TOKENS_PER_MESSAGE = 4;
+
+/**
+ * An attached image, flat.
+ *
+ * Vision models bill images by tile, not by byte, so the base64 length says
+ * nothing useful. ~1100 is the common cost of one full-resolution tile-grid
+ * image across OpenAI-compatible providers.
+ */
+const TOKENS_PER_IMAGE = 1100;
+
+export function estimateTokens(text: string): number {
+	if (!text) return 0;
+	return Math.ceil(text.length / CHARS_PER_TOKEN);
+}
+
+export function estimateMessageTokens(message: Message): number {
+	let tokens = TOKENS_PER_MESSAGE + estimateTokens(message.content ?? '');
+	// Reasoning is sent back on some providers and, more to the point, it is what
+	// makes a conversation heavy — leaving it out would report a reassuring number
+	// about a context that is nearly full.
+	tokens += estimateTokens(message.reasoning ?? '');
+	tokens += (message.images?.length ?? 0) * TOKENS_PER_IMAGE;
+	if (message.knowledge?.content) tokens += estimateTokens(message.knowledge.content);
+	return tokens;
+}
+
+/**
+ * Index of the last compaction marker, or `-1` when the conversation has never
+ * been compacted. Everything before it is history the model no longer sees.
+ */
+export function lastCompactionIndex(messages: Message[]): number {
+	for (let i = messages.length - 1; i >= 0; i--) {
+		if (messages[i].compaction) return i;
+	}
+	return -1;
+}
+
+/**
+ * The messages actually sent to the model: the last compaction summary, then
+ * everything after it. Without a marker, the whole conversation — which is what
+ * every session did before compaction existed.
+ */
+export function messagesInContext(messages: Message[]): Message[] {
+	const marker = lastCompactionIndex(messages);
+	return marker === -1 ? messages : messages.slice(marker);
+}
+
+export type ContextLevel = 'ok' | 'warn' | 'high';
+
+export interface ContextUsage {
+	/** Estimated tokens in what would be sent right now. */
+	tokens: number;
+	/** The ceiling used for the ratio. */
+	limit: number;
+	/** Where the ceiling comes from — the tooltip words itself differently for each. */
+	limitSource: 'model' | 'threshold';
+	/** `tokens / limit`, clamped to 1. */
+	ratio: number;
+	level: ContextLevel;
+	/** Messages currently in context (excluding the system prompt). */
+	messageCount: number;
+	/** Messages already summarised away by earlier compactions. */
+	compactedCount: number;
+}
+
+/**
+ * The ceiling to measure against.
+ *
+ * `num_ctx` is the only context size the app actually knows: Ollama takes it per
+ * request, so when the user set it, it is the truth. Every other provider keeps
+ * its window to itself — some (Infomaniak today) do not even publish it — so the
+ * fallback is the user's own threshold from Settings. That is the whole reason
+ * the threshold is configurable rather than derived.
+ */
+export function resolveContextLimit(
+	session: Session,
+	threshold: number
+): { limit: number; limitSource: 'model' | 'threshold' } {
+	const numCtx = session.options?.num_ctx;
+	if (typeof numCtx === 'number' && numCtx > 0) return { limit: numCtx, limitSource: 'model' };
+	return { limit: threshold, limitSource: 'threshold' };
+}
+
+export function contextUsage(session: Session, threshold: number): ContextUsage {
+	const marker = lastCompactionIndex(session.messages);
+	const active = messagesInContext(session.messages);
+
+	let tokens = estimateTokens(session.systemPrompt?.content ?? '');
+	for (const message of active) tokens += estimateMessageTokens(message);
+
+	const { limit, limitSource } = resolveContextLimit(session, threshold);
+	const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0;
+
+	return {
+		tokens,
+		limit,
+		limitSource,
+		ratio,
+		level: ratio >= 0.85 ? 'high' : ratio >= 0.6 ? 'warn' : 'ok',
+		messageCount: active.length - (marker === -1 ? 0 : 1),
+		compactedCount: marker === -1 ? 0 : marker
+	};
+}
+
+/** `12 400` → `12.4k`. Compact enough to sit next to the icon without wrapping. */
+export function formatTokens(tokens: number): string {
+	if (tokens < 1000) return String(tokens);
+	if (tokens < 10_000) return `${(tokens / 1000).toFixed(1)}k`;
+	return `${Math.round(tokens / 1000)}k`;
+}

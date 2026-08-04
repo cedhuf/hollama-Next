@@ -6,6 +6,7 @@
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
 	import Article from './Article.svelte';
+	import CompactionDivider from './CompactionDivider.svelte';
 
 	interface Props {
 		session: Session;
@@ -61,6 +62,15 @@
 		session.messages = session.messages.filter((m) => m !== message);
 		saveSession(session);
 	}
+
+	/**
+	 * Undo a compaction: drop the marker and the model sees the whole history
+	 * again. Nothing else has to be restored, because nothing was removed.
+	 */
+	function handleUndoCompaction(message: Message) {
+		session.messages = session.messages.filter((m) => m !== message);
+		saveSession(session);
+	}
 </script>
 
 {#if editor.isNewSession}
@@ -68,7 +78,10 @@
 {/if}
 
 {#each session.messages as message, i (session.id + i)}
-	{#if message !== pendingChoice}
+	{#if message.compaction}
+		<!-- Not a turn: the boundary where the context above was summarised away. -->
+		<CompactionDivider {message} onUndo={() => handleUndoCompaction(message)} />
+	{:else if message !== pendingChoice}
 		{#key message.role}
 			<Article
 				{message}

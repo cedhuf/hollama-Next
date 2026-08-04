@@ -65,6 +65,8 @@
 	let defaultModelValue = $state('');
 	let titleSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let titleShareEnabled = $state(false);
+	let compactSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let compactShareEnabled = $state(false);
 
 	const sharedModelNames = $derived(
 		Array.from(new Set(servers.flatMap((s) => s.sharedModels))).sort((a, b) =>
@@ -95,6 +97,15 @@
 	function syncTitleShare() {
 		titleSharing = titleShareEnabled ? (titleSharing === 'off' ? 'locked' : titleSharing) : 'off';
 		saveTitle();
+	}
+
+	function syncCompactShare() {
+		compactSharing = compactShareEnabled
+			? compactSharing === 'off'
+				? 'locked'
+				: compactSharing
+			: 'off';
+		saveCompact();
 	}
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
@@ -130,6 +141,8 @@
 			defaultModelValue = config.defaultModel ?? '';
 			titleSharing = config.titleSharing ?? 'off';
 			titleShareEnabled = titleSharing !== 'off';
+			compactSharing = config.compactSharing ?? 'off';
+			compactShareEnabled = compactSharing !== 'off';
 			servers = serverList as SystemServer[];
 			users = userList;
 		} finally {
@@ -218,6 +231,17 @@
 		});
 	}
 
+	async function saveCompact() {
+		const model = $settingsStore.models.find((m) => m.name === $settingsStore.compactModel);
+		await api('/api/admin/config', 'PUT', {
+			compactSharing,
+			compactModel: $settingsStore.compactModel ?? '',
+			compactServerId: model?.serverId ?? '',
+			compactAuto: $settingsStore.autoCompact,
+			compactThreshold: $settingsStore.compactThreshold
+		});
+	}
+
 	onMount(async () => {
 		await load();
 		// Refresh the snapshots from the admin's current Chat config on open, so
@@ -225,6 +249,7 @@
 		if (shareEnabled) saveSearch();
 		if (promptsShareEnabled) saveSystemPrompts();
 		if (titleShareEnabled) saveTitle();
+		if (compactShareEnabled) saveCompact();
 	});
 
 	async function toggleAllowUserKeys() {
@@ -345,6 +370,28 @@
 			<span class="text-xs text-muted">
 				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
 					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
+					: $LL.off()}
+			</span>
+		{/if}
+	</SettingsSection>
+
+	<!-- Compaction sharing -->
+	<SettingsSection
+		title={$LL.compactionSharing()}
+		description={$LL.compactionSharingDescription()}
+		card
+	>
+		<FieldCheckbox
+			label={$LL.shareCompaction()}
+			bind:checked={compactShareEnabled}
+			onChange={syncCompactShare}
+		/>
+		{#if compactShareEnabled}
+			<Select bind:value={compactSharing} options={sharingOptions} onChange={saveCompact} />
+			<span class="text-xs text-muted">
+				{$LL.sharingLabel()}: {$settingsStore.compactModel || $LL.compactModelOwn()}
+				· {$settingsStore.autoCompact
+					? `${$LL.on()} — ${$settingsStore.compactThreshold.toLocaleString()}`
 					: $LL.off()}
 			</span>
 		{/if}

@@ -10,6 +10,9 @@
 	import { page } from '$app/state';
 	import { askChoicesToText, formatAskAnswer, parseAskBlock } from '$lib/askChoice';
 	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
+	import type { CommandName } from '$lib/chat/commands';
+	import { compactSession } from '$lib/chat/compact';
+	import { contextUsage, messagesInContext } from '$lib/chat/context';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import { generateTitle } from '$lib/chat/title';
@@ -396,9 +399,27 @@
 		if (!server) throw new Error('Server not found');
 		if (!session.model?.name) throw new Error('No model');
 
-		let chatMessages = session.systemPrompt.content
-			? [session.systemPrompt, ...messages]
-			: messages;
+		// Compaction acts here and nowhere else: the conversation keeps every message
+		// it ever had, and only what leaves for the model is cut back to the last
+		// summary. Without a marker this returns the array untouched, which is what
+		// every conversation written before compaction existed gets.
+		const inContext = messagesInContext(messages);
+
+		// A stored marker holds the bare summary; the instructions that tell the model
+		// how to treat it are put around it here, so they follow the current prompt
+		// override rather than whatever it said the day the summary was written.
+		const framed = inContext.map((message) =>
+			message.compaction
+				? {
+						...message,
+						content: resolvePrompt('compactContext', $settingsStore.promptOverrides, {
+							summary: message.content
+						})
+					}
+				: message
+		);
+
+		let chatMessages = session.systemPrompt.content ? [session.systemPrompt, ...framed] : framed;
 
 		// Interactive quick-choice buttons: teach the model the <ask> protocol.
 		if (editor.interactiveChoices) {
@@ -421,7 +442,7 @@
 		// search: given an address, looking it up by keyword is the wrong move —
 		// the model would answer from snippets about the page instead of the page.
 		const linkedUrls = editor.webFetch
-			? extractUrls(messages.filter((m) => m.role === 'user').at(-1)?.content ?? '')
+			? extractUrls(inContext.filter((m) => m.role === 'user').at(-1)?.content ?? '')
 			: [];
 
 		if (linkedUrls.length && $webFetchConfig.available) {
@@ -456,7 +477,7 @@
 		// decides whether (and what) to search; otherwise we always search the
 		// latest message.
 		if (!linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
-			const lastUserMessage = messages.filter((m) => m.role === 'user').at(-1);
+			const lastUserMessage = inContext.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
 
 			// In auto mode the model first decides whether (and what) to search. This
@@ -476,7 +497,7 @@
 					datetime: formatCurrentDateTime()
 				});
 
-				const recentTurns = messages
+				const recentTurns = inContext
 					.filter((m) => m.role === 'user' || m.role === 'assistant')
 					.slice(-6)
 					.map((m) => ({
@@ -715,6 +736,7 @@
 			await scrollToBottom();
 
 			await maybeGenerateTitle();
+			await maybeAutoCompact();
 		} catch (error) {
 			const typedError = error instanceof Error ? error : new Error(String(error));
 			if (typedError.name === 'AbortError') return; // User aborted the request
@@ -739,6 +761,77 @@
 			session.updatedAt = new Date().toISOString();
 			saveSession(session);
 		}
+	}
+
+	// --- compaction -----------------------------------------------------------
+
+	const compactConfig = $derived($chatDefaultsConfig.compact);
+	let isCompacting = $state(false);
+
+	/**
+	 * There has to be enough conversation for a summary to be worth a request —
+	 * below a handful of messages, compacting costs more context than it frees.
+	 */
+	const canCompact = $derived(
+		!isCompacting &&
+			!editor.isCompletionInProgress &&
+			messagesInContext(session.messages).length >= 4
+	);
+
+	/**
+	 * Compact now, and say what happened.
+	 *
+	 * Loud on failure on purpose: the user asked for the context to be shortened,
+	 * and if it was not, the next message goes out full-length — silently letting
+	 * them believe otherwise is how a conversation hits a provider's wall.
+	 */
+	async function runCompaction(automatic = false): Promise<boolean> {
+		if (isCompacting) return false;
+		isCompacting = true;
+		const toastId = toast.loading($LL.compacting());
+
+		try {
+			const { marker, replacedCount } = await compactSession(session, { automatic });
+			session.messages = [...session.messages, marker];
+			session.updatedAt = new Date().toISOString();
+			saveSession(session);
+			await scrollToBottom(true);
+			toast.success($LL.compactedToast({ count: replacedCount }), { id: toastId });
+			return true;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			toast.error($LL.compactFailed(), { id: toastId, description: message });
+			return false;
+		} finally {
+			isCompacting = false;
+		}
+	}
+
+	/**
+	 * Automatic compaction, once a turn has landed rather than before one goes
+	 * out: the user gets their answer first, and the wait for the summary falls in
+	 * the gap while they read it instead of in front of their next message.
+	 *
+	 * Only fires once per crossing — the marker it appends drops the estimate back
+	 * under the threshold, so the next check is quiet again.
+	 */
+	async function maybeAutoCompact() {
+		if (!compactConfig.autoCompact || isCompacting) return;
+		const usage = contextUsage(session, compactConfig.compactThreshold);
+		if (usage.ratio < 1) return;
+		await runCompaction(true);
+	}
+
+	function runCommand(name: CommandName) {
+		if (name !== 'compact') return;
+		// The menu hides `/compact` when there is nothing to compact, but the name
+		// can still be typed in full — so the refusal lives here rather than only in
+		// what the autocomplete offers.
+		if (!canCompact) {
+			toast.info($LL.nothingToCompact());
+			return;
+		}
+		void runCompaction();
 	}
 
 	function stopCompletion() {
@@ -956,6 +1049,9 @@
 			{scrollToBottom}
 			{pendingChoice}
 			{chooseAnswer}
+			{runCommand}
+			{canCompact}
+			contextThreshold={compactConfig.compactThreshold}
 		/>
 	</div>
 </div>

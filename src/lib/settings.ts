@@ -33,6 +33,18 @@ export interface Settings {
 	defaultModel: string | null;
 	generateTitlesWithAI: boolean;
 	titleModel: string | null;
+	/** Model that writes compaction summaries. Empty = the conversation's own model. */
+	compactModel: string | null;
+	/** Compact on its own once the conversation crosses `compactThreshold`. */
+	autoCompact: boolean;
+	/**
+	 * Tokens at which a conversation counts as full.
+	 *
+	 * Also the ceiling the load indicator measures against whenever the real one
+	 * is unknown — which is most providers, since only Ollama's `num_ctx` is
+	 * something the app is told.
+	 */
+	compactThreshold: number;
 	webSearchByDefault: boolean;
 	webSearchAuto: boolean;
 	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
@@ -93,6 +105,9 @@ export const DEFAULT_SETTINGS: Settings = {
 	defaultModel: null,
 	generateTitlesWithAI: false,
 	titleModel: null,
+	compactModel: null,
+	autoCompact: false,
+	compactThreshold: 80000,
 	webSearchByDefault: false,
 	webSearchAuto: false,
 	webFetchEnabled: true,

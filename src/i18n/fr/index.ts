@@ -479,7 +479,50 @@ const fr = extendDictionary(en, {
 	shortcutExpandedNote:
 		"Dans l'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne — pour écrire un long message sans qu'il parte à chaque retour.",
 	shortcutMoveBetweenTabs: 'Naviguer entre les onglets',
-	close: 'Fermer'
+	close: 'Fermer',
+
+	// Charge du contexte et compaction
+	contextLoad: 'Charge de la conversation',
+	contextTokensOfLimit: '~{tokens:string} tokens sur {limit:string} ({percent:number} %)',
+	contextLimitFromModel: 'Fenêtre de contexte du modèle (num_ctx)',
+	contextLimitFromThreshold: 'Palier défini dans Réglages → Discussion',
+	contextMessagesInContext: '{count:number} {{message|messages}} dans le contexte',
+	contextMessagesCompacted: '{count:number} {{message|messages}} antérieur{{s}} résumé{{s}}',
+	contextEstimateNote: 'Estimation sur la longueur du texte, pas le décompte du fournisseur.',
+	contextCompacted: '{count:number} {{message|messages}} résumé{{s}}',
+	compactedAutomatically: 'Compacté automatiquement',
+	compactedManually: 'Compacté à la demande',
+	undoCompaction: 'Annuler',
+	undoCompactionHelp: 'Retirer ce résumé et rendre tout l’historique au modèle',
+	compacting: 'Résumé de la conversation…',
+	compactedToast: 'Contexte compacté — {count:number} {{message|messages}} résumé{{s}}',
+	compactFailed: 'La conversation n’a pas pu être compactée',
+	slashCommands: 'Commandes',
+	slashRun: 'Lancer',
+	compactCommandDescription: 'Résumer la conversation pour libérer du contexte',
+	nothingToCompact: 'Cette conversation est trop courte pour valoir une compaction',
+	shortcutsCommands: 'Commandes',
+	shortcutCompleteCommand: 'Compléter',
+	shortcutCommandsNote:
+		'Tapez / au début d’un message vide pour voir les commandes. Un message qui commence vraiment par une barre oblique s’écrit //, et tout le reste — un chemin, une date — part tel quel.',
+
+	// Réglages → Discussion → Compaction
+	compaction: 'Compaction',
+	compactionDescription:
+		'Résume le début d’une conversation pour qu’elle continue de tenir dans la fenêtre de contexte. Rien n’est supprimé : le résumé ne remplace ces messages que dans ce qui est envoyé, et reste annulable.',
+	compactModel: 'Modèle de compaction',
+	compactModelHelp:
+		'Vide = le modèle de chaque conversation. Ce que le résumé omet est perdu pour l’assistant : mieux vaut un modèle capable qu’un modèle bon marché.',
+	autoCompact: 'Compacter automatiquement',
+	autoCompactHelp: 'Résume tout seul dès qu’une conversation atteint le palier ci-dessous.',
+	compactThreshold: 'Palier (tokens)',
+	compactThresholdHelp:
+		'Sert aussi de plafond à l’indicateur de charge quand le fournisseur n’annonce pas sa fenêtre de contexte — c’est le cas de la plupart.',
+	compactModelOwn: 'modèle de la conversation',
+	compactionSharing: 'Partage de la compaction',
+	compactionSharingDescription:
+		'Partager votre modèle de compaction et votre palier avec tout le monde sur cette instance.',
+	shareCompaction: 'Partager les réglages de compaction'
 });
 
 export default fr;

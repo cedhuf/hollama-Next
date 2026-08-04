@@ -20,6 +20,19 @@
 	const dmValue = $derived($chatDefaultsConfig.defaultModel.value || undefined);
 	const titleCfg = $derived($chatDefaultsConfig.title);
 	const titleModelValue = $derived(titleCfg.titleModel || undefined);
+	const compactCfg = $derived($chatDefaultsConfig.compact);
+	const compactModelValue = $derived(compactCfg.compactModel || undefined);
+
+	/**
+	 * A threshold below a few thousand tokens would compact after every other
+	 * message, so the field refuses it rather than accepting a value that makes
+	 * the conversation unusable.
+	 */
+	function setThreshold(raw: string) {
+		const value = Number(raw);
+		if (!Number.isFinite(value) || value < 4000) return;
+		$settingsStore.compactThreshold = Math.round(value);
+	}
 
 	const spEditable = $derived($systemPromptsConfig.editable);
 	const spShared = $derived($systemPromptsConfig.shared);
@@ -113,6 +126,52 @@
 			bind:checked={$settingsStore.autoExpandReasoningBlocks}
 		/>
 		<SettingsHint>{$LL.autoExpandReasoningBlocksHelp()}</SettingsHint>
+	</SettingsSection>
+
+	<SettingsSection title={$LL.compaction()} description={$LL.compactionDescription()} card>
+		{#snippet badge()}
+			{#if !compactCfg.editable}
+				<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
+			{/if}
+		{/snippet}
+
+		{#if compactCfg.editable}
+			<SettingsField label={$LL.compactModel()}>
+				<ModelSelect
+					value={compactModelValue}
+					onSelect={(name) => ($settingsStore.compactModel = name || null)}
+				/>
+			</SettingsField>
+			<SettingsHint>{$LL.compactModelHelp()}</SettingsHint>
+
+			<FieldCheckbox label={$LL.autoCompact()} bind:checked={$settingsStore.autoCompact} />
+			<SettingsHint>{$LL.autoCompactHelp()}</SettingsHint>
+
+			<SettingsField label={$LL.compactThreshold()}>
+				<input
+					class="settings-field"
+					type="number"
+					min="4000"
+					step="1000"
+					value={$settingsStore.compactThreshold}
+					onchange={(event) => setThreshold(event.currentTarget.value)}
+				/>
+			</SettingsField>
+			<SettingsHint>{$LL.compactThresholdHelp()}</SettingsHint>
+		{:else}
+			<SettingsField label={$LL.compactModel()}>
+				<input class="settings-field" disabled value={compactCfg.compactModel || '—'} />
+			</SettingsField>
+			<SettingsField label={$LL.autoCompact()}>
+				<input
+					class="settings-field"
+					disabled
+					value={compactCfg.autoCompact
+						? `${$LL.on()} — ${compactCfg.compactThreshold.toLocaleString()}`
+						: $LL.off()}
+				/>
+			</SettingsField>
+		{/if}
 	</SettingsSection>
 
 	<SettingsSection title={$LL.systemPromptsTitle()} description={$LL.systemPromptsDescription()}>

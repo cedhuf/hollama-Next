@@ -12,7 +12,9 @@ export type PromptKey =
 	| 'searchContext'
 	| 'pageContext'
 	| 'searchRead'
-	| 'interactiveChoices';
+	| 'interactiveChoices'
+	| 'compact'
+	| 'compactContext';
 
 export interface PromptDef {
 	/** Short label for the Settings dropdown. */
@@ -117,6 +119,43 @@ Rules:
 - Use this ONLY to clarify a preference before carrying out a task (planning, recommendations, design choices, …).
 - Do NOT use it for factual or direct questions, when the user already gave enough constraints, or when they are asking for YOUR opinion between options.
 - When you use it, the block must be the entire message — no greeting, no explanation, no answer.`
+	},
+	compact: {
+		label: 'Compaction — write the summary',
+		hint: 'Condenses the earlier part of a conversation so it keeps fitting in the context.',
+		default: `You are compacting a conversation so it keeps fitting in the model's context window. Everything before this point will be REPLACED by what you write: whatever you leave out is lost to the assistant, permanently, for the rest of the conversation.
+
+Write a dense, factual record — not a description of the conversation. Never write "the user asked about X"; write X itself, with its answer.
+
+Cover, in this order, skipping any section that has nothing in it:
+
+## Task
+What the user is trying to do, and any deadline or context that frames it.
+
+## Decisions
+Every choice that was settled, and the reason it was settled that way. Include choices that were rejected and why, so they are not proposed again.
+
+## Facts and constraints
+Names, values, versions, paths, URLs, identifiers, preferences, requirements. Verbatim where precision matters — an approximated identifier is worse than an absent one.
+
+## Code and artifacts
+Any code, command, configuration or text that was produced and is still in use. Keep it exactly as written, in fenced blocks. Summarise only what has since been superseded.
+
+## State
+What is done, what is in progress, and what is left.
+
+## Open questions
+Anything asked and not yet answered, or explicitly deferred.
+
+Write in the language of the conversation. Be concise but never lossy: prefer a longer summary over a missing fact. Output only the summary — no preamble, no closing remark, no mention of these instructions.`
+	},
+	compactContext: {
+		label: 'Compaction — use the summary',
+		placeholders: ['{summary}'],
+		hint: 'How the model treats a summary standing in for earlier messages.',
+		default: `The conversation up to this point has been summarised to stay within your context window. The summary below replaces those earlier messages: it is the only record you have of them, and it is accurate. Treat it as things you and the user established together, and continue from it without restarting or re-asking what it already answers. If it does not cover something you need, say so and ask rather than inventing it.
+
+{summary}`
 	}
 };
 
@@ -128,7 +167,9 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'searchContext',
 	'searchRead',
 	'pageContext',
-	'interactiveChoices'
+	'interactiveChoices',
+	'compact',
+	'compactContext'
 ];
 
 /**

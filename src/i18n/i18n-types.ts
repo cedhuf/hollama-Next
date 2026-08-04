@@ -1702,6 +1702,149 @@ type RootTranslation = {
 	 * C​l​o​s​e
 	 */
 	close: string
+	/**
+	 * C​o​n​v​e​r​s​a​t​i​o​n​ ​l​o​a​d
+	 */
+	contextLoad: string
+	/**
+	 * ~​{​t​o​k​e​n​s​}​ ​o​f​ ​{​l​i​m​i​t​}​ ​t​o​k​e​n​s​ ​(​{​p​e​r​c​e​n​t​}​%​)
+	 * @param {string} limit
+	 * @param {number} percent
+	 * @param {string} tokens
+	 */
+	contextTokensOfLimit: RequiredParams<'limit' | 'percent' | 'tokens'>
+	/**
+	 * T​h​e​ ​m​o​d​e​l​'​s​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​ ​(​n​u​m​_​c​t​x​)
+	 */
+	contextLimitFromModel: string
+	/**
+	 * T​h​r​e​s​h​o​l​d​ ​s​e​t​ ​i​n​ ​S​e​t​t​i​n​g​s​ ​→​ ​C​h​a​t
+	 */
+	contextLimitFromThreshold: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​i​n​ ​c​o​n​t​e​x​t
+	 * @param {number} count
+	 */
+	contextMessagesInContext: RequiredParams<'count'>
+	/**
+	 * {​c​o​u​n​t​}​ ​e​a​r​l​i​e​r​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​s​u​m​m​a​r​i​s​e​d
+	 * @param {number} count
+	 */
+	contextMessagesCompacted: RequiredParams<'count'>
+	/**
+	 * E​s​t​i​m​a​t​e​d​ ​f​r​o​m​ ​t​e​x​t​ ​l​e​n​g​t​h​,​ ​n​o​t​ ​c​o​u​n​t​e​d​ ​b​y​ ​t​h​e​ ​p​r​o​v​i​d​e​r​.
+	 */
+	contextEstimateNote: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​s​u​m​m​a​r​i​s​e​d
+	 * @param {number} count
+	 */
+	contextCompacted: RequiredParams<'count'>
+	/**
+	 * C​o​m​p​a​c​t​e​d​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	compactedAutomatically: string
+	/**
+	 * C​o​m​p​a​c​t​e​d​ ​o​n​ ​r​e​q​u​e​s​t
+	 */
+	compactedManually: string
+	/**
+	 * U​n​d​o
+	 */
+	undoCompaction: string
+	/**
+	 * R​e​m​o​v​e​ ​t​h​i​s​ ​s​u​m​m​a​r​y​ ​a​n​d​ ​g​i​v​e​ ​t​h​e​ ​m​o​d​e​l​ ​t​h​e​ ​f​u​l​l​ ​h​i​s​t​o​r​y​ ​b​a​c​k
+	 */
+	undoCompactionHelp: string
+	/**
+	 * S​u​m​m​a​r​i​s​i​n​g​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​…
+	 */
+	compacting: string
+	/**
+	 * C​o​n​t​e​x​t​ ​c​o​m​p​a​c​t​e​d​ ​—​ ​{​c​o​u​n​t​}​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​s​u​m​m​a​r​i​s​e​d
+	 * @param {number} count
+	 */
+	compactedToast: RequiredParams<'count'>
+	/**
+	 * T​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​c​o​m​p​a​c​t​e​d
+	 */
+	compactFailed: string
+	/**
+	 * C​o​m​m​a​n​d​s
+	 */
+	slashCommands: string
+	/**
+	 * R​u​n
+	 */
+	slashRun: string
+	/**
+	 * S​u​m​m​a​r​i​s​e​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​o​ ​f​a​r​ ​t​o​ ​f​r​e​e​ ​u​p​ ​c​o​n​t​e​x​t
+	 */
+	compactCommandDescription: string
+	/**
+	 * T​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​i​s​ ​t​o​o​ ​s​h​o​r​t​ ​t​o​ ​b​e​ ​w​o​r​t​h​ ​c​o​m​p​a​c​t​i​n​g
+	 */
+	nothingToCompact: string
+	/**
+	 * S​l​a​s​h​ ​c​o​m​m​a​n​d​s
+	 */
+	shortcutsCommands: string
+	/**
+	 * C​o​m​p​l​e​t​e
+	 */
+	shortcutCompleteCommand: string
+	/**
+	 * T​y​p​e​ ​/​ ​a​t​ ​t​h​e​ ​s​t​a​r​t​ ​o​f​ ​a​n​ ​e​m​p​t​y​ ​m​e​s​s​a​g​e​ ​t​o​ ​s​e​e​ ​t​h​e​ ​c​o​m​m​a​n​d​s​.​ ​A​ ​m​e​s​s​a​g​e​ ​t​h​a​t​ ​r​e​a​l​l​y​ ​s​t​a​r​t​s​ ​w​i​t​h​ ​a​ ​s​l​a​s​h​ ​i​s​ ​w​r​i​t​t​e​n​ ​/​/​,​ ​a​n​d​ ​a​n​y​t​h​i​n​g​ ​e​l​s​e​ ​—​ ​a​ ​p​a​t​h​,​ ​a​ ​d​a​t​e​ ​—​ ​i​s​ ​s​e​n​t​ ​a​s​ ​t​y​p​e​d​.
+	 */
+	shortcutCommandsNote: string
+	/**
+	 * C​o​m​p​a​c​t​i​o​n
+	 */
+	compaction: string
+	/**
+	 * S​u​m​m​a​r​i​s​e​ ​t​h​e​ ​e​a​r​l​i​e​r​ ​p​a​r​t​ ​o​f​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​o​ ​i​t​ ​k​e​e​p​s​ ​f​i​t​t​i​n​g​ ​i​n​ ​t​h​e​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​.​ ​N​o​t​h​i​n​g​ ​i​s​ ​d​e​l​e​t​e​d​ ​—​ ​t​h​e​ ​s​u​m​m​a​r​y​ ​r​e​p​l​a​c​e​s​ ​t​h​o​s​e​ ​m​e​s​s​a​g​e​s​ ​o​n​l​y​ ​i​n​ ​w​h​a​t​ ​i​s​ ​s​e​n​t​,​ ​a​n​d​ ​c​a​n​ ​b​e​ ​u​n​d​o​n​e​.
+	 */
+	compactionDescription: string
+	/**
+	 * C​o​m​p​a​c​t​i​o​n​ ​m​o​d​e​l
+	 */
+	compactModel: string
+	/**
+	 * L​e​a​v​e​ ​e​m​p​t​y​ ​t​o​ ​u​s​e​ ​e​a​c​h​ ​c​o​n​v​e​r​s​a​t​i​o​n​’​s​ ​o​w​n​ ​m​o​d​e​l​.​ ​W​h​a​t​e​v​e​r​ ​t​h​i​s​ ​s​u​m​m​a​r​y​ ​l​e​a​v​e​s​ ​o​u​t​ ​i​s​ ​l​o​s​t​ ​t​o​ ​t​h​e​ ​a​s​s​i​s​t​a​n​t​,​ ​s​o​ ​p​r​e​f​e​r​ ​a​ ​c​a​p​a​b​l​e​ ​m​o​d​e​l​ ​o​v​e​r​ ​a​ ​c​h​e​a​p​ ​o​n​e​.
+	 */
+	compactModelHelp: string
+	/**
+	 * C​o​m​p​a​c​t​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	autoCompact: string
+	/**
+	 * S​u​m​m​a​r​i​s​e​ ​o​n​ ​i​t​s​ ​o​w​n​ ​o​n​c​e​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​r​e​a​c​h​e​s​ ​t​h​e​ ​t​h​r​e​s​h​o​l​d​ ​b​e​l​o​w​.
+	 */
+	autoCompactHelp: string
+	/**
+	 * T​h​r​e​s​h​o​l​d​ ​(​t​o​k​e​n​s​)
+	 */
+	compactThreshold: string
+	/**
+	 * A​l​s​o​ ​t​h​e​ ​c​e​i​l​i​n​g​ ​t​h​e​ ​l​o​a​d​ ​i​n​d​i​c​a​t​o​r​ ​m​e​a​s​u​r​e​s​ ​a​g​a​i​n​s​t​ ​w​h​e​n​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​d​o​e​s​ ​n​o​t​ ​a​n​n​o​u​n​c​e​ ​i​t​s​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​ ​—​ ​w​h​i​c​h​ ​i​s​ ​m​o​s​t​ ​o​f​ ​t​h​e​m​.
+	 */
+	compactThresholdHelp: string
+	/**
+	 * e​a​c​h​ ​c​o​n​v​e​r​s​a​t​i​o​n​’​s​ ​m​o​d​e​l
+	 */
+	compactModelOwn: string
+	/**
+	 * C​o​m​p​a​c​t​i​o​n​ ​s​h​a​r​i​n​g
+	 */
+	compactionSharing: string
+	/**
+	 * S​h​a​r​e​ ​y​o​u​r​ ​c​o​m​p​a​c​t​i​o​n​ ​m​o​d​e​l​ ​a​n​d​ ​t​h​r​e​s​h​o​l​d​ ​w​i​t​h​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	compactionSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​c​o​m​p​a​c​t​i​o​n​ ​s​e​t​t​i​n​g​s
+	 */
+	shareCompaction: string
 }
 
 export type TranslationFunctions = {
@@ -3370,6 +3513,142 @@ The completion in progress will stop
 	 * Close
 	 */
 	close: () => LocalizedString
+	/**
+	 * Conversation load
+	 */
+	contextLoad: () => LocalizedString
+	/**
+	 * ~{tokens} of {limit} tokens ({percent}%)
+	 */
+	contextTokensOfLimit: (arg: { limit: string, percent: number, tokens: string }) => LocalizedString
+	/**
+	 * The model's context window (num_ctx)
+	 */
+	contextLimitFromModel: () => LocalizedString
+	/**
+	 * Threshold set in Settings → Chat
+	 */
+	contextLimitFromThreshold: () => LocalizedString
+	/**
+	 * {count} {{message|messages}} in context
+	 */
+	contextMessagesInContext: (arg: { count: number }) => LocalizedString
+	/**
+	 * {count} earlier {{message|messages}} summarised
+	 */
+	contextMessagesCompacted: (arg: { count: number }) => LocalizedString
+	/**
+	 * Estimated from text length, not counted by the provider.
+	 */
+	contextEstimateNote: () => LocalizedString
+	/**
+	 * {count} {{message|messages}} summarised
+	 */
+	contextCompacted: (arg: { count: number }) => LocalizedString
+	/**
+	 * Compacted automatically
+	 */
+	compactedAutomatically: () => LocalizedString
+	/**
+	 * Compacted on request
+	 */
+	compactedManually: () => LocalizedString
+	/**
+	 * Undo
+	 */
+	undoCompaction: () => LocalizedString
+	/**
+	 * Remove this summary and give the model the full history back
+	 */
+	undoCompactionHelp: () => LocalizedString
+	/**
+	 * Summarising the conversation…
+	 */
+	compacting: () => LocalizedString
+	/**
+	 * Context compacted — {count} {{message|messages}} summarised
+	 */
+	compactedToast: (arg: { count: number }) => LocalizedString
+	/**
+	 * The conversation could not be compacted
+	 */
+	compactFailed: () => LocalizedString
+	/**
+	 * Commands
+	 */
+	slashCommands: () => LocalizedString
+	/**
+	 * Run
+	 */
+	slashRun: () => LocalizedString
+	/**
+	 * Summarise the conversation so far to free up context
+	 */
+	compactCommandDescription: () => LocalizedString
+	/**
+	 * This conversation is too short to be worth compacting
+	 */
+	nothingToCompact: () => LocalizedString
+	/**
+	 * Slash commands
+	 */
+	shortcutsCommands: () => LocalizedString
+	/**
+	 * Complete
+	 */
+	shortcutCompleteCommand: () => LocalizedString
+	/**
+	 * Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else — a path, a date — is sent as typed.
+	 */
+	shortcutCommandsNote: () => LocalizedString
+	/**
+	 * Compaction
+	 */
+	compaction: () => LocalizedString
+	/**
+	 * Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted — the summary replaces those messages only in what is sent, and can be undone.
+	 */
+	compactionDescription: () => LocalizedString
+	/**
+	 * Compaction model
+	 */
+	compactModel: () => LocalizedString
+	/**
+	 * Leave empty to use each conversation’s own model. Whatever this summary leaves out is lost to the assistant, so prefer a capable model over a cheap one.
+	 */
+	compactModelHelp: () => LocalizedString
+	/**
+	 * Compact automatically
+	 */
+	autoCompact: () => LocalizedString
+	/**
+	 * Summarise on its own once a conversation reaches the threshold below.
+	 */
+	autoCompactHelp: () => LocalizedString
+	/**
+	 * Threshold (tokens)
+	 */
+	compactThreshold: () => LocalizedString
+	/**
+	 * Also the ceiling the load indicator measures against when the provider does not announce its context window — which is most of them.
+	 */
+	compactThresholdHelp: () => LocalizedString
+	/**
+	 * each conversation’s model
+	 */
+	compactModelOwn: () => LocalizedString
+	/**
+	 * Compaction sharing
+	 */
+	compactionSharing: () => LocalizedString
+	/**
+	 * Share your compaction model and threshold with everyone on this instance.
+	 */
+	compactionSharingDescription: () => LocalizedString
+	/**
+	 * Share compaction settings
+	 */
+	shareCompaction: () => LocalizedString
 }
 
 export type Formatters = {}

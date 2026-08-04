@@ -461,7 +461,50 @@ const en = {
 	shortcutExpandedNote:
 		'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.',
 	shortcutMoveBetweenTabs: 'Move between tabs',
-	close: 'Close'
+	close: 'Close',
+
+	// Context load and compaction
+	contextLoad: 'Conversation load',
+	contextTokensOfLimit: '~{tokens:string} of {limit:string} tokens ({percent:number}%)',
+	contextLimitFromModel: "The model's context window (num_ctx)",
+	contextLimitFromThreshold: 'Threshold set in Settings → Chat',
+	contextMessagesInContext: '{count:number} {{message|messages}} in context',
+	contextMessagesCompacted: '{count:number} earlier {{message|messages}} summarised',
+	contextEstimateNote: 'Estimated from text length, not counted by the provider.',
+	contextCompacted: '{count:number} {{message|messages}} summarised',
+	compactedAutomatically: 'Compacted automatically',
+	compactedManually: 'Compacted on request',
+	undoCompaction: 'Undo',
+	undoCompactionHelp: 'Remove this summary and give the model the full history back',
+	compacting: 'Summarising the conversation…',
+	compactedToast: 'Context compacted — {count:number} {{message|messages}} summarised',
+	compactFailed: 'The conversation could not be compacted',
+	slashCommands: 'Commands',
+	slashRun: 'Run',
+	compactCommandDescription: 'Summarise the conversation so far to free up context',
+	nothingToCompact: 'This conversation is too short to be worth compacting',
+	shortcutsCommands: 'Slash commands',
+	shortcutCompleteCommand: 'Complete',
+	shortcutCommandsNote:
+		'Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else — a path, a date — is sent as typed.',
+
+	// Settings → Chat → Compaction
+	compaction: 'Compaction',
+	compactionDescription:
+		'Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted — the summary replaces those messages only in what is sent, and can be undone.',
+	compactModel: 'Compaction model',
+	compactModelHelp:
+		'Leave empty to use each conversation’s own model. Whatever this summary leaves out is lost to the assistant, so prefer a capable model over a cheap one.',
+	autoCompact: 'Compact automatically',
+	autoCompactHelp: 'Summarise on its own once a conversation reaches the threshold below.',
+	compactThreshold: 'Threshold (tokens)',
+	compactThresholdHelp:
+		'Also the ceiling the load indicator measures against when the provider does not announce its context window — which is most of them.',
+	compactModelOwn: 'each conversation’s model',
+	compactionSharing: 'Compaction sharing',
+	compactionSharingDescription:
+		'Share your compaction model and threshold with everyone on this instance.',
+	shareCompaction: 'Share compaction settings'
 } satisfies BaseTranslation;
 
 export default en;

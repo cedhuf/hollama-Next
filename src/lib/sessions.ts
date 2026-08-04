@@ -68,6 +68,24 @@ export interface Message {
 	isReasoningVisible?: boolean;
 	/** ISO timestamp. Absent on messages written before this was recorded. */
 	createdAt?: string;
+	/**
+	 * Set on a compaction marker: a `system` message holding a summary of the
+	 * messages before it, which is what the model receives in their place.
+	 *
+	 * Nothing is deleted — the marker only moves where the sent context starts —
+	 * so removing it restores the full history. That is what makes `/compact`
+	 * reversible, and why compaction is a marker rather than a rewrite.
+	 */
+	compaction?: {
+		/** ISO timestamp of when the summary was written. */
+		generatedAt: string;
+		/** How many messages it stands in for. */
+		replacedCount: number;
+		/** The model that wrote it, for the divider's tooltip. */
+		model?: string;
+		/** True when the app compacted on its own, at the configured threshold. */
+		automatic?: boolean;
+	};
 }
 
 export interface Session {

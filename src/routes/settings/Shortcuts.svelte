@@ -45,6 +45,17 @@
 			note: $LL.shortcutExpandedNote({ mod })
 		},
 		{
+			// src/routes/sessions/[id]/Prompt.svelte + SlashMenu.svelte
+			title: $LL.shortcutsCommands(),
+			shortcuts: [
+				{ keys: ['↑', '↓'], label: $LL.searchNavigate() },
+				{ keys: ['⇥'], label: $LL.shortcutCompleteCommand() },
+				{ keys: ['↵'], label: $LL.slashRun() },
+				{ keys: ['esc'], label: $LL.searchClose() }
+			],
+			note: $LL.shortcutCommandsNote()
+		},
+		{
 			// src/lib/components/SearchModal.svelte
 			title: $LL.shortcutsSearch(),
 			shortcuts: [

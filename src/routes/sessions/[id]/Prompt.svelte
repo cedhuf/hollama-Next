@@ -4,6 +4,13 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import {
+		commandPrefix,
+		parseSlashCommand,
+		unescapeSlash,
+		type CommandName,
+		type SlashCommand
+	} from '$lib/chat/commands';
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
@@ -22,7 +29,9 @@
 	import { webFetchConfig } from '$lib/webFetch';
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
+	import ContextMeter from './ContextMeter.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
+	import SlashMenu from './SlashMenu.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
 
@@ -35,6 +44,12 @@
 		/** Pending quick-choice, docked above the composer until answered. */
 		pendingChoice?: Message | null;
 		chooseAnswer: (message: Message, selected: string[][]) => void;
+		/** Runs a slash command instead of sending the text as a message. */
+		runCommand: (name: CommandName, args: string) => void;
+		/** Token ceiling the load meter measures against. */
+		contextThreshold: number;
+		/** False while a compaction is already running, or when there is nothing to compact. */
+		canCompact: boolean;
 	}
 
 	let {
@@ -44,8 +59,60 @@
 		stopCompletion,
 		scrollToBottom,
 		pendingChoice = null,
-		chooseAnswer
+		chooseAnswer,
+		runCommand,
+		contextThreshold,
+		canCompact
 	}: Props = $props();
+
+	// --- slash commands -------------------------------------------------------
+
+	const commands = $derived<SlashCommand[]>([
+		{
+			name: 'compact',
+			description: $LL.compactCommandDescription(),
+			available: canCompact,
+			unavailableReason: canCompact ? undefined : $LL.nothingToCompact()
+		}
+	]);
+	const knownCommands = $derived(commands.map((c) => c.name));
+
+	// The menu is open only while the prompt is a bare `/word`: as soon as a space
+	// or a newline is typed, the user is writing a message that starts with a
+	// slash, and an autocomplete floating over it would be in the way.
+	const prefix = $derived(commandPrefix(editor.prompt ?? ''));
+	const matches = $derived(
+		prefix === null ? [] : commands.filter((c) => c.name.startsWith(prefix))
+	);
+	const menuOpen = $derived(matches.length > 0 && !editor.isCompletionInProgress);
+
+	/** Positions the arrows may land on — an unavailable command is listed, not chosen. */
+	const selectable = $derived(
+		matches.map((c, i) => (c.available ? i : -1)).filter((i) => i !== -1)
+	);
+
+	let selectedCommand = $state(0);
+	$effect(() => {
+		// Land on the first command that can actually run whenever the list changes
+		// under the highlight; -1 when none can, so Enter falls through.
+		void matches.length;
+		selectedCommand = selectable[0] ?? -1;
+	});
+
+	/** Moves the highlight by `step`, wrapping, over the selectable rows only. */
+	function moveSelection(step: number) {
+		if (!selectable.length) return;
+		const at = selectable.indexOf(selectedCommand);
+		const next = (at + step + selectable.length) % selectable.length;
+		selectedCommand = selectable[next];
+	}
+
+	function pickCommand(command: SlashCommand) {
+		if (!command.available) return;
+		editor.prompt = `/${command.name}`;
+		editor.promptTextarea?.focus();
+		submit();
+	}
 
 	let attachments: Attachment[] = $state([]);
 
@@ -130,6 +197,31 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
+		// The command menu takes the arrows, Tab and Escape while it is open, and
+		// Enter picks the highlighted command rather than sending `/comp` as text.
+		if (menuOpen) {
+			if (event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey)) {
+				event.preventDefault();
+				moveSelection(1);
+				return;
+			}
+			if (event.key === 'ArrowUp' || (event.key === 'Tab' && event.shiftKey)) {
+				event.preventDefault();
+				moveSelection(-1);
+				return;
+			}
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				editor.prompt = '';
+				return;
+			}
+			if (event.key === 'Enter' && !event.shiftKey && selectedCommand >= 0) {
+				event.preventDefault();
+				pickCommand(matches[selectedCommand]);
+				return;
+			}
+		}
+
 		if (event.key !== 'Enter') return;
 
 		// Expanded is the long-form mode: Enter breaks the line and ⌘/Ctrl+Enter sends,
@@ -213,6 +305,17 @@
 	}
 
 	function submit() {
+		// A recognised command never becomes a message: it runs, and the composer
+		// clears. Anything else — including an unknown `/word` — is sent as typed,
+		// minus the `//` escape for a message that really does start with a slash.
+		const command = parseSlashCommand(editor.prompt ?? '', knownCommands);
+		if (command) {
+			editor.prompt = '';
+			runCommand(command.name, command.args);
+			return;
+		}
+		editor.prompt = unescapeSlash(editor.prompt ?? '');
+
 		const knowledgeMessages = attachments
 			.filter((a): a is KnowledgeAttachment => a.type === 'knowledge' && !!a.knowledge)
 			.map((a) => knowledgeContextMessage(a.knowledge!));
@@ -245,6 +348,16 @@
 				/>
 			{/key}
 		{:else}
+			{#if menuOpen}
+				<!-- Above the composer, not over it: the text being typed is what the
+				     list is filtered on, so it has to stay readable. -->
+				<SlashMenu
+					commands={matches}
+					selected={selectedCommand}
+					onPick={pickCommand}
+					onHover={(i) => (selectedCommand = i)}
+				/>
+			{/if}
 			<!-- One composer, always: expanding only grows the card, so the toggle, Run,
 			     Cancel, attachments and tools stay reachable in every state. -->
 			<div
@@ -269,6 +382,16 @@
 				<PromptAttachments bind:attachments {tools}>
 					{#snippet actions()}
 						<div class="flex items-center gap-x-1">
+							{#if session.messages.length}
+								<ContextMeter
+									{session}
+									threshold={contextThreshold}
+									onPrepareCompact={() => {
+										editor.prompt = '/compact';
+										editor.promptTextarea?.focus();
+									}}
+								/>
+							{/if}
 							{#if !isPersona}
 								<Button
 									variant="icon"

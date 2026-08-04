@@ -1,5 +1,5 @@
 import { getConfig } from '$lib/server/db/config';
-import type { Settings } from '$lib/settings';
+import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 export type Sharing = 'off' | 'locked' | 'overridable';
 
@@ -17,6 +17,20 @@ export interface ResolvedChatDefaults {
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: { generateTitlesWithAI: boolean; titleModel: string; titleServerId: string };
+	};
+	compact: {
+		compactModel: string;
+		compactServerId: string;
+		autoCompact: boolean;
+		compactThreshold: number;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: {
+			compactModel: string;
+			compactServerId: string;
+			autoCompact: boolean;
+			compactThreshold: number;
+		};
 	};
 }
 
@@ -36,14 +50,28 @@ export function resolveChatDefaults(
 		titleServerId: ''
 	};
 
+	const ownCompact = {
+		compactModel: userSettings?.compactModel ?? '',
+		compactServerId: '',
+		autoCompact: userSettings?.autoCompact ?? DEFAULT_SETTINGS.autoCompact,
+		compactThreshold: userSettings?.compactThreshold ?? DEFAULT_SETTINGS.compactThreshold
+	};
+
 	const defaultModelSharing = (getConfig('defaultModelSharing') as Sharing) || 'off';
 	const titleSharing = (getConfig('titleSharing') as Sharing) || 'off';
+	const compactSharing = (getConfig('compactSharing') as Sharing) || 'off';
 
 	const adminDefaultModel = getConfig('defaultModel') ?? '';
 	const adminTitle = {
 		generateTitlesWithAI: getConfig('titleEnabled') === 'true',
 		titleModel: getConfig('titleModel') ?? '',
 		titleServerId: getConfig('titleServerId') ?? ''
+	};
+	const adminCompact = {
+		compactModel: getConfig('compactModel') ?? '',
+		compactServerId: getConfig('compactServerId') ?? '',
+		autoCompact: getConfig('compactAuto') === 'true',
+		compactThreshold: Number(getConfig('compactThreshold') ?? DEFAULT_SETTINGS.compactThreshold)
 	};
 
 	// --- default model ---
@@ -81,5 +109,17 @@ export function resolveChatDefaults(
 			: { ...adminTitle, editable: true, source: 'admin', admin: adminTitle };
 	}
 
-	return { defaultModel, title };
+	// --- compaction ---
+	let compact: ResolvedChatDefaults['compact'];
+	if (isAdmin || compactSharing === 'off') {
+		compact = { ...ownCompact, editable: true, source: 'user', admin: adminCompact };
+	} else if (compactSharing === 'locked') {
+		compact = { ...adminCompact, editable: false, source: 'admin', admin: adminCompact };
+	} else {
+		compact = ownCompact.compactModel
+			? { ...ownCompact, editable: true, source: 'user', admin: adminCompact }
+			: { ...adminCompact, editable: true, source: 'admin', admin: adminCompact };
+	}
+
+	return { defaultModel, title, compact };
 }

@@ -7,11 +7,13 @@
   <img src="static/logo-mark.png" alt="Llooma" width="96" />
 </picture>
 
-# Llooma
-
-<sub>/ˈluː.mə/ · _LOO-muh_</sub>
+# Llooma /ˈluː.mə/
 
 **A (less) minimal LLM chat app that runs _entirely_ in your browser.**
+
+This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
+
+</div>
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/cedhuf/llooma)
 ![GitHub License](https://img.shields.io/github/license/cedhuf/llooma)
@@ -23,16 +25,14 @@
 
 ![The sidebar, a conversation, the Library, and the Interface and Servers settings](static/screenshots/sections.png)
 
-</div>
-
 > [!WARNING]
-> **Disclaimer** — This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
+> **Disclaimer**
 >
-> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR are more than welcome. If that's not your thing, you can check the original project instead or other forks, no hard feelings — just being transparent.
+> This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
+>
+> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR is more than welcome. If AI is not your thing, you can check the original project instead or other forks, no hard feelings, just being transparent.
 >
 > Recent work has focused on the **server / multi-user** mode. The **standalone (local)** mode may have temporary inconsistencies that still need a verification pass.
-
-This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many thanks for the original work.
 
 ---
 
@@ -42,21 +42,21 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 **Give your AI a face, a voice and a name.**
 
-Build characters — a coach, a tutor, a companion — each with its own avatar, system prompt, model, greeting and knowledge, then chat with them as one ongoing relationship. Import existing ones (OpenWebUI-compatible), pin your favourites to the sidebar, and in server mode share them across your team.
+Build characters, a coach, a tutor, a companion, each with its own avatar, personality, model, greeting and knowledge, then chat with them as one ongoing relationship. Import existing ones (OpenWebUI-compatible), pin your favourites to the sidebar, and in server mode share them across your team.
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> Feel free to participate — there is no bad contribution. One rule to keep the project manageable: **issues are for bugs only**. For a feature request or anything else, please open a discussion; if the community backs it, it will become an issue. Thanks!
+> Feel free to participate, there is no bad contribution. One rule to keep the project manageable: **issues are for bugs only**. For a feature request or anything else, please open a discussion. If the community backs it, and we agree on the technical approach, it will become an issue. Thanks!
 
 ### Features
 
 **Providers**
 
 - Ollama, OpenAI, Claude, Infomaniak, and any OpenAI-compatible server
-- One-click presets — pick a provider, paste an API key
+- One-click presets, pick a provider, paste an API key
 - Several connections at once, each with its own label and colour, shown wherever its models appear
 - Custom display names per model, so `mistral/Mistral_Small-24B-Instruct` can read as you like
 - Model name filter per connection
@@ -68,11 +68,13 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 - Markdown with syntax highlighting, KaTeX maths, and copyable code blocks
 - Attach **knowledge** and **images** from the composer, on the home screen and in any conversation
 - Edit and retry messages; copy a message, a code block, or a whole conversation (JSON or Markdown)
-- **Web search** — [degoog](https://github.com/degoog-org/degoog) or SearXNG, toggled per message, with an optional _let the model decide_ mode and a live status. Configurable from the GUI, lockable instance-wide via env, shareable by an admin
-- **Web fetch** — paste a link and the model reads the page itself, in full, rather than answering from search snippets. Toggled per message, capped in pages and characters, and switchable instance-wide by an admin
-- **Interactive choices** — when a request is ambiguous, the model can offer tappable options instead of guessing
-- **System prompts** — global, per-model and per-conversation
+- **Web search** [degoog](https://github.com/degoog-org/degoog) or SearXNG, toggled per message, with an optional _let the model decide_ mode and a live status. Configurable from the GUI, lockable instance-wide via env, shareable by an admin
+- **Web fetch** paste a link and the model reads the page itself, in full, rather than answering from search snippets. Toggled per message, capped in pages and characters, and switchable instance-wide by an admin
+- **Interactive choices** when a request is ambiguous, the model can offer tappable options instead of guessing
+- **System prompts** global, per-model and per-conversation
 - AI-generated conversation titles, using a dedicated (cheap) model
+- **Compaction** when a conversation gets too long, `/compact` in the composer replaces everything said so far with a structured summary, so it keeps fitting in the context window. Nothing is deleted: the summary only changes what is _sent_, the full transcript stays on screen, and one click on the divider puts the whole history back. Runs on the conversation's own model by default, or a dedicated one, and can fire on its own at a threshold you set. An admin can share both
+- **Conversation load** a small ring in the composer fills as the context does, warming from grey to amber to red, with the exact figures on hover. Click it to prepare `/compact`
 - Advanced Ollama parameters
 
 **Personas & knowledge**
@@ -83,7 +85,7 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 
 **Interface**
 
-- Six themes — Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized — each with a light and a dark ramp, following the system by default
+- Six themes — Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized (each with a light and a dark ramp), following the system by default
 - Responsive; dialogs go full screen on phones; installable as a PWA
 - English and French, with automatic English fallback for untranslated keys
 - Import and export each kind of data, or a full backup of everything
@@ -96,7 +98,8 @@ Build characters — a coach, a tutor, a companion — each with its own avatar,
 - [ ] User groups — per-group default prompts / models
 - [x] **Protect locked prompts from personas** — a locked instance prompt is now prepended in the proxy, so a persona's own system prompt adds to it instead of replacing it
 - [ ] **Reusable playbooks** — write step-by-step instructions in Markdown once and reuse them in any conversation (a "how-to" the model follows, separate from a persona's system prompt)
-- [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording
+- [ ] **Slash shortcuts** — save frequently used instructions and fire them by typing `/shortcut` in the composer, with an optional popup form (text fields, dropdowns, dates) for variables, so no one has to remember the exact wording. The composer's command menu and parser already exist (`/compact`); what is missing is user-defined entries and the variables form
+- [ ] **Keep compaction summaries out of search** — a summary is stored as a message, so full-text search finds it and returns the same passage twice: once in the original message and once inside the summary that replaced it. The index needs to skip compaction markers
 - [x] **Revisit translations** — English and French are complete (`pnpm run i18n:status`); other locales were dropped, and adding one back no longer means auditing every key
 - [ ] Finish the Svelte 5 migration — four legacy `on:` directives remain, all in `FieldInput.svelte`
 - [ ] **Drop the rename migrations** — the one-shot carry-overs from the Hollama Next → Llooma rename (database file, `localStorage` keys, theme-script fallback). The release that removes them must name the version to pin first, so anyone on an older build can pass through it before updating further. Reading legacy _backup_ keys stays regardless.
@@ -141,7 +144,7 @@ docker compose pull && docker compose up -d
 OLLAMA_ORIGINS=https://your-llooma-domain.com ollama serve
 ```
 
-**Running modes** — Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
+**Running modes**, Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`:
 
 > [!NOTE]
 > Why ?
@@ -151,12 +154,12 @@ OLLAMA_ORIGINS=https://your-llooma-domain.com ollama serve
 
 ---
 
-- **`local`** (default) — single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
-- **`server`** — multi-user, self-hosted. Users sign in (email + password and/or OIDC), data is stored server-side in SQLite **per user**, and **provider API keys never leave the server** (encrypted at rest). An admin configures shared providers and which models to expose; optionally, users may add their own keys (`allowUserKeys`).
+- **`local`** (default), single-user, browser-only. All data (sessions, knowledge, server connections, preferences) lives in the browser's `localStorage`, and you bring your own LLM providers (Ollama, OpenAI, Claude, …) from _Settings → Servers_. No accounts, no database. Ideal for personal use, a phone PWA, or the upcoming desktop app.
+- **`server`**, multi-user, self-hosted. Users sign in (email + password and/or OIDC), data is stored server-side in SQLite **per user**, and **provider API keys never leave the server** (encrypted at rest). An admin configures shared providers and which models to expose; optionally, users may add their own keys (`allowUserKeys`).
 
 Set `PUBLIC_MODE=server` to enable server mode. All server-mode state lives under `DATA_DIR` — a single directory you can bind-mount to persist everything.
 
-**Configuration** — copy `.env.example` to `.env` and adjust as needed.
+**Configuration**, copy `.env.example` to `.env` and adjust as needed.
 
 _Common (both modes):_
 
