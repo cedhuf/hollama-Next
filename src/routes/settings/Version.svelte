@@ -8,6 +8,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Logo from '$lib/components/Logo.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { AUTHOR_URL, DOCS_URL, GITHUB_URL, releaseUrl } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, isNewerVersion, updateStatusStore } from '$lib/updates';
@@ -93,7 +94,23 @@
 			<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
 				<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
 				<span class="text-sm text-muted" lang="en">{APP_PRONUNCIATION}</span>
-				<Badge>v{version}</Badge>
+				<!-- The badge carries the link to its own release notes, so the section
+				     below does not have to repeat the number just to have something to
+				     hang that link on. A badge does not read as clickable on its own,
+				     so the tooltip is what says where it goes. -->
+				<Tooltip side="bottom">
+					{#snippet trigger({ props })}
+						<a
+							{...props}
+							href={releaseUrl(version)}
+							target="_blank"
+							rel="noopener noreferrer external"
+						>
+							<Badge>v{version}</Badge>
+						</a>
+					{/snippet}
+					{$LL.releaseNotes()}
+				</Tooltip>
 			</div>
 			<!-- Tucked into the identity block rather than added as a third card: the
 			     logo is taller than the lines beside it, so this fills whitespace that
@@ -111,24 +128,11 @@
 	</div>
 
 	<SettingsSection title={$LL.version()} card>
-		<!-- What you run on the left, what we know about it on the right, and the
-		     action beside its own result. The button used to own a full-width row of
-		     its own, which cost height on a panel that should not scroll. -->
+		<!-- One row, one baseline: when it was checked on the left, what that check
+		     found and how to redo it on the right. The version number is not repeated
+		     here, it is the badge beside the logo. -->
 		<div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-			<div class="flex min-w-0 flex-col gap-0.5">
-				<a
-					href={releaseUrl(version)}
-					target="_blank"
-					rel="noopener noreferrer external"
-					class="w-fit text-sm font-medium text-active transition-colors hover:text-accent"
-					title={$LL.releaseNotes()}
-				>
-					v{version}
-				</a>
-				{#if lastCheckedText}
-					<span class="text-xs text-muted">{lastCheckedText}</span>
-				{/if}
-			</div>
+			<span class="text-sm text-muted">{lastCheckedText}</span>
 
 			<div class="flex shrink-0 items-center gap-2">
 				<!-- `Badge` takes an `href` but cannot carry `target`/`rel`, and this one
