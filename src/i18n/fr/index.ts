@@ -510,6 +510,7 @@ const fr = extendDictionary(en, {
 	undoCompactionHelp: 'Retirer ce résumé et rendre tout l’historique au modèle',
 	compacting: 'Résumé de la conversation…',
 	tokensFreed: '~{tokens:string} tokens libérés',
+	tokensFreedDetail: '{before:string} ramenés à {after:string}.',
 	compactFailed: 'La conversation n’a pas pu être compactée',
 	slashCommands: 'Commandes',
 	slashRun: 'Lancer',

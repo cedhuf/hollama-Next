@@ -1820,6 +1820,12 @@ type RootTranslation = {
 	 */
 	tokensFreed: RequiredParams<'tokens'>
 	/**
+	 * {​b​e​f​o​r​e​}​ ​d​o​w​n​ ​t​o​ ​{​a​f​t​e​r​}​.
+	 * @param {string} after
+	 * @param {string} before
+	 */
+	tokensFreedDetail: RequiredParams<'after' | 'before'>
+	/**
 	 * T​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​c​o​m​p​a​c​t​e​d
 	 */
 	compactFailed: string
@@ -3675,6 +3681,10 @@ The completion in progress will stop
 	 * ~{tokens} tokens freed
 	 */
 	tokensFreed: (arg: { tokens: string }) => LocalizedString
+	/**
+	 * {before} down to {after}.
+	 */
+	tokensFreedDetail: (arg: { after: string, before: string }) => LocalizedString
 	/**
 	 * The conversation could not be compacted
 	 */

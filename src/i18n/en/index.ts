@@ -492,6 +492,7 @@ const en = {
 	undoCompactionHelp: 'Remove this summary and give the model the full history back',
 	compacting: 'Summarising the conversation…',
 	tokensFreed: '~{tokens:string} tokens freed',
+	tokensFreedDetail: '{before:string} down to {after:string}.',
 	compactFailed: 'The conversation could not be compacted',
 	slashCommands: 'Commands',
 	slashRun: 'Run',

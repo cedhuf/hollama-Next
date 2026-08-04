@@ -275,22 +275,34 @@
 	   overridden and the two ended up identical in size and weight — the left rule
 	   alone wasn't carrying the hierarchy. Stepped down a size and desaturated
 	   here, where the specificity is enough to win. */
+	/* `.markdown--aside` is the same treatment under a name that does not claim to
+	   be about reasoning: a compaction summary is an aside for the same reason and
+	   wants the same size. The reasoning class stays because it is what the
+	   existing markup and the test suite reach for. */
 	:global(.article--reasoning) .markdown :global(p),
 	:global(.article--reasoning) .markdown :global(li),
-	:global(.article--reasoning) .markdown :global(strong) {
+	:global(.article--reasoning) .markdown :global(strong),
+	:global(.markdown--aside) .markdown :global(p),
+	:global(.markdown--aside) .markdown :global(li),
+	:global(.markdown--aside) .markdown :global(strong) {
 		@apply text-xs;
 		@apply md:text-sm;
 		color: hsl(var(--hsl-text-shade-2));
 	}
 
-	:global(.article--reasoning) .markdown :global(strong) {
+	:global(.article--reasoning) .markdown :global(strong),
+	:global(.markdown--aside) .markdown :global(strong) {
 		@apply font-medium;
 	}
 
 	:global(.article--reasoning) .markdown :global(h1),
 	:global(.article--reasoning) .markdown :global(h2),
 	:global(.article--reasoning) .markdown :global(h3),
-	:global(.article--reasoning) .markdown :global(h4) {
+	:global(.article--reasoning) .markdown :global(h4),
+	:global(.markdown--aside) .markdown :global(h1),
+	:global(.markdown--aside) .markdown :global(h2),
+	:global(.markdown--aside) .markdown :global(h3),
+	:global(.markdown--aside) .markdown :global(h4) {
 		@apply text-muted mt-3 mb-0.5 text-xs font-medium;
 	}
 

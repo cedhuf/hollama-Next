@@ -21,7 +21,7 @@
 </script>
 
 <script lang="ts">
-	import { ArrowRight, ChevronDown, ChevronUp, FoldVertical, Undo2, X } from '@lucide/svelte';
+	import { ChevronDown, ChevronUp, FoldVertical, TrendingDown, Undo2, X } from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
@@ -113,15 +113,39 @@
 	</div>
 
 	{#if expanded && message && info}
+		<!-- `markdown--aside` steps the summary down to the size reasoning is shown
+		     at: it is background to the conversation, not a turn in it, and it was
+		     reading as loudly as the answers around it. -->
 		<div
-			class="rounded-lg border border-shade-3 bg-shade-1 p-3"
+			class="markdown--aside rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5"
 			transition:slide={{ duration: 200, easing: quadInOut }}
 		>
 			<div class="mb-2 flex items-center justify-between gap-2">
-				<span class="text-xs text-muted">
+				<span class="min-w-0 truncate text-xs text-muted">
 					{info.automatic ? $LL.compactedAutomatically() : $LL.compactedManually()}
 					{#if info.model}· {info.model}{/if}
 				</span>
+
+				{#if savings && savings.saved > 0}
+					<!-- The point of the whole operation, on the right of its own header: a
+					     figure to glance at, not a banner across the summary it introduces.
+					     Estimated like every token figure in the app, hence the tilde, with
+					     the before and after on hover rather than spelled out here. -->
+					<span
+						class="ml-auto flex shrink-0 items-center gap-1 rounded-full border border-shade-3 bg-shade-0 px-2 py-0.5 text-[11px] font-medium text-positive shadow-sm"
+						title="{$LL.tokensFreedDetail({
+							before: formatTokens(savings.before),
+							after: formatTokens(savings.after)
+						})} {$LL.contextEstimateNote()}"
+					>
+						<TrendingDown class="h-3 w-3 shrink-0" aria-hidden="true" />
+						<span class="tabular-nums">
+							{$LL.tokensFreed({ tokens: formatTokens(savings.saved) })}
+						</span>
+						<span class="tabular-nums text-muted">{Math.round(savings.ratio * 100)}%</span>
+					</span>
+				{/if}
+
 				{#if onUndo}
 					<button
 						type="button"
@@ -134,26 +158,6 @@
 					</button>
 				{/if}
 			</div>
-
-			{#if savings && savings.saved > 0}
-				<!-- The point of the whole operation, stated once, where you go to check
-				     what it did. Estimated like every other token figure in the app, hence
-				     the tilde and the note on hover. -->
-				<div
-					class="mb-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-md bg-shade-2 px-2.5 py-1.5"
-					title={$LL.contextEstimateNote()}
-				>
-					<span class="text-xs font-medium text-positive">
-						{$LL.tokensFreed({ tokens: formatTokens(savings.saved) })}
-					</span>
-					<span class="flex items-center gap-1 text-[11px] tabular-nums text-muted">
-						{formatTokens(savings.before)}
-						<ArrowRight class="h-3 w-3 shrink-0" aria-hidden="true" />
-						{formatTokens(savings.after)}
-						<span class="opacity-70">· {Math.round(savings.ratio * 100)}%</span>
-					</span>
-				</div>
-			{/if}
 
 			<Markdown markdown={message.content} />
 		</div>
