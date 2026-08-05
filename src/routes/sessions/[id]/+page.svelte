@@ -40,7 +40,7 @@
 	import { Sitemap } from '$lib/sitemap';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
-	import { formatTimestampToNow } from '$lib/utils';
+	import { formatTimestampToNow, isTouchPrimary } from '$lib/utils';
 	import { buildPageContext, extractUrls, webFetchConfig } from '$lib/webFetch';
 
 	import type { PageData } from './$types';
@@ -127,9 +127,13 @@
 		untrack(() => maybeAutoResolveSystemPrompt());
 	});
 
+	// Taking focus back once an answer lands is a convenience with a mouse and a
+	// nuisance with a thumb, where it reopens the keyboard over the reply nobody
+	// has read yet. The request is still consumed either way, so it does not sit
+	// around waiting to fire the next time the composer appears.
 	$effect(() => {
 		if (editor.shouldFocusTextarea && editor.promptTextarea) {
-			editor.promptTextarea.focus();
+			if (!isTouchPrimary()) editor.promptTextarea.focus();
 			editor.shouldFocusTextarea = false;
 		}
 	});

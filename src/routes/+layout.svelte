@@ -212,6 +212,22 @@
 		setLocale($settingsStore.userLanguage);
 	});
 
+	/**
+	 * Repaint the strips the OS draws around the app.
+	 *
+	 * A browser tab picks up a new `content` on the existing tag, but the
+	 * installed app reads that tag when it launches and then keeps the colour it
+	 * got, which is why switching themes left the status bar on the old one until
+	 * the app was killed. Replacing the whole node is what gets it read again.
+	 */
+	function setThemeColor(color: string) {
+		for (const stale of document.querySelectorAll('meta[name="theme-color"]')) stale.remove();
+		const meta = document.createElement('meta');
+		meta.name = 'theme-color';
+		meta.content = color;
+		document.head.appendChild(meta);
+	}
+
 	$effect(() => {
 		const mode = $settingsStore.themeMode || 'system';
 		const style = $settingsStore.themeStyle || 'classic';
@@ -233,11 +249,10 @@
 			// Keep the OS/browser chrome tint in sync with the live safe-area chrome
 			// colour (shade-1), across all theme styles — Dracula, Catppuccin, …
 			if (browser) {
-				const meta = document.querySelector('meta[name="theme-color"]');
 				const chrome = getComputedStyle(document.documentElement)
 					.getPropertyValue('--color-shade-1')
 					.trim();
-				if (meta && chrome) meta.setAttribute('content', chrome);
+				if (chrome) setThemeColor(chrome);
 			}
 		};
 

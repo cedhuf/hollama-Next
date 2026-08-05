@@ -1,5 +1,19 @@
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
 
+import { browser } from '$app/environment';
+
+/**
+ * A device driven by a finger, which is also a device with a soft keyboard.
+ *
+ * Focusing a field there costs half the screen, so anything that focuses the
+ * composer on its own behalf (rather than because someone tapped it) has to
+ * check first. On a mouse-and-keyboard machine focus is free, and taking it is
+ * the friendly thing to do.
+ */
+export function isTouchPrimary() {
+	return browser && window.matchMedia('(pointer: coarse)').matches;
+}
+
 export function generateRandomId() {
 	return Math.random().toString(36).substring(2, 8); // E.g. `z7avx9`
 }

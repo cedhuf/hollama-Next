@@ -24,7 +24,7 @@
 	} from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
-	import { generateRandomId } from '$lib/utils';
+	import { generateRandomId, isTouchPrimary } from '$lib/utils';
 	import { webFetchConfig } from '$lib/webFetch';
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
@@ -304,6 +304,11 @@
 	}
 
 	function submit() {
+		// The message is gone, so the keyboard has nothing left to type into and is
+		// covering the answer about to arrive. Only on touch: on a laptop the next
+		// thing anyone does is type the next message.
+		if (isTouchPrimary()) editor.promptTextarea?.blur();
+
 		// A recognised command never becomes a message: it runs, and the composer
 		// clears. Anything else — including an unknown `/word` — is sent as typed,
 		// minus the `//` escape for a message that really does start with a slash.

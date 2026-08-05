@@ -137,3 +137,16 @@
 		</MenuItem>
 	</ContextMenu>
 {/key}
+
+<style>
+	/* iOS answers a long press on a link with its own preview sheet, and on text
+	   with the selection magnifier. Either one swallows the press before the
+	   context menu can open, which is why the menu worked everywhere except the
+	   installed app. Both properties inherit, so the row covers its title and its
+	   link at once. Nothing is lost: a sidebar row is a target, not a passage. */
+	.section-list-item {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+</style>
