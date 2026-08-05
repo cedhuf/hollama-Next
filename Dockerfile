@@ -10,7 +10,11 @@ RUN npm install -g pnpm@11.5.2
 
 # pnpm-workspace.yaml holds the allowBuilds config (esbuild/sharp/workerd),
 # so it must be present before install or build scripts get blocked.
+# `scripts/` comes along too: the `prepare` lifecycle runs during install and
+# copies the pdf.js worker out of node_modules, so the script has to exist by
+# then or the install fails outright.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY scripts ./scripts
 RUN pnpm install --frozen-lockfile
 
 COPY . .

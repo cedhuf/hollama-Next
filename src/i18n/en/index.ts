@@ -88,7 +88,6 @@ const en = {
 	editorCode: 'Code',
 	rename: 'Rename',
 	noCollection: 'No collection',
-	ungrouped: 'Ungrouped',
 	collectionSearchPlaceholder: 'Find or create a collection',
 	createCollectionNamed: 'Create "{name:string}"',
 	knowledgeCount: '{count:number} {{item|items}}',

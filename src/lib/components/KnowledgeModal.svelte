@@ -201,7 +201,9 @@
 				<Button variant="outline" onclick={() => ($knowledgeModalOpen = false)}>
 					{$LL.cancel()}
 				</Button>
-				<Button {...{ type: 'submit' }} disabled={!canSave}>{$LL.save()}</Button>
+				<!-- Explicitly wired: `Button` sets `type="button"` after spreading its
+				     props, so asking it for a submit button quietly gets a dead one. -->
+				<Button onclick={save} disabled={!canSave}>{$LL.save()}</Button>
 			</div>
 		</footer>
 	</form>

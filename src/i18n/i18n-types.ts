@@ -353,10 +353,6 @@ type RootTranslation = {
 	 */
 	noCollection: string
 	/**
-	 * U​n​g​r​o​u​p​e​d
-	 */
-	ungrouped: string
-	/**
 	 * F​i​n​d​ ​o​r​ ​c​r​e​a​t​e​ ​a​ ​c​o​l​l​e​c​t​i​o​n
 	 */
 	collectionSearchPlaceholder: string
@@ -2389,10 +2385,6 @@ The completion in progress will stop
 	 * No collection
 	 */
 	noCollection: () => LocalizedString
-	/**
-	 * Ungrouped
-	 */
-	ungrouped: () => LocalizedString
 	/**
 	 * Find or create a collection
 	 */

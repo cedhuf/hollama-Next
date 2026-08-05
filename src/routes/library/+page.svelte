@@ -201,17 +201,6 @@
 	</button>
 {/snippet}
 
-{#snippet newKnowledgeCard(collectionId: string)}
-	<button
-		type="button"
-		onclick={() => openKnowledge({ collectionId })}
-		class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
-	>
-		<Plus class="h-4 w-4" />
-		<span class="text-xs">{$LL.newKnowledge()}</span>
-	</button>
-{/snippet}
-
 <Head title={$LL.library()} />
 
 <div class="flex h-full flex-col">
@@ -351,6 +340,57 @@
 				<span class="text-xs text-muted">{$knowledgeStore.length}</span>
 			</div>
 
+			<!-- Loose knowledge first: it is where everything starts out, so it is what
+			     you came to look at. No heading over it, because "everything not filed
+			     anywhere" is not a category anyone thinks in. -->
+			<div class="mb-6">
+				<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+					{#each looseKnowledge as knowledge (knowledge.id)}
+						{@render knowledgeCard(knowledge)}
+					{/each}
+
+					{#if namingNew}
+						<!-- The card became the field it was going to create. Nothing opened,
+						     nothing covered the grid, and the name is typed where the folder
+						     will sit. -->
+						<div
+							class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
+						>
+							<Folder class="h-5 w-5 shrink-0 text-muted" />
+							<input
+								bind:this={nameField}
+								bind:value={draftName}
+								onblur={commitName}
+								onkeydown={onNameKeydown}
+								placeholder={$LL.newCollection()}
+								class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
+							/>
+						</div>
+					{:else}
+						<div
+							class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+						>
+							<button
+								type="button"
+								onclick={() => openKnowledge()}
+								class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+							>
+								<Plus class="h-4 w-4" />
+								<span class="text-xs">{$LL.newKnowledge()}</span>
+							</button>
+							<button
+								type="button"
+								onclick={startNamingNew}
+								title={$LL.newCollection()}
+								aria-label={$LL.newCollection()}
+								class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+							>
+								<FolderPlus class="h-4 w-4" />
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
 			<!-- One page, no navigation: a collection is a heading over its own grid,
 			     and the cards below it are the same cards as everywhere else. Nothing to
 			     enter, nothing to come back from, and what is where stays visible. -->
@@ -438,65 +478,10 @@
 							{#each items as knowledge (knowledge.id)}
 								{@render knowledgeCard(knowledge)}
 							{/each}
-							{@render newKnowledgeCard(collection.id)}
 						</div>
 					{/if}
 				</div>
 			{/each}
-
-			<!-- Loose knowledge, last: it is where things start out, and it is the only
-			     section that can make a collection. -->
-			<div class="mb-6">
-				{#if collections.length}
-					<p class="mb-2 text-sm font-medium text-muted">{$LL.ungrouped()}</p>
-				{/if}
-				<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
-					{#each looseKnowledge as knowledge (knowledge.id)}
-						{@render knowledgeCard(knowledge)}
-					{/each}
-
-					{#if namingNew}
-						<!-- The card became the field it was going to create. Nothing opened,
-						     nothing covered the grid, and the name is typed where the folder
-						     will sit. -->
-						<div
-							class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
-						>
-							<Folder class="h-5 w-5 shrink-0 text-muted" />
-							<input
-								bind:this={nameField}
-								bind:value={draftName}
-								onblur={commitName}
-								onkeydown={onNameKeydown}
-								placeholder={$LL.newCollection()}
-								class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
-							/>
-						</div>
-					{:else}
-						<div
-							class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
-						>
-							<button
-								type="button"
-								onclick={() => openKnowledge()}
-								class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
-							>
-								<Plus class="h-4 w-4" />
-								<span class="text-xs">{$LL.newKnowledge()}</span>
-							</button>
-							<button
-								type="button"
-								onclick={startNamingNew}
-								title={$LL.newCollection()}
-								aria-label={$LL.newCollection()}
-								class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
-							>
-								<FolderPlus class="h-4 w-4" />
-							</button>
-						</div>
-					{/if}
-				</div>
-			</div>
 		</div>
 	</div>
 </div>
