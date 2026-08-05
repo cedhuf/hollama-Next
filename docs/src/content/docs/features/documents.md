@@ -2,7 +2,7 @@
 title: Documents
 description: Attach a PDF, a Word file or a spreadsheet and talk to the model about it.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 Attach a file from the composer's _Add context_ menu and its text joins the conversation. PDF,
@@ -33,6 +33,23 @@ self-hosted instance, and works offline.
 
 Files are read one at a time even when you attach several. Parsing a PDF is the heaviest thing
 the tab will do, and three at once is how a phone kills a page.
+
+## What does the reading
+
+The parser is [**officeparser**](https://github.com/harshankur/officeParser) by
+[Harsh Ankur](https://github.com/harshankur), MIT licensed. It handles the whole list of formats
+above and emits Markdown directly, which is the reason headings and tables survive the trip into the
+conversation. Llooma bundles it and calls it in the browser; the project deserves the credit for
+everything on this page working at all.
+
+Two builds of it exist, and which one is fetched is the whole privacy story:
+
+- **slim**, used by default. No OCR engine, and no remote addresses in it at all.
+- **full**, fetched only when you turn OCR on. This is the build that carries Tesseract.
+
+PDFs additionally go through [pdf.js](https://mozilla.github.io/pdf.js/) (Apache-2.0) for page
+rendering, whose worker is served from your own origin. Both are loaded on demand, so an instance
+with documents switched off downloads neither.
 
 ## When a PDF has no text in it
 

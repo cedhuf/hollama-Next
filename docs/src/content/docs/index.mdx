@@ -17,15 +17,15 @@ hero:
       variant: minimal
 ---
 
-{/* Indentation inside CardGrid is load-bearing: indent a line by four spaces and MDX reads it as a code block, which is what broke these cards once. MDX files are excluded in .prettierignore for the same reason. Keep this comment on one line — a wrapped one breaks the parse. */}
+{/* Indentation inside CardGrid is load-bearing: indent a line by four spaces and MDX reads it as a code block, which is what broke these cards once. MDX files are excluded in .prettierignore for the same reason. Keep this comment on one line, since a wrapped one breaks the parse. */}
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-{/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid — browsers split it and the pill loses its content. */}
+{/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid: browsers split it and the pill loses its content. */}
 
 <div class="fork-note">
 	Built by [cedhuf](https://github.com/cedhuf) · A fork of
-	[Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen) — many
+	[Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen), with many
 	thanks for the original work.
 </div>
 
@@ -37,7 +37,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 </Card>
 
 <Card title="Bring your own models" icon="puzzle">
-Ollama, OpenAI, Claude, Infomaniak and anything OpenAI-compatible — several at once, each with its own label and colour.
+Ollama, OpenAI, Claude, Infomaniak and anything OpenAI-compatible. Several at once, each with its own label and colour.
+
+[See the providers →](/llooma/reference/providers/)
 </Card>
 
 <Card title="More than a chat box" icon="magnifier">

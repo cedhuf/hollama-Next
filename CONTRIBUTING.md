@@ -1,41 +1,40 @@
-## Contributing
+# Contributing
 
-Here's ways in which you can contribute:
+There is no bad contribution. One rule keeps the project manageable:
 
-- Found a **bug**
-  1. Search for it in the [existing issues](https://github.com/cedhuf/llooma/issues)
-  2. Open a [new issue](https://github.com/cedhuf/llooma/issues/new) if it doesn't yet exist
-- Comment or upvote [existing issues](https://github.com/cedhuf/llooma/issues) _(active issues will likely be prioritized)_
-- Submit a [pull request](https://github.com/cedhuf/llooma/pulls) _(please discuss in an issue first)_
+**Issues are for bugs.** Feature requests and everything else start as a
+[discussion](https://github.com/cedhuf/llooma/discussions). If the community backs it and the
+approach holds up, it becomes an issue.
 
-- Have a **feature request**?
-  - Start a new discussion for the community to decide.
+## Found a bug
 
-## Developing
+1. Search the [existing issues](https://github.com/cedhuf/llooma/issues).
+2. Open a [new one](https://github.com/cedhuf/llooma/issues/new) if it is not there.
 
-Llooma is a static site built with:
+Commenting on or upvoting an existing issue helps: active ones get prioritised.
 
-- TypeScript
-- Svelte & SvelteKit
-- Vite
-- Tailwind CSS
-- Playwright
+## Want to write code
 
-Install dependencies with `npm install`, start a development server:
+Please discuss it in an issue first, then open a
+[pull request](https://github.com/cedhuf/llooma/pulls).
 
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```shell
+pnpm install
+pnpm run dev
 ```
 
-## Building
+Requires Node 26 and pnpm.
 
-To create a production version of Llooma:
+Everything else lives in the documentation, which is the copy kept up to date:
 
-```bash
-npm run build
-```
+- **[Working on Llooma](https://cedhuf.github.io/llooma/development/)** for the layout of the
+  codebase, the one seam that matters, and the checks to run before pushing.
+- **[Translations](https://cedhuf.github.io/llooma/development/translations/)** for adding or
+  completing a language.
+- **[Releases](https://cedhuf.github.io/llooma/development/releases/)** for what commit messages
+  have to look like, since they are what produces the version and the changelog.
+- **[Roadmap](https://cedhuf.github.io/llooma/roadmap/)** for what is planned and what is known to
+  be broken. The end-to-end test suite in particular would be a genuinely valuable thing to fix.
 
-You can preview the production build with `npm run preview`.
+The documentation lives in `docs/` in this repository, so a change to the app and the change to its
+documentation can land in the same commit.

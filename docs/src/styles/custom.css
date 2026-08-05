@@ -8,7 +8,7 @@
  */
 
 /* The attribution line under the hero: present and readable, but clearly not
-   part of the pitch — it sits between the call to action and the cards, so it
+   part of the pitch: it sits between the call to action and the cards, so it
    has to give way to both. */
 .fork-note {
 	display: flex;

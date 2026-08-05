@@ -2,11 +2,11 @@
 title: HTTP API
 description: What the API is for, and how far to trust it.
 sidebar:
-  order: 2
+  order: 4
 ---
 
 Llooma's API exists to serve Llooma's own interface. It is documented so the behaviour is
-auditable and so a self-hosted instance can be scripted — not because it is a stable public
+auditable and so a self-hosted instance can be scripted, not because it is a stable public
 contract. It changes with the interface.
 
 The generated, endpoint-by-endpoint reference is in the sidebar under **HTTP API**.
@@ -23,14 +23,14 @@ inside its own handler.
 
 ## Shape of the surface
 
-| Prefix          | Purpose                                                                                |
-| --------------- | -------------------------------------------------------------------------------------- |
-| `/api/data/…`   | The user's own collections — sessions, knowledge, personas — read and written per item |
-| `/api/llm/…`    | Authenticated provider proxy; the server injects the API key                           |
-| `/api/proxy/…`  | Local-mode-only CORS proxy; **404 in server mode**                                     |
-| `/api/admin/…`  | Instance configuration, users, shared servers. Admin only                              |
-| `/api/search/…` | Full-text search across the user's conversations                                       |
-| `/api/*/config` | The resolved, per-user view of an admin-shared setting                                 |
+| Prefix          | Purpose                                                                               |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `/api/data/*`   | The user's own collections (sessions, knowledge, personas), read and written per item |
+| `/api/llm/…`    | Authenticated provider proxy; the server injects the API key                          |
+| `/api/proxy/…`  | Local-mode-only CORS proxy; **404 in server mode**                                    |
+| `/api/admin/…`  | Instance configuration, users, shared servers. Admin only                             |
+| `/api/search/…` | Full-text search across the user's conversations                                      |
+| `/api/*/config` | The resolved, per-user view of an admin-shared setting                                |
 
 ## Documentation status
 

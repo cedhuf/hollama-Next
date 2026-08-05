@@ -12,8 +12,8 @@ both are worth understanding before you expose an instance.
 
 `/api/proxy/…` forwards a request to whatever origin it is given, and **requires no signed-in
 user**. That is deliberate: in local mode the browser holds the keys and the proxy only exists to
-get past CORS, including reaching Ollama on `localhost` — so it cannot refuse private addresses
-the way the fetch tool does.
+get past CORS, including reaching Ollama on `localhost`, so it cannot refuse private addresses the
+way the fetch tool does.
 
 - **In server mode the route is disabled outright** (404). The browser goes through the
   authenticated `/api/llm/…` proxy instead, which checks the session and injects the key
@@ -25,8 +25,8 @@ the way the fetch tool does.
 ## The web fetch tool
 
 Web fetch reads the URL a user pastes, from inside your network. Private, loopback and link-local
-addresses are refused — including the cloud metadata endpoint — and redirects are re-checked at
-every hop. But an instance open to untrusted users is still letting them choose what your server
+addresses are refused, the cloud metadata endpoint included, and redirects are re-checked at every
+hop. But an instance open to untrusted users is still letting them choose what your server
 connects to.
 
 Restrict it with `FETCH_ALLOWED_ORIGINS`, or turn it off for everyone under
