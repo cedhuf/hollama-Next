@@ -88,6 +88,8 @@ const en = {
 	editorCode: 'Code',
 	rename: 'Rename',
 	noCollection: 'No collection',
+	collectionSearchPlaceholder: 'Find or create a collection',
+	createCollectionNamed: 'Create "{name:string}"',
 	knowledgeCount: '{count:number} {{item|items}}',
 	deleteCollectionConfirm: 'Delete the collection {name:string}? Its knowledge is kept.',
 	pageCount: '{count:number} {{page|pages}}',

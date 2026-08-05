@@ -353,6 +353,15 @@ type RootTranslation = {
 	 */
 	noCollection: string
 	/**
+	 * F​i​n​d​ ​o​r​ ​c​r​e​a​t​e​ ​a​ ​c​o​l​l​e​c​t​i​o​n
+	 */
+	collectionSearchPlaceholder: string
+	/**
+	 * C​r​e​a​t​e​ ​"​{​n​a​m​e​}​"
+	 * @param {string} name
+	 */
+	createCollectionNamed: RequiredParams<'name'>
+	/**
 	 * {​c​o​u​n​t​}​ ​{​{​i​t​e​m​|​i​t​e​m​s​}​}
 	 * @param {number} count
 	 */
@@ -2376,6 +2385,14 @@ The completion in progress will stop
 	 * No collection
 	 */
 	noCollection: () => LocalizedString
+	/**
+	 * Find or create a collection
+	 */
+	collectionSearchPlaceholder: () => LocalizedString
+	/**
+	 * Create "{name}"
+	 */
+	createCollectionNamed: (arg: { name: string }) => LocalizedString
 	/**
 	 * {count} {{item|items}}
 	 */

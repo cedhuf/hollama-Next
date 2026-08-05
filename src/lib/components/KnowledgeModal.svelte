@@ -1,25 +1,26 @@
 <script lang="ts">
-	import { Brain, Code, Folder, Trash2, Type } from '@lucide/svelte';
+	import { Brain, Code, Trash2, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { loadKnowledge, saveKnowledge } from '$lib/knowledge';
-	import { knowledgeStore, settingsStore } from '$lib/localStorage';
+	import { knowledgeStore } from '$lib/localStorage';
 	import { knowledgeDraft, knowledgeModalOpen } from '$lib/stores/modal';
 	import { formatTimestampToNow, generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
 	import Button from './Button.svelte';
 	import CodeEditor from './CodeEditor.svelte';
+	import CollectionSelect from './CollectionSelect.svelte';
 	import Modal from './Modal.svelte';
 
 	/**
-	 * Writing down a knowledge collection, wherever you happen to be.
+	 * Writing down a piece of knowledge, wherever you happen to be.
 	 *
-	 * One editor for both cases: a new collection and an existing one differ by
-	 * whether the fields start empty, which is not enough to justify a second
-	 * screen. It opens prefilled too, which is how a conversation becomes a
-	 * collection without a round trip through the clipboard.
+	 * One editor for both cases: a new one and an existing one differ by whether
+	 * the fields start empty, which is not enough to justify a second screen. It
+	 * opens prefilled too, which is how a conversation becomes knowledge without a
+	 * round trip through the clipboard.
 	 */
 	let id = $state('');
 	let name = $state('');
@@ -29,13 +30,12 @@
 	let confirmingDelete = $state(false);
 	let nameInput = $state<HTMLInputElement | null>(null);
 
-	const collections = $derived($settingsStore.knowledgeCollections ?? []);
 	/** Kept across openings: whoever wants the code view usually wants it every time. */
 	let view = $state<'text' | 'code'>('text');
 
 	const isNew = $derived(!updatedAt);
 	const canSave = $derived(!!name.trim() && !!content.trim());
-	// Same estimate the context meter uses, so a collection's weight is stated in
+	// Same estimate the context meter uses, so its weight is stated in
 	// the units the rest of the app talks about.
 	const tokens = $derived(Math.ceil(content.length / 3.7));
 
@@ -114,7 +114,7 @@
 		</header>
 
 		<div class="flex min-h-0 flex-1 flex-col gap-3 px-5 py-4">
-			<!-- The name reads as the collection's title rather than as a form field,
+			<!-- The name reads as the title of the thing rather than as a form field,
 			     but a title with nothing in it reads as a heading nobody can type in.
 			     A border on hover and focus says otherwise without turning it back
 			     into a box that sits there all day. -->
@@ -132,22 +132,10 @@
 			     schema or a config, where line numbers and a monospace grid are the
 			     difference between readable and not. -->
 			<div class="flex items-center justify-between gap-3">
-				{#if collections.length}
-					<label class="flex min-w-0 items-center gap-1.5 text-xs text-muted">
-						<Folder class="h-3.5 w-3.5 shrink-0" />
-						<select
-							bind:value={collectionId}
-							class="min-w-0 max-w-48 truncate rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs text-active outline-none focus:border-accent"
-						>
-							<option value="">{$LL.noCollection()}</option>
-							{#each collections as collection (collection.id)}
-								<option value={collection.id}>{collection.name}</option>
-							{/each}
-						</select>
-					</label>
-				{:else}
-					<span></span>
-				{/if}
+				<!-- Always there, including when no collection exists yet: the way to make
+				     the first one is inside it, so hiding it until one exists would hide
+				     the only door to it. -->
+				<CollectionSelect bind:value={collectionId} class="max-w-48" />
 
 				<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
 					{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}

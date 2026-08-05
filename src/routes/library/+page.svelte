@@ -10,10 +10,12 @@
 		FolderPlus,
 		Pencil,
 		Plus,
+		Trash2,
 		Upload,
 		UserRound,
 		Users
 	} from '@lucide/svelte';
+	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -62,23 +64,46 @@
 			: $knowledgeStore.filter((k) => !k.collectionId)
 	);
 
-	function addCollection() {
-		const name = window.prompt($LL.newCollection())?.trim();
-		if (name) openCollectionId = createCollection(name).id;
+	/**
+	 * Naming a collection happens where the collection will appear, not in a
+	 * dialog stacked on the page: the card turns into a field, you type, you press
+	 * Enter. Creating and renaming share it, since they are the same act.
+	 */
+	let namingNew = $state(false);
+	let renaming = $state(false);
+	let draftName = $state('');
+	let nameField = $state<HTMLInputElement | null>(null);
+	let confirmingDelete = $state(false);
+
+	async function startNaming(mode: 'new' | 'rename') {
+		namingNew = mode === 'new';
+		renaming = mode === 'rename';
+		draftName = mode === 'rename' ? (openCollection?.name ?? '') : '';
+		await tick();
+		nameField?.select();
+		nameField?.focus();
 	}
 
-	function renameOpenCollection() {
-		if (!openCollection) return;
-		const name = window.prompt($LL.rename(), openCollection.name)?.trim();
-		if (name) renameCollection(openCollection.id, name);
+	function stopNaming() {
+		namingNew = false;
+		renaming = false;
+		draftName = '';
+	}
+
+	function commitName() {
+		const name = draftName.trim();
+		if (!name) return stopNaming();
+		if (renaming && openCollection) renameCollection(openCollection.id, name);
+		else if (namingNew) openCollectionId = createCollection(name).id;
+		stopNaming();
 	}
 
 	/** Deletes the grouping only: its knowledge comes back to the top level. */
 	function removeOpenCollection() {
 		if (!openCollection) return;
-		if (!window.confirm($LL.deleteCollectionConfirm({ name: openCollection.name }))) return;
 		deleteCollection(openCollection.id);
 		openCollectionId = null;
+		confirmingDelete = false;
 	}
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
@@ -293,22 +318,58 @@
 						<ChevronLeft class="h-4 w-4" />
 						{$LL.knowledge()}
 					</button>
-					<h2 class="min-w-0 truncate text-sm font-medium text-active">{openCollection.name}</h2>
-					<span class="text-xs text-muted">{visibleKnowledge.length}</span>
-					<button
-						type="button"
-						onclick={() => renameOpenCollection()}
-						class="text-xs text-muted transition-colors hover:text-active"
-					>
-						{$LL.rename()}
-					</button>
-					<button
-						type="button"
-						onclick={() => removeOpenCollection()}
-						class="text-xs text-muted transition-colors hover:text-negative"
-					>
-						{$LL.delete()}
-					</button>
+					{#if renaming}
+						<input
+							bind:this={nameField}
+							bind:value={draftName}
+							onblur={commitName}
+							onkeydown={(event) => {
+								if (event.key === 'Enter') commitName();
+								if (event.key === 'Escape') stopNaming();
+							}}
+							class="min-w-0 rounded-md border border-accent bg-shade-0 px-2 py-0.5 text-sm font-medium text-active outline-none"
+						/>
+					{:else}
+						<button
+							type="button"
+							onclick={() => startNaming('rename')}
+							title={$LL.rename()}
+							class="min-w-0 truncate rounded-md border border-transparent px-1 text-sm font-medium text-active transition-colors hover:border-shade-3"
+						>
+							{openCollection.name}
+						</button>
+						<span class="text-xs text-muted">{visibleKnowledge.length}</span>
+					{/if}
+
+					{#if confirmingDelete}
+						<span class="ml-auto flex items-center gap-2 text-xs text-muted">
+							{$LL.deleteCollectionConfirm({ name: openCollection.name })}
+							<button
+								type="button"
+								onclick={removeOpenCollection}
+								class="font-medium text-negative transition-opacity hover:opacity-80"
+							>
+								{$LL.delete()}
+							</button>
+							<button
+								type="button"
+								onclick={() => (confirmingDelete = false)}
+								class="transition-colors hover:text-active"
+							>
+								{$LL.cancel()}
+							</button>
+						</span>
+					{:else}
+						<button
+							type="button"
+							onclick={() => (confirmingDelete = true)}
+							title={$LL.delete()}
+							aria-label={$LL.delete()}
+							class="ml-auto text-muted transition-colors hover:text-negative"
+						>
+							<Trash2 class="h-4 w-4" />
+						</button>
+					{/if}
 				{:else}
 					<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
 					<span class="text-xs text-muted">{$knowledgeStore.length}</span>
@@ -354,29 +415,51 @@
 				<!-- One dashed card, two things: the main action fills it, and the folder
 				     sits at its edge. Making a collection is rarer than writing a piece of
 				     knowledge, so it gets the smaller half. -->
-				<div
-					class="group flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
-				>
-					<button
-						type="button"
-						onclick={() => openKnowledge({ collectionId: openCollectionId ?? undefined })}
-						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+				{#if namingNew}
+					<!-- The card became the field it was going to create. Nothing opened,
+					     nothing covered the grid, and the name is typed where the folder
+					     will sit. -->
+					<div
+						class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
 					>
-						<Plus class="h-4 w-4" />
-						<span class="text-xs">{$LL.newKnowledge()}</span>
-					</button>
-					{#if !openCollectionId}
+						<Folder class="h-5 w-5 shrink-0 text-muted" />
+						<input
+							bind:this={nameField}
+							bind:value={draftName}
+							onblur={commitName}
+							onkeydown={(event) => {
+								if (event.key === 'Enter') commitName();
+								if (event.key === 'Escape') stopNaming();
+							}}
+							placeholder={$LL.newCollection()}
+							class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
+						/>
+					</div>
+				{:else}
+					<div
+						class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+					>
 						<button
 							type="button"
-							onclick={() => addCollection()}
-							title={$LL.newCollection()}
-							aria-label={$LL.newCollection()}
-							class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+							onclick={() => openKnowledge({ collectionId: openCollectionId ?? undefined })}
+							class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
 						>
-							<FolderPlus class="h-4 w-4" />
+							<Plus class="h-4 w-4" />
+							<span class="text-xs">{$LL.newKnowledge()}</span>
 						</button>
-					{/if}
-				</div>
+						{#if !openCollectionId}
+							<button
+								type="button"
+								onclick={() => startNaming('new')}
+								title={$LL.newCollection()}
+								aria-label={$LL.newCollection()}
+								class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+							>
+								<FolderPlus class="h-4 w-4" />
+							</button>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

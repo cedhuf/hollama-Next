@@ -101,6 +101,8 @@ const fr = extendDictionary(en, {
 	editorCode: 'Code',
 	rename: 'Renommer',
 	noCollection: 'Aucune collection',
+	collectionSearchPlaceholder: 'Trouver ou créer une collection',
+	createCollectionNamed: 'Créer « {name:string} »',
 	knowledgeCount: '{count:number} élément{{s}}',
 	deleteCollectionConfirm:
 		'Supprimer la collection {name:string} ? Les connaissances sont conservées.',
