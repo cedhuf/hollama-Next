@@ -44,8 +44,13 @@ Library, from the composer's _Add context_ menu, or from a conversation you deci
 a plain text view and a code view, the second one loaded only if you ask for it.
 
 **Collections** group knowledge. One level, no nesting: a piece of knowledge sits in a collection
-or sits loose. Create one from the folder icon on the _New knowledge_ card in the Library, and file
-knowledge into it from the picker in its editor.
+or sits loose. In the Library each collection is a heading over its own grid, foldable, with the
+ungrouped knowledge last. Nothing to open and nothing to come back from, so what is where stays
+visible.
+
+Create a collection from the folder icon on the _New knowledge_ card: the card becomes the field,
+you type the name, you press Enter. File knowledge into one from the picker in its editor, where
+typing a name that does not exist yet offers to create it.
 
 Attaching a collection to a conversation attaches everything in it, as separate pills, so any one
 of them can be taken back off. Deleting a collection deletes the grouping only: its knowledge comes

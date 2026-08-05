@@ -77,6 +77,8 @@ export interface Settings {
 	seededPersonaNames: string[];
 	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
 	knowledgeCollections: KnowledgeCollection[];
+	/** Ids of the collections folded shut in the Library, so the page opens as it was left. */
+	collapsedCollections: string[];
 	// Home screen layout toggles
 	homeShowHeader: boolean;
 	homeShowSuggestions: boolean;
@@ -150,6 +152,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	defaultPersonasSeeded: false,
 	seededPersonaNames: [],
 	knowledgeCollections: [],
+	collapsedCollections: [],
 	homeShowHeader: true,
 	homeShowSuggestions: true,
 	homeShowRecentPersonas: true,

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		ChevronDown,
-		ChevronLeft,
 		Cpu,
 		Download,
 		FileText,
@@ -32,7 +31,8 @@
 		knowledgeInCollection,
 		parseKnowledgeImport,
 		renameCollection,
-		saveKnowledge
+		saveKnowledge,
+		type Knowledge
 	} from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import {
@@ -51,18 +51,9 @@
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
-	/** The collection being looked inside, or nothing for the top level. */
-	let openCollectionId = $state<string | null>(null);
-
 	const collections = $derived($settingsStore.knowledgeCollections ?? []);
-	const openCollection = $derived(collections.find((c) => c.id === openCollectionId) ?? null);
-	// At the top level, loose knowledge only: what is filed shows inside its folder,
-	// not twice.
-	const visibleKnowledge = $derived(
-		openCollectionId
-			? knowledgeInCollection($knowledgeStore, openCollectionId)
-			: $knowledgeStore.filter((k) => !k.collectionId)
-	);
+	/** Knowledge in no collection, which is where everything starts out. */
+	const looseKnowledge = $derived($knowledgeStore.filter((k) => !k.collectionId));
 
 	/**
 	 * Naming a collection happens where the collection will appear, not in a
@@ -70,41 +61,65 @@
 	 * Enter. Creating and renaming share it, since they are the same act.
 	 */
 	let namingNew = $state(false);
-	let renaming = $state(false);
+	let renamingId = $state<string | null>(null);
 	let draftName = $state('');
 	let nameField = $state<HTMLInputElement | null>(null);
-	let confirmingDelete = $state(false);
+	let confirmingDeleteId = $state<string | null>(null);
 
-	async function startNaming(mode: 'new' | 'rename') {
-		namingNew = mode === 'new';
-		renaming = mode === 'rename';
-		draftName = mode === 'rename' ? (openCollection?.name ?? '') : '';
+	const isCollapsed = (id: string) => ($settingsStore.collapsedCollections ?? []).includes(id);
+
+	function toggleCollapsed(id: string) {
+		const current = $settingsStore.collapsedCollections ?? [];
+		$settingsStore.collapsedCollections = current.includes(id)
+			? current.filter((it) => it !== id)
+			: [...current, id];
+	}
+
+	async function focusName() {
 		await tick();
 		nameField?.select();
 		nameField?.focus();
 	}
 
+	function startNamingNew() {
+		namingNew = true;
+		renamingId = null;
+		draftName = '';
+		void focusName();
+	}
+
+	function startRenaming(id: string, name: string) {
+		renamingId = id;
+		namingNew = false;
+		draftName = name;
+		void focusName();
+	}
+
 	function stopNaming() {
 		namingNew = false;
-		renaming = false;
+		renamingId = null;
 		draftName = '';
 	}
 
 	function commitName() {
 		const name = draftName.trim();
 		if (!name) return stopNaming();
-		if (renaming && openCollection) renameCollection(openCollection.id, name);
-		else if (namingNew) openCollectionId = createCollection(name).id;
+		if (renamingId) renameCollection(renamingId, name);
+		else if (namingNew) createCollection(name);
 		stopNaming();
 	}
 
-	/** Deletes the grouping only: its knowledge comes back to the top level. */
-	function removeOpenCollection() {
-		if (!openCollection) return;
-		deleteCollection(openCollection.id);
-		openCollectionId = null;
-		confirmingDelete = false;
+	function onNameKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') commitName();
+		if (event.key === 'Escape') stopNaming();
 	}
+
+	/** Deletes the grouping only: its knowledge comes back to the top level. */
+	function removeCollection(id: string) {
+		deleteCollection(id);
+		confirmingDeleteId = null;
+	}
+
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
 
@@ -171,6 +186,31 @@
 		});
 	}
 </script>
+
+{#snippet knowledgeCard(knowledge: Knowledge)}
+	<button
+		type="button"
+		onclick={() => openKnowledge({ id: knowledge.id })}
+		class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
+	>
+		<FileText class="h-5 w-5 shrink-0 text-muted" />
+		<div class="min-w-0">
+			<p class="truncate text-sm font-medium text-active">{knowledge.name || $LL.untitled()}</p>
+			<p class="text-[11px] text-muted">{formatTimestampToNow(knowledge.updatedAt)}</p>
+		</div>
+	</button>
+{/snippet}
+
+{#snippet newKnowledgeCard(collectionId: string)}
+	<button
+		type="button"
+		onclick={() => openKnowledge({ collectionId })}
+		class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+	>
+		<Plus class="h-4 w-4" />
+		<span class="text-xs">{$LL.newKnowledge()}</span>
+	</button>
+{/snippet}
 
 <Head title={$LL.library()} />
 
@@ -307,159 +347,155 @@
 
 			<!-- Knowledge -->
 			<div class="mb-3 flex items-baseline gap-2">
-				{#if openCollection}
-					<!-- Inside a collection: a way back, then its name. Two levels is the
-					     whole hierarchy, so a breadcrumb is one button and a title. -->
-					<button
-						type="button"
-						onclick={() => (openCollectionId = null)}
-						class="flex items-center gap-1 text-sm text-muted transition-colors hover:text-active"
-					>
-						<ChevronLeft class="h-4 w-4" />
-						{$LL.knowledge()}
-					</button>
-					{#if renaming}
-						<input
-							bind:this={nameField}
-							bind:value={draftName}
-							onblur={commitName}
-							onkeydown={(event) => {
-								if (event.key === 'Enter') commitName();
-								if (event.key === 'Escape') stopNaming();
-							}}
-							class="min-w-0 rounded-md border border-accent bg-shade-0 px-2 py-0.5 text-sm font-medium text-active outline-none"
-						/>
-					{:else}
-						<button
-							type="button"
-							onclick={() => startNaming('rename')}
-							title={$LL.rename()}
-							class="min-w-0 truncate rounded-md border border-transparent px-1 text-sm font-medium text-active transition-colors hover:border-shade-3"
-						>
-							{openCollection.name}
-						</button>
-						<span class="text-xs text-muted">{visibleKnowledge.length}</span>
-					{/if}
-
-					{#if confirmingDelete}
-						<span class="ml-auto flex items-center gap-2 text-xs text-muted">
-							{$LL.deleteCollectionConfirm({ name: openCollection.name })}
-							<button
-								type="button"
-								onclick={removeOpenCollection}
-								class="font-medium text-negative transition-opacity hover:opacity-80"
-							>
-								{$LL.delete()}
-							</button>
-							<button
-								type="button"
-								onclick={() => (confirmingDelete = false)}
-								class="transition-colors hover:text-active"
-							>
-								{$LL.cancel()}
-							</button>
-						</span>
-					{:else}
-						<button
-							type="button"
-							onclick={() => (confirmingDelete = true)}
-							title={$LL.delete()}
-							aria-label={$LL.delete()}
-							class="ml-auto text-muted transition-colors hover:text-negative"
-						>
-							<Trash2 class="h-4 w-4" />
-						</button>
-					{/if}
-				{:else}
-					<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
-					<span class="text-xs text-muted">{$knowledgeStore.length}</span>
-				{/if}
+				<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
+				<span class="text-xs text-muted">{$knowledgeStore.length}</span>
 			</div>
 
-			<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
-				{#if !openCollectionId}
-					<!-- Collections first, as folders are shown everywhere else: a group is
-					     not a peer of the things inside it. -->
-					{#each collections as collection (collection.id)}
-						{@const count = knowledgeInCollection($knowledgeStore, collection.id).length}
-						<button
-							type="button"
-							onclick={() => (openCollectionId = collection.id)}
-							class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-2 p-3.5 text-left transition-colors hover:border-shade-4"
-						>
-							<Folder class="h-5 w-5 shrink-0 text-muted" />
-							<div class="min-w-0">
-								<p class="truncate text-sm font-medium text-active">{collection.name}</p>
-								<p class="text-[11px] text-muted">{$LL.knowledgeCount({ count })}</p>
-							</div>
-						</button>
-					{/each}
-				{/if}
-
-				{#each visibleKnowledge as knowledge (knowledge.id)}
-					<button
-						type="button"
-						onclick={() => openKnowledge({ id: knowledge.id })}
-						class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
-					>
-						<FileText class="h-5 w-5 shrink-0 text-muted" />
-						<div class="min-w-0">
-							<p class="truncate text-sm font-medium text-active">
-								{knowledge.name || $LL.untitled()}
-							</p>
-							<p class="text-[11px] text-muted">{formatTimestampToNow(knowledge.updatedAt)}</p>
-						</div>
-					</button>
-				{/each}
-
-				<!-- One dashed card, two things: the main action fills it, and the folder
-				     sits at its edge. Making a collection is rarer than writing a piece of
-				     knowledge, so it gets the smaller half. -->
-				{#if namingNew}
-					<!-- The card became the field it was going to create. Nothing opened,
-					     nothing covered the grid, and the name is typed where the folder
-					     will sit. -->
-					<div
-						class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
-					>
-						<Folder class="h-5 w-5 shrink-0 text-muted" />
-						<input
-							bind:this={nameField}
-							bind:value={draftName}
-							onblur={commitName}
-							onkeydown={(event) => {
-								if (event.key === 'Enter') commitName();
-								if (event.key === 'Escape') stopNaming();
-							}}
-							placeholder={$LL.newCollection()}
-							class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
-						/>
-					</div>
-				{:else}
-					<div
-						class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
-					>
-						<button
-							type="button"
-							onclick={() => openKnowledge({ collectionId: openCollectionId ?? undefined })}
-							class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
-						>
-							<Plus class="h-4 w-4" />
-							<span class="text-xs">{$LL.newKnowledge()}</span>
-						</button>
-						{#if !openCollectionId}
+			<!-- One page, no navigation: a collection is a heading over its own grid,
+			     and the cards below it are the same cards as everywhere else. Nothing to
+			     enter, nothing to come back from, and what is where stays visible. -->
+			{#each collections as collection (collection.id)}
+				{@const items = knowledgeInCollection($knowledgeStore, collection.id)}
+				{@const collapsed = isCollapsed(collection.id)}
+				<div class="group/section mb-6">
+					<div class="mb-2 flex items-center gap-2">
+						{#if renamingId === collection.id}
+							<input
+								bind:this={nameField}
+								bind:value={draftName}
+								onblur={commitName}
+								onkeydown={onNameKeydown}
+								class="min-w-0 rounded-md border border-accent bg-shade-0 px-2 py-0.5 text-sm font-medium text-active outline-none"
+							/>
+						{:else}
 							<button
 								type="button"
-								onclick={() => startNaming('new')}
+								onclick={() => toggleCollapsed(collection.id)}
+								aria-expanded={!collapsed}
+								class="flex min-w-0 items-center gap-1.5 text-sm font-medium text-active"
+							>
+								<ChevronDown
+									class="h-3.5 w-3.5 shrink-0 text-muted transition-transform {collapsed
+										? '-rotate-90'
+										: ''}"
+								/>
+								<Folder class="h-4 w-4 shrink-0 text-muted" />
+								<span class="truncate">{collection.name}</span>
+								<span class="shrink-0 text-xs font-normal text-muted">{items.length}</span>
+							</button>
+						{/if}
+
+						{#if confirmingDeleteId === collection.id}
+							<!-- Says what survives, because "delete the folder" reads as "delete
+							     what is in it" to most people, and here it does not. -->
+							<span class="ml-auto flex items-center gap-2 text-xs text-muted">
+								<span class="hidden sm:inline">
+									{$LL.deleteCollectionConfirm({ name: collection.name })}
+								</span>
+								<button
+									type="button"
+									onclick={() => removeCollection(collection.id)}
+									class="font-medium text-negative transition-opacity hover:opacity-80"
+								>
+									{$LL.delete()}
+								</button>
+								<button
+									type="button"
+									onclick={() => (confirmingDeleteId = null)}
+									class="transition-colors hover:text-active"
+								>
+									{$LL.cancel()}
+								</button>
+							</span>
+						{:else}
+							<div
+								class="ml-auto flex shrink-0 items-center gap-0.5 text-muted transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/section:opacity-100"
+							>
+								<button
+									type="button"
+									onclick={() => startRenaming(collection.id, collection.name)}
+									title={$LL.rename()}
+									aria-label={$LL.rename()}
+									class="rounded p-1 transition-colors hover:text-active"
+								>
+									<Pencil class="h-3.5 w-3.5" />
+								</button>
+								<button
+									type="button"
+									onclick={() => (confirmingDeleteId = collection.id)}
+									title={$LL.delete()}
+									aria-label={$LL.delete()}
+									class="rounded p-1 transition-colors hover:text-negative"
+								>
+									<Trash2 class="h-3.5 w-3.5" />
+								</button>
+							</div>
+						{/if}
+					</div>
+
+					{#if !collapsed}
+						<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+							{#each items as knowledge (knowledge.id)}
+								{@render knowledgeCard(knowledge)}
+							{/each}
+							{@render newKnowledgeCard(collection.id)}
+						</div>
+					{/if}
+				</div>
+			{/each}
+
+			<!-- Loose knowledge, last: it is where things start out, and it is the only
+			     section that can make a collection. -->
+			<div class="mb-6">
+				{#if collections.length}
+					<p class="mb-2 text-sm font-medium text-muted">{$LL.ungrouped()}</p>
+				{/if}
+				<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+					{#each looseKnowledge as knowledge (knowledge.id)}
+						{@render knowledgeCard(knowledge)}
+					{/each}
+
+					{#if namingNew}
+						<!-- The card became the field it was going to create. Nothing opened,
+						     nothing covered the grid, and the name is typed where the folder
+						     will sit. -->
+						<div
+							class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
+						>
+							<Folder class="h-5 w-5 shrink-0 text-muted" />
+							<input
+								bind:this={nameField}
+								bind:value={draftName}
+								onblur={commitName}
+								onkeydown={onNameKeydown}
+								placeholder={$LL.newCollection()}
+								class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
+							/>
+						</div>
+					{:else}
+						<div
+							class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+						>
+							<button
+								type="button"
+								onclick={() => openKnowledge()}
+								class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+							>
+								<Plus class="h-4 w-4" />
+								<span class="text-xs">{$LL.newKnowledge()}</span>
+							</button>
+							<button
+								type="button"
+								onclick={startNamingNew}
 								title={$LL.newCollection()}
 								aria-label={$LL.newCollection()}
 								class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
 							>
 								<FolderPlus class="h-4 w-4" />
 							</button>
-						{/if}
-					</div>
-				{/if}
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
