@@ -8,7 +8,8 @@ planned, and what is currently wrong.
 
 For the full list of everything this fork changed from
 [Hollama](https://github.com/fmaclen/hollama), see
-[CHANGES.md](https://github.com/cedhuf/llooma/blob/main/CHANGES.md).
+[Changes from Hollama](/llooma/changes-from-hollama/). For what shipped in which version, see the
+[changelog](/llooma/changelog/).
 
 ## Done
 

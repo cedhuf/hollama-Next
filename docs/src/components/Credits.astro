@@ -1,0 +1,99 @@
+---
+/**
+ * What Llooma is built on.
+ *
+ * One list, edited here. Anything that does real work in the app belongs in it,
+ * with the licence it is used under and a line saying what it actually does:
+ * a credit nobody can read past is not a credit.
+ *
+ * `licence` is omitted where the entry is a service rather than a dependency.
+ */
+interface Credit {
+	name: string;
+	role: string;
+	href: string;
+	licence?: string;
+}
+
+const credits: Credit[] = [
+	{
+		name: 'Hollama',
+		role: 'The project Llooma is a fork of, by fmaclen',
+		href: 'https://github.com/fmaclen/hollama',
+		licence: 'MIT'
+	},
+	{
+		name: 'officeparser',
+		role: 'Reads PDF, Word, PowerPoint and spreadsheets, in your browser',
+		href: 'https://github.com/harshankur/officeParser',
+		licence: 'MIT'
+	},
+	{
+		name: 'pdf.js',
+		role: 'Renders the pages of a scanned PDF so a vision model can read them',
+		href: 'https://mozilla.github.io/pdf.js/',
+		licence: 'Apache-2.0'
+	},
+	{
+		name: 'Svelte and SvelteKit',
+		role: 'The app itself',
+		href: 'https://svelte.dev',
+		licence: 'MIT'
+	},
+	{
+		name: 'Tailwind CSS',
+		role: 'Every style in the interface',
+		href: 'https://tailwindcss.com',
+		licence: 'MIT'
+	},
+	{
+		name: 'Bits UI',
+		role: 'Menus, dialogs and popovers that behave on a keyboard',
+		href: 'https://bits-ui.com',
+		licence: 'MIT'
+	},
+	{
+		name: 'Lucide',
+		role: 'The icons',
+		href: 'https://lucide.dev',
+		licence: 'ISC'
+	},
+	{
+		name: 'KaTeX',
+		role: 'Maths, rendered in a reply',
+		href: 'https://katex.org',
+		licence: 'MIT'
+	},
+	{
+		name: 'Ollama',
+		role: 'Models running on your own machine',
+		href: 'https://ollama.com',
+		licence: 'MIT'
+	},
+	{
+		name: 'Infomaniak',
+		role: 'Models from a Geneva datacentre that recovers its heat to warm nearby homes',
+		href: 'https://www.infomaniak.com'
+	},
+	{
+		name: 'Starlight',
+		role: 'This documentation site',
+		href: 'https://starlight.astro.build',
+		licence: 'MIT'
+	}
+];
+---
+
+<ul class="credits" role="list">
+	{
+		credits.map((credit) => (
+			<li class="credit">
+				<a class="credit__link" href={credit.href}>
+					<span class="credit__name">{credit.name}</span>
+					{credit.licence && <span class="credit__licence">{credit.licence}</span>}
+				</a>
+				<p class="credit__role">{credit.role}</p>
+			</li>
+		))
+	}
+</ul>

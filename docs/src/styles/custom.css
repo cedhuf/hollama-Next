@@ -5,11 +5,12 @@
  * already consistent and accessible, so each rule should earn its place.
  * Colours come from Starlight's own custom properties so both light and dark
  * ramps follow automatically.
+ *
+ * Everything below is used by the home page.
  */
 
-/* The attribution line under the hero: present and readable, but clearly not
-   part of the pitch: it sits between the call to action and the cards, so it
-   has to give way to both. */
+/* The attribution, directly under the name it qualifies. Small and quiet, but
+   the first thing after the title, because being a fork is not a footnote. */
 .fork-note {
 	display: flex;
 	flex-wrap: wrap;
@@ -17,8 +18,8 @@
 	justify-content: center;
 	gap: 0.35rem;
 	width: fit-content;
-	margin: -0.5rem auto 2.5rem;
-	padding: 0.45rem 1rem;
+	margin: -1.5rem auto 3rem;
+	padding: 0.4rem 1rem;
 	border: 1px solid var(--sl-color-gray-5);
 	border-radius: 999px;
 	background: var(--sl-color-gray-6);
@@ -43,4 +44,206 @@
 
 .fork-note a:hover {
 	color: var(--sl-color-text-accent);
+}
+
+/*
+ * A screenshot, framed rather than dropped in.
+ *
+ * The frame is what stops it reading as an illustration someone pasted: a
+ * border, a radius and a shadow make it a window onto the app instead. The glow
+ * behind it picks up the accent colour, faintly, so the block belongs to the
+ * page rather than sitting on top of it.
+ */
+.shot {
+	position: relative;
+	/* The glow sits at a negative z-index, which without this would put it behind
+	   the page background rather than behind the image. */
+	isolation: isolate;
+	margin: 3rem 0;
+}
+
+.shot img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.75rem;
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 0.08),
+		0 12px 32px -12px rgb(0 0 0 / 0.35);
+}
+
+.shot::before {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	inset: 8% 12% -4%;
+	background: radial-gradient(ellipse at center, var(--sl-color-accent-low), transparent 70%);
+	filter: blur(40px);
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.shot figcaption {
+	margin-top: 0.9rem;
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-sm);
+	text-align: center;
+	text-wrap: balance;
+}
+
+/* The opening shot is the argument, so it is allowed past the text column on a
+   wide screen. Clamped, because a screenshot stretched to a 27 inch display
+   stops being readable at exactly the point it stops being useful. */
+@media (min-width: 72rem) {
+	.shot--bleed {
+		width: min(76rem, 100vw - 6rem);
+		margin-inline: calc(50% - min(38rem, 50vw - 3rem));
+	}
+}
+
+/*
+ * A band: a section tinted enough to read as a change of subject, without a
+ * rule across the page or a heading shouting about it.
+ */
+.band {
+	margin: 4rem 0;
+	padding: 2.5rem clamp(1rem, 4vw, 3rem);
+	border: 1px solid var(--sl-color-gray-6);
+	border-radius: 1rem;
+	background: linear-gradient(180deg, var(--sl-color-gray-7, var(--sl-color-gray-6)), transparent);
+}
+
+.band > :first-child {
+	margin-top: 0;
+}
+
+.band .shot {
+	margin-bottom: 0;
+}
+
+/*
+ * The credits.
+ *
+ * Cards rather than a bulleted list: each entry has three things to say (what
+ * it is, what it does here, what it is licensed under) and a list flattens them
+ * into one long line nobody reads to the end of.
+ */
+.credits {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: 1rem;
+	margin: 1.5rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.credit {
+	position: relative;
+	padding: 1rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.75rem;
+	background: var(--sl-color-black);
+	transition:
+		border-color 0.2s,
+		transform 0.2s;
+}
+
+.credit:hover {
+	border-color: var(--sl-color-accent);
+	transform: translateY(-2px);
+}
+
+.credit__link {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.5rem;
+	text-decoration: none;
+}
+
+/* The whole card is the target: the link is the only thing in it worth clicking,
+   and a name three words long is a small target on a phone. */
+.credit__link::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.credit__name {
+	color: var(--sl-color-white);
+	font-size: var(--sl-text-base);
+	font-weight: 600;
+}
+
+.credit:hover .credit__name {
+	color: var(--sl-color-text-accent);
+}
+
+.credit__licence {
+	padding: 0.1rem 0.45rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.35rem;
+	color: var(--sl-color-gray-3);
+	font-family: var(--__sl-font-mono, monospace);
+	font-size: var(--sl-text-xs);
+	white-space: nowrap;
+}
+
+.credit__role {
+	margin: 0.5rem 0 0;
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-sm);
+	line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.credit {
+		transition: none;
+	}
+
+	.credit:hover {
+		transform: none;
+	}
+}
+
+/*
+ * The changelog, one section per release.
+ *
+ * The version and its date belong on the same line: the list underneath is what
+ * the reader came for, and a date on a line of its own pushes it down for no
+ * reason.
+ */
+.release + .release {
+	margin-top: 2.5rem;
+	padding-top: 2.5rem;
+	border-top: 1px solid var(--sl-color-gray-6);
+}
+
+.release h2 {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.75rem;
+	margin-top: 0;
+}
+
+.release-date {
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-sm);
+	font-weight: 400;
+}
+
+.release-tag {
+	padding: 0.1rem 0.45rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.35rem;
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-xs);
+	font-weight: 400;
+}
+
+.release-empty {
+	color: var(--sl-color-gray-3);
 }

@@ -1,8 +1,12 @@
 name: Documentation
 
 # Published on every push to `main` that touches the docs, the API routes or the
-# OpenAPI spec — the spec is rendered into the site, so a route change that
+# OpenAPI spec: the spec is rendered into the site, so a route change that
 # updates it has to reach the published pages too.
+#
+# Also on every published release, because the changelog page is built from the
+# GitHub releases. Without this it would only pick up a new version the next time
+# something else happened to touch the docs.
 on:
   push:
     branches: [main]
@@ -12,6 +16,8 @@ on:
       - 'scripts/api-routes.mjs'
       - 'scripts/check-api-docs.mjs'
       - '.github/workflows/docs.yml'
+  release:
+    types: [published]
   workflow_dispatch:
 
 # One publication at a time, and never cancel one in flight: a half-deployed site
@@ -37,19 +43,24 @@ jobs:
       # The app's own dependencies, for one reason: its `prepare` script runs
       # `svelte-kit sync`, which generates `.svelte-kit/tsconfig.json`. The root
       # `tsconfig.json` extends that generated file, and Astro's resolver reads
-      # the root config on its way up — so without this the docs build fails on a
+      # the root config on its way up, so without this the docs build fails on a
       # clean checkout with "Tsconfig not found", while working on any machine
       # where the app has been built once.
       - name: Install the app (generates .svelte-kit/tsconfig.json)
         run: pnpm install --frozen-lockfile
 
-      # `docs/` is its own pnpm project with its own lockfile — see
+      # `docs/` is its own pnpm project with its own lockfile, see
       # `docs/pnpm-workspace.yaml` for why it is kept out of the app's workspace.
       - name: Install the docs
         run: pnpm --dir docs install --frozen-lockfile
 
+      # The token is only here so the changelog's build-time call to the releases
+      # API is authenticated: a shared runner IP can otherwise be out of
+      # unauthenticated quota before the build even starts.
       - name: Build
         run: pnpm --dir docs run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/configure-pages@v6
 

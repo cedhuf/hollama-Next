@@ -93,8 +93,8 @@ docker compose pull && docker compose up -d
 
 :::note[Pinning a version]
 Some releases remove one-shot migration code. When that happens, the changelog names the version
-to pin so you can upgrade through it first. Check [CHANGES.md](https://github.com/cedhuf/llooma/blob/main/CHANGES.md)
-before jumping several versions at once.
+to pin so you can upgrade through it first. Check the [changelog](/llooma/changelog/) before
+jumping several versions at once.
 :::
 
 ## Connecting to Ollama on another machine

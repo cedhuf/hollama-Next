@@ -1,0 +1,145 @@
+---
+/**
+ * The changelog, read from the GitHub releases at build time.
+ *
+ * Release notes are already written once, by semantic-release, from the commit
+ * log. Copying them into a Markdown file here would mean maintaining a second
+ * copy that drifts the first time someone forgets, so this page fetches the real
+ * ones instead. `docs.yml` rebuilds the site when a release is published, which
+ * is what keeps the page current without anyone touching it.
+ *
+ * A failed fetch is not a failed build: offline, rate-limited or behind a
+ * proxy, the page falls back to pointing at GitHub. A documentation site that
+ * refuses to build because an API was briefly unavailable helps nobody.
+ */
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+const REPO = 'cedhuf/llooma';
+const RELEASES_URL = `https://github.com/${REPO}/releases`;
+
+interface Release {
+	tag: string;
+	name: string;
+	date: string;
+	url: string;
+	prerelease: boolean;
+	body: string;
+}
+
+async function loadReleases(): Promise<Release[] | null> {
+	const headers: Record<string, string> = {
+		accept: 'application/vnd.github+json',
+		'user-agent': 'llooma-docs'
+	};
+	// Actions passes a token so the build is not counted against the shared
+	// unauthenticated quota of whichever runner it lands on.
+	if (process.env.GITHUB_TOKEN) headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+
+	try {
+		const response = await fetch(
+			`https://api.github.com/repos/${REPO}/releases?per_page=50`,
+			{ headers }
+		);
+		if (!response.ok) return null;
+
+		const payload = (await response.json()) as {
+			tag_name: string;
+			name: string | null;
+			published_at: string | null;
+			html_url: string;
+			draft: boolean;
+			prerelease: boolean;
+			body: string | null;
+		}[];
+
+		return payload
+			.filter((release) => !release.draft)
+			.map((release) => ({
+				tag: release.tag_name,
+				name: release.name?.trim() || release.tag_name,
+				date: release.published_at ?? '',
+				url: release.html_url,
+				prerelease: release.prerelease,
+				body: release.body?.trim() || ''
+			}));
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * semantic-release opens every set of notes with a heading repeating the version
+ * and the date, which this page already shows. Kept, it would print each version
+ * twice, once as a heading of the wrong level.
+ */
+function withoutLeadingHeading(body: string): string {
+	return body.replace(/^#{1,3}\s+.*(?:\r?\n)+/, '');
+}
+
+const releases = await loadReleases();
+
+const processor = await createMarkdownProcessor();
+const rendered = releases
+	? await Promise.all(
+			releases.map(async (release) => ({
+				...release,
+				html: release.body
+					? (await processor.render(withoutLeadingHeading(release.body))).code
+					: ''
+			}))
+		)
+	: [];
+
+const formatDate = (iso: string) =>
+	iso
+		? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+		: '';
+---
+
+<StarlightPage
+	frontmatter={{
+		title: 'Changelog',
+		description: 'Every release, straight from the release notes.',
+		tableOfContents: false
+	}}
+>
+	<p>
+		Versions are produced by <a href="https://semantic-release.gitbook.io/">semantic-release</a> from
+		the commit log, so what follows is written by the commits themselves. See
+		<a href="/llooma/development/releases/">Releases</a> for how that works, and
+		<a href="/llooma/changes-from-hollama/">Changes from Hollama</a> for what this fork changed
+		before any of it was versioned.
+	</p>
+
+	{
+		rendered.length === 0 && (
+			<aside class="starlight-aside starlight-aside--note">
+				<p class="starlight-aside__title">The releases could not be read at build time</p>
+				<div class="starlight-aside__content">
+					<p>
+						They are all on <a href={RELEASES_URL}>GitHub</a>, which is where this page gets them
+						from.
+					</p>
+				</div>
+			</aside>
+		)
+	}
+
+	{
+		rendered.map((release) => (
+			<section class="release">
+				<h2 id={release.tag}>
+					<a href={release.url}>{release.name}</a>
+					{release.prerelease && <span class="release-tag">pre-release</span>}
+					<span class="release-date">{formatDate(release.date)}</span>
+				</h2>
+				{release.html ? (
+					<Fragment set:html={release.html} />
+				) : (
+					<p class="release-empty">No notes for this release.</p>
+				)}
+			</section>
+		))
+	}
+</StarlightPage>
