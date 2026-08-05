@@ -38,9 +38,18 @@ Reusable characters with their own avatar, system prompt, model, greeting and kn
 in the Library and pinned to the sidebar. Importable from OpenWebUI model exports. Knowledge
 collections attach to any conversation or persona.
 
-A collection is written in a dialog rather than on a page of its own, so it opens over whatever
-you were doing and hands it back when you are done. Same editor everywhere: from the Library, from
-the composer's _Add context_ menu, or from a conversation you decided to keep.
+A piece of knowledge is written in a dialog rather than on a page of its own, so it opens over
+whatever you were doing and hands it back when you are done. Same editor everywhere: from the
+Library, from the composer's _Add context_ menu, or from a conversation you decided to keep. It has
+a plain text view and a code view, the second one loaded only if you ask for it.
+
+**Collections** group knowledge. One level, no nesting: a piece of knowledge sits in a collection
+or sits loose. Create one from the folder icon on the _New knowledge_ card in the Library, and file
+knowledge into it from the picker in its editor.
+
+Attaching a collection to a conversation attaches everything in it, as separate pills, so any one
+of them can be taken back off. Deleting a collection deletes the grouping only: its knowledge comes
+back to the top level, never with it.
 
 ## Search
 

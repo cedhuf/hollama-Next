@@ -3,6 +3,7 @@ import { version } from '$app/environment';
 
 import type { LloomaMetadata } from '../routes/api/metadata/+server';
 import type { PromptKey } from './defaultPrompts';
+import type { KnowledgeCollection } from './knowledge';
 
 export interface Model {
 	serverId: string;
@@ -74,6 +75,8 @@ export interface Settings {
 	defaultPersonasSeeded: boolean;
 	/** Names of starter personas already seeded, so new defaults backfill without re-adding deleted ones. */
 	seededPersonaNames: string[];
+	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
+	knowledgeCollections: KnowledgeCollection[];
 	// Home screen layout toggles
 	homeShowHeader: boolean;
 	homeShowSuggestions: boolean;
@@ -146,6 +149,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	systemPrompts: { global: '', perModel: {} },
 	defaultPersonasSeeded: false,
 	seededPersonaNames: [],
+	knowledgeCollections: [],
 	homeShowHeader: true,
 	homeShowSuggestions: true,
 	homeShowRecentPersonas: true,

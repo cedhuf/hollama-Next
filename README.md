@@ -72,7 +72,7 @@ Build characters, a coach, a tutor, a companion, each with its own avatar, perso
 
 - Reusable characters with their own avatar, system prompt, model, greeting and knowledge, created in the **Library** and pinned to the sidebar
 - Import personas from a file, including OpenWebUI model exports; three starter personas ship by default
-- Knowledge collections attachable to any conversation or persona
+- **Knowledge** written in a dialog from anywhere, attachable to any conversation or persona, and groupable into **collections** you can attach whole
 
 **Interface**
 

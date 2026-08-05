@@ -4,6 +4,7 @@
 		ChevronLeft,
 		ChevronRight,
 		FileText,
+		Folder,
 		Image,
 		Paperclip,
 		Plus,
@@ -15,6 +16,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Popover from '$lib/components/Popover.svelte';
 	import type { Knowledge } from '$lib/knowledge';
+	import { settingsStore } from '$lib/localStorage';
 	import { openKnowledge } from '$lib/stores/modal';
 
 	/**
@@ -49,6 +51,8 @@
 		onPickDocuments
 	}: Props = $props();
 
+	const collections = $derived($settingsStore.knowledgeCollections ?? []);
+
 	let open = $state(false);
 	let view = $state<'root' | 'knowledge'>('root');
 	let search = $state('');
@@ -70,6 +74,11 @@
 
 	function pick(item: Knowledge) {
 		onPickKnowledge(item);
+		open = false;
+	}
+
+	function pickCollection(items: Knowledge[]) {
+		for (const item of items) onPickKnowledge(item);
 		open = false;
 	}
 
@@ -171,15 +180,41 @@
 					<Command.Empty class="px-2.5 py-3 text-center text-xs text-muted">
 						{knowledge.length ? $LL.searchEmpty() : $LL.emptyKnowledge()}
 					</Command.Empty>
+
+					<!-- A collection attaches as one gesture, which is what grouping was
+					     for. Its pieces stay separate pills afterwards, so any one of them
+					     can be taken back off. -->
+					{#each collections as collection (collection.id)}
+						{@const items = knowledge.filter((item) => item.collectionId === collection.id)}
+						{#if items.length}
+							<Command.Item
+								value={collection.name}
+								keywords={items.map((item) => item.name)}
+								onSelect={() => pickCollection(items)}
+								class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-active transition-colors data-[selected]:bg-shade-1"
+							>
+								<Folder class="h-4 w-4 shrink-0 text-muted" />
+								<span class="min-w-0 flex-1 truncate">{collection.name}</span>
+								<span class="shrink-0 text-xs tabular-nums text-muted">{items.length}</span>
+							</Command.Item>
+						{/if}
+					{/each}
+
 					{#each knowledge as item (item.id)}
+						{@const collection = collections.find((c) => c.id === item.collectionId)}
 						<Command.Item
 							value={item.name}
-							keywords={[item.id]}
+							keywords={collection ? [collection.name] : undefined}
 							onSelect={() => pick(item)}
 							class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-active transition-colors data-[selected]:bg-shade-1"
 						>
 							<Brain class="h-4 w-4 shrink-0 text-muted" />
-							<span class="truncate">{item.name}</span>
+							<span class="min-w-0 flex-1 truncate">{item.name}</span>
+							{#if collection}
+								<!-- Which folder it came out of, so two similarly named pieces of
+								     knowledge are told apart without opening either. -->
+								<span class="shrink-0 truncate text-[11px] text-muted">{collection.name}</span>
+							{/if}
 						</Command.Item>
 					{/each}
 				</Command.Viewport>

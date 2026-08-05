@@ -324,7 +324,7 @@ type RootTranslation = {
 	 */
 	knowledgeModalHint: string
 	/**
-	 * N​a​m​e​ ​t​h​i​s​ ​c​o​l​l​e​c​t​i​o​n
+	 * N​a​m​e​ ​t​h​i​s​ ​k​n​o​w​l​e​d​g​e
 	 */
 	knowledgeNamePlaceholder: string
 	/**
@@ -344,6 +344,24 @@ type RootTranslation = {
 	 * C​o​d​e
 	 */
 	editorCode: string
+	/**
+	 * R​e​n​a​m​e
+	 */
+	rename: string
+	/**
+	 * N​o​ ​c​o​l​l​e​c​t​i​o​n
+	 */
+	noCollection: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​i​t​e​m​|​i​t​e​m​s​}​}
+	 * @param {number} count
+	 */
+	knowledgeCount: RequiredParams<'count'>
+	/**
+	 * D​e​l​e​t​e​ ​t​h​e​ ​c​o​l​l​e​c​t​i​o​n​ ​{​n​a​m​e​}​?​ ​I​t​s​ ​k​n​o​w​l​e​d​g​e​ ​i​s​ ​k​e​p​t​.
+	 * @param {string} name
+	 */
+	deleteCollectionConfirm: RequiredParams<'name'>
 	/**
 	 * {​c​o​u​n​t​}​ ​{​{​p​a​g​e​|​p​a​g​e​s​}​}
 	 * @param {number} count
@@ -1267,7 +1285,7 @@ type RootTranslation = {
 	 */
 	importedPersonas: RequiredParams<'count'>
 	/**
-	 * I​m​p​o​r​t​e​d​ ​{​c​o​u​n​t​}​ ​c​o​l​l​e​c​t​i​o​n​{​{​s​}​}
+	 * I​m​p​o​r​t​e​d​ ​{​c​o​u​n​t​}​ ​k​n​o​w​l​e​d​g​e​ ​i​t​e​m​{​{​s​}​}
 	 * @param {number} count
 	 */
 	importedCollections: RequiredParams<'count'>
@@ -2331,7 +2349,7 @@ The completion in progress will stop
 	 */
 	knowledgeModalHint: () => LocalizedString
 	/**
-	 * Name this collection
+	 * Name this knowledge
 	 */
 	knowledgeNamePlaceholder: () => LocalizedString
 	/**
@@ -2350,6 +2368,22 @@ The completion in progress will stop
 	 * Code
 	 */
 	editorCode: () => LocalizedString
+	/**
+	 * Rename
+	 */
+	rename: () => LocalizedString
+	/**
+	 * No collection
+	 */
+	noCollection: () => LocalizedString
+	/**
+	 * {count} {{item|items}}
+	 */
+	knowledgeCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * Delete the collection {name}? Its knowledge is kept.
+	 */
+	deleteCollectionConfirm: (arg: { name: string }) => LocalizedString
 	/**
 	 * {count} {{page|pages}}
 	 */
@@ -3259,7 +3293,7 @@ The completion in progress will stop
 	 */
 	importedPersonas: (arg: { count: number }) => LocalizedString
 	/**
-	 * Imported {count} collection{{s}}
+	 * Imported {count} knowledge item{{s}}
 	 */
 	importedCollections: (arg: { count: number }) => LocalizedString
 	/**

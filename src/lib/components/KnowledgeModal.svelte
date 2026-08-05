@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Brain, Code, Trash2, Type } from '@lucide/svelte';
+	import { Brain, Code, Folder, Trash2, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { loadKnowledge, saveKnowledge } from '$lib/knowledge';
-	import { knowledgeStore } from '$lib/localStorage';
+	import { knowledgeStore, settingsStore } from '$lib/localStorage';
 	import { knowledgeDraft, knowledgeModalOpen } from '$lib/stores/modal';
 	import { formatTimestampToNow, generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
@@ -25,8 +25,11 @@
 	let name = $state('');
 	let content = $state('');
 	let updatedAt = $state('');
+	let collectionId = $state('');
 	let confirmingDelete = $state(false);
 	let nameInput = $state<HTMLInputElement | null>(null);
+
+	const collections = $derived($settingsStore.knowledgeCollections ?? []);
 	/** Kept across openings: whoever wants the code view usually wants it every time. */
 	let view = $state<'text' | 'code'>('text');
 
@@ -46,6 +49,7 @@
 		id = draft.id ?? generateRandomId();
 		name = draft.name ?? existing?.name ?? '';
 		content = draft.content ?? existing?.content ?? '';
+		collectionId = draft.collectionId ?? existing?.collectionId ?? '';
 		updatedAt = existing?.updatedAt ?? '';
 		confirmingDelete = false;
 
@@ -60,6 +64,7 @@
 			id,
 			name: name.trim(),
 			content,
+			collectionId: collectionId || undefined,
 			updatedAt: getUpdatedAtDate()
 		});
 		toast.success($LL.knowledgeSaved());
@@ -123,10 +128,27 @@
 			/>
 
 			<!-- Two ways to write the same field. Plain text is the default because
-			     most collections are prose; the code view is for the ones that are a
+			     most knowledge is prose; the code view is for the ones that are a
 			     schema or a config, where line numbers and a monospace grid are the
 			     difference between readable and not. -->
-			<div class="flex items-center justify-end">
+			<div class="flex items-center justify-between gap-3">
+				{#if collections.length}
+					<label class="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+						<Folder class="h-3.5 w-3.5 shrink-0" />
+						<select
+							bind:value={collectionId}
+							class="min-w-0 max-w-48 truncate rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs text-active outline-none focus:border-accent"
+						>
+							<option value="">{$LL.noCollection()}</option>
+							{#each collections as collection (collection.id)}
+								<option value={collection.id}>{collection.name}</option>
+							{/each}
+						</select>
+					</label>
+				{:else}
+					<span></span>
+				{/if}
+
 				<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
 					{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
 						{@const Icon = tab.icon}

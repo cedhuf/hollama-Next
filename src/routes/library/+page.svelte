@@ -1,9 +1,13 @@
 <script lang="ts">
 	import {
 		ChevronDown,
+		ChevronLeft,
 		Cpu,
 		Download,
+		FileText,
+		Folder,
 		FolderOpen,
+		FolderPlus,
 		Pencil,
 		Plus,
 		Upload,
@@ -20,7 +24,14 @@
 	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
-	import { parseKnowledgeImport, saveKnowledge } from '$lib/knowledge';
+	import {
+		createCollection,
+		deleteCollection,
+		knowledgeInCollection,
+		parseKnowledgeImport,
+		renameCollection,
+		saveKnowledge
+	} from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import {
 		installPersona,
@@ -38,6 +49,37 @@
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
+	/** The collection being looked inside, or nothing for the top level. */
+	let openCollectionId = $state<string | null>(null);
+
+	const collections = $derived($settingsStore.knowledgeCollections ?? []);
+	const openCollection = $derived(collections.find((c) => c.id === openCollectionId) ?? null);
+	// At the top level, loose knowledge only: what is filed shows inside its folder,
+	// not twice.
+	const visibleKnowledge = $derived(
+		openCollectionId
+			? knowledgeInCollection($knowledgeStore, openCollectionId)
+			: $knowledgeStore.filter((k) => !k.collectionId)
+	);
+
+	function addCollection() {
+		const name = window.prompt($LL.newCollection())?.trim();
+		if (name) openCollectionId = createCollection(name).id;
+	}
+
+	function renameOpenCollection() {
+		if (!openCollection) return;
+		const name = window.prompt($LL.rename(), openCollection.name)?.trim();
+		if (name) renameCollection(openCollection.id, name);
+	}
+
+	/** Deletes the grouping only: its knowledge comes back to the top level. */
+	function removeOpenCollection() {
+		if (!openCollection) return;
+		if (!window.confirm($LL.deleteCollectionConfirm({ name: openCollection.name }))) return;
+		deleteCollection(openCollection.id);
+		openCollectionId = null;
+	}
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
 
@@ -240,18 +282,66 @@
 
 			<!-- Knowledge -->
 			<div class="mb-3 flex items-baseline gap-2">
-				<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
-				<span class="text-xs text-muted">{$knowledgeStore.length}</span>
+				{#if openCollection}
+					<!-- Inside a collection: a way back, then its name. Two levels is the
+					     whole hierarchy, so a breadcrumb is one button and a title. -->
+					<button
+						type="button"
+						onclick={() => (openCollectionId = null)}
+						class="flex items-center gap-1 text-sm text-muted transition-colors hover:text-active"
+					>
+						<ChevronLeft class="h-4 w-4" />
+						{$LL.knowledge()}
+					</button>
+					<h2 class="min-w-0 truncate text-sm font-medium text-active">{openCollection.name}</h2>
+					<span class="text-xs text-muted">{visibleKnowledge.length}</span>
+					<button
+						type="button"
+						onclick={() => renameOpenCollection()}
+						class="text-xs text-muted transition-colors hover:text-active"
+					>
+						{$LL.rename()}
+					</button>
+					<button
+						type="button"
+						onclick={() => removeOpenCollection()}
+						class="text-xs text-muted transition-colors hover:text-negative"
+					>
+						{$LL.delete()}
+					</button>
+				{:else}
+					<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
+					<span class="text-xs text-muted">{$knowledgeStore.length}</span>
+				{/if}
 			</div>
 
 			<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
-				{#each $knowledgeStore as knowledge (knowledge.id)}
+				{#if !openCollectionId}
+					<!-- Collections first, as folders are shown everywhere else: a group is
+					     not a peer of the things inside it. -->
+					{#each collections as collection (collection.id)}
+						{@const count = knowledgeInCollection($knowledgeStore, collection.id).length}
+						<button
+							type="button"
+							onclick={() => (openCollectionId = collection.id)}
+							class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-2 p-3.5 text-left transition-colors hover:border-shade-4"
+						>
+							<Folder class="h-5 w-5 shrink-0 text-muted" />
+							<div class="min-w-0">
+								<p class="truncate text-sm font-medium text-active">{collection.name}</p>
+								<p class="text-[11px] text-muted">{$LL.knowledgeCount({ count })}</p>
+							</div>
+						</button>
+					{/each}
+				{/if}
+
+				{#each visibleKnowledge as knowledge (knowledge.id)}
 					<button
 						type="button"
 						onclick={() => openKnowledge({ id: knowledge.id })}
 						class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
 					>
-						<FolderOpen class="h-5 w-5 shrink-0 text-muted" />
+						<FileText class="h-5 w-5 shrink-0 text-muted" />
 						<div class="min-w-0">
 							<p class="truncate text-sm font-medium text-active">
 								{knowledge.name || $LL.untitled()}
@@ -261,14 +351,32 @@
 					</button>
 				{/each}
 
-				<button
-					type="button"
-					onclick={() => openKnowledge()}
-					class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+				<!-- One dashed card, two things: the main action fills it, and the folder
+				     sits at its edge. Making a collection is rarer than writing a piece of
+				     knowledge, so it gets the smaller half. -->
+				<div
+					class="group flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
 				>
-					<Plus class="h-4 w-4" />
-					<span class="text-xs">{$LL.newCollection()}</span>
-				</button>
+					<button
+						type="button"
+						onclick={() => openKnowledge({ collectionId: openCollectionId ?? undefined })}
+						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+					>
+						<Plus class="h-4 w-4" />
+						<span class="text-xs">{$LL.newKnowledge()}</span>
+					</button>
+					{#if !openCollectionId}
+						<button
+							type="button"
+							onclick={() => addCollection()}
+							title={$LL.newCollection()}
+							aria-label={$LL.newCollection()}
+							class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+						>
+							<FolderPlus class="h-4 w-4" />
+						</button>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>

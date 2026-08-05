@@ -26,10 +26,12 @@ export function openSearch(query = ''): void {
  * and meant the same editor had to exist twice once anything else needed it.
  */
 export interface KnowledgeDraft {
-	/** Existing collection to edit, or nothing to start a new one. */
+	/** Existing knowledge to edit, or nothing to start a new one. */
 	id?: string;
 	name?: string;
 	content?: string;
+	/** Which collection a new one lands in, when opened from inside one. */
+	collectionId?: string;
 }
 
 export const knowledgeModalOpen = writable(false);
