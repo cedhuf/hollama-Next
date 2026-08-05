@@ -43,15 +43,16 @@
 			!collections.some((collection) => collection.name.toLowerCase() === typed.toLowerCase())
 	);
 
+	// Focus follows the panel opening rather than a click handler on the trigger:
+	// the trigger's own click is what opens it, and putting ours there replaced it,
+	// which is why the button did nothing at all.
 	$effect(() => {
-		if (open) return;
-		search = '';
+		if (!open) {
+			search = '';
+			return;
+		}
+		void tick().then(() => searchInput?.focus());
 	});
-
-	async function onOpen() {
-		await tick();
-		searchInput?.focus();
-	}
 
 	function choose(id: string) {
 		value = id;
@@ -69,7 +70,6 @@
 		<button
 			{...props}
 			type="button"
-			onclick={onOpen}
 			data-testid="collection-select"
 			class="flex items-center gap-1.5 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs transition-colors hover:border-shade-4 data-[state=open]:border-accent {className}"
 		>
