@@ -97,6 +97,8 @@ const fr = extendDictionary(en, {
 	knowledgeNamePlaceholder: 'Nommer cette collection',
 	knowledgeContentPlaceholder: 'Collez ou écrivez ce que le modèle doit savoir',
 	knowledgeTokens: '~{tokens:string} tokens',
+	editorPlain: 'Texte',
+	editorCode: 'Code',
 	pageCount: '{count:number} page{{s}}',
 	documentFailed: '{name:string} n’a pas pu être lu',
 	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',

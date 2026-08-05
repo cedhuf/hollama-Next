@@ -337,6 +337,14 @@ type RootTranslation = {
 	 */
 	knowledgeTokens: RequiredParams<'tokens'>
 	/**
+	 * T​e​x​t
+	 */
+	editorPlain: string
+	/**
+	 * C​o​d​e
+	 */
+	editorCode: string
+	/**
 	 * {​c​o​u​n​t​}​ ​{​{​p​a​g​e​|​p​a​g​e​s​}​}
 	 * @param {number} count
 	 */
@@ -2334,6 +2342,14 @@ The completion in progress will stop
 	 * ~{tokens} tokens
 	 */
 	knowledgeTokens: (arg: { tokens: string }) => LocalizedString
+	/**
+	 * Text
+	 */
+	editorPlain: () => LocalizedString
+	/**
+	 * Code
+	 */
+	editorCode: () => LocalizedString
 	/**
 	 * {count} {{page|pages}}
 	 */

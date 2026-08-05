@@ -84,6 +84,8 @@ const en = {
 	knowledgeNamePlaceholder: 'Name this collection',
 	knowledgeContentPlaceholder: 'Paste or write what the model should know',
 	knowledgeTokens: '~{tokens:string} tokens',
+	editorPlain: 'Text',
+	editorCode: 'Code',
 	pageCount: '{count:number} {{page|pages}}',
 	documentFailed: '{name:string} could not be read',
 	documentEmpty: 'No text could be read from {name:string}',

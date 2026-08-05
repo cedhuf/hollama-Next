@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, Trash2 } from '@lucide/svelte';
+	import { Brain, Code, Trash2, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -10,6 +10,7 @@
 	import { formatTimestampToNow, generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
 	import Button from './Button.svelte';
+	import CodeEditor from './CodeEditor.svelte';
 	import Modal from './Modal.svelte';
 
 	/**
@@ -26,6 +27,8 @@
 	let updatedAt = $state('');
 	let confirmingDelete = $state(false);
 	let nameInput = $state<HTMLInputElement | null>(null);
+	/** Kept across openings: whoever wants the code view usually wants it every time. */
+	let view = $state<'text' | 'code'>('text');
 
 	const isNew = $derived(!updatedAt);
 	const canSave = $derived(!!name.trim() && !!content.trim());
@@ -106,22 +109,52 @@
 		</header>
 
 		<div class="flex min-h-0 flex-1 flex-col gap-3 px-5 py-4">
-			<!-- The name reads as the collection's title rather than as a form field:
-			     it is the only short thing on a screen otherwise full of prose. -->
+			<!-- The name reads as the collection's title rather than as a form field,
+			     but a title with nothing in it reads as a heading nobody can type in.
+			     A border on hover and focus says otherwise without turning it back
+			     into a box that sits there all day. -->
 			<input
 				bind:this={nameInput}
 				bind:value={name}
 				name="name"
 				placeholder={$LL.knowledgeNamePlaceholder()}
 				spellcheck="false"
-				class="w-full bg-transparent text-lg font-semibold text-active outline-none placeholder:font-normal placeholder:text-muted"
+				class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-active outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 focus:border-accent focus:bg-shade-0"
 			/>
 
-			<textarea
-				bind:value={content}
-				placeholder={$LL.knowledgeContentPlaceholder()}
-				class="min-h-0 w-full flex-1 resize-none rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
-			></textarea>
+			<!-- Two ways to write the same field. Plain text is the default because
+			     most collections are prose; the code view is for the ones that are a
+			     schema or a config, where line numbers and a monospace grid are the
+			     difference between readable and not. -->
+			<div class="flex items-center justify-end">
+				<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
+					{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
+						{@const Icon = tab.icon}
+						<button
+							type="button"
+							onclick={() => (view = tab.id as 'text' | 'code')}
+							aria-pressed={view === tab.id}
+							class="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors {view ===
+							tab.id
+								? 'bg-shade-0 text-active shadow-sm'
+								: 'text-muted hover:text-active'}"
+						>
+							<Icon class="h-3.5 w-3.5" />
+							{tab.label}
+						</button>
+					{/each}
+				</div>
+			</div>
+
+			{#if view === 'code'}
+				<CodeEditor bind:value={content} onSubmit={save} />
+			{:else}
+				<textarea
+					bind:value={content}
+					placeholder={$LL.knowledgeContentPlaceholder()}
+					class="min-h-0 w-full flex-1 resize-none rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
+				></textarea>
+			{/if}
 		</div>
 
 		<footer class="flex items-center gap-2 border-t border-shade-3 px-5 py-3">
