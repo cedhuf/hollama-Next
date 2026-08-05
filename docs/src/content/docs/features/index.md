@@ -38,6 +38,10 @@ Reusable characters with their own avatar, system prompt, model, greeting and kn
 in the Library and pinned to the sidebar. Importable from OpenWebUI model exports. Knowledge
 collections attach to any conversation or persona.
 
+A collection is written in a dialog rather than on a page of its own, so it opens over whatever
+you were doing and hands it back when you are done. Same editor everywhere: from the Library, from
+the composer's _Add context_ menu, or from a conversation you decided to keep.
+
 ## Search
 
 Full-text search across every conversation, ranked by relevance, with the matching passage shown
@@ -49,10 +53,12 @@ Six themes, each with a light and a dark ramp, following the system by default. 
 installable as a PWA, English and French with automatic fallback. Import and export each kind of
 data, or a full backup.
 
-Right-click a conversation in the sidebar to pin it, keep it as a knowledge collection, or delete
-it. Deleting still asks on the row itself. The same pin and delete can sit on every row instead,
-one click closer: _Settings → Interface → Sidebar_. They are off by default, since they hover over
-the title on a narrow sidebar and put delete next to the conversation you meant to open.
+Right-click a conversation in the sidebar to pin it, keep it as a knowledge collection, copy it as
+Markdown or JSON, or delete it. Deleting still asks on the row itself. The same pin and delete can
+sit on every row instead, one click closer: _Settings → Interface → Sidebar_. They are off by
+default, since they hover over the title on a narrow sidebar and put delete next to the
+conversation you meant to open.
 
-Keeping a conversation as knowledge takes the same transcript as the Markdown export, as a copy: it
-does not keep following the conversation afterwards.
+Keeping a conversation as knowledge opens the editor with the transcript already in it, so it can
+be named and trimmed before it exists. Same transcript the Markdown export produces, and a copy:
+it does not keep following the conversation afterwards.

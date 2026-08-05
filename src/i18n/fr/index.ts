@@ -91,7 +91,12 @@ const fr = extendDictionary(en, {
 	showListQuickActionsHelp:
 		'Désactivé, les deux restent dans le menu contextuel, où ils ne recouvrent aucun titre et ne se cliquent pas par erreur. Ce menu permet aussi de garder une conversation en connaissance.',
 	saveAsKnowledge: 'Garder en connaissance',
-	savedAsKnowledge: '{name:string} enregistré en connaissance',
+	copyAsMarkdown: 'Copier en Markdown',
+	copyAsJson: 'Copier en JSON',
+	knowledgeModalHint: 'Notes, références, tout ce qui vaut d’être redonné à un modèle',
+	knowledgeNamePlaceholder: 'Nommer cette collection',
+	knowledgeContentPlaceholder: 'Collez ou écrivez ce que le modèle doit savoir',
+	knowledgeTokens: '~{tokens:string} tokens',
 	pageCount: '{count:number} page{{s}}',
 	documentFailed: '{name:string} n’a pas pu être lu',
 	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',

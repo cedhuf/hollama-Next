@@ -18,12 +18,11 @@
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
-	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import ThinkingIndicator from '$lib/components/ThinkingIndicator.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { type Message } from '$lib/sessions';
-	import { Sitemap } from '$lib/sitemap';
+	import { openKnowledge } from '$lib/stores/modal';
 
 	import ActivityText from './ActivityText.svelte';
 	import AskChoices from './AskChoices.svelte';
@@ -225,7 +224,7 @@
 				<Brain class="base-icon" />
 			</div>
 			<div class="attachment__name text-sm">
-				<Button variant="link" href={generateNewUrl(Sitemap.KNOWLEDGE, message.knowledge?.id)}>
+				<Button variant="link" onclick={() => openKnowledge({ id: message.knowledge?.id })}>
 					{message.knowledge?.name}
 				</Button>
 			</div>

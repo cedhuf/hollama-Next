@@ -78,7 +78,12 @@ const en = {
 	showListQuickActionsHelp:
 		'Off, both stay in the right-click menu, where they cannot cover a title or be clicked by mistake. The menu also keeps a conversation as knowledge.',
 	saveAsKnowledge: 'Save as knowledge',
-	savedAsKnowledge: '{name:string} saved as knowledge',
+	copyAsMarkdown: 'Copy as Markdown',
+	copyAsJson: 'Copy as JSON',
+	knowledgeModalHint: 'Notes, references, anything worth handing to a model again',
+	knowledgeNamePlaceholder: 'Name this collection',
+	knowledgeContentPlaceholder: 'Paste or write what the model should know',
+	knowledgeTokens: '~{tokens:string} tokens',
 	pageCount: '{count:number} {{page|pages}}',
 	documentFailed: '{name:string} could not be read',
 	documentEmpty: 'No text could be read from {name:string}',

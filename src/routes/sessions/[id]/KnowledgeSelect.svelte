@@ -3,10 +3,9 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import FieldSelect from '$lib/components/FieldSelect.svelte';
 	import { type Knowledge } from '$lib/knowledge';
-	import { Sitemap } from '$lib/sitemap';
+	import { openKnowledge } from '$lib/stores/modal';
 
 	let {
 		value = $bindable(''),
@@ -43,7 +42,7 @@
 			<Button
 				aria-label={$LL.newKnowledge()}
 				variant="outline"
-				href={generateNewUrl(Sitemap.KNOWLEDGE)}
+				onclick={() => openKnowledge()}
 				class="h-full text-muted"
 			>
 				<Brain class="base-icon" />

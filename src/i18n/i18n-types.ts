@@ -312,10 +312,30 @@ type RootTranslation = {
 	 */
 	saveAsKnowledge: string
 	/**
-	 * {​n​a​m​e​}​ ​s​a​v​e​d​ ​a​s​ ​k​n​o​w​l​e​d​g​e
-	 * @param {string} name
+	 * C​o​p​y​ ​a​s​ ​M​a​r​k​d​o​w​n
 	 */
-	savedAsKnowledge: RequiredParams<'name'>
+	copyAsMarkdown: string
+	/**
+	 * C​o​p​y​ ​a​s​ ​J​S​O​N
+	 */
+	copyAsJson: string
+	/**
+	 * N​o​t​e​s​,​ ​r​e​f​e​r​e​n​c​e​s​,​ ​a​n​y​t​h​i​n​g​ ​w​o​r​t​h​ ​h​a​n​d​i​n​g​ ​t​o​ ​a​ ​m​o​d​e​l​ ​a​g​a​i​n
+	 */
+	knowledgeModalHint: string
+	/**
+	 * N​a​m​e​ ​t​h​i​s​ ​c​o​l​l​e​c​t​i​o​n
+	 */
+	knowledgeNamePlaceholder: string
+	/**
+	 * P​a​s​t​e​ ​o​r​ ​w​r​i​t​e​ ​w​h​a​t​ ​t​h​e​ ​m​o​d​e​l​ ​s​h​o​u​l​d​ ​k​n​o​w
+	 */
+	knowledgeContentPlaceholder: string
+	/**
+	 * ~​{​t​o​k​e​n​s​}​ ​t​o​k​e​n​s
+	 * @param {string} tokens
+	 */
+	knowledgeTokens: RequiredParams<'tokens'>
 	/**
 	 * {​c​o​u​n​t​}​ ​{​{​p​a​g​e​|​p​a​g​e​s​}​}
 	 * @param {number} count
@@ -2291,9 +2311,29 @@ The completion in progress will stop
 	 */
 	saveAsKnowledge: () => LocalizedString
 	/**
-	 * {name} saved as knowledge
+	 * Copy as Markdown
 	 */
-	savedAsKnowledge: (arg: { name: string }) => LocalizedString
+	copyAsMarkdown: () => LocalizedString
+	/**
+	 * Copy as JSON
+	 */
+	copyAsJson: () => LocalizedString
+	/**
+	 * Notes, references, anything worth handing to a model again
+	 */
+	knowledgeModalHint: () => LocalizedString
+	/**
+	 * Name this collection
+	 */
+	knowledgeNamePlaceholder: () => LocalizedString
+	/**
+	 * Paste or write what the model should know
+	 */
+	knowledgeContentPlaceholder: () => LocalizedString
+	/**
+	 * ~{tokens} tokens
+	 */
+	knowledgeTokens: (arg: { tokens: string }) => LocalizedString
 	/**
 	 * {count} {{page|pages}}
 	 */

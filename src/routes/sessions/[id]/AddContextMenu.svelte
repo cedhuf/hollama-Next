@@ -13,11 +13,9 @@
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { goto } from '$app/navigation';
-	import { generateNewUrl } from '$lib/components/ButtonNew';
 	import Popover from '$lib/components/Popover.svelte';
 	import type { Knowledge } from '$lib/knowledge';
-	import { Sitemap } from '$lib/sitemap';
+	import { openKnowledge } from '$lib/stores/modal';
 
 	/**
 	 * The one way to attach context to the next message.
@@ -64,7 +62,7 @@
 		search = '';
 	});
 
-	async function openKnowledge() {
+	async function showKnowledgeView() {
 		view = 'knowledge';
 		await tick();
 		searchInput?.focus();
@@ -87,7 +85,7 @@
 
 	function newKnowledge() {
 		open = false;
-		goto(generateNewUrl(Sitemap.KNOWLEDGE));
+		openKnowledge();
 	}
 </script>
 
@@ -129,7 +127,7 @@
 
 		<button
 			type="button"
-			onclick={openKnowledge}
+			onclick={showKnowledgeView}
 			data-testid="add-knowledge"
 			class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
 		>

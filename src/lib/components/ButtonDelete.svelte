@@ -22,9 +22,11 @@
 		shouldConfirmDeletion = false;
 
 		switch (sitemap) {
+			// No navigation: a collection is edited in a dialog, so there is nowhere
+			// to be sent back to once it is gone.
 			case Sitemap.KNOWLEDGE:
 				knowledgeStore.remove(id);
-				return goto(resolve('/knowledge'));
+				return;
 
 			case Sitemap.SESSIONS:
 				sessionsStore.remove(id);

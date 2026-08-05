@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Brain, Pin, PinOff, Trash2 } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
+	import { Braces, Brain, FileText, Pin, PinOff, Trash2 } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { copyText } from '$lib/clipboard';
+	import { repository } from '$lib/data';
 	import { settingsStore } from '$lib/localStorage';
-	import { saveSessionAsKnowledge } from '$lib/sessionExport';
+	import { serializeSession, sessionAsKnowledgeDraft, type ExportFormat } from '$lib/sessionExport';
 	import { toggleSessionPin } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
+	import { openKnowledge } from '$lib/stores/modal';
 
 	import ButtonDelete from './ButtonDelete.svelte';
 	import { generateNewUrl } from './ButtonNew';
@@ -39,15 +40,22 @@
 	 */
 	const showQuickActions = $derived($settingsStore.showListQuickActions === true);
 
+	/**
+	 * Offer the transcript, don't file it.
+	 *
+	 * The editor opens with the conversation already in it, so the collection can
+	 * be named and trimmed before it exists. Writing it straight to the library
+	 * left people with an item called after the conversation, holding everything
+	 * that was ever said in it, which is rarely what they wanted to keep.
+	 */
 	async function saveAsKnowledge() {
-		const knowledge = await saveSessionAsKnowledge(id);
-		if (!knowledge) return;
-		toast.success($LL.savedAsKnowledge({ name: knowledge.name }), {
-			action: {
-				label: $LL.goToKnowledge(),
-				onClick: () => void goto(generateNewUrl(Sitemap.KNOWLEDGE, knowledge.id))
-			}
-		});
+		const draft = await sessionAsKnowledgeDraft(id);
+		if (draft) openKnowledge(draft);
+	}
+
+	async function copyAs(format: ExportFormat) {
+		const session = await repository.loadSession(id);
+		if (session) await copyText(serializeSession(session, format));
 	}
 </script>
 
@@ -107,6 +115,18 @@
 			<MenuItem icon={Brain} onclick={() => void saveAsKnowledge()}>
 				{$LL.saveAsKnowledge()}
 			</MenuItem>
+
+			<div class="my-1 h-px bg-shade-3" role="none"></div>
+
+			<!-- The same two formats the conversation's own copy menu offers, so what
+			     "copy this conversation" produces does not depend on where you asked. -->
+			<MenuItem icon={FileText} onclick={() => void copyAs('markdown')}>
+				{$LL.copyAsMarkdown()}
+			</MenuItem>
+			<MenuItem icon={Braces} onclick={() => void copyAs('json')}>
+				{$LL.copyAsJson()}
+			</MenuItem>
+
 			<div class="my-1 h-px bg-shade-3" role="none"></div>
 		{/if}
 

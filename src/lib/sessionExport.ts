@@ -1,7 +1,5 @@
 import { repository } from '$lib/data';
-import { saveKnowledge, type Knowledge } from '$lib/knowledge';
 import { resolveSessionTitle, type Message, type Session } from '$lib/sessions';
-import { generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
 export type ExportFormat = 'json' | 'markdown';
 
@@ -104,26 +102,25 @@ export function serializeSession(
 }
 
 /**
- * Keep a conversation as a knowledge collection.
+ * A conversation, ready to become a knowledge collection.
  *
  * What was worked out in a conversation is often what you want to hand to the
- * next one, and copying the transcript by hand to paste it into a new knowledge
- * item was the only way to do it. Same transcript as the Markdown export, so
- * there is one idea of what a conversation reads like.
+ * next one, and copying the transcript by hand was the only way to do it. Same
+ * transcript as the Markdown export, so there is one idea of what a conversation
+ * reads like.
  *
- * The conversation is left alone: this is a copy, taken at this moment, and it
- * does not follow the conversation if it continues.
+ * A draft rather than a saved collection: it opens in the editor to be named and
+ * trimmed first. The conversation is untouched either way, and the copy does not
+ * follow it if it continues.
  */
-export async function saveSessionAsKnowledge(id: string): Promise<Knowledge | null> {
+export async function sessionAsKnowledgeDraft(
+	id: string
+): Promise<{ name: string; content: string } | null> {
 	const session = await repository.loadSession(id);
 	if (!session) return null;
 
-	const knowledge: Knowledge = {
-		id: generateRandomId(),
+	return {
 		name: resolveSessionTitle(session) || `Session #${session.id}`,
-		content: sessionToMarkdown(session),
-		updatedAt: getUpdatedAtDate()
+		content: sessionToMarkdown(session)
 	};
-	saveKnowledge(knowledge);
-	return knowledge;
 }

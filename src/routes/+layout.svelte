@@ -19,6 +19,7 @@
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
+	import KnowledgeModal from '$lib/components/KnowledgeModal.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { buildDefaultPersonas } from '$lib/defaultPersonas';
@@ -421,6 +422,7 @@
 {:else}
 	<SettingsModal />
 	<SearchModal bind:open={$searchModalOpen} initialQuery={$searchModalQuery} />
+	<KnowledgeModal />
 	<Onboarding />
 	<Welcome />
 

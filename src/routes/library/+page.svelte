@@ -15,7 +15,6 @@
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { generateNewUrl } from '$lib/components/ButtonNew.js';
 	import Head from '$lib/components/Head.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
@@ -32,7 +31,7 @@
 		type Persona
 	} from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
-	import { Sitemap } from '$lib/sitemap';
+	import { openKnowledge } from '$lib/stores/modal';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import PersonaModal from './PersonaModal.svelte';
@@ -247,9 +246,10 @@
 
 			<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
 				{#each $knowledgeStore as knowledge (knowledge.id)}
-					<a
-						href={generateNewUrl(Sitemap.KNOWLEDGE, knowledge.id)}
-						class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 transition-colors hover:border-shade-4"
+					<button
+						type="button"
+						onclick={() => openKnowledge({ id: knowledge.id })}
+						class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
 					>
 						<FolderOpen class="h-5 w-5 shrink-0 text-muted" />
 						<div class="min-w-0">
@@ -258,16 +258,17 @@
 							</p>
 							<p class="text-[11px] text-muted">{formatTimestampToNow(knowledge.updatedAt)}</p>
 						</div>
-					</a>
+					</button>
 				{/each}
 
-				<a
-					href={generateNewUrl(Sitemap.KNOWLEDGE)}
+				<button
+					type="button"
+					onclick={() => openKnowledge()}
 					class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
 				>
 					<Plus class="h-4 w-4" />
 					<span class="text-xs">{$LL.newCollection()}</span>
-				</a>
+				</button>
 			</div>
 		</div>
 	</div>
