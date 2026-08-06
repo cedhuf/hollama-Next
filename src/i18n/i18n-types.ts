@@ -1445,6 +1445,34 @@ type RootTranslation = {
 	 */
 	webSearchUnavailable: string
 	/**
+	 * N​a​t​i​v​e​ ​t​o​o​l​ ​c​a​l​l​i​n​g
+	 */
+	nativeToolsTitle: string
+	/**
+	 * H​o​w​ ​t​h​e​ ​m​o​d​e​l​ ​i​s​ ​g​i​v​e​n​ ​t​h​e​ ​w​e​b​ ​t​o​o​l​s​:​ ​a​s​ ​t​e​x​t​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​i​t​ ​a​n​s​w​e​r​s​ ​i​n​ ​i​t​s​ ​r​e​p​l​i​e​s​,​ ​o​r​ ​a​s​ ​t​o​o​l​ ​c​a​l​l​s​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​t​r​a​n​s​p​o​r​t​s​ ​f​o​r​ ​i​t​.
+	 */
+	nativeToolsDescription: string
+	/**
+	 * M​o​d​e
+	 */
+	nativeToolsLabel: string
+	/**
+	 * T​e​x​t​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​(​w​o​r​k​s​ ​e​v​e​r​y​w​h​e​r​e​)
+	 */
+	nativeToolsOff: string
+	/**
+	 * N​a​t​i​v​e​ ​w​h​e​r​e​ ​s​u​p​p​o​r​t​e​d
+	 */
+	nativeToolsAuto: string
+	/**
+	 * A​l​w​a​y​s​ ​n​a​t​i​v​e
+	 */
+	nativeToolsForce: string
+	/**
+	 * N​a​t​i​v​e​ ​c​a​l​l​i​n​g​ ​l​e​t​s​ ​t​h​e​ ​m​o​d​e​l​ ​s​e​a​r​c​h​ ​o​n​ ​i​t​s​ ​o​w​n​,​ ​s​o​ ​n​o​ ​e​x​t​r​a​ ​r​e​q​u​e​s​t​ ​i​s​ ​n​e​e​d​e​d​ ​t​o​ ​d​e​c​i​d​e​ ​f​o​r​ ​i​t​.​ ​O​l​l​a​m​a​ ​r​e​p​o​r​t​s​ ​p​e​r​ ​m​o​d​e​l​ ​w​h​e​t​h​e​r​ ​i​t​ ​c​a​n​;​ ​t​h​e​ ​h​o​s​t​e​d​ ​p​r​o​v​i​d​e​r​s​ ​a​l​l​ ​c​a​n​.​ ​C​h​o​o​s​e​ ​"​a​l​w​a​y​s​"​ ​o​n​l​y​ ​f​o​r​ ​a​ ​s​e​l​f​-​h​o​s​t​e​d​ ​e​n​d​p​o​i​n​t​ ​y​o​u​ ​k​n​o​w​ ​s​u​p​p​o​r​t​s​ ​i​t​,​ ​s​i​n​c​e​ ​a​ ​m​o​d​e​l​ ​o​f​f​e​r​e​d​ ​t​o​o​l​s​ ​i​t​ ​c​a​n​n​o​t​ ​c​a​l​l​ ​w​i​l​l​ ​i​m​p​r​o​v​i​s​e​ ​i​n​s​t​e​a​d​ ​o​f​ ​f​a​i​l​i​n​g​.
+	 */
+	nativeToolsHelp: string
+	/**
 	 * I​n​t​e​r​a​c​t​i​v​e​ ​c​h​o​i​c​e​s
 	 */
 	interactiveChoicesTitle: string
@@ -3457,6 +3485,34 @@ The completion in progress will stop
 	 * Web search isn't available yet. An admin can configure it for this instance.
 	 */
 	webSearchUnavailable: () => LocalizedString
+	/**
+	 * Native tool calling
+	 */
+	nativeToolsTitle: () => LocalizedString
+	/**
+	 * How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.
+	 */
+	nativeToolsDescription: () => LocalizedString
+	/**
+	 * Mode
+	 */
+	nativeToolsLabel: () => LocalizedString
+	/**
+	 * Text instructions (works everywhere)
+	 */
+	nativeToolsOff: () => LocalizedString
+	/**
+	 * Native where supported
+	 */
+	nativeToolsAuto: () => LocalizedString
+	/**
+	 * Always native
+	 */
+	nativeToolsForce: () => LocalizedString
+	/**
+	 * Native calling lets the model search on its own, so no extra request is needed to decide for it. Ollama reports per model whether it can; the hosted providers all can. Choose "always" only for a self-hosted endpoint you know supports it, since a model offered tools it cannot call will improvise instead of failing.
+	 */
+	nativeToolsHelp: () => LocalizedString
 	/**
 	 * Interactive choices
 	 */

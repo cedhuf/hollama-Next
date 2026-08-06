@@ -112,6 +112,22 @@
 		{/if}
 	</SettingsSection>
 
+	<SettingsSection title={$LL.nativeToolsTitle()} description={$LL.nativeToolsDescription()} card>
+		<SettingsField label={$LL.nativeToolsLabel()}>
+			<Select
+				value={$settingsStore.nativeTools}
+				options={[
+					{ value: 'off', label: $LL.nativeToolsOff() },
+					{ value: 'auto', label: $LL.nativeToolsAuto() },
+					{ value: 'force', label: $LL.nativeToolsForce() }
+				]}
+				onChange={(option) =>
+					($settingsStore.nativeTools = option.value as 'off' | 'auto' | 'force')}
+			/>
+		</SettingsField>
+		<SettingsHint>{$LL.nativeToolsHelp()}</SettingsHint>
+	</SettingsSection>
+
 	<SettingsSection title={$LL.webFetchTitle()} description={$LL.webFetchDescription()} card>
 		{#if $webFetchConfig.editable}
 			<FieldCheckbox label={$LL.webFetchToggle()} bind:checked={$settingsStore.webFetchEnabled} />

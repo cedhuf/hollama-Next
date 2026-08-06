@@ -183,6 +183,25 @@ export function supportsThinkingRequest(connectionType: ConnectionType): boolean
 }
 
 /**
+ * Whether an endpoint is known to accept a `tools` array.
+ *
+ * The hosted providers all do, and have for long enough that a version check
+ * would be noise. Ollama does too, but only for some models, so it answers for
+ * itself per model and is deliberately not listed here. What is left is
+ * `OpenAICompatible`: llama.cpp, vLLM, SGLang, LM Studio, a proxy someone wrote
+ * last week. Some support tool calling, some accept the field and ignore it, some
+ * return 400. There is no way to ask, so the honest answer is no, and the user
+ * who knows better says so with the `force` setting.
+ */
+export function supportsNativeTools(connectionType: ConnectionType): boolean {
+	return (
+		connectionType === ConnectionType.OpenAI ||
+		connectionType === ConnectionType.Anthropic ||
+		connectionType === ConnectionType.Infomaniak
+	);
+}
+
+/**
  * Whether the composer should offer the per-conversation Reasoning toggle: Ollama
  * (native thinking) plus any endpoint that takes the explicit thinking flag.
  */

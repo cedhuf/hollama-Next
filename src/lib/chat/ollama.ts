@@ -82,8 +82,43 @@ export class OllamaStrategy implements ChatStrategy {
 	/** Per-(server, model) cache of whether the model advertises the `thinking` capability. */
 	private static thinkingSupport = new Map<string, boolean>();
 
+	/** The same, for `tools`. */
+	private static toolSupport = new Map<string, boolean>();
+
 	constructor(private server: Server) {
 		this.base = ollamaBaseUrl(server);
+	}
+
+	/**
+	 * Ask `/api/show` whether a model can call tools.
+	 *
+	 * The opposite default to `supportsThinking`: unknown means no. Thinking has a
+	 * runtime fallback to catch a wrong guess, tool calling has none — a model that
+	 * cannot call tools but is offered them does not fail, it improvises, and the
+	 * user gets an answer with a JSON blob in it or a promise to search that never
+	 * happened. Better to keep the text protocol, which works everywhere.
+	 */
+	async supportsTools(model: string): Promise<boolean> {
+		const key = `${this.base}::${model}`;
+		const cached = OllamaStrategy.toolSupport.get(key);
+		if (cached !== undefined) return cached;
+
+		try {
+			const response = await fetch(`${this.base}/api/show`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ model })
+			});
+			if (!response.ok) return false;
+			const data = await response.json();
+			const supported = Array.isArray(data?.capabilities)
+				? data.capabilities.includes('tools')
+				: false; // capabilities absent (older Ollama) → assume not
+			OllamaStrategy.toolSupport.set(key, supported);
+			return supported;
+		} catch {
+			return false;
+		}
 	}
 
 	/**

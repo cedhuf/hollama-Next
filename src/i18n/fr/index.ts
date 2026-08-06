@@ -396,6 +396,15 @@ const fr = extendDictionary(en, {
 		"Le modèle détermine d'abord si une question nécessite le web. La plupart des modèles récents (même sous Ollama) s'en sortent bien, quelques petits modèles moins.",
 	webSearchUnavailable:
 		"La recherche web n'est pas encore disponible. Un administrateur peut la configurer pour cette instance.",
+	nativeToolsTitle: 'Appel natif des outils',
+	nativeToolsDescription:
+		"Comment les outils web sont donnés au modèle : sous forme de consignes textuelles auxquelles il répond dans ses messages, ou sous forme d'appels que le fournisseur transporte pour lui.",
+	nativeToolsLabel: 'Mode',
+	nativeToolsOff: 'Consignes textuelles (fonctionne partout)',
+	nativeToolsAuto: "Natif là où c'est supporté",
+	nativeToolsForce: 'Toujours natif',
+	nativeToolsHelp:
+		"L'appel natif permet au modèle de chercher de lui-même, sans requête supplémentaire pour décider à sa place. Ollama indique modèle par modèle s'il en est capable, et les fournisseurs hébergés le sont tous. Ne choisissez « toujours » que pour un serveur auto-hébergé dont vous savez qu'il le gère : un modèle à qui l'on propose des outils qu'il ne sait pas appeler improvise au lieu d'échouer.",
 	interactiveChoicesTitle: 'Choix interactifs',
 	interactiveChoicesDescription:
 		"Quand une demande est ambiguë et dépend d'une préférence, le modèle peut proposer quelques options à toucher plutôt que de deviner. Votre choix est envoyé comme un message normal.",

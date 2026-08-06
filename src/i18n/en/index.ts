@@ -380,6 +380,15 @@ const en = {
 		'The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.',
 	webSearchUnavailable:
 		"Web search isn't available yet. An admin can configure it for this instance.",
+	nativeToolsTitle: 'Native tool calling',
+	nativeToolsDescription:
+		'How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.',
+	nativeToolsLabel: 'Mode',
+	nativeToolsOff: 'Text instructions (works everywhere)',
+	nativeToolsAuto: 'Native where supported',
+	nativeToolsForce: 'Always native',
+	nativeToolsHelp:
+		'Native calling lets the model search on its own, so no extra request is needed to decide for it. Ollama reports per model whether it can; the hosted providers all can. Choose "always" only for a self-hosted endpoint you know supports it, since a model offered tools it cannot call will improvise instead of failing.',
 	interactiveChoicesTitle: 'Interactive choices',
 	interactiveChoicesDescription:
 		'When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message.',

@@ -56,6 +56,17 @@ export interface Settings {
 	compactThreshold: number;
 	webSearchByDefault: boolean;
 	webSearchAuto: boolean;
+	/**
+	 * Whether the web tools are offered as native tool calls rather than through
+	 * the text protocols.
+	 *
+	 * `off` keeps the `<read>` blocks and the router pre-pass, which work on every
+	 * endpoint the app can talk to. `auto` uses native calling wherever it is known
+	 * to be supported — Ollama says so per model, the hosted providers all take it —
+	 * and falls back to the text path everywhere else. `force` is for a
+	 * self-hosted OpenAI-compatible server that supports it without any way to say so.
+	 */
+	nativeTools: 'off' | 'auto' | 'force';
 	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
 	webFetchEnabled: boolean;
 	webFetchByDefault: boolean;
@@ -138,6 +149,9 @@ export const DEFAULT_SETTINGS: Settings = {
 	compactThreshold: 80000,
 	webSearchByDefault: false,
 	webSearchAuto: false,
+	// Off by default: the text protocols work everywhere and have the mileage, and
+	// a small model that calls tools badly fails in ways a user did not ask for.
+	nativeTools: 'off',
 	webFetchEnabled: true,
 	webFetchByDefault: true,
 	webFetchMaxPages: 3,
