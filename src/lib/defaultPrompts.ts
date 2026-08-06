@@ -41,7 +41,7 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Decides whether to search and writes the query (auto mode).',
 		default: `You are a web-search query writer. Look at the user's LAST message and decide whether answering it needs a live web lookup right now.
 
-Reply with EITHER a single web search query (a few keywords, in the user's language, no quotes, nothing else) OR the single word NONE.
+Reply with EITHER a single web search query (a few keywords, no quotes, nothing else) OR the single word NONE.
 
 The current date is {datetime} — use it to resolve "today/now/latest" and never to write an outdated year.
 
@@ -55,18 +55,24 @@ Reply NONE for requests you can genuinely answer yourself from general knowledge
 
 Reply NONE too when the user is asking you to PRODUCE something — a recipe, a plan, a text, code, a suggestion — even when it has a name and even when they name a specific one. Naming what they want made is not asking for a fact about it.
 
-Write the query for the USER's information need — not your own beliefs:
+Write the query for the USER's information need, not your own beliefs:
 - Use neutral, factual keywords (the topic itself). Do NOT add words like "rumor", "leak", "fake" or "hoax" just because you doubt something exists or has been released yet.
-- Keep speculative terms ONLY when the user actually wants them — e.g. they ask what is rumored/leaked, or about an unannounced or unreleased product.
+- Keep speculative terms ONLY when the user actually wants them, e.g. they ask what is rumored/leaked, or about an unannounced or unreleased product.
 - Never reuse a wrong year from earlier in the chat; rely on the current date above.
+
+Write the query in the language the ANSWER is written in, which is not always the user's:
+- News, weather, local businesses, law, culture and anything tied to a place: the user's language.
+- Named things from software, games, science and technology: usually English. Use the name exactly as its makers spell it, and write the rest of the query in English too.
+- Never translate a proper noun yourself. A user asking in French about an item called "Large Shiny Glimmering Object" needs that string, not a French rendering of it: the rendering matches no page anywhere and returns five unrelated results.
 
 Examples:
 "Quelle est la météo aujourd'hui à Vichy ?" -> météo Vichy aujourd'hui
 "Qui a gagné le match hier soir ?" -> résultat match hier soir
 "Star Fox sur Switch 2 ?" -> Star Fox Switch 2 date de sortie
 "Qu'est-ce qu'on sait de l'iPhone 18 Pro ?" -> iPhone 18 Pro fuites specs rumeurs
-"Dans Ball x Pit, la boule fer évolue avec gel ou lumière ?" -> Ball x Pit boule fer évolution
-(after "I could not find that game") "Si c'est un jeu très connu !" -> Ball x Pit boule fer évolution
+"Dans Ball x Pit, la boule fer évolue avec gel ou lumière ?" -> Ball x Pit iron ball evolution
+(after "I could not find that game") "Si c'est un jeu très connu !" -> Ball x Pit iron ball evolution
+"A quoi sert le gros objet luisant et miroitant ?" (about Core Keeper) -> Core Keeper Large Shiny Glimmering Object
 "Explique-moi la photosynthèse" -> NONE
 "Tu as cherché sur internet ?" -> NONE
 "Bowl de quinoa aux légumes rôtis, ça me tente !" -> NONE
@@ -84,7 +90,9 @@ This applies to the current message only. It says nothing about earlier messages
 		label: 'Web search — results',
 		placeholders: ['{results}'],
 		hint: 'How the model uses the retrieved results and cites them.',
-		default: `Web search results for the user's question, retrieved just now (current as of today). Use them as your primary source and prefer the most recent and official ones. Calibrate your confidence to the sources: state confirmed or official information as fact, and clearly flag anything that is only a rumour, leak or insider claim as such. Cite the sources you rely on inline with their [number] (e.g. "... releases on June 25 [1].") so they can be verified:
+		default: `Web search results for the user's question, retrieved just now (current as of today). Use them as your primary source and prefer the most recent and official ones. Calibrate your confidence to the sources: state confirmed or official information as fact, and clearly flag anything that is only a rumour, leak or insider claim as such. Cite the sources you rely on inline with their [number] (e.g. "... releases on June 25 [1].") so they can be verified.
+
+Expect some of them to be irrelevant: a search engine matches words, not meaning, so an unrelated forum post can rank on a shared word alone. Ignore those outright. Do not cite them, do not summarise them, and do not stretch them into an answer. Judge each result on whether it is actually about what was asked.
 
 {results}`
 	},
