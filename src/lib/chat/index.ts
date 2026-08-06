@@ -6,10 +6,46 @@ import type { Model } from '$lib/settings';
 
 import { type OllamaOptions } from './ollama';
 
+/**
+ * A tool the model may call, in the shape every provider agreed on: a name, a
+ * sentence telling the model when to reach for it, and a JSON Schema for its
+ * arguments.
+ */
+export interface ToolSpec {
+	name: string;
+	description: string;
+	parameters: {
+		type: 'object';
+		properties: Record<string, unknown>;
+		required?: string[];
+	};
+}
+
+/** A call the model asked for. */
+export interface ToolCall {
+	/** The provider's id for this call, echoed back on the answer so they pair up. */
+	id: string;
+	name: string;
+	/**
+	 * The arguments exactly as the model wrote them, still JSON text.
+	 *
+	 * Not parsed here on purpose: this layer does not know any tool's schema, and a
+	 * small model writing malformed JSON is a routine event that the caller has to
+	 * handle as a failed call rather than as a crashed request.
+	 */
+	arguments: string;
+}
+
 export interface Message {
-	role: 'user' | 'assistant' | 'system';
+	role: 'user' | 'assistant' | 'system' | 'tool';
 	content: string;
 	images?: string[]; // Optional array of base64 image strings
+	/** Set on an assistant turn that asked for one or more tools. */
+	toolCalls?: ToolCall[];
+	/** Set on a `tool` message: the id of the call it answers. */
+	toolCallId?: string;
+	/** Set on a `tool` message: the tool that produced it. Ollama pairs on the name. */
+	toolName?: string;
 }
 
 export interface ChatRequest {
@@ -23,10 +59,21 @@ export interface ChatRequest {
 	 * false to never request it (e.g. title generation, or a per-session toggle).
 	 */
 	think?: boolean;
+	/** Tools the model may call this turn. Absent means none are offered. */
+	tools?: ToolSpec[];
 }
 
-/** A single streamed delta: regular `content` and/or separate reasoning `thinking`. */
-export type ChatChunk = { content?: string; thinking?: string };
+/**
+ * A single streamed delta: regular `content`, separate reasoning `thinking`,
+ * and/or the tool calls the turn ended on.
+ *
+ * Tool calls arrive whole. Providers stream them in fragments — OpenAI sends the
+ * name and then the arguments a few characters at a time, keyed by an index that
+ * has to be reassembled — and every caller doing that reassembly itself would be
+ * the same bug written three times. Each strategy accumulates internally and
+ * emits the finished calls once, at the end of the stream.
+ */
+export type ChatChunk = { content?: string; thinking?: string; toolCalls?: ToolCall[] };
 
 /**
  * The answer without the model's chain-of-thought.

@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
 import type {
 	ChatCompletionContentPart,
-	ChatCompletionMessageParam
+	ChatCompletionMessageParam,
+	ChatCompletionTool
 } from 'openai/resources/index.mjs';
 
 import { supportsThinkingRequest, type Server } from '$lib/connections';
@@ -31,6 +32,31 @@ export class OpenAIStrategy implements ChatStrategy {
 
 	private formatMessages(messages: Message[]): ChatCompletionMessageParam[] {
 		return messages.map((message: Message): ChatCompletionMessageParam => {
+			// An answer from a tool, paired to its call by id. Sent back verbatim: this
+			// is the record of what the tool returned, and the model reads it as such.
+			if (message.role === 'tool') {
+				return {
+					role: 'tool',
+					tool_call_id: message.toolCallId ?? '',
+					content: message.content
+				};
+			}
+
+			// The turn where the model asked. It has to be replayed with the calls
+			// attached, not just its text: a `tool` message answering a call the
+			// conversation no longer contains is rejected by every provider.
+			if (message.role === 'assistant' && message.toolCalls?.length) {
+				return {
+					role: 'assistant',
+					content: message.content || null,
+					tool_calls: message.toolCalls.map((call) => ({
+						id: call.id,
+						type: 'function' as const,
+						function: { name: call.name, arguments: call.arguments }
+					}))
+				};
+			}
+
 			if (message.images && message.images.length > 0) {
 				const content: ChatCompletionContentPart[] = [{ type: 'text', text: message.content }];
 				message.images.forEach((img) => {
@@ -82,14 +108,39 @@ export class OpenAIStrategy implements ChatStrategy {
 				? { chat_template_kwargs: { enable_thinking: true } }
 				: undefined;
 
+		const tools = payload.tools?.length
+			? payload.tools.map((tool) => ({
+					type: 'function' as const,
+					function: {
+						name: tool.name,
+						description: tool.description,
+						parameters: tool.parameters
+					}
+				}))
+			: undefined;
+
 		try {
-			await this.streamChat(payload.model, formattedMessages, thinkBody, abortSignal, onChunk);
+			await this.streamChat(
+				payload.model,
+				formattedMessages,
+				thinkBody,
+				tools,
+				abortSignal,
+				onChunk
+			);
 		} catch (error) {
 			// A server that doesn't understand `chat_template_kwargs` answers 400 — drop
 			// the extra field and retry so the chat still completes (without reasoning).
 			const status = (error as { status?: number } | null)?.status;
 			if (thinkBody && status === 400) {
-				await this.streamChat(payload.model, formattedMessages, undefined, abortSignal, onChunk);
+				await this.streamChat(
+					payload.model,
+					formattedMessages,
+					undefined,
+					tools,
+					abortSignal,
+					onChunk
+				);
 				return;
 			}
 			throw error;
@@ -100,6 +151,7 @@ export class OpenAIStrategy implements ChatStrategy {
 		model: string,
 		messages: ChatCompletionMessageParam[],
 		extraBody: Record<string, unknown> | undefined,
+		tools: ChatCompletionTool[] | undefined,
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
@@ -107,8 +159,14 @@ export class OpenAIStrategy implements ChatStrategy {
 			model,
 			messages,
 			stream: true,
+			...(tools ? { tools } : {}),
 			...extraBody
 		});
+
+		// Tool calls stream in fragments keyed by position: one delta carries the id
+		// and name, the next few carry slices of the argument JSON. Nothing is usable
+		// until the stream ends, so they are assembled here and emitted once.
+		const pending = new Map<number, { id: string; name: string; arguments: string }>();
 
 		for await (const chunk of response) {
 			if (abortSignal.aborted) break;
@@ -118,16 +176,50 @@ export class OpenAIStrategy implements ChatStrategy {
 			// separate reasoning panel; inline <think> tags in `content` are still split
 			// out downstream by the FSM processor.
 			const delta = chunk.choices?.[0]?.delta as
-				| { content?: string | null; reasoning_content?: string; reasoning?: string }
+				| {
+						content?: string | null;
+						reasoning_content?: string;
+						reasoning?: string;
+						tool_calls?: {
+							index: number;
+							id?: string;
+							function?: { name?: string; arguments?: string };
+						}[];
+				  }
 				| undefined;
 			const thinking = delta?.reasoning_content ?? delta?.reasoning;
 			if (thinking) onChunk({ thinking });
 			if (delta?.content) onChunk({ content: delta.content });
+
+			for (const fragment of delta?.tool_calls ?? []) {
+				const slot = pending.get(fragment.index) ?? { id: '', name: '', arguments: '' };
+				if (fragment.id) slot.id = fragment.id;
+				if (fragment.function?.name) slot.name = fragment.function.name;
+				if (fragment.function?.arguments) slot.arguments += fragment.function.arguments;
+				pending.set(fragment.index, slot);
+			}
 		}
+
+		// An aborted stream leaves half-written arguments behind: acting on those is
+		// worse than dropping the call the user just cancelled.
+		if (abortSignal.aborted || !pending.size) return;
+
+		const toolCalls = [...pending.entries()]
+			.sort(([a], [b]) => a - b)
+			.map(([index, slot]) => ({
+				// Some OpenAI-compatible servers omit the id entirely; the pairing still
+				// has to be unambiguous when the answer goes back.
+				id: slot.id || `call_${index}`,
+				name: slot.name,
+				arguments: slot.arguments
+			}))
+			.filter((call) => call.name);
+
+		if (toolCalls.length) onChunk({ toolCalls });
 	}
 
 	async complete(payload: ChatRequest): Promise<string> {
-		const messages = payload.messages.map((m) => ({ role: m.role, content: m.content }));
+		const messages = this.formatMessages(payload.messages);
 
 		// `complete()` serves the short internal errands — routing a search, naming a
 		// session — where the answer is a handful of words and reasoning is pure cost:

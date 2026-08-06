@@ -1,5 +1,4 @@
 import type {
-	ChatRequest,
 	ChatResponse,
 	ErrorResponse,
 	ListResponse,
@@ -55,6 +54,28 @@ export interface OllamaOptions {
 	stop: string[];
 }
 
+/** Ollama's shape for a call it wants made. */
+interface OllamaToolCall {
+	function?: { name?: string; arguments?: Record<string, unknown> };
+}
+
+/**
+ * The model's arguments as an object, or an empty one.
+ *
+ * A call whose JSON does not parse is a call that cannot be made. Throwing here
+ * would take the whole request down over one malformed argument list, which is a
+ * routine thing for a small model to produce; an empty object lets the tool
+ * report a useless call and the turn carry on.
+ */
+function safeParseArguments(raw: string): Record<string, unknown> {
+	try {
+		const parsed = JSON.parse(raw);
+		return parsed && typeof parsed === 'object' ? parsed : {};
+	} catch {
+		return {};
+	}
+}
+
 export class OllamaStrategy implements ChatStrategy {
 	private base: string;
 
@@ -95,11 +116,11 @@ export class OllamaStrategy implements ChatStrategy {
 	}
 
 	async chat(
-		payload: ChatRequest,
+		payload: AppChatRequest,
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
-		const wantThink = (payload as AppChatRequest).think !== false;
+		const wantThink = payload.think !== false;
 		const useThink = wantThink && (await this.supportsThinking(payload.model));
 
 		try {
@@ -118,14 +139,47 @@ export class OllamaStrategy implements ChatStrategy {
 	}
 
 	private async streamChat(
-		payload: ChatRequest,
+		payload: AppChatRequest,
 		think: boolean,
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
 		// Forward the resolved boolean: `think: false` is always safe, and `think: true`
 		// only reaches models we already verified support it.
-		const body = { ...payload, think };
+		const body = {
+			...payload,
+			think,
+			// Ollama takes the same shape as everyone else, one level deeper.
+			...(payload.tools?.length
+				? {
+						tools: payload.tools.map((tool) => ({
+							type: 'function',
+							function: {
+								name: tool.name,
+								description: tool.description,
+								parameters: tool.parameters
+							}
+						}))
+					}
+				: {}),
+			messages: payload.messages.map((message) => ({
+				role: message.role,
+				content: message.content,
+				...(message.images ? { images: message.images } : {}),
+				...(message.toolName ? { tool_name: message.toolName } : {}),
+				...(message.toolCalls?.length
+					? {
+							tool_calls: message.toolCalls.map((call) => ({
+								function: {
+									name: call.name,
+									// Ollama wants an object here, not the JSON text the model wrote.
+									arguments: safeParseArguments(call.arguments)
+								}
+							}))
+						}
+					: {})
+			}))
+		};
 
 		const response = await fetch(`${this.base}/api/chat`, {
 			method: 'POST',
@@ -153,6 +207,20 @@ export class OllamaStrategy implements ChatStrategy {
 				// Reasoning models stream `thinking` separately from `content`.
 				if (message.thinking) onChunk({ thinking: message.thinking });
 				if (message.content) onChunk({ content: message.content });
+
+				// Whole, in one message, and with the arguments already parsed: none of
+				// the fragment reassembly the OpenAI path needs. There is no call id
+				// either, so one is minted for the round trip.
+				const calls = (message as { tool_calls?: OllamaToolCall[] }).tool_calls;
+				if (calls?.length && !abortSignal.aborted) {
+					onChunk({
+						toolCalls: calls.map((call, index) => ({
+							id: `call_${index}_${Date.now()}`,
+							name: call.function?.name ?? '',
+							arguments: JSON.stringify(call.function?.arguments ?? {})
+						}))
+					});
+				}
 			}
 		}
 	}
