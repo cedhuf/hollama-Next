@@ -75,8 +75,10 @@ Never answer the question yourself. Output only the query, or NONE.`
 	},
 	searchNone: {
 		label: 'Web search — not used',
-		hint: 'Tells the model when no search ran, so it cannot claim it searched.',
-		default: `No web search was run for this message: you are answering from your own knowledge alone, and you have not read anything online in this conversation turn. Never claim or imply otherwise — do not say you searched, looked it up, checked the web, or found nothing online, and do not narrate searching in your reasoning. If you do not know something, say plainly that you do not know it and that you have not looked it up.`
+		hint: 'Tells the model no search ran for this message, so it cannot claim it searched.',
+		default: `No web search was run for THIS message: whatever you write now comes from your own knowledge. Never claim or imply otherwise: do not say you searched, looked it up, checked the web, or found nothing online, and do not narrate searching in your reasoning. If you do not know something, say plainly that you do not know it and that you have not looked it up for this question.
+
+This applies to the current message only. It says nothing about earlier messages in this conversation: if you were given search results before, they were real, and this does not licence you to doubt or disown them.`
 	},
 	searchContext: {
 		label: 'Web search — results',
