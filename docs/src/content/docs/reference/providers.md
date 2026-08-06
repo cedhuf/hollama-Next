@@ -10,20 +10,20 @@ _Settings → Servers_. Add as many as you like, from as many providers as you l
 
 ## The five presets
 
-| Provider              | Endpoint                                                | Key      |
-| --------------------- | ------------------------------------------------------- | -------- |
-| **Ollama**            | `http://localhost:11434`                                | none     |
-| **OpenAI**            | `https://api.openai.com/v1`                             | required |
-| **Claude**            | `https://api.anthropic.com/v1`                          | required |
-| **Infomaniak**        | `https://api.infomaniak.com/2/ai/{productId}/openai/v1` | required |
-| **OpenAI-compatible** | anything                                                | optional |
+| Provider              | Endpoint                       | Key      |
+| --------------------- | ------------------------------ | -------- |
+| **Ollama**            | `http://localhost:11434`       | none     |
+| **OpenAI**            | `https://api.openai.com/v1`    | required |
+| **Claude**            | `https://api.anthropic.com/v1` | required |
+| **Infomaniak**        | built from your product ID     | required |
+| **OpenAI-compatible** | anything                       | optional |
 
-Everything except Ollama speaks the OpenAI chat API. For OpenAI and Claude the endpoint is filled in
-and tucked behind an _Advanced_ disclosure, since editing it is the exception. Each preset links to
-its own "where do I find my API key" page.
+Everything except Ollama speaks the OpenAI chat API. For the three named providers the endpoint is
+worked out for you and tucked behind an _Advanced_ disclosure, since editing it is the exception.
+Each preset links to its own "where do I find my API key" page.
 
-**Infomaniak** embeds a product ID in the path. Replace `{productId}` with yours, paste the key, and
-it behaves as a plain OpenAI-compatible server from there.
+**Infomaniak** asks for the AI Tools product ID from your manager, not a URL: the endpoint only
+varies by that number, so it is built for you. The connection cannot be synced until you give one.
 
 **OpenAI-compatible** is the catch-all: vLLM, llama.cpp, SGLang, LM Studio, a gateway, a colleague's
 box. Give it a base URL, and a key if it wants one.

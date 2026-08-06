@@ -30,6 +30,23 @@ There is a second step you may notice. Results come back as titles and snippets,
 ask to open up to three of them in full when the snippets are not enough. That is a prompt, not a
 hard-coded rule, and it is editable below.
 
+What was found stays with the conversation. Later turns keep a short index of the sources each answer
+cited, titles and addresses only, so a model asked a follow-up still knows what it read rather than
+having to trust its memory of it. It can reopen any of those pages, which is what it should do before
+taking back something it said earlier.
+
+## Native tool calling
+
+The web tools reach the model one of two ways. By default they are text instructions it answers in
+its replies, which works on every endpoint Llooma can talk to. Set to **native where supported** and
+the model calls them as real tools instead, deciding for itself when to search rather than being
+asked in a separate request first.
+
+Ollama reports per model whether it can; the hosted providers all can; a self-hosted
+OpenAI-compatible endpoint has no way to say, so it stays on the text path unless you pick **always
+native**. Only do that for a server you know handles it: a model offered tools it cannot call tends
+to improvise rather than fail cleanly.
+
 **Where the configuration comes from** decides whether you can edit it. `PUBLIC_SEARCH_URL` in the
 environment locks it instance-wide and the fields go read-only with an `env` badge. In server mode
 an admin can share theirs instead, either locked or overridable. See
@@ -79,17 +96,18 @@ Every one of these features works by adding text to what the model receives, and
 yours to rewrite. Pick a prompt from the dropdown, edit it, and the override is saved. Blank it, or
 type the default back, and the override disappears.
 
-| Prompt                    | What it drives                                         |
-| ------------------------- | ------------------------------------------------------ |
-| Current date              | How the date is framed                                 |
-| Web search, query         | Whether to search and what to search for, in auto mode |
-| Web search, not used      | Stops the model claiming it searched when it did not   |
-| Web search, results       | How results are handed over, and how they are cited    |
-| Web search, read a result | The rule for opening a result in full                  |
-| Web fetch, pages          | How fetched pages are framed                           |
-| Interactive choices       | The question protocol                                  |
-| Compaction, write         | How the summary is written                             |
-| Compaction, use           | How the summary is framed for the model afterwards     |
+| Prompt                      | What it drives                                          |
+| --------------------------- | ------------------------------------------------------- |
+| Current date                | How the date is framed                                  |
+| Web search, query           | Whether to search and what to search for, in auto mode  |
+| Web search, not used        | Stops the model claiming it searched when it did not    |
+| Web search, results         | How results are handed over, and how they are cited     |
+| Web search, earlier sources | The index of what past turns found, and how to treat it |
+| Web search, read a result   | The rule for opening a page in full                     |
+| Web fetch, pages            | How fetched pages are framed                            |
+| Interactive choices         | The question protocol                                   |
+| Compaction, write           | How the summary is written                              |
+| Compaction, use             | How the summary is framed for the model afterwards      |
 
 Some prompts take placeholders, listed under the editor. `{datetime}`, `{results}` and `{pages}` are
 substituted at send time. Leave one out and the model simply never sees that part.
