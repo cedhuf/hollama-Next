@@ -624,6 +624,19 @@
 		// worse than snippets alone. The index survives the user switching the web tools
 		// off (their earlier answers still cite it) but rereading does not — turning them
 		// off has to mean no request goes out.
+		// Native mode: when to reach for a tool, as an instruction rather than as a
+		// line in a tool description. The text path has a whole pre-pass whose only job
+		// is deciding whether to look something up, and dropping that left the decision
+		// resting on a description the model weighs far more lightly. A model that
+		// answered a question about a niche game from memory, with a search tool sitting
+		// right there unused, is what this is for.
+		if (nativeTools.length) {
+			chatMessages = [
+				...chatMessages,
+				{ role: 'system', content: resolvePrompt('toolPolicy', $settingsStore.promptOverrides) }
+			];
+		}
+
 		// Not in native mode, where `read_page` says all of this in its own description
 		// and the model has a real call to make instead of a block to write.
 		if (!native && mayReread && (sentSnippets || recalled.length)) {
@@ -881,11 +894,11 @@
 				}
 
 				if (round > 0) break;
-				// Same gate as the offer above: a model that emits the block unprompted,
-				// on a turn where the user wants no web tools, still gets nothing fetched.
-				if (!mayReread) break;
 
 				const wanted = parseReadBlock(editor.completion);
+				// Nothing was asked for, so this reply is the answer.
+				if (!wanted.indices.length && !wanted.urls.length) break;
+
 				const sources = searchInfo?.sources ?? [];
 
 				// Numbers address this turn's results; addresses reach anything the
@@ -894,17 +907,52 @@
 				// against what we handed it: an address it invented matches nothing and is
 				// dropped, so no reply of its own can send a request somewhere new.
 				const allowed = recallableUrls(recalled);
-				// Deduplicated: a model that asks for both `1` and its address means one page.
-				const urls = [
-					...new Set(
-						[
-							...wanted.indices.map((n) => sources[n - 1]?.url),
-							...wanted.urls.filter((url) => allowed.has(url) || sources.some((s) => s.url === url))
-						].filter((url): url is string => !!url)
-					)
-				];
 
-				if (!urls.length) break;
+				// What a number means. This turn's results first, then the index of what
+				// earlier turns found, which keeps the numbers the answers citing it used.
+				// Without the fallback, a turn that searched nothing could not resolve any
+				// number at all — and the model reads its numbers off that index, so
+				// `<read>5</read>` pointed at nothing and the turn ended silent.
+				const byNumber: Record<number, string> = {};
+				for (const search of recalled) {
+					for (const source of search.sources) byNumber[source.number] = source.url;
+				}
+				sources.forEach((source, i) => (byNumber[i + 1] = source.url));
+
+				// Deduplicated: a model that asks for both `1` and its address means one page.
+				// Nothing resolves when the user has the web tools off, which is the same
+				// gate as the offer above: a block emitted unprompted fetches nothing.
+				const urls = mayReread
+					? [
+							...new Set(
+								[
+									...wanted.indices.map((n) => byNumber[n]),
+									...wanted.urls.filter(
+										(url) => allowed.has(url) || sources.some((s) => s.url === url)
+									)
+								].filter((url): url is string => !!url)
+							)
+						]
+					: [];
+
+				// It asked for something, and none of it resolved. Breaking here used to
+				// end the turn on whatever was left of the reply, which for a model that
+				// wrote nothing but the request block is nothing at all: the user got an
+				// empty message. Tell it, and let it answer.
+				if (!urls.length) {
+					chatRequest = {
+						...chatRequest,
+						messages: [
+							...chatRequest.messages,
+							{
+								role: 'system',
+								content:
+									'Nothing could be opened from that request: those numbers and addresses do not match anything you have been shown. Answer now from what you already have, and say what you could not check. Do not ask to read anything again.'
+							}
+						]
+					};
+					continue;
+				}
 
 				// From here the turn takes a second round, which overwrites the live
 				// reasoning: this round's thinking joins the timeline as a step, in the
@@ -948,8 +996,11 @@
 					continue;
 				}
 
+				// Not necessarily a search that happened this turn: a page can now be
+				// reopened off the index alone, so there may be no query behind it.
 				searchInfo = {
-					...searchInfo!,
+					query: searchInfo?.query ?? '',
+					resultCount: read.pages.length,
 					sources: read.pages.map((page) => ({ title: page.title, url: page.url }))
 				};
 				editor.webSearchInfo = searchInfo;

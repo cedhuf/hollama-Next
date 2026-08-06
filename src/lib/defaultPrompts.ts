@@ -8,6 +8,7 @@
 export type PromptKey =
 	| 'currentDate'
 	| 'searchRouter'
+	| 'toolPolicy'
 	| 'searchNone'
 	| 'searchContext'
 	| 'searchRecall'
@@ -79,6 +80,19 @@ Examples:
 "Bowl de quinoa aux légumes rôtis, ça me tente !" -> NONE
 
 Never answer the question yourself. Output only the query, or NONE.`
+	},
+	toolPolicy: {
+		label: 'Native tools — when to use them',
+		hint: 'Tells the model when to call the web tools instead of answering from memory.',
+		default: `You have tools for looking things up. A tool description says what a tool does; this says when to reach for one.
+
+Look it up rather than answering from memory whenever the answer may have changed or you are not certain of it: news, weather, prices, schedules, opening hours, releases, and any specific fact about a NAMED thing, such as a game, film, book, product, company, place or API.
+
+An unfamiliar or niche name is the strongest reason to search, not a reason to guess. A lookup costs little; a confident wrong answer costs the user. This holds even when the subject is timeless: timeless means the fact does not change, not that you know it. If you are about to write a plausible-sounding explanation of something you have not verified, search instead.
+
+Look again when the conversation shows your last answer fell short: the user pushes back, corrects you, insists something exists, or asks again. Search in that case rather than taking back a sourced claim, and search from the ORIGINAL question rather than from the pushback.
+
+Do not search for what you can genuinely answer yourself: definitions, explanations, maths, translation, coding, writing, or a request to produce something rather than to look a fact up. Naming what they want made is not asking for a fact about it.`
 	},
 	searchNone: {
 		label: 'Web search — not used',
@@ -192,6 +206,7 @@ Write in the language of the conversation. Be concise but never lossy: prefer a 
 export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
 	'searchRouter',
+	'toolPolicy',
 	'searchNone',
 	'searchContext',
 	'searchRecall',

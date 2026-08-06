@@ -100,6 +100,7 @@ type the default back, and the override disappears.
 | --------------------------- | ------------------------------------------------------- |
 | Current date                | How the date is framed                                  |
 | Web search, query           | Whether to search and what to search for, in auto mode  |
+| Native tools, when to use   | When the model should call a tool rather than answer    |
 | Web search, not used        | Stops the model claiming it searched when it did not    |
 | Web search, results         | How results are handed over, and how they are cited     |
 | Web search, earlier sources | The index of what past turns found, and how to treat it |
