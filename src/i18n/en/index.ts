@@ -380,6 +380,9 @@ const en = {
 		'The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.',
 	webSearchUnavailable:
 		"Web search isn't available yet. An admin can configure it for this instance.",
+	infomaniakProductId: 'Product ID',
+	infomaniakProductIdHelp:
+		'The AI Tools product number from your Infomaniak manager. The endpoint is built from it.',
 	nativeToolsTitle: 'Native tool calling',
 	nativeToolsDescription:
 		'How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.',

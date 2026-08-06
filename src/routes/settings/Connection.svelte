@@ -10,6 +10,8 @@
 	import {
 		ConnectionType,
 		getProvider,
+		infomaniakBaseUrl,
+		infomaniakProductId,
 		isOpenAiCompatible,
 		SERVER_COLORS,
 		serverBadge,
@@ -233,6 +235,24 @@
 							bind:value={server.baseUrl}
 							placeholder={provider.baseUrl}
 							oninput={persist}
+						/>
+					</SettingsField>
+				{/if}
+
+				<!-- Infomaniak's endpoint differs only by the product ID in its path, so
+				     that is what the form asks for and the URL is derived from it. An
+				     empty ID leaves the URL empty, which is what stops the connection
+				     being synced before it can work. -->
+				{#if provider.type === ConnectionType.Infomaniak}
+					<SettingsField label={$LL.infomaniakProductId()} hint={$LL.infomaniakProductIdHelp()}>
+						<input
+							class="settings-field font-mono text-xs"
+							value={infomaniakProductId(server.baseUrl)}
+							placeholder="123456"
+							oninput={(e) => {
+								server.baseUrl = infomaniakBaseUrl(e.currentTarget.value);
+								persist();
+							}}
 						/>
 					</SettingsField>
 				{/if}

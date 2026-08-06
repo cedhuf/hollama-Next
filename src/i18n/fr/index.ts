@@ -396,6 +396,9 @@ const fr = extendDictionary(en, {
 		"Le modèle détermine d'abord si une question nécessite le web. La plupart des modèles récents (même sous Ollama) s'en sortent bien, quelques petits modèles moins.",
 	webSearchUnavailable:
 		"La recherche web n'est pas encore disponible. Un administrateur peut la configurer pour cette instance.",
+	infomaniakProductId: 'Identifiant du produit',
+	infomaniakProductIdHelp:
+		"Le numéro du produit AI Tools dans votre manager Infomaniak. L'adresse du service en est déduite.",
 	nativeToolsTitle: 'Appel natif des outils',
 	nativeToolsDescription:
 		"Comment les outils web sont donnés au modèle : sous forme de consignes textuelles auxquelles il répond dans ses messages, ou sous forme d'appels que le fournisseur transporte pour lui.",

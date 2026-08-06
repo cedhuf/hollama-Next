@@ -89,10 +89,12 @@ export function serverInitials(name: string): string {
 
 /**
  * Metadata describing each provider. Drives the provider picker cards and the
- * per-connection form. `identified` providers have a fixed/known endpoint, so
- * the user mostly just needs to supply an API key — the Base URL is hidden by
- * default. Non-identified providers (Ollama, OpenAI-compatible) expose the
- * Base URL as their primary field.
+ * per-connection form. `identified` providers have a known endpoint, so the user
+ * supplies an API key and little else, and the Base URL is hidden under Advanced.
+ * Non-identified ones (Ollama, OpenAI-compatible) expose it as their main field.
+ *
+ * Infomaniak counts as identified even though its URL is not one fixed string:
+ * it varies only by the product ID, which the form asks for directly.
  */
 export interface ProviderInfo {
 	type: ConnectionType;
@@ -106,6 +108,30 @@ export interface ProviderInfo {
 	modelFilter?: string;
 	requiresApiKey: boolean;
 	apiKeyHelpUrl?: string;
+}
+
+/**
+ * Infomaniak's endpoint, bar the product ID that identifies the user's AI Tools
+ * subscription. Everything else about the URL is fixed.
+ */
+export const INFOMANIAK_URL_TEMPLATE = 'https://api.infomaniak.com/2/ai/{productId}/openai/v1';
+
+/** The endpoint for a product ID, or nothing when there is no ID to build it from. */
+export function infomaniakBaseUrl(productId: string): string {
+	const id = productId.trim();
+	return id ? INFOMANIAK_URL_TEMPLATE.replace('{productId}', id) : '';
+}
+
+/**
+ * The product ID out of a stored endpoint.
+ *
+ * Lets the form show a field for something that was never stored as a field, so
+ * connections configured before this keep working and fill the input in on their
+ * own. An unsubstituted placeholder reads as no ID at all, which is what it is.
+ */
+export function infomaniakProductId(baseUrl: string): string {
+	const found = baseUrl?.match(/\/ai\/([^/]+)\/openai/)?.[1] ?? '';
+	return found === '{productId}' ? '' : found;
 }
 
 export const PROVIDERS: ProviderInfo[] = [
@@ -138,14 +164,15 @@ export const PROVIDERS: ProviderInfo[] = [
 		apiKeyHelpUrl: 'https://console.anthropic.com/settings/keys'
 	},
 	{
-		// Infomaniak embeds the product ID directly in the endpoint path, so we
-		// treat it as a plain OpenAI-compatible server: the user pastes the URL
-		// (replacing the {productId} placeholder) and their API key.
+		// The endpoint is fixed except for the product ID in its path, so the form
+		// asks for that one value and builds the URL. Asking for the whole URL with a
+		// {productId} placeholder in it, which is what this used to do, sends the
+		// placeholder itself to the API the moment anyone misses it.
 		type: ConnectionType.Infomaniak,
 		name: 'Infomaniak',
 		family: 'openai',
-		identified: false,
-		baseUrl: 'https://api.infomaniak.com/2/ai/{productId}/openai/v1',
+		identified: true,
+		baseUrl: INFOMANIAK_URL_TEMPLATE,
 		requiresApiKey: true,
 		apiKeyHelpUrl: 'https://manager.infomaniak.com/v3/infomaniak-api'
 	},
@@ -218,7 +245,10 @@ export function getDefaultServer(
 
 	return {
 		id: generateRandomId(),
-		baseUrl: provider.baseUrl,
+		// Infomaniak starts empty rather than with its template: an endpoint that
+		// still has `{productId}` in it is not a working endpoint, and leaving it
+		// blank is what makes the form refuse to sync until the ID is given.
+		baseUrl: connectionType === ConnectionType.Infomaniak ? '' : provider.baseUrl,
 		connectionType,
 		modelFilter: provider.modelFilter,
 		color: pickServerColor(usedColors),

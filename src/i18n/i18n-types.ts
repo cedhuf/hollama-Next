@@ -1445,6 +1445,14 @@ type RootTranslation = {
 	 */
 	webSearchUnavailable: string
 	/**
+	 * P​r​o​d​u​c​t​ ​I​D
+	 */
+	infomaniakProductId: string
+	/**
+	 * T​h​e​ ​A​I​ ​T​o​o​l​s​ ​p​r​o​d​u​c​t​ ​n​u​m​b​e​r​ ​f​r​o​m​ ​y​o​u​r​ ​I​n​f​o​m​a​n​i​a​k​ ​m​a​n​a​g​e​r​.​ ​T​h​e​ ​e​n​d​p​o​i​n​t​ ​i​s​ ​b​u​i​l​t​ ​f​r​o​m​ ​i​t​.
+	 */
+	infomaniakProductIdHelp: string
+	/**
 	 * N​a​t​i​v​e​ ​t​o​o​l​ ​c​a​l​l​i​n​g
 	 */
 	nativeToolsTitle: string
@@ -3485,6 +3493,14 @@ The completion in progress will stop
 	 * Web search isn't available yet. An admin can configure it for this instance.
 	 */
 	webSearchUnavailable: () => LocalizedString
+	/**
+	 * Product ID
+	 */
+	infomaniakProductId: () => LocalizedString
+	/**
+	 * The AI Tools product number from your Infomaniak manager. The endpoint is built from it.
+	 */
+	infomaniakProductIdHelp: () => LocalizedString
 	/**
 	 * Native tool calling
 	 */
