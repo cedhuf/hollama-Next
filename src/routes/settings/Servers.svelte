@@ -38,7 +38,7 @@
 	/>
 {:else}
 	<SettingsPanel>
-		<SettingsSection title={$LL.servers()} description={$LL.addAServerDescription()}>
+		<SettingsSection title={$LL.servers()}>
 			<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 				{#each PROVIDERS as provider (provider.type)}
 					<button

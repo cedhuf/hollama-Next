@@ -124,10 +124,6 @@ type RootTranslation = {
 	 */
 	noModelsToRename: string
 	/**
-	 * R​e​n​a​m​e​ ​m​o​d​e​l​s​ ​f​o​r​ ​d​i​s​p​l​a​y​ ​o​n​l​y​ ​—​ ​r​e​q​u​e​s​t​s​ ​s​t​i​l​l​ ​u​s​e​ ​t​h​e​ ​r​e​a​l​ ​m​o​d​e​l​ ​i​d​.
-	 */
-	modelNamesHelp: string
-	/**
 	 * M​o​d​e​l​ ​n​a​m​e​s
 	 */
 	modelNames: string
@@ -189,10 +185,6 @@ type RootTranslation = {
 	 * @param {number} count
 	 */
 	modelsCount: RequiredParams<'count'>
-	/**
-	 * I​d​e​n​t​i​f​i​e​s​ ​t​h​e​ ​c​o​n​n​e​c​t​i​o​n​ ​i​n​ ​t​h​e​ ​m​o​d​e​l​s​ ​l​i​s​t
-	 */
-	connectionLabelHelp: string
 	/**
 	 * C​o​n​n​e​c​t​i​n​g​.​.​.
 	 */
@@ -604,10 +596,6 @@ type RootTranslation = {
 	 * M​o​d​e​l​ ​n​a​m​e​s​ ​f​i​l​t​e​r
 	 */
 	modelsFilter: string
-	/**
-	 * H​i​d​e​s​ ​m​o​d​e​l​ ​n​a​m​e​s​ ​t​h​a​t​ ​d​o​n​'​t​ ​s​t​a​r​t​ ​w​i​t​h​ ​t​h​e​ ​f​i​l​t​e​r
-	 */
-	modelsFilterHelp: string
 	/**
 	 * N​a​m​e
 	 */
@@ -1120,10 +1108,6 @@ type RootTranslation = {
 	 */
 	themeStyle: string
 	/**
-	 * R​e​p​l​a​c​e​ ​t​h​e​ ​p​r​o​d​u​c​t​I​d​ ​p​l​a​c​e​h​o​l​d​e​r​ ​i​n​ ​t​h​e​ ​U​R​L​ ​w​i​t​h​ ​y​o​u​r​ ​I​n​f​o​m​a​n​i​a​k​ ​p​r​o​d​u​c​t​ ​I​D
-	 */
-	infomaniakUrlHelp: string
-	/**
 	 * F​i​r​s​t​ ​n​a​m​e
 	 */
 	firstName: string
@@ -1445,14 +1429,6 @@ type RootTranslation = {
 	 */
 	webSearchUnavailable: string
 	/**
-	 * P​r​o​d​u​c​t​ ​I​D
-	 */
-	infomaniakProductId: string
-	/**
-	 * T​h​e​ ​A​I​ ​T​o​o​l​s​ ​p​r​o​d​u​c​t​ ​n​u​m​b​e​r​ ​f​r​o​m​ ​y​o​u​r​ ​I​n​f​o​m​a​n​i​a​k​ ​m​a​n​a​g​e​r​.​ ​T​h​e​ ​e​n​d​p​o​i​n​t​ ​i​s​ ​b​u​i​l​t​ ​f​r​o​m​ ​i​t​.
-	 */
-	infomaniakProductIdHelp: string
-	/**
 	 * N​a​t​i​v​e​ ​t​o​o​l​ ​c​a​l​l​i​n​g
 	 */
 	nativeToolsTitle: string
@@ -1566,17 +1542,9 @@ type RootTranslation = {
 	 */
 	systemServers: string
 	/**
-	 * S​h​a​r​e​d​ ​w​i​t​h​ ​e​v​e​r​y​o​n​e​ ​—​ ​p​i​c​k​ ​w​h​i​c​h​ ​m​o​d​e​l​s​ ​t​o​ ​e​x​p​o​s​e​ ​i​n​ ​t​h​e​ ​A​d​m​i​n​ ​t​a​b​.​ ​K​e​y​s​ ​a​r​e​ ​e​n​c​r​y​p​t​e​d​ ​a​n​d​ ​n​e​v​e​r​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​b​r​o​w​s​e​r​.
-	 */
-	systemServersDescription: string
-	/**
 	 * Y​o​u​r​ ​s​e​r​v​e​r​s
 	 */
 	yourServers: string
-	/**
-	 * Y​o​u​r​ ​o​w​n​ ​p​r​o​v​i​d​e​r​ ​c​o​n​n​e​c​t​i​o​n​s​,​ ​p​r​i​v​a​t​e​ ​t​o​ ​y​o​u​r​ ​a​c​c​o​u​n​t​.
-	 */
-	yourServersDescription: string
 	/**
 	 * P​r​o​v​i​d​e​r​s​ ​a​r​e​ ​m​a​n​a​g​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
 	 */
@@ -1585,10 +1553,6 @@ type RootTranslation = {
 	 * A​d​d​ ​a​ ​s​e​r​v​e​r
 	 */
 	addAServer: string
-	/**
-	 * C​o​n​n​e​c​t​ ​O​l​l​a​m​a​ ​o​r​ ​a​n​ ​O​p​e​n​A​I​-​c​o​m​p​a​t​i​b​l​e​ ​p​r​o​v​i​d​e​r​ ​t​o​ ​s​t​a​r​t​ ​c​h​a​t​t​i​n​g​.
-	 */
-	addAServerDescription: string
 	/**
 	 * O​p​t​i​o​n​a​l
 	 */
@@ -2198,10 +2162,6 @@ The completion in progress will stop
 	 */
 	noModelsToRename: () => LocalizedString
 	/**
-	 * Rename models for display only — requests still use the real model id.
-	 */
-	modelNamesHelp: () => LocalizedString
-	/**
 	 * Model names
 	 */
 	modelNames: () => LocalizedString
@@ -2261,10 +2221,6 @@ The completion in progress will stop
 	 * {count} model{{s}}
 	 */
 	modelsCount: (arg: { count: number }) => LocalizedString
-	/**
-	 * Identifies the connection in the models list
-	 */
-	connectionLabelHelp: () => LocalizedString
 	/**
 	 * Connecting...
 	 */
@@ -2665,10 +2621,6 @@ The completion in progress will stop
 	 * Model names filter
 	 */
 	modelsFilter: () => LocalizedString
-	/**
-	 * Hides model names that don't start with the filter
-	 */
-	modelsFilterHelp: () => LocalizedString
 	/**
 	 * Name
 	 */
@@ -3174,10 +3126,6 @@ The completion in progress will stop
 	 */
 	themeStyle: () => LocalizedString
 	/**
-	 * Replace the productId placeholder in the URL with your Infomaniak product ID
-	 */
-	infomaniakUrlHelp: () => LocalizedString
-	/**
 	 * First name
 	 */
 	firstName: () => LocalizedString
@@ -3494,14 +3442,6 @@ The completion in progress will stop
 	 */
 	webSearchUnavailable: () => LocalizedString
 	/**
-	 * Product ID
-	 */
-	infomaniakProductId: () => LocalizedString
-	/**
-	 * The AI Tools product number from your Infomaniak manager. The endpoint is built from it.
-	 */
-	infomaniakProductIdHelp: () => LocalizedString
-	/**
 	 * Native tool calling
 	 */
 	nativeToolsTitle: () => LocalizedString
@@ -3614,17 +3554,9 @@ The completion in progress will stop
 	 */
 	systemServers: () => LocalizedString
 	/**
-	 * Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.
-	 */
-	systemServersDescription: () => LocalizedString
-	/**
 	 * Your servers
 	 */
 	yourServers: () => LocalizedString
-	/**
-	 * Your own provider connections, private to your account.
-	 */
-	yourServersDescription: () => LocalizedString
 	/**
 	 * Providers are managed by your administrator.
 	 */
@@ -3633,10 +3565,6 @@ The completion in progress will stop
 	 * Add a server
 	 */
 	addAServer: () => LocalizedString
-	/**
-	 * Connect Ollama or an OpenAI-compatible provider to start chatting.
-	 */
-	addAServerDescription: () => LocalizedString
 	/**
 	 * Optional
 	 */

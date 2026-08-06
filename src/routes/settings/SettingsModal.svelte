@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		ArrowLeft,
 		Database,
 		Info,
 		LogOut,
@@ -17,7 +18,7 @@
 	import { env } from '$env/dynamic/public';
 	import Modal from '$lib/components/Modal.svelte';
 	import { currentUser } from '$lib/stores/auth';
-	import { settingsModalOpen } from '$lib/stores/modal';
+	import { settingsBack, settingsModalOpen } from '$lib/stores/modal';
 
 	import Admin from './Admin.svelte';
 	import Chat from './Chat.svelte';
@@ -138,14 +139,34 @@
 		<!-- min-h-0 so the flex-1 panel stays bounded in the mobile column layout, letting
 		     the inner content scroll instead of overflowing (desktop is a row, unaffected). -->
 		<div class="flex min-h-0 min-w-0 flex-1 flex-col">
+			<!-- Empty on desktop but for the close button, which is why it is hidden on
+			     mobile. A sub-view publishing a way back gives it something to hold, so
+			     it appears at every width rather than stranding a phone in the sub-view. -->
 			<div
-				class="hidden h-12 shrink-0 items-center justify-end border-b border-shade-2 px-3 sm:flex"
+				class="h-12 shrink-0 items-center justify-between border-b border-shade-2 px-3 {$settingsBack
+					? 'flex'
+					: 'hidden sm:flex'}"
 			>
+				{#if $settingsBack}
+					<button
+						type="button"
+						onclick={$settingsBack.onBack}
+						class="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					>
+						<ArrowLeft class="h-4 w-4" />
+						{$settingsBack.label}
+					</button>
+				{:else}
+					<span></span>
+				{/if}
+
+				<!-- Mobile already has a close in the sidebar header; a second one here
+				     would sit a thumb's width from the back button. -->
 				<button
 					type="button"
 					onclick={() => ($settingsModalOpen = false)}
 					aria-label="Close"
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="hidden rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active sm:block"
 				>
 					<X class="h-4 w-4" />
 				</button>

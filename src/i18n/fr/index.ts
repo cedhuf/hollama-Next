@@ -38,8 +38,6 @@ const fr = extendDictionary(en, {
 	checkNow: 'Vérifier maintenant',
 	clear: 'Effacer',
 	noModelsToRename: 'Aucun modèle disponible. Synchronisez d’abord cette connexion.',
-	modelNamesHelp:
-		"Renomme les modèles pour l'affichage uniquement — les requêtes utilisent toujours l'identifiant réel.",
 	modelNames: 'Noms des modèles',
 	resetAllNames: 'Tout réinitialiser',
 	confirmResetNames: 'Effacer tous les noms personnalisés ?',
@@ -54,7 +52,6 @@ const fr = extendDictionary(en, {
 	lastSynced: 'Dernière synchro {date:string}',
 	neverSynced: 'Jamais synchronisé — lancez une synchro pour charger ses modèles',
 	modelsCount: '{count:number} modèle{{s}}',
-	connectionLabelHelp: 'Identifie la connexion dans la liste des modèles',
 	connecting: 'Connexion...',
 	connectionIsVerified: 'La connexion a été vérifiée et est prête à être utilisée',
 	connectionFailedToVerify:
@@ -160,7 +157,6 @@ const fr = extendDictionary(en, {
 	modelOptions: 'Options de modèle',
 	modelWasDownloaded: '{model:string} a été téléchargé',
 	modelsFilter: 'Filtre des noms de modèles',
-	modelsFilterHelp: 'Masque les noms de modèles ne commençant pas par le filtre',
 	name: 'Nom',
 	newKnowledge: 'Nouvelle connaissance',
 	newSession: 'Nouvelle session',
@@ -279,7 +275,6 @@ const fr = extendDictionary(en, {
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	theme: 'Thème',
 	themeStyle: 'Style du thème',
-	infomaniakUrlHelp: "Remplacez le segment productId dans l'URL par votre ID de produit Infomaniak",
 	firstName: 'Prénom',
 	lastName: 'Nom',
 	role: 'Rôle',
@@ -396,9 +391,6 @@ const fr = extendDictionary(en, {
 		"Le modèle détermine d'abord si une question nécessite le web. La plupart des modèles récents (même sous Ollama) s'en sortent bien, quelques petits modèles moins.",
 	webSearchUnavailable:
 		"La recherche web n'est pas encore disponible. Un administrateur peut la configurer pour cette instance.",
-	infomaniakProductId: 'Identifiant du produit',
-	infomaniakProductIdHelp:
-		"Le numéro du produit AI Tools dans votre manager Infomaniak. L'adresse du service en est déduite.",
 	nativeToolsTitle: 'Appel natif des outils',
 	nativeToolsDescription:
 		"Comment les outils web sont donnés au modèle : sous forme de consignes textuelles auxquelles il répond dans ses messages, ou sous forme d'appels que le fournisseur transporte pour lui.",
@@ -437,14 +429,9 @@ const fr = extendDictionary(en, {
 
 	// --- Paramètres › Serveurs -------------------------------------------------
 	systemServers: 'Serveurs système',
-	systemServersDescription:
-		"Partagés avec tout le monde — choisissez les modèles à exposer dans l'onglet Admin. Les clés sont chiffrées et ne sont jamais envoyées au navigateur.",
 	yourServers: 'Vos serveurs',
-	yourServersDescription: 'Vos propres connexions, privées à votre compte.',
 	providersManagedByAdmin: 'Les fournisseurs sont gérés par votre administrateur.',
 	addAServer: 'Ajouter un serveur',
-	addAServerDescription:
-		'Connectez Ollama ou un fournisseur compatible OpenAI pour commencer à discuter.',
 	optional: 'Facultatif',
 	verifying: 'Vérification…',
 	modelsFound: '{count:number} modèle{{s}} trouvé{{s}}',

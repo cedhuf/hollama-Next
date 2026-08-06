@@ -29,7 +29,6 @@ const en = {
 	checkNow: 'Check now',
 	clear: 'Clear',
 	noModelsToRename: 'No models available. Sync this connection first.',
-	modelNamesHelp: 'Rename models for display only — requests still use the real model id.',
 	modelNames: 'Model names',
 	resetAllNames: 'Reset all',
 	confirmResetNames: 'Clear every custom name?',
@@ -45,7 +44,6 @@ const en = {
 	lastSynced: 'Last synced {date:string}',
 	neverSynced: 'Never synced — run a sync to load its models',
 	modelsCount: '{count:number} model{{s}}',
-	connectionLabelHelp: 'Identifies the connection in the models list',
 	connecting: 'Connecting...',
 	connectionIsVerified: 'Connection has been verified and is ready to use',
 	connectionFailedToVerify:
@@ -154,7 +152,6 @@ const en = {
 	modelOptions: 'Model options',
 	modelWasDownloaded: '{model:string} was downloaded',
 	modelsFilter: 'Model names filter',
-	modelsFilterHelp: "Hides model names that don't start with the filter",
 	name: 'Name',
 	newKnowledge: 'New knowledge',
 	newSession: 'New session',
@@ -286,7 +283,6 @@ const en = {
 		'Automatically name new sessions after the first reply, using the selected model',
 	theme: 'Theme',
 	themeStyle: 'Theme style',
-	infomaniakUrlHelp: 'Replace the productId placeholder in the URL with your Infomaniak product ID',
 	firstName: 'First name',
 	lastName: 'Last name',
 	role: 'Role',
@@ -380,9 +376,6 @@ const en = {
 		'The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.',
 	webSearchUnavailable:
 		"Web search isn't available yet. An admin can configure it for this instance.",
-	infomaniakProductId: 'Product ID',
-	infomaniakProductIdHelp:
-		'The AI Tools product number from your Infomaniak manager. The endpoint is built from it.',
 	nativeToolsTitle: 'Native tool calling',
 	nativeToolsDescription:
 		'How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.',
@@ -421,13 +414,9 @@ const en = {
 
 	// --- Settings › Servers ----------------------------------------------------
 	systemServers: 'System servers',
-	systemServersDescription:
-		'Shared with everyone — pick which models to expose in the Admin tab. Keys are encrypted and never sent to the browser.',
 	yourServers: 'Your servers',
-	yourServersDescription: 'Your own provider connections, private to your account.',
 	providersManagedByAdmin: 'Providers are managed by your administrator.',
 	addAServer: 'Add a server',
-	addAServerDescription: 'Connect Ollama or an OpenAI-compatible provider to start chatting.',
 	optional: 'Optional',
 	verifying: 'Verifying…',
 	modelsFound: '{count:number} model{{s}} found',

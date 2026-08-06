@@ -11,6 +11,8 @@
 		ConnectionType,
 		getDefaultServer,
 		getProvider,
+		infomaniakBaseUrl,
+		infomaniakProductId,
 		PROVIDERS,
 		type Server
 	} from '$lib/connections';
@@ -258,10 +260,7 @@
 	/>
 {:else}
 	<SettingsPanel>
-		<SettingsSection
-			title={isAdmin ? $LL.systemServers() : $LL.yourServers()}
-			description={isAdmin ? $LL.systemServersDescription() : $LL.yourServersDescription()}
-		>
+		<SettingsSection title={isAdmin ? $LL.systemServers() : $LL.yourServers()}>
 			{#if loading}
 				<!-- Placeholders rather than an empty section: the list keeps its shape
 				     and nothing claims to be the final answer. `Skeleton` stays invisible
@@ -307,14 +306,31 @@
 					</div>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<SettingsField label={$LL.baseUrl()}>
-							<input
-								class="settings-field font-mono text-xs"
-								bind:value={draft.baseUrl}
-								oninput={touch}
-								placeholder={draftProvider.baseUrl}
-							/>
-						</SettingsField>
+						<!-- Same rule as an existing connection: Infomaniak's endpoint is a
+						     function of its product ID, so that is what is asked for. Leaving
+						     it empty leaves the URL empty, and Verify stays disabled. -->
+						{#if draft.connectionType === ConnectionType.Infomaniak}
+							<SettingsField label={$LL.productId()}>
+								<input
+									class="settings-field font-mono text-xs"
+									value={infomaniakProductId(draft.baseUrl)}
+									placeholder="123456"
+									oninput={(e) => {
+										draft.baseUrl = infomaniakBaseUrl(e.currentTarget.value);
+										touch();
+									}}
+								/>
+							</SettingsField>
+						{:else}
+							<SettingsField label={$LL.baseUrl()}>
+								<input
+									class="settings-field font-mono text-xs"
+									bind:value={draft.baseUrl}
+									oninput={touch}
+									placeholder={draftProvider.baseUrl}
+								/>
+							</SettingsField>
+						{/if}
 
 						<SettingsField label={$LL.apiKey()}>
 							<input
@@ -327,7 +343,7 @@
 							/>
 						</SettingsField>
 
-						<SettingsField label={$LL.label()} hint={$LL.connectionLabelHelp()}>
+						<SettingsField label={$LL.label()}>
 							<input
 								class="settings-field"
 								bind:value={draft.label}

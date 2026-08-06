@@ -243,8 +243,8 @@
 				     that is what the form asks for and the URL is derived from it. An
 				     empty ID leaves the URL empty, which is what stops the connection
 				     being synced before it can work. -->
-				{#if provider.type === ConnectionType.Infomaniak}
-					<SettingsField label={$LL.infomaniakProductId()} hint={$LL.infomaniakProductIdHelp()}>
+				{#if isInfomaniak}
+					<SettingsField label={$LL.productId()}>
 						<input
 							class="settings-field font-mono text-xs"
 							value={infomaniakProductId(server.baseUrl)}
@@ -316,7 +316,7 @@
 					</SettingsField>
 				{/if}
 
-				<SettingsField label={$LL.label()} hint={$LL.connectionLabelHelp()}>
+				<SettingsField label={$LL.label()}>
 					<input
 						class="settings-field"
 						bind:value={server.label}
@@ -325,7 +325,7 @@
 					/>
 				</SettingsField>
 
-				<SettingsField label={$LL.modelsFilter()} hint={$LL.modelsFilterHelp()}>
+				<SettingsField label={$LL.modelsFilter()}>
 					<input
 						class="settings-field"
 						bind:value={server.modelFilter}
@@ -358,9 +358,10 @@
 				{/each}
 			</div>
 
-			{#if isInfomaniak}
-				<p class="text-xs leading-snug text-muted">{$LL.infomaniakUrlHelp()}</p>
-			{:else if isOllamaFamily}
+			<!-- Kept where the other help text went: this one is not a description of a
+			     field, it is the fix for the CORS failure that stops Ollama connecting,
+			     and it only shows while the connection is still unverified. -->
+			{#if isOllamaFamily}
 				<OllamaBaseURLHelp {server} />
 			{/if}
 

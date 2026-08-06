@@ -1,6 +1,17 @@
 import { writable } from 'svelte/store';
 
 export const settingsModalOpen = writable(false);
+
+/**
+ * The way out of a settings sub-view, lifted to the modal's own header.
+ *
+ * A sub-view carrying its own back button put two headers on top of each other:
+ * the modal's, and the one the panel drew for itself. The sub-view still owns the
+ * state, it just publishes the way back here and the modal draws it in the bar it
+ * already has. Registered on mount, cleared on destroy, so nothing has to
+ * remember to tidy up when a tab changes.
+ */
+export const settingsBack = writable<{ label: string; onBack: () => void } | null>(null);
 export const onboardingOpen = writable(false);
 /** Server-mode welcome tour, shown once on a user's first connection. */
 export const welcomeOpen = writable(false);

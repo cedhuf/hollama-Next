@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { ArrowLeft, RotateCcw, Search, X } from '@lucide/svelte';
+	import { RotateCcw, Search, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
+	import { settingsBack } from '$lib/stores/modal';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 
@@ -22,6 +23,14 @@
 	}
 
 	let { server, onBack, onChange }: Props = $props();
+
+	// Hand the way out to the modal header for as long as this view is mounted.
+	// Leaving by any route (back, another tab, closing the dialog) unmounts it,
+	// which clears it.
+	$effect(() => {
+		settingsBack.set({ label: $LL.servers(), onBack });
+		return () => settingsBack.set(null);
+	});
 
 	let query = $state('');
 	let confirmingReset = $state(false);
@@ -65,16 +74,9 @@
 
 <!-- The sub-view owns its shell, so both modes present it identically. -->
 <SettingsPanel>
-	<!-- Header: back to the connection list, plus which connection we're editing -->
+	<!-- Which connection is being edited. The way back is in the modal's own header,
+	     published above, so this row is not a second one. -->
 	<div class="flex items-center gap-2">
-		<button
-			type="button"
-			onclick={onBack}
-			class="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
-		>
-			<ArrowLeft class="h-4 w-4" />
-			{$LL.servers()}
-		</button>
 		<span
 			class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
 			style="background-color: {badge.color}"
@@ -88,8 +90,6 @@
 			</span>
 		{/if}
 	</div>
-
-	<p class="text-xs leading-snug text-muted">{$LL.modelNamesHelp()}</p>
 
 	{#if models.length}
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
