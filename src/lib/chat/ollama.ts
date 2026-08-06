@@ -12,7 +12,12 @@ import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { ollamaBaseUrl } from './endpoint';
-import type { ChatRequest as AppChatRequest, ChatChunk, ChatStrategy } from './index';
+import {
+	stripThinkTags,
+	type ChatRequest as AppChatRequest,
+	type ChatChunk,
+	type ChatStrategy
+} from './index';
 
 export interface OllamaOptions {
 	numa: boolean;
@@ -160,12 +165,18 @@ export class OllamaStrategy implements ChatStrategy {
 				model: payload.model,
 				messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
 				options: payload.options,
-				stream: false
+				stream: false,
+				// The short internal errands don't want reasoning: it costs a round trip
+				// and buries the one line the caller is after. `false` is accepted by
+				// every model, unlike `true` (see `chat()` above).
+				think: false
 			})
 		});
 		if (!response.ok) return '';
 		const data = await response.json();
-		return data?.message?.content ?? '';
+		// Ollama returns reasoning in `message.thinking`, so `content` is normally
+		// clean — but a model that ignores `think: false` falls back to inline tags.
+		return stripThinkTags(data?.message?.content ?? '');
 	}
 
 	async getModels(): Promise<Model[]> {

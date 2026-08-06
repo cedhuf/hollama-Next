@@ -475,6 +475,9 @@
 		if (!linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
 			const lastUserMessage = inContext.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
+			// Whether `query` is the router's own wording or the raw user message it
+			// fell back to. Only the first is short enough to be worth showing.
+			let queryIsRewritten = false;
 
 			// In auto mode the model first decides whether (and what) to search. This
 			// phase is transparent (no indicator): if it replies NONE we skip the
@@ -505,24 +508,33 @@
 					}));
 
 				try {
-					const decision = await decider.complete?.({
+					const reply = await decider.complete?.({
 						model: session.model.name,
 						options: { temperature: 0 },
 						messages: [{ role: 'system' as const, content: routerInstruction }, ...recentTurns]
 					});
-					// Anything that doesn't look like a query counts as NONE: a router that
-					// answers the conversation instead of routing must not have its sentence
-					// handed to a search engine.
-					query = parseRouterDecision(decision);
+					const decision = parseRouterDecision(reply);
+					// A router that declines has answered the question, so its answer stands.
+					// One that produced something unreadable has not: treating that as a
+					// refusal turns any parse failure into "web search off for this message",
+					// invisibly, and then tells the model it chose not to look anything up.
+					// Falling back to the raw message is what explicit mode does anyway.
+					if (decision.kind === 'query') {
+						query = decision.query;
+						queryIsRewritten = true;
+					} else if (decision.kind === 'none') {
+						query = null;
+					}
 				} catch {
 					// Router failed — fall back to searching the raw user message.
 				}
 			}
 
 			if (query) {
-				// In auto mode the query is a concise model-written reformulation worth
-				// showing; in explicit mode it's the raw (often long) user message, so hide it.
-				if ($settingsStore.webSearchAuto) editor.searchQuery = query;
+				// A reformulation by the router is concise and worth showing; the raw user
+				// message, which is what both explicit mode and the router fallback search,
+				// is often a paragraph long.
+				if (queryIsRewritten) editor.searchQuery = query;
 				editor.searchActivity = 'search';
 				editor.isSearching = true;
 				try {

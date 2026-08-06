@@ -28,6 +28,27 @@ export interface ChatRequest {
 /** A single streamed delta: regular `content` and/or separate reasoning `thinking`. */
 export type ChatChunk = { content?: string; thinking?: string };
 
+/**
+ * The answer without the model's chain-of-thought.
+ *
+ * Providers that expose reasoning in a field of its own (Ollama's `thinking`,
+ * `reasoning_content` over OpenAI-compatible endpoints) are already separated for
+ * us. The rest emit `<think>…</think>` inline in the content, which the streaming
+ * path splits out downstream — but `complete()` returns the raw string, so every
+ * one-shot caller has to do it here or read the model's deliberation as if it were
+ * the answer. A router that replies `<think>Hmm, is this real?…</think>NONE` is
+ * indistinguishable from one that replies nothing at all.
+ *
+ * An unclosed block counts as thinking to the end: a truncated reply is all
+ * deliberation and no answer.
+ */
+export function stripThinkTags(raw: string): string {
+	return raw
+		.replace(/<think>[\s\S]*?<\/think>/gi, '')
+		.replace(/<think>[\s\S]*$/i, '')
+		.trim();
+}
+
 export interface ChatStrategy {
 	chat(
 		payload: ChatRequest,

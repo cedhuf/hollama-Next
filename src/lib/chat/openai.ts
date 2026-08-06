@@ -8,7 +8,13 @@ import { supportsThinkingRequest, type Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 import { openaiClientConfig } from './endpoint';
-import type { ChatChunk, ChatRequest, ChatStrategy, Message } from './index';
+import {
+	stripThinkTags,
+	type ChatChunk,
+	type ChatRequest,
+	type ChatStrategy,
+	type Message
+} from './index';
 
 export class OpenAIStrategy implements ChatStrategy {
 	private openai: OpenAI;
@@ -121,13 +127,38 @@ export class OpenAIStrategy implements ChatStrategy {
 	}
 
 	async complete(payload: ChatRequest): Promise<string> {
-		const response = await this.openai.chat.completions.create({
-			model: payload.model,
-			messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
-			temperature: payload.options?.temperature,
-			stream: false
-		});
-		return response.choices?.[0]?.message?.content ?? '';
+		const messages = payload.messages.map((m) => ({ role: m.role, content: m.content }));
+
+		// `complete()` serves the short internal errands — routing a search, naming a
+		// session — where the answer is a handful of words and reasoning is pure cost:
+		// a round trip spent deliberating, and a reply the caller then has to dig the
+		// answer out of. Ask for it to be off, with the same scoping and the same
+		// retry-on-400 as `chat()`, since the field is not universally understood.
+		const noThinkBody = supportsThinkingRequest(this.server.connectionType)
+			? { chat_template_kwargs: { enable_thinking: false } }
+			: undefined;
+
+		const send = (extraBody: Record<string, unknown> | undefined) =>
+			this.openai.chat.completions.create({
+				model: payload.model,
+				messages,
+				temperature: payload.options?.temperature,
+				stream: false,
+				...extraBody
+			});
+
+		let response;
+		try {
+			response = await send(noThinkBody);
+		} catch (error) {
+			const status = (error as { status?: number } | null)?.status;
+			if (!noThinkBody || status !== 400) throw error;
+			response = await send(undefined);
+		}
+
+		// Belt and braces: the flag is a request, not a guarantee, and a model that
+		// reasons anyway does it inline in the content.
+		return stripThinkTags(response.choices?.[0]?.message?.content ?? '');
 	}
 
 	async getModels(): Promise<Model[]> {

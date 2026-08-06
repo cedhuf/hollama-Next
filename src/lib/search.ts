@@ -110,31 +110,52 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
 }
 
 /**
- * The query the router asked for — or nothing, when it didn't route.
+ * What the router came back with.
+ *
+ * Three outcomes, not two. `none` is the router doing its job and declining;
+ * `unreadable` is the router failing to answer the question it was asked. They
+ * used to be the same value, and the caller could only treat both as "don't
+ * search" — which meant a model whose reply we couldn't parse silently disabled
+ * web search for that message, and then got told it had chosen not to look
+ * anything up. Keeping them apart lets the caller fall back instead.
+ */
+export type RouterDecision =
+	| { kind: 'query'; query: string }
+	| { kind: 'none' }
+	| { kind: 'unreadable' };
+
+/**
+ * Read the router's reply.
  *
  * The router is the chat model itself, told to answer with a query or with NONE.
  * A small model handed the recent turns sometimes forgets the job and simply
  * carries on the conversation, and its reply was being searched verbatim: an
  * instance of this turned "Excellent choix ! C'est un plat complet…" into a web
- * search. Anything that doesn't look like a query is treated as NONE, because a
- * search on prose is worse than no search at all — it feeds the model five
+ * search. So anything that reads as prose is refused rather than searched: a
+ * search on prose is worse than no search at all, it feeds the model five
  * irrelevant results and invites it to use them.
+ *
+ * Refused is not the same as declined, though, which is what `unreadable` is for.
  */
-export function parseRouterDecision(raw: string | undefined): string | null {
-	// Only the first line: a model that explains itself does so underneath.
+export function parseRouterDecision(raw: string | undefined): RouterDecision {
+	// Only the first line: a model that explains itself does so underneath. Its
+	// reasoning, which used to land here and read as prose, is stripped upstream by
+	// `complete()`.
 	const first = (raw ?? '')
 		.split('\n')[0]
 		.trim()
 		.replace(/^["']+|["']+$/g, '');
-	if (!first || /^none\b/i.test(first)) return null;
+
+	if (!first) return { kind: 'unreadable' };
+	if (/^none\b/i.test(first)) return { kind: 'none' };
 
 	// Prose tells: it was written for a reader, not for a search engine.
-	if (first.length > 120) return null;
-	if (first.split(/\s+/).length > 15) return null;
-	if (/[*_`#|<>]|\.\.\.|…/.test(first)) return null;
-	if (/[.!?:;]$/.test(first)) return null;
+	if (first.length > 120) return { kind: 'unreadable' };
+	if (first.split(/\s+/).length > 15) return { kind: 'unreadable' };
+	if (/[*_`#|<>]|\.\.\.|…/.test(first)) return { kind: 'unreadable' };
+	if (/[.!?:;]$/.test(first)) return { kind: 'unreadable' };
 
-	return first;
+	return { kind: 'query', query: first };
 }
 
 export interface SearchContext {

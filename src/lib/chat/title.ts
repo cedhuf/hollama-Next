@@ -4,7 +4,7 @@ import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
-import type { ChatStrategy } from './index';
+import { stripThinkTags, type ChatStrategy } from './index';
 import { OllamaStrategy } from './ollama';
 import { OpenAIStrategy } from './openai';
 
@@ -80,9 +80,7 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 			}
 		);
 
-		const title = stripTitleMarkdown(
-			result.replace(/<think>[\s\S]*?<\/think>/g, '') // drop reasoning blocks if any
-		).slice(0, 80);
+		const title = stripTitleMarkdown(stripThinkTags(result)).slice(0, 80);
 
 		return title || null;
 	} catch (error) {
