@@ -1,5 +1,7 @@
 import type { Message, Session } from '$lib/sessions';
 
+import { formatSourceIndex, recallSearches } from './sourceIndex';
+
 /**
  * How heavy a conversation is, and how much of the model's context it uses.
  *
@@ -46,6 +48,18 @@ export function estimateMessageTokens(message: Message): number {
 	tokens += (message.images?.length ?? 0) * TOKENS_PER_IMAGE;
 	if (message.knowledge?.content) tokens += estimateTokens(message.knowledge.content);
 	return tokens;
+}
+
+/**
+ * What the index of earlier sources adds to a request.
+ *
+ * Only the list itself: the prompt wrapped around it is a fixed cost shared with
+ * every other injected instruction, none of which this estimate counts either.
+ */
+export function estimateSourceIndexTokens(messages: Message[]): number {
+	const searches = recallSearches(messages);
+	if (!searches.length) return 0;
+	return estimateTokens(formatSourceIndex(searches));
 }
 
 /**
@@ -156,6 +170,11 @@ export function contextUsage(session: Session, threshold: number): ContextUsage 
 
 	let tokens = estimateTokens(session.systemPrompt?.content ?? '');
 	for (const message of active) tokens += estimateMessageTokens(message);
+	// The index of earlier sources is built at send time, so it is in the request
+	// without being in the messages. Left out, the gauge would read low on exactly
+	// the conversations that carry the most of it, and auto-compaction would fire
+	// late — the failure the estimate exists to prevent.
+	tokens += estimateSourceIndexTokens(active);
 
 	const { limit, limitSource } = resolveContextLimit(session, threshold);
 	const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0;

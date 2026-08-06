@@ -10,6 +10,7 @@ export type PromptKey =
 	| 'searchRouter'
 	| 'searchNone'
 	| 'searchContext'
+	| 'searchRecall'
 	| 'pageContext'
 	| 'searchRead'
 	| 'interactiveChoices'
@@ -96,14 +97,32 @@ Expect some of them to be irrelevant: a search engine matches words, not meaning
 
 {results}`
 	},
+	searchRecall: {
+		label: 'Web search — earlier sources',
+		placeholders: ['{results}'],
+		hint: 'Reminds the model what it already looked up, so it stops disowning it.',
+		default: `Sources you were shown earlier in this conversation, under the numbers your own answers cited them by. This is an index, not the pages: the text you were given at the time is no longer in front of you.
+
+They are real. You searched, you were shown these, and you answered from them. So do not retract, hedge or apologise for a claim you drew from them merely because you cannot now see the text behind it, and never suggest you may have invented it. Being unable to recall a source is not evidence that it does not exist.
+
+If a claim is challenged, or you find yourself doubting one, check it: reread the page. Taking back a sourced answer on a hunch is worse than either confirming it or correcting it on evidence.
+
+{results}`
+	},
 	searchRead: {
 		label: 'Web search — read a result',
-		hint: 'Lets the model open the full text of a result instead of answering from snippets.',
-		default: `The results above are titles and short snippets, not the pages themselves. If answering accurately needs what a page actually says — a changelog, a release note, a specification, anything where the detail matters — reply with ONLY this block and nothing else:
+		hint: 'Lets the model open the full text of a page instead of answering from snippets.',
+		default: `Search results are titles and short snippets, not the pages themselves. You can ask for a page in full. Reply with ONLY a block like this and nothing else:
 
 <read>1,3</read>
 
-using the numbers of the results you want. Their full text will be given to you and you will then answer. Ask only for what you need, three results at most. If the snippets are genuinely enough, just answer normally.`
+using the numbers of the results just given to you, or
+
+<read>https://example.com/page</read>
+
+using the address of any source listed above, including ones from earlier in this conversation. You may mix the two forms in one block. The full text will be given to you and you will then answer.
+
+Ask when the detail decides the answer and the snippets do not settle it: a changelog, a release note, a specification. Ask too when you are about to contradict, doubt or take back something you said earlier from a source, which is exactly the moment to look rather than guess. Ask only for what you need, three pages at most. If what you already have is genuinely enough, just answer normally.`
 	},
 	pageContext: {
 		label: 'Web fetch — pages',
@@ -175,6 +194,7 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'searchRouter',
 	'searchNone',
 	'searchContext',
+	'searchRecall',
 	'searchRead',
 	'pageContext',
 	'interactiveChoices',

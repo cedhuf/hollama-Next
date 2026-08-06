@@ -15,6 +15,7 @@
 	import { contextUsage, messagesInContext } from '$lib/chat/context';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
+	import { formatSourceIndex, recallableUrls, recallSearches } from '$lib/chat/sourceIndex';
 	import { generateTitle } from '$lib/chat/title';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
@@ -433,6 +434,17 @@
 		}
 
 		let searchInfo: WebSearchInfo | undefined;
+		// Whether this turn hands the model snippets rather than pages. Pages the user
+		// linked arrive in full, so there is nothing to open and `<read>` is not offered
+		// for them; search results are two lines each, which is the whole reason it exists.
+		let sentSnippets = false;
+
+		// What earlier turns already looked up.
+		const recalled = recallSearches(inContext);
+
+		// Whether the model may open a page this turn: the tool has to exist, and the
+		// user has to have left at least one of the web toggles on.
+		const mayReread = $webFetchConfig.available && (editor.webSearch || editor.webFetch);
 
 		// Pages the user linked to are read in full, and take precedence over a
 		// search: given an address, looking it up by keyword is the wrong move —
@@ -540,13 +552,8 @@
 				try {
 					const search = await buildSearchContext(query);
 					if (search) {
-						// The protocol is only advertised when the tool that serves it is
-						// available: promising the model a page it can't be given is worse
-						// than snippets alone.
-						const context = $webFetchConfig.available
-							? `${search.context}\n\n${resolvePrompt('searchRead', $settingsStore.promptOverrides)}`
-							: search.context;
-						chatMessages = [{ role: 'system', content: context }, ...chatMessages];
+						chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
+						sentSnippets = true;
 						searchInfo = {
 							query: search.query,
 							resultCount: search.resultCount,
@@ -570,11 +577,42 @@
 				// model apart "I searched and found nothing" from "I never searched" —
 				// and models fill that silence by claiming they looked it up, sometimes
 				// staging fake searches in their reasoning first.
+				//
+				// Sent alongside the index below rather than instead of it: the two answer
+				// different questions, one about this message and one about the ones before
+				// it, which is exactly the distinction the model was failing to make.
 				chatMessages = [
 					{ role: 'system', content: resolvePrompt('searchNone', $settingsStore.promptOverrides) },
 					...chatMessages
 				];
 			}
+		}
+
+		// The index of what earlier turns found, ahead of anything retrieved for this
+		// message: oldest first, so "what you already knew" reads before "what you were
+		// just handed", and the two lists of [numbers] can't be mistaken for each other.
+		if (recalled.length) {
+			chatMessages = [
+				{
+					role: 'system',
+					content: resolvePrompt('searchRecall', $settingsStore.promptOverrides, {
+						results: formatSourceIndex(recalled)
+					})
+				},
+				...chatMessages
+			];
+		}
+
+		// Offered once, whatever put a source in front of the model, and only when the
+		// tool that serves it is available: promising a page that can't be fetched is
+		// worse than snippets alone. The index survives the user switching the web tools
+		// off (their earlier answers still cite it) but rereading does not — turning them
+		// off has to mean no request goes out.
+		if (mayReread && (sentSnippets || recalled.length)) {
+			chatMessages = [
+				...chatMessages,
+				{ role: 'system', content: resolvePrompt('searchRead', $settingsStore.promptOverrides) }
+			];
 		}
 
 		// Map messages for the chat request, converting images if necessary
@@ -647,11 +685,29 @@
 				reasoningProcessor.finalize();
 
 				if (round > 0) break;
+				// Same gate as the offer above: a model that emits the block unprompted,
+				// on a turn where the user wants no web tools, still gets nothing fetched.
+				if (!mayReread) break;
+
 				const wanted = parseReadBlock(editor.completion);
 				const sources = searchInfo?.sources ?? [];
-				if (!wanted.length || !sources.length || !$webFetchConfig.available) break;
 
-				const urls = wanted.map((n) => sources[n - 1]?.url).filter((url): url is string => !!url);
+				// Numbers address this turn's results; addresses reach anything the
+				// conversation was shown, which is how the model rereads a page from three
+				// messages ago instead of taking back what it said then. Both resolve
+				// against what we handed it: an address it invented matches nothing and is
+				// dropped, so no reply of its own can send a request somewhere new.
+				const allowed = recallableUrls(recalled);
+				// Deduplicated: a model that asks for both `1` and its address means one page.
+				const urls = [
+					...new Set(
+						[
+							...wanted.indices.map((n) => sources[n - 1]?.url),
+							...wanted.urls.filter((url) => allowed.has(url) || sources.some((s) => s.url === url))
+						].filter((url): url is string => !!url)
+					)
+				];
+
 				if (!urls.length) break;
 
 				// From here the turn takes a second round, which overwrites the live
