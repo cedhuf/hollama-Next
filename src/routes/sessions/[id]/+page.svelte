@@ -9,7 +9,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { askChoicesToText, formatAskAnswer, parseAskBlock } from '$lib/askChoice';
-	import { type ChatRequest, type ChatStrategy } from '$lib/chat';
+	import { type ChatRequest, type ChatStrategy, type ToolCall, type ToolSpec } from '$lib/chat';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
 	import { contextUsage, messagesInContext } from '$lib/chat/context';
@@ -17,6 +17,7 @@
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import { formatSourceIndex, recallableUrls, recallSearches } from '$lib/chat/sourceIndex';
 	import { generateTitle } from '$lib/chat/title';
+	import { READ_PAGE_TOOL, useNativeTools, WEB_SEARCH_TOOL } from '$lib/chat/tools';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -446,6 +447,17 @@
 		// user has to have left at least one of the web toggles on.
 		const mayReread = $webFetchConfig.available && (editor.webSearch || editor.webFetch);
 
+		// Which of the two protocols carries the web tools this turn. Asked only when
+		// there is a tool to carry, since for Ollama the answer costs a request.
+		const native =
+			(searchAvailable && editor.webSearch) || mayReread
+				? await useNativeTools(server, session.model.name, $settingsStore.nativeTools)
+				: false;
+
+		const nativeTools: ToolSpec[] = [];
+		if (native && searchAvailable && editor.webSearch) nativeTools.push(WEB_SEARCH_TOOL);
+		if (native && mayReread) nativeTools.push(READ_PAGE_TOOL);
+
 		// Pages the user linked to are read in full, and take precedence over a
 		// search: given an address, looking it up by keyword is the wrong move —
 		// the model would answer from snippets about the page instead of the page.
@@ -484,7 +496,11 @@
 		// Web search: prepend results as context. In "auto" mode the model first
 		// decides whether (and what) to search; otherwise we always search the
 		// latest message.
-		if (!linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
+		// The text path: a pre-pass decides whether to search, and the results are
+		// pushed into the context before the model ever sees the question. Skipped
+		// entirely when the model can call the tool itself, which is the whole saving:
+		// no extra request to decide on its behalf.
+		if (!native && !linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
 			const lastUserMessage = inContext.filter((m) => m.role === 'user').at(-1);
 			let query: string | null = lastUserMessage?.content ?? null;
 			// Whether `query` is the router's own wording or the raw user message it
@@ -608,7 +624,9 @@
 		// worse than snippets alone. The index survives the user switching the web tools
 		// off (their earlier answers still cite it) but rereading does not — turning them
 		// off has to mean no request goes out.
-		if (mayReread && (sentSnippets || recalled.length)) {
+		// Not in native mode, where `read_page` says all of this in its own description
+		// and the model has a real call to make instead of a block to write.
+		if (!native && mayReread && (sentSnippets || recalled.length)) {
 			chatMessages = [
 				...chatMessages,
 				{ role: 'system', content: resolvePrompt('searchRead', $settingsStore.promptOverrides) }
@@ -636,8 +654,115 @@
 			model: session.model.name,
 			options: session.options,
 			messages: chatMessagesForRequest,
-			think: editor.thinking !== false
+			think: editor.thinking !== false,
+			...(nativeTools.length ? { tools: nativeTools } : {})
 		};
+
+		/**
+		 * Sources this turn has put in front of the model, in the order it saw them.
+		 *
+		 * Numbering runs across the whole turn rather than restarting per call: a model
+		 * that searches twice and then cites [2] has to mean one thing. It is also what
+		 * ends up stored on the message, and therefore what the next turn's index is
+		 * built from.
+		 */
+		const turnSources: { title: string; url: string }[] = [];
+
+		/** Addresses `read_page` will open: only what this conversation has shown. */
+		const openable = () =>
+			new Set([...recallableUrls(recalled), ...turnSources.map((s) => s.url), ...linkedUrls]);
+
+		/**
+		 * Run one call and return what the model should read as its result.
+		 *
+		 * Every failure comes back as text rather than as an exception. A tool that
+		 * throws takes down a turn the user is waiting on; a tool that explains what
+		 * went wrong lets the model apologise, try differently, or answer without it.
+		 */
+		async function runToolCall(call: ToolCall): Promise<string> {
+			let args: Record<string, unknown>;
+			try {
+				args = JSON.parse(call.arguments || '{}');
+			} catch {
+				return 'Those arguments were not valid JSON, so the call was not made. Try again with a well-formed argument object, or answer without this tool.';
+			}
+
+			if (call.name === WEB_SEARCH_TOOL.name) {
+				const query = typeof args.query === 'string' ? args.query.trim() : '';
+				if (!query) return 'This call needs a non-empty "query" string.';
+
+				editor.searchQuery = query;
+				editor.searchActivity = 'search';
+				editor.isSearching = true;
+				let search: Awaited<ReturnType<typeof buildSearchContext>> = null;
+				try {
+					search = await buildSearchContext(query, turnSources.length + 1);
+				} catch {
+					// Reported to the model below, like any other empty result.
+				}
+				editor.isSearching = false;
+
+				editor.reasoningTrace = [
+					...(editor.reasoningTrace ?? []),
+					{ type: 'search', query, resultCount: search?.resultCount ?? 0 }
+				];
+
+				if (!search)
+					return `No results came back for "${query}". Say so rather than inventing any.`;
+
+				turnSources.push(...search.results.map((r) => ({ title: r.title, url: r.url })));
+				searchInfo = {
+					query,
+					resultCount: turnSources.length,
+					sources: [...turnSources]
+				};
+				editor.webSearchInfo = searchInfo;
+				return search.context;
+			}
+
+			if (call.name === READ_PAGE_TOOL.name) {
+				const url = typeof args.url === 'string' ? args.url.trim() : '';
+				if (!url) return 'This call needs a non-empty "url" string.';
+				// The same allowlist the `<read>` protocol resolves against: the model can
+				// reopen what it was shown and nothing else, so no address it composes
+				// turns into a request.
+				if (!openable().has(url)) {
+					return `${url} has not appeared in this conversation, so it cannot be opened. Only addresses from search results or from earlier messages can be read.`;
+				}
+
+				editor.searchActivity = 'read';
+				editor.isSearching = true;
+				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
+				try {
+					read = await buildPageContext([url], turnSources.length + 1);
+				} catch {
+					// Same as an unreachable page.
+				}
+				editor.isSearching = false;
+
+				editor.reasoningTrace = [
+					...(editor.reasoningTrace ?? []),
+					{ type: 'read', pages: read?.pages.map((p) => ({ title: p.title, url: p.url })) ?? [] }
+				];
+
+				if (!read?.pages.length) {
+					return `${url} could not be read. Say plainly that you could not open it rather than presenting its contents as if you had.`;
+				}
+
+				turnSources.push(...read.pages.map((p) => ({ title: p.title, url: p.url })));
+				searchInfo = {
+					query: searchInfo?.query ?? '',
+					resultCount: turnSources.length,
+					sources: [...turnSources]
+				};
+				editor.webSearchInfo = searchInfo;
+				return resolvePrompt('pageContext', $settingsStore.promptOverrides, {
+					pages: read.context
+				});
+			}
+
+			return `There is no tool called "${call.name}".`;
+		}
 
 		try {
 			let strategy: ChatStrategy | undefined = undefined;
@@ -655,12 +780,38 @@
 
 			if (!strategy) throw new Error('Invalid strategy');
 
-			// Two rounds at most: the model may answer the first with a <read> block
-			// asking for the full text of some results, which is fetched and handed
-			// back for the second. It never gets a third — an answer is due by then.
-			for (let round = 0; round < 2; round++) {
+			// Two rounds for the text protocol: the model may answer the first with a
+			// <read> block asking for the full text of some results, which is fetched
+			// and handed back for the second. It never gets a third.
+			//
+			// Four when it has real tools, because it spends them one call at a time and
+			// a search followed by a read is already two. Still a hard ceiling: a small
+			// model that has decided to call the same tool forever costs the user a
+			// bounded number of requests, and then owes an answer with what it has.
+			const maxRounds = nativeTools.length ? 4 : 2;
+
+			for (let round = 0; round < maxRounds; round++) {
 				editor.completion = '';
 				editor.reasoning = '';
+
+				// The last round is the one that has to produce a reply, so the tools are
+				// withdrawn for it. Declining the calls instead would leave the model's
+				// final word being a request nobody answers, and the user with an empty
+				// message; taking the tools away leaves it no choice but to write.
+				if (nativeTools.length && round === maxRounds - 1) {
+					chatRequest = {
+						...chatRequest,
+						tools: undefined,
+						messages: [
+							...chatRequest.messages,
+							{
+								role: 'system',
+								content:
+									'No further tool calls are possible for this message. Answer now with what you have, and say plainly what you were not able to check.'
+							}
+						]
+					};
+				}
 
 				// Create a reasoning processor to handle tag parsing
 				const reasoningProcessor = createReasoningProcessor(
@@ -672,17 +823,62 @@
 					}
 				);
 
+				let toolCalls: ToolCall[] = [];
+
 				await strategy.chat(chatRequest, editor.abortController.signal, async (part) => {
 					// Native reasoning (Ollama `message.thinking`, OpenAI `reasoning_content`)
 					// streams straight into the reasoning panel. Regular content still goes
 					// through the FSM so inline <think> tags from other providers are split out.
 					if (part.thinking) editor.reasoning += part.thinking;
 					if (part.content) reasoningProcessor.processChunk(part.content);
+					if (part.toolCalls) toolCalls = part.toolCalls;
 					await scrollToBottom();
 				});
 
 				// Finalize processing of any remaining content
 				reasoningProcessor.finalize();
+
+				// The native path. A turn ends when the model stops asking for tools, or
+				// when it runs out of rounds — never on the tools failing, since a failure
+				// is text it can read and answer around.
+				if (nativeTools.length) {
+					if (!toolCalls.length || editor.abortController.signal.aborted) break;
+
+					// Whatever it wrote alongside the calls belongs to the round that asked,
+					// and the reply is written fresh next round. Kept in the timeline so the
+					// thinking that led to the call is not lost off screen.
+					if (editor.reasoning?.trim()) {
+						editor.reasoningTrace = [
+							...(editor.reasoningTrace ?? []),
+							{ type: 'reasoning', content: editor.reasoning }
+						];
+					}
+
+					// Sequentially, not in parallel: each call numbers its sources from what
+					// the turn has already collected, so two searches resolved at once would
+					// both start from the same number and the model's citations would point
+					// at two different pages. It also lets a read follow a search that only
+					// just produced the address.
+					const results: { call: ToolCall; content: string }[] = [];
+					for (const call of toolCalls) {
+						results.push({ call, content: await runToolCall(call) });
+					}
+
+					chatRequest = {
+						...chatRequest,
+						messages: [
+							...chatRequest.messages,
+							{ role: 'assistant', content: editor.completion, toolCalls },
+							...results.map(({ call, content }) => ({
+								role: 'tool' as const,
+								content,
+								toolCallId: call.id,
+								toolName: call.name
+							}))
+						]
+					};
+					continue;
+				}
 
 				if (round > 0) break;
 				// Same gate as the offer above: a model that emits the block unprompted,

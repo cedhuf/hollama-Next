@@ -165,12 +165,24 @@ export interface SearchContext {
 	results: SearchResult[];
 }
 
-/** Run a search and format the results as a system-context block (always mode). */
-export async function buildSearchContext(query: string): Promise<SearchContext | null> {
+/**
+ * Run a search and format the results as a context block.
+ *
+ * `startNumber` continues the numbering from earlier results in the same turn,
+ * which native tool calling makes possible: a model that searches twice would
+ * otherwise be handed two lists both starting at [1], and its citations would say
+ * nothing about which one it meant.
+ */
+export async function buildSearchContext(
+	query: string,
+	startNumber = 1
+): Promise<SearchContext | null> {
 	const results = await searchWeb(query);
 	if (!results.length) return null;
 
-	const body = results.map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.snippet}`).join('\n\n');
+	const body = results
+		.map((r, i) => `[${startNumber + i}] ${r.title}\n${r.url}\n${r.snippet}`)
+		.join('\n\n');
 	return {
 		context: resolvePrompt('searchContext', get(settingsStore).promptOverrides, { results: body }),
 		query,

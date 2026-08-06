@@ -90,8 +90,16 @@ export function extractUrls(text: string): string[] {
 	return [...new Set(cleaned)];
 }
 
-/** Fetches the given pages and formats them as a system-context block. */
-export async function buildPageContext(urls: string[]): Promise<PageContext | null> {
+/**
+ * Fetches the given pages and formats them as a context block.
+ *
+ * `startNumber` continues the numbering from whatever the turn has already shown
+ * the model, so one set of citation numbers covers the whole turn.
+ */
+export async function buildPageContext(
+	urls: string[],
+	startNumber = 1
+): Promise<PageContext | null> {
 	const config = get(webFetchConfig);
 	const wanted = urls.slice(0, config.maxPages);
 	if (!wanted.length) return null;
@@ -116,7 +124,7 @@ export async function buildPageContext(urls: string[]): Promise<PageContext | nu
 	const body = [
 		...pages.map(
 			(page, i) =>
-				`[${i + 1}] ${page.title}\n${page.url}\n\n${page.text}${
+				`[${startNumber + i}] ${page.title}\n${page.url}\n\n${page.text}${
 					page.truncated ? '\n\n[…truncated]' : ''
 				}`
 		),
