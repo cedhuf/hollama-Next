@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Copy } from '@lucide/svelte';
+
 	import LL, { setLocale } from '$i18n/i18n-svelte';
 	import type { Locales } from '$i18n/i18n-types';
 	import { loadLocale } from '$i18n/i18n-util.sync';
@@ -46,15 +48,24 @@
 				bind:checked={$settingsStore.surfaceTransparency}
 			/>
 		</div>
-		<SettingsSlider
-			label={$LL.surfaceTransparencyStrength()}
-			bind:value={$settingsStore.surfaceTransparencyLevel}
-			min={10}
-			max={100}
-			step={10}
-			format={(value) => `${value}%`}
-			disabled={!$settingsStore.surfaceTransparency}
-		/>
+		<!-- The ends say what the track does, the way iOS does it: the same two
+		     stacked shapes, see-through on the left and filled on the right. A word
+		     at each end would need translating and would still say less. -->
+		<div class="flex items-center gap-3 {$settingsStore.surfaceTransparency ? '' : 'opacity-40'}">
+			<Copy class="h-4 w-4 shrink-0 text-muted" />
+			<div class="min-w-0 flex-1">
+				<SettingsSlider
+					label={$LL.surfaceTransparencyStrength()}
+					bind:value={$settingsStore.surfaceTransparencyLevel}
+					min={10}
+					max={100}
+					step={10}
+					showValue={false}
+					disabled={!$settingsStore.surfaceTransparency}
+				/>
+			</div>
+			<Copy class="h-4 w-4 shrink-0 fill-current text-muted" />
+		</div>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.homeScreen()} card>

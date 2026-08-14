@@ -136,10 +136,12 @@ export interface Settings {
 	 */
 	surfaceTransparency: boolean;
 	/**
-	 * How much of it, from 0 to 100, with 50 the reference. The two halves of the
-	 * material move together: further up is both more see-through and more
-	 * blurred, because transparency without blur leaves the text underneath
-	 * legible through the surface, which is what makes glass unreadable.
+	 * Where along the axis, from 10 to 100, with 50 the reference the surfaces are
+	 * drawn for. Low is glass: see-through, barely blurred, the content behind
+	 * readable. High is tint: dense and heavily blurred, closer to paint. The two
+	 * properties move together because either one alone is unusable — transparency
+	 * without blur leaves two texts fighting, blur without transparency shows
+	 * nothing.
 	 */
 	surfaceTransparencyLevel: number;
 	userLanguage: Locales | null;

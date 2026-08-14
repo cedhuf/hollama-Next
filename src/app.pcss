@@ -596,10 +596,16 @@
  * values live together here — raising a blur in one place and forgetting the
  * others is how a set of surfaces stops looking like a set.
  *
- * Each level states what it looks like at full strength; `--surface-strength`
- * (0 to 1, set from the settings) scales all of them at once, towards opaque and
- * unblurred. `--surface-color` is the tint a surface sits on, so a card over the
- * conversation can use a different shade without leaving the system.
+ * Each level states what it looks like at `--surface-strength: 1`, the middle of
+ * the settings slider. That one number moves every surface along a single axis,
+ * from glass to tint: down is more see-through and less blurred, up is denser and
+ * more blurred. The two have to move together — see-through without blur leaves
+ * the text underneath legible through the surface, and blur without transparency
+ * is just paint — which is why one control drives both. Zero is fully transparent
+ * and unblurred, two fully opaque.
+ *
+ * `--surface-color` is the tint a surface sits on, so a card over the conversation
+ * can use a different shade without leaving the system.
  *
  * Zero switches `backdrop-filter` off rather than asking it to blur by nothing,
  * which still costs a pass. The system's reduced-transparency preference does the
@@ -620,7 +626,7 @@
 		--surface-color: var(--color-shade-1);
 		background-color: color-mix(
 			in srgb,
-			var(--surface-color) calc(100% - var(--surface-opening) * var(--surface-strength)),
+			var(--surface-color) calc(100% - var(--surface-opening) * (2 - var(--surface-strength))),
 			transparent
 		);
 		backdrop-filter: blur(calc(var(--surface-blur) * var(--surface-strength)));
