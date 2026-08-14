@@ -113,6 +113,13 @@ export interface Settings {
 	 * or be hit by accident.
 	 */
 	showListQuickActions: boolean;
+	/**
+	 * Draw the conversation's bar as a pill hovering over it rather than as the
+	 * column's top edge. On by default: it matches the composer, which floats at the
+	 * other end, and the text passing around both is what gives the column depth.
+	 * Off puts it back on the edge, where the wallpaper reaches it.
+	 */
+	floatingChatHeader: boolean;
 	/** Tint your own messages with the app's accent so they stand out from replies. */
 	accentUserMessages: boolean;
 	/** Show the time each message was sent, next to its role badge. */
@@ -208,6 +215,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	showPinnedPersonas: true,
 	compactSidebarHeader: false,
 	showListQuickActions: false,
+	floatingChatHeader: true,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
 	fadeCompactedMessages: true,

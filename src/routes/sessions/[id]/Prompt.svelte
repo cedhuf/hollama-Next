@@ -137,10 +137,6 @@
 	// expand-to-code-editor toggle.
 	const isPersona = $derived(!!session.personaId);
 
-	// In the plain chat view the composer floats over the messages; the strip below
-	// it stays opaque so scrolling text never peeks under the input.
-	const isFloating = $derived(editor.view === 'messages' && !editor.isExpanded);
-
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
 	const tools = $derived(
 		buildChatTools(
@@ -330,7 +326,7 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto w-full px-4 pt-2 lg:px-6 xl:px-8 {editor.isExpanded
+	class="prompt-editor pointer-events-auto w-full px-4 py-2 lg:px-6 xl:px-8 {editor.isExpanded
 		? 'prompt-editor--fullscreen'
 		: ''}"
 >
@@ -458,12 +454,6 @@
 			</div>
 		{/if}
 	</div>
-	{#if isFloating}
-		<!-- Opaque strip in the conversation-card colour (shade-1): keeps a little breathing
-		     room below the input while preventing scrolling text from peeking under it. Inset
-		     (no full-bleed) so it never paints over the card's rounded bottom corners. -->
-		<div class="h-3 bg-shade-1 md:h-4" aria-hidden="true"></div>
-	{/if}
 </div>
 
 <style lang="postcss">

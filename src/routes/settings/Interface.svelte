@@ -143,6 +143,11 @@
 
 	<SettingsSection title={$LL.messages()} card>
 		<FieldCheckbox
+			label={$LL.floatingChatHeader()}
+			bind:checked={$settingsStore.floatingChatHeader}
+		/>
+		<SettingsHint>{$LL.floatingChatHeaderHelp()}</SettingsHint>
+		<FieldCheckbox
 			label={$LL.accentUserMessages()}
 			bind:checked={$settingsStore.accentUserMessages}
 		/>

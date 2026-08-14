@@ -611,7 +611,9 @@
  *
  * Three levels, and the whole app draws from them: `surface-chrome` for what frames
  * the content (a top bar, a footer), `surface-pane` for the body it frames,
- * `surface-floating` for a card that hovers over the content it acts on. The gaps
+ * `surface-floating` for a card that hovers over the content it acts on. Where
+ * several of them stack, `surface-group` on whatever holds them takes over the
+ * blurring; see its own note for why that is not optional. The gaps
  * between them are what read as a hierarchy, so the values live together here —
  * raising a blur in one place and forgetting the others is how a set of surfaces
  * stops looking like a set.
@@ -689,6 +691,46 @@
 		--surface-blur-range: 5px;
 	}
 
+	/**
+	 * One blur for a whole stack of surfaces.
+	 *
+	 * `backdrop-filter` samples only the backdrop inside its own element's box, and
+	 * fills whatever the blur kernel reaches for past that edge by repeating the
+	 * last pixels it can see. Two surfaces stacked one on the other therefore blur
+	 * the same picture differently exactly where they meet, and the mismatch draws a
+	 * seam that no pair of matching values can close: it is geometry, not tint.
+	 *
+	 * So the blur is lifted onto whatever holds them. The group filters its backdrop
+	 * once, in one piece, and the levels inside keep only their tint, which is what
+	 * was carrying the hierarchy anyway — two pixels of blur apart, they were never
+	 * telling anyone anything. It also costs one filtered layer per frame instead of
+	 * one per block.
+	 *
+	 * A level used on its own, with nothing of its kind above or below it, has no
+	 * seam to avoid and keeps its own blur. So does `surface-floating`, even inside
+	 * a group: a seam is what two surfaces draw where their edges meet, and a card
+	 * that hovers over the content has no edge in common with it. Its blur is the
+	 * whole point of it, and lifting that one away would leave it flat.
+	 */
+	.surface-group {
+		--surface-blur: 16px;
+		--surface-blur-range: 6px;
+		backdrop-filter: blur(
+			calc(var(--surface-blur) + var(--surface-blur-range) * (var(--surface-strength) - 1))
+		);
+	}
+
+	.surface-group .surface-chrome,
+	.surface-group .surface-pane {
+		backdrop-filter: none;
+	}
+
+	/* It carries a filter and nothing else, so it is switched off on its own terms
+	   rather than with the levels, which also have a tint to fall back to. */
+	:root[data-transparency='off'] .surface-group {
+		backdrop-filter: none;
+	}
+
 	/** Hovers over it, so it blurs hardest: 80% and 24px, from 72%/14px to 90%/36px. */
 	.surface-floating {
 		--surface-color: var(--color-shade-0);
@@ -696,6 +738,32 @@
 		--surface-tint-range: 10%;
 		--surface-blur: 24px;
 		--surface-blur-range: 12px;
+	}
+
+	/*
+	 * Nothing behind but the app's own canvas.
+	 *
+	 * A surface reveals what is under it, and under a column there is only a flat
+	 * colour of the app's own. Revealing it gains nothing, costs a filtered layer on
+	 * every frame, and — because the tint being mixed is not that colour — shifts
+	 * every shade of the theme by a hair. Which is exactly what it looks like: a
+	 * palette that is almost right.
+	 *
+	 * So the column materials are simply opaque until there is a picture worth
+	 * showing. `surface-floating` is not one of them: it hovers over the
+	 * conversation, and what it reveals is the conversation, wallpaper or not.
+	 *
+	 * Written as `:not([data-wallpaper='on'])` rather than `='off'` so the first
+	 * paint, before the attribute is set, is already the opaque one.
+	 */
+	:root:not([data-wallpaper='on']) .surface-group {
+		backdrop-filter: none;
+	}
+
+	:root:not([data-wallpaper='on']) .surface-chrome,
+	:root:not([data-wallpaper='on']) .surface-pane {
+		background-color: var(--surface-color);
+		backdrop-filter: none;
 	}
 
 	:root[data-transparency='off'] .surface-chrome,
@@ -706,6 +774,10 @@
 	}
 
 	@media (prefers-reduced-transparency: reduce) {
+		.surface-group {
+			backdrop-filter: none;
+		}
+
 		.surface-chrome,
 		.surface-pane,
 		.surface-floating {

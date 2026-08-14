@@ -449,6 +449,9 @@ const en = {
 		'Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. Stored with your settings, so prefer a reasonably sized file.',
 	chooseImage: 'Choose an image',
 	replaceImage: 'Replace',
+	floatingChatHeader: 'Floating conversation bar',
+	floatingChatHeaderHelp:
+		'A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.',
 	compactSidebarHeader: 'Use the compact header',
 	compactSidebarHeaderHelp:
 		'New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.',

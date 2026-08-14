@@ -464,6 +464,9 @@ const fr = extendDictionary(en, {
 		'Affichée derrière l’application. La barre latérale est translucide, l’image se lit donc au travers ; la conversation reste opaque, rien n’est à lire sur une photo. Enregistrée avec vos réglages, préférez donc un fichier de taille raisonnable.',
 	chooseImage: 'Choisir une image',
 	replaceImage: 'Remplacer',
+	floatingChatHeader: 'Barre de conversation flottante',
+	floatingChatHeaderHelp:
+		'Une pastille posée sur la conversation, assortie au composeur à l’autre bout, avec le texte qui passe autour des deux. Désactivée, elle redevient le bord haut de la colonne, où l’image d’arrière-plan l’atteint.',
 	compactSidebarHeader: 'Utiliser l’en-tête réduit',
 	compactSidebarHeaderHelp:
 		'Nouvelle discussion passe sur la ligne de recherche, et les personas deviennent une rangée d’avatars. Plus de place pour la liste, moins de libellés.',

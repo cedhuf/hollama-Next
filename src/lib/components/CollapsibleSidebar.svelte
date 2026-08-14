@@ -77,14 +77,16 @@
      no padding has to stand in for a pane. Each block carries its own material, and
      what shows through them is whatever the column is standing on.
 
-     The column itself paints nothing, on purpose: a colour here would be the one
-     thing between the materials and the wallpaper.
+     The column paints nothing and blurs everything, on purpose. A colour here would
+     be the one thing standing between the materials and the wallpaper; and the blur
+     has to be here rather than on each block, because two stacked surfaces filter
+     their own share of the backdrop and leave a seam where they meet.
 
      Mobile: a fixed, stationary drawer pinned under the page (iOS reveal), where
      the page slides aside to uncover it and the sidebar itself never moves.
      Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="app-panel fixed inset-y-0 left-0 flex h-full w-[min(84vw,22rem)] shrink-0 flex-col overflow-hidden transition-[width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
+	class="app-panel surface-group fixed inset-y-0 left-0 flex h-full w-[min(84vw,22rem)] shrink-0 flex-col overflow-hidden transition-[width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
 		{$settingsStore.sidebarExpanded ? 'lg:mr-4 lg:w-96' : 'lg:mr-2 lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"

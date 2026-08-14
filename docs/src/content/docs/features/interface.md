@@ -55,6 +55,11 @@ use it.
 
 ## Messages
 
+- **Floating conversation bar.** On by default: the bar at the top of a conversation is a pill
+  hovering over it, matching the composer at the other end, and the text passes around both. Turn it
+  off and it goes back to being the top edge of the column, flat against the sidebar's own bar, where
+  a [background image](#background) reaches it. Either way it keeps the same height, so the two
+  columns still line up.
 - **Tint your messages with the accent colour**, so your turns read as a bubble against the
   assistant's plain prose.
 - **Timestamps** under each message.

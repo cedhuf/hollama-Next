@@ -78,7 +78,22 @@
 			{@render children()}
 		</div>
 	{:else}
-		<main class="app-panel flex min-w-0 flex-1 flex-col bg-shade-1 lg:rounded-xl lg:border">
+		<!-- Built like the sidebar: the column carries one blur for everything in it,
+		     the bar and the conversation are neighbours that each paint their own tint,
+		     and only the composer still floats, keeping the blur that lets a message be
+		     glimpsed passing under it.
+
+		     `relative` on purpose rather than by accident: the composer positions
+		     against this box, and until now it was a `backdrop-filter` that happened to
+		     make one. Turn the filter off and the composer would have gone looking for
+		     its box somewhere else.
+
+		     `overflow-hidden` for the same reason the sidebar has it: this box draws the
+		     border and the rounded corners, its children paint the fills, and without a
+		     clip a square fill simply hangs out past a round outline. -->
+		<main
+			class="app-panel surface-group relative flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-xl lg:border"
+		>
 			<div class="flex-1 overflow-auto">
 				{@render children()}
 			</div>

@@ -78,6 +78,21 @@
 		sendCurrentDate: $settingsStore.sendCurrentDate,
 		thinking: true
 	});
+	/**
+	 * Where the composer is drawn: sticky at the foot of the conversation while you
+	 * are reading it, in the column's own footer once the editor takes the screen.
+	 */
+	const floatingComposer = $derived(editor.view === 'messages' && !editor.isExpanded);
+
+	/**
+	 * The bar floats on the same terms, plus the setting.
+	 *
+	 * Reading a conversation is the only view where either of them has something to
+	 * float over; with the editor or the controls filling the screen, both go back
+	 * to being the column's edges.
+	 */
+	const floatingHeader = $derived($settingsStore.floatingChatHeader !== false && floatingComposer);
+
 	let messagesWindow: HTMLDivElement | undefined = $state();
 	let modelName: string | undefined = $state();
 	let userScrolledUp = $state(false);
@@ -86,8 +101,6 @@
 	// The chat composer floats over the message list (translucent + blur). We reserve
 	// matching bottom space in the scroll area so the last message clears it. Only the
 	// plain chat view floats; controls and the expanded code editor stay in flow.
-	let promptHeight = $state(0);
-	const composerFloating = $derived(editor.view === 'messages' && !editor.isExpanded);
 
 	// The persona this conversation belongs to, if any (drives the header identity).
 	const persona = $derived(
@@ -1254,15 +1267,12 @@
 	}
 </script>
 
-<div class="session relative flex h-full w-full flex-col overflow-hidden">
-	<Head
-		title={[editor.isNewSession ? $LL.newSession() : resolveSessionTitle(session), $LL.sessions()]}
-	/>
-	<Header confirmDeletion={shouldConfirmDeletion}>
+{#snippet topBar(floating: boolean)}
+	<Header confirmDeletion={shouldConfirmDeletion} {floating}>
 		{#snippet headline()}
 			{#if persona}
 				<!-- Persona identity, laid out like the classic title/meta pair: avatar + name,
-				     tagline as the muted second line. -->
+			     tagline as the muted second line. -->
 				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
 					<PersonaAvatar {persona} size={32} />
 					<div class="flex min-w-0 flex-col gap-0.5">
@@ -1274,9 +1284,9 @@
 				</div>
 			{:else}
 				<!-- Once a conversation has a title it becomes the headline, with the id
-				     kept as a parenthesised link so it stays copyable/navigable. -->
+			     kept as a parenthesised link so it stays copyable/navigable. -->
 				<!-- leading-tight, not leading-none: `truncate` hides overflow, so a line box
-				     the exact height of the font clips descenders. -->
+			     the exact height of the font clips descenders. -->
 				<p data-testid="session-id" class="truncate font-bold leading-tight">
 					{#if sessionTitle}
 						{sessionTitle}
@@ -1297,11 +1307,11 @@
 		{#snippet nav()}
 			{#if !persona}
 				<!-- Model + settings as one control: the model belongs to this conversation's
-				     configuration, so it sits with the button that opens it. Keeping it out
-				     of the headline also leaves the title its full height. On mobile only the
-				     settings half shows — the model is changed from inside the panel.
-				     The border lives on the group rather than on each half, so focusing (or
-				     opening) the picker rings the whole control instead of stopping mid-way. -->
+			     configuration, so it sits with the button that opens it. Keeping it out
+			     of the headline also leaves the title its full height. On mobile only the
+			     settings half shows — the model is changed from inside the panel.
+			     The border lives on the group rather than on each half, so focusing (or
+			     opening) the picker rings the whole control instead of stopping mid-way. -->
 				<div
 					class="mr-1 flex items-center overflow-hidden rounded-md border border-shade-3 transition-colors focus-within:border-accent has-[[data-state=open]]:border-accent"
 				>
@@ -1309,7 +1319,7 @@
 						<ModelSelect bind:value={modelName} variant="attached" />
 					</span>
 					<!-- Transparent on the header's own background: the control is chrome, not
-					     content, so it only lifts on hover. -->
+				     content, so it only lifts on hover. -->
 					<button
 						type="button"
 						class="flex h-8 items-center justify-center bg-transparent px-2 text-muted transition-colors hover:bg-shade-2 hover:text-active"
@@ -1329,66 +1339,103 @@
 			{/if}
 		{/snippet}
 	</Header>
+{/snippet}
 
-	<!-- The header floats, so both views owe it the room it covers. -->
+{#snippet composer()}
+	<Prompt
+		bind:session
+		bind:editor
+		{handleSubmit}
+		{stopCompletion}
+		{scrollToBottom}
+		{pendingChoice}
+		{chooseAnswer}
+		{runCommand}
+		{canCompact}
+		contextThreshold={compactConfig.compactThreshold}
+	/>
+{/snippet}
+
+<div class="session relative flex h-full w-full flex-col overflow-hidden">
+	<Head
+		title={[editor.isNewSession ? $LL.newSession() : resolveSessionTitle(session), $LL.sessions()]}
+	/>
+	{#if !floatingHeader}
+		{@render topBar(false)}
+	{/if}
+
+	<!-- Under the bar rather than beneath it, so neither owes the other any room. -->
 	{#if editor.view === 'controls'}
-		<div class="flex min-h-0 flex-grow flex-col pt-[var(--app-header-h)]">
+		<div class="flex min-h-0 flex-grow flex-col surface-pane">
 			<Controls bind:session />
 		</div>
 	{:else}
-		<div
-			class="session__history base-fieldset-container overflow-scrollbar flex-grow pt-[var(--app-header-h)]"
-			style={composerFloating ? `padding-bottom: ${promptHeight + 16}px` : undefined}
-			bind:this={messagesWindow}
-		>
-			<Messages
-				bind:session
-				bind:editor
-				{handleRetry}
-				{chooseAnswer}
-				{pendingChoice}
-				assistantLabel={persona?.name}
-				{isCompacting}
-				onCancelCompaction={cancelCompaction}
-			/>
-		</div>
-
-		<!-- Scrolling up during a reply silently opts you out of auto-follow; without
-		     this there is nothing to say content is still arriving below, nor any way
-		     back short of dragging. Sits above the composer, which floats over the
-		     history. -->
-		{#if userScrolledUp}
-			<button
-				type="button"
-				transition:fly={{ y: 8, duration: 150 }}
-				onclick={() => scrollToBottom(true, true)}
-				aria-label={$LL.scrollToBottom()}
-				title={$LL.scrollToBottom()}
-				style={composerFloating ? `bottom: ${promptHeight + 16}px` : undefined}
-				class="scroll-to-bottom absolute bottom-4 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-0 text-muted shadow-md transition-colors hover:text-active"
+		<!-- The transcript and the button that returns to its foot, in one box: the
+		     button then anchors to the conversation rather than to the column, and
+		     stops needing to be told how tall the composer happens to be. -->
+		<div class="relative flex min-h-0 flex-grow flex-col">
+			<div
+				class="session__history base-fieldset-container overflow-scrollbar flex-grow surface-pane"
+				bind:this={messagesWindow}
 			>
-				<ArrowDown class="base-icon" />
-			</button>
-		{/if}
+				{#if floatingHeader}
+					<!-- The mirror image of the composer below: sticky rather than laid on
+					     top, so it reserves its own room at the head of the conversation and
+					     never covers the first message, while everything after it passes
+					     behind on the way up. -->
+					<div class="sticky top-0 z-20 -mx-4 -mt-4 lg:-mx-6 lg:-mt-6 xl:-mx-8 xl:-mt-8">
+						{@render topBar(true)}
+					</div>
+				{/if}
+				<Messages
+					bind:session
+					bind:editor
+					{handleRetry}
+					{chooseAnswer}
+					{pendingChoice}
+					assistantLabel={persona?.name}
+					{isCompacting}
+					onCancelCompaction={cancelCompaction}
+				/>
+
+				{#if floatingComposer}
+					<!-- Sticky rather than laid on top, which is the whole of the difference:
+					     it stays in the flow, so it reserves its own room at the end of the
+					     conversation and never covers the last message, while everything above
+					     passes behind it on the way there. Nothing measures it, nothing pads
+					     for it. The negative margins undo the transcript's gutter so it spans
+					     the column rather than the text. -->
+					<div class="sticky bottom-0 z-10 -mx-4 -mb-4 lg:-mx-6 lg:-mb-6 xl:-mx-8 xl:-mb-8">
+						<!-- Scrolling up during a reply silently opts you out of auto-follow;
+						     without this there is nothing to say content is still arriving below,
+						     nor any way back short of dragging. Carried by the composer, so it
+						     stands above it without anyone having to know how tall it is. -->
+						{#if userScrolledUp}
+							<button
+								type="button"
+								transition:fly={{ y: 8, duration: 150 }}
+								onclick={() => scrollToBottom(true, true)}
+								aria-label={$LL.scrollToBottom()}
+								title={$LL.scrollToBottom()}
+								class="scroll-to-bottom absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-0 text-muted shadow-md transition-colors hover:text-active"
+							>
+								<ArrowDown class="base-icon" />
+							</button>
+						{/if}
+						{@render composer()}
+					</div>
+				{/if}
+			</div>
+		</div>
 	{/if}
 
-	<div
-		class={composerFloating ? 'pointer-events-none absolute inset-x-0 bottom-0 z-10' : ''}
-		bind:clientHeight={promptHeight}
-	>
-		<Prompt
-			bind:session
-			bind:editor
-			{handleSubmit}
-			{stopCompletion}
-			{scrollToBottom}
-			{pendingChoice}
-			{chooseAnswer}
-			{runCommand}
-			{canCompact}
-			contextThreshold={compactConfig.compactThreshold}
-		/>
-	</div>
+	<!-- Drawn in one of two places, never both, which is why it is written once and
+	     rendered where it belongs. -->
+	{#if !floatingComposer}
+		<div class="shrink-0 surface-chrome">
+			{@render composer()}
+		</div>
+	{/if}
 </div>
 
 <SessionModal bind:open={sessionModalOpen} bind:session bind:modelName />
