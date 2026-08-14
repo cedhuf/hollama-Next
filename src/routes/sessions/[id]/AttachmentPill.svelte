@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, FileText, X } from '@lucide/svelte';
+	import { Brain, FileText, Library, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { attachmentLabel, type Attachment } from '$lib/promptAttachments';
@@ -19,9 +19,16 @@
 		attachment: Attachment;
 		/** Absent on a message already sent: there is nothing left to take back. */
 		onRemove?: () => void;
+		/**
+		 * Offered on a document already sent: keep its text in the Library, where it
+		 * can be attached to another conversation or to a persona. Absent everywhere
+		 * else, since a file still sitting in the composer has not been read into
+		 * anything yet.
+		 */
+		onSave?: () => void;
 	}
 
-	let { attachment, onRemove }: Props = $props();
+	let { attachment, onRemove, onSave }: Props = $props();
 </script>
 
 <span
@@ -58,6 +65,19 @@
 		</span>
 	{/if}
 
+	{#if onSave}
+		<button
+			type="button"
+			onclick={onSave}
+			aria-label={$LL.keepInLibrary()}
+			title={$LL.keepInLibrary()}
+			data-testid="attachment-save"
+			class="shrink-0 rounded-full p-0.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+		>
+			<Library class="h-3.5 w-3.5" />
+		</button>
+	{/if}
+
 	{#if onRemove}
 		<button
 			type="button"
@@ -69,7 +89,7 @@
 		>
 			<X class="h-3.5 w-3.5" />
 		</button>
-	{:else}
+	{:else if !onSave}
 		<!-- Keeps the pill's right side even with the removable ones beside it. -->
 		<span class="w-0.5" aria-hidden="true"></span>
 	{/if}

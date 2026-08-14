@@ -87,6 +87,7 @@ const fr = extendDictionary(en, {
 	showListQuickActions: 'Afficher épingler et supprimer sur chaque ligne',
 	showListQuickActionsHelp:
 		'Désactivé, les deux restent dans le menu contextuel, où ils ne recouvrent aucun titre et ne se cliquent pas par erreur. Ce menu permet aussi de garder une conversation en connaissance.',
+	keepInLibrary: 'Garder dans la bibliothèque',
 	saveAsKnowledge: 'Garder en connaissance',
 	copyAsMarkdown: 'Copier en Markdown',
 	copyAsJson: 'Copier en JSON',

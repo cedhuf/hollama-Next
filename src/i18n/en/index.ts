@@ -75,6 +75,7 @@ const en = {
 	showListQuickActions: 'Show pin and delete on each row',
 	showListQuickActionsHelp:
 		'Off, both stay in the right-click menu, where they cannot cover a title or be clicked by mistake. The menu also keeps a conversation as knowledge.',
+	keepInLibrary: 'Keep in the Library',
 	saveAsKnowledge: 'Save as knowledge',
 	copyAsMarkdown: 'Copy as Markdown',
 	copyAsJson: 'Copy as JSON',

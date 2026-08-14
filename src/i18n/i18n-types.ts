@@ -300,6 +300,10 @@ type RootTranslation = {
 	 */
 	showListQuickActionsHelp: string
 	/**
+	 * K​e​e​p​ ​i​n​ ​t​h​e​ ​L​i​b​r​a​r​y
+	 */
+	keepInLibrary: string
+	/**
 	 * S​a​v​e​ ​a​s​ ​k​n​o​w​l​e​d​g​e
 	 */
 	saveAsKnowledge: string
@@ -2349,6 +2353,10 @@ The completion in progress will stop
 	 * Off, both stay in the right-click menu, where they cannot cover a title or be clicked by mistake. The menu also keeps a conversation as knowledge.
 	 */
 	showListQuickActionsHelp: () => LocalizedString
+	/**
+	 * Keep in the Library
+	 */
+	keepInLibrary: () => LocalizedString
 	/**
 	 * Save as knowledge
 	 */

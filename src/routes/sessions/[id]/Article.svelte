@@ -217,6 +217,7 @@
 				tokens: 0,
 				pages: message.document.pages
 			}}
+			onSave={() => openKnowledge({ name: message.document?.name ?? '', content: message.content })}
 		/>
 	</div>
 {:else if isKnowledgeAttachment}

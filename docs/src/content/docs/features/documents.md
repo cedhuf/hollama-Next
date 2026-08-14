@@ -34,6 +34,13 @@ self-hosted instance, and works offline.
 Files are read one at a time even when you attach several. Parsing a PDF is the heaviest thing
 the tab will do, and three at once is how a phone kills a page.
 
+## Keeping one
+
+The pill on a sent document carries a Library button. It opens the knowledge editor with the
+document's text already in it, so you can name and trim it before it exists, and attach it to another
+conversation or to a persona afterwards. Nothing is filed automatically: a document you only needed
+once should not leave anything behind.
+
 ## What does the reading
 
 The parser is [**officeparser**](https://github.com/harshankur/officeParser) by
