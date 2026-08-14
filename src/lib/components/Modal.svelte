@@ -18,7 +18,12 @@
 		<!-- Blurred, not just dimmed: the page behind stays recognisable as context
 		     while losing enough detail to stop competing with the dialog. -->
 		<Dialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
-		<!-- Full screen on phones, a floating card from `sm` up.
+		<!-- `surface-chrome`: the same material as the app's other framing surfaces,
+		     defined once in `app.pcss`. A dialog frames a task the way a top bar
+		     frames a list, so it sits at the same level of the hierarchy, and the one
+		     switch in the settings turns all of them opaque together.
+
+		     Full screen on phones, a floating card from `sm` up.
 		     90vw × 85vh left a 5% gutter of unreachable page around a dialog that
 		     already needed every pixel — neither a card nor a screen. These dialogs
 		     are whole tasks (settings, a persona, a conversation's config), so on a
@@ -31,7 +36,7 @@
 		     focused element into view, sliding its whole body up by that distance and
 		     leaving it there. `clip` cannot be scrolled at all. -->
 		<Dialog.Content
-			class="modal-content fixed inset-0 z-50 flex h-dvh w-screen overflow-clip bg-shade-1 sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl sm:shadow-xl"
+			class="modal-content surface-chrome fixed inset-0 z-50 flex h-dvh w-screen overflow-clip sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl sm:shadow-xl"
 		>
 			{#if closeButton}
 				<Dialog.Close

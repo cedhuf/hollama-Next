@@ -91,22 +91,6 @@
 	let settledAt = 0;
 	const mod = $derived(modKey());
 
-	/**
-	 * The two materials the floating bars are made of.
-	 *
-	 * Kept here rather than repeated at each of the three surfaces, so the edges
-	 * and the pane cannot drift apart: the gap between them is what reads as a
-	 * hierarchy. `sidebar-chrome` and `sidebar-pane` are hooks with no styling of
-	 * their own, for the reduced-transparency rule in `app.pcss`.
-	 */
-	const glass = $derived($settingsStore.sidebarTransparency);
-	const chromeSurface = $derived(
-		`sidebar-chrome ${glass ? 'bg-shade-1/85 backdrop-blur-md' : 'bg-shade-1'}`
-	);
-	const paneSurface = $derived(
-		`sidebar-pane ${glass ? 'bg-shade-1/70 backdrop-blur-sm' : 'bg-shade-1'}`
-	);
-
 	// Never while searching: the field holds text, and shrinking it in the middle
 	// of reading the matches is exactly the wrong moment.
 	const condensed = $derived(($settingsStore.compactSidebarHeader || scrolled) && !q);
@@ -305,7 +289,7 @@
 	     where the pane is lighter and sharper. The edges of the column hide what
 	     passes under them; the pane, which belongs to the list, lets it read. -->
 	<div
-		class="absolute inset-x-0 top-0 z-20 flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 {chromeSurface}"
+		class="absolute inset-x-0 top-0 z-20 flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 surface-chrome"
 	>
 		{#if showRail}
 			<div class="flex w-full justify-center">
@@ -414,7 +398,7 @@
 		<div class="relative flex min-h-0 flex-1 flex-col">
 			<div
 				bind:clientHeight={headerHeight}
-				class="absolute inset-x-0 top-[var(--app-header-h)] z-10 border-b border-shade-3/40 {paneSurface}"
+				class="absolute inset-x-0 top-[var(--app-header-h)] z-10 border-b border-shade-3/40 surface-pane"
 			>
 				<!-- Top actions.
 		     Two New chat buttons rather than one that moves: a single button would
@@ -654,7 +638,7 @@
 	     material as the top bar: both are the edges of the column. -->
 	<div
 		bind:clientHeight={footerHeight}
-		class="absolute inset-x-0 bottom-0 z-20 border-t p-2 {chromeSurface}"
+		class="absolute inset-x-0 bottom-0 z-20 border-t p-2 surface-chrome"
 	>
 		{#if showRail}
 			<div class="flex justify-center">

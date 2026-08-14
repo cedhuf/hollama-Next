@@ -234,6 +234,14 @@
 
 		document.documentElement.setAttribute('data-theme-style', style);
 
+		// One attribute for the whole app: every translucent surface reads it from
+		// the root rather than being told, so a dialog opened from anywhere is
+		// already in the right state.
+		document.documentElement.setAttribute(
+			'data-transparency',
+			$settingsStore.surfaceTransparency === false ? 'off' : 'on'
+		);
+
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;
 			if (mode === 'system') {

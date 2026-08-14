@@ -105,12 +105,7 @@ export interface Settings {
 	 * names what its controls do.
 	 */
 	compactSidebarHeader: boolean;
-	/**
-	 * Let the sidebar's bars be translucent, with the list visible behind them.
-	 * On by default, and overridden anyway when the system asks for reduced
-	 * transparency. Off also spares `backdrop-filter`, which is paid every frame.
-	 */
-	sidebarTransparency: boolean;
+
 	/**
 	 * Show pin and delete buttons on the rows of the sidebar lists. Off by
 	 * default: both live in the right-click menu, where they cannot cover a title
@@ -131,6 +126,13 @@ export interface Settings {
 	documentOcrLanguage: string;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
+	/**
+	 * Let the app's framing surfaces be translucent, with the content visible and
+	 * blurred behind them. On by default, and overridden anyway when the system
+	 * asks for reduced transparency. Off also spares `backdrop-filter`, which is
+	 * paid on every frame of every scroll.
+	 */
+	surfaceTransparency: boolean;
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
 	onboardingComplete: boolean;
@@ -187,7 +189,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
 	compactSidebarHeader: false,
-	sidebarTransparency: true,
 	showListQuickActions: false,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
@@ -197,6 +198,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	documentOcrLanguage: 'eng',
 	themeMode: 'system',
 	themeStyle: 'classic',
+	surfaceTransparency: true,
 	userLanguage: null,
 	sidebarExpanded: true,
 	onboardingComplete: false,

@@ -38,6 +38,12 @@
 		</SettingsField>
 
 		<ThemePicker />
+
+		<FieldCheckbox
+			label={$LL.surfaceTransparency()}
+			bind:checked={$settingsStore.surfaceTransparency}
+		/>
+		<SettingsHint>{$LL.surfaceTransparencyHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.homeScreen()} card>
@@ -96,11 +102,6 @@
 			bind:checked={$settingsStore.compactSidebarHeader}
 		/>
 		<SettingsHint>{$LL.compactSidebarHeaderHelp()}</SettingsHint>
-		<FieldCheckbox
-			label={$LL.sidebarTransparency()}
-			bind:checked={$settingsStore.sidebarTransparency}
-		/>
-		<SettingsHint>{$LL.sidebarTransparencyHelp()}</SettingsHint>
 		<FieldCheckbox
 			label={$LL.showListQuickActions()}
 			bind:checked={$settingsStore.showListQuickActions}
