@@ -361,7 +361,7 @@
 			<!-- One composer, always: expanding only grows the card, so the toggle, Run,
 			     Cancel, attachments and tools stay reachable in every state. -->
 			<div
-				class="flex flex-col rounded-2xl border border-shade-3 bg-shade-0/80 shadow-lg backdrop-blur-xl transition-colors focus-within:border-shade-5"
+				class="surface-floating flex flex-col rounded-2xl border border-shade-3 shadow-lg transition-colors focus-within:border-shade-5"
 			>
 				<!-- The textarea auto-grows with its content (field-sizing); expanding only
 				     raises its floor and ceiling, so no flex-height chain to depend on. -->

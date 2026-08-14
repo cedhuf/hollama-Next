@@ -274,9 +274,9 @@ const fr = extendDictionary(en, {
 	generateTitlesWithAIHelp:
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	theme: 'Thème',
-	surfaceTransparency: 'Surfaces translucides',
+	surfaceTransparency: 'Transparence des surfaces',
 	surfaceTransparencyHelp:
-		'Les barres et les fenêtres laissent voir, flouté, ce qui se trouve derrière. Désactivez pour des surfaces opaques : plus lisibles, et moins coûteuses à afficher sur une machine lente. Le réglage système de transparence réduite est suivi dans tous les cas.',
+		'Ce que les barres et les panneaux flottants laissent passer, flouté. À zéro elles sont opaques et plates, ce qui est plus lisible et moins coûteux à afficher sur une machine lente. Le réglage système de transparence réduite prime dans tous les cas.',
 	themeStyle: 'Style du thème',
 	firstName: 'Prénom',
 	lastName: 'Nom',

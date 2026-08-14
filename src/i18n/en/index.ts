@@ -282,9 +282,9 @@ const en = {
 	generateTitlesWithAIHelp:
 		'Automatically name new sessions after the first reply, using the selected model',
 	theme: 'Theme',
-	surfaceTransparency: 'Translucent surfaces',
+	surfaceTransparency: 'Surface transparency',
 	surfaceTransparencyHelp:
-		'Bars and dialogs let what is behind them show through, blurred. Turn it off for flat, opaque surfaces — easier to read, and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed either way.',
+		'How much the bars and floating panels let through, blurred. At zero they are flat and opaque, which is easier to read and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed whatever this says.',
 	themeStyle: 'Theme style',
 	firstName: 'First name',
 	lastName: 'Last name',

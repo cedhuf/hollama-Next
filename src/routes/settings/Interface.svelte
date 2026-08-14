@@ -39,10 +39,16 @@
 
 		<ThemePicker />
 
-		<FieldCheckbox
-			label={$LL.surfaceTransparency()}
-			bind:checked={$settingsStore.surfaceTransparency}
-		/>
+		<SettingsField label={$LL.surfaceTransparency()}>
+			<SettingsSlider
+				label={$LL.surfaceTransparency()}
+				bind:value={$settingsStore.surfaceTransparencyLevel}
+				min={0}
+				max={100}
+				step={10}
+				format={(value) => `${value}%`}
+			/>
+		</SettingsField>
 		<SettingsHint>{$LL.surfaceTransparencyHelp()}</SettingsHint>
 	</SettingsSection>
 

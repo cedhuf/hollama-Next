@@ -127,12 +127,14 @@ export interface Settings {
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
 	/**
-	 * Let the app's framing surfaces be translucent, with the content visible and
-	 * blurred behind them. On by default, and overridden anyway when the system
-	 * asks for reduced transparency. Off also spares `backdrop-filter`, which is
-	 * paid on every frame of every scroll.
+	 * How translucent the app's framing surfaces are, from 0 (flat and opaque) to
+	 * 100 (the full effect). One number for taste, legibility and cost at once:
+	 * `backdrop-filter` is paid on every frame of every scroll, and text over a
+	 * blurred background is harder to read for some people. Zero switches the
+	 * filter off entirely rather than blurring by nothing, and the system's
+	 * reduced-transparency preference overrides it whatever it says.
 	 */
-	surfaceTransparency: boolean;
+	surfaceTransparencyLevel: number;
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
 	onboardingComplete: boolean;
@@ -198,7 +200,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	documentOcrLanguage: 'eng',
 	themeMode: 'system',
 	themeStyle: 'classic',
-	surfaceTransparency: true,
+	surfaceTransparencyLevel: 100,
 	userLanguage: null,
 	sidebarExpanded: true,
 	onboardingComplete: false,

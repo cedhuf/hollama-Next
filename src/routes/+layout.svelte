@@ -234,13 +234,13 @@
 
 		document.documentElement.setAttribute('data-theme-style', style);
 
-		// One attribute for the whole app: every translucent surface reads it from
-		// the root rather than being told, so a dialog opened from anywhere is
-		// already in the right state.
-		document.documentElement.setAttribute(
-			'data-transparency',
-			$settingsStore.surfaceTransparency === false ? 'off' : 'on'
-		);
+		// One number for the whole app: every translucent surface scales itself from
+		// it rather than being told, so a panel rendered anywhere is already in the
+		// right state. The attribute is only there for zero, where the filter has to
+		// be switched off rather than asked to blur by nothing.
+		const transparency = $settingsStore.surfaceTransparencyLevel ?? 100;
+		document.documentElement.style.setProperty('--surface-strength', String(transparency / 100));
+		document.documentElement.setAttribute('data-transparency', transparency ? 'on' : 'off');
 
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;

@@ -1104,11 +1104,11 @@ type RootTranslation = {
 	 */
 	theme: string
 	/**
-	 * T​r​a​n​s​l​u​c​e​n​t​ ​s​u​r​f​a​c​e​s
+	 * S​u​r​f​a​c​e​ ​t​r​a​n​s​p​a​r​e​n​c​y
 	 */
 	surfaceTransparency: string
 	/**
-	 * B​a​r​s​ ​a​n​d​ ​d​i​a​l​o​g​s​ ​l​e​t​ ​w​h​a​t​ ​i​s​ ​b​e​h​i​n​d​ ​t​h​e​m​ ​s​h​o​w​ ​t​h​r​o​u​g​h​,​ ​b​l​u​r​r​e​d​.​ ​T​u​r​n​ ​i​t​ ​o​f​f​ ​f​o​r​ ​f​l​a​t​,​ ​o​p​a​q​u​e​ ​s​u​r​f​a​c​e​s​ ​—​ ​e​a​s​i​e​r​ ​t​o​ ​r​e​a​d​,​ ​a​n​d​ ​c​h​e​a​p​e​r​ ​t​o​ ​d​r​a​w​ ​o​n​ ​a​ ​s​l​o​w​ ​m​a​c​h​i​n​e​.​ ​Y​o​u​r​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​ ​f​o​r​ ​r​e​d​u​c​e​d​ ​t​r​a​n​s​p​a​r​e​n​c​y​ ​i​s​ ​f​o​l​l​o​w​e​d​ ​e​i​t​h​e​r​ ​w​a​y​.
+	 * H​o​w​ ​m​u​c​h​ ​t​h​e​ ​b​a​r​s​ ​a​n​d​ ​f​l​o​a​t​i​n​g​ ​p​a​n​e​l​s​ ​l​e​t​ ​t​h​r​o​u​g​h​,​ ​b​l​u​r​r​e​d​.​ ​A​t​ ​z​e​r​o​ ​t​h​e​y​ ​a​r​e​ ​f​l​a​t​ ​a​n​d​ ​o​p​a​q​u​e​,​ ​w​h​i​c​h​ ​i​s​ ​e​a​s​i​e​r​ ​t​o​ ​r​e​a​d​ ​a​n​d​ ​c​h​e​a​p​e​r​ ​t​o​ ​d​r​a​w​ ​o​n​ ​a​ ​s​l​o​w​ ​m​a​c​h​i​n​e​.​ ​Y​o​u​r​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​ ​f​o​r​ ​r​e​d​u​c​e​d​ ​t​r​a​n​s​p​a​r​e​n​c​y​ ​i​s​ ​f​o​l​l​o​w​e​d​ ​w​h​a​t​e​v​e​r​ ​t​h​i​s​ ​s​a​y​s​.
 	 */
 	surfaceTransparencyHelp: string
 	/**
@@ -3138,11 +3138,11 @@ The completion in progress will stop
 	 */
 	theme: () => LocalizedString
 	/**
-	 * Translucent surfaces
+	 * Surface transparency
 	 */
 	surfaceTransparency: () => LocalizedString
 	/**
-	 * Bars and dialogs let what is behind them show through, blurred. Turn it off for flat, opaque surfaces — easier to read, and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed either way.
+	 * How much the bars and floating panels let through, blurred. At zero they are flat and opaque, which is easier to read and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed whatever this says.
 	 */
 	surfaceTransparencyHelp: () => LocalizedString
 	/**

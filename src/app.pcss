@@ -589,44 +589,74 @@
 /*
  * Translucent surfaces.
  *
- * Two levels, and the whole app draws from them: `surface-chrome` for what
- * frames the content (a top bar, a footer, a dialog), `surface-pane` for what
- * belongs to it (the controls sitting above a list). The gap between the two is
- * what reads as a hierarchy, so the values live together here — raising a blur
- * in one place and forgetting the other is how a set of surfaces stops looking
- * like a set.
+ * Three levels, and the whole app draws from them: `surface-chrome` for what
+ * frames the content (a top bar, a footer), `surface-pane` for the controls
+ * sitting above a list, `surface-floating` for a card that hovers over the
+ * content it acts on. The gaps between them are what read as a hierarchy, so the
+ * values live together here — raising a blur in one place and forgetting the
+ * others is how a set of surfaces stops looking like a set.
  *
- * Both are switched off by `data-transparency="off"` on the root, and by the
- * system's reduced-transparency preference, which wins over the setting: text
- * over a blurred, moving background is what that preference exists to prevent.
+ * Each level states what it looks like at full strength; `--surface-strength`
+ * (0 to 1, set from the settings) scales all of them at once, towards opaque and
+ * unblurred. `--surface-color` is the tint a surface sits on, so a card over the
+ * conversation can use a different shade without leaving the system.
+ *
+ * Zero switches `backdrop-filter` off rather than asking it to blur by nothing,
+ * which still costs a pass. The system's reduced-transparency preference does the
+ * same and overrides the setting: text over a blurred, moving background is what
+ * that preference exists to prevent.
  */
 @layer components {
-	.surface-chrome,
-	.surface-pane {
-		background-color: var(--surface-tint);
-		backdrop-filter: blur(var(--surface-blur));
+	/* On the root, not on the surfaces: a value declared on the element itself
+	   would win over the one the settings set here, and the slider would move
+	   nothing. */
+	:root {
+		--surface-strength: 1;
 	}
 
+	.surface-chrome,
+	.surface-pane,
+	.surface-floating {
+		--surface-color: var(--color-shade-1);
+		background-color: color-mix(
+			in srgb,
+			var(--surface-color) calc(100% - var(--surface-opening) * var(--surface-strength)),
+			transparent
+		);
+		backdrop-filter: blur(calc(var(--surface-blur) * var(--surface-strength)));
+	}
+
+	/** 85% and 12px at full strength. */
 	.surface-chrome {
-		--surface-tint: color-mix(in srgb, var(--color-shade-1) 85%, transparent);
+		--surface-opening: 15%;
 		--surface-blur: 12px;
 	}
 
+	/** 70% and 8px at full strength. */
 	.surface-pane {
-		--surface-tint: color-mix(in srgb, var(--color-shade-1) 70%, transparent);
+		--surface-opening: 30%;
 		--surface-blur: 8px;
 	}
 
+	/** 80% and 24px at full strength: it floats furthest from what it covers. */
+	.surface-floating {
+		--surface-color: var(--color-shade-0);
+		--surface-opening: 20%;
+		--surface-blur: 24px;
+	}
+
 	:root[data-transparency='off'] .surface-chrome,
-	:root[data-transparency='off'] .surface-pane {
-		--surface-tint: var(--color-shade-1);
+	:root[data-transparency='off'] .surface-pane,
+	:root[data-transparency='off'] .surface-floating {
+		background-color: var(--surface-color);
 		backdrop-filter: none;
 	}
 
 	@media (prefers-reduced-transparency: reduce) {
 		.surface-chrome,
-		.surface-pane {
-			--surface-tint: var(--color-shade-1);
+		.surface-pane,
+		.surface-floating {
+			background-color: var(--surface-color);
 			backdrop-filter: none;
 		}
 	}
