@@ -65,9 +65,7 @@
 	 * flip it straight back — the oscillation reads as a stutter.
 	 */
 	let listEl: HTMLDivElement | undefined = $state();
-	let gridEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
-	let pastGrid = $state(false);
 	let queued = false;
 	let settledAt = 0;
 	const mod = $derived(modKey());
@@ -76,55 +74,14 @@
 	// of reading the matches is exactly the wrong moment.
 	const condensed = $derived(($settingsStore.compactSidebarHeader || scrolled) && !q);
 
-	/**
-	 * Fold the grid away as the strip takes over, without moving the list.
-	 *
-	 * The grid sits at the top of the scrolled content, so closing it removes
-	 * height *above* the viewport and everything below would slide up by exactly
-	 * that much. The fix is to give the scroll position back what the layout took:
-	 * follow the grid's height for the length of the transition and subtract each
-	 * frame's difference from `scrollTop`. Never more than the scroll position
-	 * itself, or the list would fight the top of its own content.
-	 *
-	 * Growing back is only compensated when there is somewhere to compensate from:
-	 * the grid reopens at the top of the list, where watching it unfold is the
-	 * point.
-	 */
-	function keepStillWhileGridResizes() {
-		if (!listEl || !gridEl) return;
-
-		let previous = gridEl.offsetHeight;
-		const until = performance.now() + TRANSITION_MS + 50;
-
-		const step = () => {
-			if (!listEl || !gridEl) return;
-
-			const height = gridEl.offsetHeight;
-			const delta = previous - height;
-			previous = height;
-
-			if (delta > 0) listEl.scrollTop -= Math.min(delta, listEl.scrollTop);
-			else if (delta < 0 && listEl.scrollTop > 0) listEl.scrollTop -= delta;
-
-			if (performance.now() < until) requestAnimationFrame(step);
-		};
-		requestAnimationFrame(step);
-	}
-
 	function onListScroll() {
 		if (queued) return;
 		queued = true;
 		requestAnimationFrame(() => {
 			queued = false;
-
-			const top = listEl?.scrollTop ?? 0;
-
-			// Measured only while the grid is open: once folded it has no height left
-			// to be past, and reading it then would keep it folded forever.
-			if (!gridFolded && gridEl) pastGrid = top >= gridEl.offsetTop + gridEl.offsetHeight;
-
 			if (performance.now() < settledAt) return;
 
+			const top = listEl?.scrollTop ?? 0;
 			const next = scrolled ? top >= 8 : top > 48;
 			if (next === scrolled) return;
 
@@ -147,30 +104,6 @@
 	const personaById = $derived(
 		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
 	);
-
-	/**
-	 * The grid closes behind you, not under you.
-	 *
-	 * The header and the strip answer to a short fixed distance, because that is
-	 * when the room is wanted. The grid cannot: folding it takes its height back
-	 * out of the scroll position, and while it is still on screen there is not
-	 * enough scrolled distance to give back — the list would lurch. So it waits
-	 * until it has left the view, and the two presentations overlap for the moment
-	 * it takes to scroll past it. A transition rather than a state.
-	 *
-	 * Chosen from the settings, there is no scrolling involved and nothing below to
-	 * displace, so it folds straight away.
-	 */
-	const gridFolded = $derived(
-		condensed && personaLaunchers.length > 0 && (pastGrid || $settingsStore.compactSidebarHeader)
-	);
-
-	let wasFolded = false;
-	$effect(() => {
-		if (gridFolded === wasFolded) return;
-		wasFolded = gridFolded;
-		keepStillWhileGridResizes();
-	});
 
 	const visibleSessions = $derived(
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
@@ -536,63 +469,52 @@
 			style="overscroll-behavior-y: contain"
 		>
 			{#if filteredPersonas.length > 0}
-				<!-- Folds away as the strip takes over: the same avatars twice, once as
-				     a grid and once as a row, is worse than either alone. Rows of a grid
-				     rather than a height, so it collapses from its own content without
-				     anything having to be measured. -->
-				<div
-					bind:this={gridEl}
-					class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {gridFolded
-						? 'grid-rows-[0fr] opacity-0'
-						: 'grid-rows-[1fr] opacity-100'}"
-				>
-					<div class="mb-2 min-h-0 overflow-hidden">
-						<button
-							type="button"
-							onclick={() => (personasOpen = !personasOpen)}
-							class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
-						>
-							<span>{$LL.personas()} · {filteredPersonas.length}</span>
-							<ChevronDown
-								class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
-							/>
-						</button>
-						{#if showPersonaList}
-							<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
-							<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
-								{#each filteredPersonas as persona (persona.id)}
-									{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
-									<button
-										type="button"
-										onclick={() =>
-											goto(
-												resolve('/sessions/[id]', {
-													id: launchPersona(persona, $settingsStore.models)
-												})
-											)}
-										style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
-										class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
-										title={persona.tagline || persona.name}
+				<div class="mb-2">
+					<button
+						type="button"
+						onclick={() => (personasOpen = !personasOpen)}
+						class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
+					>
+						<span>{$LL.personas()} · {filteredPersonas.length}</span>
+						<ChevronDown
+							class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
+						/>
+					</button>
+					{#if showPersonaList}
+						<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
+						<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
+							{#each filteredPersonas as persona (persona.id)}
+								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
+								<button
+									type="button"
+									onclick={() =>
+										goto(
+											resolve('/sessions/[id]', {
+												id: launchPersona(persona, $settingsStore.models)
+											})
+										)}
+									style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
+									class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
+									title={persona.tagline || persona.name}
+								>
+									<span
+										class="relative inline-flex rounded-full {active
+											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
+											: ''}"
 									>
-										<span
-											class="relative inline-flex rounded-full {active
-												? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
-												: ''}"
-										>
-											<PersonaAvatar {persona} size={44} />
-										</span>
-										<span
-											class="w-full truncate text-center text-xs {active
-												? 'font-medium text-active'
-												: 'text-muted'}"
-										>
-											{persona.name}
-										</span>
-									</button>
-								{/each}
-							</div>
-						{/if}
-					</div>
+										<PersonaAvatar {persona} size={44} />
+									</span>
+									<span
+										class="w-full truncate text-center text-xs {active
+											? 'font-medium text-active'
+											: 'text-muted'}"
+									>
+										{persona.name}
+									</span>
+								</button>
+							{/each}
+						</div>
+					{/if}
 				</div>
 			{/if}
 
