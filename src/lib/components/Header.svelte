@@ -15,8 +15,11 @@
 		 * What it buys instead is the text passing around it, the same way it passes
 		 * around the composer.
 		 *
-		 * Either way the bar keeps `--app-header-h` of height, so the sidebar's own
-		 * top bar still lines up with it.
+		 * The band around the pill is padded rather than sized: sixteen from the card's
+		 * edge, eight from the text, and the composer is spaced the same way at the
+		 * other end, so the column reads as balanced whichever end you look at. The
+		 * pill's own horizontal padding clears its curve, since at this radius text
+		 * set flush to the edge sits inside the rounding rather than beside it.
 		 */
 		floating?: boolean;
 		headline: Snippet;
@@ -44,9 +47,9 @@
 {#if floating}
 	<!-- The gutter beside the pill belongs to the conversation, not to the bar: it
 	     lets pointer events through so a message showing there stays reachable. -->
-	<div class="pointer-events-none flex h-[var(--app-header-h)] items-center px-4 lg:px-6 xl:px-8">
+	<div class="pointer-events-none flex px-4 pb-2 pt-4 lg:px-6 xl:px-8">
 		<header
-			class="surface-floating pointer-events-auto flex h-14 w-full items-center justify-between rounded-full border border-shade-3 px-3 text-xs shadow-lg {confirmDeletion
+			class="surface-floating pointer-events-auto flex h-16 w-full items-center justify-between rounded-full border border-shade-3 px-5 text-xs shadow-lg [--surface-tint:66%] {confirmDeletion
 				? 'confirm-deletion'
 				: ''}"
 		>

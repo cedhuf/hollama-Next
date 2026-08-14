@@ -1372,10 +1372,16 @@
 	{:else}
 		<!-- The transcript and the button that returns to its foot, in one box: the
 		     button then anchors to the conversation rather than to the column, and
-		     stops needing to be told how tall the composer happens to be. -->
+		     stops needing to be told how tall the composer happens to be.
+
+		     Its scrollbar gutter is reserved whether or not there is a scrollbar to
+		     put in it, because the two floating bars live inside this box: otherwise
+		     they would be a scrollbar narrower on a long conversation than on a short
+		     one, and would shift sideways the moment a reply made the page overflow. -->
 		<div class="relative flex min-h-0 flex-grow flex-col">
 			<div
-				class="session__history base-fieldset-container overflow-scrollbar flex-grow surface-pane"
+				class="session__history overflow-scrollbar flex flex-grow flex-col px-4 surface-pane lg:px-6 xl:px-8"
+				style="scrollbar-gutter: stable"
 				bind:this={messagesWindow}
 			>
 				{#if floatingHeader}
@@ -1383,29 +1389,38 @@
 					     top, so it reserves its own room at the head of the conversation and
 					     never covers the first message, while everything after it passes
 					     behind on the way up. -->
-					<div class="sticky top-0 z-20 -mx-4 -mt-4 lg:-mx-6 lg:-mt-6 xl:-mx-8 xl:-mt-8">
+					<div class="sticky top-0 z-20 -mx-4 lg:-mx-6 xl:-mx-8">
 						{@render topBar(true)}
 					</div>
 				{/if}
-				<Messages
-					bind:session
-					bind:editor
-					{handleRetry}
-					{chooseAnswer}
-					{pendingChoice}
-					assistantLabel={persona?.name}
-					{isCompacting}
-					onCancelCompaction={cancelCompaction}
-				/>
+				<!-- Grows to fill whatever the conversation does not, which is what puts the
+				     composer at the foot of a short exchange instead of halfway up the page.
+				     A sticky element only sticks once there is something to scroll; below
+				     that it simply sits where the flow leaves it, and the flow is what this
+				     corrects. -->
+				<div class="grow">
+					<Messages
+						bind:session
+						bind:editor
+						{handleRetry}
+						{chooseAnswer}
+						{pendingChoice}
+						assistantLabel={persona?.name}
+						{isCompacting}
+						onCancelCompaction={cancelCompaction}
+					/>
+				</div>
 
 				{#if floatingComposer}
 					<!-- Sticky rather than laid on top, which is the whole of the difference:
 					     it stays in the flow, so it reserves its own room at the end of the
 					     conversation and never covers the last message, while everything above
 					     passes behind it on the way there. Nothing measures it, nothing pads
-					     for it. The negative margins undo the transcript's gutter so it spans
-					     the column rather than the text. -->
-					<div class="sticky bottom-0 z-10 -mx-4 -mb-4 lg:-mx-6 lg:-mb-6 xl:-mx-8 xl:-mb-8">
+					     for it. The negative margins undo the transcript's side gutter so it
+					     spans the column rather than the text; there is no vertical one left to
+					     undo, because a stuck element anchors to the inside of the scrollport
+					     and a padding there would have pushed it back down. -->
+					<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
 						<!-- Scrolling up during a reply silently opts you out of auto-follow;
 						     without this there is nothing to say content is still arriving below,
 						     nor any way back short of dragging. Carried by the composer, so it
