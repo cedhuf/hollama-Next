@@ -118,9 +118,31 @@
 		</div>
 	</div>
 
-	<!-- Pinned means pinned. The setting that puts the launchers here is the only
-	     thing that decides whether they stay, so both shapes hold their place above
-	     the list and neither is ever scrolled out of reach. Anyone who would rather
-	     have the room turns the pin off, or picks the compact row. -->
-	<SidebarPersonas {personas} shape={compact ? 'strip' : 'grid'} forceOpen={!!q} />
+	<!-- Pinned means pinned. Whatever shape the header is in, the launchers hold
+	     their place above the list and are never scrolled out of reach; only their
+	     size changes.
+
+	     Both shapes are drawn, each folding on its own axis, because a swap cannot be
+	     animated and an unannounced hundred-pixel jump in the list is worse than
+	     seeing them overlap for a fifth of a second. The grid folds on grid rows,
+	     which needs no height to be known; the strip opens on a height it has by
+	     construction. -->
+	<div
+		class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {compact
+			? 'grid-rows-[0fr] opacity-0'
+			: 'grid-rows-[1fr] opacity-100'}"
+	>
+		<div class="min-h-0 overflow-hidden">
+			<SidebarPersonas {personas} shape="grid" forceOpen={!!q} />
+		</div>
+	</div>
+
+	<div
+		class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {compact &&
+		personas.length > 0
+			? 'h-11 opacity-100'
+			: 'h-0 opacity-0'}"
+	>
+		<SidebarPersonas {personas} shape="strip" />
+	</div>
 </div>

@@ -23,9 +23,24 @@
 		personaById: Record<string, Persona>;
 		/** Whether the header still has a match to show, for the empty state. */
 		hasPersonaMatches: boolean;
+		/** Reports the scroll position, once per frame. The header decides what to do with it. */
+		onScroll?: (top: number) => void;
 	}
 
-	let { sessions, q, personaById, hasPersonaMatches }: Props = $props();
+	let { sessions, q, personaById, hasPersonaMatches, onScroll }: Props = $props();
+
+	// Scroll fires far more often than the screen refreshes, so the read waits for
+	// the next frame.
+	let el: HTMLDivElement | undefined = $state();
+	let queued = false;
+	function handleScroll() {
+		if (!onScroll || queued) return;
+		queued = true;
+		requestAnimationFrame(() => {
+			queued = false;
+			onScroll?.(el?.scrollTop ?? 0);
+		});
+	}
 
 	const filtered = $derived(
 		q ? sessions.filter((s) => resolveSessionTitle(s).toLowerCase().includes(q)) : sessions
@@ -56,6 +71,8 @@
      the height of the column. What the translucency reveals is the wallpaper, which
      is the only thing behind the column worth revealing. -->
 <div
+	bind:this={el}
+	onscroll={handleScroll}
 	class="min-h-0 flex-1 overflow-auto px-2 py-2 surface-pane"
 	style="overscroll-behavior-y: contain"
 >

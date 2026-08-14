@@ -17,8 +17,52 @@
 
 	const q = $derived(query.trim().toLowerCase());
 
-	/** The header's shape, chosen in settings and nowhere else. */
-	const compact = $derived($settingsStore.compactSidebarHeader);
+	/** Matches `duration-200` in the actions block. The lock below and the CSS must agree. */
+	const TRANSITION_MS = 200;
+	/** How far a gesture has to travel before it counts as one, rather than as a tremor. */
+	const SCROLL_STEP = 6;
+
+	/**
+	 * The header gives its room back on the way down, and takes it back the moment
+	 * you go up, wherever you happen to be. A phone's does the same.
+	 *
+	 * Direction rather than position, which is what makes it feel answered rather
+	 * than triggered: you do not have to return to the top to get the controls back.
+	 *
+	 * And it is safe here in a way it was not before, because there is no longer a
+	 * circuit to close. The actions are a neighbour of the list, not a layer over it,
+	 * so no padding stands in for them, nothing measures their height, and nothing
+	 * writes the scroll position. One arrow, from the scroll to a class, and a single
+	 * arrow cannot loop.
+	 */
+	let scrolledAway = $state(false);
+	let lastTop = 0;
+	let settledAt = 0;
+
+	function onListScroll(top: number) {
+		// A flip makes the list taller or shorter, and on a barely scrollable one the
+		// browser trims `scrollTop` to fit. That trim is not a gesture, so it is not
+		// read as one; without this it would read as scrolling up, reopen the header,
+		// and start again.
+		if (performance.now() < settledAt) {
+			lastTop = top;
+			return;
+		}
+
+		// Small moves accumulate rather than being discarded, so a slow drag still
+		// crosses the step eventually.
+		const delta = top - lastTop;
+		if (Math.abs(delta) < SCROLL_STEP) return;
+		lastTop = top;
+
+		const next = delta > 0 && top > SCROLL_STEP;
+		if (next === scrolledAway) return;
+		scrolledAway = next;
+		settledAt = performance.now() + TRANSITION_MS;
+	}
+
+	/** The header's shape: the setting, or the way you are going through the list. */
+	const compact = $derived($settingsStore.compactSidebarHeader || scrolledAway);
 
 	// Personas you've talked to, surfaced above the list unless disabled in
 	// settings. Their raw session row is dropped to avoid showing them twice.
@@ -102,6 +146,7 @@
 			{q}
 			{personaById}
 			hasPersonaMatches={filteredPersonas.length > 0}
+			onScroll={onListScroll}
 		/>
 	{/if}
 
