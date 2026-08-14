@@ -8,6 +8,22 @@ import type { Settings } from '$lib/settings';
 import type { StorageKey } from './keys';
 
 /**
+ * Nobody is signed in.
+ *
+ * Distinct from a read that failed, because the two deserve opposite reactions:
+ * a failure has to be shouted about, since an empty sidebar looks exactly like
+ * an empty account. Being signed out is not a failure at all — the login page
+ * asks the same questions as the app and would answer 401 to every one of them.
+ * Saving still stays suspended either way.
+ */
+export class NotAuthenticatedError extends Error {
+	constructor() {
+		super('Not signed in');
+		this.name = 'NotAuthenticatedError';
+	}
+}
+
+/**
  * The full set of app data, as held in memory by the reactive stores.
  * Returned synchronously by `DataRepository.hydrate()` in local mode so the
  * stores can seed without a loading flash.

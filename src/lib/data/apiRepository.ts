@@ -10,7 +10,7 @@ import type { Session } from '$lib/sessions';
 import { normalizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
-import type { Backup, DataRepository } from './repository';
+import { NotAuthenticatedError, type Backup, type DataRepository } from './repository';
 
 type Collection = 'sessions' | 'knowledge' | 'personas' | 'settings';
 
@@ -145,6 +145,7 @@ export class ApiRepository implements DataRepository {
 	 */
 	async #get<T>(collection: Collection, fallback: T): Promise<T> {
 		const response = await fetch(`/api/data/${collection}`);
+		if (response.status === 401) throw new NotAuthenticatedError();
 		if (!response.ok) throw new Error(`GET /api/data/${collection}: HTTP ${response.status}`);
 		return ((await response.json()) as T) ?? fallback;
 	}

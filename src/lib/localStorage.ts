@@ -10,6 +10,7 @@ import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { repository } from './data';
+import { NotAuthenticatedError } from './data/repository';
 
 // Re-exported so existing call sites keep importing these from `$lib/localStorage`.
 export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
@@ -248,6 +249,11 @@ export async function refreshStores(): Promise<void> {
  * destroy the rest. Saving is off until a load succeeds, so say so.
  */
 function reportLoadFailure(error: unknown): void {
+	// Signed out is not a failure: the login page boots the same stores and would
+	// otherwise greet every visitor with an alarm about data it was never meant
+	// to read yet.
+	if (error instanceof NotAuthenticatedError) return;
+
 	toast.error('Could not load your data', {
 		id: 'data-load-error',
 		description: `${error instanceof Error ? error.message : 'Unknown error'} — saving is paused; reload once the server is back.`,
