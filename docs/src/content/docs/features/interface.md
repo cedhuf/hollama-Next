@@ -44,6 +44,10 @@ use it.
 
 Conversations, and optionally the personas you have talked to, pinned above them.
 
+Start scrolling the list and the header gives its room back: the _New chat_ button drops its label
+onto the search row, and the persona grid becomes a strip of avatars so they stay one tap away. It
+comes back when the list is at the top, and stays put while you are searching.
+
 **Right-click any conversation** (long press on a touch screen) for the full menu: pin it, save it as
 [knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always
 asks, and asks on the row itself rather than in a dialog somewhere else.

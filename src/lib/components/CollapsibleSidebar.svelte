@@ -17,9 +17,11 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { APP_NAME } from '$lib/brand';
+	import Kbd from '$lib/components/Kbd.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona } from '$lib/personas';
+	import { modKey } from '$lib/platform';
 	import {
 		formatSessionMetadata,
 		groupSessions,
@@ -44,6 +46,28 @@
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onChats = $derived(pathname.includes('/sessions'));
 	const q = $derived(query.trim().toLowerCase());
+
+	/**
+	 * The header gives its room back once you start scrolling.
+	 *
+	 * Two thresholds rather than one: a single boundary flickers when the list
+	 * comes to rest exactly on it. Collapsing at 48 and reopening at 8 also means
+	 * the header only comes back when you are properly at the top, not at the
+	 * first flick upwards, which is the behaviour everyone hates.
+	 */
+	let listEl: HTMLDivElement | undefined = $state();
+	let scrolled = $state(false);
+	const mod = $derived(modKey());
+
+	// Never while searching: the field holds text, and shrinking it in the middle
+	// of reading the matches is exactly the wrong moment.
+	const condensed = $derived(scrolled && !q);
+
+	function onListScroll() {
+		const top = listEl?.scrollTop ?? 0;
+		if (!scrolled && top > 48) scrolled = true;
+		else if (scrolled && top < 8) scrolled = false;
+	}
 
 	// Personas you've talked to, surfaced atop the list (unless disabled in
 	// settings). Their raw session row is hidden below to avoid duplication.
@@ -286,17 +310,28 @@
 			{/if}
 		</div>
 	{:else}
-		<!-- Top actions -->
-		<div class="flex flex-col gap-2 px-3 py-3">
+		<!-- Top actions. Condensed, the button drops its label and moves onto the
+		     search row: the same two controls, one line instead of two. -->
+		<div
+			class="flex flex-wrap gap-2 px-3 py-3 transition-all duration-200 motion-reduce:transition-none"
+		>
 			<button
 				onclick={newChat}
-				class="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+				title={$LL.newChat()}
+				aria-label={$LL.newChat()}
+				class="flex items-center justify-center gap-2 rounded-lg bg-accent py-2 text-sm font-medium text-shade-0 transition-all duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
+					? 'order-2 w-9 px-0'
+					: 'order-1 w-full px-3'}"
 			>
-				<Plus class="h-4 w-4" />
-				{$LL.newChat()}
+				<Plus class="h-4 w-4 shrink-0" />
+				<span class={condensed ? 'sr-only' : ''}>{$LL.newChat()}</span>
 			</button>
 
-			<div class="relative">
+			<div
+				class="relative transition-all duration-200 motion-reduce:transition-none {condensed
+					? 'order-1 w-[calc(100%-2.75rem)]'
+					: 'order-2 w-full'}"
+			>
 				<Search
 					class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
 				/>
@@ -304,8 +339,16 @@
 					bind:value={query}
 					type="text"
 					placeholder={$LL.searchChatsPersonas()}
-					class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-2.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+					class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
 				/>
+				<!-- The shortcut opens the full-text dialog, which is a different thing
+				     from this field. Shown as a hint, not a button: it is the keyboard's
+				     way in, and the line below is the pointer's. -->
+				<span
+					class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
+				>
+					<Kbd>{mod}</Kbd><Kbd>K</Kbd>
+				</span>
 			</div>
 
 			<!-- The field above filters titles; this is the way out to the content of
@@ -315,14 +358,14 @@
 				<button
 					type="button"
 					onclick={() => openSearch(query)}
-					class="flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+					class="order-3 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
 				>
 					<Search class="h-4 w-4 shrink-0" />
 					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
 				</button>
 			{/if}
 
-			<div class="flex gap-1.5">
+			<div class="order-4 flex w-full gap-1.5">
 				<a
 					href={resolve('/sessions')}
 					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
@@ -344,8 +387,43 @@
 			</div>
 		</div>
 
+		<!-- Condensed, the persona grid has scrolled out of reach, so it comes back
+		     as a strip. Height rather than {#if}, so it opens and closes instead of
+		     appearing. -->
+		<div
+			class="overflow-hidden transition-all duration-200 motion-reduce:transition-none {condensed &&
+			personaLaunchers.length > 0
+				? 'h-11 opacity-100'
+				: 'h-0 opacity-0'}"
+		>
+			<div class="flex gap-1.5 overflow-x-auto px-3 pb-2">
+				{#each personaLaunchers as persona (persona.id)}
+					{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
+					<button
+						type="button"
+						onclick={() =>
+							goto(
+								resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
+							)}
+						title={persona.name}
+						aria-label={persona.name}
+						class="shrink-0 rounded-full transition-transform hover:scale-105 {active
+							? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
+							: ''}"
+					>
+						<PersonaAvatar {persona} size={28} />
+					</button>
+				{/each}
+			</div>
+		</div>
+
 		<!-- Scrollable list -->
-		<div class="min-h-0 flex-1 overflow-auto px-2 pb-2" style="overscroll-behavior-y: contain">
+		<div
+			bind:this={listEl}
+			onscroll={onListScroll}
+			class="min-h-0 flex-1 overflow-auto px-2 pb-2"
+			style="overscroll-behavior-y: contain"
+		>
 			{#if filteredPersonas.length > 0}
 				<div class="mb-2">
 					<button

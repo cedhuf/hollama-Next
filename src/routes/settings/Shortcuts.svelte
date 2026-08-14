@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { browser } from '$app/environment';
 	import Kbd from '$lib/components/Kbd.svelte';
+	import { modKey } from '$lib/platform';
 
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -13,16 +13,7 @@
 	 * teaches the wrong thing. Each group below names where its keys are handled.
 	 */
 
-	// ⌘ on Apple keyboards, Ctrl everywhere else. `userAgentData` where it exists,
-	// since `navigator.platform` is deprecated; the string check is the fallback.
-	const isApple = $derived(
-		browser &&
-			/mac|iphone|ipad/i.test(
-				(navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ??
-					navigator.userAgent
-			)
-	);
-	const mod = $derived(isApple ? '⌘' : 'Ctrl');
+	const mod = $derived(modKey());
 
 	interface Shortcut {
 		keys: string[];
