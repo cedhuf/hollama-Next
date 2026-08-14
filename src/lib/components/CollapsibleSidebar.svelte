@@ -39,6 +39,9 @@
 	import PersonaAvatar from './PersonaAvatar.svelte';
 	import SectionListItem from './SectionListItem.svelte';
 
+	/** Matches `duration-200` below. The scroll lock and the CSS must agree. */
+	const TRANSITION_MS = 200;
+
 	let query = $state('');
 	let personasOpen = $state(true);
 
@@ -54,19 +57,37 @@
 	 * comes to rest exactly on it. Collapsing at 48 and reopening at 8 also means
 	 * the header only comes back when you are properly at the top, not at the
 	 * first flick upwards, which is the behaviour everyone hates.
+	 *
+	 * The rest is about staying smooth. Scroll fires far more often than the
+	 * screen refreshes, so the read is deferred to the next frame; and a flip is
+	 * locked for the length of the transition, because collapsing the header makes
+	 * the list taller, which moves `scrollTop` on a short list and could otherwise
+	 * flip it straight back — the oscillation reads as a stutter.
 	 */
 	let listEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
+	let queued = false;
+	let settledAt = 0;
 	const mod = $derived(modKey());
 
 	// Never while searching: the field holds text, and shrinking it in the middle
 	// of reading the matches is exactly the wrong moment.
-	const condensed = $derived(scrolled && !q);
+	const condensed = $derived(($settingsStore.compactSidebarHeader || scrolled) && !q);
 
 	function onListScroll() {
-		const top = listEl?.scrollTop ?? 0;
-		if (!scrolled && top > 48) scrolled = true;
-		else if (scrolled && top < 8) scrolled = false;
+		if (queued) return;
+		queued = true;
+		requestAnimationFrame(() => {
+			queued = false;
+			if (performance.now() < settledAt) return;
+
+			const top = listEl?.scrollTop ?? 0;
+			const next = scrolled ? top >= 8 : top > 48;
+			if (next === scrolled) return;
+
+			scrolled = next;
+			settledAt = performance.now() + TRANSITION_MS;
+		});
 	}
 
 	// Personas you've talked to, surfaced atop the list (unless disabled in
@@ -77,6 +98,13 @@
 	const launcherSessionIds = $derived(
 		personaLaunchers.map((p) => p.sessionId).filter((id): id is string => !!id)
 	);
+	// A persona's conversation is not obviously one when its launcher is turned
+	// off: it lands among the others with nothing to tell it apart. Its avatar is
+	// the thing that says so.
+	const personaById = $derived(
+		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
+	);
+
 	const visibleSessions = $derived(
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
 	);
@@ -310,45 +338,57 @@
 			{/if}
 		</div>
 	{:else}
-		<!-- Top actions. Condensed, the button drops its label and moves onto the
-		     search row: the same two controls, one line instead of two. -->
-		<div
-			class="flex flex-wrap gap-2 px-3 py-3 transition-all duration-200 motion-reduce:transition-none"
-		>
+		<!-- Top actions.
+		     Two New chat buttons rather than one that moves: a single button would
+		     have to cross a flex line break, and a line break is the one thing CSS
+		     cannot interpolate — it happens on a frame, which is the jump. Here the
+		     tall one closes on its height while the compact one opens on its width,
+		     both continuous, and only ever one of them is reachable. -->
+		<div class="flex flex-col px-3 py-3">
 			<button
 				onclick={newChat}
-				title={$LL.newChat()}
-				aria-label={$LL.newChat()}
-				class="flex items-center justify-center gap-2 rounded-lg bg-accent py-2 text-sm font-medium text-shade-0 transition-all duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
-					? 'order-2 w-9 px-0'
-					: 'order-1 w-full px-3'}"
+				tabindex={condensed ? -1 : 0}
+				aria-hidden={condensed}
+				class="flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
+					? 'pointer-events-none mb-0 h-0 opacity-0'
+					: 'mb-2 h-9 opacity-100'}"
 			>
 				<Plus class="h-4 w-4 shrink-0" />
-				<span class={condensed ? 'sr-only' : ''}>{$LL.newChat()}</span>
+				{$LL.newChat()}
 			</button>
 
-			<div
-				class="relative transition-all duration-200 motion-reduce:transition-none {condensed
-					? 'order-1 w-[calc(100%-2.75rem)]'
-					: 'order-2 w-full'}"
-			>
-				<Search
-					class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
-				/>
-				<input
-					bind:value={query}
-					type="text"
-					placeholder={$LL.searchChatsPersonas()}
-					class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
-				/>
-				<!-- The shortcut opens the full-text dialog, which is a different thing
-				     from this field. Shown as a hint, not a button: it is the keyboard's
-				     way in, and the line below is the pointer's. -->
-				<span
-					class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
+			<div class="flex items-center">
+				<div class="relative min-w-0 flex-1">
+					<Search
+						class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+					/>
+					<input
+						bind:value={query}
+						type="text"
+						placeholder={$LL.searchChatsPersonas()}
+						class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
+					/>
+					<!-- The shortcut opens the full-text dialog, which is a different thing
+					     from this field. Shown as a hint, not a button: it is the keyboard's
+					     way in, and the line below is the pointer's. -->
+					<span
+						class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
+					>
+						<Kbd>{mod}</Kbd><Kbd>K</Kbd>
+					</span>
+				</div>
+				<button
+					onclick={newChat}
+					title={$LL.newChat()}
+					aria-label={$LL.newChat()}
+					tabindex={condensed ? 0 : -1}
+					aria-hidden={!condensed}
+					class="flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
+						? 'ml-2 w-9 opacity-100'
+						: 'pointer-events-none ml-0 w-0 opacity-0'}"
 				>
-					<Kbd>{mod}</Kbd><Kbd>K</Kbd>
-				</span>
+					<Plus class="h-4 w-4 shrink-0" />
+				</button>
 			</div>
 
 			<!-- The field above filters titles; this is the way out to the content of
@@ -358,14 +398,14 @@
 				<button
 					type="button"
 					onclick={() => openSearch(query)}
-					class="order-3 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+					class="mt-2 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
 				>
 					<Search class="h-4 w-4 shrink-0" />
 					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
 				</button>
 			{/if}
 
-			<div class="order-4 flex w-full gap-1.5">
+			<div class="mt-2 flex w-full gap-1.5">
 				<a
 					href={resolve('/sessions')}
 					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
@@ -391,12 +431,16 @@
 		     as a strip. Height rather than {#if}, so it opens and closes instead of
 		     appearing. -->
 		<div
-			class="overflow-hidden transition-all duration-200 motion-reduce:transition-none {condensed &&
+			class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {condensed &&
 			personaLaunchers.length > 0
 				? 'h-11 opacity-100'
 				: 'h-0 opacity-0'}"
 		>
-			<div class="flex gap-1.5 overflow-x-auto px-3 pb-2">
+			<!-- Spread rather than stacked to the left: four avatars bunched in a
+			     corner read as a leftover, the same four spaced across the width read
+			     as a row. `justify-evenly` gives way to scrolling once they no longer
+			     fit, which is the point at which even spacing stops being possible. -->
+			<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 pb-2">
 				{#each personaLaunchers as persona (persona.id)}
 					{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
 					<button
@@ -483,13 +527,20 @@
 					     session used to butt two rounded highlights against each other. -->
 					<div class="flex flex-col gap-0.5">
 						{#each group.sessions as session (session.id)}
+							{@const persona = session.personaId ? personaById[session.personaId] : undefined}
 							<SectionListItem
 								sitemap={Sitemap.SESSIONS}
 								id={session.id}
 								title={resolveSessionTitle(session)}
 								subtitle={formatSessionMetadata(session, $serversStore)}
 								pinned={session.pinned}
+								leading={persona ? personaBadge : undefined}
 							/>
+							{#snippet personaBadge()}
+								{#if persona}
+									<PersonaAvatar {persona} size={24} />
+								{/if}
+							{/snippet}
 						{/each}
 					</div>
 				</div>

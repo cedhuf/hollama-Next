@@ -455,6 +455,9 @@ const fr = extendDictionary(en, {
 	fadeCompactedMessagesHelp:
 		'Les messages compactés restent affichés mais ne sont plus envoyés au modèle. Les estomper montre où commence le contexte actif ; survolez-en un pour le lire normalement.',
 	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
+	compactSidebarHeader: 'Toujours utiliser l’en-tête réduit',
+	compactSidebarHeaderHelp:
+		'L’en-tête se réduit tout seul dès que la liste défile. Activez ceci pour le garder ainsi dès le départ.',
 
 	// --- Paramètres › À propos -------------------------------------------------
 	source: 'Source',

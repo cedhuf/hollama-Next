@@ -1636,6 +1636,14 @@ type RootTranslation = {
 	 */
 	pinPersonasInSidebar: string
 	/**
+	 * A​l​w​a​y​s​ ​u​s​e​ ​t​h​e​ ​c​o​m​p​a​c​t​ ​h​e​a​d​e​r
+	 */
+	compactSidebarHeader: string
+	/**
+	 * T​h​e​ ​h​e​a​d​e​r​ ​c​o​n​d​e​n​s​e​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​o​n​c​e​ ​t​h​e​ ​l​i​s​t​ ​i​s​ ​s​c​r​o​l​l​e​d​.​ ​T​u​r​n​ ​t​h​i​s​ ​o​n​ ​t​o​ ​k​e​e​p​ ​i​t​ ​t​h​a​t​ ​w​a​y​ ​f​r​o​m​ ​t​h​e​ ​s​t​a​r​t​.
+	 */
+	compactSidebarHeaderHelp: string
+	/**
 	 * S​o​u​r​c​e
 	 */
 	source: string
@@ -3645,6 +3653,14 @@ The completion in progress will stop
 	 * Pin personas you talk to at the top of the sidebar
 	 */
 	pinPersonasInSidebar: () => LocalizedString
+	/**
+	 * Always use the compact header
+	 */
+	compactSidebarHeader: () => LocalizedString
+	/**
+	 * The header condenses on its own once the list is scrolled. Turn this on to keep it that way from the start.
+	 */
+	compactSidebarHeaderHelp: () => LocalizedString
 	/**
 	 * Source
 	 */

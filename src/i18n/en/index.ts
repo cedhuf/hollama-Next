@@ -440,6 +440,9 @@ const en = {
 	fadeCompactedMessagesHelp:
 		'Compacted messages stay on screen but are no longer sent to the model. Fading them shows where the live context begins; hover one to read it at full strength.',
 	pinPersonasInSidebar: 'Pin personas you talk to at the top of the sidebar',
+	compactSidebarHeader: 'Always use the compact header',
+	compactSidebarHeaderHelp:
+		'The header condenses on its own once the list is scrolled. Turn this on to keep it that way from the start.',
 
 	// --- Settings › About ------------------------------------------------------
 	source: 'Source',

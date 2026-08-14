@@ -100,6 +100,12 @@ export interface Settings {
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
 	/**
+	 * Keep the sidebar header in its condensed form at all times, rather than only
+	 * once the list is scrolled. Off by default: the full header is the one that
+	 * names what its controls do.
+	 */
+	compactSidebarHeader: boolean;
+	/**
 	 * Show pin and delete buttons on the rows of the sidebar lists. Off by
 	 * default: both live in the right-click menu, where they cannot cover a title
 	 * or be hit by accident.
@@ -174,6 +180,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
+	compactSidebarHeader: false,
 	showListQuickActions: false,
 	accentUserMessages: true,
 	showMessageTimestamps: true,

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Braces, Brain, FileText, Pin, PinOff, Trash2 } from '@lucide/svelte';
+	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { page } from '$app/state';
@@ -22,9 +23,11 @@
 		title: string;
 		subtitle: string;
 		pinned?: boolean;
+		/** Drawn before the title. A persona's conversation carries its avatar here. */
+		leading?: Snippet;
 	}
 
-	let { sitemap, id, title, subtitle, pinned = false }: Props = $props();
+	let { sitemap, id, title, subtitle, pinned = false, leading }: Props = $props();
 	let isDeleting = $state(false);
 
 	const isSession = $derived(sitemap === Sitemap.SESSIONS);
@@ -69,6 +72,9 @@
 				{isActive ? 'bg-shade-0' : ''}"
 				class:confirm-deletion={isDeleting}
 			>
+				{#if leading}
+					<span class="mr-2 shrink-0">{@render leading()}</span>
+				{/if}
 				<a
 					class="relative z-0 min-w-0 flex-1 py-2 {isActive ? 'text-active' : 'hover:text-active'}"
 					data-testid={isSession ? 'session-item' : 'knowledge-item'}
