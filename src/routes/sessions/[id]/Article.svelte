@@ -43,6 +43,11 @@
 		assistantLabel = undefined,
 		currentRawReasoning,
 		currentRawCompletion,
+		// Write-only here: the component sets it for the parent and never reads it
+		// back, which the rule below reads as a dead initialiser. It isn't: an
+		// unbound parent still needs the default, and $bindable() must be the
+		// declared value for the prop to be bindable at all.
+		// eslint-disable-next-line no-useless-assignment
 		streamingReasoningExpanded = $bindable(false),
 		onToggleReasoning = undefined,
 		anchorId = undefined,

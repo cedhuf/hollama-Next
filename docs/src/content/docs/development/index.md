@@ -37,8 +37,8 @@ reference.
 | `src/lib/data/`       | The repository seam: the local and API implementations                                            |
 | `src/lib/server/`     | Everything that only ever runs on the server: database, migrations, auth, resolvers               |
 | `src/lib/components/` | Shared components, provider-agnostic and route-agnostic                                           |
-| `src/routes/api/`     | The HTTP API, see the [reference](/reference/api/)                                         |
-| `src/i18n/`           | typesafe-i18n dictionaries, see [Translations](/development/translations/)                 |
+| `src/routes/api/`     | The HTTP API, see the [reference](/reference/api/)                                                |
+| `src/i18n/`           | typesafe-i18n dictionaries, see [Translations](/development/translations/)                        |
 
 ## Checks
 

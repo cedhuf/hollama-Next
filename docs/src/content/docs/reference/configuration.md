@@ -13,7 +13,7 @@ Copy `.env.example` to `.env` and adjust. Everything here is read at startup.
 | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
 | `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any**. See [Security](/guides/security/)                                            |
+| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any**. See [Security](/guides/security/)                                                   |
 | `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                    |
 | `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
 | `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |

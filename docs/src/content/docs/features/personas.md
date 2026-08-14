@@ -25,7 +25,7 @@ want. They are not re-added.
 | Model         | Resolved to a concrete server when the conversation starts                 |
 | Temperature   | Optional, applied to the conversation                                      |
 | Suggestions   | Starter prompts offered on the home screen                                 |
-| Knowledge     | Pieces of [knowledge](/features/knowledge/) attached to every chat  |
+| Knowledge     | Pieces of [knowledge](/features/knowledge/) attached to every chat         |
 | Web search    | Whether the conversation starts with search on                             |
 
 ## One persona, one conversation

@@ -12,8 +12,8 @@ listens for, so it cannot drift from this page without both being wrong.
 
 Type `/` at the start of an empty message and the command menu appears.
 
-| Command    | What it does                                                                          |
-| ---------- | ------------------------------------------------------------------------------------- |
+| Command    | What it does                                                                   |
+| ---------- | ------------------------------------------------------------------------------ |
 | `/compact` | [Summarises the conversation so far](/features/compaction/) to free up context |
 
 That is the whole list today. User-defined commands are on the [roadmap](/roadmap/); the menu

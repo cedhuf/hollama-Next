@@ -24,8 +24,8 @@ Conversations name themselves after the first reply, using whichever model you p
 
 ## The rest
 
-| Page                                       | What it covers                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------ |
+| Page                                | What it covers                                                     |
+| ----------------------------------- | ------------------------------------------------------------------ |
 | [Personas](/features/personas/)     | Reusable characters with their own prompt, model, avatar and voice |
 | [Knowledge](/features/knowledge/)   | Text you keep and attach, and the collections that group it        |
 | [Documents](/features/documents/)   | Reading a PDF, a spreadsheet or a Word file in the browser         |
