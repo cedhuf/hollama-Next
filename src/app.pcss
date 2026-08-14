@@ -589,16 +589,46 @@
 /*
  * Wallpaper.
  *
- * The sidebar is built out of the materials below, so the picture comes through
- * it; the conversation stays opaque, so nothing is ever read off a photograph.
- * Between the two, and around them both, the margin lets it show plainly.
+ * Blurred once, here, on a layer of its own, rather than by every surface that
+ * happens to sit over it.
  *
- * That only works if the columns read as panels rather than as holes, hence the
- * shadow: over a flat canvas a hairline border is enough to separate them, over
- * a picture it is not. Applied from the root attribute rather than per component,
- * so a panel added later is a class away from belonging.
+ * The surfaces below were built to blur the app's own content, which moves, so
+ * they use `backdrop-filter` and pay for it on every frame. A picture does not
+ * move: blurring it sixty times a second buys nothing. And `backdrop-filter`
+ * brought two faults with it that no arrangement of values could settle. Two of
+ * them side by side blur their own share of the backdrop and draw a seam where
+ * they meet. One of them on a clipped box blanks the backdrop of everything
+ * inside it, which is why a rounded column and a frosted card could not both
+ * work: clip the column and the card had nothing left to blur, leave it unclipped
+ * and a square fill hung out past a round outline.
+ *
+ * Blurring the source removes both at once. The columns keep only their tint,
+ * which is what carried the hierarchy anyway, and `backdrop-filter` is left to
+ * the only surfaces with a real reason for it: the cards that hover over moving
+ * text.
+ *
+ * The layer is inset by the blur radius, otherwise the kernel reaches past the
+ * picture's edge, finds nothing, and fades the border of the screen.
  */
 @layer components {
+	:root {
+		--wallpaper-blur: calc(18px + 6px * (var(--surface-strength) - 1));
+	}
+
+	:root[data-wallpaper='on'] .app-shell::before {
+		content: '';
+		position: absolute;
+		inset: calc(-1 * var(--wallpaper-blur));
+		z-index: 0;
+		background-image: var(--wallpaper);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		filter: blur(var(--wallpaper-blur));
+	}
+
+	/* Over a flat canvas a hairline border separates the columns; over a picture it
+	   does not, and they read as holes cut in it rather than as panels on it. */
 	:root[data-wallpaper='on'] .app-panel {
 		box-shadow:
 			0 10px 30px -10px rgb(0 0 0 / 0.35),
@@ -611,9 +641,9 @@
  *
  * Three levels, and the whole app draws from them: `surface-chrome` for what frames
  * the content (a top bar, a footer), `surface-pane` for the body it frames,
- * `surface-floating` for a card that hovers over the content it acts on. Where
- * several of them stack, `surface-group` on whatever holds them takes over the
- * blurring; see its own note for why that is not optional. The gaps
+ * `surface-floating` for a card that hovers over the content it acts on. The first
+ * two are tint alone; only the third filters what is behind it, because it is the
+ * only one with something behind it that moves. The gaps
  * between them are what read as a hierarchy, so the values live together here —
  * raising a blur in one place and forgetting the others is how a set of surfaces
  * stops looking like a set.
@@ -657,87 +687,70 @@
 				calc(var(--surface-tint) + var(--surface-tint-range) * (var(--surface-strength) - 1)),
 			transparent
 		);
+	}
+
+	/*
+	 * Only what hovers over moving content filters its backdrop.
+	 *
+	 * The column materials have nothing of their own to blur: they are neighbours,
+	 * so nothing passes behind them, and the one thing that used to justify their
+	 * filter, the wallpaper, is now blurred at the source. A card over a
+	 * conversation is the opposite case, and the only one left.
+	 */
+	.surface-floating {
 		backdrop-filter: blur(
 			calc(var(--surface-blur) + var(--surface-blur-range) * (var(--surface-strength) - 1))
 		);
 	}
 
 	/**
-	 * Frames the content: 90% and 17px, from 83%/11px to 97%/23px.
+	/**
+	 * Frames the content: 94%, from 89% to 99%.
 	 *
-	 * Also the chat's top bar, where the translucency has a second job: letting a
-	 * message be glimpsed as it passes underneath. That is why this level is dense
-	 * but not opaque, and why the blur carries more of the distance from the level
-	 * below than the tint does.
+	 * Ten points above the level below it, at every point of the slider, because
+	 * ten points of tint is what one surface needs to read as a different material
+	 * from another. It used to be two, back when the blur carried the rest of the
+	 * distance; now that the picture is blurred at the source, the tint is on its
+	 * own and has to say the whole thing.
+	 *
+	 * The two ranges are equal for the same reason: unequal ones close the gap as
+	 * the slider rises, and a hierarchy that holds only in the middle of its own
+	 * control is not one.
 	 */
 	.surface-chrome {
-		--surface-tint: 90%;
-		--surface-tint-range: 7%;
-		--surface-blur: 17px;
-		--surface-blur-range: 6px;
+		--surface-tint: 94%;
+		--surface-tint-range: 5%;
 	}
 
 	/**
-	 * The body those bars frame: 88% and 15px, from 80%/10px to 96%/20px.
+	 * The body those bars frame: 84%, from 79% to 89%.
 	 *
-	 * The sidebar's controls and its list of conversations both, which is why it is
-	 * the level whose floor has to stay legible over a photograph rather than over
-	 * more of the app.
+	 * The level whose floor has to stay legible over a photograph rather than over
+	 * more of the app. It can afford to sit lower than it did: what shows through
+	 * it is a picture already blurred at the source, which text survives far better
+	 * than a sharp one.
 	 */
 	.surface-pane {
-		--surface-tint: 88%;
-		--surface-tint-range: 8%;
-		--surface-blur: 15px;
-		--surface-blur-range: 5px;
+		--surface-tint: 84%;
+		--surface-tint-range: 5%;
 	}
 
 	/**
-	 * One blur for a whole stack of surfaces.
+	 * Hovers over it, so it blurs hardest: 76% and 18px, from 66%/10px to 86%/26px.
 	 *
-	 * `backdrop-filter` samples only the backdrop inside its own element's box, and
-	 * fills whatever the blur kernel reaches for past that edge by repeating the
-	 * last pixels it can see. Two surfaces stacked one on the other therefore blur
-	 * the same picture differently exactly where they meet, and the mismatch draws a
-	 * seam that no pair of matching values can close: it is geometry, not tint.
-	 *
-	 * So the blur is lifted onto whatever holds them. The group filters its backdrop
-	 * once, in one piece, and the levels inside keep only their tint, which is what
-	 * was carrying the hierarchy anyway — two pixels of blur apart, they were never
-	 * telling anyone anything. It also costs one filtered layer per frame instead of
-	 * one per block.
-	 *
-	 * A level used on its own, with nothing of its kind above or below it, has no
-	 * seam to avoid and keeps its own blur. So does `surface-floating`, even inside
-	 * a group: a seam is what two surfaces draw where their edges meet, and a card
-	 * that hovers over the content has no edge in common with it. Its blur is the
-	 * whole point of it, and lifting that one away would leave it flat.
+	 * The one level a caller is meant to lighten on the spot, by overriding
+	 * `--surface-tint`, because two cards over the same conversation are not
+	 * necessarily the same weight. The conversation's own bar does exactly that: it
+	 * carries a title and a date, the composer carries what you are writing, and ten
+	 * points between them says which one is the subject without adding a rule, a
+	 * shadow or a border to say it.
 	 */
-	.surface-group {
-		--surface-blur: 16px;
-		--surface-blur-range: 6px;
-		backdrop-filter: blur(
-			calc(var(--surface-blur) + var(--surface-blur-range) * (var(--surface-strength) - 1))
-		);
-	}
-
-	.surface-group .surface-chrome,
-	.surface-group .surface-pane {
-		backdrop-filter: none;
-	}
-
-	/* It carries a filter and nothing else, so it is switched off on its own terms
-	   rather than with the levels, which also have a tint to fall back to. */
-	:root[data-transparency='off'] .surface-group {
-		backdrop-filter: none;
-	}
-
-	/** Hovers over it, so it blurs hardest: 80% and 24px, from 72%/14px to 90%/36px. */
 	.surface-floating {
 		--surface-color: var(--color-shade-0);
-		--surface-tint: 80%;
+		--surface-tint: 76%;
 		--surface-tint-range: 10%;
-		--surface-blur: 24px;
-		--surface-blur-range: 12px;
+		--surface-blur: 18px;
+		--surface-blur-range: 8px;
 	}
 
 	/*
@@ -756,14 +769,9 @@
 	 * Written as `:not([data-wallpaper='on'])` rather than `='off'` so the first
 	 * paint, before the attribute is set, is already the opaque one.
 	 */
-	:root:not([data-wallpaper='on']) .surface-group {
-		backdrop-filter: none;
-	}
-
 	:root:not([data-wallpaper='on']) .surface-chrome,
 	:root:not([data-wallpaper='on']) .surface-pane {
 		background-color: var(--surface-color);
-		backdrop-filter: none;
 	}
 
 	:root[data-transparency='off'] .surface-chrome,
@@ -774,10 +782,6 @@
 	}
 
 	@media (prefers-reduced-transparency: reduce) {
-		.surface-group {
-			backdrop-filter: none;
-		}
-
 		.surface-chrome,
 		.surface-pane,
 		.surface-floating {

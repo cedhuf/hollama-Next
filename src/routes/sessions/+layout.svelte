@@ -73,7 +73,7 @@
 		     it with itself gives that colour back exactly and the panel stays
 		     invisible until there is a picture under it. -->
 		<div
-			class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex min-w-0 flex-1 flex-col surface-chrome lg:rounded-xl"
+			class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex min-w-0 flex-1 flex-col surface-pane lg:rounded-xl"
 		>
 			{@render children()}
 		</div>
@@ -92,7 +92,7 @@
 		     border and the rounded corners, its children paint the fills, and without a
 		     clip a square fill simply hangs out past a round outline. -->
 		<main
-			class="app-panel surface-group relative flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-xl lg:border"
+			class="app-panel relative flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-xl lg:border"
 		>
 			<div class="flex-1 overflow-auto">
 				{@render children()}

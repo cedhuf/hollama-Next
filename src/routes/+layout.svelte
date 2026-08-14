@@ -246,8 +246,8 @@
 		document.documentElement.style.setProperty('--surface-strength', String(on ? strength : 0));
 		document.documentElement.setAttribute('data-transparency', on ? 'on' : 'off');
 
-		// The columns stay opaque over a wallpaper; what changes is that they need a
-		// shadow to read as panels rather than as holes cut in the picture.
+		// Drives the wallpaper's own layer and the shadow the columns need to read as
+		// panels on a picture rather than as holes cut in it.
 		const wallpaper = !!$settingsStore.backgroundImage;
 		document.documentElement.setAttribute('data-wallpaper', wallpaper ? 'on' : 'off');
 
@@ -460,12 +460,14 @@
 
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
-	<!-- The wallpaper, when there is one, sits here: behind both columns, showing
-	     through the margin this padding leaves and the gap between them. -->
+	<!-- The wallpaper, when there is one, is painted by this box's own backdrop layer
+	     and handed over as a custom property: a `filter` set here would blur the
+	     application along with the picture. It shows through the margin this padding
+	     leaves and the gap between the two columns. -->
 	<div
-		class="app-shell relative flex w-full overflow-hidden bg-shade-1 bg-cover bg-center bg-no-repeat lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		class="app-shell relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
 		style={$settingsStore.backgroundImage
-			? `background-image: url(${$settingsStore.backgroundImage})`
+			? `--wallpaper: url(${$settingsStore.backgroundImage})`
 			: ''}
 	>
 		<CollapsibleSidebar />
