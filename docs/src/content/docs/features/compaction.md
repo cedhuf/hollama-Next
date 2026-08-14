@@ -25,7 +25,7 @@ Type `/compact` in the composer. A command menu appears as soon as you type `/`.
 The command is recognised only when the whole message is a single line naming it. A message that
 merely starts with a slash (a path, a date, a regular expression) is sent as typed. To send a
 message that really does begin with a slash, start it with `//`. The full rule is on the
-[commands](/llooma/reference/shortcuts/) page.
+[commands](/reference/shortcuts/) page.
 
 If the conversation is too short to be worth compacting, `/compact` stays listed but greyed out,
 with the reason.
@@ -96,4 +96,4 @@ changing it also affects summaries written earlier.
 
 An admin can share the compaction model, the automatic toggle and the threshold with everyone on
 the instance, as `locked` or `overridable`, the same three states as title generation. See
-[Administration](/llooma/guides/administration/).
+[Administration](/guides/administration/).

@@ -7,8 +7,8 @@ Llooma is a fork of [Hollama](https://github.com/fmaclen/hollama) by
 [fmaclen](https://github.com/fmaclen). This page is the record of what has been added, reworked or
 removed since, kept as a whole rather than release by release.
 
-For what shipped in a given version, see the [changelog](/llooma/changelog/). For what is planned,
-see the [roadmap](/llooma/roadmap/).
+For what shipped in a given version, see the [changelog](/changelog/). For what is planned,
+see the [roadmap](/roadmap/).
 
 ## Providers & connections
 

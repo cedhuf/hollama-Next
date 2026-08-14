@@ -37,7 +37,7 @@ use it.
   assistant's plain prose.
 - **Timestamps** under each message.
 - **Fade messages a summary has replaced.** On by default, so it is visible at a glance where the
-  live context begins after a [compaction](/llooma/features/compaction/). Hovering a faded message
+  live context begins after a [compaction](/features/compaction/). Hovering a faded message
   brings it back to full strength. If the effect bothers you, this is the switch.
 
 ## Sidebar
@@ -45,7 +45,7 @@ use it.
 Conversations, and optionally the personas you have talked to, pinned above them.
 
 **Right-click any conversation** (long press on a touch screen) for the full menu: pin it, save it as
-[knowledge](/llooma/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always
+[knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always
 asks, and asks on the row itself rather than in a dialog somewhere else.
 
 The same pin and delete can sit on every row instead, one click closer:
@@ -59,7 +59,7 @@ English and French. A key missing from a translation falls back to English rathe
 blank, so a partial translation degrades into a readable app instead of an empty one.
 
 The interface is translated. The documentation is not, and neither is the source. See
-[Translations](/llooma/development/translations/) if you want to add a language.
+[Translations](/development/translations/) if you want to add a language.
 
 ## Profile
 
@@ -77,5 +77,5 @@ Chrome's menu. Installed, it runs without browser chrome and keeps its own theme
 :::caution[Installed does not mean synced]
 In local mode the installed app is a browser profile like any other. Two devices are two separate
 installations. If you want the same conversations on both, that is what
-[server mode](/llooma/guides/running-modes/) is for.
+[server mode](/guides/running-modes/) is for.
 :::

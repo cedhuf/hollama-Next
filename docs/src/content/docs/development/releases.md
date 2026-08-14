@@ -50,7 +50,7 @@ an older build can upgrade through it first.
 
 This is the one thing in the release process that cannot be automated away, because it is a promise
 to people whose data is at stake. See the note in
-[Installation](/llooma/guides/installation/).
+[Installation](/guides/installation/).
 
 ## The documentation site
 
@@ -67,4 +67,4 @@ The `base` in `astro.config.mjs` has to match the repository name: Pages serves 
 sub-path and every internal link is built from it.
 
 The HTTP API reference is generated from `docs/openapi.yaml`, and CI fails if a route exists that
-the spec does not describe. See [Working on Llooma](/llooma/development/).
+the spec does not describe. See [Working on Llooma](/development/).

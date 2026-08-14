@@ -60,7 +60,7 @@ Ollama models can be pulled from inside the app, and Ollama conversations expose
 parameters (`num_ctx` among them).
 
 `num_ctx` is worth setting: it is the one case where Llooma knows the model's real context window,
-which makes the [load meter](/llooma/features/compaction/) exact instead of measuring against the
+which makes the [load meter](/features/compaction/) exact instead of measuring against the
 threshold you guessed.
 
 ## How requests travel
@@ -69,4 +69,4 @@ threshold you guessed.
 CORS requires it. Ollama on another machine needs your origin in `OLLAMA_ORIGINS`.
 
 **Server mode**: the browser calls `/api/llm`, and the server injects the key. Keys never reach a
-browser, and the generic proxy is disabled outright. See [Security](/llooma/guides/security/).
+browser, and the generic proxy is disabled outright. See [Security](/guides/security/).

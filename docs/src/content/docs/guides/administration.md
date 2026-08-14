@@ -7,7 +7,7 @@ sidebar:
 
 Server mode only. _Settings → Admin_ appears for accounts with the admin role, bootstrapped by
 `ADMIN_EMAIL` or granted through an OIDC claim. See
-[Configuration](/llooma/reference/configuration/).
+[Configuration](/reference/configuration/).
 
 The tab is governance, not plumbing. Provider connections are configured in the Servers tab like
 anyone else's; here you decide what your users get from them.
@@ -49,7 +49,7 @@ Two switches under _User permissions_:
 - **Allow users to add their own provider connections.** Off means the instance's models are the
   only models. On means a user can paste their own key and use whatever they like alongside them.
 - **Allow users to create their own personas.** Off leaves them with the ones you share. Installing a
-  shared [persona](/llooma/features/personas/) still works either way.
+  shared [persona](/features/personas/) still works either way.
 
 ## Accounts
 
@@ -68,7 +68,7 @@ signed-in user is policed exactly like the app's own.
 
 A locked instance prompt is guaranteed **present** rather than exclusive: it is prepended in the
 proxy, so a persona's system prompt adds to it instead of replacing it. See
-[Security](/llooma/guides/security/), which is worth reading in full before an instance is reachable
+[Security](/guides/security/), which is worth reading in full before an instance is reachable
 from anywhere you do not control.
 
 ## Provider keys

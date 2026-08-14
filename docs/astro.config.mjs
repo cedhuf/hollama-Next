@@ -9,13 +9,13 @@ import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
  * change to its documentation land in the same commit, the only thing that
  * actually keeps the two in step.
  *
- * Published to GitHub Pages by `.github/workflows/docs.yml`. `base` has to match
- * the repository name: Pages serves the site from a sub-path, and every internal
- * link is built from it.
+ * Published to GitHub Pages by `.github/workflows/docs.yml`, served at the apex
+ * of llooma.eu. The custom domain is what lets `base` stay at the root: without
+ * it Pages serves the site from a sub-path and every internal link carries the
+ * repository name.
  */
 export default defineConfig({
-	site: 'https://cedhuf.github.io',
-	base: '/llooma',
+	site: 'https://llooma.eu',
 	integrations: [
 		starlight({
 			title: 'Llooma',

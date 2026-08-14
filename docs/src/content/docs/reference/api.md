@@ -18,7 +18,7 @@ issued by Auth.js on sign-in.
 
 Note that `/api` is exempt from the page-level auth guard: **each endpoint checks the session
 itself**. That is why an endpoint that forgets to is a real vulnerability rather than a missing
-redirect, and why the [generic proxy](/llooma/guides/security/) has to refuse server mode from
+redirect, and why the [generic proxy](/guides/security/) has to refuse server mode from
 inside its own handler.
 
 ## Shape of the surface

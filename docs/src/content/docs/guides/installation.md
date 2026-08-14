@@ -32,7 +32,7 @@ docker compose up -d
 Then open <http://localhost:4173>.
 
 That runs Llooma in **local mode**, where everything lives in your browser and the container holds
-no state at all. [Running modes](/llooma/guides/running-modes/) explains the difference and why you
+no state at all. [Running modes](/guides/running-modes/) explains the difference and why you
 might want the other one.
 
 ### For server mode
@@ -66,7 +66,7 @@ openssl rand -base64 32
 
 `./data` is everything: the SQLite database, the sessions, the encrypted provider keys. Back up that
 directory and `AUTH_SECRET` together, since one is useless without the other. Every variable is
-listed in [Configuration](/llooma/reference/configuration/).
+listed in [Configuration](/reference/configuration/).
 
 The repository also ships a `docker-compose.yml` and a `.env.example` if you would rather start from
 those:
@@ -93,7 +93,7 @@ docker compose pull && docker compose up -d
 
 :::note[Pinning a version]
 Some releases remove one-shot migration code. When that happens, the changelog names the version
-to pin so you can upgrade through it first. Check the [changelog](/llooma/changelog/) before
+to pin so you can upgrade through it first. Check the [changelog](/changelog/) before
 jumping several versions at once.
 :::
 
@@ -116,9 +116,9 @@ pnpm install
 pnpm run dev
 ```
 
-Requires Node 26 and pnpm. See [Working on Llooma](/llooma/development/).
+Requires Node 26 and pnpm. See [Working on Llooma](/development/).
 
 ## Next
 
-Once it is running, [First run](/llooma/guides/first-run/) takes you from an empty app to a first
+Once it is running, [First run](/guides/first-run/) takes you from an empty app to a first
 answer.

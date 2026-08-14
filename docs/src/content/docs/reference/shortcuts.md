@@ -14,9 +14,9 @@ Type `/` at the start of an empty message and the command menu appears.
 
 | Command    | What it does                                                                          |
 | ---------- | ------------------------------------------------------------------------------------- |
-| `/compact` | [Summarises the conversation so far](/llooma/features/compaction/) to free up context |
+| `/compact` | [Summarises the conversation so far](/features/compaction/) to free up context |
 
-That is the whole list today. User-defined commands are on the [roadmap](/llooma/roadmap/); the menu
+That is the whole list today. User-defined commands are on the [roadmap](/roadmap/); the menu
 and the parser exist, what is missing is entries you write yourself.
 
 ### The parsing rule

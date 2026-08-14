@@ -25,7 +25,7 @@ want. They are not re-added.
 | Model         | Resolved to a concrete server when the conversation starts                 |
 | Temperature   | Optional, applied to the conversation                                      |
 | Suggestions   | Starter prompts offered on the home screen                                 |
-| Knowledge     | Pieces of [knowledge](/llooma/features/knowledge/) attached to every chat  |
+| Knowledge     | Pieces of [knowledge](/features/knowledge/) attached to every chat  |
 | Web search    | Whether the conversation starts with search on                             |
 
 ## One persona, one conversation
@@ -41,7 +41,7 @@ yours to change. A persona is a starting point, not a layer that keeps overridin
 That also means the persona's system prompt is marked as edited on the conversation, so the global
 and per-model prompts do not resolve on top of it. The one exception is a locked instance prompt in
 server mode, which is prepended server-side and cannot be displaced. See
-[Security](/llooma/guides/security/).
+[Security](/guides/security/).
 
 ## Importing
 

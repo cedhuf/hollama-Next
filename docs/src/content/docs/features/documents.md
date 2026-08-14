@@ -26,7 +26,7 @@ self-hosted instance, and works offline.
    survive rather than collapsing into a wall of text.
 4. The pill fills in with the name and the page count.
 5. When you send your message, the extracted text goes out as a context block ahead of it, the
-   same envelope [knowledge](/llooma/features/) uses.
+   same envelope [knowledge](/features/) uses.
 6. The conversation shows the pill, not the text. A hundred pages of Markdown unrolled in the
    thread would bury the conversation. The text is still in the message: still searchable, still
    exported, still counted by the load meter.
@@ -127,8 +127,8 @@ entirely and no user can turn it back on.
 
 It reads a document into the conversation. It does not index a library, and there is no retrieval
 step: the whole document goes into the context, and a document too large for the model's window is
-too large, full stop. The [load meter](/llooma/features/compaction/) shows what you are about to
-spend before you send, and [compaction](/llooma/features/compaction/) buys room back once the
+too large, full stop. The [load meter](/features/compaction/) shows what you are about to
+spend before you send, and [compaction](/features/compaction/) buys room back once the
 conversation runs long.
 
 One consequence worth stating plainly, because it surprises people: attaching a spreadsheet gives
@@ -157,7 +157,7 @@ keeps working offline and needs no setup. The parser already emits chunks with t
 the groundwork exists. Vector search would only follow if that proved genuinely insufficient.
 
 Until then, the honest boundary is the one above: a document too large for the model's window is
-too large. The [load meter](/llooma/features/compaction/) shows the cost before you send, and
-[compaction](/llooma/features/compaction/) buys room back as the conversation runs long. If you
+too large. The [load meter](/features/compaction/) shows the cost before you send, and
+[compaction](/features/compaction/) buys room back as the conversation runs long. If you
 have a use case this does not cover, open a discussion: that is exactly the demand worth measuring
 before building anything heavier.

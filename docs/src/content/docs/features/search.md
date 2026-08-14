@@ -49,6 +49,6 @@ containing markup a way into the page.
 ## Known limitation
 
 A compaction summary is stored as a message, so a conversation that has been
-[compacted](/llooma/features/compaction/) can return the same passage twice: once from the original
+[compacted](/features/compaction/) can return the same passage twice: once from the original
 message and once from inside the summary that stands in for it. Teaching the index to skip
-compaction markers is on the [roadmap](/llooma/roadmap/).
+compaction markers is on the [roadmap](/roadmap/).

@@ -44,5 +44,5 @@ proxy, so a persona's own system prompt adds to it instead of replacing it.
 
 ## Reporting something
 
-Open a [security advisory](https://github.com/cedhuf/llooma/security/advisories/new) rather than a
+Open a [security advisory](https://github.com/cedhuf/security/advisories/new) rather than a
 public issue.

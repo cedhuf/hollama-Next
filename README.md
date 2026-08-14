@@ -9,7 +9,7 @@
 
 **A (less) minimal LLM chat app that runs _entirely_ in your browser.**
 
-[Documentation](https://cedhuf.github.io/llooma) · [Roadmap](https://cedhuf.github.io/llooma/roadmap/) · [Changes from Hollama](https://cedhuf.github.io/llooma/changes-from-hollama/)
+[Documentation](https://llooma.eu) · [Roadmap](https://llooma.eu/roadmap/) · [Changes from Hollama](https://llooma.eu/changes-from-hollama/)
 
 This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](https://github.com/fmaclen).
 
@@ -43,7 +43,7 @@ chat with them from an app that is yours.
 - **Full-text search** across every conversation, answering with the passage itself.
 - **Six themes**, each with a light and a dark ramp, English and French, installable as a PWA.
 
-The [documentation](https://cedhuf.github.io/llooma/features/) covers each of these properly.
+The [documentation](https://llooma.eu/features/) covers each of these properly.
 
 ## Get started
 
@@ -56,11 +56,11 @@ Then open <http://localhost:4173>. That is local mode, with nothing stored outsi
 For a real deployment, Docker Compose, server mode, every environment variable, and the security
 notes that matter before exposing an instance:
 
-- [Installation](https://cedhuf.github.io/llooma/guides/installation/)
-- [Running modes](https://cedhuf.github.io/llooma/guides/running-modes/)
-- [First run](https://cedhuf.github.io/llooma/guides/first-run/)
-- [Configuration](https://cedhuf.github.io/llooma/reference/configuration/)
-- [Security](https://cedhuf.github.io/llooma/guides/security/)
+- [Installation](https://llooma.eu/guides/installation/)
+- [Running modes](https://llooma.eu/guides/running-modes/)
+- [First run](https://llooma.eu/guides/first-run/)
+- [Configuration](https://llooma.eu/reference/configuration/)
+- [Security](https://llooma.eu/guides/security/)
 
 ## Contributing
 
@@ -68,7 +68,7 @@ notes that matter before exposing an instance:
 > Feel free to participate, there is no bad contribution. One rule to keep the project manageable: **issues are for bugs only**. For a feature request or anything else, please open a discussion. If the community backs it, and we agree on the technical approach, it will become an issue. Thanks!
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), and
-[Working on Llooma](https://cedhuf.github.io/llooma/development/) for how the codebase is laid out.
+[Working on Llooma](https://llooma.eu/development/) for how the codebase is laid out.
 
 ## Screenshots
 

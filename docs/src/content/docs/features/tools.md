@@ -50,7 +50,7 @@ to improvise rather than fail cleanly.
 **Where the configuration comes from** decides whether you can edit it. `PUBLIC_SEARCH_URL` in the
 environment locks it instance-wide and the fields go read-only with an `env` badge. In server mode
 an admin can share theirs instead, either locked or overridable. See
-[Administration](/llooma/guides/administration/).
+[Administration](/guides/administration/).
 
 ## Web fetch
 
@@ -63,7 +63,7 @@ preferable to a request refused by the provider.
 
 The tool refuses private, loopback and link-local addresses, including the cloud metadata endpoint,
 and re-checks every redirect hop. An instance open to people you do not know still deserves
-`FETCH_ALLOWED_ORIGINS`. See [Security](/llooma/guides/security/).
+`FETCH_ALLOWED_ORIGINS`. See [Security](/guides/security/).
 
 An admin can turn it off for everyone, and `/api/fetch` enforces that itself rather than the
 interface merely hiding the button.
@@ -88,7 +88,7 @@ because they postdate its training. With it, it weighs them.
 ## Documents
 
 Covered on its own page, including OCR and the instance-wide off switch. See
-[Documents](/llooma/features/documents/).
+[Documents](/features/documents/).
 
 ## System instructions
 

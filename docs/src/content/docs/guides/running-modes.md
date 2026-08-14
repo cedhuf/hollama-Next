@@ -54,4 +54,4 @@ a laptop), and what makes a shared instance possible at all.
 
 That last row is the reason the generic proxy is **disabled outright in server mode**: it takes
 whatever origin it is given and needs no signed-in user, which in front of a multi-user instance
-would be an open relay. See [Security](/llooma/guides/security/).
+would be an open relay. See [Security](/guides/security/).

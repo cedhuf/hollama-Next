@@ -27,13 +27,13 @@ Requires Node 26 and pnpm.
 
 Everything else lives in the documentation, which is the copy kept up to date:
 
-- **[Working on Llooma](https://cedhuf.github.io/llooma/development/)** for the layout of the
+- **[Working on Llooma](https://llooma.eu/development/)** for the layout of the
   codebase, the one seam that matters, and the checks to run before pushing.
-- **[Translations](https://cedhuf.github.io/llooma/development/translations/)** for adding or
+- **[Translations](https://llooma.eu/development/translations/)** for adding or
   completing a language.
-- **[Releases](https://cedhuf.github.io/llooma/development/releases/)** for what commit messages
+- **[Releases](https://llooma.eu/development/releases/)** for what commit messages
   have to look like, since they are what produces the version and the changelog.
-- **[Roadmap](https://cedhuf.github.io/llooma/roadmap/)** for what is planned and what is known to
+- **[Roadmap](https://llooma.eu/roadmap/)** for what is planned and what is known to
   be broken. The end-to-end test suite in particular would be a genuinely valuable thing to fix.
 
 The documentation lives in `docs/` in this repository, so a change to the app and the change to its
