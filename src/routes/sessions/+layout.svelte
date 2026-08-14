@@ -67,12 +67,18 @@
 
 <div class="flex h-full w-full">
 	{#if isHome}
-		<!-- Frameless landing, like Library: content sits directly on the app canvas. -->
-		<div class="flex min-w-0 flex-1 flex-col">
+		<!-- Frameless landing, like Library: no border, no card, the content reads as
+		     sitting directly on the app canvas. It still needs a surface, because the
+		     canvas can be a photograph. Tinted with the canvas' own colour, so mixing
+		     it with itself gives that colour back exactly and the panel stays
+		     invisible until there is a picture under it. -->
+		<div
+			class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex min-w-0 flex-1 flex-col surface-chrome lg:rounded-xl"
+		>
 			{@render children()}
 		</div>
 	{:else}
-		<main class="flex min-w-0 flex-1 flex-col bg-shade-1 lg:rounded-xl lg:border">
+		<main class="app-panel flex min-w-0 flex-1 flex-col bg-shade-1 lg:rounded-xl lg:border">
 			<div class="flex-1 overflow-auto">
 				{@render children()}
 			</div>

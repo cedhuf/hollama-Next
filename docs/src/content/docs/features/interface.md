@@ -19,13 +19,27 @@ ramps whatever mode is selected.
 The strip the operating system draws around the app (the status bar on a phone, the title bar of an
 installed window) follows the theme too.
 
-**Translucent surfaces** is the switch below. The bars, the sidebar's panel and the floating cards
-let what is behind them show through, blurred, and the slider sets how much: left is glass, more
-see-through and barely blurred; right is tint, denser and heavily blurred. The two always move
+**Translucent surfaces** is the switch below. The sidebar, the bars and the floating cards let what
+is behind them show through, blurred, and the slider sets how much: left is glass, more see-through
+and barely blurred; right is tint, denser and heavily blurred. The two always move
 together, because transparency without blur leaves two texts fighting and blur without transparency
 is just paint. Turning it off makes every surface flat and opaque, which is easier to read and
 cheaper to draw on a slow machine. If your system asks for reduced transparency, that wins whatever
 is set here.
+
+Four levels move together, and the sidebar is where three of them meet: its top bar and its footer
+are the densest, the search and tabs below sit one step lighter, and the conversation list is the
+thinnest of all. That is what gives the column depth instead of one flat sheet of glass, and it is
+also why the picture behind the app reads in the list rather than across the whole thing.
+
+## Background
+
+A picture behind the app, under _Settings → Interface → Background_. The sidebar is translucent, so
+it reads through the column; the conversation stays opaque, so nothing is ever asked to be read off a
+photograph; the margin around both shows it plainly.
+
+It is stored with your settings, which travel, so prefer a reasonably sized file over a 20-megapixel
+original.
 
 ## Home screen
 
@@ -50,13 +64,12 @@ use it.
 
 ## Sidebar
 
-Conversations, and optionally the personas you have talked to, pinned above them. The personas sit
-in the header rather than in the list, so they never scroll out of reach.
+Conversations, and optionally the personas you have talked to, pinned above them. Pinned means
+pinned: they hold their place in the header in both shapes, so they never scroll out of reach. If
+they take more room than you want, that is what the pin switch and the compact header are for.
 
-Start scrolling and the header gives its room back: the _New chat_ button drops its label onto the
-search row, and the persona grid becomes a strip of avatars. It comes back when the list is at the
-top, and stays put while you are searching. **Always use the compact header** keeps it that way from
-the start.
+**Use the compact header** trades the labels for room: _New chat_ moves onto the search row as an
+icon, and the persona grid becomes a row of avatars.
 
 The search field carries the `Ctrl`/`Cmd` + `K` hint, which opens the full-text
 [search](/features/search/) over every conversation rather than filtering the titles in place.

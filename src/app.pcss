@@ -587,14 +587,39 @@
 }
 
 /*
+ * Wallpaper.
+ *
+ * The sidebar is built out of the materials below, so the picture comes through
+ * it; the conversation stays opaque, so nothing is ever read off a photograph.
+ * Between the two, and around them both, the margin lets it show plainly.
+ *
+ * That only works if the columns read as panels rather than as holes, hence the
+ * shadow: over a flat canvas a hairline border is enough to separate them, over
+ * a picture it is not. Applied from the root attribute rather than per component,
+ * so a panel added later is a class away from belonging.
+ */
+@layer components {
+	:root[data-wallpaper='on'] .app-panel {
+		box-shadow:
+			0 10px 30px -10px rgb(0 0 0 / 0.35),
+			0 2px 8px -3px rgb(0 0 0 / 0.2);
+	}
+}
+
+/*
  * Translucent surfaces.
  *
- * Three levels, and the whole app draws from them: `surface-chrome` for what
- * frames the content (a top bar, a footer), `surface-pane` for the controls
- * sitting above a list, `surface-floating` for a card that hovers over the
- * content it acts on. The gaps between them are what read as a hierarchy, so the
- * values live together here — raising a blur in one place and forgetting the
- * others is how a set of surfaces stops looking like a set.
+ * Three levels, and the whole app draws from them: `surface-chrome` for what frames
+ * the content (a top bar, a footer), `surface-pane` for the body it frames,
+ * `surface-floating` for a card that hovers over the content it acts on. The gaps
+ * between them are what read as a hierarchy, so the values live together here —
+ * raising a blur in one place and forgetting the others is how a set of surfaces
+ * stops looking like a set.
+ *
+ * Two of them are enough for the sidebar: its edges, then everything between them.
+ * A third, splitting the controls from the list underneath, was tried and dropped —
+ * two levels four points apart read as a column, three levels two points apart read
+ * as a smear.
  *
  * Each level states its reference (`--surface-tint` and `--surface-blur`, what it
  * looks like at the middle of the settings slider) and how far the slider moves
@@ -605,8 +630,9 @@
  *
  * The ranges deliberately stop short of opaque. Fully solid is the switch's job,
  * and it also turns `backdrop-filter` off, which a slider pretending to reach the
- * same place would not. Nor do the three bands overlap, so the hierarchy holds
- * wherever the slider sits.
+ * same place would not. The levels never cross either: chrome stays above pane at
+ * every point of the slider, not merely at its middle, so the hierarchy holds
+ * wherever it sits.
  *
  * `--surface-color` is the tint a surface sits on, so a card over the conversation
  * can use a different shade without leaving the system.
@@ -634,20 +660,33 @@
 		);
 	}
 
-	/** Frames the content: 85% and 12px, from 77%/7px to 95%/18px. */
+	/**
+	 * Frames the content: 90% and 17px, from 83%/11px to 97%/23px.
+	 *
+	 * Also the chat's top bar, where the translucency has a second job: letting a
+	 * message be glimpsed as it passes underneath. That is why this level is dense
+	 * but not opaque, and why the blur carries more of the distance from the level
+	 * below than the tint does.
+	 */
 	.surface-chrome {
-		--surface-tint: 85%;
-		--surface-tint-range: 10%;
-		--surface-blur: 12px;
+		--surface-tint: 90%;
+		--surface-tint-range: 7%;
+		--surface-blur: 17px;
 		--surface-blur-range: 6px;
 	}
 
-	/** Belongs to the content: 70% and 8px, from 58%/5px to 85%/12px. */
+	/**
+	 * The body those bars frame: 88% and 15px, from 80%/10px to 96%/20px.
+	 *
+	 * The sidebar's controls and its list of conversations both, which is why it is
+	 * the level whose floor has to stay legible over a photograph rather than over
+	 * more of the app.
+	 */
 	.surface-pane {
-		--surface-tint: 70%;
-		--surface-tint-range: 15%;
-		--surface-blur: 8px;
-		--surface-blur-range: 4px;
+		--surface-tint: 88%;
+		--surface-tint-range: 8%;
+		--surface-blur: 15px;
+		--surface-blur-range: 5px;
 	}
 
 	/** Hovers over it, so it blurs hardest: 80% and 24px, from 72%/14px to 90%/36px. */

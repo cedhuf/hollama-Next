@@ -19,6 +19,16 @@
 
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
+	// Kept as a data URL, the way the profile avatar already is, so it survives a
+	// reload without anything new to store it in.
+	function pickBackground(event: Event) {
+		const file = (event.currentTarget as HTMLInputElement).files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => ($settingsStore.backgroundImage = String(reader.result ?? ''));
+		reader.readAsDataURL(file);
+	}
+
 	function changeLanguage({ value }: { value: string; label: string }) {
 		const locale = value as Locales;
 		loadLocale(locale);
@@ -57,15 +67,48 @@
 				<SettingsSlider
 					label={$LL.surfaceTransparencyStrength()}
 					bind:value={$settingsStore.surfaceTransparencyLevel}
-					min={10}
+					min={0}
 					max={100}
 					step={10}
+					midpoint
 					showValue={false}
 					disabled={!$settingsStore.surfaceTransparency}
 				/>
 			</div>
 			<Copy class="h-4 w-4 shrink-0 fill-current text-muted" />
 		</div>
+	</SettingsSection>
+
+	<SettingsSection title={$LL.background()} card>
+		<!-- The thumbnail is the setting: a file name says nothing about a picture, and
+		     what this changes is entirely how the app looks. -->
+		<div class="flex items-center gap-3">
+			{#if $settingsStore.backgroundImage}
+				<img
+					src={$settingsStore.backgroundImage}
+					alt=""
+					class="h-14 w-20 shrink-0 rounded-md border border-shade-3 object-cover"
+				/>
+			{/if}
+			<div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+				<label
+					class="cursor-pointer rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm text-active transition-colors hover:border-accent"
+				>
+					{$settingsStore.backgroundImage ? $LL.replaceImage() : $LL.chooseImage()}
+					<input type="file" accept="image/*" onchange={pickBackground} class="sr-only" />
+				</label>
+				{#if $settingsStore.backgroundImage}
+					<button
+						type="button"
+						onclick={() => ($settingsStore.backgroundImage = '')}
+						class="rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-active"
+					>
+						{$LL.remove()}
+					</button>
+				{/if}
+			</div>
+		</div>
+		<SettingsHint>{$LL.backgroundImageHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.homeScreen()} card>

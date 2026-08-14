@@ -443,9 +443,15 @@ const en = {
 	fadeCompactedMessagesHelp:
 		'Compacted messages stay on screen but are no longer sent to the model. Fading them shows where the live context begins; hover one to read it at full strength.',
 	pinPersonasInSidebar: 'Pin personas you talk to at the top of the sidebar',
-	compactSidebarHeader: 'Always use the compact header',
+	background: 'Background',
+	backgroundImage: 'Background image',
+	backgroundImageHelp:
+		'Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. Stored with your settings, so prefer a reasonably sized file.',
+	chooseImage: 'Choose an image',
+	replaceImage: 'Replace',
+	compactSidebarHeader: 'Use the compact header',
 	compactSidebarHeaderHelp:
-		'The header condenses on its own once the list is scrolled. Turn this on to keep it that way from the start.',
+		'New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.',
 
 	// --- Settings › About ------------------------------------------------------
 	source: 'Source',

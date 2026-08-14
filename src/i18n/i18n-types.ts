@@ -1648,11 +1648,31 @@ type RootTranslation = {
 	 */
 	pinPersonasInSidebar: string
 	/**
-	 * A​l​w​a​y​s​ ​u​s​e​ ​t​h​e​ ​c​o​m​p​a​c​t​ ​h​e​a​d​e​r
+	 * B​a​c​k​g​r​o​u​n​d
+	 */
+	background: string
+	/**
+	 * B​a​c​k​g​r​o​u​n​d​ ​i​m​a​g​e
+	 */
+	backgroundImage: string
+	/**
+	 * S​h​o​w​n​ ​b​e​h​i​n​d​ ​t​h​e​ ​a​p​p​.​ ​T​h​e​ ​s​i​d​e​b​a​r​ ​i​s​ ​t​r​a​n​s​l​u​c​e​n​t​ ​s​o​ ​t​h​e​ ​p​i​c​t​u​r​e​ ​r​e​a​d​s​ ​t​h​r​o​u​g​h​ ​i​t​,​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​t​a​y​s​ ​o​p​a​q​u​e​ ​s​o​ ​n​o​t​h​i​n​g​ ​h​a​s​ ​t​o​ ​b​e​ ​r​e​a​d​ ​o​f​f​ ​a​ ​p​h​o​t​o​g​r​a​p​h​.​ ​S​t​o​r​e​d​ ​w​i​t​h​ ​y​o​u​r​ ​s​e​t​t​i​n​g​s​,​ ​s​o​ ​p​r​e​f​e​r​ ​a​ ​r​e​a​s​o​n​a​b​l​y​ ​s​i​z​e​d​ ​f​i​l​e​.
+	 */
+	backgroundImageHelp: string
+	/**
+	 * C​h​o​o​s​e​ ​a​n​ ​i​m​a​g​e
+	 */
+	chooseImage: string
+	/**
+	 * R​e​p​l​a​c​e
+	 */
+	replaceImage: string
+	/**
+	 * U​s​e​ ​t​h​e​ ​c​o​m​p​a​c​t​ ​h​e​a​d​e​r
 	 */
 	compactSidebarHeader: string
 	/**
-	 * T​h​e​ ​h​e​a​d​e​r​ ​c​o​n​d​e​n​s​e​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​o​n​c​e​ ​t​h​e​ ​l​i​s​t​ ​i​s​ ​s​c​r​o​l​l​e​d​.​ ​T​u​r​n​ ​t​h​i​s​ ​o​n​ ​t​o​ ​k​e​e​p​ ​i​t​ ​t​h​a​t​ ​w​a​y​ ​f​r​o​m​ ​t​h​e​ ​s​t​a​r​t​.
+	 * N​e​w​ ​c​h​a​t​ ​m​o​v​e​s​ ​o​n​t​o​ ​t​h​e​ ​s​e​a​r​c​h​ ​r​o​w​,​ ​a​n​d​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​b​e​c​o​m​e​ ​a​ ​r​o​w​ ​o​f​ ​a​v​a​t​a​r​s​.​ ​M​o​r​e​ ​r​o​o​m​ ​f​o​r​ ​t​h​e​ ​l​i​s​t​,​ ​f​e​w​e​r​ ​l​a​b​e​l​s​.
 	 */
 	compactSidebarHeaderHelp: string
 	/**
@@ -3678,11 +3698,31 @@ The completion in progress will stop
 	 */
 	pinPersonasInSidebar: () => LocalizedString
 	/**
-	 * Always use the compact header
+	 * Background
+	 */
+	background: () => LocalizedString
+	/**
+	 * Background image
+	 */
+	backgroundImage: () => LocalizedString
+	/**
+	 * Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. Stored with your settings, so prefer a reasonably sized file.
+	 */
+	backgroundImageHelp: () => LocalizedString
+	/**
+	 * Choose an image
+	 */
+	chooseImage: () => LocalizedString
+	/**
+	 * Replace
+	 */
+	replaceImage: () => LocalizedString
+	/**
+	 * Use the compact header
 	 */
 	compactSidebarHeader: () => LocalizedString
 	/**
-	 * The header condenses on its own once the list is scrolled. Turn this on to keep it that way from the start.
+	 * New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.
 	 */
 	compactSidebarHeaderHelp: () => LocalizedString
 	/**

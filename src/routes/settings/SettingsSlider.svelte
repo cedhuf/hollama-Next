@@ -30,6 +30,14 @@
 		 * result is on screen behind the dialog anyway.
 		 */
 		showValue?: boolean;
+		/**
+		 * Mark the middle of the track.
+		 *
+		 * For a scale whose centre is the default rather than an extreme: without a
+		 * mark, going back to it means guessing, and a value you cannot return to is
+		 * one people stop moving.
+		 */
+		midpoint?: boolean;
 	}
 
 	let {
@@ -40,7 +48,8 @@
 		step = 1,
 		format,
 		disabled = false,
-		showValue = true
+		showValue = true,
+		midpoint = false
 	}: Props = $props();
 </script>
 
@@ -57,6 +66,11 @@
 	>
 		<span class="relative h-1.5 w-full grow overflow-hidden rounded-full bg-shade-3">
 			<Slider.Range class="absolute h-full bg-accent" />
+			<!-- Drawn last so it reads on the filled half as well as the empty one, and
+			     in the track's own background colour, which contrasts with both. -->
+			{#if midpoint}
+				<span class="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-shade-0"></span>
+			{/if}
 		</span>
 		<Slider.Thumb
 			index={0}

@@ -458,9 +458,15 @@ const fr = extendDictionary(en, {
 	fadeCompactedMessagesHelp:
 		'Les messages compactés restent affichés mais ne sont plus envoyés au modèle. Les estomper montre où commence le contexte actif ; survolez-en un pour le lire normalement.',
 	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
-	compactSidebarHeader: 'Toujours utiliser l’en-tête réduit',
+	background: 'Arrière-plan',
+	backgroundImage: 'Image d’arrière-plan',
+	backgroundImageHelp:
+		'Affichée derrière l’application. La barre latérale est translucide, l’image se lit donc au travers ; la conversation reste opaque, rien n’est à lire sur une photo. Enregistrée avec vos réglages, préférez donc un fichier de taille raisonnable.',
+	chooseImage: 'Choisir une image',
+	replaceImage: 'Remplacer',
+	compactSidebarHeader: 'Utiliser l’en-tête réduit',
 	compactSidebarHeaderHelp:
-		'L’en-tête se réduit tout seul dès que la liste défile. Activez ceci pour le garder ainsi dès le départ.',
+		'Nouvelle discussion passe sur la ligne de recherche, et les personas deviennent une rangée d’avatars. Plus de place pour la liste, moins de libellés.',
 
 	// --- Paramètres › À propos -------------------------------------------------
 	source: 'Source',

@@ -100,9 +100,10 @@ export interface Settings {
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
 	/**
-	 * Keep the sidebar header in its condensed form at all times, rather than only
-	 * once the list is scrolled. Off by default: the full header is the one that
-	 * names what its controls do.
+	 * Draw the sidebar header in its condensed form: New chat on the search row,
+	 * the personas as a row of avatars. Off by default, because the full header is
+	 * the one that names what its controls do. The shape is settled here and
+	 * nowhere else, so nothing about the header answers to the scroll.
 	 */
 	compactSidebarHeader: boolean;
 
@@ -136,14 +137,20 @@ export interface Settings {
 	 */
 	surfaceTransparency: boolean;
 	/**
-	 * Where along the axis, from 10 to 100, with 50 the reference the surfaces are
-	 * drawn for. Low is glass: see-through, barely blurred, the content behind
+	 * Where along the axis, from 0 to 100, with 50 the reference the surfaces are
+	 * drawn for and the middle of the track, marked so it can be found again. Low is glass: see-through, barely blurred, the content behind
 	 * readable. High is tint: dense and heavily blurred, closer to paint. The two
 	 * properties move together because either one alone is unusable — transparency
 	 * without blur leaves two texts fighting, blur without transparency shows
 	 * nothing.
 	 */
 	surfaceTransparencyLevel: number;
+	/**
+	 * A picture behind the app, as a data URL. The sidebar's materials let it
+	 * through, the conversation stays opaque over it, and the margin around both
+	 * shows it plainly.
+	 */
+	backgroundImage: string;
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
 	onboardingComplete: boolean;
@@ -211,6 +218,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	themeStyle: 'classic',
 	surfaceTransparency: true,
 	surfaceTransparencyLevel: 50,
+	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,
 	onboardingComplete: false,

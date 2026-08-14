@@ -203,7 +203,11 @@
 
 <Head title={$LL.library()} />
 
-<div class="flex h-full flex-col">
+<!-- Frameless like the sessions landing, and for the same reason it still carries a
+     surface: see the comment there. -->
+<div
+	class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex h-full flex-col surface-chrome lg:rounded-xl"
+>
 	<MobileMenuBar />
 	<div class="min-h-0 flex-1 overflow-auto">
 		<div class="mx-auto w-full max-w-4xl px-6 py-8">

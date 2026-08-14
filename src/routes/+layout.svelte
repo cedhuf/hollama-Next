@@ -236,14 +236,20 @@
 
 		// One number for the whole app: every translucent surface scales itself from
 		// it rather than being told, so a panel rendered anywhere is already in the
-		// right state. The attribute is only there for zero, where the filter has to
-		// be switched off rather than asked to blur by nothing.
+		// right state. Switching the effect off is the attribute's job, not the
+		// number's: the bottom of the slider is the thinnest surface, not the absence
+		// of one, and only the attribute can also turn `backdrop-filter` off.
 		const on = $settingsStore.surfaceTransparency !== false;
 		// 50 is the reference the surfaces are drawn for, so it maps to 1 and the
 		// slider reaches past it as well as below it.
 		const strength = ($settingsStore.surfaceTransparencyLevel ?? 50) / 50;
 		document.documentElement.style.setProperty('--surface-strength', String(on ? strength : 0));
 		document.documentElement.setAttribute('data-transparency', on ? 'on' : 'off');
+
+		// The columns stay opaque over a wallpaper; what changes is that they need a
+		// shadow to read as panels rather than as holes cut in the picture.
+		const wallpaper = !!$settingsStore.backgroundImage;
+		document.documentElement.setAttribute('data-wallpaper', wallpaper ? 'on' : 'off');
 
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;
@@ -454,8 +460,13 @@
 
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
+	<!-- The wallpaper, when there is one, sits here: behind both columns, showing
+	     through the margin this padding leaves and the gap between them. -->
 	<div
-		class="app-shell relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		class="app-shell relative flex w-full overflow-hidden bg-shade-1 bg-cover bg-center bg-no-repeat lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		style={$settingsStore.backgroundImage
+			? `background-image: url(${$settingsStore.backgroundImage})`
+			: ''}
 	>
 		<CollapsibleSidebar />
 		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
