@@ -20,8 +20,8 @@ const guard: Handle = async ({ event, resolve }) => {
 		pathname === '/login' || pathname.startsWith('/auth') || pathname.startsWith('/api');
 
 	if (!isExempt) {
-		const session = await event.locals.auth();
-		if (!session) {
+		const { sessionUser } = await import('$lib/server/session');
+		if (!(await sessionUser(event))) {
 			const redirectTo = encodeURIComponent(pathname + event.url.search);
 			throw redirect(303, `/login?redirectTo=${redirectTo}`);
 		}

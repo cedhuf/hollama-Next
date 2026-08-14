@@ -3,6 +3,7 @@ import { error, type RequestEvent } from '@sveltejs/kit';
 import { env as publicEnv } from '$env/dynamic/public';
 
 import type { Role } from './db/users';
+import { sessionUser } from './session';
 
 /**
  * Guard for `/api/data/*` endpoints: they only exist in server mode and require
@@ -11,10 +12,10 @@ import type { Role } from './db/users';
 export async function requireUser(event: RequestEvent): Promise<{ id: string; role: Role }> {
 	if (publicEnv.PUBLIC_MODE !== 'server') throw error(404, 'Not found');
 
-	const session = await event.locals.auth();
-	if (!session?.user?.id) throw error(401, 'Unauthorized');
+	const user = await sessionUser(event);
+	if (!user) throw error(401, 'Unauthorized');
 
-	return { id: session.user.id, role: session.user.role };
+	return user;
 }
 
 /** Like `requireUser`, but also requires the `admin` role. */

@@ -9,9 +9,11 @@ export const load = async ({ url, locals }) => {
 
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
-	// Already signed in → go straight to the target.
-	const session = await locals.auth();
-	if (session) throw redirect(303, redirectTo);
+	// Already signed in → go straight to the target. Asked of the database, like
+	// the guard that sent us here: a session whose user is gone has to read as
+	// signed out on both sides, or the two bounce the browser between them.
+	const { sessionUser } = await import('$lib/server/session');
+	if (await sessionUser({ locals })) throw redirect(303, redirectTo);
 
 	const credentials = privateEnv.AUTH_CREDENTIALS === 'true';
 	const oidc = privateEnv.OIDC_ISSUER?.trim()
