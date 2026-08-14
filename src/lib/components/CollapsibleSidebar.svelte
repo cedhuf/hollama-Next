@@ -440,7 +440,10 @@
 			     corner read as a leftover, the same four spaced across the width read
 			     as a row. `justify-evenly` gives way to scrolling once they no longer
 			     fit, which is the point at which even spacing stops being possible. -->
-			<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 pb-2">
+			<!-- `pt-1` is not decoration: the active ring is drawn outside the avatar,
+			     and this row clips its own overflow, so without it the top of the ring
+			     is cut off. -->
+			<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 pb-2 pt-1">
 				{#each personaLaunchers as persona (persona.id)}
 					{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
 					<button
