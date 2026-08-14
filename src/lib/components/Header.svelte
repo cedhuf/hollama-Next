@@ -12,10 +12,15 @@
 	let { confirmDeletion = false, headline, nav }: Props = $props();
 </script>
 
-<!-- One solid header bar everywhere: same design on mobile and desktop, and shared by
-     classic conversations, personas and knowledge entries (no floating variant). -->
+<!-- One header bar everywhere: same design on mobile and desktop, for classic
+     conversations and for personas alike.
+
+     It floats over what it heads rather than sitting above it, like the sidebar's
+     own bars, so the conversation passes under it and its material has something
+     to show. Whoever renders it owes the content below `--app-header-h` of top
+     padding; the positioning context is the page shell it sits in. -->
 <header
-	class="flex h-[var(--app-header-h)] shrink-0 items-center justify-between rounded-tl-xl rounded-tr-xl border-b bg-shade-1 px-3 text-xs {confirmDeletion
+	class="surface-chrome absolute inset-x-0 top-0 z-20 flex h-[var(--app-header-h)] items-center justify-between rounded-tl-xl rounded-tr-xl border-b px-3 text-xs {confirmDeletion
 		? 'confirm-deletion'
 		: ''}"
 >

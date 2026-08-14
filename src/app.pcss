@@ -596,21 +596,20 @@
  * values live together here — raising a blur in one place and forgetting the
  * others is how a set of surfaces stops looking like a set.
  *
- * Each level states what it looks like at `--surface-strength: 1`, the middle of
- * the settings slider. That one number moves every surface along a single axis,
- * from glass to tint: down is more see-through and less blurred, up is denser and
- * more blurred. The two have to move together — see-through without blur leaves
- * the text underneath legible through the surface, and blur without transparency
- * is just paint — which is why one control drives both. Zero is fully transparent
- * and unblurred, two fully opaque.
+ * Each level states its reference (`--surface-tint` and `--surface-blur`, what it
+ * looks like at the middle of the settings slider) and how far the slider moves
+ * it (`--surface-tint-range`, `--surface-blur-range`). The two move together and
+ * in the same direction: down is glass, see-through and barely blurred, up is
+ * tint, dense and heavily blurred. Either alone is unusable — see-through without
+ * blur leaves two texts fighting, blur without transparency is just paint.
+ *
+ * The ranges deliberately stop short of opaque. Fully solid is the switch's job,
+ * and it also turns `backdrop-filter` off, which a slider pretending to reach the
+ * same place would not. Nor do the three bands overlap, so the hierarchy holds
+ * wherever the slider sits.
  *
  * `--surface-color` is the tint a surface sits on, so a card over the conversation
  * can use a different shade without leaving the system.
- *
- * Zero switches `backdrop-filter` off rather than asking it to blur by nothing,
- * which still costs a pass. The system's reduced-transparency preference does the
- * same and overrides the setting: text over a blurred, moving background is what
- * that preference exists to prevent.
  */
 @layer components {
 	/* On the root, not on the surfaces: a value declared on the element itself
@@ -626,29 +625,38 @@
 		--surface-color: var(--color-shade-1);
 		background-color: color-mix(
 			in srgb,
-			var(--surface-color) calc(100% - var(--surface-opening) * (2 - var(--surface-strength))),
+			var(--surface-color)
+				calc(var(--surface-tint) + var(--surface-tint-range) * (var(--surface-strength) - 1)),
 			transparent
 		);
-		backdrop-filter: blur(calc(var(--surface-blur) * var(--surface-strength)));
+		backdrop-filter: blur(
+			calc(var(--surface-blur) + var(--surface-blur-range) * (var(--surface-strength) - 1))
+		);
 	}
 
-	/** 85% and 12px at full strength. */
+	/** Frames the content: 85% and 12px, from 77%/7px to 95%/18px. */
 	.surface-chrome {
-		--surface-opening: 15%;
+		--surface-tint: 85%;
+		--surface-tint-range: 10%;
 		--surface-blur: 12px;
+		--surface-blur-range: 6px;
 	}
 
-	/** 70% and 8px at full strength. */
+	/** Belongs to the content: 70% and 8px, from 58%/5px to 85%/12px. */
 	.surface-pane {
-		--surface-opening: 30%;
+		--surface-tint: 70%;
+		--surface-tint-range: 15%;
 		--surface-blur: 8px;
+		--surface-blur-range: 4px;
 	}
 
-	/** 80% and 24px at full strength: it floats furthest from what it covers. */
+	/** Hovers over it, so it blurs hardest: 80% and 24px, from 72%/14px to 90%/36px. */
 	.surface-floating {
 		--surface-color: var(--color-shade-0);
-		--surface-opening: 20%;
+		--surface-tint: 80%;
+		--surface-tint-range: 10%;
 		--surface-blur: 24px;
+		--surface-blur-range: 12px;
 	}
 
 	:root[data-transparency='off'] .surface-chrome,

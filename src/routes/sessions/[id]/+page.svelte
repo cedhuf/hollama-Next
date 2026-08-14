@@ -1330,11 +1330,14 @@
 		{/snippet}
 	</Header>
 
+	<!-- The header floats, so both views owe it the room it covers. -->
 	{#if editor.view === 'controls'}
-		<Controls bind:session />
+		<div class="flex min-h-0 flex-grow flex-col pt-[var(--app-header-h)]">
+			<Controls bind:session />
+		</div>
 	{:else}
 		<div
-			class="session__history base-fieldset-container overflow-scrollbar flex-grow"
+			class="session__history base-fieldset-container overflow-scrollbar flex-grow pt-[var(--app-header-h)]"
 			style={composerFloating ? `padding-bottom: ${promptHeight + 16}px` : undefined}
 			bind:this={messagesWindow}
 		>
