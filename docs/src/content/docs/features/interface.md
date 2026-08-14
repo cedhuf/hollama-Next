@@ -19,6 +19,14 @@ ramps whatever mode is selected.
 The strip the operating system draws around the app (the status bar on a phone, the title bar of an
 installed window) follows the theme too.
 
+**Translucent surfaces** is the switch below. The bars, the sidebar's panel and the floating cards
+let what is behind them show through, blurred, and the slider sets how much: left is glass, more
+see-through and barely blurred; right is tint, denser and heavily blurred. The two always move
+together, because transparency without blur leaves two texts fighting and blur without transparency
+is just paint. Turning it off makes every surface flat and opaque, which is easier to read and
+cheaper to draw on a slow machine. If your system asks for reduced transparency, that wins whatever
+is set here.
+
 ## Home screen
 
 Four independent pieces, each with its own switch:
@@ -42,12 +50,19 @@ use it.
 
 ## Sidebar
 
-Conversations, and optionally the personas you have talked to, pinned above them.
+Conversations, and optionally the personas you have talked to, pinned above them. The personas sit
+in the header rather than in the list, so they never scroll out of reach.
 
-Start scrolling the list and the header gives its room back: the _New chat_ button drops its label
-onto the search row, and the persona grid becomes a strip of avatars so they stay one tap away. It
-comes back when the list is at the top, and stays put while you are searching. To keep it that way
-from the start: _Settings → Interface → Sidebar → Always use the compact header_.
+Start scrolling and the header gives its room back: the _New chat_ button drops its label onto the
+search row, and the persona grid becomes a strip of avatars. It comes back when the list is at the
+top, and stays put while you are searching. **Always use the compact header** keeps it that way from
+the start.
+
+The search field carries the `Ctrl`/`Cmd` + `K` hint, which opens the full-text
+[search](/features/search/) over every conversation rather than filtering the titles in place.
+
+A persona's conversation shows its avatar in the list, so it is recognisable even with the pinned
+launchers turned off.
 
 **Right-click any conversation** (long press on a touch screen) for the full menu: pin it, save it as
 [knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always

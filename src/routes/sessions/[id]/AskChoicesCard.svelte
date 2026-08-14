@@ -75,8 +75,10 @@
 	}
 </script>
 
+<!-- `surface-floating`, like the composer it sits above: both are cards hovering
+     over the conversation, and both answer to the transparency setting. -->
 <div
-	class="ask-card flex max-h-[min(55vh,30rem)] w-full flex-col overflow-hidden rounded-2xl border border-shade-3 bg-shade-0/90 shadow-lg backdrop-blur-xl"
+	class="ask-card surface-floating flex max-h-[min(55vh,30rem)] w-full flex-col overflow-hidden rounded-2xl border border-shade-3 shadow-lg"
 >
 	<!-- Header: the current question, a counter when there are several, and dismiss. -->
 	<div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
