@@ -1,21 +1,18 @@
 <script lang="ts">
-	import { Braces, Brain, FileText, Pin, PinOff, Trash2 } from '@lucide/svelte';
+	import { Pin, Trash2 } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { page } from '$app/state';
-	import { copyText } from '$lib/clipboard';
-	import { repository } from '$lib/data';
 	import { settingsStore } from '$lib/localStorage';
-	import { serializeSession, sessionAsKnowledgeDraft, type ExportFormat } from '$lib/sessionExport';
 	import { toggleSessionPin } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
-	import { openKnowledge } from '$lib/stores/modal';
 
 	import ButtonDelete from './ButtonDelete.svelte';
 	import { generateNewUrl } from './ButtonNew';
 	import ContextMenu from './ContextMenu.svelte';
 	import MenuItem from './MenuItem.svelte';
+	import SessionMenu from './SessionMenu.svelte';
 
 	interface Props {
 		sitemap: Sitemap;
@@ -42,24 +39,6 @@
 	 * anyone who would rather have them one click closer.
 	 */
 	const showQuickActions = $derived($settingsStore.showListQuickActions === true);
-
-	/**
-	 * Offer the transcript, don't file it.
-	 *
-	 * The editor opens with the conversation already in it, so the collection can
-	 * be named and trimmed before it exists. Writing it straight to the library
-	 * left people with an item called after the conversation, holding everything
-	 * that was ever said in it, which is rarely what they wanted to keep.
-	 */
-	async function saveAsKnowledge() {
-		const draft = await sessionAsKnowledgeDraft(id);
-		if (draft) openKnowledge(draft);
-	}
-
-	async function copyAs(format: ExportFormat) {
-		const session = await repository.loadSession(id);
-		if (session) await copyText(serializeSession(session, format));
-	}
 </script>
 
 <!-- Need to use `#key id` to re-render the delete nav after deletion -->
@@ -115,32 +94,14 @@
 		{/snippet}
 
 		{#if isSession}
-			<MenuItem icon={pinned ? PinOff : Pin} onclick={() => void toggleSessionPin(id)}>
-				{pinned ? $LL.unpin() : $LL.pin()}
+			<SessionMenu {id} {pinned} onDelete={() => (isDeleting = true)} />
+		{:else}
+			<!-- Asks rather than does: the confirmation appears on the row, in the same
+			     place it appears when the quick buttons are on. -->
+			<MenuItem icon={Trash2} danger onclick={() => (isDeleting = true)}>
+				{$LL.deleteKnowledge()}
 			</MenuItem>
-			<MenuItem icon={Brain} onclick={() => void saveAsKnowledge()}>
-				{$LL.saveAsKnowledge()}
-			</MenuItem>
-
-			<div class="my-1 h-px bg-shade-3" role="none"></div>
-
-			<!-- The same two formats the conversation's own copy menu offers, so what
-			     "copy this conversation" produces does not depend on where you asked. -->
-			<MenuItem icon={FileText} onclick={() => void copyAs('markdown')}>
-				{$LL.copyAsMarkdown()}
-			</MenuItem>
-			<MenuItem icon={Braces} onclick={() => void copyAs('json')}>
-				{$LL.copyAsJson()}
-			</MenuItem>
-
-			<div class="my-1 h-px bg-shade-3" role="none"></div>
 		{/if}
-
-		<!-- Asks rather than does: the confirmation appears on the row, in the same
-		     place it appears when the quick buttons are on. -->
-		<MenuItem icon={Trash2} danger onclick={() => (isDeleting = true)}>
-			{isSession ? $LL.deleteSession() : $LL.deleteKnowledge()}
-		</MenuItem>
 	</ContextMenu>
 {/key}
 
