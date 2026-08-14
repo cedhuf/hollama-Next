@@ -67,6 +67,7 @@
 	let listEl: HTMLDivElement | undefined = $state();
 	let gridEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
+	let pastGrid = $state(false);
 	let queued = false;
 	let settledAt = 0;
 	const mod = $derived(modKey());
@@ -110,45 +111,27 @@
 		requestAnimationFrame(step);
 	}
 
-	/**
-	 * How far down the list the header holds on.
-	 *
-	 * The grid folds at the same moment, and folding it takes back its height from
-	 * the scroll position — so the switch has to happen once it is already out of
-	 * view, or there would not be enough scrolled distance to give back and the
-	 * list would snap to its own top. Waiting for it is also what stops the same
-	 * personas being shown twice, as a grid and as a strip. With no grid to clear,
-	 * a short fixed distance is enough.
-	 */
-	function collapsePoint(): number {
-		const grid = gridEl && condensed === false ? gridEl.offsetTop + gridEl.offsetHeight : 0;
-		return Math.max(grid, 48);
-	}
-
 	function onListScroll() {
 		if (queued) return;
 		queued = true;
 		requestAnimationFrame(() => {
 			queued = false;
-			if (performance.now() < settledAt) return;
 
 			const top = listEl?.scrollTop ?? 0;
-			const next = scrolled ? top >= 8 : top > collapsePoint();
+
+			// Measured only while the grid is open: once folded it has no height left
+			// to be past, and reading it then would keep it folded forever.
+			if (!gridFolded && gridEl) pastGrid = top >= gridEl.offsetTop + gridEl.offsetHeight;
+
+			if (performance.now() < settledAt) return;
+
+			const next = scrolled ? top >= 8 : top > 48;
 			if (next === scrolled) return;
 
 			scrolled = next;
 			settledAt = performance.now() + TRANSITION_MS;
 		});
 	}
-
-	// Whatever flipped it — a scroll, a search, the setting — the grid changes
-	// size and the list has to be held still through it.
-	let wasCondensed = false;
-	$effect(() => {
-		if (condensed === wasCondensed) return;
-		wasCondensed = condensed;
-		keepStillWhileGridResizes();
-	});
 
 	// Personas you've talked to, surfaced atop the list (unless disabled in
 	// settings). Their raw session row is hidden below to avoid duplication.
@@ -164,6 +147,30 @@
 	const personaById = $derived(
 		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
 	);
+
+	/**
+	 * The grid closes behind you, not under you.
+	 *
+	 * The header and the strip answer to a short fixed distance, because that is
+	 * when the room is wanted. The grid cannot: folding it takes its height back
+	 * out of the scroll position, and while it is still on screen there is not
+	 * enough scrolled distance to give back — the list would lurch. So it waits
+	 * until it has left the view, and the two presentations overlap for the moment
+	 * it takes to scroll past it. A transition rather than a state.
+	 *
+	 * Chosen from the settings, there is no scrolling involved and nothing below to
+	 * displace, so it folds straight away.
+	 */
+	const gridFolded = $derived(
+		condensed && personaLaunchers.length > 0 && (pastGrid || $settingsStore.compactSidebarHeader)
+	);
+
+	let wasFolded = false;
+	$effect(() => {
+		if (gridFolded === wasFolded) return;
+		wasFolded = gridFolded;
+		keepStillWhileGridResizes();
+	});
 
 	const visibleSessions = $derived(
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
@@ -535,8 +542,7 @@
 				     anything having to be measured. -->
 				<div
 					bind:this={gridEl}
-					class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {condensed &&
-					personaLaunchers.length > 0
+					class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {gridFolded
 						? 'grid-rows-[0fr] opacity-0'
 						: 'grid-rows-[1fr] opacity-100'}"
 				>
