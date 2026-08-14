@@ -65,9 +65,7 @@
 	 * flip it straight back — the oscillation reads as a stutter.
 	 */
 	let listEl: HTMLDivElement | undefined = $state();
-	let gridEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
-	let pastGrid = $state(false);
 	let queued = false;
 	let settledAt = 0;
 	const mod = $derived(modKey());
@@ -81,13 +79,9 @@
 		queued = true;
 		requestAnimationFrame(() => {
 			queued = false;
-
-			const top = listEl?.scrollTop ?? 0;
-			const gridBottom = gridEl ? gridEl.offsetTop + gridEl.offsetHeight : 0;
-			pastGrid = top >= gridBottom;
-
 			if (performance.now() < settledAt) return;
 
+			const top = listEl?.scrollTop ?? 0;
 			const next = scrolled ? top >= 8 : top > 48;
 			if (next === scrolled) return;
 
@@ -114,17 +108,6 @@
 	const visibleSessions = $derived(
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
 	);
-
-	/**
-	 * The strip replaces the grid, so it waits for the grid to be gone.
-	 *
-	 * Not tied to the header: the header answers to a fixed threshold, while the
-	 * grid's height depends on how many personas there are and on whether its
-	 * section is folded. Measuring it is what stops the two showing the same
-	 * avatars at once, and it needs no layout change — the grid keeps its place in
-	 * the list, so nothing shifts under the thumb.
-	 */
-	const showStrip = $derived(pastGrid && !q && personaLaunchers.length > 0);
 
 	const filteredPersonas = $derived(
 		q ? personaLaunchers.filter((p) => p.name.toLowerCase().includes(q)) : personaLaunchers
@@ -444,11 +427,12 @@
 			</div>
 		</div>
 
-		<!-- Once the grid has scrolled out of reach the personas come back as a
-		     strip. Height rather than {#if}, so it opens and closes instead of
+		<!-- Condensed, the persona grid has scrolled out of reach, so it comes back
+		     as a strip. Height rather than {#if}, so it opens and closes instead of
 		     appearing. -->
 		<div
-			class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {showStrip
+			class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {condensed &&
+			personaLaunchers.length > 0
 				? 'h-11 opacity-100'
 				: 'h-0 opacity-0'}"
 		>
@@ -485,8 +469,7 @@
 			style="overscroll-behavior-y: contain"
 		>
 			{#if filteredPersonas.length > 0}
-				<!-- Measured, not guessed: the strip below waits for this to be gone. -->
-				<div class="mb-2" bind:this={gridEl}>
+				<div class="mb-2">
 					<button
 						type="button"
 						onclick={() => (personasOpen = !personasOpen)}
