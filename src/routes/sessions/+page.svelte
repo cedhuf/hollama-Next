@@ -42,6 +42,17 @@
 	let thinking = $state(true);
 	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);
+	/**
+	 * The category the panel is drawn from, which lags `openCategory` by one close.
+	 *
+	 * The panel folds shut on a transition, and a transition needs something left to
+	 * animate: unmounting its contents the moment the category is cleared would make
+	 * it vanish rather than close. So this keeps the last one, and is never cleared.
+	 */
+	let shownCategory = $state<string | null>(null);
+	$effect(() => {
+		if (openCategory) shownCategory = openCategory;
+	});
 
 	// Reasoning is only offered for backends that actually support it (Ollama's
 	// native `think`, or OpenAI-compatible/Infomaniak `enable_thinking`).
@@ -115,7 +126,9 @@
 		]
 	};
 
-	const activeSuggestions = $derived(openCategory ? suggestionsByCategory[openCategory] || [] : []);
+	const shownSuggestions = $derived(
+		shownCategory ? suggestionsByCategory[shownCategory] || [] : []
+	);
 
 	const recentSessions = $derived(
 		($sessionsStore ?? []).slice(0, $settingsStore.homeRecentSessionsCount)
@@ -221,39 +234,51 @@
 						{/each}
 					</div>
 
-					{#if openCategory && activeSuggestions.length > 0}
-						{@const currentCategory = categories.find((c) => c.id === openCategory)}
-						<div class="mt-3 rounded-xl border border-shade-3 bg-shade-0 overflow-hidden">
-							<div class="flex items-center gap-2 px-3 py-2 border-b border-shade-3">
-								{#if currentCategory}
-									<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
-								{/if}
-								<span class="text-xs font-medium text-muted flex-1">{openCategory}</span>
-								<button
-									type="button"
-									onclick={() => (openCategory = null)}
-									class="text-muted hover:text-active transition-colors"
-									aria-label="Close suggestions"
-								>
-									<X class="h-3.5 w-3.5" />
-								</button>
-							</div>
-							<div class="divide-y divide-shade-3">
-								{#each activeSuggestions as suggestion (suggestion)}
-									<button
-										type="button"
-										onclick={() => submit(suggestion)}
-										class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
-									>
-										<span class="flex-1">{suggestion}</span>
-										<ArrowRight
-											class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
-										/>
-									</button>
-								{/each}
-							</div>
+					<!-- Folds on grid rows rather than on a height, so nothing has to be
+					     measured and the panel opens from whatever its content happens to be.
+					     The margin rides the same transition, otherwise the gap above it would
+					     appear on a frame while the panel was still opening. -->
+					<div
+						class="grid transition-[grid-template-rows,opacity,margin] duration-200 ease-out motion-reduce:transition-none {openCategory
+							? 'mt-3 grid-rows-[1fr] opacity-100'
+							: 'mt-0 grid-rows-[0fr] opacity-0'}"
+					>
+						<div class="min-h-0 overflow-hidden">
+							{#if shownCategory && shownSuggestions.length > 0}
+								{@const currentCategory = categories.find((c) => c.id === shownCategory)}
+								<div class="overflow-hidden rounded-xl border border-shade-3 bg-shade-0">
+									<div class="flex items-center gap-2 border-b border-shade-3 px-3 py-2">
+										{#if currentCategory}
+											<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
+										{/if}
+										<span class="flex-1 text-xs font-medium text-muted">{shownCategory}</span>
+										<button
+											type="button"
+											onclick={() => (openCategory = null)}
+											class="text-muted transition-colors hover:text-active"
+											aria-label="Close suggestions"
+										>
+											<X class="h-3.5 w-3.5" />
+										</button>
+									</div>
+									<div class="divide-y divide-shade-3">
+										{#each shownSuggestions as suggestion (suggestion)}
+											<button
+												type="button"
+												onclick={() => submit(suggestion)}
+												class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
+											>
+												<span class="flex-1">{suggestion}</span>
+												<ArrowRight
+													class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
+												/>
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
-					{/if}
+					</div>
 				</div>
 			{/if}
 
