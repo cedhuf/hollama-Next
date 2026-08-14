@@ -585,3 +585,16 @@
 		background-color: transparent;
 	}
 }
+
+/*
+ * Reduced transparency is an accessibility request, not a taste: text over a
+ * blurred, moving background is what it exists to prevent. So it overrides the
+ * setting rather than being one more thing to find and turn off.
+ */
+@media (prefers-reduced-transparency: reduce) {
+	.sidebar-chrome,
+	.sidebar-pane {
+		background-color: var(--color-shade-1);
+		backdrop-filter: none;
+	}
+}

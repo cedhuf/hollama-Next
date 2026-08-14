@@ -42,6 +42,16 @@
 	/** Matches `duration-200` below. The scroll lock and the CSS must agree. */
 	const TRANSITION_MS = 200;
 
+	/**
+	 * Stand-in for the header's height until it has been measured, which is one
+	 * frame after mount. Only ever used then: a wrong value would show as the
+	 * first row sitting under the header for that frame, not as a lasting layout.
+	 */
+	const HEADER_FALLBACK_H = 148;
+
+	/** The same, for the footer's single row. */
+	const FOOTER_FALLBACK_H = 56;
+
 	let query = $state('');
 	let personasOpen = $state(true);
 
@@ -66,13 +76,63 @@
 	 */
 	let listEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
+	/**
+	 * The floating header's height, measured rather than assumed.
+	 *
+	 * It drives the list's top padding, so the two cannot drift: the header
+	 * changes height when it condenses, when the strip opens, when a search adds
+	 * its row. Bound to `clientHeight`, which follows the transition frame by
+	 * frame, so the list moves with it instead of after it.
+	 */
+	let headerHeight = $state(0);
+	/** Same idea for the footer, which floats too. */
+	let footerHeight = $state(0);
 	let queued = false;
 	let settledAt = 0;
 	const mod = $derived(modKey());
 
+	/**
+	 * The two materials the floating bars are made of.
+	 *
+	 * Kept here rather than repeated at each of the three surfaces, so the edges
+	 * and the pane cannot drift apart: the gap between them is what reads as a
+	 * hierarchy. `sidebar-chrome` and `sidebar-pane` are hooks with no styling of
+	 * their own, for the reduced-transparency rule in `app.pcss`.
+	 */
+	const glass = $derived($settingsStore.sidebarTransparency);
+	const chromeSurface = $derived(
+		`sidebar-chrome ${glass ? 'bg-shade-1/85 backdrop-blur-md' : 'bg-shade-1'}`
+	);
+	const paneSurface = $derived(
+		`sidebar-pane ${glass ? 'bg-shade-1/70 backdrop-blur-sm' : 'bg-shade-1'}`
+	);
+
 	// Never while searching: the field holds text, and shrinking it in the middle
 	// of reading the matches is exactly the wrong moment.
 	const condensed = $derived(($settingsStore.compactSidebarHeader || scrolled) && !q);
+
+	/**
+	 * Hold the list still when the header changes height.
+	 *
+	 * The padding that keeps the list clear of the header is part of the scrolled
+	 * content, so shrinking it pulls everything up by the same amount. Giving the
+	 * difference back to `scrollTop` cancels that exactly. `clientHeight` updates
+	 * on every frame of the transition, so this runs per frame and reads as no
+	 * movement at all rather than as a correction after the fact.
+	 *
+	 * Growth is only compensated when there is somewhere to compensate from: at the
+	 * top of the list the header unfolding is meant to be seen.
+	 */
+	let lastHeaderHeight = 0;
+	$effect(() => {
+		const height = headerHeight;
+		const delta = lastHeaderHeight - height;
+		lastHeaderHeight = height;
+		if (!listEl || !delta) return;
+
+		if (delta > 0) listEl.scrollTop -= Math.min(delta, listEl.scrollTop);
+		else if (listEl.scrollTop > 0) listEl.scrollTop -= delta;
+	});
 
 	function onListScroll() {
 		if (queued) return;
@@ -241,7 +301,12 @@
 	data-testid="sidebar"
 >
 	<!-- Header -->
-	<div class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4">
+	<!-- The same material as the pane below, one step up: denser and more blurred,
+	     where the pane is lighter and sharper. The edges of the column hide what
+	     passes under them; the pane, which belongs to the list, lets it read. -->
+	<div
+		class="absolute inset-x-0 top-0 z-20 flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 {chromeSurface}"
+	>
 		{#if showRail}
 			<div class="flex w-full justify-center">
 				<button
@@ -271,7 +336,11 @@
 
 	{#if showRail}
 		<!-- Collapsed rail: primary actions + quick launchers -->
-		<div class="flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto py-3">
+		<div
+			class="flex min-h-0 flex-1 flex-col items-center gap-1.5 overflow-y-auto px-0"
+			style="padding-top: calc(var(--app-header-h) + 0.75rem); padding-bottom: calc({footerHeight ||
+				FOOTER_FALLBACK_H}px + 0.75rem)"
+		>
 			<button
 				onclick={newChat}
 				title={$LL.newChat()}
@@ -338,225 +407,255 @@
 			{/if}
 		</div>
 	{:else}
-		<!-- Top actions.
+		<!-- The list runs full height under a floating header, rather than beside it.
+		     That is what makes the blur mean something: a pane with nothing behind it
+		     blurs an aplat and shows nothing. The list is padded by exactly the
+		     header's measured height, so nothing is ever hidden under it. -->
+		<div class="relative flex min-h-0 flex-1 flex-col">
+			<div
+				bind:clientHeight={headerHeight}
+				class="absolute inset-x-0 top-[var(--app-header-h)] z-10 border-b border-shade-3/40 {paneSurface}"
+			>
+				<!-- Top actions.
 		     Two New chat buttons rather than one that moves: a single button would
 		     have to cross a flex line break, and a line break is the one thing CSS
 		     cannot interpolate — it happens on a frame, which is the jump. Here the
 		     tall one closes on its height while the compact one opens on its width,
 		     both continuous, and only ever one of them is reachable. -->
-		<div class="flex flex-col px-3 py-3">
-			<button
-				onclick={newChat}
-				tabindex={condensed ? -1 : 0}
-				aria-hidden={condensed}
-				class="flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
-					? 'pointer-events-none mb-0 h-0 opacity-0'
-					: 'mb-2 h-9 opacity-100'}"
-			>
-				<Plus class="h-4 w-4 shrink-0" />
-				{$LL.newChat()}
-			</button>
+				<div class="flex flex-col px-3 py-3">
+					<button
+						onclick={newChat}
+						tabindex={condensed ? -1 : 0}
+						aria-hidden={condensed}
+						class="flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
+							? 'pointer-events-none mb-0 h-0 opacity-0'
+							: 'mb-2 h-9 opacity-100'}"
+					>
+						<Plus class="h-4 w-4 shrink-0" />
+						{$LL.newChat()}
+					</button>
 
-			<div class="flex items-center">
-				<div class="relative min-w-0 flex-1">
-					<Search
-						class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
-					/>
-					<input
-						bind:value={query}
-						type="text"
-						placeholder={$LL.searchChatsPersonas()}
-						class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
-					/>
-					<!-- The shortcut opens the full-text dialog, which is a different thing
+					<div class="flex items-center">
+						<div class="relative min-w-0 flex-1">
+							<Search
+								class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+							/>
+							<input
+								bind:value={query}
+								type="text"
+								placeholder={$LL.searchChatsPersonas()}
+								class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
+							/>
+							<!-- The shortcut opens the full-text dialog, which is a different thing
 					     from this field. Shown as a hint, not a button: it is the keyboard's
 					     way in, and the line below is the pointer's. -->
-					<span
-						class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
-					>
-						<Kbd>{mod}</Kbd><Kbd>K</Kbd>
-					</span>
-				</div>
-				<button
-					onclick={newChat}
-					title={$LL.newChat()}
-					aria-label={$LL.newChat()}
-					tabindex={condensed ? 0 : -1}
-					aria-hidden={!condensed}
-					class="flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
-						? 'ml-2 w-9 opacity-100'
-						: 'pointer-events-none ml-0 w-0 opacity-0'}"
-				>
-					<Plus class="h-4 w-4 shrink-0" />
-				</button>
-			</div>
+							<span
+								class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
+							>
+								<Kbd>{mod}</Kbd><Kbd>K</Kbd>
+							</span>
+						</div>
+						<button
+							onclick={newChat}
+							title={$LL.newChat()}
+							aria-label={$LL.newChat()}
+							tabindex={condensed ? 0 : -1}
+							aria-hidden={!condensed}
+							class="flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-200 hover:opacity-90 motion-reduce:transition-none {condensed
+								? 'ml-2 w-9 opacity-100'
+								: 'pointer-events-none ml-0 w-0 opacity-0'}"
+						>
+							<Plus class="h-4 w-4 shrink-0" />
+						</button>
+					</div>
 
-			<!-- The field above filters titles; this is the way out to the content of
+					<!-- The field above filters titles; this is the way out to the content of
 			     every conversation. Offered rather than configured: the choice belongs
 			     to the moment, not to a setting. -->
-			{#if q}
-				<button
-					type="button"
-					onclick={() => openSearch(query)}
-					class="mt-2 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
-				>
-					<Search class="h-4 w-4 shrink-0" />
-					<span class="truncate">{$LL.searchAllConversations({ query })}</span>
-				</button>
-			{/if}
+					{#if q}
+						<button
+							type="button"
+							onclick={() => openSearch(query)}
+							class="mt-2 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+						>
+							<Search class="h-4 w-4 shrink-0" />
+							<span class="truncate">{$LL.searchAllConversations({ query })}</span>
+						</button>
+					{/if}
 
-			<div class="mt-2 flex w-full gap-1.5">
-				<a
-					href={resolve('/sessions')}
-					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
-						? 'bg-shade-0 text-active shadow-sm'
-						: 'text-muted hover:bg-shade-0 hover:text-active'}"
-				>
-					<MessageSquareText class="h-4 w-4 shrink-0" />
-					{$LL.chats()}
-				</a>
-				<a
-					href={resolve('/library')}
-					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onLibrary
-						? 'bg-shade-0 text-active shadow-sm'
-						: 'text-muted hover:bg-shade-0 hover:text-active'}"
-				>
-					<Library class="h-4 w-4 shrink-0" />
-					{$LL.library()}
-				</a>
-			</div>
-		</div>
+					<div class="mt-2 flex w-full gap-1.5">
+						<a
+							href={resolve('/sessions')}
+							class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
+								? 'bg-shade-0 text-active shadow-sm'
+								: 'text-muted hover:bg-shade-0 hover:text-active'}"
+						>
+							<MessageSquareText class="h-4 w-4 shrink-0" />
+							{$LL.chats()}
+						</a>
+						<a
+							href={resolve('/library')}
+							class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onLibrary
+								? 'bg-shade-0 text-active shadow-sm'
+								: 'text-muted hover:bg-shade-0 hover:text-active'}"
+						>
+							<Library class="h-4 w-4 shrink-0" />
+							{$LL.library()}
+						</a>
+					</div>
+				</div>
 
-		<!-- Condensed, the persona grid has scrolled out of reach, so it comes back
-		     as a strip. Height rather than {#if}, so it opens and closes instead of
-		     appearing. -->
-		<div
-			class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {condensed &&
-			personaLaunchers.length > 0
-				? 'h-11 opacity-100'
-				: 'h-0 opacity-0'}"
-		>
-			<!-- Spread rather than stacked to the left: four avatars bunched in a
+				<!-- The personas live in the header, not in the list.
+				     Stuck there they cannot scroll out of reach, and the grid and the
+				     strip become two states of one block rather than two blocks that can
+				     both be on screen — which is what made "always compact" show the same
+				     people twice. Rows of a grid rather than a height, so it folds from
+				     its own content without anything being measured. -->
+				{#if filteredPersonas.length > 0}
+					<div
+						class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {condensed
+							? 'grid-rows-[0fr] opacity-0'
+							: 'grid-rows-[1fr] opacity-100'}"
+					>
+						<div class="min-h-0 overflow-hidden">
+							<div class="px-2 pb-2">
+								<button
+									type="button"
+									onclick={() => (personasOpen = !personasOpen)}
+									class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
+								>
+									<span>{$LL.personas()} · {filteredPersonas.length}</span>
+									<ChevronDown
+										class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
+									/>
+								</button>
+								{#if showPersonaList}
+									<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
+									<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
+										{#each filteredPersonas as persona (persona.id)}
+											{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
+											<button
+												type="button"
+												onclick={() =>
+													goto(
+														resolve('/sessions/[id]', {
+															id: launchPersona(persona, $settingsStore.models)
+														})
+													)}
+												style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
+												class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
+												title={persona.tagline || persona.name}
+											>
+												<span
+													class="relative inline-flex rounded-full {active
+														? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
+														: ''}"
+												>
+													<PersonaAvatar {persona} size={44} />
+												</span>
+												<span
+													class="w-full truncate text-center text-xs {active
+														? 'font-medium text-active'
+														: 'text-muted'}"
+												>
+													{persona.name}
+												</span>
+											</button>
+										{/each}
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Its other state: the same people as a row, once the header condenses. -->
+				<div
+					class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {condensed &&
+					personaLaunchers.length > 0
+						? 'h-11 opacity-100'
+						: 'h-0 opacity-0'}"
+				>
+					<!-- Spread rather than stacked to the left: four avatars bunched in a
 			     corner read as a leftover, the same four spaced across the width read
 			     as a row. `justify-evenly` gives way to scrolling once they no longer
 			     fit, which is the point at which even spacing stops being possible. -->
-			<!-- `pt-1` is not decoration: the active ring is drawn outside the avatar,
+					<!-- `pt-1` is not decoration: the active ring is drawn outside the avatar,
 			     and this row clips its own overflow, so without it the top of the ring
 			     is cut off. -->
-			<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 pb-2 pt-1">
-				{#each personaLaunchers as persona (persona.id)}
-					{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
-					<button
-						type="button"
-						onclick={() =>
-							goto(
-								resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
-							)}
-						title={persona.name}
-						aria-label={persona.name}
-						class="shrink-0 rounded-full transition-transform hover:scale-105 {active
-							? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
-							: ''}"
-					>
-						<PersonaAvatar {persona} size={28} />
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		<!-- Scrollable list -->
-		<div
-			bind:this={listEl}
-			onscroll={onListScroll}
-			class="min-h-0 flex-1 overflow-auto px-2 pb-2"
-			style="overscroll-behavior-y: contain"
-		>
-			{#if filteredPersonas.length > 0}
-				<div class="mb-2">
-					<button
-						type="button"
-						onclick={() => (personasOpen = !personasOpen)}
-						class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
-					>
-						<span>{$LL.personas()} · {filteredPersonas.length}</span>
-						<ChevronDown
-							class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
-						/>
-					</button>
-					{#if showPersonaList}
-						<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
-						<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
-							{#each filteredPersonas as persona (persona.id)}
-								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
-								<button
-									type="button"
-									onclick={() =>
-										goto(
-											resolve('/sessions/[id]', {
-												id: launchPersona(persona, $settingsStore.models)
-											})
-										)}
-									style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
-									class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
-									title={persona.tagline || persona.name}
-								>
-									<span
-										class="relative inline-flex rounded-full {active
-											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
-											: ''}"
-									>
-										<PersonaAvatar {persona} size={44} />
-									</span>
-									<span
-										class="w-full truncate text-center text-xs {active
-											? 'font-medium text-active'
-											: 'text-muted'}"
-									>
-										{persona.name}
-									</span>
-								</button>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			{/if}
-
-			{#each sessionGroups as group (group.key)}
-				<div class="mb-2">
-					<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
-						{groupLabel(group.key)}
-					</p>
-					<!-- A hair of space between rows: hovering the neighbour of the active
-					     session used to butt two rounded highlights against each other. -->
-					<div class="flex flex-col gap-0.5">
-						{#each group.sessions as session (session.id)}
-							{@const persona = session.personaId ? personaById[session.personaId] : undefined}
-							<SectionListItem
-								sitemap={Sitemap.SESSIONS}
-								id={session.id}
-								title={resolveSessionTitle(session)}
-								subtitle={formatSessionMetadata(session, $serversStore)}
-								pinned={session.pinned}
-								leading={persona ? personaBadge : undefined}
-							/>
-							{#snippet personaBadge()}
-								{#if persona}
-									<PersonaAvatar {persona} size={24} />
-								{/if}
-							{/snippet}
+					<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 pb-2 pt-1">
+						{#each personaLaunchers as persona (persona.id)}
+							{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
+							<button
+								type="button"
+								onclick={() =>
+									goto(
+										resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
+									)}
+								title={persona.name}
+								aria-label={persona.name}
+								class="shrink-0 rounded-full transition-transform hover:scale-105 {active
+									? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
+									: ''}"
+							>
+								<PersonaAvatar {persona} size={28} />
+							</button>
 						{/each}
 					</div>
 				</div>
-			{/each}
+			</div>
 
-			{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
-				<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
-			{/if}
+			<!-- Scrollable list -->
+			<div
+				bind:this={listEl}
+				onscroll={onListScroll}
+				class="min-h-0 flex-1 overflow-auto px-2"
+				style="overscroll-behavior-y: contain; padding-top: calc(var(--app-header-h) + {headerHeight ||
+					HEADER_FALLBACK_H}px); padding-bottom: calc({footerHeight ||
+					FOOTER_FALLBACK_H}px + 0.5rem)"
+			>
+				{#each sessionGroups as group (group.key)}
+					<div class="mb-2">
+						<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+							{groupLabel(group.key)}
+						</p>
+						<!-- A hair of space between rows: hovering the neighbour of the active
+					     session used to butt two rounded highlights against each other. -->
+						<div class="flex flex-col gap-0.5">
+							{#each group.sessions as session (session.id)}
+								{@const persona = session.personaId ? personaById[session.personaId] : undefined}
+								<SectionListItem
+									sitemap={Sitemap.SESSIONS}
+									id={session.id}
+									title={resolveSessionTitle(session)}
+									subtitle={formatSessionMetadata(session, $serversStore)}
+									pinned={session.pinned}
+									leading={persona ? personaBadge : undefined}
+								/>
+								{#snippet personaBadge()}
+									{#if persona}
+										<PersonaAvatar {persona} size={24} />
+									{/if}
+								{/snippet}
+							{/each}
+						</div>
+					</div>
+				{/each}
+
+				{#if sessionGroups.length === 0 && filteredPersonas.length === 0}
+					<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
+				{/if}
+			</div>
 		</div>
 	{/if}
 
-	<!-- Footer: profile + settings -->
-	<div class="mt-auto border-t p-2">
+	<!-- Footer: profile + settings. Floating like the two above, so the list runs
+	     under it and ends by fading out rather than stopping at a rule. Same
+	     material as the top bar: both are the edges of the column. -->
+	<div
+		bind:clientHeight={footerHeight}
+		class="absolute inset-x-0 bottom-0 z-20 border-t p-2 {chromeSurface}"
+	>
 		{#if showRail}
 			<div class="flex justify-center">
 				<button
