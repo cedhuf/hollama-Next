@@ -1104,13 +1104,17 @@ type RootTranslation = {
 	 */
 	theme: string
 	/**
-	 * S​u​r​f​a​c​e​ ​t​r​a​n​s​p​a​r​e​n​c​y
+	 * T​r​a​n​s​l​u​c​e​n​t​ ​s​u​r​f​a​c​e​s
 	 */
 	surfaceTransparency: string
 	/**
-	 * H​o​w​ ​m​u​c​h​ ​t​h​e​ ​b​a​r​s​ ​a​n​d​ ​f​l​o​a​t​i​n​g​ ​p​a​n​e​l​s​ ​l​e​t​ ​t​h​r​o​u​g​h​,​ ​b​l​u​r​r​e​d​.​ ​A​t​ ​z​e​r​o​ ​t​h​e​y​ ​a​r​e​ ​f​l​a​t​ ​a​n​d​ ​o​p​a​q​u​e​,​ ​w​h​i​c​h​ ​i​s​ ​e​a​s​i​e​r​ ​t​o​ ​r​e​a​d​ ​a​n​d​ ​c​h​e​a​p​e​r​ ​t​o​ ​d​r​a​w​ ​o​n​ ​a​ ​s​l​o​w​ ​m​a​c​h​i​n​e​.​ ​Y​o​u​r​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​ ​f​o​r​ ​r​e​d​u​c​e​d​ ​t​r​a​n​s​p​a​r​e​n​c​y​ ​i​s​ ​f​o​l​l​o​w​e​d​ ​w​h​a​t​e​v​e​r​ ​t​h​i​s​ ​s​a​y​s​.
+	 * T​h​e​ ​b​a​r​s​ ​a​n​d​ ​f​l​o​a​t​i​n​g​ ​p​a​n​e​l​s​ ​l​e​t​ ​w​h​a​t​ ​i​s​ ​b​e​h​i​n​d​ ​t​h​e​m​ ​s​h​o​w​ ​t​h​r​o​u​g​h​,​ ​b​l​u​r​r​e​d​.​ ​F​u​r​t​h​e​r​ ​r​i​g​h​t​ ​i​s​ ​b​o​t​h​ ​m​o​r​e​ ​s​e​e​-​t​h​r​o​u​g​h​ ​a​n​d​ ​m​o​r​e​ ​b​l​u​r​r​e​d​,​ ​s​i​n​c​e​ ​o​n​e​ ​w​i​t​h​o​u​t​ ​t​h​e​ ​o​t​h​e​r​ ​i​s​ ​u​n​r​e​a​d​a​b​l​e​.​ ​O​f​f​ ​i​s​ ​f​l​a​t​ ​a​n​d​ ​o​p​a​q​u​e​:​ ​e​a​s​i​e​r​ ​t​o​ ​r​e​a​d​,​ ​a​n​d​ ​c​h​e​a​p​e​r​ ​t​o​ ​d​r​a​w​ ​o​n​ ​a​ ​s​l​o​w​ ​m​a​c​h​i​n​e​.​ ​Y​o​u​r​ ​s​y​s​t​e​m​ ​s​e​t​t​i​n​g​ ​f​o​r​ ​r​e​d​u​c​e​d​ ​t​r​a​n​s​p​a​r​e​n​c​y​ ​i​s​ ​f​o​l​l​o​w​e​d​ ​w​h​a​t​e​v​e​r​ ​t​h​i​s​ ​s​a​y​s​.
 	 */
 	surfaceTransparencyHelp: string
+	/**
+	 * A​m​o​u​n​t​ ​o​f​ ​t​r​a​n​s​p​a​r​e​n​c​y
+	 */
+	surfaceTransparencyStrength: string
 	/**
 	 * T​h​e​m​e​ ​s​t​y​l​e
 	 */
@@ -3138,13 +3142,17 @@ The completion in progress will stop
 	 */
 	theme: () => LocalizedString
 	/**
-	 * Surface transparency
+	 * Translucent surfaces
 	 */
 	surfaceTransparency: () => LocalizedString
 	/**
-	 * How much the bars and floating panels let through, blurred. At zero they are flat and opaque, which is easier to read and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed whatever this says.
+	 * The bars and floating panels let what is behind them show through, blurred. Further right is both more see-through and more blurred, since one without the other is unreadable. Off is flat and opaque: easier to read, and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed whatever this says.
 	 */
 	surfaceTransparencyHelp: () => LocalizedString
+	/**
+	 * Amount of transparency
+	 */
+	surfaceTransparencyStrength: () => LocalizedString
 	/**
 	 * Theme style
 	 */

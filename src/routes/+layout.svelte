@@ -238,9 +238,12 @@
 		// it rather than being told, so a panel rendered anywhere is already in the
 		// right state. The attribute is only there for zero, where the filter has to
 		// be switched off rather than asked to blur by nothing.
-		const transparency = $settingsStore.surfaceTransparencyLevel ?? 100;
-		document.documentElement.style.setProperty('--surface-strength', String(transparency / 100));
-		document.documentElement.setAttribute('data-transparency', transparency ? 'on' : 'off');
+		const on = $settingsStore.surfaceTransparency !== false;
+		// 50 is the reference the surfaces are drawn for, so it maps to 1 and the
+		// slider reaches past it as well as below it.
+		const strength = ($settingsStore.surfaceTransparencyLevel ?? 50) / 50;
+		document.documentElement.style.setProperty('--surface-strength', String(on ? strength : 0));
+		document.documentElement.setAttribute('data-transparency', on ? 'on' : 'off');
 
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;

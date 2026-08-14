@@ -22,18 +22,29 @@
 		step?: number;
 		/** Draws the value in place of the raw number (e.g. "20k characters"). */
 		format?: (value: number) => string;
+		/** Shown but not answering, when the switch above it is off. */
+		disabled?: boolean;
 	}
 
-	let { label, value = $bindable(), min = 0, max = 10, step = 1, format }: Props = $props();
+	let {
+		label,
+		value = $bindable(),
+		min = 0,
+		max = 10,
+		step = 1,
+		format,
+		disabled = false
+	}: Props = $props();
 </script>
 
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-3 {disabled ? 'pointer-events-none opacity-40' : ''}">
 	<Slider.Root
 		type="single"
 		bind:value
 		{min}
 		{max}
 		{step}
+		{disabled}
 		aria-label={label}
 		class="relative flex h-5 w-full touch-none select-none items-center"
 	>
