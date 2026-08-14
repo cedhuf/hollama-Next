@@ -65,6 +65,7 @@
 	 * flip it straight back — the oscillation reads as a stutter.
 	 */
 	let listEl: HTMLDivElement | undefined = $state();
+	let gridEl: HTMLDivElement | undefined = $state();
 	let scrolled = $state(false);
 	let queued = false;
 	let settledAt = 0;
@@ -74,6 +75,56 @@
 	// of reading the matches is exactly the wrong moment.
 	const condensed = $derived(($settingsStore.compactSidebarHeader || scrolled) && !q);
 
+	/**
+	 * Fold the grid away as the strip takes over, without moving the list.
+	 *
+	 * The grid sits at the top of the scrolled content, so closing it removes
+	 * height *above* the viewport and everything below would slide up by exactly
+	 * that much. The fix is to give the scroll position back what the layout took:
+	 * follow the grid's height for the length of the transition and subtract each
+	 * frame's difference from `scrollTop`. Never more than the scroll position
+	 * itself, or the list would fight the top of its own content.
+	 *
+	 * Growing back is only compensated when there is somewhere to compensate from:
+	 * the grid reopens at the top of the list, where watching it unfold is the
+	 * point.
+	 */
+	function keepStillWhileGridResizes() {
+		if (!listEl || !gridEl) return;
+
+		let previous = gridEl.offsetHeight;
+		const until = performance.now() + TRANSITION_MS + 50;
+
+		const step = () => {
+			if (!listEl || !gridEl) return;
+
+			const height = gridEl.offsetHeight;
+			const delta = previous - height;
+			previous = height;
+
+			if (delta > 0) listEl.scrollTop -= Math.min(delta, listEl.scrollTop);
+			else if (delta < 0 && listEl.scrollTop > 0) listEl.scrollTop -= delta;
+
+			if (performance.now() < until) requestAnimationFrame(step);
+		};
+		requestAnimationFrame(step);
+	}
+
+	/**
+	 * How far down the list the header holds on.
+	 *
+	 * The grid folds at the same moment, and folding it takes back its height from
+	 * the scroll position — so the switch has to happen once it is already out of
+	 * view, or there would not be enough scrolled distance to give back and the
+	 * list would snap to its own top. Waiting for it is also what stops the same
+	 * personas being shown twice, as a grid and as a strip. With no grid to clear,
+	 * a short fixed distance is enough.
+	 */
+	function collapsePoint(): number {
+		const grid = gridEl && condensed === false ? gridEl.offsetTop + gridEl.offsetHeight : 0;
+		return Math.max(grid, 48);
+	}
+
 	function onListScroll() {
 		if (queued) return;
 		queued = true;
@@ -82,13 +133,22 @@
 			if (performance.now() < settledAt) return;
 
 			const top = listEl?.scrollTop ?? 0;
-			const next = scrolled ? top >= 8 : top > 48;
+			const next = scrolled ? top >= 8 : top > collapsePoint();
 			if (next === scrolled) return;
 
 			scrolled = next;
 			settledAt = performance.now() + TRANSITION_MS;
 		});
 	}
+
+	// Whatever flipped it — a scroll, a search, the setting — the grid changes
+	// size and the list has to be held still through it.
+	let wasCondensed = false;
+	$effect(() => {
+		if (condensed === wasCondensed) return;
+		wasCondensed = condensed;
+		keepStillWhileGridResizes();
+	});
 
 	// Personas you've talked to, surfaced atop the list (unless disabled in
 	// settings). Their raw session row is hidden below to avoid duplication.
@@ -469,52 +529,64 @@
 			style="overscroll-behavior-y: contain"
 		>
 			{#if filteredPersonas.length > 0}
-				<div class="mb-2">
-					<button
-						type="button"
-						onclick={() => (personasOpen = !personasOpen)}
-						class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
-					>
-						<span>{$LL.personas()} · {filteredPersonas.length}</span>
-						<ChevronDown
-							class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
-						/>
-					</button>
-					{#if showPersonaList}
-						<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
-						<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
-							{#each filteredPersonas as persona (persona.id)}
-								{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
-								<button
-									type="button"
-									onclick={() =>
-										goto(
-											resolve('/sessions/[id]', {
-												id: launchPersona(persona, $settingsStore.models)
-											})
-										)}
-									style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
-									class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
-									title={persona.tagline || persona.name}
-								>
-									<span
-										class="relative inline-flex rounded-full {active
-											? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
-											: ''}"
+				<!-- Folds away as the strip takes over: the same avatars twice, once as
+				     a grid and once as a row, is worse than either alone. Rows of a grid
+				     rather than a height, so it collapses from its own content without
+				     anything having to be measured. -->
+				<div
+					bind:this={gridEl}
+					class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {condensed &&
+					personaLaunchers.length > 0
+						? 'grid-rows-[0fr] opacity-0'
+						: 'grid-rows-[1fr] opacity-100'}"
+				>
+					<div class="mb-2 min-h-0 overflow-hidden">
+						<button
+							type="button"
+							onclick={() => (personasOpen = !personasOpen)}
+							class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
+						>
+							<span>{$LL.personas()} · {filteredPersonas.length}</span>
+							<ChevronDown
+								class="h-3.5 w-3.5 transition-transform {showPersonaList ? '' : '-rotate-90'}"
+							/>
+						</button>
+						{#if showPersonaList}
+							<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
+							<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
+								{#each filteredPersonas as persona (persona.id)}
+									{@const active = !!persona.sessionId && pathname.includes(persona.sessionId)}
+									<button
+										type="button"
+										onclick={() =>
+											goto(
+												resolve('/sessions/[id]', {
+													id: launchPersona(persona, $settingsStore.models)
+												})
+											)}
+										style="flex: 0 0 calc(100% / {personaCols} - 0.25rem)"
+										class="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 transition-colors hover:bg-shade-0"
+										title={persona.tagline || persona.name}
 									>
-										<PersonaAvatar {persona} size={44} />
-									</span>
-									<span
-										class="w-full truncate text-center text-xs {active
-											? 'font-medium text-active'
-											: 'text-muted'}"
-									>
-										{persona.name}
-									</span>
-								</button>
-							{/each}
-						</div>
-					{/if}
+										<span
+											class="relative inline-flex rounded-full {active
+												? 'ring-2 ring-accent ring-offset-2 ring-offset-shade-1'
+												: ''}"
+										>
+											<PersonaAvatar {persona} size={44} />
+										</span>
+										<span
+											class="w-full truncate text-center text-xs {active
+												? 'font-medium text-active'
+												: 'text-muted'}"
+										>
+											{persona.name}
+										</span>
+									</button>
+								{/each}
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/if}
 
