@@ -9,10 +9,10 @@ hero:
     dark: ../../assets/logo-mark-dark.png
   actions:
     - text: Install it
-      link: /llooma/guides/installation/
+      link: /guides/installation/
       icon: right-arrow
     - text: See what it does
-      link: /llooma/features/
+      link: /features/
       icon: document
       variant: secondary
     - text: Source on GitHub
@@ -36,6 +36,12 @@ import themes from '../../assets/screenshots/themes.png';
 	[fmaclen](https://github.com/fmaclen)
 </div>
 
+:::caution[Early preview]
+Llooma is not made for production use. Expect breaking changes, unfinished features and rough
+edges. Recent work has focused on server mode; local mode may have inconsistencies that still
+need a verification pass.
+:::
+
 <figure class="shot shot--bleed">
 	<Image src={sections} alt="The sidebar, a conversation, the Library, and the settings" loading="eager" />
 	<figcaption>Your conversations, your Library, your servers. Nothing of it leaves the machine unless you send it.</figcaption>
@@ -45,25 +51,25 @@ import themes from '../../assets/screenshots/themes.png';
 <Card title="Two ways to run it" icon="laptop">
 **Local** keeps everything in your browser, with your own provider keys. **Server** signs users in, stores their data per account, and keeps the API keys where a browser can never read them.
 
-[Choose a mode →](/llooma/guides/running-modes/)
+[Choose a mode →](/guides/running-modes/)
 </Card>
 
 <Card title="Bring your own models" icon="puzzle">
 Ollama, OpenAI, Claude, Infomaniak and anything OpenAI-compatible. Several at once, each with its own label and colour, so you always know which endpoint is about to be billed.
 
-[See the providers →](/llooma/reference/providers/)
+[See the providers →](/reference/providers/)
 </Card>
 
 <Card title="Documents, read in the tab" icon="open-book">
 A PDF, a spreadsheet, a Word file. Parsed in your browser and never uploaded, in server mode too. Optional OCR for scans, and a vision fallback when a page is a picture of words.
 
-[How it works →](/llooma/features/documents/)
+[How it works →](/features/documents/)
 </Card>
 
 <Card title="Conversations that keep fitting" icon="seti:clock">
 `/compact` replaces a long history with a structured summary so it still fits in the window. Nothing is deleted, and one click puts it all back.
 
-[Read about compaction →](/llooma/features/compaction/)
+[Read about compaction →](/features/compaction/)
 </Card>
 </CardGrid>
 
@@ -88,38 +94,16 @@ Llooma is a small amount of glue around a lot of other people's work.
 
 <section class="band">
 
-## When local isn't an option
-
-Ollama on your own machine is this app with no third party in it at all, and it is the version worth
-reaching for first. It also needs hardware, which not everyone has and no phone does. The moment it
-is out of reach the question stops being technical: someone else runs the model, so who?
-
-Infomaniak is a preset here for that reason rather than by accident. What they say about it, on
-[their own page](https://www.infomaniak.com/en/hosting/ai-tools):
-
-- **It runs in Switzerland**, in datacentres they own, with no dependency on operators elsewhere.
-  Swiss rather than EU, which is a real distinction, though they commit to the GDPR as well as the
-  Swiss FADP.
-- **The models are open weights**, so what you build on does not turn on one vendor's roadmap.
-- **Prompts are not logged**, not used for training, and not used to improve the service.
-- **The heat is not thrown away.** The power is renewable and fully recovered: 6,000 homes warmed in
-  winter, the equivalent of 20,000 showers a day in summer. The GPUs run without dedicated air
-  conditioning, on adiabatic cooling, and draw water only in a heatwave.
-
-That last one is the reason it gets a paragraph. The energy cost of this technology is its least
-answered question, and heating a neighbourhood with the waste is a better answer than most.
-
 <p class="pill">Not sponsored</p>
 
-No affiliation, no affiliate link, no free credits, no hardware, nothing received and nothing
-promised. The claims above are theirs, not measurements of mine, which is why they are attributed
-and linked rather than repeated as fact. Any other OpenAI-compatible provider works exactly as well
-here, and [that list](/llooma/reference/providers/) is short on purpose.
+## When local isn't an option
+
+Running Ollama on your own machine means no third party at all, and that's what I'd recommend
+first. It needs a decent GPU though, and no phone has one. If that's not realistic, someone else
+runs the model, and it's worth caring who.
+
+[Infomaniak](https://www.infomaniak.com/en/hosting/ai-tools) is the one I like: Swiss datacentres
+they own and run, open-weight models, prompts they don't log or train on, and the GPU heat goes
+into warming homes nearby. Any other OpenAI-compatible provider works just as well here.
 
 </section>
-
-:::caution[Early preview]
-Llooma is not made for production use. Expect breaking changes, unfinished features and rough
-edges. Recent work has focused on server mode; local mode may have inconsistencies that still
-need a verification pass.
-:::

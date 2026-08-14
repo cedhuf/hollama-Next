@@ -125,9 +125,9 @@
 /*
  * A disclosure pill.
  *
- * Small, and deliberately ahead of the sentence it qualifies rather than
- * buried under it: a disclosure that arrives after the reader has finished
- * forming an opinion has not disclosed anything.
+ * Small, and ahead of what it qualifies rather than buried under it: a
+ * disclosure that arrives after the reader has formed an opinion has not
+ * disclosed anything.
  */
 .pill {
 	display: inline-block;
@@ -144,10 +144,11 @@
 	text-transform: uppercase;
 }
 
-/* What the pill introduces is fine print, and should read as fine print. */
-.pill + p {
-	color: var(--sl-color-gray-3);
-	font-size: var(--sl-text-sm);
+/* In a band it sits beside the heading, not above it: two words on a line of
+   their own would carry more weight than a disclosure deserves. */
+.band > .pill {
+	float: right;
+	margin: 0.2rem 0 0.5rem 1rem;
 }
 
 /*
