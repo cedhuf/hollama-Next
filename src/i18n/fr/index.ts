@@ -458,6 +458,9 @@ const fr = extendDictionary(en, {
 	compactSidebarHeader: 'Toujours utiliser l’en-tête réduit',
 	compactSidebarHeaderHelp:
 		'L’en-tête se réduit tout seul dès que la liste défile. Activez ceci pour le garder ainsi dès le départ.',
+	sidebarTransparency: 'Barres translucides',
+	sidebarTransparencyHelp:
+		'Les barres laissent voir la liste, floutée, derrière elles. Désactivez pour des barres opaques : plus lisibles, et moins coûteuses à afficher sur une machine lente. Le réglage système de transparence réduite est suivi dans tous les cas.',
 
 	// --- Paramètres › À propos -------------------------------------------------
 	source: 'Source',

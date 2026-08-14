@@ -97,6 +97,11 @@
 		/>
 		<SettingsHint>{$LL.compactSidebarHeaderHelp()}</SettingsHint>
 		<FieldCheckbox
+			label={$LL.sidebarTransparency()}
+			bind:checked={$settingsStore.sidebarTransparency}
+		/>
+		<SettingsHint>{$LL.sidebarTransparencyHelp()}</SettingsHint>
+		<FieldCheckbox
 			label={$LL.showListQuickActions()}
 			bind:checked={$settingsStore.showListQuickActions}
 		/>

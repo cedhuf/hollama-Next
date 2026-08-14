@@ -106,6 +106,12 @@ export interface Settings {
 	 */
 	compactSidebarHeader: boolean;
 	/**
+	 * Let the sidebar's bars be translucent, with the list visible behind them.
+	 * On by default, and overridden anyway when the system asks for reduced
+	 * transparency. Off also spares `backdrop-filter`, which is paid every frame.
+	 */
+	sidebarTransparency: boolean;
+	/**
 	 * Show pin and delete buttons on the rows of the sidebar lists. Off by
 	 * default: both live in the right-click menu, where they cannot cover a title
 	 * or be hit by accident.
@@ -181,6 +187,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
 	compactSidebarHeader: false,
+	sidebarTransparency: true,
 	showListQuickActions: false,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
