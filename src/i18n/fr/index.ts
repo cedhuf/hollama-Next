@@ -275,8 +275,6 @@ const fr = extendDictionary(en, {
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	theme: 'Thème',
 	surfaceTransparency: 'Surfaces translucides',
-	surfaceTransparencyHelp:
-		'Les barres et les panneaux flottants laissent voir, flouté, ce qui se trouve derrière. Vers la droite, plus transparent et plus flou à la fois, car l’un sans l’autre devient illisible. Désactivé, elles sont opaques et plates : plus lisibles, et moins coûteuses à afficher sur une machine lente. Le réglage système de transparence réduite prime dans tous les cas.',
 	surfaceTransparencyStrength: 'Quantité de transparence',
 	themeStyle: 'Style du thème',
 	firstName: 'Prénom',

@@ -283,8 +283,6 @@ const en = {
 		'Automatically name new sessions after the first reply, using the selected model',
 	theme: 'Theme',
 	surfaceTransparency: 'Translucent surfaces',
-	surfaceTransparencyHelp:
-		'The bars and floating panels let what is behind them show through, blurred. Further right is both more see-through and more blurred, since one without the other is unreadable. Off is flat and opaque: easier to read, and cheaper to draw on a slow machine. Your system setting for reduced transparency is followed whatever this says.',
 	surfaceTransparencyStrength: 'Amount of transparency',
 	themeStyle: 'Theme style',
 	firstName: 'First name',

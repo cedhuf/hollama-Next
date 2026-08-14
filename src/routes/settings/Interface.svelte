@@ -39,10 +39,13 @@
 
 		<ThemePicker />
 
-		<FieldCheckbox
-			label={$LL.surfaceTransparency()}
-			bind:checked={$settingsStore.surfaceTransparency}
-		/>
+		<!-- Set apart from the theme picker: same section, different question. -->
+		<div class="mt-2">
+			<FieldCheckbox
+				label={$LL.surfaceTransparency()}
+				bind:checked={$settingsStore.surfaceTransparency}
+			/>
+		</div>
 		<SettingsSlider
 			label={$LL.surfaceTransparencyStrength()}
 			bind:value={$settingsStore.surfaceTransparencyLevel}
@@ -52,7 +55,6 @@
 			format={(value) => `${value}%`}
 			disabled={!$settingsStore.surfaceTransparency}
 		/>
-		<SettingsHint>{$LL.surfaceTransparencyHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.homeScreen()} card>
