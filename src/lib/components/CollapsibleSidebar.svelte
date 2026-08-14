@@ -17,8 +17,8 @@
 
 	const q = $derived(query.trim().toLowerCase());
 
-	/** Matches `duration-200` in the actions block. The lock below and the CSS must agree. */
-	const TRANSITION_MS = 200;
+	/** Matches `duration-300` in the actions block. The lock below and the CSS must agree. */
+	const TRANSITION_MS = 300;
 	/** How far a gesture has to travel before it counts as one, rather than as a tremor. */
 	const SCROLL_STEP = 6;
 

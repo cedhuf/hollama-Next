@@ -40,15 +40,22 @@
      are neighbours in a column, and the column does the arithmetic. -->
 <div class="shrink-0 border-b border-shade-3/40 surface-pane">
 	<div class="flex flex-col px-3 py-3">
-		{#if !compact}
-			<button
-				onclick={onNewChat}
-				class="mb-2 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-accent text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
-			>
-				<Plus class="h-4 w-4 shrink-0" />
-				{$LL.newChat()}
-			</button>
-		{/if}
+		<!-- Two New chat buttons rather than one that moves: a single button would have
+		     to cross a flex line break, and a line break is the one thing CSS cannot
+		     interpolate, so it happens on a frame, which is the jump. Here the tall one
+		     closes on its height while the compact one opens on its width, both
+		     continuous, and only ever one of them is reachable. -->
+		<button
+			onclick={onNewChat}
+			tabindex={compact ? -1 : 0}
+			aria-hidden={compact}
+			class="flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-300 ease-out hover:opacity-90 motion-reduce:transition-none {compact
+				? 'pointer-events-none mb-0 h-0 opacity-0'
+				: 'mb-2 h-9 opacity-100'}"
+		>
+			<Plus class="h-4 w-4 shrink-0" />
+			{$LL.newChat()}
+		</button>
 
 		<div class="flex items-center">
 			<div class="relative min-w-0 flex-1">
@@ -70,16 +77,18 @@
 					<Kbd>{mod}</Kbd><Kbd>K</Kbd>
 				</span>
 			</div>
-			{#if compact}
-				<button
-					onclick={onNewChat}
-					title={$LL.newChat()}
-					aria-label={$LL.newChat()}
-					class="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity hover:opacity-90"
-				>
-					<Plus class="h-4 w-4 shrink-0" />
-				</button>
-			{/if}
+			<button
+				onclick={onNewChat}
+				title={$LL.newChat()}
+				aria-label={$LL.newChat()}
+				tabindex={compact ? 0 : -1}
+				aria-hidden={!compact}
+				class="flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-300 ease-out hover:opacity-90 motion-reduce:transition-none {compact
+					? 'ml-2 w-9 opacity-100'
+					: 'pointer-events-none ml-0 w-0 opacity-0'}"
+			>
+				<Plus class="h-4 w-4 shrink-0" />
+			</button>
 		</div>
 
 		<!-- The field above filters titles; this is the way out to the content of
@@ -128,7 +137,7 @@
 	     which needs no height to be known; the strip opens on a height it has by
 	     construction. -->
 	<div
-		class="grid transition-[grid-template-rows,opacity] duration-200 motion-reduce:transition-none {compact
+		class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none {compact
 			? 'grid-rows-[0fr] opacity-0'
 			: 'grid-rows-[1fr] opacity-100'}"
 	>
@@ -138,7 +147,7 @@
 	</div>
 
 	<div
-		class="overflow-hidden transition-[height,opacity] duration-200 motion-reduce:transition-none {compact &&
+		class="overflow-hidden transition-[height,opacity] duration-300 ease-out motion-reduce:transition-none {compact &&
 		personas.length > 0
 			? 'h-11 opacity-100'
 			: 'h-0 opacity-0'}"
