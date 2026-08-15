@@ -1,5 +1,9 @@
 <script lang="ts">
+	import { PanelLeft } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
+
+	import LL from '$i18n/i18n-svelte';
+	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
 	import SidebarToggle from './SidebarToggle.svelte';
 
@@ -24,9 +28,20 @@
 		floating?: boolean;
 		headline: Snippet;
 		nav: Snippet;
+		/**
+		 * What the floating bar carries on a phone, where it is a different object.
+		 *
+		 * A pill spanning the width has to earn it, and on a narrow screen it cannot:
+		 * the title truncates to nothing between two clusters of controls, and the
+		 * controls themselves shrink to fit around it. So the phone gets what it
+		 * actually needs, the way to the sidebar and the way to this conversation's
+		 * own actions, and the title moves inside the menu where it has room to be
+		 * read. The wide bar is unchanged, because at that width it works.
+		 */
+		compact?: Snippet;
 	}
 
-	let { confirmDeletion = false, floating = false, headline, nav }: Props = $props();
+	let { confirmDeletion = false, floating = false, headline, nav, compact }: Props = $props();
 </script>
 
 <!-- One header bar everywhere: same design on mobile and desktop, for classic
@@ -50,10 +65,36 @@
 	<div
 		class="pointer-events-none flex px-4 pb-2 pt-[calc(1rem+env(safe-area-inset-top))] lg:px-6 lg:pt-4 xl:px-8"
 	>
+		{#if compact}
+			<!-- Two objects rather than one bar, because they answer to two different
+			     places, and pushed to opposite edges for the same reason: the round one
+			     belongs to the app and opens the column beside it, the pill belongs to
+			     this conversation. What is between them is left to the conversation,
+			     which shows through it. -->
+			<div class="flex w-full items-center justify-between gap-2 lg:hidden">
+				<button
+					type="button"
+					onclick={() => mobileDrawerOpen.set(true)}
+					aria-label={$LL.expandSidebar()}
+					class="surface-floating pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-shade-3 text-muted shadow-lg transition-colors [--surface-tint:66%] hover:text-active"
+				>
+					<PanelLeft class="h-5 w-5" />
+				</button>
+
+				<div
+					class="surface-floating pointer-events-auto flex h-12 items-center gap-1 rounded-full border border-shade-3 px-1.5 shadow-lg [--surface-tint:66%] {confirmDeletion
+						? 'confirm-deletion'
+						: ''}"
+				>
+					{@render compact()}
+				</div>
+			</div>
+		{/if}
+
 		<header
-			class="surface-floating pointer-events-auto flex h-16 w-full items-center justify-between rounded-full border border-shade-3 px-5 text-xs shadow-lg [--surface-tint:66%] {confirmDeletion
-				? 'confirm-deletion'
-				: ''}"
+			class="surface-floating pointer-events-auto h-16 w-full items-center justify-between rounded-full border border-shade-3 px-5 text-xs shadow-lg [--surface-tint:66%] {compact
+				? 'hidden lg:flex'
+				: 'flex'} {confirmDeletion ? 'confirm-deletion' : ''}"
 		>
 			{@render contents()}
 		</header>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowDown, Settings2 } from '@lucide/svelte';
+	import { ArrowDown, MoreHorizontal, Settings2 } from '@lucide/svelte';
 	import { onMount, tick, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { get } from 'svelte/store';
@@ -23,8 +23,10 @@
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
+	import Menu from '$lib/components/Menu.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import SessionMenu from '$lib/components/SessionMenu.svelte';
 	import { ConnectionType } from '$lib/connections';
 	import { formatCurrentDateTime } from '$lib/currentDate';
 	import { resolvePrompt } from '$lib/defaultPrompts';
@@ -1336,6 +1338,52 @@
 					<ButtonCopyConversation {session} assistantLabel={persona?.name} />
 				{/if}
 				<ButtonDelete sitemap={Sitemap.SESSIONS} id={session.id} bind:shouldConfirmDeletion />
+			{/if}
+		{/snippet}
+
+		<!-- The phone's two buttons. Deleting takes the pill over while it waits for an
+		     answer, rather than asking somewhere else: there is nowhere else. -->
+		{#snippet compact()}
+			{#if shouldConfirmDeletion}
+				<ButtonDelete sitemap={Sitemap.SESSIONS} id={session.id} bind:shouldConfirmDeletion />
+			{:else}
+				<button
+					type="button"
+					class="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					onclick={() => (sessionModalOpen = true)}
+					aria-label={$LL.session()}
+				>
+					<Settings2 class="h-5 w-5" />
+				</button>
+
+				<Menu class="w-64" align="start">
+					{#snippet trigger({ props })}
+						<button
+							{...props}
+							type="button"
+							class="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							aria-label={$LL.moreOptions()}
+						>
+							<MoreHorizontal class="h-5 w-5" />
+						</button>
+					{/snippet}
+
+					<!-- The title lives here now, and this is the one place it has room to be
+					     read: two lines, fixed, cut with an ellipsis past that, so the menu
+					     never changes height with the conversation it belongs to. -->
+					<p class="line-clamp-2 px-2 py-1.5 text-xs leading-snug text-muted">
+						{editor.isNewSession ? $LL.newSession() : resolveSessionTitle(session)}
+					</p>
+					<div class="my-1 h-px bg-shade-3" role="none"></div>
+
+					{#if !editor.isNewSession}
+						<SessionMenu
+							id={session.id}
+							pinned={session.pinned}
+							onDelete={() => (shouldConfirmDeletion = true)}
+						/>
+					{/if}
+				</Menu>
 			{/if}
 		{/snippet}
 	</Header>

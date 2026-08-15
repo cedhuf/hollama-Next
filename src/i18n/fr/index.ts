@@ -308,6 +308,7 @@ const fr = extendDictionary(en, {
 	noServerConnected: 'Aucun serveur connecté',
 	untitled: 'Sans titre',
 	allConversations: 'Toutes les conversations',
+	moreOptions: 'Plus d’options',
 	administrator: 'Administrateur',
 	user: 'Utilisateur',
 

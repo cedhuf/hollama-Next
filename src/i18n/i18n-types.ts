@@ -1224,6 +1224,10 @@ type RootTranslation = {
 	 */
 	allConversations: string
 	/**
+	 * M​o​r​e​ ​o​p​t​i​o​n​s
+	 */
+	moreOptions: string
+	/**
 	 * A​d​m​i​n​i​s​t​r​a​t​o​r
 	 */
 	administrator: string
@@ -3317,6 +3321,10 @@ The completion in progress will stop
 	 * All conversations
 	 */
 	allConversations: () => LocalizedString
+	/**
+	 * More options
+	 */
+	moreOptions: () => LocalizedString
 	/**
 	 * Administrator
 	 */
