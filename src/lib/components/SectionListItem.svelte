@@ -63,32 +63,43 @@
 					<p class="truncate text-xs text-muted">{subtitle}</p>
 				</a>
 
-				<!-- Overlaid on the right so they don't shift the title. Shown while a
-				     deletion is waiting to be confirmed whatever the setting says: the
-				     confirmation has to appear where the row is, including when the
-				     deletion was asked for from the right-click menu. -->
-				{#if showQuickActions || isDeleting || pinned}
-					<nav
-						class="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5 rounded-md bg-shade-0 pl-1 opacity-0 transition-opacity group-hover:opacity-100
-						{isDeleting || pinned ? 'opacity-100' : ''}"
+				<!-- In the flow rather than over the title.
+
+				     Overlaying them meant painting a plate underneath so the title did
+				     not read through the icons, and that plate is every complaint at
+				     once: a rectangle in a different colour from the row it sits on, a
+				     left padding that put the lone pin off centre inside it, and the
+				     look of a button where an icon was wanted. Here the row makes room
+				     for them instead, so there is nothing to mask and nothing to draw.
+
+				     They keep their room while invisible, so a title does not change
+				     length under the pointer. -->
+				{#if isSession && !isDeleting && (pinned || showQuickActions)}
+					<button
+						type="button"
+						onclick={() => void toggleSessionPin(id)}
+						title={pinned ? $LL.unpin() : $LL.pin()}
+						aria-label={pinned ? $LL.unpin() : $LL.pin()}
+						class="shrink-0 px-1.5 py-1 transition-[color,opacity] {pinned
+							? 'text-accent'
+							: 'text-muted opacity-0 hover:text-active focus-visible:opacity-100 group-hover:opacity-100'}"
 					>
-						{#if isSession && !isDeleting && (showQuickActions || pinned)}
-							<button
-								type="button"
-								onclick={() => void toggleSessionPin(id)}
-								title={pinned ? $LL.unpin() : $LL.pin()}
-								aria-label={pinned ? $LL.unpin() : $LL.pin()}
-								class="rounded p-1 text-muted transition-colors hover:text-active {pinned
-									? 'text-accent hover:text-accent'
-									: ''}"
-							>
-								<Pin class="h-3.5 w-3.5 {pinned ? 'fill-accent' : ''}" />
-							</button>
-						{/if}
-						{#if showQuickActions || isDeleting}
-							<ButtonDelete {sitemap} {id} bind:shouldConfirmDeletion={isDeleting} />
-						{/if}
-					</nav>
+						<Pin class="base-icon {pinned ? 'fill-accent' : ''}" />
+					</button>
+				{/if}
+
+				<!-- Shown while a deletion is waiting to be confirmed whatever the
+				     setting says: the confirmation has to appear where the row is,
+				     including when the deletion was asked for from the right-click
+				     menu. -->
+				{#if showQuickActions || isDeleting}
+					<div
+						class="flex shrink-0 items-center {isDeleting
+							? ''
+							: 'opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100'}"
+					>
+						<ButtonDelete {sitemap} {id} compact bind:shouldConfirmDeletion={isDeleting} />
+					</div>
 				{/if}
 			</div>
 		{/snippet}

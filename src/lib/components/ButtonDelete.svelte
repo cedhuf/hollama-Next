@@ -14,9 +14,18 @@
 		sitemap: Sitemap;
 		id: string;
 		shouldConfirmDeletion: boolean;
+		/**
+		 * Tighter padding, for a sidebar row.
+		 *
+		 * A toolbar can afford a comfortable target; a list row is forty pixels tall
+		 * and has a title to leave room for.
+		 */
+		compact?: boolean;
 	}
 
-	let { sitemap, id, shouldConfirmDeletion = $bindable() }: Props = $props();
+	let { sitemap, id, shouldConfirmDeletion = $bindable(), compact = false }: Props = $props();
+
+	const variant = $derived(compact ? 'icon-sm' : 'icon');
 
 	function deleteRecord() {
 		shouldConfirmDeletion = false;
@@ -49,7 +58,7 @@
 >
 	{#if shouldConfirmDeletion}
 		<Button
-			variant="icon"
+			{variant}
 			class="delete-button__confirm hover:text-negative"
 			onclick={deleteRecord}
 			title={$LL.confirmDeletion()}
@@ -58,7 +67,7 @@
 		</Button>
 
 		<Button
-			variant="icon"
+			{variant}
 			class="delete__cancel"
 			onclick={() => updateConfirmDeletion(false)}
 			title={$LL.dismiss()}
@@ -67,7 +76,7 @@
 		</Button>
 	{:else}
 		<Button
-			variant="icon"
+			{variant}
 			class="delete__trash"
 			onclick={() => updateConfirmDeletion(true)}
 			title={sitemap === Sitemap.KNOWLEDGE ? $LL.deleteKnowledge() : $LL.deleteSession()}
