@@ -30,32 +30,53 @@
 	],
 	"screenshots": [
 		{
-			"src": "/screenshots/narrow-conversation.png",
+			"src": "/screenshots/mobile_conversation.png",
 			"sizes": "440x956",
 			"type": "image/png",
 			"form_factor": "narrow",
 			"label": "A conversation"
 		},
 		{
-			"src": "/screenshots/narrow-sidebar.png",
+			"src": "/screenshots/mobile_sidebar.png",
 			"sizes": "440x956",
 			"type": "image/png",
 			"form_factor": "narrow",
 			"label": "Your conversations"
 		},
 		{
-			"src": "/screenshots/narrow-home.png",
+			"src": "/screenshots/mobile_home.png",
 			"sizes": "440x956",
 			"type": "image/png",
 			"form_factor": "narrow",
 			"label": "The home screen"
 		},
 		{
-			"src": "/screenshots/narrow-library.png",
+			"src": "/screenshots/mobile_library.png",
 			"sizes": "440x956",
 			"type": "image/png",
 			"form_factor": "narrow",
 			"label": "The library"
+		},
+		{
+			"src": "/screenshots/desktop_conversation.png",
+			"sizes": "1440x900",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "A conversation"
+		},
+		{
+			"src": "/screenshots/desktop_library.png",
+			"sizes": "1440x900",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "The library"
+		},
+		{
+			"src": "/screenshots/desktop_settings.png",
+			"sizes": "1440x900",
+			"type": "image/png",
+			"form_factor": "wide",
+			"label": "Settings"
 		}
 	]
 }

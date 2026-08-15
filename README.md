@@ -15,7 +15,7 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 </div>
 
-![The sidebar, a conversation, the Library, and the Interface and Servers settings](static/screenshots/sections.png)
+![The sidebar, the Library, the Interface settings, and a conversation over a wallpaper](static/screenshots/sections.png)
 
 > [!WARNING]
 > This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
@@ -74,12 +74,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), and
 
 ![Themes](static/screenshots/themes.png)
 
-_The six themes, left to right: Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized,
-alternating light and dark ramps._
+_The six themes, left to right: Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized. Light
+ramps on the top row, dark on the bottom._
 
-| ![Home](static/screenshots/home.png)                   | ![A conversation](static/screenshots/session.png)     | ![Library](static/screenshots/library.png)        |
-| ------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------- |
-| ![Interface settings](static/screenshots/settings.png) | ![Server connections](static/screenshots/servers.png) | ![Dark mode](static/screenshots/session-dark.png) |
+| ![Home](static/screenshots/desktop_home.png)                   | ![A conversation](static/screenshots/desktop_conversation.png) | ![Library](static/screenshots/desktop_library.png)             |
+| -------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
+| ![Interface settings](static/screenshots/desktop_settings.png) | ![Server connections](static/screenshots/desktop_servers.png)  | ![Dark mode](static/screenshots/desktop_conversation_dark.png) |
+| ![A wallpaper](static/screenshots/desktop_wallpaper.png)       | ![The collapsed rail](static/screenshots/desktop_rail.png)     | ![On a phone](static/screenshots/mobile_conversation.png)      |
 
 ## License
 
