@@ -47,7 +47,9 @@
 {#if floating}
 	<!-- The gutter beside the pill belongs to the conversation, not to the bar: it
 	     lets pointer events through so a message showing there stays reachable. -->
-	<div class="pointer-events-none flex px-4 pb-2 pt-4 lg:px-6 xl:px-8">
+	<div
+		class="pointer-events-none flex px-4 pb-2 pt-[calc(1rem+env(safe-area-inset-top))] lg:px-6 lg:pt-4 xl:px-8"
+	>
 		<header
 			class="surface-floating pointer-events-auto flex h-16 w-full items-center justify-between rounded-full border border-shade-3 px-5 text-xs shadow-lg [--surface-tint:66%] {confirmDeletion
 				? 'confirm-deletion'
@@ -57,8 +59,11 @@
 		</header>
 	</div>
 {:else}
+	<!-- The bar sits at the top of the display, so its material passes under the status
+	     bar and its height grows by as much, rather than the whole thing being pushed
+	     down and leaving a strip of something else above it. -->
 	<header
-		class="surface-chrome flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs {confirmDeletion
+		class="surface-chrome flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))] max-lg:pt-[env(safe-area-inset-top)] {confirmDeletion
 			? 'confirm-deletion'
 			: ''}"
 	>

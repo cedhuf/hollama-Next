@@ -63,7 +63,9 @@
 {/snippet}
 
 <!-- The bottom edge of the column, the same material as the top one. -->
-<div class="shrink-0 border-t p-2 surface-chrome">
+<div
+	class="shrink-0 border-t p-2 surface-chrome max-lg:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+>
 	{#if rail}
 		<div class="flex justify-center">
 			<button

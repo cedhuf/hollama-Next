@@ -481,16 +481,27 @@
 		style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 	>
 		<CollapsibleSidebar />
+		<!-- The card runs the full height of the display, so its corners round on the
+		     corners of the screen rather than somewhere below them.
+
+		     It owes the safe areas nothing at either end. Content is meant to reach both
+		     edges and pass under the status bar and the home indicator; that is what
+		     makes an app read as native rather than as a page in a frame. What has to
+		     stay legible are the bars over it, and each of those holds itself off the
+		     edge on its own account. -->
 		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
 		     that slides right to uncover the stationary sidebar underneath; left-rounded
 		     corners (matching the phone's screen radius) + a left-edge shadow make it read
-		     as a sheet lifted above the menu. The shadow is only painted while open and
-		     fades with the slide — otherwise it would bleed through the rounded corner
+		     as a sheet lifted above the menu. The rounding and the shadow are painted only
+		     while it is open, and travel with the slide: a corner cut into a card that
+		     covers the whole screen shows whatever is behind it, which on a phone whose
+		     display has no rounding of its own, or in a browser tab, is a notch of
+		     wallpaper in the corner of the page. The shadow was already conditional — otherwise it would bleed through the rounded corner
 		     notch and reveal the rounding even when the page covers the whole screen.
 		     A no-op on desktop, where the sidebar lives in flow. -->
 		<div
-			class="relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-200 ease-in-out max-lg:overflow-hidden max-lg:rounded-l-[1.75rem] max-lg:bg-shade-1 {$mobileDrawerOpen
-				? 'max-lg:translate-x-[min(84vw,22rem)] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
+			class="relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-200 ease-in-out max-lg:overflow-hidden max-lg:bg-shade-1 {$mobileDrawerOpen
+				? 'max-lg:translate-x-[min(84vw,22rem)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
 				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 		>
 			<!-- Each route now owns the single sidebar toggle at its top-left (inside its
@@ -532,10 +543,34 @@
 		}
 	}
 
-	/* Full-height app shell — the same model as desktop, just responsive. No viewport-fit=cover,
-	   so iOS keeps the web view inside the safe area itself and handles the keyboard natively;
-	   `dvh` already tracks the dynamic viewport (browser toolbars) without any JS. */
+	/* Full-height app shell. In a browser tab `dvh` is the right unit: it tracks the
+	   toolbars sliding in and out. */
 	.app-shell {
 		height: 100dvh;
+	}
+
+	/* The installed app is a different animal, and these numbers were measured on the
+	   device rather than argued about.
+
+	   Under the status bar, iOS moves the document up but leaves the layout viewport
+	   at the height of the display minus the status bar: 812 against 874 on an iPhone
+	   16 Pro. The document is drawn at the top, and the strip left over at the bottom
+	   shows nothing at all, which is the white bar every guide to this warns about.
+
+	   The cure is to give the document the height of the display and to stop it
+	   scrolling. Sized but scrollable, it merely slides its own bottom off the screen
+	   instead of filling the strip, which is what happened on the first attempt here.
+	   `vh` is the only unit that knows the real number: `dvh`, `svh` and a plain
+	   percentage all report the short one. */
+	@media (display-mode: standalone) {
+		:global(html),
+		:global(body) {
+			height: 100vh;
+			overflow: hidden;
+		}
+
+		.app-shell {
+			height: 100vh;
+		}
 	}
 </style>

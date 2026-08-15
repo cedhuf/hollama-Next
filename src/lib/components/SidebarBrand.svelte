@@ -18,7 +18,9 @@
 
 <!-- The top edge of the column, and the densest of its materials along with the
      footer: edges read as edges by being more solid than what they enclose. -->
-<div class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 surface-chrome">
+<div
+	class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 surface-chrome max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))] max-lg:pt-[env(safe-area-inset-top)]"
+>
 	{#if rail}
 		<!-- The mark holds the corner at the same size it does at full width, so the
 		     column keeps its identity when it narrows rather than looking like a

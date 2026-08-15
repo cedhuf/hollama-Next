@@ -5,13 +5,17 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<link rel="stylesheet" href="/fonts/inter/inter.css" />
 		<link rel="stylesheet" href="/fonts/jetbrains-mono/jetbrains-mono.css" />
-		<!-- Fit the device width. We deliberately do NOT use viewport-fit=cover, so iOS keeps the
-		     web view inside the safe area on its own (status bar + home indicator handled by the OS) —
-		     no manual safe-area insets anywhere, and the keyboard is left to native handling. Zoom is
-		     disabled for a stable, native feel; the 16px input rule also blocks the iOS focus-zoom. -->
+		<!-- Fit the device width, and take the whole of it: `viewport-fit=cover` puts the
+		     web view under the status bar and the home indicator instead of beside them, so
+		     those strips belong to the app rather than to the OS. That is the only way they
+		     can follow the theme, carry the wallpaper, or be anything other than one flat
+		     colour decided once at launch. The price is that every edge now has to say what
+		     it owes the notch, which is what the `env(safe-area-inset-*)` insets do.
+		     Zoom is disabled for a stable, native feel; the 16px input rule also blocks the
+		     iOS focus-zoom. -->
 		<meta
 			name="viewport"
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
 		/>
 		<!-- Installable PWA + iOS standalone (fullscreen, status bar drawn over the app). -->
 		<link rel="manifest" href="/manifest.webmanifest" />
@@ -19,7 +23,11 @@
 		<meta name="theme-color" content="#242424" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<!-- The one value that puts the app under the status bar rather than beside it.
+		     It moves the document up without growing the layout viewport, which is what
+		     leaves the notorious white bar along the bottom; the document is given the
+		     full height of the display in the stylesheet to fill it. -->
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Llooma" />
 		<title>Llooma</title>
 		%sveltekit.head%
