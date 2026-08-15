@@ -2,6 +2,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { serversStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
+	import type { ScrollDirectionWatcher } from '$lib/scrollDirection';
 	import {
 		formatSessionMetadata,
 		groupSessions,
@@ -24,10 +25,19 @@
 		/** Whether the header still has a match to show, for the empty state. */
 		hasPersonaMatches: boolean;
 		/** Reports the scroller itself, once per frame. The header decides what to do with it. */
-		onScroll?: (element: HTMLElement) => void;
+		onScroll?: ScrollDirectionWatcher;
 	}
 
 	let { sessions, q, personaById, hasPersonaMatches, onScroll }: Props = $props();
+
+	// Collapsing the column takes this list with it, and expanding builds another
+	// one, at the top. The watcher outlives both, so it is told here, where the new
+	// scroller appears, that nothing it remembers describes this one. Otherwise the
+	// column comes back folded over a list nobody has scrolled, and the fold has to
+	// be undone by hand, down and back up.
+	$effect(() => {
+		onScroll?.reset();
+	});
 
 	// Scroll fires far more often than the screen refreshes, so the read waits for
 	// the next frame.

@@ -44,6 +44,20 @@ export interface ScrollDirectionOptions {
 	settle?: number;
 }
 
+export interface ScrollDirectionWatcher {
+	(element: HTMLElement): void;
+	/**
+	 * Forget the list that was being watched, for when it is not the same list any
+	 * more: unmounted and mounted again, or replaced by another.
+	 *
+	 * A new scroller starts at the top, while everything held here still describes
+	 * the old one, from the position last seen down to the answer given about it.
+	 * Left alone, the first gesture on the new list is measured against a position
+	 * it never had, and the flag says folded over a list that is not scrolled.
+	 */
+	reset(): void;
+}
+
 /**
  * Returns a listener to call with the scrolling element. It calls back only when
  * the answer changes: `true` on the way down, `false` on the way up, wherever in
@@ -52,13 +66,13 @@ export interface ScrollDirectionOptions {
 export function watchScrollDirection(
 	onChange: (scrolledAway: boolean) => void,
 	{ step = 6, stepUp = 48, settle = 300 }: ScrollDirectionOptions = {}
-): (element: HTMLElement) => void {
+): ScrollDirectionWatcher {
 	let scrolledAway = false;
 	let last = 0;
 	let travel = 0;
 	let deafUntil = 0;
 
-	return (element: HTMLElement) => {
+	const watch = (element: HTMLElement) => {
 		const max = Math.max(0, element.scrollHeight - element.clientHeight);
 		const top = element.scrollTop;
 
@@ -88,4 +102,18 @@ export function watchScrollDirection(
 		deafUntil = now + settle;
 		onChange(scrolledAway);
 	};
+
+	// The answer is given back as well as cleared: this is the only holder of it,
+	// and a caller left believing the old one would be the very state this exists
+	// to prevent.
+	watch.reset = () => {
+		last = 0;
+		travel = 0;
+		deafUntil = 0;
+		if (!scrolledAway) return;
+		scrolledAway = false;
+		onChange(false);
+	};
+
+	return watch;
 }
