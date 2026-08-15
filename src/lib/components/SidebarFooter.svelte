@@ -26,12 +26,16 @@
 	}
 </script>
 
-{#snippet avatar(size: number)}
+<!-- The same 2rem the mark occupies at the other end of the column, and not by
+     coincidence. The rail centres what it holds; the open column starts it at the
+     gutter. An element only sits in the same place under both rules when its width
+     matches the gutter on either side of it, which is why the mark never moved and
+     why the avatar, four pixels wider, did. -->
+{#snippet avatar()}
 	{#if hasName}
 		<div
-			class="flex items-center justify-center rounded-full"
-			style="width:{size}px;height:{size}px;background-color:{$settingsStore.profileColor ||
-				'#6366f1'}"
+			class="flex h-8 w-8 items-center justify-center rounded-full"
+			style="background-color:{$settingsStore.profileColor || '#6366f1'}"
 		>
 			{#if $settingsStore.profileAvatar}
 				<img
@@ -44,10 +48,7 @@
 			{/if}
 		</div>
 	{:else}
-		<div
-			class="flex items-center justify-center rounded-full bg-shade-2 text-muted"
-			style="width:{size}px;height:{size}px"
-		>
+		<div class="flex h-8 w-8 items-center justify-center rounded-full bg-shade-2 text-muted">
 			<Settings2 class="h-4 w-4" />
 		</div>
 	{/if}
@@ -62,6 +63,18 @@
 	></span>
 {/snippet}
 
+<!-- The dot hangs off the avatar's corner, so it is the avatar that has to be the
+     positioning context. Given to the surrounding button instead, it would sit in
+     the corner of whatever that button happens to measure, which is not the same
+     box in the rail as it is in the open column. Hence one snippet for the pair
+     rather than two places that have to agree. -->
+{#snippet identity()}
+	<span class="relative shrink-0">
+		{@render avatar()}
+		{@render connectionDot()}
+	</span>
+{/snippet}
+
 <!-- The bottom edge of the column, the same material as the top one. -->
 <div class="flex shrink-0 border-t surface-chrome">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
@@ -74,12 +87,11 @@
 			<div class="flex justify-center">
 				<button
 					onclick={() => ($settingsModalOpen = true)}
-					class="relative flex h-12 items-center transition-transform hover:scale-105"
+					class="flex h-12 items-center transition-transform hover:scale-105"
 					title={$LL.settings()}
 					aria-label={$LL.settings()}
 				>
-					{@render avatar(36)}
-					{@render connectionDot()}
+					{@render identity()}
 				</button>
 			</div>
 		{:else}
@@ -91,10 +103,7 @@
 				aria-label={$LL.settings()}
 				class="flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-shade-0"
 			>
-				<span class="relative shrink-0">
-					{@render avatar(36)}
-					{@render connectionDot()}
-				</span>
+				{@render identity()}
 				<span class="flex min-w-0 flex-1 flex-col">
 					<span class="truncate text-sm font-medium">
 						{hasName
