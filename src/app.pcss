@@ -678,6 +678,7 @@
 	}
 
 	.surface-chrome,
+	.surface-column,
 	.surface-pane,
 	.surface-floating {
 		--surface-color: var(--color-shade-1);
@@ -704,18 +705,17 @@
 	}
 
 	/**
-	/**
 	 * Frames the content: 94%, from 89% to 99%.
 	 *
-	 * Ten points above the level below it, at every point of the slider, because
-	 * ten points of tint is what one surface needs to read as a different material
-	 * from another. It used to be two, back when the blur carried the rest of the
-	 * distance; now that the picture is blurred at the source, the tint is on its
-	 * own and has to say the whole thing.
+	 * The densest of them, and the only one that has to read as an edge rather than
+	 * as a surface. It used to sit two points above its neighbour, back when the
+	 * blur carried the rest of the distance; now that the picture is blurred at the
+	 * source, the tint is on its own and has to say the whole thing.
 	 *
-	 * The two ranges are equal for the same reason: unequal ones close the gap as
-	 * the slider rises, and a hierarchy that holds only in the middle of its own
-	 * control is not one.
+	 * Every range below is five points, and that is the load-bearing part: unequal
+	 * ranges close the gaps as the slider rises, and a hierarchy that holds only in
+	 * the middle of its own control is not one. Whatever the distances between the
+	 * levels are, they are the same wherever the slider sits.
 	 */
 	.surface-chrome {
 		--surface-tint: 94%;
@@ -723,7 +723,24 @@
 	}
 
 	/**
-	 * The body those bars frame: 84%, from 79% to 89%.
+	 * The sidebar's own body: 91%, from 86% to 96%.
+	 *
+	 * Between the bars that frame the column and the conversation beside it, and
+	 * that is what it is for: the search, the tabs and the list of conversations are
+	 * not the frame, and they are not the thing being read either.
+	 *
+	 * Not halfway between the two, deliberately. Three points below the bars and
+	 * nine above the conversation: the column reads as one material lightly stepped,
+	 * while the gap that has to be obvious, between the column and what sits beside
+	 * it, keeps nearly the whole of the old distance.
+	 */
+	.surface-column {
+		--surface-tint: 91%;
+		--surface-tint-range: 5%;
+	}
+
+	/**
+	 * The body those bars frame: 82%, from 77% to 87%.
 	 *
 	 * The level whose floor has to stay legible over a photograph rather than over
 	 * more of the app. It can afford to sit lower than it did: what shows through
@@ -731,7 +748,7 @@
 	 * than a sharp one.
 	 */
 	.surface-pane {
-		--surface-tint: 84%;
+		--surface-tint: 82%;
 		--surface-tint-range: 5%;
 	}
 
@@ -770,11 +787,13 @@
 	 * paint, before the attribute is set, is already the opaque one.
 	 */
 	:root:not([data-wallpaper='on']) .surface-chrome,
+	:root:not([data-wallpaper='on']) .surface-column,
 	:root:not([data-wallpaper='on']) .surface-pane {
 		background-color: var(--surface-color);
 	}
 
 	:root[data-transparency='off'] .surface-chrome,
+	:root[data-transparency='off'] .surface-column,
 	:root[data-transparency='off'] .surface-pane,
 	:root[data-transparency='off'] .surface-floating {
 		background-color: var(--surface-color);
@@ -783,6 +802,7 @@
 
 	@media (prefers-reduced-transparency: reduce) {
 		.surface-chrome,
+		.surface-column,
 		.surface-pane,
 		.surface-floating {
 			background-color: var(--surface-color);

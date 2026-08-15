@@ -114,31 +114,38 @@
      the page slides aside to uncover it and the sidebar itself never moves.
      Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="fixed inset-y-0 left-0 h-full w-[min(84vw,22rem)] shrink-0 transition-[width,margin] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[env(safe-area-inset-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
-		{$settingsStore.sidebarExpanded ? 'lg:mr-4 lg:w-96' : 'lg:mr-2 lg:w-16'}"
+	class="fixed inset-y-0 left-0 h-full w-[min(84vw,22rem)] shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[env(safe-area-inset-left)] lg:relative lg:z-30 lg:mr-4 lg:max-w-none lg:translate-x-0
+		{$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
 	<!-- The column proper, and the only thing that clips. It is a box of its own so
 	     that the handle below can sit astride its edge: rounding a corner means
 	     cutting off whatever crosses it, and a handle that straddles the edge is
-	     exactly that. -->
-	<div class="app-panel flex h-full flex-col overflow-hidden lg:rounded-xl lg:border">
-		<!-- Laid out at the width it is going to, not at the width it is passing
-		     through, in both directions.
+	     exactly that.
 
-		     Nothing inside then moves at all: the column slides over its contents
-		     instead of dragging them along. Which is why the mark does not so much as
-		     twitch between the two states, centred in sixty four pixels being exactly
-		     where it already sits at three hundred and eighty four.
+	     It carries the column's material as well as its frame, which matters for one
+	     third of a second and looks broken without it. The blocks inside are laid out
+	     at the width the column is going to, not the one it is passing through, so
+	     while it narrows there is a strip between them and the border. Painted, that
+	     strip is the column still closing. Left bare, it was a lit window in a shrinking
+	     frame, showing the wallpaper straight through. -->
+	<div class="app-panel flex h-full overflow-hidden lg:rounded-xl lg:border">
+		<!-- The blocks fill this, and each one holds its own contents at the width the
+		     column is going to.
 
-		     It also spares the whole column a reflow per frame. A search field, a pair
-		     of tabs and a grid of avatars used to recompute their wrapping sixty times
-		     a second on the way between the two widths, which is what made the
-		     animation look like boiling rather than opening. -->
-		<div
-			class="flex h-full w-full flex-col {$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
-		>
+		     The split is theirs rather than this box's, and it took three attempts to
+		     see why. Pin a whole column at its target width and the frame keeps
+		     animating around it, leaving a strip that nothing paints: a lit window on
+		     the wallpaper, and no single material can fill it, since the right one at
+		     any height is whichever block is there. Let the column follow the frame
+		     instead and everything inside re-wraps sixty times a second, which is what
+		     made this look like boiling rather than opening.
+
+		     Separated, each block paints out to the edge at every frame while its
+		     contents stay put. Nothing moves, nothing is left bare, and no third layer
+		     was needed to hide either. -->
+		<div class="flex h-full w-full flex-col">
 			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} />
 
 			{#if showRail}

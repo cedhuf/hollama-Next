@@ -34,15 +34,15 @@
 		!!persona.sessionId && pathname.includes(persona.sessionId);
 
 	/**
-	 * Balanced columns: fill rows evenly (4→4, 6→3, 5→3…), capped at 4 so the
-	 * avatars stay a reasonable size.
+	 * Five to a row, always, and the last row centred on whatever is left.
+	 *
+	 * The cell is therefore the same width whether there are two personas or
+	 * twenty, which is what makes the block read as a grid rather than as a
+	 * different arrangement each time one is added. Rows used to be balanced
+	 * instead, six going to three and three rather than five and one, and the
+	 * avatars changed size as the list grew.
 	 */
-	const columns = $derived.by(() => {
-		const n = personas.length;
-		if (n <= 1) return 1;
-		const rows = Math.ceil(n / 4);
-		return Math.ceil(n / rows);
-	});
+	const COLUMNS = 5;
 
 	function launch(persona: Persona) {
 		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
@@ -61,13 +61,13 @@
 				<ChevronDown class="h-3.5 w-3.5 transition-transform {open ? '' : '-rotate-90'}" />
 			</button>
 			{#if open}
-				<!-- iOS Messages-style grid: avatars in balanced rows, partial rows centred. -->
+				<!-- iOS Messages-style grid: five to a row, a partial row centred. -->
 				<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
 					{#each personas as persona (persona.id)}
 						<button
 							type="button"
 							onclick={() => launch(persona)}
-							style="flex: 0 0 calc(100% / {columns} - 0.25rem)"
+							style="flex: 0 0 calc(100% / {COLUMNS} - 0.25rem)"
 							class="group flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 outline-none"
 							title={persona.tagline || persona.name}
 						>

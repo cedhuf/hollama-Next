@@ -73,38 +73,44 @@
 <div
 	bind:this={el}
 	onscroll={handleScroll}
-	class="min-h-0 flex-1 overflow-auto px-2 py-2 surface-pane"
-	style="overscroll-behavior-y: contain"
+	class="min-h-0 flex-1 overflow-y-auto surface-column"
+	style="overscroll-behavior-y: contain; overflow-x: hidden"
 >
-	{#each groups as group (group.key)}
-		<div class="mb-2">
-			<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
-				{groupLabel(group.key)}
-			</p>
-			<!-- A hair of space between rows: hovering the neighbour of the active
+	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`.
+	     Sideways overflow is hidden rather than scrolled, since while the column
+	     narrows this box is wider than what holds it and a scrollbar would appear for
+	     the length of the animation. -->
+	<div class="w-full px-2 py-2 lg:w-96">
+		{#each groups as group (group.key)}
+			<div class="mb-2">
+				<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+					{groupLabel(group.key)}
+				</p>
+				<!-- A hair of space between rows: hovering the neighbour of the active
 			     session used to butt two rounded highlights against each other. -->
-			<div class="flex flex-col gap-0.5">
-				{#each group.sessions as session (session.id)}
-					{@const persona = session.personaId ? personaById[session.personaId] : undefined}
-					<SectionListItem
-						sitemap={Sitemap.SESSIONS}
-						id={session.id}
-						title={resolveSessionTitle(session)}
-						subtitle={formatSessionMetadata(session, $serversStore)}
-						pinned={session.pinned}
-						leading={persona ? personaBadge : undefined}
-					/>
-					{#snippet personaBadge()}
-						{#if persona}
-							<PersonaAvatar {persona} size={24} />
-						{/if}
-					{/snippet}
-				{/each}
+				<div class="flex flex-col gap-0.5">
+					{#each group.sessions as session (session.id)}
+						{@const persona = session.personaId ? personaById[session.personaId] : undefined}
+						<SectionListItem
+							sitemap={Sitemap.SESSIONS}
+							id={session.id}
+							title={resolveSessionTitle(session)}
+							subtitle={formatSessionMetadata(session, $serversStore)}
+							pinned={session.pinned}
+							leading={persona ? personaBadge : undefined}
+						/>
+						{#snippet personaBadge()}
+							{#if persona}
+								<PersonaAvatar {persona} size={24} />
+							{/if}
+						{/snippet}
+					{/each}
+				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
 
-	{#if groups.length === 0 && !hasPersonaMatches}
-		<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
-	{/if}
+		{#if groups.length === 0 && !hasPersonaMatches}
+			<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
+		{/if}
+	</div>
 </div>

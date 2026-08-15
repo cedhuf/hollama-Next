@@ -28,9 +28,10 @@ cheaper to draw on a slow machine. If your system asks for reduced transparency,
 is set here.
 
 Four levels move together, and the sidebar is where three of them meet: its top bar and its footer
-are the densest, the search and tabs below sit one step lighter, and the conversation list is the
-thinnest of all. That is what gives the column depth instead of one flat sheet of glass, and it is
-also why the picture behind the app reads in the list rather than across the whole thing.
+are the densest, its search, tabs and conversation list sit one step lighter, and the conversation
+beside them is lighter still. That is what gives the column depth instead of one flat sheet of glass,
+and it is also why the picture behind the app reads in the conversation rather than across the whole
+thing.
 
 ## Background
 
