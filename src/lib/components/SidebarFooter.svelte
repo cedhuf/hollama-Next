@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { Settings2, Smartphone } from '@lucide/svelte';
+	import { Settings2 } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
-	import { browser } from '$app/environment';
-	import { isInstalled, openInstallDialog } from '$lib/install';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
-
-	import Tooltip from './Tooltip.svelte';
 
 	interface Props {
 		/** The collapsed desktop rail keeps the avatar and drops the name. */
@@ -74,41 +70,6 @@
 			? 'lg:w-16'
 			: 'lg:w-96'}"
 	>
-		<!-- Standing here rather than appearing once and being gone. On the platforms
-	     that matter most there is no install button anywhere in the browser, only a
-	     gesture nobody knows, and the one place someone thinks to look for it is the
-	     app itself. Read once, when the column is drawn: nothing installs an app
-	     halfway through a session except the offer, which hides itself. -->
-		{#if browser && !isInstalled()}
-			{#if rail}
-				<div class="mb-1 flex justify-center">
-					<Tooltip side="right">
-						{#snippet trigger({ props })}
-							<button
-								{...props}
-								type="button"
-								onclick={openInstallDialog}
-								aria-label={$LL.installApp()}
-								class="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:text-active"
-							>
-								<Smartphone class="h-5 w-5" />
-							</button>
-						{/snippet}
-						{$LL.installApp()}
-					</Tooltip>
-				</div>
-			{:else}
-				<button
-					type="button"
-					onclick={openInstallDialog}
-					class="mb-1 flex h-9 w-full items-center gap-3 rounded-lg px-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
-				>
-					<Smartphone class="h-4 w-4 shrink-0" />
-					<span class="truncate">{$LL.installApp()}</span>
-				</button>
-			{/if}
-		{/if}
-
 		{#if rail}
 			<div class="flex justify-center">
 				<button

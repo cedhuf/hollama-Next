@@ -1236,7 +1236,7 @@ type RootTranslation = {
 	 */
 	offerInstall: string
 	/**
-	 * I​n​s​t​a​l​l​e​d​,​ ​i​t​ ​r​u​n​s​ ​w​i​t​h​o​u​t​ ​b​r​o​w​s​e​r​ ​c​h​r​o​m​e​,​ ​k​e​e​p​s​ ​i​t​s​ ​o​w​n​ ​i​c​o​n​ ​a​n​d​ ​s​t​a​r​t​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​s​c​r​e​e​n​.​ ​T​h​e​ ​o​f​f​e​r​ ​a​p​p​e​a​r​s​ ​o​n​ ​t​h​e​ ​f​i​r​s​t​ ​v​i​s​i​t​ ​a​n​d​ ​t​h​e​n​ ​o​n​l​y​ ​o​c​c​a​s​i​o​n​a​l​l​y​;​ ​t​h​e​ ​e​n​t​r​y​ ​a​t​ ​t​h​e​ ​b​o​t​t​o​m​ ​o​f​ ​t​h​e​ ​s​i​d​e​b​a​r​ ​o​p​e​n​s​ ​i​t​ ​w​h​e​n​e​v​e​r​ ​y​o​u​ ​w​a​n​t​.
+	 * I​n​s​t​a​l​l​e​d​,​ ​i​t​ ​r​u​n​s​ ​w​i​t​h​o​u​t​ ​b​r​o​w​s​e​r​ ​c​h​r​o​m​e​,​ ​k​e​e​p​s​ ​i​t​s​ ​o​w​n​ ​i​c​o​n​ ​a​n​d​ ​s​t​a​r​t​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​s​c​r​e​e​n​.​ ​T​h​e​ ​o​f​f​e​r​ ​a​p​p​e​a​r​s​ ​o​n​ ​t​h​e​ ​f​i​r​s​t​ ​v​i​s​i​t​ ​a​n​d​ ​t​h​e​n​ ​o​n​l​y​ ​o​c​c​a​s​i​o​n​a​l​l​y​;​ ​i​t​ ​c​a​n​ ​a​l​s​o​ ​b​e​ ​o​p​e​n​e​d​ ​f​r​o​m​ ​A​b​o​u​t​ ​a​t​ ​a​n​y​ ​t​i​m​e​.
 	 */
 	offerInstallHelp: string
 	/**
@@ -3346,7 +3346,7 @@ The completion in progress will stop
 	 */
 	offerInstall: () => LocalizedString
 	/**
-	 * Installed, it runs without browser chrome, keeps its own icon and starts on its own screen. The offer appears on the first visit and then only occasionally; the entry at the bottom of the sidebar opens it whenever you want.
+	 * Installed, it runs without browser chrome, keeps its own icon and starts on its own screen. The offer appears on the first visit and then only occasionally; it can also be opened from About at any time.
 	 */
 	offerInstallHelp: () => LocalizedString
 	/**

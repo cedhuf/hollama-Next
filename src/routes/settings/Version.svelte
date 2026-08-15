@@ -10,7 +10,7 @@
 	} from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { version } from '$app/environment';
+	import { browser, version } from '$app/environment';
 	import { APP_NAME, APP_PRONUNCIATION } from '$lib/brand';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -18,10 +18,12 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { AUTHOR_URL, DOCS_URL, GITHUB_URL, releaseUrl } from '$lib/github';
+	import { isInstalled, openInstallDialog } from '$lib/install';
 	import { settingsStore } from '$lib/localStorage';
 	import { checkForUpdates, isNewerVersion, updateStatusStore } from '$lib/updates';
 	import { formatTimestampToNowShort } from '$lib/utils';
 
+	import SettingsLink from './SettingsLink.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -185,6 +187,13 @@
 			label={$LL.automaticallyCheckForUpdates()}
 			bind:checked={$settingsStore.autoCheckForUpdates}
 		/>
+		<!-- One line, and only where it can lead anywhere: an app already on the home
+		     screen has nothing to offer here, and a browser that cannot install has
+		     nothing to say. The offer itself comes and goes on its own; this is simply
+		     where someone would think to look for it again. -->
+		{#if browser && !isInstalled()}
+			<SettingsLink onclick={openInstallDialog}>{$LL.installApp()}</SettingsLink>
+		{/if}
 	</SettingsSection>
 
 	<SettingsSection title={$LL.source()}>
