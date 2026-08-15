@@ -461,9 +461,15 @@ const fr = extendDictionary(en, {
 	background: 'Arrière-plan',
 	backgroundImage: 'Image d’arrière-plan',
 	backgroundImageHelp:
-		'Affichée derrière l’application. La barre latérale est translucide, l’image se lit donc au travers ; la conversation reste opaque, rien n’est à lire sur une photo. Enregistrée avec vos réglages, préférez donc un fichier de taille raisonnable.',
+		'Affichée derrière l’application. La barre latérale est translucide, l’image se lit donc au travers ; la conversation reste opaque, rien n’est à lire sur une photo. Celles fournies avec l’application ne coûtent rien à stocker ; la vôtre est enregistrée avec vos réglages, qui voyagent.',
 	chooseImage: 'Choisir une image',
 	replaceImage: 'Remplacer',
+	noBackground: 'Aucun',
+	backgroundBlur: 'Flou de l’arrière-plan',
+	useYourOwnImage: 'Utiliser votre image',
+	yourImage: 'Votre image',
+	maxImageSize: '3 Mo maximum',
+	imageTooLarge: 'Cette image dépasse 3 Mo. Choisissez-en une plus légère, ou redimensionnez-la.',
 	floatingChatHeader: 'Barre de conversation flottante',
 	floatingChatHeaderHelp:
 		'Une pastille posée sur la conversation, assortie au composeur à l’autre bout, avec le texte qui passe autour des deux. Désactivée, elle redevient le bord haut de la colonne, où l’image d’arrière-plan l’atteint.',

@@ -38,8 +38,18 @@ A picture behind the app, under _Settings → Interface → Background_. The sid
 it reads through the column; the conversation stays opaque, so nothing is ever asked to be read off a
 photograph; the margin around both shows it plainly.
 
-It is stored with your settings, which travel, so prefer a reasonably sized file over a 20-megapixel
-original.
+Eight are shipped with the app, in a row you scroll sideways. They are gradients rather than
+photographs, which is why they weigh nothing, never look soft on a large display, and cost a dozen
+bytes to store: the setting keeps their name, not their pixels.
+
+Your own picture goes in from the button under the row, and then joins the row as a tile like any
+other. That one is kept with your settings, which travel, so it is capped at 3 MB, and a file over
+the limit is refused rather than quietly resized.
+
+**Background blur** is the slider below, on its own axis rather than following the transparency one.
+The picture is softened before anything is drawn on top of it, which is what keeps text legible over
+a busy photograph. The middle of the track is the default and is marked, so it can be found again;
+left of it the picture is left as it is, right of it it turns to colour and light.
 
 ## Home screen
 

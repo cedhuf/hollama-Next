@@ -1656,7 +1656,7 @@ type RootTranslation = {
 	 */
 	backgroundImage: string
 	/**
-	 * S​h​o​w​n​ ​b​e​h​i​n​d​ ​t​h​e​ ​a​p​p​.​ ​T​h​e​ ​s​i​d​e​b​a​r​ ​i​s​ ​t​r​a​n​s​l​u​c​e​n​t​ ​s​o​ ​t​h​e​ ​p​i​c​t​u​r​e​ ​r​e​a​d​s​ ​t​h​r​o​u​g​h​ ​i​t​,​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​t​a​y​s​ ​o​p​a​q​u​e​ ​s​o​ ​n​o​t​h​i​n​g​ ​h​a​s​ ​t​o​ ​b​e​ ​r​e​a​d​ ​o​f​f​ ​a​ ​p​h​o​t​o​g​r​a​p​h​.​ ​S​t​o​r​e​d​ ​w​i​t​h​ ​y​o​u​r​ ​s​e​t​t​i​n​g​s​,​ ​s​o​ ​p​r​e​f​e​r​ ​a​ ​r​e​a​s​o​n​a​b​l​y​ ​s​i​z​e​d​ ​f​i​l​e​.
+	 * S​h​o​w​n​ ​b​e​h​i​n​d​ ​t​h​e​ ​a​p​p​.​ ​T​h​e​ ​s​i​d​e​b​a​r​ ​i​s​ ​t​r​a​n​s​l​u​c​e​n​t​ ​s​o​ ​t​h​e​ ​p​i​c​t​u​r​e​ ​r​e​a​d​s​ ​t​h​r​o​u​g​h​ ​i​t​,​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​t​a​y​s​ ​o​p​a​q​u​e​ ​s​o​ ​n​o​t​h​i​n​g​ ​h​a​s​ ​t​o​ ​b​e​ ​r​e​a​d​ ​o​f​f​ ​a​ ​p​h​o​t​o​g​r​a​p​h​.​ ​T​h​e​ ​o​n​e​s​ ​s​h​i​p​p​e​d​ ​w​i​t​h​ ​t​h​e​ ​a​p​p​ ​c​o​s​t​ ​n​o​t​h​i​n​g​ ​t​o​ ​s​t​o​r​e​;​ ​y​o​u​r​ ​o​w​n​ ​i​s​ ​k​e​p​t​ ​w​i​t​h​ ​y​o​u​r​ ​s​e​t​t​i​n​g​s​,​ ​w​h​i​c​h​ ​t​r​a​v​e​l​.
 	 */
 	backgroundImageHelp: string
 	/**
@@ -1667,6 +1667,30 @@ type RootTranslation = {
 	 * R​e​p​l​a​c​e
 	 */
 	replaceImage: string
+	/**
+	 * N​o​n​e
+	 */
+	noBackground: string
+	/**
+	 * B​a​c​k​g​r​o​u​n​d​ ​b​l​u​r
+	 */
+	backgroundBlur: string
+	/**
+	 * U​s​e​ ​y​o​u​r​ ​o​w​n​ ​i​m​a​g​e
+	 */
+	useYourOwnImage: string
+	/**
+	 * Y​o​u​r​ ​i​m​a​g​e
+	 */
+	yourImage: string
+	/**
+	 * m​a​x​.​ ​3​ ​M​B
+	 */
+	maxImageSize: string
+	/**
+	 * T​h​a​t​ ​p​i​c​t​u​r​e​ ​i​s​ ​o​v​e​r​ ​3​ ​M​B​.​ ​C​h​o​o​s​e​ ​a​ ​l​i​g​h​t​e​r​ ​o​n​e​,​ ​o​r​ ​r​e​s​i​z​e​ ​i​t​ ​f​i​r​s​t​.
+	 */
+	imageTooLarge: string
 	/**
 	 * F​l​o​a​t​i​n​g​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​b​a​r
 	 */
@@ -3714,7 +3738,7 @@ The completion in progress will stop
 	 */
 	backgroundImage: () => LocalizedString
 	/**
-	 * Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. Stored with your settings, so prefer a reasonably sized file.
+	 * Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. The ones shipped with the app cost nothing to store; your own is kept with your settings, which travel.
 	 */
 	backgroundImageHelp: () => LocalizedString
 	/**
@@ -3725,6 +3749,30 @@ The completion in progress will stop
 	 * Replace
 	 */
 	replaceImage: () => LocalizedString
+	/**
+	 * None
+	 */
+	noBackground: () => LocalizedString
+	/**
+	 * Background blur
+	 */
+	backgroundBlur: () => LocalizedString
+	/**
+	 * Use your own image
+	 */
+	useYourOwnImage: () => LocalizedString
+	/**
+	 * Your image
+	 */
+	yourImage: () => LocalizedString
+	/**
+	 * max. 3 MB
+	 */
+	maxImageSize: () => LocalizedString
+	/**
+	 * That picture is over 3 MB. Choose a lighter one, or resize it first.
+	 */
+	imageTooLarge: () => LocalizedString
 	/**
 	 * Floating conversation bar
 	 */

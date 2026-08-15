@@ -153,6 +153,17 @@ export interface Settings {
 	 */
 	surfaceTransparencyLevel: number;
 	/**
+	 * How far the wallpaper is blurred, from 0 to 100, with 50 the reference and
+	 * the middle of the track.
+	 *
+	 * Its own axis rather than a share of the transparency one: how much the
+	 * surfaces let through and how legible what they let through is are two
+	 * questions, and a photograph with a lot going on needs to be softened whether
+	 * the panes are glass or paint. At 0 the picture is left as it is, which is a
+	 * legitimate answer for a quiet one.
+	 */
+	backgroundBlurLevel: number;
+	/**
 	 * A picture behind the app, as a data URL. The sidebar's materials let it
 	 * through, the conversation stays opaque over it, and the margin around both
 	 * shows it plainly.
@@ -226,6 +237,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	themeStyle: 'classic',
 	surfaceTransparency: true,
 	surfaceTransparencyLevel: 50,
+	backgroundBlurLevel: 50,
 	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,

@@ -446,9 +446,15 @@ const en = {
 	background: 'Background',
 	backgroundImage: 'Background image',
 	backgroundImageHelp:
-		'Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. Stored with your settings, so prefer a reasonably sized file.',
+		'Shown behind the app. The sidebar is translucent so the picture reads through it, the conversation stays opaque so nothing has to be read off a photograph. The ones shipped with the app cost nothing to store; your own is kept with your settings, which travel.',
 	chooseImage: 'Choose an image',
 	replaceImage: 'Replace',
+	noBackground: 'None',
+	backgroundBlur: 'Background blur',
+	useYourOwnImage: 'Use your own image',
+	yourImage: 'Your image',
+	maxImageSize: 'max. 3 MB',
+	imageTooLarge: 'That picture is over 3 MB. Choose a lighter one, or resize it first.',
 	floatingChatHeader: 'Floating conversation bar',
 	floatingChatHeaderHelp:
 		'A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.',

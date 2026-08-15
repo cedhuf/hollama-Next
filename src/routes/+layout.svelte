@@ -47,6 +47,7 @@
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerSystemPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
+	import { wallpaperImage } from '$lib/wallpapers';
 	import { loadWebFetchConfig } from '$lib/webFetch';
 
 	import type { LayoutData } from './$types';
@@ -228,6 +229,14 @@
 		document.head.appendChild(meta);
 	}
 
+	/**
+	 * The wallpaper as CSS, which is a pack entry's gradient or the user's own file.
+	 *
+	 * Resolved once, here, so that the attribute driving the shadows and the layer
+	 * that paints the picture cannot disagree about whether there is one.
+	 */
+	const wallpaper = $derived(wallpaperImage($settingsStore.backgroundImage));
+
 	$effect(() => {
 		const mode = $settingsStore.themeMode || 'system';
 		const style = $settingsStore.themeStyle || 'classic';
@@ -248,8 +257,11 @@
 
 		// Drives the wallpaper's own layer and the shadow the columns need to read as
 		// panels on a picture rather than as holes cut in it.
-		const wallpaper = !!$settingsStore.backgroundImage;
 		document.documentElement.setAttribute('data-wallpaper', wallpaper ? 'on' : 'off');
+		// Same shape as the surfaces above, and 50 means the same thing here: the
+		// value the effect was drawn for, in the middle of its own track.
+		const blur = ($settingsStore.backgroundBlurLevel ?? 50) / 50;
+		document.documentElement.style.setProperty('--wallpaper-strength', String(blur));
 
 		const applyTheme = (prefersDark?: boolean) => {
 			let theme: string;
@@ -466,9 +478,7 @@
 	     leaves and the gap between the two columns. -->
 	<div
 		class="app-shell relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
-		style={$settingsStore.backgroundImage
-			? `--wallpaper: url(${$settingsStore.backgroundImage})`
-			: ''}
+		style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 	>
 		<CollapsibleSidebar />
 		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card

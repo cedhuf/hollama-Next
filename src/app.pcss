@@ -612,7 +612,7 @@
  */
 @layer components {
 	:root {
-		--wallpaper-blur: calc(18px + 6px * (var(--surface-strength) - 1));
+		--wallpaper-blur: calc(18px * var(--wallpaper-strength, 1));
 	}
 
 	:root[data-wallpaper='on'] .app-shell::before {

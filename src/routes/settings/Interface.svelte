@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Copy } from '@lucide/svelte';
+	import { Copy, Image as ImageIcon, ImagePlus } from '@lucide/svelte';
 
 	import LL, { setLocale } from '$i18n/i18n-svelte';
 	import type { Locales } from '$i18n/i18n-types';
@@ -7,8 +7,10 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { languageOptions } from '$lib/i18n';
 	import { settingsStore } from '$lib/localStorage';
+	import { CUSTOM_MAX_BYTES, PACK_PREFIX, WALLPAPERS, wallpaperThumb } from '$lib/wallpapers';
 
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
@@ -19,14 +21,35 @@
 
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
+	const background = $derived($settingsStore.backgroundImage);
+	// Anything that is not one of ours is a file the user brought, and it is the
+	// only case with a thumbnail of its own to draw.
+	const custom = $derived(!!background && !background.startsWith(PACK_PREFIX));
+
+	let tooLarge = $state(false);
+
 	// Kept as a data URL, the way the profile avatar already is, so it survives a
-	// reload without anything new to store it in.
+	// reload without anything new to store it in. Which is also why it is measured
+	// first: this one goes into settings that travel.
 	function pickBackground(event: Event) {
-		const file = (event.currentTarget as HTMLInputElement).files?.[0];
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		// Clearing the input is what lets the same file be picked again after it was
+		// refused: without it the second choice is not a change, and nothing fires.
+		input.value = '';
 		if (!file) return;
+
+		tooLarge = file.size > CUSTOM_MAX_BYTES;
+		if (tooLarge) return;
+
 		const reader = new FileReader();
 		reader.onload = () => ($settingsStore.backgroundImage = String(reader.result ?? ''));
 		reader.readAsDataURL(file);
+	}
+
+	function choose(value: string) {
+		tooLarge = false;
+		$settingsStore.backgroundImage = value;
 	}
 
 	function changeLanguage({ value }: { value: string; label: string }) {
@@ -80,34 +103,113 @@
 	</SettingsSection>
 
 	<SettingsSection title={$LL.background()} card>
-		<!-- The thumbnail is the setting: a file name says nothing about a picture, and
-		     what this changes is entirely how the app looks. -->
-		<div class="flex items-center gap-3">
-			{#if $settingsStore.backgroundImage}
-				<img
-					src={$settingsStore.backgroundImage}
-					alt=""
-					class="h-14 w-20 shrink-0 rounded-md border border-shade-3 object-cover"
-				/>
+		<!-- The thumbnails are the setting: a name says nothing about a picture, and
+		     what this changes is entirely how the app looks. They scroll sideways
+		     rather than wrapping, so the section keeps its height whatever the pack
+		     grows to.
+
+		     Padded rather than flush, because the ring marking the chosen one is drawn
+		     outside its tile, and a scroll container clips both its axes: without the
+		     room, the top of the ring is simply cut off. The negative margin gives it
+		     back, so the row still lines up with the rest of the panel. -->
+		<div class="-m-1 flex gap-2 overflow-x-auto p-1" style="scrollbar-width: thin">
+			<button
+				type="button"
+				onclick={() => choose('')}
+				aria-pressed={!background}
+				class="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border bg-shade-2 text-xs text-muted transition-colors {background
+					? 'border-shade-3 hover:border-accent'
+					: 'border-accent ring-2 ring-accent'}"
+			>
+				{$LL.noBackground()}
+			</button>
+
+			<!-- The user's own picture sits with the others rather than off at the end:
+			     it is a choice among them, and the one they went to the most trouble
+			     for. -->
+			{#if custom}
+				<button
+					type="button"
+					aria-label={$LL.yourImage()}
+					aria-pressed="true"
+					class="h-14 w-20 shrink-0 rounded-md border border-accent bg-cover bg-center ring-2 ring-accent"
+					style="background-image: {wallpaperThumb(background)}"
+				></button>
 			{/if}
-			<div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-				<label
-					class="cursor-pointer rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm text-active transition-colors hover:border-accent"
-				>
-					{$settingsStore.backgroundImage ? $LL.replaceImage() : $LL.chooseImage()}
-					<input type="file" accept="image/*" onchange={pickBackground} class="sr-only" />
-				</label>
-				{#if $settingsStore.backgroundImage}
-					<button
-						type="button"
-						onclick={() => ($settingsStore.backgroundImage = '')}
-						class="rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-active"
-					>
-						{$LL.remove()}
-					</button>
-				{/if}
-			</div>
+
+			{#each WALLPAPERS as wallpaper (wallpaper.id)}
+				{@const value = PACK_PREFIX + wallpaper.id}
+				<button
+					type="button"
+					onclick={() => choose(value)}
+					aria-label={wallpaper.name}
+					aria-pressed={background === value}
+					class="h-14 w-20 shrink-0 rounded-md border bg-cover bg-center transition-colors {background ===
+					value
+						? 'border-accent ring-2 ring-accent'
+						: 'border-shade-3 hover:border-accent'}"
+					style="background-image: {wallpaper.thumb ?? wallpaper.image}"
+				></button>
+			{/each}
 		</div>
+
+		<!-- Under the row rather than in it. Bringing your own picture is a different
+		     act from picking one, it opens a dialog, and it is the one thing here that
+		     can be refused, so it says what it is in words. The limit is given before
+		     the file dialog opens: learning it afterwards means having chosen for
+		     nothing. -->
+		<div class="flex flex-wrap items-center gap-2">
+			<Tooltip side="top">
+				{#snippet trigger({ props })}
+					<label
+						{...props}
+						class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm text-active transition-colors hover:border-accent"
+					>
+						<ImagePlus class="h-4 w-4 shrink-0" />
+						{custom ? $LL.replaceImage() : $LL.useYourOwnImage()}
+						<input type="file" accept="image/*" onchange={pickBackground} class="sr-only" />
+					</label>
+				{/snippet}
+				{$LL.maxImageSize()}
+			</Tooltip>
+
+			{#if custom}
+				<button
+					type="button"
+					onclick={() => choose('')}
+					class="rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-active"
+				>
+					{$LL.remove()}
+				</button>
+			{/if}
+		</div>
+
+		{#if tooLarge}
+			<p class="text-xs text-negative">{$LL.imageTooLarge()}</p>
+		{/if}
+
+		<!-- The same two ends as the transparency track, and the same shape twice
+		     rather than two words: sharp on the left, softened on the right, which is
+		     literally what the slider does to the picture. Idle without a wallpaper,
+		     shown rather than hidden, so the setting does not appear out of nowhere
+		     the moment one is chosen. -->
+		<div class="flex items-center gap-3 {background ? '' : 'opacity-40'}">
+			<ImageIcon class="h-4 w-4 shrink-0 text-muted" />
+			<div class="min-w-0 flex-1">
+				<SettingsSlider
+					label={$LL.backgroundBlur()}
+					bind:value={$settingsStore.backgroundBlurLevel}
+					min={0}
+					max={100}
+					step={10}
+					midpoint
+					showValue={false}
+					disabled={!background}
+				/>
+			</div>
+			<ImageIcon class="h-4 w-4 shrink-0 text-muted blur-[1.5px]" />
+		</div>
+
 		<SettingsHint>{$LL.backgroundImageHelp()}</SettingsHint>
 	</SettingsSection>
 
