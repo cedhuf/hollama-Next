@@ -8,16 +8,13 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { askChoicesToText, formatAskAnswer, parseAskBlock } from '$lib/askChoice';
-	import { type ChatRequest, type ChatStrategy, type ToolCall, type ToolSpec } from '$lib/chat';
+	import { formatAskAnswer } from '$lib/askChoice';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
-	import { contextUsage, messagesInContext } from '$lib/chat/context';
-	import { OllamaStrategy } from '$lib/chat/ollama';
-	import { OpenAIStrategy } from '$lib/chat/openai';
-	import { formatSourceIndex, recallableUrls, recallSearches } from '$lib/chat/sourceIndex';
-	import { generateTitle } from '$lib/chat/title';
-	import { READ_PAGE_TOOL, useNativeTools, WEB_SEARCH_TOOL } from '$lib/chat/tools';
+	import { messagesInContext } from '$lib/chat/context';
+	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
+	import { runLocally } from '$lib/chat/run/local';
+	import type { RunInput } from '$lib/chat/run/types';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -27,32 +24,21 @@
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import SessionMenu from '$lib/components/SessionMenu.svelte';
-	import { ConnectionType } from '$lib/connections';
-	import { formatCurrentDateTime } from '$lib/currentDate';
-	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 	import { contextMessages, imagesPayload } from '$lib/promptAttachments';
-	import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
-	import { buildSearchContext, parseRouterDecision, searchConfig } from '$lib/search';
-	import {
-		resolveSessionTitle,
-		saveSession,
-		type Editor,
-		type Message,
-		type WebSearchInfo
-	} from '$lib/sessions';
+	import { searchConfig } from '$lib/search';
+	import { resolveSessionTitle, saveSession, type Editor, type Message } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 	import { formatTimestampToNow, isTouchPrimary } from '$lib/utils';
-	import { buildPageContext, extractUrls, webFetchConfig } from '$lib/webFetch';
+	import { webFetchConfig } from '$lib/webFetch';
 
 	import type { PageData } from './$types';
 	import ButtonCopyConversation from './ButtonCopyConversation.svelte';
 	import Controls from './Controls.svelte';
 	import Messages from './Messages.svelte';
 	import Prompt from './Prompt.svelte';
-	import { createReasoningProcessor } from './reasoningProcessor';
 	import SessionModal from './SessionModal.svelte';
 
 	interface Props {
@@ -395,7 +381,19 @@
 		await handleCompletion(session.messages);
 	}
 
+	/**
+	 * Send a turn and follow it.
+	 *
+	 * Everything that used to happen inline here now happens in the orchestrator,
+	 * which is what lets the same turn run in a process that outlives this page.
+	 * What is left is the page's own half of the job: settle what the turn is,
+	 * hand it over, and apply what comes back.
+	 */
 	async function handleCompletion(messages: Message[]) {
+		const server = $serversStore.find((s) => s.id === session.model?.serverId);
+		if (!server) throw new Error('Server not found');
+		if (!session.model?.name) throw new Error('No model');
+
 		editor.abortController = new AbortController();
 		editor.isCompletionInProgress = true;
 		editor.prompt = '';
@@ -408,686 +406,69 @@
 		editor.searchQuery = undefined;
 		editor.webSearchInfo = undefined;
 
-		const server = $serversStore.find((s) => s.id === session.model?.serverId);
-		if (!server) throw new Error('Server not found');
-		if (!session.model?.name) throw new Error('No model');
-
 		// Compaction acts here and nowhere else: the conversation keeps every message
 		// it ever had, and only what leaves for the model is cut back to the last
 		// summary. Without a marker this returns the array untouched, which is what
 		// every conversation written before compaction existed gets.
-		const inContext = messagesInContext(messages);
-
-		// A stored marker holds the bare summary; the instructions that tell the model
-		// how to treat it are put around it here, so they follow the current prompt
-		// override rather than whatever it said the day the summary was written.
-		const framed = inContext.map((message) =>
-			message.compaction
-				? {
-						...message,
-						content: resolvePrompt('compactContext', $settingsStore.promptOverrides, {
-							summary: message.content
-						})
-					}
-				: message
-		);
-
-		let chatMessages = session.systemPrompt.content ? [session.systemPrompt, ...framed] : framed;
-
-		// Interactive quick-choice buttons: teach the model the <ask> protocol.
-		if (editor.interactiveChoices) {
-			const content = resolvePrompt('interactiveChoices', $settingsStore.promptOverrides);
-			chatMessages = [{ role: 'system', content }, ...chatMessages];
-		}
-
-		// Anchor the model in real time so it doesn't fall back on its training-cutoff
-		// sense of "now" (and reject facts that postdate it). Led first in the context.
-		if (editor.sendCurrentDate) {
-			const content = resolvePrompt('currentDate', $settingsStore.promptOverrides, {
-				datetime: formatCurrentDateTime()
-			});
-			chatMessages = [{ role: 'system', content }, ...chatMessages];
-		}
-
-		let searchInfo: WebSearchInfo | undefined;
-		// Whether this turn hands the model snippets rather than pages. Pages the user
-		// linked arrive in full, so there is nothing to open and `<read>` is not offered
-		// for them; search results are two lines each, which is the whole reason it exists.
-		let sentSnippets = false;
-
-		// What earlier turns already looked up.
-		const recalled = recallSearches(inContext);
-
-		// Whether the model may open a page this turn: the tool has to exist, and the
-		// user has to have left at least one of the web toggles on.
-		const mayReread = $webFetchConfig.available && (editor.webSearch || editor.webFetch);
-
-		// Which of the two protocols carries the web tools this turn. Asked only when
-		// there is a tool to carry, since for Ollama the answer costs a request.
-		const native =
-			(searchAvailable && editor.webSearch) || mayReread
-				? await useNativeTools(server, session.model.name, $settingsStore.nativeTools)
-				: false;
-
-		const nativeTools: ToolSpec[] = [];
-		if (native && searchAvailable && editor.webSearch) nativeTools.push(WEB_SEARCH_TOOL);
-		if (native && mayReread) nativeTools.push(READ_PAGE_TOOL);
-
-		// Pages the user linked to are read in full, and take precedence over a
-		// search: given an address, looking it up by keyword is the wrong move —
-		// the model would answer from snippets about the page instead of the page.
-		const linkedUrls = editor.webFetch
-			? extractUrls(inContext.filter((m) => m.role === 'user').at(-1)?.content ?? '')
-			: [];
-
-		if (linkedUrls.length && $webFetchConfig.available) {
-			editor.isSearching = true;
-			try {
-				const read = await buildPageContext(linkedUrls);
-				if (read) {
-					chatMessages = [
-						{
-							role: 'system',
-							content: resolvePrompt('pageContext', $settingsStore.promptOverrides, {
-								pages: read.context
-							})
-						},
-						...chatMessages
-					];
-					searchInfo = {
-						query: '',
-						resultCount: read.pages.length,
-						sources: read.pages.map((p) => ({ title: p.title, url: p.url }))
-					};
-				}
-			} catch {
-				// Reading failed: fall through to the normal flow rather than block the
-				// message the user actually wants to send.
-			}
-			editor.isSearching = false;
-			editor.webSearchInfo = searchInfo;
-		}
-
-		// Web search: prepend results as context. In "auto" mode the model first
-		// decides whether (and what) to search; otherwise we always search the
-		// latest message.
-		// The text path: a pre-pass decides whether to search, and the results are
-		// pushed into the context before the model ever sees the question. Skipped
-		// entirely when the model can call the tool itself, which is the whole saving:
-		// no extra request to decide on its behalf.
-		if (!native && !linkedUrls.length && searchAvailable && editor.webSearch && session.model) {
-			const lastUserMessage = inContext.filter((m) => m.role === 'user').at(-1);
-			let query: string | null = lastUserMessage?.content ?? null;
-			// Whether `query` is the router's own wording or the raw user message it
-			// fell back to. Only the first is short enough to be worth showing.
-			let queryIsRewritten = false;
-
-			// In auto mode the model first decides whether (and what) to search. This
-			// phase is transparent (no indicator): if it replies NONE we skip the
-			// search entirely and nothing is shown.
-			if (query && $settingsStore.webSearchAuto) {
-				const decider =
-					server.connectionType === ConnectionType.Ollama
-						? new OllamaStrategy(server)
-						: new OpenAIStrategy(server);
-
-				// The query writer: decides whether to search and reformulates a neutral,
-				// date-anchored query (query rewriting). Fed only the recent turns — not
-				// the session system prompt, which would bias it toward chatting. Run at
-				// temperature 0 for determinism. Editable in Settings → Tools.
-				const routerInstruction = resolvePrompt('searchRouter', $settingsStore.promptOverrides, {
-					datetime: formatCurrentDateTime()
-				});
-
-				const recentTurns = inContext
-					.filter((m) => m.role === 'user' || m.role === 'assistant')
-					.slice(-6)
-					.map((m) => ({
-						role: m.role,
-						content:
-							m.role === 'assistant' && !m.content?.trim() && m.choices
-								? askChoicesToText(m.choices)
-								: m.content
-					}));
-
-				try {
-					const reply = await decider.complete?.({
-						model: session.model.name,
-						options: { temperature: 0 },
-						messages: [{ role: 'system' as const, content: routerInstruction }, ...recentTurns]
-					});
-					const decision = parseRouterDecision(reply);
-					// A router that declines has answered the question, so its answer stands.
-					// One that produced something unreadable has not: treating that as a
-					// refusal turns any parse failure into "web search off for this message",
-					// invisibly, and then tells the model it chose not to look anything up.
-					// Falling back to the raw message is what explicit mode does anyway.
-					if (decision.kind === 'query') {
-						query = decision.query;
-						queryIsRewritten = true;
-					} else if (decision.kind === 'none') {
-						query = null;
-					}
-				} catch {
-					// Router failed — fall back to searching the raw user message.
-				}
-			}
-
-			if (query) {
-				// A reformulation by the router is concise and worth showing; the raw user
-				// message, which is what both explicit mode and the router fallback search,
-				// is often a paragraph long.
-				if (queryIsRewritten) editor.searchQuery = query;
-				editor.searchActivity = 'search';
-				editor.isSearching = true;
-				try {
-					const search = await buildSearchContext(query);
-					if (search) {
-						chatMessages = [{ role: 'system', content: search.context }, ...chatMessages];
-						sentSnippets = true;
-						searchInfo = {
-							query: search.query,
-							resultCount: search.resultCount,
-							sources: search.results.map((r) => ({ title: r.title, url: r.url }))
-						};
-					} else {
-						searchInfo = { query, resultCount: 0 };
-					}
-				} catch {
-					searchInfo = { query, resultCount: 0 };
-				}
-				editor.isSearching = false;
-				editor.webSearchInfo = searchInfo;
-				// Opens the timeline: everything the turn does afterwards lines up below it.
-				editor.reasoningTrace = [
-					...(editor.reasoningTrace ?? []),
-					{ type: 'search', query: searchInfo.query, resultCount: searchInfo.resultCount }
-				];
-			} else {
-				// The router declined. Without this note nothing in the context tells the
-				// model apart "I searched and found nothing" from "I never searched" —
-				// and models fill that silence by claiming they looked it up, sometimes
-				// staging fake searches in their reasoning first.
-				//
-				// Sent alongside the index below rather than instead of it: the two answer
-				// different questions, one about this message and one about the ones before
-				// it, which is exactly the distinction the model was failing to make.
-				chatMessages = [
-					{ role: 'system', content: resolvePrompt('searchNone', $settingsStore.promptOverrides) },
-					...chatMessages
-				];
-			}
-		}
-
-		// The index of what earlier turns found, ahead of anything retrieved for this
-		// message: oldest first, so "what you already knew" reads before "what you were
-		// just handed", and the two lists of [numbers] can't be mistaken for each other.
-		if (recalled.length) {
-			chatMessages = [
-				{
-					role: 'system',
-					content: resolvePrompt('searchRecall', $settingsStore.promptOverrides, {
-						results: formatSourceIndex(recalled)
-					})
-				},
-				...chatMessages
-			];
-		}
-
-		// Offered once, whatever put a source in front of the model, and only when the
-		// tool that serves it is available: promising a page that can't be fetched is
-		// worse than snippets alone. The index survives the user switching the web tools
-		// off (their earlier answers still cite it) but rereading does not — turning them
-		// off has to mean no request goes out.
-		// Native mode: when to reach for a tool, as an instruction rather than as a
-		// line in a tool description. The text path has a whole pre-pass whose only job
-		// is deciding whether to look something up, and dropping that left the decision
-		// resting on a description the model weighs far more lightly. A model that
-		// answered a question about a niche game from memory, with a search tool sitting
-		// right there unused, is what this is for.
-		if (nativeTools.length) {
-			chatMessages = [
-				...chatMessages,
-				{ role: 'system', content: resolvePrompt('toolPolicy', $settingsStore.promptOverrides) }
-			];
-		}
-
-		// Not in native mode, where `read_page` says all of this in its own description
-		// and the model has a real call to make instead of a block to write.
-		if (!native && mayReread && (sentSnippets || recalled.length)) {
-			chatMessages = [
-				...chatMessages,
-				{ role: 'system', content: resolvePrompt('searchRead', $settingsStore.promptOverrides) }
-			];
-		}
-
-		// Map messages for the chat request, converting images if necessary
-		const chatMessagesForRequest = chatMessages.map((msg) => {
-			// Ollama expects images as base64 strings without filename
-			const images = msg.images?.map((img) => img.data);
-			// An assistant turn that was only an <ask> block has empty content; some
-			// providers (Mistral) reject that, so send the questions as text.
-			const content =
-				msg.role === 'assistant' && !msg.content?.trim() && msg.choices
-					? askChoicesToText(msg.choices)
-					: msg.content;
-			return {
-				...msg,
-				content,
-				images // Override images with just the data
-			};
-		});
-
-		let chatRequest: ChatRequest = {
+		const input: RunInput = {
+			sessionId: session.id,
+			server: { kind: 'inline', server },
 			model: session.model.name,
 			options: session.options,
-			messages: chatMessagesForRequest,
 			think: editor.thinking !== false,
-			...(nativeTools.length ? { tools: nativeTools } : {})
+			systemPrompt: session.systemPrompt.content || undefined,
+			messages: messagesInContext(messages),
+			flags: {
+				webSearch: !!editor.webSearch,
+				webFetch: !!editor.webFetch,
+				interactiveChoices: !!editor.interactiveChoices,
+				sendCurrentDate: !!editor.sendCurrentDate,
+				nativeTools: $settingsStore.nativeTools,
+				webSearchAuto: $settingsStore.webSearchAuto
+			},
+			capabilities: {
+				search: searchAvailable,
+				fetch: $webFetchConfig.available
+			},
+			promptOverrides: $settingsStore.promptOverrides
 		};
 
-		/**
-		 * Sources this turn has put in front of the model, in the order it saw them.
-		 *
-		 * Numbering runs across the whole turn rather than restarting per call: a model
-		 * that searches twice and then cites [2] has to mean one thing. It is also what
-		 * ends up stored on the message, and therefore what the next turn's index is
-		 * built from.
-		 */
-		const turnSources: { title: string; url: string }[] = [];
+		// Both are asked for before the turn goes out, because both are about the
+		// state it will leave behind: a conversation with no assistant message yet is
+		// the one about to earn a name, and automatic compaction is due once this
+		// answer has landed rather than before it does.
+		const wants = {
+			title:
+				$chatDefaultsConfig.title.generateTitlesWithAI &&
+				!session.title &&
+				session.messages.filter((m) => m.role === 'assistant').length === 0,
+			compact: compactConfig.autoCompact && !isCompacting
+		};
 
-		/** Addresses `read_page` will open: only what this conversation has shown. */
-		const openable = () =>
-			new Set([...recallableUrls(recalled), ...turnSources.map((s) => s.url), ...linkedUrls]);
-
-		/**
-		 * Run one call and return what the model should read as its result.
-		 *
-		 * Every failure comes back as text rather than as an exception. A tool that
-		 * throws takes down a turn the user is waiting on; a tool that explains what
-		 * went wrong lets the model apologise, try differently, or answer without it.
-		 */
-		async function runToolCall(call: ToolCall): Promise<string> {
-			let args: Record<string, unknown>;
-			try {
-				args = JSON.parse(call.arguments || '{}');
-			} catch {
-				return 'Those arguments were not valid JSON, so the call was not made. Try again with a well-formed argument object, or answer without this tool.';
-			}
-
-			if (call.name === WEB_SEARCH_TOOL.name) {
-				const query = typeof args.query === 'string' ? args.query.trim() : '';
-				if (!query) return 'This call needs a non-empty "query" string.';
-
-				editor.searchQuery = query;
-				editor.searchActivity = 'search';
-				editor.isSearching = true;
-				let search: Awaited<ReturnType<typeof buildSearchContext>> = null;
-				try {
-					search = await buildSearchContext(query, turnSources.length + 1);
-				} catch {
-					// Reported to the model below, like any other empty result.
-				}
-				editor.isSearching = false;
-
-				editor.reasoningTrace = [
-					...(editor.reasoningTrace ?? []),
-					{ type: 'search', query, resultCount: search?.resultCount ?? 0 }
-				];
-
-				if (!search)
-					return `No results came back for "${query}". Say so rather than inventing any.`;
-
-				turnSources.push(...search.results.map((r) => ({ title: r.title, url: r.url })));
-				searchInfo = {
-					query,
-					resultCount: turnSources.length,
-					sources: [...turnSources]
-				};
-				editor.webSearchInfo = searchInfo;
-				return search.context;
-			}
-
-			if (call.name === READ_PAGE_TOOL.name) {
-				const url = typeof args.url === 'string' ? args.url.trim() : '';
-				if (!url) return 'This call needs a non-empty "url" string.';
-				// The same allowlist the `<read>` protocol resolves against: the model can
-				// reopen what it was shown and nothing else, so no address it composes
-				// turns into a request.
-				if (!openable().has(url)) {
-					return `${url} has not appeared in this conversation, so it cannot be opened. Only addresses from search results or from earlier messages can be read.`;
-				}
-
-				editor.searchActivity = 'read';
-				editor.isSearching = true;
-				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
-				try {
-					read = await buildPageContext([url], turnSources.length + 1);
-				} catch {
-					// Same as an unreachable page.
-				}
-				editor.isSearching = false;
-
-				editor.reasoningTrace = [
-					...(editor.reasoningTrace ?? []),
-					{ type: 'read', pages: read?.pages.map((p) => ({ title: p.title, url: p.url })) ?? [] }
-				];
-
-				if (!read?.pages.length) {
-					return `${url} could not be read. Say plainly that you could not open it rather than presenting its contents as if you had.`;
-				}
-
-				turnSources.push(...read.pages.map((p) => ({ title: p.title, url: p.url })));
-				searchInfo = {
-					query: searchInfo?.query ?? '',
-					resultCount: turnSources.length,
-					sources: [...turnSources]
-				};
-				editor.webSearchInfo = searchInfo;
-				return resolvePrompt('pageContext', $settingsStore.promptOverrides, {
-					pages: read.context
-				});
-			}
-
-			return `There is no tool called "${call.name}".`;
-		}
-
-		try {
-			let strategy: ChatStrategy | undefined = undefined;
-			switch (server.connectionType) {
-				case ConnectionType.Ollama:
-					strategy = new OllamaStrategy(server);
-					break;
-				case ConnectionType.OpenAI:
-				case ConnectionType.OpenAICompatible:
-				case ConnectionType.Anthropic:
-				case ConnectionType.Infomaniak:
-					strategy = new OpenAIStrategy(server);
-					break;
-			}
-
-			if (!strategy) throw new Error('Invalid strategy');
-
-			// Two rounds for the text protocol: the model may answer the first with a
-			// <read> block asking for the full text of some results, which is fetched
-			// and handed back for the second. It never gets a third.
-			//
-			// Four when it has real tools, because it spends them one call at a time and
-			// a search followed by a read is already two. Still a hard ceiling: a small
-			// model that has decided to call the same tool forever costs the user a
-			// bounded number of requests, and then owes an answer with what it has.
-			const maxRounds = nativeTools.length ? 4 : 2;
-
-			for (let round = 0; round < maxRounds; round++) {
-				editor.completion = '';
-				editor.reasoning = '';
-
-				// The last round is the one that has to produce a reply, so the tools are
-				// withdrawn for it. Declining the calls instead would leave the model's
-				// final word being a request nobody answers, and the user with an empty
-				// message; taking the tools away leaves it no choice but to write.
-				if (nativeTools.length && round === maxRounds - 1) {
-					chatRequest = {
-						...chatRequest,
-						tools: undefined,
-						messages: [
-							...chatRequest.messages,
-							{
-								role: 'system',
-								content:
-									'No further tool calls are possible for this message. Answer now with what you have, and say plainly what you were not able to check.'
-							}
-						]
-					};
-				}
-
-				// Create a reasoning processor to handle tag parsing
-				const reasoningProcessor = createReasoningProcessor(
-					(text) => {
-						editor.completion += text;
-					},
-					(text) => {
-						editor.reasoning += text;
-					}
-				);
-
-				let toolCalls: ToolCall[] = [];
-
-				await strategy.chat(chatRequest, editor.abortController.signal, async (part) => {
-					// Native reasoning (Ollama `message.thinking`, OpenAI `reasoning_content`)
-					// streams straight into the reasoning panel. Regular content still goes
-					// through the FSM so inline <think> tags from other providers are split out.
-					if (part.thinking) editor.reasoning += part.thinking;
-					if (part.content) reasoningProcessor.processChunk(part.content);
-					if (part.toolCalls) toolCalls = part.toolCalls;
-					await scrollToBottom();
-				});
-
-				// Finalize processing of any remaining content
-				reasoningProcessor.finalize();
-
-				// The native path. A turn ends when the model stops asking for tools, or
-				// when it runs out of rounds — never on the tools failing, since a failure
-				// is text it can read and answer around.
-				if (nativeTools.length) {
-					if (!toolCalls.length || editor.abortController.signal.aborted) break;
-
-					// Whatever it wrote alongside the calls belongs to the round that asked,
-					// and the reply is written fresh next round. Kept in the timeline so the
-					// thinking that led to the call is not lost off screen.
-					if (editor.reasoning?.trim()) {
-						editor.reasoningTrace = [
-							...(editor.reasoningTrace ?? []),
-							{ type: 'reasoning', content: editor.reasoning }
-						];
-					}
-
-					// Sequentially, not in parallel: each call numbers its sources from what
-					// the turn has already collected, so two searches resolved at once would
-					// both start from the same number and the model's citations would point
-					// at two different pages. It also lets a read follow a search that only
-					// just produced the address.
-					const results: { call: ToolCall; content: string }[] = [];
-					for (const call of toolCalls) {
-						results.push({ call, content: await runToolCall(call) });
-					}
-
-					chatRequest = {
-						...chatRequest,
-						messages: [
-							...chatRequest.messages,
-							{ role: 'assistant', content: editor.completion, toolCalls },
-							...results.map(({ call, content }) => ({
-								role: 'tool' as const,
-								content,
-								toolCallId: call.id,
-								toolName: call.name
-							}))
-						]
-					};
-					continue;
-				}
-
-				if (round > 0) break;
-
-				const wanted = parseReadBlock(editor.completion);
-				// Nothing was asked for, so this reply is the answer.
-				if (!wanted.indices.length && !wanted.urls.length) break;
-
-				const sources = searchInfo?.sources ?? [];
-
-				// Numbers address this turn's results; addresses reach anything the
-				// conversation was shown, which is how the model rereads a page from three
-				// messages ago instead of taking back what it said then. Both resolve
-				// against what we handed it: an address it invented matches nothing and is
-				// dropped, so no reply of its own can send a request somewhere new.
-				const allowed = recallableUrls(recalled);
-
-				// What a number means. This turn's results first, then the index of what
-				// earlier turns found, which keeps the numbers the answers citing it used.
-				// Without the fallback, a turn that searched nothing could not resolve any
-				// number at all — and the model reads its numbers off that index, so
-				// `<read>5</read>` pointed at nothing and the turn ended silent.
-				const byNumber: Record<number, string> = {};
-				for (const search of recalled) {
-					for (const source of search.sources) byNumber[source.number] = source.url;
-				}
-				sources.forEach((source, i) => (byNumber[i + 1] = source.url));
-
-				// Deduplicated: a model that asks for both `1` and its address means one page.
-				// Nothing resolves when the user has the web tools off, which is the same
-				// gate as the offer above: a block emitted unprompted fetches nothing.
-				const urls = mayReread
-					? [
-							...new Set(
-								[
-									...wanted.indices.map((n) => byNumber[n]),
-									...wanted.urls.filter(
-										(url) => allowed.has(url) || sources.some((s) => s.url === url)
-									)
-								].filter((url): url is string => !!url)
-							)
-						]
-					: [];
-
-				// It asked for something, and none of it resolved. Breaking here used to
-				// end the turn on whatever was left of the reply, which for a model that
-				// wrote nothing but the request block is nothing at all: the user got an
-				// empty message. Tell it, and let it answer.
-				if (!urls.length) {
-					chatRequest = {
-						...chatRequest,
-						messages: [
-							...chatRequest.messages,
-							{
-								role: 'system',
-								content:
-									'Nothing could be opened from that request: those numbers and addresses do not match anything you have been shown. Answer now from what you already have, and say what you could not check. Do not ask to read anything again.'
-							}
-						]
-					};
-					continue;
-				}
-
-				// From here the turn takes a second round, which overwrites the live
-				// reasoning: this round's thinking joins the timeline as a step, in the
-				// same position it already occupied, so nothing moves on screen.
-				if (editor.reasoning?.trim())
-					editor.reasoningTrace = [
-						...(editor.reasoningTrace ?? []),
-						{ type: 'reasoning', content: editor.reasoning }
-					];
-
-				editor.searchActivity = 'read';
-				editor.isSearching = true;
-				let read: Awaited<ReturnType<typeof buildPageContext>> = null;
-				try {
-					read = await buildPageContext(urls);
-				} catch {
-					// Unreachable pages shouldn't cost the user their answer: fall through
-					// and let the model reply from the snippets it already has.
-				}
-				editor.isSearching = false;
-
-				editor.reasoningTrace = [
-					...(editor.reasoningTrace ?? []),
-					{ type: 'read', pages: read?.pages.map((p) => ({ title: p.title, url: p.url })) ?? [] }
-				];
-
-				// It asked and got nothing: say so, rather than let it answer from the
-				// one-line snippets as though it had read the pages.
-				if (!read) {
-					chatRequest = {
-						...chatRequest,
-						messages: [
-							...chatRequest.messages,
-							{
-								role: 'system',
-								content:
-									'The pages you asked to read could not be retrieved. Answer from the search snippets alone, and say plainly that you could not open the pages — do not present their contents as if you had read them.'
-							}
-						]
-					};
-					continue;
-				}
-
-				// Not necessarily a search that happened this turn: a page can now be
-				// reopened off the index alone, so there may be no query behind it.
-				searchInfo = {
-					query: searchInfo?.query ?? '',
-					resultCount: read.pages.length,
-					sources: read.pages.map((page) => ({ title: page.title, url: page.url }))
-				};
-				editor.webSearchInfo = searchInfo;
-				chatRequest = {
-					...chatRequest,
-					messages: [
-						...chatRequest.messages,
-						{
-							role: 'system',
-							content: resolvePrompt('pageContext', $settingsStore.promptOverrides, {
-								pages: read.context
-							})
-						}
-					]
-				};
-			}
-
-			// Pull out an <ask> quick-choice block, if the model emitted one. The
-			// stored content drops the raw block (buttons render from `choices`).
-			const { content, choices } = parseAskBlock(stripReadBlock(editor.completion));
-
-			const message: Message = {
-				role: 'assistant',
-				content,
-				reasoning: editor.reasoning,
-				reasoningTrace: editor.reasoningTrace,
-				webSearch: searchInfo,
-				choices,
-				// Stamped BEFORE the message is appended so the completed Article mounts
-				// with the panel already in the right state — no post-render re-open flash.
-				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
-				createdAt: new Date().toISOString()
-			};
-
-			session.messages = [...session.messages, message];
-			session.updatedAt = new Date().toISOString();
-			saveSession(session);
-
-			editor.completion = '';
-			editor.reasoning = '';
-			editor.reasoningTrace = undefined;
-			editor.shouldFocusTextarea = true;
-			editor.isCompletionInProgress = false;
-			await scrollToBottom();
-
-			await maybeGenerateTitle();
-			await maybeAutoCompact();
-		} catch (error) {
-			const typedError = error instanceof Error ? error : new Error(String(error));
-			if (typedError.name === 'AbortError') return; // User aborted the request
-			handleError(typedError);
-		}
-	}
-
-	async function maybeGenerateTitle() {
-		// Auto-name a brand new session once its first exchange completes.
-		const isFirstExchange = session.messages.filter((m) => m.role === 'assistant').length === 1;
-		if (!$chatDefaultsConfig.title.generateTitlesWithAI || session.title || !isFirstExchange)
-			return;
-
-		const firstUserMessage = session.messages.find(
-			(m) => m.role === 'user' && m.content && !m.knowledge
+		await runLocally(
+			input,
+			session,
+			wants,
+			(event) => applyRunEvent(event, surface),
+			editor.abortController.signal
 		);
-		if (!firstUserMessage?.content) return;
-
-		const title = await generateTitle(firstUserMessage.content);
-		if (title) {
-			session.title = title;
-			session.updatedAt = new Date().toISOString();
-			saveSession(session);
-		}
 	}
+
+	/** Where a run's events land, whether the run is in this tab or in the server. */
+	const surface: RunSurface = {
+		get editor() {
+			return editor;
+		},
+		get session() {
+			return session;
+		},
+		save: () => saveSession(session),
+		onProgress: () => void scrollToBottom(),
+		setCompacting: (active) => (isCompacting = active),
+		onFinish: ({ error }) => {
+			if (error) handleError(new Error(error));
+		}
+	};
 
 	// --- compaction -----------------------------------------------------------
 
@@ -1152,21 +533,6 @@
 		compactAbort?.abort();
 	}
 
-	/**
-	 * Automatic compaction, once a turn has landed rather than before one goes
-	 * out: the user gets their answer first, and the wait for the summary falls in
-	 * the gap while they read it instead of in front of their next message.
-	 *
-	 * Only fires once per crossing — the marker it appends drops the estimate back
-	 * under the threshold, so the next check is quiet again.
-	 */
-	async function maybeAutoCompact() {
-		if (!compactConfig.autoCompact || isCompacting) return;
-		const usage = contextUsage(session, compactConfig.compactThreshold);
-		if (usage.ratio < 1) return;
-		await runCompaction(true);
-	}
-
 	function runCommand(name: CommandName) {
 		if (name !== 'compact') return;
 		// The menu hides `/compact` when there is nothing to compact, but the name
@@ -1179,28 +545,15 @@
 		void runCompaction();
 	}
 
+	/**
+	 * Stop, and keep what was written.
+	 *
+	 * Only the abort: what to do with a half-written answer is the run's ending,
+	 * and it is written down once in the reducer. Doing it here as well is how the
+	 * same partial message used to be appended twice.
+	 */
 	function stopCompletion() {
 		editor.abortController?.abort();
-
-		// Add the incomplete message to session if there's any content
-		if (editor.completion || editor.reasoning) {
-			const message: Message = {
-				role: 'assistant',
-				content: editor.completion || '',
-				reasoning: editor.reasoning || '',
-				isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
-				createdAt: new Date().toISOString()
-			};
-			session.messages = [...session.messages, message];
-			session.updatedAt = new Date().toISOString();
-			saveSession(session);
-		}
-
-		// Clear editor state
-		editor.completion = '';
-		editor.reasoning = '';
-		editor.isCompletionInProgress = false;
-		editor.shouldFocusTextarea = true;
 	}
 
 	function handleError(error: Error) {

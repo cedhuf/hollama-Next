@@ -70,27 +70,6 @@ export async function loadWebFetchConfig(): Promise<void> {
 }
 
 /**
- * The URLs in a message.
- *
- * Deliberately strict — a bare `example.com` is left alone. Guessing at what is
- * a link would send requests the user never asked for; only an explicit scheme
- * counts as "please read this".
- */
-export function extractUrls(text: string): string[] {
-	const found = text.match(/\bhttps?:\/\/[^\s<>"'`]+/gi) ?? [];
-	const cleaned = found.map((url) =>
-		// Trailing punctuation usually belongs to the sentence, not the URL —
-		// unless it closes a pair that opened inside it.
-		url.replace(/[.,;:!?]+$/, '').replace(/\)+$/, (parens) => {
-			const opened = (url.match(/\(/g) ?? []).length;
-			const closed = (url.match(/\)/g) ?? []).length;
-			return closed > opened ? parens.slice(0, opened - closed) : parens;
-		})
-	);
-	return [...new Set(cleaned)];
-}
-
-/**
  * Fetches the given pages and formats them as a context block.
  *
  * `startNumber` continues the numbering from whatever the turn has already shown
