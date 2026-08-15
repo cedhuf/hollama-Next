@@ -164,6 +164,13 @@ export interface Settings {
 	 */
 	backgroundBlurLevel: number;
 	/**
+	 * Whether the app may offer to install itself, now and then.
+	 *
+	 * A preference about being asked, so it travels with the rest; when it was
+	 * last asked is a fact about one device, and stays there.
+	 */
+	offerInstall: boolean;
+	/**
 	 * A picture behind the app, as a data URL. The sidebar's materials let it
 	 * through, the conversation stays opaque over it, and the margin around both
 	 * shows it plainly.
@@ -238,6 +245,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	surfaceTransparency: true,
 	surfaceTransparencyLevel: 50,
 	backgroundBlurLevel: 50,
+	offerInstall: true,
 	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,

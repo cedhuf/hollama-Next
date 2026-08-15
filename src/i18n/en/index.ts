@@ -316,6 +316,10 @@ const en = {
 	untitled: 'Untitled',
 	allConversations: 'All conversations',
 	moreOptions: 'More options',
+	installApp: 'Install the app',
+	offerInstall: 'Offer to install the app now and then',
+	offerInstallHelp:
+		'Installed, it runs without browser chrome, keeps its own icon and starts on its own screen. The offer appears on the first visit and then only occasionally; the entry at the bottom of the sidebar opens it whenever you want.',
 	administrator: 'Administrator',
 	user: 'User',
 

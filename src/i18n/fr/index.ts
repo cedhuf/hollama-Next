@@ -309,6 +309,10 @@ const fr = extendDictionary(en, {
 	untitled: 'Sans titre',
 	allConversations: 'Toutes les conversations',
 	moreOptions: 'Plus d’options',
+	installApp: 'Installer l’application',
+	offerInstall: 'Proposer d’installer l’application de temps en temps',
+	offerInstallHelp:
+		'Installée, elle s’ouvre sans l’habillage du navigateur, garde sa propre icône et démarre sur son écran. La proposition apparaît à la première visite puis seulement de loin en loin ; l’entrée en bas de la barre latérale l’ouvre quand vous voulez.',
 	administrator: 'Administrateur',
 	user: 'Utilisateur',
 

@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { Settings2 } from '@lucide/svelte';
+	import { Settings2, Smartphone } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
+	import { browser } from '$app/environment';
+	import { isInstalled, openInstallDialog } from '$lib/install';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
+
+	import Tooltip from './Tooltip.svelte';
 
 	interface Props {
 		/** The collapsed desktop rail keeps the avatar and drops the name. */
@@ -63,47 +67,87 @@
 {/snippet}
 
 <!-- The bottom edge of the column, the same material as the top one. -->
-<div
-	class="shrink-0 border-t p-2 surface-chrome max-lg:pb-[max(0.5rem,env(safe-area-inset-bottom))]"
->
-	{#if rail}
-		<div class="flex justify-center">
-			<button
-				onclick={() => ($settingsModalOpen = true)}
-				class="relative transition-transform hover:scale-105"
-				title={$LL.settings()}
-				aria-label={$LL.settings()}
-			>
-				{@render avatar(36)}
-				{@render connectionDot()}
-			</button>
-		</div>
-	{:else}
-		<!-- Labelled explicitly: otherwise the accessible name is whatever its
+<div class="flex shrink-0 border-t surface-chrome">
+	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
+	<div
+		class="w-full shrink-0 p-2 max-lg:pb-[max(0.5rem,env(safe-area-inset-bottom))] {rail
+			? 'lg:w-16'
+			: 'lg:w-96'}"
+	>
+		<!-- Standing here rather than appearing once and being gone. On the platforms
+	     that matter most there is no install button anywhere in the browser, only a
+	     gesture nobody knows, and the one place someone thinks to look for it is the
+	     app itself. Read once, when the column is drawn: nothing installs an app
+	     halfway through a session except the offer, which hides itself. -->
+		{#if browser && !isInstalled()}
+			{#if rail}
+				<div class="mb-1 flex justify-center">
+					<Tooltip side="right">
+						{#snippet trigger({ props })}
+							<button
+								{...props}
+								type="button"
+								onclick={openInstallDialog}
+								aria-label={$LL.installApp()}
+								class="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:text-active"
+							>
+								<Smartphone class="h-5 w-5" />
+							</button>
+						{/snippet}
+						{$LL.installApp()}
+					</Tooltip>
+				</div>
+			{:else}
+				<button
+					type="button"
+					onclick={openInstallDialog}
+					class="mb-1 flex h-9 w-full items-center gap-3 rounded-lg px-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+				>
+					<Smartphone class="h-4 w-4 shrink-0" />
+					<span class="truncate">{$LL.installApp()}</span>
+				</button>
+			{/if}
+		{/if}
+
+		{#if rail}
+			<div class="flex justify-center">
+				<button
+					onclick={() => ($settingsModalOpen = true)}
+					class="relative flex h-12 items-center transition-transform hover:scale-105"
+					title={$LL.settings()}
+					aria-label={$LL.settings()}
+				>
+					{@render avatar(36)}
+					{@render connectionDot()}
+				</button>
+			</div>
+		{:else}
+			<!-- Labelled explicitly: otherwise the accessible name is whatever its
 		     children happen to concatenate to ("No server connected Settings
 		     Administrator"), which announces badly and is unusable as a handle. -->
-		<button
-			onclick={() => ($settingsModalOpen = true)}
-			aria-label={$LL.settings()}
-			class="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-shade-0"
-		>
-			<span class="relative shrink-0">
-				{@render avatar(36)}
-				{@render connectionDot()}
-			</span>
-			<span class="flex min-w-0 flex-1 flex-col">
-				<span class="truncate text-sm font-medium">
-					{hasName
-						? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
-						: $LL.settings()}
+			<button
+				onclick={() => ($settingsModalOpen = true)}
+				aria-label={$LL.settings()}
+				class="flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-shade-0"
+			>
+				<span class="relative shrink-0">
+					{@render avatar(36)}
+					{@render connectionDot()}
 				</span>
-				<span class="text-xs text-muted">
-					{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
+				<span class="flex min-w-0 flex-1 flex-col">
+					<span class="truncate text-sm font-medium">
+						{hasName
+							? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
+							: $LL.settings()}
+					</span>
+					<span class="text-xs text-muted">
+						{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
+					</span>
 				</span>
-			</span>
-			<span class="shrink-0 text-muted">
-				<Settings2 class="h-5 w-5" />
-			</span>
-		</button>
-	{/if}
+				<span class="shrink-0 text-muted">
+					<Settings2 class="h-5 w-5" />
+				</span>
+			</button>
+		{/if}
+	</div>
 </div>

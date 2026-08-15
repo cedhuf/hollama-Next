@@ -25,6 +25,13 @@
 	import { buildDefaultPersonas } from '$lib/defaultPersonas';
 	import { releaseUrl } from '$lib/github';
 	import {
+		installDialog,
+		isInstalled,
+		markInstallOffered,
+		shouldOfferInstall,
+		type PwaInstallDialog
+	} from '$lib/install';
+	import {
 		hydrateStores,
 		knowledgeStore,
 		personasStore,
@@ -423,6 +430,43 @@
 		) {
 			$welcomeOpen = true;
 		}
+
+		// The web component is only ever loaded in the browser: it registers a custom
+		// element, which is not a thing the server can do.
+		void import('@khmyznikov/pwa-install');
+	});
+
+	/** Handed to the store so anything can ask for it, the sidebar entry included. */
+	let pwaInstall: PwaInstallDialog | undefined = $state();
+
+	/**
+	 * The offer, once the component says there is one to make.
+	 *
+	 * On its event rather than on its `isInstallAvailable` property, which is the
+	 * mistake worth not making twice: that property belongs to a Lit element, so
+	 * reading it here creates no dependency and the answer is taken once, too early.
+	 * Chromium settles it when the browser hands its prompt over, and Apple half a
+	 * second after load, by which time an effect that ran at mount is long finished.
+	 *
+	 * Never over the first-run wizard: two dialogs on a first launch is one too
+	 * many, and the app has not yet given anyone a reason to want it on their home
+	 * screen. On a returning visit there is no wizard, so the offer is immediate.
+	 */
+	$effect(() => {
+		const dialog = pwaInstall;
+		installDialog.set(dialog ?? null);
+		if (!dialog) return;
+
+		const offer = () => {
+			if (get(onboardingOpen) || get(welcomeOpen)) return;
+			if (!shouldOfferInstall(get(settingsStore).offerInstall !== false)) return;
+
+			markInstallOffered();
+			dialog.showDialog();
+		};
+
+		dialog.addEventListener('pwa-install-available-event', offer);
+		return () => dialog.removeEventListener('pwa-install-available-event', offer);
 	});
 </script>
 
@@ -469,6 +513,19 @@
 	<KnowledgeModal />
 	<Onboarding />
 	<Welcome />
+
+	<!-- Held in manual mode, so it shows nothing of its own accord: when to ask is
+	     the product's business, and it is decided above. The manifest is where it
+	     reads the name, the description and the screenshots from, so the sheet it
+	     draws is the same one Chromium draws natively. -->
+	{#if browser && !isInstalled()}
+		<pwa-install
+			bind:this={pwaInstall}
+			manual-apple
+			manual-chrome
+			manifest-url="/manifest.webmanifest"
+		></pwa-install>
+	{/if}
 
 	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->

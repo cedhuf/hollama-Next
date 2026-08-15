@@ -213,6 +213,14 @@
 		<SettingsHint>{$LL.backgroundImageHelp()}</SettingsHint>
 	</SettingsSection>
 
+	<!-- The way to be left alone about it. The offer itself is a dialogue the app
+	     does not own, so the opt-out cannot live inside it; it lives here, beside
+	     everything else that decides what the app is allowed to do unprompted. -->
+	<SettingsSection title={$LL.installApp()} card>
+		<FieldCheckbox label={$LL.offerInstall()} bind:checked={$settingsStore.offerInstall} />
+		<SettingsHint>{$LL.offerInstallHelp()}</SettingsHint>
+	</SettingsSection>
+
 	<SettingsSection title={$LL.homeScreen()} card>
 		<FieldCheckbox label={$LL.showGreetingHeader()} bind:checked={$settingsStore.homeShowHeader} />
 		<FieldCheckbox
