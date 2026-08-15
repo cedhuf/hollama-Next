@@ -399,10 +399,6 @@ test.describe('screenshots', () => {
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
 		await shoot(page, 'desktop_conversation');
 
-		await page.goto('/sessions');
-		await expect(page.getByText('John Smith')).toBeVisible();
-		await shoot(page, 'desktop_home');
-
 		// The collapsed rail, which is a different way of using the app rather than
 		// the same one made narrower.
 		await configure(page, { sidebarExpanded: false });
@@ -432,10 +428,6 @@ test.describe('screenshots', () => {
 		await page.getByRole('tab', { name: 'Interface' }).click();
 		await expect(page.getByText('Theme style')).toBeVisible();
 		await shoot(page, 'desktop_settings');
-
-		await page.getByRole('tab', { name: 'Servers' }).click();
-		await expect(page.getByTestId('server')).toHaveCount(2);
-		await shoot(page, 'desktop_servers');
 	});
 
 	/**
@@ -455,7 +447,10 @@ test.describe('screenshots', () => {
 		for (const themeMode of ['light', 'dark'] as const) {
 			const row: string[] = [];
 			for (const themeStyle of THEME_STYLES) {
-				await configure(page, { themeStyle, themeMode });
+				// The flat bar rather than the floating pill: the pill hovers over the
+				// transcript, which is right in use and untidy in a photograph, where a
+				// half-covered line of text is all anyone sees.
+				await configure(page, { themeStyle, themeMode, floatingChatHeader: false });
 				await page.goto('/sessions/ab12cd');
 				await expect(page.locator('html')).toHaveAttribute('data-color-theme', themeMode);
 				await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
@@ -508,6 +503,6 @@ test.describe('screenshots', () => {
 		// Where each section has something to show: the sidebar and its list sit
 		// left, the library's cards fill the middle, the settings dialog is centred,
 		// and the wallpaper reads best across the conversation.
-		await composeRows(page, [shots], { gap: 6, focus: [260, 900, 900, 1150], name: 'sections' });
+		await composeRows(page, [shots], { gap: 6, focus: [260, 620, 900, 1150], name: 'sections' });
 	});
 });
