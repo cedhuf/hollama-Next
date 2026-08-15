@@ -1220,6 +1220,10 @@ type RootTranslation = {
 	 */
 	untitled: string
 	/**
+	 * A​l​l​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
+	 */
+	allConversations: string
+	/**
 	 * A​d​m​i​n​i​s​t​r​a​t​o​r
 	 */
 	administrator: string
@@ -3309,6 +3313,10 @@ The completion in progress will stop
 	 * Untitled
 	 */
 	untitled: () => LocalizedString
+	/**
+	 * All conversations
+	 */
+	allConversations: () => LocalizedString
 	/**
 	 * Administrator
 	 */

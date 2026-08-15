@@ -314,6 +314,7 @@ const en = {
 	connected: 'Connected',
 	noServerConnected: 'No server connected',
 	untitled: 'Untitled',
+	allConversations: 'All conversations',
 	administrator: 'Administrator',
 	user: 'User',
 

@@ -92,6 +92,12 @@ The search field carries the `Ctrl`/`Cmd` + `K` hint, which opens the full-text
 A persona's conversation shows its avatar in the list, so it is recognisable even with the pinned
 launchers turned off.
 
+Collapsed, the sidebar becomes a one-lane rail: new chat and search, the two sections, your pinned
+personas, and the four conversations you were in most recently, each as a single letter with its name
+on hover. The button under them opens the rest of the list, with titles, without having to expand the
+column for a single visit. The mark stays at the top, at the size it has at full width, and the
+control that widens the column again sits astride the column's edge, half on it and half off it.
+
 **Right-click any conversation** (long press on a touch screen) for the full menu: pin it, save it as
 [knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always
 asks, and asks on the row itself rather than in a dialog somewhere else.

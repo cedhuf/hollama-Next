@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PanelLeft, PanelLeftClose } from '@lucide/svelte';
+	import { PanelLeftClose } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
@@ -8,29 +8,25 @@
 	import Logo from './Logo.svelte';
 
 	interface Props {
-		/** The collapsed desktop rail has room for one button and no name. */
+		/** The collapsed desktop rail keeps the mark and drops the name. */
 		rail: boolean;
-		onExpand: () => void;
 		onCollapse: () => void;
 	}
 
-	let { rail, onExpand, onCollapse }: Props = $props();
+	let { rail, onCollapse }: Props = $props();
 </script>
 
 <!-- The top edge of the column, and the densest of its materials along with the
      footer: edges read as edges by being more solid than what they enclose. -->
 <div class="flex h-[var(--app-header-h)] shrink-0 items-center border-b px-4 surface-chrome">
 	{#if rail}
-		<div class="flex w-full justify-center">
-			<button
-				onclick={onExpand}
-				class="rounded-lg p-2 text-muted transition-colors hover:text-active"
-				aria-label={$LL.expandSidebar()}
-				title={$LL.expandSidebar()}
-			>
-				<PanelLeft class="h-5 w-5" />
-			</button>
-		</div>
+		<!-- The mark holds the corner at the same size it does at full width, so the
+		     column keeps its identity when it narrows rather than looking like a
+		     smaller version of itself. Widening it again is the handle's business, and
+		     the handle is not in here: it sits astride the column's edge. -->
+		<a href={resolve('/sessions')} aria-label={APP_NAME} class="flex w-full justify-center">
+			<Logo class="h-8 w-8 shrink-0" />
+		</a>
 	{:else}
 		<a href={resolve('/sessions')} class="flex items-center gap-2">
 			<Logo class="h-8 w-8 shrink-0" />

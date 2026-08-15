@@ -1,8 +1,12 @@
 <script lang="ts">
+	import { ChevronsRight } from '@lucide/svelte';
+
+	import LL from '$i18n/i18n-svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas } from '$lib/personas';
+	import { watchScrollDirection } from '$lib/scrollDirection';
 	import { Sitemap } from '$lib/sitemap';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
@@ -19,8 +23,6 @@
 
 	/** Matches `duration-300` in the actions block. The lock below and the CSS must agree. */
 	const TRANSITION_MS = 300;
-	/** How far a gesture has to travel before it counts as one, rather than as a tremor. */
-	const SCROLL_STEP = 6;
 
 	/**
 	 * The header gives its room back on the way down, and takes it back the moment
@@ -32,34 +34,12 @@
 	 * And it is safe here in a way it was not before, because there is no longer a
 	 * circuit to close. The actions are a neighbour of the list, not a layer over it,
 	 * so no padding stands in for them, nothing measures their height, and nothing
-	 * writes the scroll position. One arrow, from the scroll to a class, and a single
-	 * arrow cannot loop.
+	 * writes the scroll position.
 	 */
 	let scrolledAway = $state(false);
-	let lastTop = 0;
-	let settledAt = 0;
-
-	function onListScroll(top: number) {
-		// A flip makes the list taller or shorter, and on a barely scrollable one the
-		// browser trims `scrollTop` to fit. That trim is not a gesture, so it is not
-		// read as one; without this it would read as scrolling up, reopen the header,
-		// and start again.
-		if (performance.now() < settledAt) {
-			lastTop = top;
-			return;
-		}
-
-		// Small moves accumulate rather than being discarded, so a slow drag still
-		// crosses the step eventually.
-		const delta = top - lastTop;
-		if (Math.abs(delta) < SCROLL_STEP) return;
-		lastTop = top;
-
-		const next = delta > 0 && top > SCROLL_STEP;
-		if (next === scrolledAway) return;
-		scrolledAway = next;
-		settledAt = performance.now() + TRANSITION_MS;
-	}
+	const onListScroll = watchScrollDirection((away) => (scrolledAway = away), {
+		settle: TRANSITION_MS
+	});
 
 	/** The header's shape: the setting, or the way you are going through the list. */
 	const compact = $derived($settingsStore.compactSidebarHeader || scrolledAway);
@@ -84,7 +64,6 @@
 	const personaById = $derived(
 		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
 	);
-	const recentSessions = $derived(visibleSessions.slice(0, 4));
 
 	// Mobile drawer open/close is transient (sidebar store, starts closed); desktop
 	// rail/full is the persisted sidebarExpanded preference. Kept separate so the
@@ -130,25 +109,64 @@
      the page slides aside to uncover it and the sidebar itself never moves.
      Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="app-panel fixed inset-y-0 left-0 flex h-full w-[min(84vw,22rem)] shrink-0 flex-col overflow-hidden transition-[width] duration-200 ease-in-out lg:relative lg:z-auto lg:max-w-none lg:translate-x-0 lg:rounded-xl lg:border
+	class="fixed inset-y-0 left-0 h-full w-[min(84vw,22rem)] shrink-0 transition-[width,margin] duration-300 ease-out motion-reduce:transition-none lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
 		{$settingsStore.sidebarExpanded ? 'lg:mr-4 lg:w-96' : 'lg:mr-2 lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
-	<SidebarBrand rail={showRail} onExpand={expandSidebar} onCollapse={collapseOrClose} />
+	<!-- The column proper, and the only thing that clips. It is a box of its own so
+	     that the handle below can sit astride its edge: rounding a corner means
+	     cutting off whatever crosses it, and a handle that straddles the edge is
+	     exactly that. -->
+	<div class="app-panel flex h-full flex-col overflow-hidden lg:rounded-xl lg:border">
+		<!-- Laid out at the width it is going to, not at the width it is passing
+		     through, in both directions.
 
+		     Nothing inside then moves at all: the column slides over its contents
+		     instead of dragging them along. Which is why the mark does not so much as
+		     twitch between the two states, centred in sixty four pixels being exactly
+		     where it already sits at three hundred and eighty four.
+
+		     It also spares the whole column a reflow per frame. A search field, a pair
+		     of tabs and a grid of avatars used to recompute their wrapping sixty times
+		     a second on the way between the two widths, which is what made the
+		     animation look like boiling rather than opening. -->
+		<div
+			class="flex h-full w-full flex-col {$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
+		>
+			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} />
+
+			{#if showRail}
+				<SidebarRail personas={personaLaunchers} sessions={visibleSessions} onNewChat={newChat} />
+			{:else}
+				<SidebarActions bind:query personas={filteredPersonas} {compact} onNewChat={newChat} />
+				<SidebarSessions
+					sessions={visibleSessions}
+					{q}
+					{personaById}
+					hasPersonaMatches={filteredPersonas.length > 0}
+					onScroll={onListScroll}
+				/>
+			{/if}
+
+			<SidebarFooter rail={showRail} />
+		</div>
+	</div>
+
+	<!-- Astride the edge, level with the brand. Half of it belongs to the column and
+	     half to what is beside it, which is the whole of what it does: it is the seam
+	     between the two, not a button the column happens to carry. Hence its position
+	     from the header's own height rather than from a number that would have to be
+	     kept in step with it. -->
 	{#if showRail}
-		<SidebarRail personas={personaLaunchers} sessions={recentSessions} onNewChat={newChat} />
-	{:else}
-		<SidebarActions bind:query personas={filteredPersonas} {compact} onNewChat={newChat} />
-		<SidebarSessions
-			sessions={visibleSessions}
-			{q}
-			{personaById}
-			hasPersonaMatches={filteredPersonas.length > 0}
-			onScroll={onListScroll}
-		/>
+		<button
+			onclick={expandSidebar}
+			aria-label={$LL.expandSidebar()}
+			title={$LL.expandSidebar()}
+			style="top: calc(var(--app-header-h) / 2)"
+			class="absolute right-0 hidden -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-1 p-1 text-muted shadow-sm transition-colors hover:border-accent hover:text-active lg:flex"
+		>
+			<ChevronsRight class="h-3.5 w-3.5" />
+		</button>
 	{/if}
-
-	<SidebarFooter rail={showRail} />
 </nav>

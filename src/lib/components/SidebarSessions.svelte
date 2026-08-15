@@ -23,8 +23,8 @@
 		personaById: Record<string, Persona>;
 		/** Whether the header still has a match to show, for the empty state. */
 		hasPersonaMatches: boolean;
-		/** Reports the scroll position, once per frame. The header decides what to do with it. */
-		onScroll?: (top: number) => void;
+		/** Reports the scroller itself, once per frame. The header decides what to do with it. */
+		onScroll?: (element: HTMLElement) => void;
 	}
 
 	let { sessions, q, personaById, hasPersonaMatches, onScroll }: Props = $props();
@@ -38,7 +38,7 @@
 		queued = true;
 		requestAnimationFrame(() => {
 			queued = false;
-			onScroll?.(el?.scrollTop ?? 0);
+			if (el) onScroll?.(el);
 		});
 	}
 
