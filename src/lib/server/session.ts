@@ -1,6 +1,6 @@
 import type { RequestEvent } from '@sveltejs/kit';
 
-import { getUserById, type Role } from './db/users';
+import { getUserById, touchLastSeen, type Role } from './db/users';
 
 /**
  * The signed-in user, or null.
@@ -16,5 +16,11 @@ export async function sessionUser(event: {
 }): Promise<{ id: string; role: Role } | null> {
 	const session = await event.locals.auth();
 	if (!session?.user?.id) return null;
-	return getUserById(session.user.id) ? { id: session.user.id, role: session.user.role } : null;
+	if (!getUserById(session.user.id)) return null;
+
+	// Here because this is the one place that answers "who is this": a route cannot
+	// forget to do it, and a route that never asks has nobody to record.
+	touchLastSeen(session.user.id);
+
+	return { id: session.user.id, role: session.user.role };
 }

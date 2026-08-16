@@ -2158,6 +2158,24 @@ type RootTranslation = {
 	 */
 	users: string
 	/**
+	 * n​o​w
+	 */
+	lastSeenNow: string
+	/**
+	 * {​h​o​u​r​s​}​h​ ​a​g​o
+	 * @param {number} hours
+	 */
+	lastSeenHours: RequiredParams<'hours'>
+	/**
+	 * {​d​a​y​s​}​d​ ​a​g​o
+	 * @param {number} days
+	 */
+	lastSeenDays: RequiredParams<'days'>
+	/**
+	 * n​e​v​e​r​ ​s​e​e​n
+	 */
+	lastSeenNever: string
+	/**
 	 * A​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
 	 */
 	usersDescription: string
@@ -4595,6 +4613,22 @@ The completion in progress will stop
 	 * Users
 	 */
 	users: () => LocalizedString
+	/**
+	 * now
+	 */
+	lastSeenNow: () => LocalizedString
+	/**
+	 * {hours}h ago
+	 */
+	lastSeenHours: (arg: { hours: number }) => LocalizedString
+	/**
+	 * {days}d ago
+	 */
+	lastSeenDays: (arg: { days: number }) => LocalizedString
+	/**
+	 * never seen
+	 */
+	lastSeenNever: () => LocalizedString
 	/**
 	 * Accounts on this instance.
 	 */

@@ -57,6 +57,11 @@ There is **no self-registration**. You create accounts here, with an email, a pa
 or users arrive through OIDC (auto-provisioned on first sign-in unless you set
 `OIDC_AUTO_PROVISION=false`).
 
+Each row shows when that account was last around, in hours up to a day and then in days. It is
+recorded at most every few minutes, which is all a figure like that is worth, and left blank for an
+account nobody has opened since the instance was updated: saying "created three months ago" under a
+heading that reads "last seen" would be a plausible lie, and a blank is not.
+
 Deleting a user deletes their data with them. Their conversations, knowledge and personas are theirs
 alone, and nothing of it is shared with the instance.
 

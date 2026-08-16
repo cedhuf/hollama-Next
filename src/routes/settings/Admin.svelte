@@ -45,6 +45,22 @@
 		email: string;
 		role: string;
 		created_at: string;
+		last_seen_at: string | null;
+	}
+
+	/**
+	 * How long ago, in one glance.
+	 *
+	 * Hours up to a day, then days, and nothing finer: the value is written at most
+	 * every few minutes, so a figure in minutes would be more precise than the data
+	 * behind it. Under an hour reads as "now", which is what it means in a list
+	 * whose question is who is still around.
+	 */
+	function lastSeen(at: string): string {
+		const hours = Math.floor((Date.now() - new Date(at).getTime()) / 3_600_000);
+		if (hours < 1) return $LL.lastSeenNow();
+		if (hours < 24) return $LL.lastSeenHours({ hours });
+		return $LL.lastSeenDays({ days: Math.floor(hours / 24) });
 	}
 
 	let allowUserKeys = $state(false);
@@ -591,7 +607,17 @@
 			<div
 				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
 			>
-				<span>{user.email} <span class="text-xs text-muted">({user.role})</span></span>
+				<span class="min-w-0 truncate">
+					{user.email}
+					<span class="text-xs text-muted">({user.role})</span>
+				</span>
+				<!-- Quiet and to the right of the row, before the one control that acts on
+				     it: an administrator scanning the list is looking for who is still
+				     around, not reading a report. Blank rather than a guess for an account
+				     nobody has opened since this existed. -->
+				<span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted">
+					{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
+				</span>
 				<Button variant="icon" onclick={() => removeUser(user.id)}>
 					<Trash2 class="base-icon" />
 				</Button>

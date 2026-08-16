@@ -11,6 +11,8 @@ export interface UserRow {
 	role: Role;
 	profile: string; // JSON
 	created_at: string;
+	/** Last request this account made, to the minute it was written. Null: never seen. */
+	last_seen_at: string | null;
 }
 
 export function getUserByEmail(email: string): UserRow | undefined {
@@ -53,12 +55,37 @@ export function setUserRole(id: string, role: Role): void {
 	getDb().prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
 }
 
-export type UserSummary = Pick<UserRow, 'id' | 'email' | 'role' | 'created_at'>;
+export type UserSummary = Pick<UserRow, 'id' | 'email' | 'role' | 'created_at' | 'last_seen_at'>;
 
 export function listUsers(): UserSummary[] {
 	return getDb()
-		.prepare('SELECT id, email, role, created_at FROM users ORDER BY created_at')
+		.prepare('SELECT id, email, role, created_at, last_seen_at FROM users ORDER BY created_at')
 		.all() as unknown as UserSummary[];
+}
+
+/**
+ * Note that an account is around, at most once every few minutes.
+ *
+ * Called from the one place that answers "who is this", so it cannot be
+ * forgotten on a route. Throttled in memory because it is called on every
+ * authenticated request, and a chat writes several a second: to the minute is
+ * all a "last seen" column is worth, and a write per request to store it would
+ * be the most expensive thing on the page.
+ *
+ * The throttle is per process and per user, so a restart costs one extra write.
+ */
+const TOUCH_EVERY_MS = 5 * 60 * 1000;
+const touched = new Map<string, number>();
+
+export function touchLastSeen(id: string): void {
+	const now = Date.now();
+	const last = touched.get(id) ?? 0;
+	if (now - last < TOUCH_EVERY_MS) return;
+	touched.set(id, now);
+
+	getDb()
+		.prepare('UPDATE users SET last_seen_at = ? WHERE id = ?')
+		.run(new Date(now).toISOString(), id);
 }
 
 export function deleteUser(id: string): void {

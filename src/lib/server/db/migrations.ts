@@ -170,6 +170,18 @@ const migrations: Migration[] = [
 			WHERE json_extract(m.value, '$.cleared') IS NOT NULL
 			   OR json_extract(m.value, '$.compaction') IS NOT NULL;
 		`
+	},
+	{
+		version: 8,
+		up: `
+			-- When each account was last seen, for the administrator's user list.
+			--
+			-- Nullable and left null on existing rows rather than backfilled with the
+			-- creation date: an account nobody has opened since this shipped has not
+			-- been seen, and saying "created three months ago" in a column headed "last
+			-- seen" would be a plausible lie, which is worse than a blank.
+			ALTER TABLE users ADD COLUMN last_seen_at TEXT;
+		`
 	}
 ];
 
