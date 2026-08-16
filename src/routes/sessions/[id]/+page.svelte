@@ -205,9 +205,6 @@
 	onMount(async () => {
 		handleSessionChange();
 		messagesWindow?.addEventListener('scroll', handleScroll);
-		// The reason any of this exists: a turn that was still going when the page
-		// went away is picked back up here, transcript and all.
-		void reattach();
 	});
 
 	beforeNavigate((navigation) => {
@@ -215,7 +212,7 @@
 		// the server keeps going and is waiting when the conversation is opened
 		// again, so asking whether to abandon it would be asking about a danger that
 		// no longer exists.
-		if (editor.isCompletionInProgress && !activeRun) {
+		if (editor.isCompletionInProgress && runLocation !== 'server') {
 			const userConfirmed = confirm($LL.areYouSureYouWantToLeave());
 			if (userConfirmed) {
 				stopCompletion();
@@ -226,7 +223,7 @@
 		}
 
 		// Leaving a server-side turn only stops watching it.
-		if (activeRun) stopFollowing?.();
+		if (runLocation === 'server') stopFollowing?.();
 
 		// Only show confirmation when navigating outside of /sessions/ path
 		if (
@@ -242,6 +239,23 @@
 	});
 
 	async function handleSessionChange() {
+		// Opening another conversation reuses this component, so what was on screen
+		// for the last one has to be put down explicitly. Without this the streaming
+		// article of the conversation you just left is the first thing the next one
+		// shows, and the run being followed is the wrong conversation's.
+		stopFollowing?.();
+		stopFollowing = null;
+		activeRun = null;
+		runLocation = 'none';
+		editor.isCompletionInProgress = false;
+		editor.completion = '';
+		editor.reasoning = '';
+		editor.reasoningTrace = undefined;
+		editor.isSearching = false;
+		editor.searchActivity = undefined;
+		editor.searchQuery = undefined;
+		editor.webSearchInfo = undefined;
+
 		session = data.session;
 		modelName = session.model?.name || '';
 		editor.view = 'messages';
@@ -318,7 +332,14 @@
 
 			await tick();
 			handleSubmit();
+			return;
 		}
+
+		// The reason any of this exists: a turn that was still going when the page
+		// went away is picked back up here, transcript and all. Here rather than in
+		// `onMount`, because opening another conversation reuses this component and
+		// never mounts it again, which is the ordinary way you leave and come back.
+		void reattach();
 	}
 
 	async function handleSubmitNewMessage(images?: { data: string; filename: string }[]) {
@@ -431,6 +452,10 @@
 		// summary. Without a marker this returns the array untouched, which is what
 		// every conversation written before compaction existed gets.
 		const onServer = $settingsStore.serverSideGeneration;
+		// Said now rather than when the server answers: between the two there is a
+		// round trip, and a page that thinks the turn is in this tab for the length
+		// of it will warn about losing something that is not at risk.
+		runLocation = onServer ? 'server' : 'tab';
 
 		const input: RunInput = {
 			sessionId: session.id,
@@ -484,13 +509,17 @@
 		};
 
 		if (!onServer) {
-			await runLocally(
-				input,
-				session,
-				wants,
-				(event) => applyRunEvent(event, surface),
-				editor.abortController.signal
-			);
+			try {
+				await runLocally(
+					input,
+					session,
+					wants,
+					(event) => applyRunEvent(event, surface),
+					editor.abortController.signal
+				);
+			} finally {
+				runLocation = 'none';
+			}
 			return;
 		}
 
@@ -518,16 +547,31 @@
 			// nothing has been started, so the tab runs it rather than losing the
 			// message. A server that is down should cost a promise, not an answer.
 			console.warn('Falling back to a local run:', error);
-			await runLocally(
-				input,
-				session,
-				wants,
-				(event) => applyRunEvent(event, surface),
-				editor.abortController.signal
-			);
+			runLocation = 'tab';
+			try {
+				await runLocally(
+					input,
+					session,
+					wants,
+					(event) => applyRunEvent(event, surface),
+					editor.abortController.signal
+				);
+			} finally {
+				runLocation = 'none';
+			}
 		}
 	}
 
+	/**
+	 * Where the turn in progress is running.
+	 *
+	 * One value rather than two, and set before the request goes out rather than
+	 * when the answer to it comes back. Derived from a pair, there was a moment
+	 * between "a turn started" and "the server acknowledged it" where the page
+	 * believed the turn was in this tab, and leaving during that moment asked
+	 * whether to abandon something that was in no danger.
+	 */
+	let runLocation = $state<'none' | 'tab' | 'server'>('none');
 	/** The id of the run this page is watching, if it is watching one. */
 	let activeRun = $state<string | null>(null);
 	let stopFollowing: (() => void) | null = null;
@@ -540,17 +584,28 @@
 	 */
 	async function follow(runId: string, from: number) {
 		activeRun = runId;
+		runLocation = 'server';
 		rememberRun(session.id, runId);
 		editor.isCompletionInProgress = true;
 
-		const { done, stop } = followRun(runId, from, (event) => applyRunEvent(event, surface));
+		let ended = false;
+		const { done, stop } = followRun(runId, from, (event) => {
+			if (event.type === 'done' || event.type === 'error') ended = true;
+			applyRunEvent(event, surface);
+		});
 		stopFollowing = stop;
+
 		try {
 			await done;
 		} finally {
 			stopFollowing = null;
 			activeRun = null;
-			forgetRun(session.id);
+			runLocation = 'none';
+			// Only an ending clears the note. Closing the window on a turn that is
+			// still going is the case the note exists for, so leaving must not erase
+			// the one thing that says there is something to come back to.
+			if (ended) forgetRun(session.id);
+			else editor.isCompletionInProgress = false;
 		}
 	}
 
@@ -563,12 +618,25 @@
 	 */
 	async function reattach() {
 		if (!$settingsStore.serverSideGeneration) return;
-		if (editor.isCompletionInProgress || activeRun) return;
+		if (activeRun) return;
 
-		const hint = rememberedRun(session.id);
-		const run = await runForSession(session.id).catch(() => null);
+		const sessionId = session.id;
+		// The note the tab that started it left behind. It is only a hint, and the
+		// server is still asked; but it is enough to say "still going" immediately
+		// rather than after a round trip, which is the difference between coming
+		// back to a conversation that looks stalled and one that looks alive.
+		const hint = rememberedRun(sessionId);
+		if (hint) editor.isCompletionInProgress = true;
+
+		const run = await runForSession(sessionId).catch(() => null);
+		// The conversation may have changed under us while that was in flight.
+		if (sessionId !== session.id) return;
+
 		if (!run) {
-			if (hint) forgetRun(session.id);
+			if (hint) {
+				forgetRun(sessionId);
+				editor.isCompletionInProgress = false;
+			}
 			return;
 		}
 
