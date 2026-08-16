@@ -67,25 +67,36 @@ export function listUsers(): UserSummary[] {
  * Note that an account is around, at most once every few minutes.
  *
  * Called from the one place that answers "who is this", so it cannot be
- * forgotten on a route. Throttled in memory because it is called on every
- * authenticated request, and a chat writes several a second: to the minute is
- * all a "last seen" column is worth, and a write per request to store it would
- * be the most expensive thing on the page.
+ * forgotten on a route. It is therefore called on every authenticated request,
+ * and a conversation makes several a second: a write each time, to store a value
+ * that is only ever read to the hour, would be the most expensive thing on the
+ * page.
  *
- * The throttle is per process and per user, so a restart costs one extra write.
+ * So it is throttled twice, and the two do different jobs.
+ *
+ * In memory, which is the fast path: the common request does not reach SQLite at
+ * all. It is per process and per user, which is why it is not the whole answer.
+ *
+ * And in the statement itself, which is the correct one: the row is only written
+ * when what it holds is genuinely older than the window. That makes a restart
+ * cost nothing rather than one spurious write per user, and it makes two
+ * processes agree without knowing about each other, which the map cannot do.
+ * A no-op update touches no page.
  */
 const TOUCH_EVERY_MS = 5 * 60 * 1000;
 const touched = new Map<string, number>();
 
 export function touchLastSeen(id: string): void {
 	const now = Date.now();
-	const last = touched.get(id) ?? 0;
-	if (now - last < TOUCH_EVERY_MS) return;
+	if (now - (touched.get(id) ?? 0) < TOUCH_EVERY_MS) return;
 	touched.set(id, now);
 
 	getDb()
-		.prepare('UPDATE users SET last_seen_at = ? WHERE id = ?')
-		.run(new Date(now).toISOString(), id);
+		.prepare(
+			`UPDATE users SET last_seen_at = ?
+			 WHERE id = ? AND (last_seen_at IS NULL OR last_seen_at < ?)`
+		)
+		.run(new Date(now).toISOString(), id, new Date(now - TOUCH_EVERY_MS).toISOString());
 }
 
 export function deleteUser(id: string): void {
