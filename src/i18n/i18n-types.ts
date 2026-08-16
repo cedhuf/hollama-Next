@@ -440,6 +440,10 @@ type RootTranslation = {
 	 */
 	deleteServer: string
 	/**
+	 * D​e​l​e​t​e​ ​t​h​i​s​ ​m​e​s​s​a​g​e
+	 */
+	deleteMessage: string
+	/**
 	 * D​e​l​e​t​e​ ​s​e​s​s​i​o​n
 	 */
 	deleteSession: string
@@ -2895,6 +2899,10 @@ The completion in progress will stop
 	 * Delete server
 	 */
 	deleteServer: () => LocalizedString
+	/**
+	 * Delete this message
+	 */
+	deleteMessage: () => LocalizedString
 	/**
 	 * Delete session
 	 */

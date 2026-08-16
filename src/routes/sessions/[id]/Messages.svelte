@@ -129,6 +129,22 @@
 	}
 
 	/**
+	 * Remove one turn.
+	 *
+	 * By identity rather than by index: the list drawn is a slice of the
+	 * conversation when something has been cleared, and an index into what is on
+	 * screen is not an index into what is stored.
+	 *
+	 * Only the message asked for. Deleting a question does not delete its answer,
+	 * because sometimes the answer is the part worth keeping, and a rule that took
+	 * both would be one nobody could undo.
+	 */
+	function handleDeleteMessage(message: Message) {
+		session.messages = session.messages.filter((m) => m !== message);
+		saveSession(session);
+	}
+
+	/**
 	 * Undo a compaction: drop the marker and the model sees the whole history
 	 * again. Nothing else has to be restored, because nothing was removed.
 	 */
@@ -170,6 +186,7 @@
 				onChoose={(selected) => chooseAnswer(message, selected)}
 				handleEditMessage={() => handleEditMessage(message)}
 				handleDeleteAttachment={() => handleDeleteAttachment(message)}
+				handleDeleteMessage={() => handleDeleteMessage(message)}
 				onToggleReasoning={() => saveSession(session)}
 				folded={fade && i < foldedBefore}
 			/>

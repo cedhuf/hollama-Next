@@ -113,6 +113,7 @@ const en = {
 		'Tesseract language codes, for example eng, fra, deu. Combine them with a plus sign: eng+fra. Each language is a separate download.',
 	deleteKnowledge: 'Delete knowledge',
 	deleteServer: 'Delete server',
+	deleteMessage: 'Delete this message',
 	deleteSession: 'Delete session',
 	disconnected: 'Disconnected',
 	dismiss: 'Dismiss',

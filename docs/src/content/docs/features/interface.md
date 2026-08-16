@@ -121,6 +121,11 @@ entry only it has: _End this conversation_. That is not deletion and does not re
 puts the persona back to unstarted and leaves the transcript in the list as an ordinary conversation;
 deleting is the entry below, and it is the only one that loses anything.
 
+**Every message carries its own actions** under it: retry, edit if it is yours, copy, and delete.
+Deleting takes that one turn and nothing else. A question deleted does not take its answer with it,
+because sometimes the answer is the part worth keeping. It asks first, on the message itself, and
+the confirmation replaces the icon it was asked from so nothing in the thread moves while it waits.
+
 ### Archive
 
 The middle answer between a conversation in the way and a conversation gone. Archiving takes it out

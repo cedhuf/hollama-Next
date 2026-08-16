@@ -76,6 +76,7 @@ const fr = extendDictionary(en, {
 	dark: 'Sombre',
 	deleteKnowledge: 'Supprimer la connaissance',
 	deleteServer: 'Supprimer le serveur',
+	deleteMessage: 'Supprimer ce message',
 	deleteSession: 'Supprimer la session',
 	disconnected: 'Déconnecté',
 	dismiss: 'Ignorer',

@@ -8,7 +8,8 @@
 		Globe,
 		Pencil,
 		RefreshCw,
-		Trash2
+		Trash2,
+		X
 	} from '@lucide/svelte';
 	import { untrack } from 'svelte';
 	import { quadInOut } from 'svelte/easing';
@@ -36,6 +37,7 @@
 		handleRetry = undefined,
 		handleEditMessage = undefined,
 		handleDeleteAttachment = undefined,
+		handleDeleteMessage = undefined,
 		onChoose = undefined,
 		isStreamingArticle = false,
 		isSearching = false,
@@ -65,6 +67,8 @@
 		handleRetry?: (index: number) => void;
 		handleEditMessage?: (message: Message) => void;
 		handleDeleteAttachment?: (message: Message) => void;
+		/** Removes this one turn from the conversation. Absent where that makes no sense. */
+		handleDeleteMessage?: (message: Message) => void;
 		/** Called with the picked option(s) when the message has quick-choice buttons. */
 		onChoose?: (selected: string[][]) => void;
 		isStreamingArticle?: boolean;
@@ -90,6 +94,9 @@
 
 	const isKnowledgeAttachment = $derived(message.knowledge?.name !== undefined);
 	const isDocumentAttachment = $derived(!!message.document);
+	/** Waiting for a second click, since a deleted turn does not come back. */
+	let confirmingDelete = $state(false);
+
 	const isUserRole = $derived(
 		message.role === 'user' && !isKnowledgeAttachment && !isDocumentAttachment
 	);
@@ -554,6 +561,46 @@
 					</Button>
 				{/if}
 				<ButtonCopy content={message.content} compact />
+
+				<!-- Removing one turn, which the conversation had no way to do: everything
+				     that deleted anything deleted the whole conversation, so a message
+				     sent twice, a reply that went wrong, or a duplicate left by an older
+				     bug had to be lived with.
+
+				     It asks first, and it asks here rather than in a dialog somewhere
+				     else, the way the sidebar's rows do. Nothing else in the thread moves
+				     while it waits: the confirmation replaces the icon it was asked
+				     from. -->
+				{#if handleDeleteMessage}
+					{#if confirmingDelete}
+						<Button
+							title={$LL.confirmDeletion()}
+							variant="icon-sm"
+							class="text-negative"
+							onclick={() => {
+								confirmingDelete = false;
+								handleDeleteMessage?.(message);
+							}}
+						>
+							<Check class="h-3.5 w-3.5" />
+						</Button>
+						<Button
+							title={$LL.cancel()}
+							variant="icon-sm"
+							onclick={() => (confirmingDelete = false)}
+						>
+							<X class="h-3.5 w-3.5" />
+						</Button>
+					{:else}
+						<Button
+							title={$LL.deleteMessage()}
+							variant="icon-sm"
+							onclick={() => (confirmingDelete = true)}
+						>
+							<Trash2 class="h-3.5 w-3.5" />
+						</Button>
+					{/if}
+				{/if}
 			</div>
 		{/if}
 	</article>
