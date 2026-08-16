@@ -164,14 +164,18 @@
 
 	/**
 	 * The prompt cut into plain runs and mentions, for the mirror behind the input.
-	 *
-	 * A trailing newline is padded, because a textarea keeps a blank last line and
-	 * a div collapses it, which would put the mirror one line short of the text on
-	 * top of it.
 	 */
-	const promptSegments = $derived(
-		splitMentions((editor.prompt ?? '') + '\u200b', $personasStore ?? [])
-	);
+	const promptSegments = $derived(splitMentions(editor.prompt ?? '', $personasStore ?? []));
+
+	/**
+	 * One space when the prompt ends on a newline.
+	 *
+	 * A textarea keeps its blank last line and a box collapses it, so without this
+	 * the mirror is one line short of the text standing on it. A zero-width space
+	 * was tried and is worse: it is a break opportunity, so it can move where the
+	 * last line wraps.
+	 */
+	const trailingPad = $derived((editor.prompt ?? '').endsWith('\n') ? ' ' : '');
 
 	let mirror = $state<HTMLDivElement | undefined>();
 
@@ -503,13 +507,13 @@
 						aria-hidden="true"
 						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 overflow-hidden px-4 pt-3.5"
 					>
-						{#each promptSegments as segment, i (i)}
-							{#if segment.kind === 'mention'}
-								<span class="prompt-editor__mention">{segment.text}</span>
-							{:else}
-								{segment.text}
-							{/if}
-						{/each}
+						<!-- Written on one line, and it has to stay on one line. The mirror
+						     renders with `pre-wrap`, so the newlines and indentation between
+						     these tags are not formatting, they are characters: laid out
+						     normally, every segment pushed the next one along and two mentions
+						     were enough to see the text slide out from under itself. -->
+						<!-- prettier-ignore -->
+						{#each promptSegments as segment, i (i)}{#if segment.kind === 'mention'}<span class="prompt-editor__mention">{segment.text}</span>{:else}{segment.text}{/if}{/each}{trailingPad}
 					</div>
 
 					<textarea
