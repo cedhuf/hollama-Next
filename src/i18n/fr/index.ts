@@ -665,6 +665,11 @@ const fr = extendDictionary(en, {
 	tokensFreedDetail: '{before:string} ramenés à {after:string}.',
 	compactFailed: 'La conversation n’a pas pu être compactée',
 	slashCommands: 'Commandes',
+	mentionPersona: 'Appeler un persona',
+	mentionInsert: 'insérer',
+	mentionsSequential: 'Les personas appelés ensemble se lisent entre eux',
+	mentionsSequentialHelp:
+		"Activé, ils répondent dans l'ordre où vous les avez nommés, chacun ayant lu les précédents. Désactivé, chacun reçoit la même question et aucune des autres réponses.",
 	slashRun: 'Lancer',
 	clearCommandDescription:
 		'Repartir de zéro : replier cette conversation et rendre au modèle une page blanche',

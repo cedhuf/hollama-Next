@@ -200,6 +200,8 @@
 		searchQuery={editor.searchQuery}
 		{preparingChoices}
 		{assistantLabel}
+		speakerName={editor.speakerName}
+		speakerPersonaId={editor.speakerPersonaId}
 		currentRawReasoning={editor.reasoning}
 		currentRawCompletion={streamingContent}
 		bind:streamingReasoningExpanded={editor.streamingReasoningExpanded}

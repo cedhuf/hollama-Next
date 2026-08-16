@@ -14,7 +14,8 @@ import { buildSearchContext } from '$lib/search';
 import type { Session } from '$lib/sessions';
 import { buildPageContext } from '$lib/webFetch';
 
-import { runTurn, type RunDeps } from './orchestrator';
+import { type RunDeps } from './orchestrator';
+import { runSpeakers } from './speakers';
 import type { RunEvent, RunInput } from './types';
 
 /**
@@ -110,10 +111,17 @@ export async function runLocally(
 	emit: (event: RunEvent) => void,
 	signal: AbortSignal
 ): Promise<void> {
-	const server = resolveServer(input);
-	if (!server) {
-		emit({ type: 'error', message: 'Server not found', aborted: false });
-		return;
-	}
-	await runTurn(input, browserDeps(input, server, session, wants), emit, signal);
+	// Resolved per pass rather than once: each speaker brings its own server, so a
+	// generalist model can hold the conversation and an expensive specialist can be
+	// asked for one opinion inside it.
+	await runSpeakers(
+		input,
+		(pass) => {
+			const server = resolveServer(pass);
+			if (!server) throw new Error('Server not found');
+			return browserDeps(pass, server, session, wants);
+		},
+		emit,
+		signal
+	);
 }

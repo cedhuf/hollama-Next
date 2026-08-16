@@ -8,6 +8,8 @@
 export type PromptKey =
 	| 'currentDate'
 	| 'personaLanguage'
+	| 'personaSummoned'
+	| 'multiSpeaker'
 	| 'searchRouter'
 	| 'toolPolicy'
 	| 'searchNone'
@@ -44,6 +46,19 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Fixes the language a persona answers in, added to its own prompt.',
 		default:
 			'Always reply in {language}, whatever language the user writes to you in, unless they explicitly ask for another language.'
+	},
+	personaSummoned: {
+		label: 'Persona called into a conversation',
+		placeholders: ['{name}'],
+		hint: 'Added to a persona’s own prompt when it is summoned with @ from another conversation.',
+		default:
+			'You have been called into an ongoing conversation as {name}. You are one participant among several, not the assistant who has been answering so far: the messages above are the conversation as it stands, and some of them were written by other participants, each marked with their name. Read all of it as context, answer only the part addressed to you, and speak as yourself. Do not introduce yourself, do not summarise what was already said, and do not answer on anybody else’s behalf.'
+	},
+	multiSpeaker: {
+		label: 'Several participants',
+		hint: 'Tells the model that some replies in the conversation were written by someone else.',
+		default:
+			'This conversation has more than one participant. Replies that begin with a name in square brackets were written by that participant, not by you. Attribute them correctly and never claim their words as your own.'
 	},
 	searchRouter: {
 		label: 'Web search — query',
@@ -214,6 +229,8 @@ Write in the language of the conversation. Be concise but never lossy: prefer a 
 export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
 	'personaLanguage',
+	'personaSummoned',
+	'multiSpeaker',
 	'searchRouter',
 	'toolPolicy',
 	'searchNone',

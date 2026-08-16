@@ -80,18 +80,36 @@ export async function runTurn(
 		// A stored marker holds the bare summary; the instructions that tell the model
 		// how to treat it are put around it here, so they follow the current prompt
 		// override rather than whatever it said the day the summary was written.
-		const framed = input.messages.map((message) =>
-			message.compaction
-				? {
-						...message,
-						content: resolvePrompt('compactContext', overrides, { summary: message.content })
-					}
-				: message
-		);
+		const framed = input.messages.map((message) => {
+			if (message.compaction) {
+				return {
+					...message,
+					content: resolvePrompt('compactContext', overrides, { summary: message.content })
+				};
+			}
+			// Who said it, in the text, because that is the only place every provider
+			// reads. A reply written by a persona is an `assistant` message like any
+			// other, so without this the next model to read the conversation takes it
+			// for something it said itself, and carries on from words it never wrote.
+			// `name` on a message would be the tidy answer and is not portable.
+			if (message.personaName) {
+				return { ...message, content: `[${message.personaName}] ${message.content}` };
+			}
+			return message;
+		});
 
 		let chatMessages: Message[] = input.systemPrompt
 			? [{ role: 'system', content: input.systemPrompt }, ...framed]
 			: framed;
+
+		// Said once, and only when it is true: a conversation nobody was called into
+		// reads exactly as it did before any of this existed.
+		if (input.messages.some((message) => message.personaName)) {
+			chatMessages = [
+				{ role: 'system', content: resolvePrompt('multiSpeaker', overrides) },
+				...chatMessages
+			];
+		}
 
 		// Interactive quick-choice buttons: teach the model the <ask> protocol.
 		if (input.flags.interactiveChoices) {
@@ -652,7 +670,11 @@ export async function runTurn(
 			reasoning,
 			webSearch: searchInfo,
 			choices,
-			createdAt: new Date().toISOString()
+			createdAt: new Date().toISOString(),
+			// Who said it. Absent on an ordinary turn, which is every turn the app had
+			// before a persona could be called into one.
+			personaId: input.speaker?.personaId,
+			personaName: input.speaker?.name
 		};
 
 		emit({ type: 'message', message });

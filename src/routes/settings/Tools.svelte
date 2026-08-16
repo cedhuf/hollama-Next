@@ -223,6 +223,14 @@
 				? $LL.personaAutoUpdateForcedHelp()
 				: $LL.personaAutoUpdateHelp()}
 		</SettingsHint>
+
+		<!-- Only about several in one message: calling one persona is unaffected, and
+		     calling them in separate messages was always sequential by definition. -->
+		<FieldCheckbox
+			label={$LL.mentionsSequential()}
+			bind:checked={$settingsStore.mentionsSequential}
+		/>
+		<SettingsHint>{$LL.mentionsSequentialHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection

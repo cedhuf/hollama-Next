@@ -184,7 +184,7 @@ export const deletePersona = (id: string): void => {
  * contributes, so it is a snapshot and not a live setting reaching into a chat
  * already under way.
  */
-function languageInstruction(persona: Persona): string {
+export function languageInstruction(persona: Persona): string {
 	const settings = get(settingsStore);
 	const language =
 		persona.language?.trim() ||

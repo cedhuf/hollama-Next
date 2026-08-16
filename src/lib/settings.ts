@@ -117,6 +117,15 @@ export interface Settings {
 	 * update, it is a loss; those keep being offered rather than applied.
 	 */
 	personaAutoUpdate: boolean;
+	/**
+	 * Whether personas called in one message read each other.
+	 *
+	 * On: they answer in the order they were named, each having read the ones
+	 * before, which is what a conversation with several people is. Off: each is
+	 * handed the same question and none of the others' answers, which is what you
+	 * want when you are collecting independent opinions rather than a discussion.
+	 */
+	mentionsSequential: boolean;
 	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
 	knowledgeCollections: KnowledgeCollection[];
 	/** Ids of the collections folded shut in the Library, so the page opens as it was left. */
@@ -270,6 +279,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	personaStoreUrl: '',
 	personaStoreLayout: 'grid',
 	personaAutoUpdate: false,
+	mentionsSequential: true,
 	knowledgeCollections: [],
 	collapsedCollections: [],
 	homeShowHeader: true,

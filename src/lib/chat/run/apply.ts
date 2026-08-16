@@ -53,6 +53,16 @@ export function applyRunEvent(
 	};
 
 	switch (event.type) {
+		case 'speaker':
+			// A new voice: whatever the previous one had half-written has already been
+			// closed by its own `message`, so this only has to say who is next.
+			editor.speakerPersonaId = event.personaId;
+			editor.speakerName = event.name;
+			editor.completion = '';
+			editor.reasoning = '';
+			editor.reasoningTrace = undefined;
+			return;
+
 		case 'content':
 			editor.completion = (editor.completion ?? '') + event.text;
 			progress();
@@ -126,6 +136,8 @@ export function applyRunEvent(
 
 		case 'done':
 			editor.isCompletionInProgress = false;
+			editor.speakerPersonaId = undefined;
+			editor.speakerName = undefined;
 			editor.shouldFocusTextarea = true;
 			surface.onFinish?.({ aborted: false });
 			return;
@@ -145,13 +157,19 @@ export function applyRunEvent(
 							reasoning: editor.reasoning,
 							reasoningTrace: editor.reasoningTrace,
 							isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
-							createdAt: new Date().toISOString()
+							createdAt: new Date().toISOString(),
+							// A half-written answer keeps its author: it is still theirs, and a
+							// later turn has to attribute it as such.
+							personaId: editor.speakerPersonaId,
+							personaName: editor.speakerName
 						}
 					];
 					session.updatedAt = new Date().toISOString();
 					surface.save();
 				}
 			}
+			editor.speakerPersonaId = undefined;
+			editor.speakerName = undefined;
 			editor.completion = '';
 			editor.reasoning = '';
 			editor.reasoningTrace = undefined;

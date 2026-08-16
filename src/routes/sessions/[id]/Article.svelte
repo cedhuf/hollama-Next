@@ -15,12 +15,14 @@
 	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
+	import { splitMentions } from '$lib/chat/mentions';
 	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThinkingIndicator from '$lib/components/ThinkingIndicator.svelte';
-	import { settingsStore } from '$lib/localStorage';
+	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { type Message } from '$lib/sessions';
 	import { openKnowledge } from '$lib/stores/modal';
 
@@ -51,9 +53,14 @@
 		streamingReasoningExpanded = $bindable(false),
 		onToggleReasoning = undefined,
 		anchorId = undefined,
-		folded = false
+		folded = false,
+		speakerName: liveSpeakerName = undefined,
+		speakerPersonaId: liveSpeakerPersonaId = undefined
 	}: {
 		message: Message;
+		/** Who is writing the bubble being streamed, when it is not the assistant. */
+		speakerName?: string;
+		speakerPersonaId?: string;
 		retryIndex?: number;
 		handleRetry?: (index: number) => void;
 		handleEditMessage?: (message: Message) => void;
@@ -85,6 +92,25 @@
 	const isDocumentAttachment = $derived(!!message.document);
 	const isUserRole = $derived(
 		message.role === 'user' && !isKnowledgeAttachment && !isDocumentAttachment
+	);
+
+	/**
+	 * Who wrote this, when it was not the conversation's assistant.
+	 *
+	 * The stored name for a message that has landed, the live one for the bubble
+	 * still filling. The face comes from the library, since it is decoration and can
+	 * be missing; the name comes from the message, since it is attribution and
+	 * cannot.
+	 */
+	const speakerName = $derived(message.personaName ?? liveSpeakerName);
+	const speakerId = $derived(message.personaId ?? liveSpeakerPersonaId);
+	const speaker = $derived(
+		speakerId ? ($personasStore ?? []).find((persona) => persona.id === speakerId) : undefined
+	);
+
+	/** The names called in this message, drawn as labels rather than as plain text. */
+	const mentionSegments = $derived(
+		isUserRole ? splitMentions(message.content ?? '', $personasStore ?? []) : []
 	);
 	/** Empty when turned off in Interface, or on messages written before it was recorded. */
 	const sentAt = $derived(
@@ -262,15 +288,23 @@
 		<nav
 			class="article__nav flex items-center gap-2 text-muted {isUserRole ? 'flex-row-reverse' : ''}"
 		>
+			{#if speaker}
+				<PersonaAvatar persona={speaker} size={20} />
+			{/if}
 			<div
 				data-testid="session-role"
 				class="article__role text-center text-xs font-bold uppercase leading-7"
 			>
+				<!-- A persona called in with `@` answers as itself, so the badge says its
+				     name and its face sits beside it. Read from the message rather than
+				     from the library: the name has to keep working after the persona has
+				     been renamed or deleted, and attribution that stops working when
+				     somebody tidies up is attribution nobody can rely on. -->
 				<Badge>
 					{#if isUserRole}
 						{$LL.you()}
 					{:else if message.role === 'assistant'}
-						{assistantLabel || $LL.assistant()}
+						{speakerName || assistantLabel || $LL.assistant()}
 					{:else}
 						{$LL.system()}
 					{/if}
@@ -414,7 +448,23 @@
 						? 'bg-accent/10'
 						: 'bg-shade-2'}"
 				>
-					<Markdown markdown={message.content} />
+					<!-- The names you called are drawn as labels, the way every chat draws a
+					     mention. Segments rather than markup, for the reason the search
+					     excerpts give: message content turned into HTML would hand any
+					     conversation containing markup a way into the page. -->
+					{#if mentionSegments.length > 1}
+						<p class="whitespace-pre-wrap text-sm leading-relaxed">
+							{#each mentionSegments as segment, i (i)}
+								{#if segment.kind === 'mention'}
+									<span class="font-medium text-accent">{segment.text}</span>
+								{:else}
+									{segment.text}
+								{/if}
+							{/each}
+						</p>
+					{:else}
+						<Markdown markdown={message.content} />
+					{/if}
 				</div>
 			{:else}
 				<Markdown markdown={message.content} {citations} />

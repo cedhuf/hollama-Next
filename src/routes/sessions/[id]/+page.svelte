@@ -13,6 +13,7 @@
 	import { compactSession } from '$lib/chat/compact';
 	import { contextUsage, messagesInContext } from '$lib/chat/context';
 	import { isServerMode } from '$lib/chat/endpoint';
+	import { mentionedPersonas } from '$lib/chat/mentions';
 	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
 	import {
 		cancelRun,
@@ -24,7 +25,7 @@
 		startRun
 	} from '$lib/chat/run/client';
 	import { runLocally } from '$lib/chat/run/local';
-	import type { RunInput } from '$lib/chat/run/types';
+	import type { RunInput, RunSpeaker } from '$lib/chat/run/types';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
@@ -34,7 +35,9 @@
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import SessionMenu from '$lib/components/SessionMenu.svelte';
+	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
+	import { languageInstruction } from '$lib/personas';
 	import { contextMessages, imagesPayload } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import { resolveSessionTitle, saveSession, type Editor, type Message } from '$lib/sessions';
@@ -423,6 +426,68 @@
 	}
 
 	/**
+	 * Who answers this turn.
+	 *
+	 * The personas named with `@` in the message just sent, in the order they were
+	 * named, each carrying everything they are: their model, their server, their
+	 * options, their prompt, their tools. Nothing is borrowed from the conversation
+	 * except the conversation itself, which is the point of calling one in.
+	 *
+	 * Empty means the conversation's own assistant, which is every turn that
+	 * mentions nobody. Naming somebody is choosing them, so the assistant does not
+	 * answer alongside them.
+	 */
+	function speakersFor(messages: Message[]): RunSpeaker[] | undefined {
+		const lastUser = [...messages].reverse().find((m) => m.role === 'user' && !m.knowledge);
+		if (!lastUser?.content) return undefined;
+
+		const named = mentionedPersonas(lastUser.content, $personasStore ?? []);
+		if (!named.length) return undefined;
+
+		const speakers: RunSpeaker[] = [];
+
+		for (const persona of named) {
+			// Its own model, and the conversation's when it names one nobody has. A
+			// persona that cannot answer at all would be worse than one answering on
+			// the model in front of it.
+			const model =
+				$settingsStore.models.find((m) => m.name === persona.modelName) ?? session.model;
+			const server = $serversStore.find((srv) => srv.id === model?.serverId);
+			if (!model?.name || !server) continue;
+
+			const framing = resolvePrompt('personaSummoned', $settingsStore.promptOverrides, {
+				name: persona.name
+			});
+			const language = languageInstruction(persona);
+
+			speakers.push({
+				personaId: persona.id,
+				name: persona.name,
+				server: isServerMode ? { kind: 'id', id: server.id } : { kind: 'inline', server },
+				model: model.name,
+				options:
+					persona.params?.temperature != null ? { temperature: persona.params.temperature } : {},
+				think: editor.thinking !== false,
+				systemPrompt: [persona.systemPrompt, language, framing].filter(Boolean).join('\n\n'),
+				flags: {
+					// Its own capabilities, not the composer's: the toggles above the input
+					// belong to the conversation's assistant, and a persona that searches
+					// the web searches the web wherever it is asked to speak.
+					webSearch: !!persona.webSearch,
+					webFetch: !!editor.webFetch,
+					interactiveChoices: !!editor.interactiveChoices,
+					sendCurrentDate: !!editor.sendCurrentDate,
+					nativeTools: $settingsStore.nativeTools,
+					webSearchAuto: $settingsStore.webSearchAuto
+				},
+				capabilities: { search: searchAvailable, fetch: $webFetchConfig.available }
+			});
+		}
+
+		return speakers.length ? speakers : undefined;
+	}
+
+	/**
 	 * Send a turn and follow it.
 	 *
 	 * Everything that used to happen inline here now happens in the orchestrator,
@@ -480,6 +545,8 @@
 				fetch: $webFetchConfig.available
 			},
 			promptOverrides: $settingsStore.promptOverrides,
+			speakers: speakersFor(messages),
+			sequential: $settingsStore.mentionsSequential !== false,
 			// Only local mode sends these: they are the browser's own configuration,
 			// and in server mode the instance answers the same questions itself.
 			local: isServerMode

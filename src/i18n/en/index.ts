@@ -646,6 +646,11 @@ const en = {
 	tokensFreedDetail: '{before:string} down to {after:string}.',
 	compactFailed: 'The conversation could not be compacted',
 	slashCommands: 'Commands',
+	mentionPersona: 'Call a persona',
+	mentionInsert: 'insert',
+	mentionsSequential: 'Personas called together read each other',
+	mentionsSequentialHelp:
+		'On, they answer in the order you named them, each having read the ones before. Off, each is handed the same question and none of the others\u2019 answers.',
 	slashRun: 'Run',
 	clearCommandDescription:
 		'Start again: fold this conversation away and give the model a blank slate',

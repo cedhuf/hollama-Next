@@ -77,6 +77,17 @@ export interface Message {
 	/** ISO timestamp. Absent on messages written before this was recorded. */
 	createdAt?: string;
 	/**
+	 * Set on a reply written by a persona called into the conversation with `@`.
+	 *
+	 * Two fields rather than one, and the name is not a convenience. The id is how
+	 * the avatar is drawn and how a retry re-runs the right persona; the name is
+	 * what is sent to the model on later turns, and it has to survive the persona
+	 * being renamed or deleted. Attribution that stops working when somebody tidies
+	 * their library is attribution nobody can rely on.
+	 */
+	personaId?: string;
+	personaName?: string;
+	/**
 	 * Set on a compaction marker: a `system` message holding a summary of the
 	 * messages before it, which is what the model receives in their place.
 	 *
@@ -162,6 +173,16 @@ export interface Editor {
 	searchActivity?: 'search' | 'read';
 	searchQuery?: string; // The query being searched, shown live while isSearching
 	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article
+	/**
+	 * Who is writing the answer being streamed, when it is not the assistant.
+	 *
+	 * A turn can hand the floor to several personas in a row, so the bubble on
+	 * screen has to say whose it is while it fills. Set by the `speaker` event and
+	 * cleared by the next one, which means a replay arrives at the same place as
+	 * having watched it.
+	 */
+	speakerPersonaId?: string;
+	speakerName?: string;
 	attachments?: { type: 'image'; id: string; name: string; dataUrl: string }[];
 	completion?: string;
 	reasoning?: string;

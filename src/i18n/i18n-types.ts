@@ -2358,6 +2358,22 @@ type RootTranslation = {
 	 */
 	slashCommands: string
 	/**
+	 * C​a​l​l​ ​a​ ​p​e​r​s​o​n​a
+	 */
+	mentionPersona: string
+	/**
+	 * i​n​s​e​r​t
+	 */
+	mentionInsert: string
+	/**
+	 * P​e​r​s​o​n​a​s​ ​c​a​l​l​e​d​ ​t​o​g​e​t​h​e​r​ ​r​e​a​d​ ​e​a​c​h​ ​o​t​h​e​r
+	 */
+	mentionsSequential: string
+	/**
+	 * O​n​,​ ​t​h​e​y​ ​a​n​s​w​e​r​ ​i​n​ ​t​h​e​ ​o​r​d​e​r​ ​y​o​u​ ​n​a​m​e​d​ ​t​h​e​m​,​ ​e​a​c​h​ ​h​a​v​i​n​g​ ​r​e​a​d​ ​t​h​e​ ​o​n​e​s​ ​b​e​f​o​r​e​.​ ​O​f​f​,​ ​e​a​c​h​ ​i​s​ ​h​a​n​d​e​d​ ​t​h​e​ ​s​a​m​e​ ​q​u​e​s​t​i​o​n​ ​a​n​d​ ​n​o​n​e​ ​o​f​ ​t​h​e​ ​o​t​h​e​r​s​’​ ​a​n​s​w​e​r​s​.
+	 */
+	mentionsSequentialHelp: string
+	/**
 	 * R​u​n
 	 */
 	slashRun: string
@@ -4763,6 +4779,22 @@ The completion in progress will stop
 	 * Commands
 	 */
 	slashCommands: () => LocalizedString
+	/**
+	 * Call a persona
+	 */
+	mentionPersona: () => LocalizedString
+	/**
+	 * insert
+	 */
+	mentionInsert: () => LocalizedString
+	/**
+	 * Personas called together read each other
+	 */
+	mentionsSequential: () => LocalizedString
+	/**
+	 * On, they answer in the order you named them, each having read the ones before. Off, each is handed the same question and none of the others’ answers.
+	 */
+	mentionsSequentialHelp: () => LocalizedString
 	/**
 	 * Run
 	 */

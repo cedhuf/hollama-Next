@@ -41,6 +41,40 @@ left to the model to work out. Inferring it is exactly what goes wrong: an Engli
 English answer feel right to the model even when everything around it is French. The sentence itself
 is editable under _Settings → Tools → System instructions_, like the others the app builds.
 
+## Calling one into a conversation
+
+Type `@` in any conversation and the personas you have installed are offered, filtered as you type.
+Pick one and it answers that message, in place of the conversation's own assistant: naming somebody
+is choosing them, not adding them.
+
+What answers is the **whole persona**, not its prompt. Its model, its server, its temperature, its
+web search, its language. Which is the useful part: a conversation can run on a small local model
+and ask an expensive specialist for one opinion inside it, without leaving the conversation or
+losing its thread.
+
+The persona reads everything above, exactly as the assistant does. Its own ongoing conversation is
+untouched: calling it here changes nothing there.
+
+### Several at once
+
+Several personas in one message get several replies, each labelled with its name and its face. By
+default they answer **in the order you named them, each having read the ones before**, which is what
+a conversation with several people is. _Settings → Tools → Personas_ turns that off, and each is
+then handed the same question and none of the others' answers, for when you want independent
+opinions rather than a discussion.
+
+Every reply is a full generation over the whole conversation, so three names cost three answers.
+
+### Who said what
+
+A reply written by a persona carries its name, and later turns are told: the model reads
+`[Maïté] …` and a line saying the conversation has more than one participant. Without it, the next
+model to read the conversation takes those words for its own and carries on from something it never
+wrote.
+
+The name is stored on the message rather than looked up. Renaming or deleting a persona does not
+rewrite what it already said.
+
 ## One persona, one conversation
 
 Launching a persona opens its conversation, and launching it again returns to the same one. A

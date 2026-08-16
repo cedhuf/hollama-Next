@@ -31,6 +31,49 @@ export type RunServer = { kind: 'id'; id: string } | { kind: 'inline'; server: S
 /** How eagerly to use the provider's own tool calling. The setting's own values. */
 export type NativeToolsPreference = 'off' | 'auto' | 'force';
 
+/**
+ * One voice in a turn, when the turn has more than one.
+ *
+ * Calling a persona with `@` does not add an instruction to the conversation's
+ * assistant: it hands the turn to somebody else, with their model, their
+ * options, their prompt and their tools. Which is why a speaker carries the
+ * fields it overrides rather than a persona id the runner would have to look up
+ * — the run has no library, and by the time it starts every question about who
+ * is answering has to be settled.
+ *
+ * The ordinary turn is one speaker with no persona, and says so by having none.
+ */
+export interface RunSpeaker {
+	personaId: string;
+	/** How the reply is attributed, on screen and in what later turns are sent. */
+	name: string;
+	server: RunServer;
+	model: string;
+	options?: Partial<OllamaOptions>;
+	think: boolean;
+	/** Its own prompt, already framed by the one that says it was called into a conversation. */
+	systemPrompt?: string;
+	flags: RunFlags;
+	capabilities: RunCapabilities;
+}
+
+/** The toggles the composer offers, for one message. */
+export interface RunFlags {
+	webSearch: boolean;
+	webFetch: boolean;
+	interactiveChoices: boolean;
+	sendCurrentDate: boolean;
+	nativeTools: NativeToolsPreference;
+	/** Let the model decide whether a search is worth it, in the text protocol. */
+	webSearchAuto: boolean;
+}
+
+/** What each tool is actually able to do here, decided by config, not by hope. */
+export interface RunCapabilities {
+	search: boolean;
+	fetch: boolean;
+}
+
 /** Everything a turn needs, resolved by the caller and settled before it starts. */
 export interface RunInput {
 	/** The conversation this belongs to, so a reattaching client can find its run. */
@@ -48,20 +91,30 @@ export interface RunInput {
 	 */
 	messages: Message[];
 	/** The toggles the composer offers, for this message only. */
-	flags: {
-		webSearch: boolean;
-		webFetch: boolean;
-		interactiveChoices: boolean;
-		sendCurrentDate: boolean;
-		nativeTools: NativeToolsPreference;
-		/** Let the model decide whether a search is worth it, in the text protocol. */
-		webSearchAuto: boolean;
-	};
-	/** What each tool is actually able to do here, decided by config, not by hope. */
-	capabilities: {
-		search: boolean;
-		fetch: boolean;
-	};
+	flags: RunFlags;
+	capabilities: RunCapabilities;
+	/**
+	 * Who answers, when it is not the conversation's own assistant.
+	 *
+	 * Empty or absent is the ordinary turn. Otherwise each entry answers in order,
+	 * and the conversation's assistant does not: naming somebody is choosing them,
+	 * not adding them.
+	 */
+	speakers?: RunSpeaker[];
+	/**
+	 * Who is answering this particular pass, set by the driver rather than by the
+	 * caller. It is what stamps the reply so a later turn can attribute it.
+	 */
+	speaker?: { personaId: string; name: string };
+	/**
+	 * Whether each speaker reads the ones before it.
+	 *
+	 * On by default, because that is what a conversation with several people is.
+	 * Off gives each of them the same question and none of the others' answers,
+	 * which is what you want when you are asking for independent opinions rather
+	 * than for a discussion.
+	 */
+	sequential?: boolean;
 	/** The user's prompt overrides, so the run resolves the same text the page would. */
 	promptOverrides?: Record<string, string>;
 	/** Set when this turn should also name the conversation once it lands. */
@@ -97,6 +150,15 @@ export interface RunInput {
  * cannot be replayed that way does not belong in here.
  */
 export type RunEvent =
+	/**
+	 * A new voice takes the turn.
+	 *
+	 * Sent before anything that voice produces, including for the ordinary
+	 * single-speaker turn, where it carries no persona. A client that joins late
+	 * therefore learns who is speaking by replaying, exactly as it learns
+	 * everything else, instead of having to be told separately.
+	 */
+	| { type: 'speaker'; personaId?: string; name?: string }
 	/** A fragment of the answer. */
 	| { type: 'content'; text: string }
 	/** A fragment of the model's reasoning for the round in progress. */

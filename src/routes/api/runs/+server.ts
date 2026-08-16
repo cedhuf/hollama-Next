@@ -1,7 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import { env as publicEnv } from '$env/dynamic/public';
-import { runTurn } from '$lib/chat/run/orchestrator';
+import { runSpeakers } from '$lib/chat/run/speakers';
 import type { RunInput } from '$lib/chat/run/types';
 import { requireUser } from '$lib/server/api';
 import { PolicyError } from '$lib/server/llmPolicy';
@@ -27,9 +27,11 @@ export async function POST(event) {
 	const existing = findRunForSession(input.sessionId, principal.userId);
 	if (existing?.status === 'running') return json(summarise(existing), { status: 409 });
 
-	let deps;
+	// Resolved once here so a policy refusal is a 4xx on the request that caused it
+	// rather than an error event on a run that should never have started. The
+	// per-pass resolution below is the same call, for the speakers that follow.
 	try {
-		deps = serverDeps(input, principal);
+		serverDeps(input, principal);
 	} catch (e) {
 		if (e instanceof PolicyError) throw error(e.status, e.message);
 		throw e;
@@ -39,7 +41,12 @@ export async function POST(event) {
 
 	// Deliberately not awaited: this is the handover. Failures inside become
 	// `error` events on the run, which is where a client will look for them.
-	void runTurn(input, deps, (ev) => emitTo(run, ev), run.controller.signal);
+	void runSpeakers(
+		input,
+		(pass) => serverDeps(pass, principal),
+		(ev) => emitTo(run, ev),
+		run.controller.signal
+	);
 
 	return json(summarise(run), { status: 201 });
 }

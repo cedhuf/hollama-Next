@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { CircleStop, FoldVertical, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
 	import Settings_2 from '@lucide/svelte/icons/settings-2';
+	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -11,11 +12,13 @@
 		type CommandName,
 		type SlashCommand
 	} from '$lib/chat/commands';
+	import { mentionPrefix, splitMentions } from '$lib/chat/mentions';
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
-	import { serversStore } from '$lib/localStorage';
+	import { personasStore, serversStore } from '$lib/localStorage';
+	import type { Persona } from '$lib/personas';
 	import {
 		contextMessages,
 		imagesPayload,
@@ -29,6 +32,7 @@
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
 	import ContextMeter from './ContextMeter.svelte';
+	import MentionMenu from './MentionMenu.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
 	import SlashMenu from './SlashMenu.svelte';
 
@@ -122,6 +126,80 @@
 		submit();
 	}
 
+	// --- mentions -------------------------------------------------------------
+
+	/**
+	 * Calling a persona into this conversation with `@`.
+	 *
+	 * The twin of the slash menu above, in the same place with the same keys. What
+	 * differs is what happens on Enter: a command runs, a mention is inserted and
+	 * you keep typing, because a mention is the start of a sentence rather than the
+	 * whole of one.
+	 *
+	 * The caret is tracked rather than the whole prompt, since a mention can be
+	 * added in the middle of a message already written.
+	 */
+	let caret = $state(0);
+
+	function trackCaret() {
+		caret = editor.promptTextarea?.selectionStart ?? (editor.prompt ?? '').length;
+	}
+
+	const mentionQuery = $derived(mentionPrefix(editor.prompt ?? '', caret));
+	const mentionMatches = $derived.by(() => {
+		if (mentionQuery === null) return [];
+		const q = mentionQuery.trim().toLowerCase();
+		const all = ($personasStore ?? []).filter((persona) => persona.name.trim());
+		return (q ? all.filter((persona) => persona.name.toLowerCase().includes(q)) : all).slice(0, 8);
+	});
+	const mentionMenuOpen = $derived(
+		mentionMatches.length > 0 && !editor.isCompletionInProgress && !menuOpen
+	);
+
+	let selectedMention = $state(0);
+	$effect(() => {
+		void mentionMatches.length;
+		selectedMention = 0;
+	});
+
+	/**
+	 * The prompt cut into plain runs and mentions, for the mirror behind the input.
+	 *
+	 * A trailing newline is padded, because a textarea keeps a blank last line and
+	 * a div collapses it, which would put the mirror one line short of the text on
+	 * top of it.
+	 */
+	const promptSegments = $derived(
+		splitMentions((editor.prompt ?? '') + '\u200b', $personasStore ?? [])
+	);
+
+	let mirror = $state<HTMLDivElement | undefined>();
+
+	/** The mirror scrolls with the input, or a long prompt paints its pills adrift. */
+	function syncMirror() {
+		if (mirror && editor.promptTextarea) mirror.scrollTop = editor.promptTextarea.scrollTop;
+	}
+
+	function pickMention(persona: Persona) {
+		const text = editor.prompt ?? '';
+		const at = text.slice(0, caret).lastIndexOf('@');
+		if (at === -1) return;
+
+		// A trailing space, because a mention is almost never the end of the message
+		// and typing one by hand after every name is a small tax paid every time.
+		const inserted = `@${persona.name.trim()} `;
+		editor.prompt = text.slice(0, at) + inserted + text.slice(caret);
+
+		const position = at + inserted.length;
+		const textarea = editor.promptTextarea;
+		textarea?.focus();
+		// After the value has been written, or the caret lands where the old text put it.
+		tick().then(() => {
+			textarea?.setSelectionRange(position, position);
+			caret = position;
+		});
+	}
+
 	let attachments: Attachment[] = $state([]);
 
 	// The quick-choice card takes over the composer; dismissing (✕) falls back to free
@@ -203,6 +281,34 @@
 	function handleKeyDown(event: KeyboardEvent) {
 		// The command menu takes the arrows, Tab and Escape while it is open, and
 		// Enter picks the highlighted command rather than sending `/comp` as text.
+		// The mention menu takes the same keys as the command menu, and only one of
+		// them is ever open: a prompt that is a bare `/word` cannot also be inside an
+		// `@name`.
+		if (mentionMenuOpen) {
+			if (event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey)) {
+				event.preventDefault();
+				selectedMention = (selectedMention + 1) % mentionMatches.length;
+				return;
+			}
+			if (event.key === 'ArrowUp' || (event.key === 'Tab' && event.shiftKey)) {
+				event.preventDefault();
+				selectedMention = (selectedMention - 1 + mentionMatches.length) % mentionMatches.length;
+				return;
+			}
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				// Closing without losing what was typed: the `@` is left in place as the
+				// ordinary character it is, and moving the caret past it shuts the menu.
+				caret = -1;
+				return;
+			}
+			if (event.key === 'Enter' && !event.shiftKey) {
+				event.preventDefault();
+				pickMention(mentionMatches[selectedMention]);
+				return;
+			}
+		}
+
 		if (menuOpen) {
 			if (event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey)) {
 				event.preventDefault();
@@ -353,6 +459,14 @@
 				/>
 			{/key}
 		{:else}
+			{#if mentionMenuOpen}
+				<MentionMenu
+					personas={mentionMatches}
+					selected={selectedMention}
+					onPick={pickMention}
+					onHover={(i) => (selectedMention = i)}
+				/>
+			{/if}
 			{#if menuOpen}
 				<!-- Above the composer, not over it: the text being typed is what the
 				     list is filtered on, so it has to stay readable. -->
@@ -370,19 +484,53 @@
 			>
 				<!-- The textarea auto-grows with its content (field-sizing); expanding only
 				     raises its floor and ceiling, so no flex-height chain to depend on. -->
-				<textarea
-					name="prompt"
-					class="prompt-editor__textarea base-input resize-none px-4 pt-3.5 {editor.isExpanded
-						? 'min-h-[52dvh] max-h-[70dvh]'
-						: 'min-h-14 max-h-[40dvh]'}"
-					placeholder={$LL.promptPlaceholder()}
-					bind:this={editor.promptTextarea}
-					bind:value={editor.prompt}
-					onkeydown={handleKeyDown}
-					onpaste={handlePaste}
-					enterkeyhint={editor.isExpanded ? 'enter' : 'send'}
-					inputmode="text"
-				></textarea>
+				<!-- A mention is drawn as a label, and a textarea cannot hold one.
+				     So the pill is painted behind the text rather than in it: a mirror
+				     with the same font, the same padding and the same wrapping renders
+				     the prompt with the names highlighted, and the textarea sits on top
+				     with its own text transparent and its caret left visible.
+
+				     Which is why the highlight has no weight, no size and no border of
+				     its own. Anything that changed a glyph's metrics would move the
+				     mirror out from under the real text, and the two would drift apart
+				     by a character more with every line. Colour and a background do not
+				     move anything; the padding is cancelled by an equal negative margin.
+
+				     `aria-hidden`, because the textarea already carries the text. -->
+				<div class="relative">
+					<div
+						bind:this={mirror}
+						aria-hidden="true"
+						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 overflow-hidden px-4 pt-3.5"
+					>
+						{#each promptSegments as segment, i (i)}
+							{#if segment.kind === 'mention'}
+								<span class="prompt-editor__mention">{segment.text}</span>
+							{:else}
+								{segment.text}
+							{/if}
+						{/each}
+					</div>
+
+					<textarea
+						name="prompt"
+						class="prompt-editor__textarea prompt-editor__input base-input relative resize-none px-4 pt-3.5 {editor.isExpanded
+							? 'min-h-[52dvh] max-h-[70dvh]'
+							: 'min-h-14 max-h-[40dvh]'}"
+						placeholder={$LL.promptPlaceholder()}
+						bind:this={editor.promptTextarea}
+						bind:value={editor.prompt}
+						onkeydown={handleKeyDown}
+						onkeyup={trackCaret}
+						onclick={trackCaret}
+						oninput={trackCaret}
+						onselect={trackCaret}
+						onscroll={syncMirror}
+						onpaste={handlePaste}
+						enterkeyhint={editor.isExpanded ? 'enter' : 'send'}
+						inputmode="text"
+					></textarea>
+				</div>
 
 				<PromptAttachments bind:attachments {tools}>
 					{#snippet actions()}
@@ -470,5 +618,44 @@
 		/* Grows with what's typed, bounded by min/max-height — no manual resize needed. */
 		field-sizing: content;
 		font-variant-ligatures: none;
+	}
+
+	/* Everything that decides where a glyph lands is shared between the two, and
+	   only what does not is allowed to differ. `white-space: pre-wrap` and
+	   `overflow-wrap` are stated because a div and a textarea do not wrap the same
+	   way by default, which is the one difference that would show. */
+	.prompt-editor__mirror,
+	.prompt-editor__input {
+		white-space: pre-wrap;
+		overflow-wrap: break-word;
+		word-break: normal;
+		tab-size: 4;
+	}
+
+	/* The mirror is what is read, so it carries the theme's ink. The textarea on
+	   top keeps its caret and its selection and nothing else. */
+	.prompt-editor__mirror {
+		color: var(--color-active);
+	}
+
+	.prompt-editor__input {
+		color: transparent;
+		background: transparent;
+		caret-color: var(--color-active);
+	}
+
+	.prompt-editor__input::selection {
+		/* A selection over transparent text would be an empty band, so it paints its
+		   own ink for the length of the highlight. */
+		color: var(--color-active);
+	}
+
+	/* Colour alone, and that is not only taste. Anything with a box around it —
+	   a background, a border, padding — is a rectangle drawn under a caret that
+	   moves through it, and it looks like a mistake at every position but one.
+	   Colour changes no metric either, so the mirror stays exactly under the text
+	   it is standing in for. */
+	.prompt-editor__mention {
+		color: var(--color-accent);
 	}
 </style>
