@@ -21,6 +21,29 @@
 	}
 
 	let { open, step, totalSteps, onDismiss, children, footer }: Props = $props();
+
+	/**
+	 * The dialog grows and shrinks between steps, and does it smoothly.
+	 *
+	 * Each step is a different amount of content, so the box used to jump on every
+	 * Next: a profile form, then a list of servers, then three bubbles. A fixed
+	 * height would have been the other answer and is worse, because it is the
+	 * tallest step's height on every step, leaving the short ones stranded in a
+	 * half-empty box.
+	 *
+	 * The measurement drives a height on the outer box only. Nothing reads it back:
+	 * the inner box is in normal flow and its natural height does not depend on
+	 * what the outer one is set to, so there is no loop here, only a value copied
+	 * one way. Before the first measurement the height is left alone, so the first
+	 * paint is the content's own size rather than zero.
+	 *
+	 * Not `flex-1`, which was here before: it sets `flex-basis: 0%`, and a basis is
+	 * what a column flex container sizes from, so the height below would have been
+	 * measured, written, and then ignored. Left to shrink instead, the height is
+	 * what it is until the dialog hits its ceiling, at which point the box gives
+	 * way and scrolls.
+	 */
+	let contentHeight = $state(0);
 </script>
 
 <Dialog.Root
@@ -54,8 +77,13 @@
 			</div>
 
 			<!-- Step content -->
-			<div class="flex-1 overflow-auto px-5 py-4">
-				{@render children()}
+			<div
+				class="onboarding-body min-h-0 overflow-auto"
+				style={contentHeight ? `height:${contentHeight}px` : ''}
+			>
+				<div bind:clientHeight={contentHeight} class="px-5 py-4">
+					{@render children()}
+				</div>
 			</div>
 
 			{#if footer}
@@ -66,3 +94,15 @@
 		</Dialog.Content>
 	</Dialog.Portal>
 </Dialog.Root>
+
+<style lang="postcss">
+	.onboarding-body {
+		transition: height 260ms cubic-bezier(0.32, 0.72, 0, 1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.onboarding-body {
+			transition: none;
+		}
+	}
+</style>

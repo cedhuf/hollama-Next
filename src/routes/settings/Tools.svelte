@@ -1,11 +1,14 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { APP_NAME } from '$lib/brand';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { documentsDisabledByInstance } from '$lib/documents';
 	import { settingsStore } from '$lib/localStorage';
+	import { personasConfig, saveStoreUrl } from '$lib/personasConfig';
+	import { DEFAULT_PERSONA_STORE } from '$lib/personaStore';
 	import { searchConfig } from '$lib/search';
 	import { webFetchConfig } from '$lib/webFetch';
 
@@ -25,6 +28,24 @@
 
 	function restoreServerDefault() {
 		$settingsStore.searchUrl = '';
+	}
+
+	/**
+	 * The persona store's address, which belongs to whoever owns the instance.
+	 *
+	 * Local mode: your own preference, and your browser is what fetches it. Server
+	 * mode: the instance's, fetched by the server, so it is shown to everyone and
+	 * writable only by an admin. Same field, two owners, which is why the value and
+	 * the writer are read separately rather than both from the settings store.
+	 */
+	const storeEditable = $derived(!isServerMode || $personasConfig.canEditStore);
+	const storeValue = $derived(
+		isServerMode ? $personasConfig.storeUrl : $settingsStore.personaStoreUrl
+	);
+
+	function setStoreUrl(value: string) {
+		if (isServerMode) void saveStoreUrl(value);
+		else $settingsStore.personaStoreUrl = value;
 	}
 
 	// System-instruction editor: one prompt shown at a time. The textarea reflects the
@@ -168,6 +189,26 @@
 			</div>
 		{/if}
 		<SettingsHint>{$LL.webFetchHint()}</SettingsHint>
+	</SettingsSection>
+
+	<SettingsSection title={$LL.personas()} description={$LL.personaStoreDescription()} card>
+		{#snippet badge()}
+			{#if isServerMode && !$personasConfig.canEditStore}
+				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
+			{/if}
+		{/snippet}
+
+		<SettingsField label={$LL.personaStoreUrl()}>
+			<input
+				class="settings-field disabled:opacity-60"
+				disabled={!storeEditable}
+				value={storeValue}
+				placeholder={DEFAULT_PERSONA_STORE}
+				spellcheck="false"
+				onchange={(e) => setStoreUrl(e.currentTarget.value)}
+			/>
+		</SettingsField>
+		<SettingsHint>{$LL.personaStoreUrlHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection

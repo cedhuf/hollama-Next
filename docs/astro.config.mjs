@@ -16,6 +16,10 @@ import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
  */
 export default defineConfig({
 	site: 'https://llooma.eu',
+	// The persona store page reads the app's glyph table directly, which lives
+	// outside this project. One table drawn by both, rather than a copy here that
+	// would be right on the day it was written.
+	vite: { server: { fs: { allow: ['..'] } } },
 	integrations: [
 		starlight({
 			title: 'Llooma',
@@ -74,6 +78,7 @@ export default defineConfig({
 				{
 					label: 'Project',
 					items: [
+						{ label: 'Persona store', link: '/personas/' },
 						{ label: 'Roadmap', link: '/roadmap/' },
 						{ label: 'Changelog', link: '/changelog/' },
 						{ label: 'Changes from Hollama', link: '/changes-from-hollama/' }

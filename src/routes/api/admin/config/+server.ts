@@ -5,9 +5,11 @@ import {
 	allowUserKeys,
 	allowUserPersonas,
 	getConfig,
+	personaStoreUrl,
 	setAllowUserKeys,
 	setAllowUserPersonas,
-	setConfig
+	setConfig,
+	setPersonaStoreUrl
 } from '$lib/server/db/config';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
 
@@ -16,6 +18,7 @@ export async function GET(event) {
 	return json({
 		allowUserKeys: allowUserKeys(),
 		allowUserPersonas: allowUserPersonas(),
+		personaStoreUrl: personaStoreUrl() ?? '',
 		searchUrl: getConfig('searchUrl') ?? '',
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
 		searchSharing: getConfig('searchSharing') ?? 'off',
@@ -37,6 +40,7 @@ export async function PUT(event) {
 
 	if (typeof body?.allowUserKeys === 'boolean') setAllowUserKeys(body.allowUserKeys);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
+	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {
 		setConfig('searchBackend', body.searchBackend);

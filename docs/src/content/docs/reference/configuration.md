@@ -20,6 +20,7 @@ Copy `.env.example` to `.env` and adjust. Everything here is read at startup.
 | `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI |
 | `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
 | `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                   |
+| `PERSONA_STORE_URL`         | _(public)_  | Where the [persona store](/features/personas/) is read from (server mode). The instance fetches it, so browsers with no way out still get a catalogue        |
 
 ## Documents and OCR
 

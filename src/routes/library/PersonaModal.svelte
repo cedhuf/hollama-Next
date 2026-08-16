@@ -8,9 +8,9 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { knowledgeStore } from '$lib/localStorage';
+	import { personaToBundle } from '$lib/personaBundle';
 	import {
 		deletePersona,
-		exportPersonas,
 		PERSONA_AVATAR_COLORS,
 		personaInitials,
 		savePersona,
@@ -49,8 +49,16 @@
 		persist();
 	}
 
+	/**
+	 * What leaves is a bundle, not the stored record.
+	 *
+	 * The two used to be the same thing, which meant handing over an id, a
+	 * conversation binding and a list of knowledge ids pointing at documents the
+	 * recipient does not have. A bundle carries what was written, with its
+	 * documents in it, and is the same file the store serves.
+	 */
 	function exportThis() {
-		const data = exportPersonas([persona]);
+		const data = JSON.stringify(personaToBundle(persona), null, 2);
 		const blob = new Blob([data], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');

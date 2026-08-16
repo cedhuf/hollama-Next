@@ -26,3 +26,9 @@ jobs:
       # that actually happens.
       - name: Check the API documentation is in step with the routes
         run: pnpm run check:api
+
+      # Fails when a persona bundle was added or edited without regenerating the
+      # store's listing. The listing is what the app reads, so a stale one means a
+      # persona that exists in the repository and not in the store.
+      - name: Check the persona store listing is in step with its bundles
+        run: pnpm run personas:check

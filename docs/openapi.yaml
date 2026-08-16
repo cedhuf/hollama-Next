@@ -236,6 +236,29 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
+  /api/personas/catalog/{path}:
+    parameters:
+      - name: path
+        in: path
+        required: true
+        schema: { type: string }
+        description: Catch-all segment; may contain slashes.
+    get:
+      tags: [personas]
+      summary: Read the persona store on the instance's behalf
+      description: >
+        Pass-through to the persona store (`PERSONA_STORE_URL`, defaulting to the
+        public one), so an instance fetches once for all its users and browsers
+        with no way out still get a catalogue. Responses are held briefly, and a
+        held copy is served when the store is unreachable.
+      responses:
+        '200':
+          description: The store's listing or one persona bundle, verbatim.
+          content:
+            application/json: {}
+        '400': { description: The path escapes the store's address. }
+        '404': { description: No such file in the store. }
+        '502': { description: The store could not be reached. }
   /api/personas/config:
     get:
       tags: [personas]

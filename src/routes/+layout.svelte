@@ -22,7 +22,6 @@
 	import KnowledgeModal from '$lib/components/KnowledgeModal.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
-	import { buildDefaultPersonas } from '$lib/defaultPersonas';
 	import { releaseUrl } from '$lib/github';
 	import {
 		installDialog,
@@ -34,7 +33,6 @@
 	import {
 		hydrateStores,
 		knowledgeStore,
-		personasStore,
 		refreshStores,
 		serversStore,
 		sessionsStore,
@@ -311,25 +309,12 @@
 		await loadServerChatDefaults();
 		await loadServerPersonas();
 
-		// Seed the built-in starter personas, for admins (and local-mode users, who are
-		// always admin of their own data). Idempotent by name: a newly-added default
-		// backfills on next boot, but a starter the user deleted is never re-added.
-		const isAdmin = env.PUBLIC_MODE === 'server' ? data.user?.role === 'admin' : true;
-		if (isAdmin) {
-			const seeded = [...($settingsStore.seededPersonaNames ?? [])];
-			// Migrate the old boolean: prior seeding accounts for the original three.
-			if ($settingsStore.defaultPersonasSeeded && seeded.length === 0) {
-				seeded.push('Max', 'Lou', 'Nova');
-			}
-			const model = $settingsStore.defaultModel || $settingsStore.models[0]?.name || '';
-			const allDefaults = buildDefaultPersonas(model);
-			const missing = allDefaults.filter((p) => !seeded.includes(p.name));
-			for (const persona of missing) personasStore.upsert(persona);
-			for (const p of allDefaults) if (!seeded.includes(p.name)) seeded.push(p.name);
-			$settingsStore.seededPersonaNames = seeded;
-			$settingsStore.defaultPersonasSeeded = true;
-		}
-
+		// No personas are written at boot any more. They used to be built here and
+		// pushed straight into the store, which made "shipped with the app" and
+		// "installed by you" the same thing: the starters were in your library
+		// whether you wanted them or not, and they went out in your backup as if you
+		// had written them. They now live in the store the Library browses, and
+		// nothing arrives until you install it.
 		booted = true;
 
 		// Language

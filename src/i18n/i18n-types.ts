@@ -1276,6 +1276,58 @@ type RootTranslation = {
 	 */
 	sharedByAdmin: string
 	/**
+	 * P​e​r​s​o​n​a​ ​s​t​o​r​e
+	 */
+	personaStore: string
+	/**
+	 * B​r​o​w​s​e​ ​t​h​e​ ​s​t​o​r​e
+	 */
+	personaStoreBrowse: string
+	/**
+	 * S​e​a​r​c​h​ ​p​e​r​s​o​n​a​s
+	 */
+	personaStoreSearch: string
+	/**
+	 * A​l​l
+	 */
+	personaStoreAll: string
+	/**
+	 * O​f​f​i​c​i​a​l
+	 */
+	personaStoreOfficial: string
+	/**
+	 * C​o​m​m​u​n​i​t​y
+	 */
+	personaStoreCommunity: string
+	/**
+	 * I​n​s​t​a​l​l​e​d
+	 */
+	personaStoreInstalled: string
+	/**
+	 * R​e​f​r​e​s​h
+	 */
+	personaStoreRefresh: string
+	/**
+	 * T​h​i​s​ ​p​e​r​s​o​n​a​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​i​n​s​t​a​l​l​e​d
+	 */
+	personaStoreInstallFailed: string
+	/**
+	 * T​h​e​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​r​e​a​c​h​e​d
+	 */
+	personaStoreUnreachable: string
+	/**
+	 * P​e​r​s​o​n​a​ ​s​t​o​r​e​ ​a​d​d​r​e​s​s
+	 */
+	personaStoreUrl: string
+	/**
+	 * W​h​e​r​e​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​o​f​f​e​r​e​d​ ​i​n​ ​t​h​e​ ​L​i​b​r​a​r​y​ ​a​r​e​ ​r​e​a​d​ ​f​r​o​m​.
+	 */
+	personaStoreDescription: string
+	/**
+	 * W​h​e​r​e​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​o​f​f​e​r​e​d​ ​i​n​ ​t​h​e​ ​L​i​b​r​a​r​y​ ​a​r​e​ ​r​e​a​d​ ​f​r​o​m​.​ ​L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​.
+	 */
+	personaStoreUrlHelp: string
+	/**
 	 * I​n​s​t​a​l​l
 	 */
 	install: string
@@ -3393,6 +3445,58 @@ The completion in progress will stop
 	 * Shared by admin
 	 */
 	sharedByAdmin: () => LocalizedString
+	/**
+	 * Persona store
+	 */
+	personaStore: () => LocalizedString
+	/**
+	 * Browse the store
+	 */
+	personaStoreBrowse: () => LocalizedString
+	/**
+	 * Search personas
+	 */
+	personaStoreSearch: () => LocalizedString
+	/**
+	 * All
+	 */
+	personaStoreAll: () => LocalizedString
+	/**
+	 * Official
+	 */
+	personaStoreOfficial: () => LocalizedString
+	/**
+	 * Community
+	 */
+	personaStoreCommunity: () => LocalizedString
+	/**
+	 * Installed
+	 */
+	personaStoreInstalled: () => LocalizedString
+	/**
+	 * Refresh
+	 */
+	personaStoreRefresh: () => LocalizedString
+	/**
+	 * This persona could not be installed
+	 */
+	personaStoreInstallFailed: () => LocalizedString
+	/**
+	 * The persona store could not be reached
+	 */
+	personaStoreUnreachable: () => LocalizedString
+	/**
+	 * Persona store address
+	 */
+	personaStoreUrl: () => LocalizedString
+	/**
+	 * Where the personas offered in the Library are read from.
+	 */
+	personaStoreDescription: () => LocalizedString
+	/**
+	 * Where the personas offered in the Library are read from. Leave empty for the public store.
+	 */
+	personaStoreUrlHelp: () => LocalizedString
 	/**
 	 * Install
 	 */

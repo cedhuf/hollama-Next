@@ -19,6 +19,12 @@ src/i18n/i18n-util.async.ts
 src/i18n/i18n-util.sync.ts
 src/i18n/i18n-util.ts
 
+# Generated from the bundles beside it by `pnpm personas:index`, in a shape the
+# script controls. Formatting it here means the committed file and the one the
+# script writes disagree, and the CI check that compares them fails forever.
+/personas/index.json
+/docs/public/personas
+
 # The docs site is its own project with its own toolchain; it is formatted and
 # built from `docs/`, not from here.
 /docs/dist

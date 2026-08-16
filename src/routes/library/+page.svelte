@@ -2,13 +2,13 @@
 	import {
 		ChevronDown,
 		Cpu,
-		Download,
 		FileText,
 		Folder,
 		FolderOpen,
 		FolderPlus,
 		Pencil,
 		Plus,
+		Store,
 		Trash2,
 		Upload,
 		UserRound,
@@ -35,8 +35,8 @@
 		type Knowledge
 	} from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
+	import { installPersonaBundle, parsePersonaBundle, type PersonaBundle } from '$lib/personaBundle';
 	import {
-		installPersona,
 		launchPersona,
 		newPersona,
 		parsePersonasImport,
@@ -48,6 +48,7 @@
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import PersonaModal from './PersonaModal.svelte';
+	import PersonaStoreModal from './PersonaStoreModal.svelte';
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
@@ -122,19 +123,9 @@
 
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
+	let storeOpen = $state(false);
 
 	const canCreate = $derived($personasConfig.canCreate);
-	// Admin-shared personas the user hasn't installed (or already owns) yet.
-	const sharedToShow = $derived(
-		$personasConfig.shared.filter(
-			(sp) => !$personasStore.some((p) => p.id === sp.id || p.installedFrom === sp.id)
-		)
-	);
-
-	function install(persona: Persona) {
-		installPersona(persona);
-		toast.success($LL.installedPersona({ name: persona.name }));
-	}
 
 	function createPersona() {
 		editing = newPersona();
@@ -168,8 +159,26 @@
 		reader.readAsText(file);
 	}
 
+	/**
+	 * A dropped file, which is one of three things.
+	 *
+	 * Bundles first, because that is what the app itself exports and what the store
+	 * serves, and because they are the only form that carries its documents: read
+	 * as anything else, a persona with knowledge attached arrives with the
+	 * attachment pointing nowhere. The older shapes, our raw records and OpenWebUI
+	 * models, still import behind it.
+	 */
 	function onImportPersonas(event: Event) {
 		readJsonFile(event.target as HTMLInputElement, (data) => {
+			const bundles = (Array.isArray(data) ? data : [data])
+				.map(parsePersonaBundle)
+				.filter((b): b is PersonaBundle => !!b);
+
+			if (bundles.length) {
+				for (const bundle of bundles) installPersonaBundle(bundle, { origin: 'file' });
+				return toast.success($LL.importedPersonas({ count: bundles.length }));
+			}
+
 			const personas = parsePersonasImport(data);
 			if (personas.length === 0) return toast.error($LL.noPersonasInFile());
 			for (const persona of personas) savePersona(persona);
@@ -245,9 +254,19 @@
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
 
 			<!-- Personas -->
-			<div class="mb-3 flex items-baseline gap-2">
-				<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
-				<span class="text-xs text-muted">{$personasStore.length}</span>
+			<div class="mb-3 flex items-baseline justify-between gap-2">
+				<div class="flex items-baseline gap-2">
+					<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
+					<span class="text-xs text-muted">{$personasStore.length}</span>
+				</div>
+				<button
+					type="button"
+					onclick={() => (storeOpen = true)}
+					class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
+				>
+					<Store class="h-3.5 w-3.5" />
+					{$LL.personaStore()}
+				</button>
 			</div>
 
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
@@ -294,6 +313,18 @@
 					</div>
 				{/each}
 
+				<!-- The two ways to gain one, side by side. Nothing is installed for you
+				     any more, so on a fresh library these two cards are the whole section,
+				     which is exactly what it should say: here is where they come from. -->
+				<button
+					type="button"
+					onclick={() => (storeOpen = true)}
+					class="flex min-h-[118px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+				>
+					<Store class="h-5 w-5" />
+					<span class="text-xs">{$LL.personaStoreBrowse()}</span>
+				</button>
+
 				<!-- New persona -->
 				{#if canCreate}
 					<button
@@ -306,37 +337,6 @@
 					</button>
 				{/if}
 			</div>
-
-			<!-- Shared by admin -->
-			{#if sharedToShow.length > 0}
-				<div class="mb-3 flex items-baseline gap-2">
-					<h2 class="text-sm font-medium text-active">{$LL.sharedByAdmin()}</h2>
-					<span class="text-xs text-muted">{sharedToShow.length}</span>
-				</div>
-				<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
-					{#each sharedToShow as persona (persona.id)}
-						<div class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 p-3.5">
-							<div class="mb-2.5">
-								<PersonaAvatar {persona} size={40} />
-							</div>
-							<p class="truncate text-sm font-medium text-active">
-								{persona.name || $LL.untitled()}
-							</p>
-							{#if persona.tagline}
-								<p class="mb-2 line-clamp-2 text-xs text-muted">{persona.tagline}</p>
-							{/if}
-							<button
-								type="button"
-								onclick={() => install(persona)}
-								class="mt-auto flex items-center justify-center gap-1.5 rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
-							>
-								<Download class="h-3.5 w-3.5" />
-								{$LL.install()}
-							</button>
-						</div>
-					{/each}
-				</div>
-			{/if}
 
 			<!-- Knowledge -->
 			<div class="mb-3 flex items-baseline gap-2">
@@ -509,3 +509,5 @@
 {#if editing}
 	<PersonaModal bind:open={modalOpen} bind:persona={editing} />
 {/if}
+
+<PersonaStoreModal bind:open={storeOpen} />

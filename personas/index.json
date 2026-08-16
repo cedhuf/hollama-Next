@@ -1,0 +1,105 @@
+{
+	"format": "llooma.personas",
+	"version": 1,
+	"entries": [
+		{
+			"id": "lou",
+			"name": "Lou",
+			"tagline": "A friendly ear, anytime",
+			"avatar": {
+				"kind": "glyph",
+				"id": "heart",
+				"color": "#D4537E"
+			},
+			"locale": "en",
+			"tags": [
+				"wellbeing",
+				"companionship"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/lou.json"
+		},
+		{
+			"id": "maite",
+			"name": "Maïté",
+			"tagline": "Everyday cooking, no fuss",
+			"avatar": {
+				"kind": "glyph",
+				"id": "pot",
+				"color": "#BA7517"
+			},
+			"locale": "en",
+			"tags": [
+				"cooking",
+				"recipes",
+				"food"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/maite.json"
+		},
+		{
+			"id": "max",
+			"name": "Max",
+			"tagline": "Personal trainer & motivation",
+			"avatar": {
+				"kind": "glyph",
+				"id": "dumbbell",
+				"color": "#D85A30"
+			},
+			"locale": "en",
+			"tags": [
+				"fitness",
+				"health",
+				"coaching"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/max.json"
+		},
+		{
+			"id": "nova",
+			"name": "Nova",
+			"tagline": "Your everyday assistant",
+			"avatar": {
+				"kind": "glyph",
+				"id": "sparkle",
+				"color": "#378ADD"
+			},
+			"locale": "en",
+			"tags": [
+				"assistant",
+				"writing",
+				"productivity"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/nova.json"
+		},
+		{
+			"id": "pixel",
+			"name": "Pixel",
+			"tagline": "Video games, always up to date",
+			"avatar": {
+				"kind": "glyph",
+				"id": "gamepad",
+				"color": "#7F77DD"
+			},
+			"locale": "en",
+			"tags": [
+				"games",
+				"news",
+				"web search"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/pixel.json"
+		}
+	]
+}

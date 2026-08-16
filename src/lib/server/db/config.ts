@@ -34,3 +34,18 @@ export function allowUserPersonas(): boolean {
 export function setAllowUserPersonas(value: boolean): void {
 	setConfig('allowUserPersonas', value ? 'true' : 'false');
 }
+
+/**
+ * Where the persona store is read from.
+ *
+ * The instance's, not each person's: the server is what fetches it, so the
+ * address has to be one an administrator sets. `PERSONA_STORE_URL` seeds it for
+ * a deployment that would rather not click, and the admin panel overrides it.
+ */
+export function personaStoreUrl(): string | undefined {
+	return getConfig('personaStoreUrl')?.trim() || undefined;
+}
+
+export function setPersonaStoreUrl(value: string): void {
+	setConfig('personaStoreUrl', value.trim());
+}

@@ -99,10 +99,14 @@ export interface Settings {
 	/** Per-instruction overrides of the built-in system prompts (empty = use the default). */
 	promptOverrides: Partial<Record<PromptKey, string>>;
 	systemPrompts: SystemPrompts;
-	/** Set once the built-in starter personas have been seeded (admins / local mode). */
-	defaultPersonasSeeded: boolean;
-	/** Names of starter personas already seeded, so new defaults backfill without re-adding deleted ones. */
-	seededPersonaNames: string[];
+	/**
+	 * Where to read the persona store, when it is not the public one.
+	 *
+	 * Empty means `DEFAULT_PERSONA_STORE`. A closed network points this at its own
+	 * mirror; nothing else needs to change, because every path in the listing is
+	 * relative to this address.
+	 */
+	personaStoreUrl: string;
 	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
 	knowledgeCollections: KnowledgeCollection[];
 	/** Ids of the collections folded shut in the Library, so the page opens as it was left. */
@@ -238,8 +242,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	sendCurrentDate: true,
 	promptOverrides: {},
 	systemPrompts: { global: '', perModel: {} },
-	defaultPersonasSeeded: false,
-	seededPersonaNames: [],
+	personaStoreUrl: '',
 	knowledgeCollections: [],
 	collapsedCollections: [],
 	homeShowHeader: true,

@@ -1,0 +1,166 @@
+---
+// Imported by path rather than from `@astrojs/starlight/components`, which does
+// not re-export it in Starlight 0.41.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+// The glyph set, imported from the application rather than copied.
+//
+// It is a plain module of data with no dependencies, which is exactly why it was
+// pulled out of the app's seeding code: the app draws these faces, and so does
+// this page, from one table. A second copy here would be right on the day it was
+// written and wrong at the next glyph.
+import { PERSONA_GLYPHS } from '../../../src/lib/personaGlyphs';
+// Written into `public/` by `scripts/copy-personas.mjs`, which the dev and build
+// scripts both run first. The listing is generated from the bundles, so this page
+// cannot describe a persona the store does not actually serve.
+import index from '../../public/personas/index.json';
+
+const glyphs = Object.fromEntries(PERSONA_GLYPHS.map((glyph) => [glyph.id, glyph.body]));
+
+const entries = [...index.entries].sort((a, b) => a.name.localeCompare(b.name));
+
+const title = 'Persona store';
+const description = 'The personas you can install into Llooma, and how to add one.';
+---
+
+<StarlightPage frontmatter={{ title, description, tableOfContents: false }}>
+	<p>
+		Personas are not shipped inside Llooma. The app reads this store over the network, which is why
+		adding one is a pull request rather than a release. Open the Library, choose <strong
+			>Persona store</strong
+		>, and install what you want.
+	</p>
+
+	<div class="persona-grid not-content">
+		{
+			entries.map((entry) => (
+				<article class="persona-card">
+					<div class="persona-avatar" style={`background-color:${entry.avatar.color}`}>
+						{entry.avatar.kind === 'glyph' && glyphs[entry.avatar.id] ? (
+							<svg
+								viewBox="0 0 64 64"
+								role="presentation"
+								style={`--persona-glyph-cut:${entry.avatar.color}`}
+								set:html={glyphs[entry.avatar.id]}
+							/>
+						) : (
+							<span>{entry.name.slice(0, 2).toUpperCase()}</span>
+						)}
+					</div>
+
+					<div class="persona-body">
+						<h2>{entry.name}</h2>
+						<p class="persona-tagline">{entry.tagline}</p>
+						{entry.tags.length > 0 && (
+							<ul class="persona-tags">
+								{entry.tags.map((tag) => (
+									<li>{tag}</li>
+								))}
+							</ul>
+						)}
+						<p class="persona-meta">
+							<span>{entry.origin}</span>
+							<span>{entry.locale.toUpperCase()}</span>
+							{entry.author && <span>{entry.author}</span>}
+							<a href={`/personas/${entry.path}`}>bundle</a>
+						</p>
+					</div>
+				</article>
+			))
+		}
+	</div>
+
+	<h2>Adding one</h2>
+
+	<p>
+		Write a bundle in <a href="https://github.com/cedhuf/llooma/tree/main/personas"
+			><code>personas/bundles/</code></a
+		>, run <code>pnpm personas:index</code>, and open a pull request. The format, the avatar glyphs
+		and the rules are documented in the
+		<a href="https://github.com/cedhuf/llooma/blob/main/personas/README.md">folder's README</a>.
+	</p>
+
+	<p>
+		Personas are written in English. The store is read by everyone, and a listing half in one
+		language and half in another is one nobody can browse; a persona answers in whatever language it
+		is spoken to.
+	</p>
+</StarlightPage>
+
+<style>
+	.persona-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+		gap: 1rem;
+		margin-block: 1.5rem;
+	}
+
+	.persona-card {
+		display: flex;
+		gap: 0.875rem;
+		padding: 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.75rem;
+		background: var(--sl-color-black);
+	}
+
+	.persona-avatar {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 50%;
+		color: #fff;
+		font-weight: 600;
+	}
+
+	.persona-avatar svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	.persona-body {
+		min-width: 0;
+	}
+
+	.persona-body h2 {
+		margin: 0;
+		font-size: var(--sl-text-base);
+		line-height: 1.3;
+		border: 0;
+	}
+
+	.persona-tagline {
+		margin: 0.25rem 0 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.persona-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		margin: 0.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.persona-tags li {
+		padding: 0.05rem 0.4rem;
+		border-radius: 0.25rem;
+		background: var(--sl-color-gray-6);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+
+	.persona-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin: 0.6rem 0 0;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+</style>

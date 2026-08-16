@@ -19,6 +19,8 @@
 		"typesafe-i18n": "typesafe-i18n",
 		"i18n:status": "node scripts/i18n-status.mjs",
 		"check:api": "node scripts/check-api-docs.mjs",
+		"personas:index": "node scripts/build-persona-index.mjs",
+		"personas:check": "node scripts/build-persona-index.mjs --check",
 		"docs:dev": "pnpm --dir docs run dev",
 		"docs:build": "pnpm --dir docs run build"
 	},

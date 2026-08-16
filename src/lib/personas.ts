@@ -11,6 +11,36 @@ export interface PersonaParams {
 }
 
 /**
+ * Where a persona came from, for the ones nobody here wrote.
+ *
+ * One notion rather than three. There used to be `installedFrom` for an admin's
+ * shared persona and nothing at all for a file someone dropped on the page, which
+ * meant the answer to "is this mine?" was spelled differently depending on how it
+ * had arrived. The catalogue makes that a third case, and three spellings of the
+ * same question is where it stops being answerable.
+ *
+ * A persona without a source is one you wrote.
+ */
+export interface PersonaSource {
+	origin: 'official' | 'community' | 'admin' | 'file';
+	/** Its id where it came from: a catalogue id, or the shared persona's id. */
+	id?: string;
+	/** The revision installed, so a newer one can be noticed later. */
+	revision?: number;
+}
+
+/**
+ * The catalogue or shared id a persona was installed from, whichever field says so.
+ *
+ * `installedFrom` is what personas installed before `source` existed carry, and
+ * they are already in people's stores. Read in one place so nothing else has to
+ * know there were ever two fields.
+ */
+export function personaOrigin(persona: Persona): string | undefined {
+	return persona.source?.id ?? persona.installedFrom;
+}
+
+/**
  * A reusable "character": a named bundle of a system prompt (its soul), a base
  * model, an avatar and a few capabilities. Created in the Library, chatted with
  * as an ongoing relationship. A persona is a *template* — when a chat starts its
@@ -26,6 +56,8 @@ export interface Persona {
 	avatarColor: string;
 	/** Optional image avatar as a data URI (OpenWebUI `meta.profile_image_url`). */
 	avatarImage?: string;
+	/** Id of a glyph the app draws itself, tinted with `avatarColor`. See `personaGlyphs`. */
+	avatarGlyph?: string;
 	/** The "soul": the full system prompt (OpenWebUI `params.system`). */
 	systemPrompt: string;
 	/** Opening line, shown as the first assistant bubble when the chat starts. */
@@ -39,7 +71,13 @@ export interface Persona {
 	knowledgeIds?: string[];
 	/** Admin-shared with users (server mode). */
 	shared?: boolean;
-	/** Id of the shared persona this one was installed from (to hide it from the catalog). */
+	/** Where this persona came from, when it was not written here. */
+	source?: PersonaSource;
+	/**
+	 * Superseded by `source`, read for personas installed before it existed.
+	 *
+	 * @deprecated Use `source.id`.
+	 */
 	installedFrom?: string;
 	/** The single ongoing conversation bound to this persona. */
 	sessionId?: string;
@@ -157,7 +195,7 @@ export function unbindPersonaSession(sessionId: string): void {
 /** Install a shared persona as an editable personal copy (the "Install" action). */
 export function installPersona(persona: Persona): Persona {
 	const copy = fromNative({ ...persona, shared: false });
-	copy.installedFrom = persona.id;
+	copy.source = { origin: 'admin', id: persona.id };
 	savePersona(copy);
 	return copy;
 }
@@ -220,6 +258,8 @@ function fromNative(p: Partial<Persona>): Persona {
 		...p,
 		id: base.id, // fresh id so imports never collide with existing personas
 		sessionId: undefined, // don't carry a stale conversation binding
+		source: undefined, // whoever installs it says where it came from
+		installedFrom: undefined,
 		avatarColor: p.avatarColor || base.avatarColor,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt
@@ -236,10 +276,6 @@ export function parsePersonasImport(json: unknown): Persona[] {
 		if ('systemPrompt' in o || 'modelName' in o) personas.push(fromNative(o as Partial<Persona>));
 		else if (isOpenWebUIModel(o)) personas.push(fromOpenWebUI(o as OpenWebUIModel));
 	}
+	for (const persona of personas) persona.source = { origin: 'file' };
 	return personas;
-}
-
-/** Serialise personas to our native JSON format (pretty-printed). */
-export function exportPersonas(personas: Persona[]): string {
-	return JSON.stringify(personas, null, 2);
 }
