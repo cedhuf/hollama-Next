@@ -207,7 +207,6 @@
 
 	onMount(async () => {
 		handleSessionChange();
-		messagesWindow?.addEventListener('scroll', handleScroll);
 	});
 
 	beforeNavigate((navigation) => {
@@ -904,11 +903,85 @@
 	 */
 	const SCROLL_BOTTOM_THRESHOLD = 32;
 
+	/**
+	 * Where the conversation is, read from the box itself.
+	 *
+	 * This is the only thing that ever puts auto-follow back on: you are following
+	 * again once you are at the bottom, whether you got there with the button, with
+	 * the wheel, or by letting the answer catch up with you.
+	 *
+	 * It is deliberately not the only thing that turns it off. Geometry cannot tell
+	 * a scroll you made from a scroll the page made, and during a generation the
+	 * page makes one every frame.
+	 */
 	function handleScroll() {
 		if (!messagesWindow) return;
 		const { scrollTop, scrollHeight, clientHeight } = messagesWindow;
 		userScrolledUp = scrollTop + clientHeight < scrollHeight - SCROLL_BOTTOM_THRESHOLD;
 	}
+
+	/**
+	 * Reading upwards stops the follow, at once, from the gesture rather than from
+	 * where it lands.
+	 *
+	 * This is what the page was missing, and it is why scrolling during a
+	 * generation caught: a flick of the wheel takes a moment to travel more than
+	 * the slack above, and the next token landed inside that moment, scrolled to
+	 * the bottom, and killed the momentum with it. Flick, snap back, flick, snap
+	 * back. Nothing was wrong with the arithmetic; the intent simply arrived too
+	 * late to be acted on.
+	 *
+	 * A wheel event fires before the scroll it causes, so setting this here means
+	 * the frame that would have yanked you back reads it and does nothing.
+	 */
+	function detachOnIntent() {
+		userScrolledUp = true;
+	}
+
+	function handleWheel(event: WheelEvent) {
+		if (event.deltaY < 0) detachOnIntent();
+	}
+
+	/** The same, for a finger: dragging downwards is reading upwards. */
+	let touchStartY = 0;
+	function handleTouchStart(event: TouchEvent) {
+		touchStartY = event.touches[0]?.clientY ?? 0;
+	}
+	function handleTouchMove(event: TouchEvent) {
+		const y = event.touches[0]?.clientY ?? 0;
+		if (y > touchStartY + 4) detachOnIntent();
+	}
+
+	/**
+	 * Bound to the box, and rebound whenever there is a different box.
+	 *
+	 * This used to be one `addEventListener` in `onMount`, which is a fix rather
+	 * than a tidy-up: the scroller lives in the `else` of the view switch, so
+	 * opening the model's controls destroyed it and coming back built a new one
+	 * with nothing listening to it. From then on `userScrolledUp` was never set
+	 * again, auto-follow was permanently on, and the page pulled you back to the
+	 * bottom whatever you did.
+	 *
+	 * As an effect it follows the element, and cleans up after the one that left.
+	 * Passive throughout: none of these ever cancels a gesture, they only read it.
+	 */
+	$effect(() => {
+		const box = messagesWindow;
+		if (!box) return;
+
+		const passive = { passive: true } as const;
+		box.addEventListener('scroll', handleScroll, passive);
+		box.addEventListener('wheel', handleWheel, passive);
+		box.addEventListener('touchstart', handleTouchStart, passive);
+		box.addEventListener('touchmove', handleTouchMove, passive);
+
+		return () => {
+			box.removeEventListener('scroll', handleScroll);
+			box.removeEventListener('wheel', handleWheel);
+			box.removeEventListener('touchstart', handleTouchStart);
+			box.removeEventListener('touchmove', handleTouchMove);
+		};
+	});
 
 	/** One frame may hold at most one queued auto-follow, however many tokens land. */
 	let scrollQueued = false;
