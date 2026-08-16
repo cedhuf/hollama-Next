@@ -253,12 +253,23 @@
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
 
 			<!-- Personas -->
-			<!-- No shortcut in the heading: the store is one half of the control at the
-			     end of the grid, exactly where adding knowledge and adding a collection
-			     are. Two doors to one room is how a page stops being learnable. -->
-			<div class="mb-3 flex items-baseline gap-2">
-				<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
-				<span class="text-xs text-muted">{$personasStore.length}</span>
+			<!-- The shortcut in the heading and the one at the end of the grid are both
+			     worth having: the heading is where you look when you arrive knowing what
+			     you want, the tile is where you end up having scrolled and found nothing
+			     that suits. -->
+			<div class="mb-3 flex items-baseline justify-between gap-2">
+				<div class="flex items-baseline gap-2">
+					<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
+					<span class="text-xs text-muted">{$personasStore.length}</span>
+				</div>
+				<button
+					type="button"
+					onclick={() => (storeOpen = true)}
+					class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
+				>
+					<Store class="h-3.5 w-3.5" />
+					{$LL.personaStore()}
+				</button>
 			</div>
 
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
