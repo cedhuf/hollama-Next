@@ -198,6 +198,16 @@ A persona shared **from a library** does not carry its attached knowledge: the d
 that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A
 relayed one has no such problem, since what users install is the bundle itself.
 
+### Showing the tour again
+
+Under _Settings → Admin → Developer options_, **Show the welcome tour again** plays it once for
+everyone on their next load, whether or not they have seen it. It is the closest thing to a release
+note nobody can miss: the tour says what the app is and where things are, so it is worth replaying
+after a version that moved either.
+
+It stamps a moment rather than clearing a flag on each account, so nothing on the server has to track
+who has seen what, and the tour appears exactly once per person per stamp.
+
 ### What a user's store contains
 
 A store is the door people already know, from every phone they own, so the door stays where it is

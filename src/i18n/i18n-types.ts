@@ -1412,6 +1412,46 @@ type RootTranslation = {
 	 */
 	personaChat: string
 	/**
+	 * T​h​e​ ​t​h​e​m​e​ ​i​s​ ​s​e​t​ ​f​o​r​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
+	 */
+	themeLockedByAdmin: string
+	/**
+	 * T​h​e​m​e
+	 */
+	themeSharingTitle: string
+	/**
+	 * G​i​v​e​ ​y​o​u​r​ ​u​s​e​r​s​ ​t​h​e​ ​l​o​o​k​ ​y​o​u​ ​a​r​e​ ​u​s​i​n​g​.
+	 */
+	themeSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​m​y​ ​t​h​e​m​e​ ​w​i​t​h​ ​u​s​e​r​s
+	 */
+	shareTheme: string
+	/**
+	 * L​o​c​k​e​d​ ​f​i​x​e​s​ ​i​t​ ​a​n​d​ ​r​e​m​o​v​e​s​ ​t​h​e​i​r​ ​t​h​e​m​e​ ​c​o​n​t​r​o​l​s​.​ ​O​v​e​r​r​i​d​a​b​l​e​ ​s​e​t​s​ ​w​h​a​t​ ​a​ ​n​e​w​ ​a​c​c​o​u​n​t​ ​s​t​a​r​t​s​ ​o​n​ ​a​n​d​ ​l​e​t​s​ ​t​h​e​m​ ​c​h​a​n​g​e​ ​i​t​.
+	 */
+	themeSharingHint: string
+	/**
+	 * D​e​v​ ​t​o​o​l​s
+	 */
+	devTools: string
+	/**
+	 * O​c​c​a​s​i​o​n​a​l​ ​i​n​s​t​a​n​c​e​-​w​i​d​e​ ​o​p​e​r​a​t​i​o​n​s​.
+	 */
+	devToolsDescription: string
+	/**
+	 * S​h​o​w​ ​t​h​e​ ​w​e​l​c​o​m​e​ ​t​o​u​r​ ​a​g​a​i​n
+	 */
+	resetOnboarding: string
+	/**
+	 * P​l​a​y​s​ ​i​t​ ​o​n​c​e​ ​f​o​r​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​e​i​r​ ​n​e​x​t​ ​l​o​a​d​,​ ​w​h​e​t​h​e​r​ ​o​r​ ​n​o​t​ ​t​h​e​y​ ​h​a​v​e​ ​s​e​e​n​ ​i​t​.​ ​U​s​e​f​u​l​ ​a​f​t​e​r​ ​a​ ​r​e​l​e​a​s​e​ ​w​o​r​t​h​ ​e​x​p​l​a​i​n​i​n​g​.
+	 */
+	resetOnboardingHelp: string
+	/**
+	 * T​h​e​ ​w​e​l​c​o​m​e​ ​t​o​u​r​ ​w​i​l​l​ ​p​l​a​y​ ​a​g​a​i​n​ ​f​o​r​ ​e​v​e​r​y​o​n​e​.
+	 */
+	resetOnboardingDone: string
+	/**
 	 * R​e​p​l​y​ ​l​a​n​g​u​a​g​e
 	 */
 	personaLanguageLabel: string
@@ -3715,6 +3755,46 @@ The completion in progress will stop
 	 * Chat
 	 */
 	personaChat: () => LocalizedString
+	/**
+	 * The theme is set for this instance by your administrator.
+	 */
+	themeLockedByAdmin: () => LocalizedString
+	/**
+	 * Theme
+	 */
+	themeSharingTitle: () => LocalizedString
+	/**
+	 * Give your users the look you are using.
+	 */
+	themeSharingDescription: () => LocalizedString
+	/**
+	 * Share my theme with users
+	 */
+	shareTheme: () => LocalizedString
+	/**
+	 * Locked fixes it and removes their theme controls. Overridable sets what a new account starts on and lets them change it.
+	 */
+	themeSharingHint: () => LocalizedString
+	/**
+	 * Dev tools
+	 */
+	devTools: () => LocalizedString
+	/**
+	 * Occasional instance-wide operations.
+	 */
+	devToolsDescription: () => LocalizedString
+	/**
+	 * Show the welcome tour again
+	 */
+	resetOnboarding: () => LocalizedString
+	/**
+	 * Plays it once for everyone on their next load, whether or not they have seen it. Useful after a release worth explaining.
+	 */
+	resetOnboardingHelp: () => LocalizedString
+	/**
+	 * The welcome tour will play again for everyone.
+	 */
+	resetOnboardingDone: () => LocalizedString
 	/**
 	 * Reply language
 	 */

@@ -362,6 +362,18 @@ const fr = extendDictionary(en, {
 	personaStoreUpdate: 'Mettre à jour',
 	personaDefaultModel: 'Votre modèle par défaut',
 	personaChat: 'Discuter',
+	themeLockedByAdmin: 'Le thème est fixé pour cette instance par votre administrateur.',
+	themeSharingTitle: 'Thème',
+	themeSharingDescription: 'Donnez à vos utilisateurs le thème que vous utilisez.',
+	shareTheme: 'Partager mon thème avec les utilisateurs',
+	themeSharingHint:
+		"Verrouillé le fixe et retire leurs réglages de thème. Modifiable donne le thème de départ d'un nouveau compte, qu'il reste libre de changer.",
+	devTools: 'Outils',
+	devToolsDescription: "Opérations ponctuelles à l'échelle de l'instance.",
+	resetOnboarding: 'Rejouer la visite de bienvenue',
+	resetOnboardingHelp:
+		"La joue une fois pour tout le monde au prochain chargement, qu'ils l'aient déjà vue ou non. Utile après une version qui mérite une explication.",
+	resetOnboardingDone: 'La visite de bienvenue sera rejouée pour tout le monde.',
 	personaLanguageLabel: 'Langue des réponses',
 	personaLanguageHint:
 		"La langue dans laquelle il répond, quelle que soit celle dans laquelle il a été écrit. Vide, il suit l'interface.",

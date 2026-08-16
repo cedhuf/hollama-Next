@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PlayCircle, Plus, Trash2, X } from '@lucide/svelte';
+	import { PlayCircle, Plus, RotateCcw, Trash2, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -50,6 +50,10 @@
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
+
+	let themeSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let themeShareEnabled = $state(false);
+	let resettingOnboarding = $state(false);
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
 	/** Until the first `load()` settles, the empty states below would be lies. */
@@ -140,6 +144,8 @@
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
 			personaStoreMode = config.personaStoreMode ?? 'open';
+			themeSharing = config.themeSharing ?? 'off';
+			themeShareEnabled = themeSharing !== 'off';
 			searchSharing = config.searchSharing ?? 'off';
 			shareEnabled = searchSharing !== 'off';
 			sharedUrl = config.searchUrl ?? '';
@@ -275,6 +281,42 @@
 		await api('/api/admin/config', 'PUT', { personaStoreMode });
 	}
 
+	/**
+	 * The admin shares the theme they are using, the way they share their search
+	 * engine and their prompts: the panel decides who gets it, the values come
+	 * from this account. Nothing to pick twice.
+	 */
+	async function saveTheme() {
+		await api('/api/admin/config', 'PUT', {
+			themeSharing,
+			themeMode: $settingsStore.themeMode,
+			themeStyle: $settingsStore.themeStyle
+		});
+	}
+
+	async function syncThemeShare() {
+		themeSharing = themeShareEnabled ? 'overridable' : 'off';
+		await saveTheme();
+	}
+
+	/**
+	 * Play the welcome tour again, for everyone.
+	 *
+	 * A release note nobody can miss: what the tour says is what changed, and it
+	 * appears in front of every account on its next load whether or not they have
+	 * seen it before. It stamps a moment rather than clearing a flag on each
+	 * person, so nothing here has to know who has seen what.
+	 */
+	async function askForOnboarding() {
+		resettingOnboarding = true;
+		try {
+			await api('/api/admin/config', 'PUT', { resetOnboarding: true });
+			toast.success($LL.resetOnboardingDone());
+		} finally {
+			resettingOnboarding = false;
+		}
+	}
+
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
 	}
@@ -356,6 +398,22 @@
 					<span class="text-xs text-muted">{$LL.currentlySharing({ value: sharedUrl })}</span>
 				{/if}
 			{/if}
+		{/if}
+	</SettingsSection>
+
+	<!-- Theme sharing -->
+	<SettingsSection title={$LL.themeSharingTitle()} description={$LL.themeSharingDescription()} card>
+		<FieldCheckbox
+			label={$LL.shareTheme()}
+			bind:checked={themeShareEnabled}
+			onChange={syncThemeShare}
+		/>
+		{#if themeShareEnabled}
+			<Select bind:value={themeSharing} options={sharingOptions} onChange={saveTheme} />
+			<SettingsHint>{$LL.themeSharingHint()}</SettingsHint>
+			<span class="text-xs text-muted">
+				{$LL.sharingLabel()}: {$settingsStore.themeStyle} · {$settingsStore.themeMode}
+			</span>
 		{/if}
 	</SettingsSection>
 
@@ -576,6 +634,22 @@
 			</div>
 			<Button variant="outline" onclick={replayWelcome}>
 				<PlayCircle class="base-icon" />
+				{$LL.launch()}
+			</Button>
+		</div>
+
+		<!-- The same tour, for everyone rather than for you. Worth its own row
+		     beside the preview above: one shows you what they will see, the other
+		     makes them see it. -->
+		<div
+			class="mt-2 flex items-center justify-between gap-3 rounded-md border border-shade-3 p-3 text-sm"
+		>
+			<div class="flex min-w-0 flex-col">
+				<span class="font-medium text-active">{$LL.resetOnboarding()}</span>
+				<span class="text-xs text-muted">{$LL.resetOnboardingHelp()}</span>
+			</div>
+			<Button variant="outline" disabled={resettingOnboarding} onclick={askForOnboarding}>
+				<RotateCcw class="base-icon" />
 				{$LL.launch()}
 			</Button>
 		</div>

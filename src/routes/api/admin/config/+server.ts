@@ -7,11 +7,13 @@ import {
 	getConfig,
 	personaStoreMode,
 	personaStoreUrl,
+	resetOnboarding,
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
 	setPersonaStoreMode,
-	setPersonaStoreUrl
+	setPersonaStoreUrl,
+	themeSharing
 } from '$lib/server/db/config';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
 
@@ -21,6 +23,10 @@ export async function GET(event) {
 		allowUserKeys: allowUserKeys(),
 		allowUserPersonas: allowUserPersonas(),
 		personaStoreMode: personaStoreMode(),
+		themeSharing: themeSharing(),
+		themeMode: getConfig('themeMode') ?? 'system',
+		themeStyle: getConfig('themeStyle') ?? 'classic',
+		onboardingEpoch: Number(getConfig('onboardingEpoch') ?? 0),
 		personaStoreUrl: personaStoreUrl() ?? '',
 		searchUrl: getConfig('searchUrl') ?? '',
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
@@ -46,6 +52,19 @@ export async function PUT(event) {
 	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
 		setPersonaStoreMode(body.personaStoreMode);
 	}
+
+	// The admin shares their own look, exactly as they share their search engine
+	// and their prompts: the panel decides who gets it, the values come from the
+	// account that is sharing.
+	if (['off', 'locked', 'overridable'].includes(body?.themeSharing)) {
+		setConfig('themeSharing', body.themeSharing);
+	}
+	if (typeof body?.themeMode === 'string') setConfig('themeMode', body.themeMode);
+	if (typeof body?.themeStyle === 'string') setConfig('themeStyle', body.themeStyle);
+
+	// A stamp, so every browser can tell on its next load whether it has already
+	// acknowledged this one. Nothing here has to know who has seen what.
+	if (body?.resetOnboarding === true) resetOnboarding();
 	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {

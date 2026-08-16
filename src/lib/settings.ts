@@ -155,6 +155,14 @@ export interface Settings {
 	documentOcr: boolean;
 	/** Tesseract language code(s) for OCR, e.g. `eng` or `eng+fra`. */
 	documentOcrLanguage: string;
+	/**
+	 * Whether the theme was ever picked here, rather than inherited.
+	 *
+	 * An instance can hand its users a starting theme they stay free to change, and
+	 * that offer has to stop the first time someone chooses. Reading the stored
+	 * values cannot tell "never chose" from "chose what the default happened to be".
+	 */
+	themeChosen: boolean;
 	themeMode: 'system' | 'light' | 'dark';
 	themeStyle: 'classic' | 'dracula' | 'catppuccin' | 'gruvbox' | 'nord' | 'solarized';
 	/**
@@ -204,6 +212,13 @@ export interface Settings {
 	onboardingComplete: boolean;
 	/** Server mode: the new-user welcome tour (app intro, theme, personas) has been seen. */
 	welcomeComplete: boolean;
+	/**
+	 * The last "show everyone the tour again" stamp this browser acknowledged.
+	 *
+	 * Lets an admin replay the tour for the whole instance, as a release note
+	 * nobody can miss, without the server keeping a list of who has seen what.
+	 */
+	onboardingEpochSeen: number;
 	lloomaMetadata: LloomaMetadata;
 	profileFirstName: string;
 	profileLastName: string;
@@ -264,6 +279,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	documentsEnabled: true,
 	documentOcr: false,
 	documentOcrLanguage: 'eng',
+	themeChosen: false,
 	themeMode: 'system',
 	themeStyle: 'classic',
 	surfaceTransparency: true,
@@ -275,6 +291,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	sidebarExpanded: true,
 	onboardingComplete: false,
 	welcomeComplete: false,
+	onboardingEpochSeen: 0,
 	lloomaMetadata: { currentVersion: version },
 	profileFirstName: '',
 	profileLastName: '',

@@ -33,6 +33,19 @@ beside them is lighter still. That is what gives the column depth instead of one
 and it is also why the picture behind the app reads in the conversation rather than across the whole
 thing.
 
+### A theme for the whole instance
+
+In server mode an admin can hand their users the theme they are using, under
+_Settings → Admin → Theme_:
+
+- **Overridable** decides what an account starts on. The first time someone picks a theme of their
+  own, the offer stops applying to them.
+- **Locked** fixes it, and the theme controls disappear from _Settings → Interface_ rather than being
+  drawn and refused. An instance with a house style has made a decision, and a disabled row of
+  colours only invites the question.
+
+Nobody's stored preference is rewritten either way, so unlocking gives everyone their own back.
+
 ## Background
 
 A picture behind the app, under _Settings → Interface → Background_. The sidebar is translucent, so
@@ -99,9 +112,24 @@ on hover. The button under them opens the rest of the list, with titles, without
 column for a single visit. The mark stays at the top, at the size it has at full width, and the
 control that widens the column again sits astride the column's edge, half on it and half off it.
 
-**Right-click any conversation** (long press on a touch screen) for the full menu: pin it, save it as
-[knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting always
-asks, and asks on the row itself rather than in a dialog somewhere else.
+**Right-click any conversation** (long press on a touch screen) for the full menu: pin it, archive
+it, save it as [knowledge](/features/knowledge/), copy it as Markdown or JSON, delete it. Deleting
+always asks, and asks on the row itself rather than in a dialog somewhere else.
+
+**A persona's launcher answers the same right-click**, with everything a conversation offers plus one
+entry only it has: _End this conversation_. That is not deletion and does not read as one. Ending it
+puts the persona back to unstarted and leaves the transcript in the list as an ordinary conversation;
+deleting is the entry below, and it is the only one that loses anything.
+
+### Archive
+
+The middle answer between a conversation in the way and a conversation gone. Archiving takes it out
+of the list and keeps everything: the messages, the model, the settings, the persona it belonged to.
+
+Archived conversations are reached from a link at the foot of the list, which appears only once there
+is something in it, and each one can be restored or deleted from there. Nothing else in the app shows
+them: they are not a group at the bottom of the sidebar, because being out of the way is the whole
+point.
 
 The same pin and delete can sit on every row instead, one click closer:
 _Settings → Interface → Sidebar → Show quick actions_. They are off by default, because they hover

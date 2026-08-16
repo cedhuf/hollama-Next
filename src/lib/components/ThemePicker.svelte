@@ -145,6 +145,24 @@
 	});
 
 	const mode = $derived($settingsStore.themeMode || 'system');
+
+	/**
+	 * Touching either control settles the question for good.
+	 *
+	 * An instance can hand out a starting theme without fixing it, and that offer
+	 * has to stop the moment someone makes a choice of their own — including the
+	 * choice of what the instance happened to be giving them. Guessing from the
+	 * stored values cannot tell "never chose" from "chose the default".
+	 */
+	function chooseMode(value: (typeof themeModes)[number]['value']) {
+		$settingsStore.themeMode = value;
+		$settingsStore.themeChosen = true;
+	}
+
+	function chooseStyle(value: (typeof themeStyles)[number]['value']) {
+		$settingsStore.themeStyle = value;
+		$settingsStore.themeChosen = true;
+	}
 	const isDark = $derived(mode === 'dark' || (mode === 'system' && systemPrefersDark));
 </script>
 
@@ -156,7 +174,7 @@
 			{@const Icon = themeMode.icon}
 			<button
 				type="button"
-				onclick={() => ($settingsStore.themeMode = themeMode.value)}
+				onclick={() => chooseMode(themeMode.value)}
 				class="flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors
 					{mode === themeMode.value ? 'bg-shade-2 text-active shadow-sm' : 'text-muted hover:text-active'}"
 			>
@@ -177,7 +195,7 @@
 			{@const swatch = isDark ? style.dark : style.light}
 			<button
 				type="button"
-				onclick={() => ($settingsStore.themeStyle = style.value)}
+				onclick={() => chooseStyle(style.value)}
 				class="flex flex-col items-center gap-2 rounded-lg border p-3 transition-colors
 					{$settingsStore.themeStyle === style.value
 					? 'border-accent bg-shade-1'

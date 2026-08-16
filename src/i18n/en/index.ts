@@ -368,6 +368,18 @@ const en = {
 	personaStoreUpdate: 'Update',
 	personaDefaultModel: 'Your default model',
 	personaChat: 'Chat',
+	themeLockedByAdmin: 'The theme is set for this instance by your administrator.',
+	themeSharingTitle: 'Theme',
+	themeSharingDescription: 'Give your users the look you are using.',
+	shareTheme: 'Share my theme with users',
+	themeSharingHint:
+		'Locked fixes it and removes their theme controls. Overridable sets what a new account starts on and lets them change it.',
+	devTools: 'Dev tools',
+	devToolsDescription: 'Occasional instance-wide operations.',
+	resetOnboarding: 'Show the welcome tour again',
+	resetOnboardingHelp:
+		'Plays it once for everyone on their next load, whether or not they have seen it. Useful after a release worth explaining.',
+	resetOnboardingDone: 'The welcome tour will play again for everyone.',
 	personaLanguageLabel: 'Reply language',
 	personaLanguageHint:
 		'What it answers in, whatever language it was written in. Empty follows the interface.',

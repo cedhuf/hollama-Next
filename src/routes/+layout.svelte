@@ -42,6 +42,7 @@
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentRole, currentUser } from '$lib/stores/auth';
+	import { setInstanceConfig } from '$lib/stores/instance';
 	import {
 		onboardingOpen,
 		openSearch,
@@ -69,6 +70,7 @@
 
 	$effect(() => {
 		currentUser.set(data.user);
+		setInstanceConfig(data.instance ?? null);
 	});
 
 	const updateToastClasses = {
@@ -243,8 +245,15 @@
 	const wallpaper = $derived(wallpaperImage($settingsStore.backgroundImage));
 
 	$effect(() => {
-		const mode = $settingsStore.themeMode || 'system';
-		const style = $settingsStore.themeStyle || 'classic';
+		// A locked instance theme wins over the stored one rather than overwriting
+		// it: unlock it later and everyone gets their own back, which is not true of
+		// a policy that rewrote people's settings on its way through. An offered one
+		// applies only until this account picks for itself.
+		const sharing = data.instance?.themeSharing ?? 'off';
+		const locked =
+			sharing === 'locked' || (sharing === 'overridable' && !$settingsStore.themeChosen);
+		const mode = (locked ? data.instance?.themeMode : $settingsStore.themeMode) || 'system';
+		const style = (locked ? data.instance?.themeStyle : $settingsStore.themeStyle) || 'classic';
 
 		document.documentElement.setAttribute('data-theme-style', style);
 
@@ -408,10 +417,15 @@
 		// Server mode has no first-run wizard (the account and its profile are
 		// provisioned for the user), so new users get the welcome tour instead —
 		// once, on their first connection.
+		// Shown again when an administrator says so, which is what the epoch is for:
+		// each browser remembers the stamp it acknowledged, so a newer one plays the
+		// tour once for everybody and then stops, with nothing tracking who saw what.
+		const epoch = data.instance?.onboardingEpoch ?? 0;
+		const seen = $settingsStore.onboardingEpochSeen ?? 0;
 		if (
 			env.PUBLIC_MODE === 'server' &&
 			env.PUBLIC_DISABLE_ONBOARDING !== 'true' &&
-			!$settingsStore.welcomeComplete
+			(!$settingsStore.welcomeComplete || epoch > seen)
 		) {
 			$welcomeOpen = true;
 		}

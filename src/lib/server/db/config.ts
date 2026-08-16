@@ -75,3 +75,22 @@ export function personaStoreUrl(): string | undefined {
 export function setPersonaStoreUrl(value: string): void {
 	setConfig('personaStoreUrl', value.trim());
 }
+
+/**
+ * The theme an instance gives its users, and how firmly.
+ *
+ * `off` leaves everyone their own. `overridable` sets what a new account starts
+ * on and lets them change it. `locked` fixes it, and the theme controls go away:
+ * an instance with a house style is making a decision, not a suggestion.
+ */
+export type ThemeSharing = 'off' | 'locked' | 'overridable';
+
+export function themeSharing(): ThemeSharing {
+	const value = getConfig('themeSharing');
+	return value === 'locked' || value === 'overridable' ? value : 'off';
+}
+
+/** Stamp the moment an admin asked everyone to see the tour again. */
+export function resetOnboarding(): void {
+	setConfig('onboardingEpoch', String(Date.now()));
+}

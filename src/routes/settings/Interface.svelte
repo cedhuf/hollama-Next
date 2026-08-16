@@ -10,6 +10,7 @@
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { languageOptions } from '$lib/i18n';
 	import { settingsStore } from '$lib/localStorage';
+	import { themeLocked } from '$lib/stores/instance';
 	import { CUSTOM_MAX_BYTES, PACK_PREFIX, WALLPAPERS, wallpaperThumb } from '$lib/wallpapers';
 
 	import SettingsField from './SettingsField.svelte';
@@ -72,7 +73,13 @@
 			/>
 		</SettingsField>
 
-		<ThemePicker />
+		<!-- Absent, not disabled, when the instance has settled it: a row of colours
+		     that refuses to be clicked only invites the question. -->
+		{#if $themeLocked}
+			<SettingsHint>{$LL.themeLockedByAdmin()}</SettingsHint>
+		{:else}
+			<ThemePicker />
+		{/if}
 
 		<!-- Set apart from the theme picker: same section, different question. -->
 		<div class="mt-2">

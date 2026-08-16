@@ -12,6 +12,7 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { avatarFields } from '$lib/personaBundle';
 	import { catalogState, loadCatalog } from '$lib/personaCatalog';
+	import { instanceConfig } from '$lib/stores/instance';
 	import { welcomeOpen } from '$lib/stores/modal';
 
 	/**
@@ -53,6 +54,8 @@
 
 	function finish() {
 		$settingsStore.welcomeComplete = true;
+		// Acknowledge the instance's current stamp, so this replay does not repeat.
+		$settingsStore.onboardingEpochSeen = $instanceConfig?.onboardingEpoch ?? 0;
 		$welcomeOpen = false;
 		step = 0;
 	}
