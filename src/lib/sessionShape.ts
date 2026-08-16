@@ -35,6 +35,7 @@ export interface SessionSummary {
 	model?: Model;
 	pinned?: boolean;
 	personaId?: string;
+	archived?: boolean;
 }
 
 /** The title a conversation shows in a list: its own, or its first words. */
@@ -53,7 +54,8 @@ export function summarizeSession(session: Session): SessionSummary {
 		updatedAt: session.updatedAt,
 		model: session.model,
 		pinned: session.pinned,
-		personaId: session.personaId
+		personaId: session.personaId,
+		archived: session.archived
 	};
 }
 

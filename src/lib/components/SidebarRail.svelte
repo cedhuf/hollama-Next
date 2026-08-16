@@ -5,8 +5,8 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { settingsStore } from '$lib/localStorage';
-	import { launchPersona, type Persona } from '$lib/personas';
+	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import { launchPersona, unbindPersonaSession, type Persona } from '$lib/personas';
 	import { resolveSessionTitle, type SessionSummary } from '$lib/sessions';
 	import { openSearch } from '$lib/stores/modal';
 
@@ -34,7 +34,19 @@
 	 */
 	const RAIL_RECENT = 4;
 
-	const recent = $derived(sessions.slice(0, RAIL_RECENT));
+	const recent = $derived(sessions.filter((session) => !session.archived).slice(0, RAIL_RECENT));
+
+	/** A launcher's conversation, when it has one: without it there is no menu to draw. */
+	const sessionOf = (persona: Persona) =>
+		persona.sessionId ? sessions.find((session) => session.id === persona.sessionId) : undefined;
+
+	function deleteConversation(persona: Persona) {
+		if (!persona.sessionId) return;
+		const isOpen = pathname.includes(persona.sessionId);
+		sessionsStore.remove(persona.sessionId);
+		unbindPersonaSession(persona.sessionId);
+		if (isOpen) void goto(resolve('/sessions'));
+	}
 	let browsing = $state(false);
 
 	const pathname = $derived(page.url.pathname);
@@ -129,29 +141,49 @@
 		{#if personas.length > 0}
 			<div class="my-1 h-px w-8 bg-shade-3"></div>
 			{#each personas as persona (persona.id)}
-				<Tooltip side="right" class="w-56">
-					{#snippet trigger({ props })}
-						<button
-							{...props}
-							type="button"
-							onclick={() =>
-								goto(
-									resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
-								)}
-							aria-label={persona.name}
-							class="rounded-full outline-none transition duration-150 hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-shade-1 motion-reduce:transition-none"
-						>
-							<PersonaAvatar {persona} size={32} />
-						</button>
+				{@const session = sessionOf(persona)}
+				<!-- The same menu the open column gives it, since it is the same thing:
+				     narrowing the sidebar is not meant to take actions away. -->
+				<ContextMenu>
+					{#snippet trigger({ props: menuProps })}
+						<Tooltip side="right" class="w-56">
+							{#snippet trigger({ props })}
+								<button
+									{...menuProps}
+									{...props}
+									type="button"
+									onclick={() =>
+										goto(
+											resolve('/sessions/[id]', {
+												id: launchPersona(persona, $settingsStore.models)
+											})
+										)}
+									aria-label={persona.name}
+									class="persona-launcher rounded-full outline-none transition duration-150 hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-shade-1 motion-reduce:transition-none"
+								>
+									<PersonaAvatar {persona} size={32} />
+								</button>
+							{/snippet}
+							<!-- Its name first: at this width the avatar is all there is, so the
+						     tooltip is where the persona says who it is before saying what it
+						     is for. -->
+							<span class="block font-medium text-active">{persona.name}</span>
+							{#if persona.tagline}
+								<span class="mt-0.5 block text-muted">{persona.tagline}</span>
+							{/if}
+						</Tooltip>
 					{/snippet}
-					<!-- Its name first: at this width the avatar is all there is, so the
-				     tooltip is where the persona says who it is before saying what it
-				     is for. -->
-					<span class="block font-medium text-active">{persona.name}</span>
-					{#if persona.tagline}
-						<span class="mt-0.5 block text-muted">{persona.tagline}</span>
+
+					{#if session}
+						<SessionMenu
+							id={session.id}
+							pinned={session.pinned}
+							archived={session.archived}
+							onClose={() => unbindPersonaSession(persona.sessionId ?? '')}
+							onDelete={() => deleteConversation(persona)}
+						/>
 					{/if}
-				</Tooltip>
+				</ContextMenu>
 			{/each}
 		{/if}
 
@@ -231,3 +263,13 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	/* iOS answers a long press on an image with its own preview sheet, which
+	   swallows the press before the context menu can open. */
+	.persona-launcher {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+</style>

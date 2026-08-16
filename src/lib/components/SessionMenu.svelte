@@ -1,11 +1,20 @@
 <script lang="ts">
-	import { Braces, Brain, FileText, Pin, PinOff, Trash2 } from '@lucide/svelte';
+	import {
+		Archive,
+		ArchiveRestore,
+		Braces,
+		Brain,
+		FileText,
+		Pin,
+		PinOff,
+		Trash2
+	} from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { copyText } from '$lib/clipboard';
 	import { repository } from '$lib/data';
 	import { serializeSession, sessionAsKnowledgeDraft, type ExportFormat } from '$lib/sessionExport';
-	import { toggleSessionPin } from '$lib/sessions';
+	import { toggleSessionArchive, toggleSessionPin } from '$lib/sessions';
 	import { openKnowledge } from '$lib/stores/modal';
 
 	import MenuItem from './MenuItem.svelte';
@@ -20,6 +29,9 @@
 	interface Props {
 		id: string;
 		pinned?: boolean;
+		archived?: boolean;
+		/** Offered only where a persona's conversation is shown as the persona itself. */
+		onClose?: () => void;
 		/**
 		 * Where deletion is offered, since it is the one entry that needs room the
 		 * caller may not have: it asks before it acts, on the row itself.
@@ -27,7 +39,7 @@
 		onDelete?: () => void;
 	}
 
-	let { id, pinned = false, onDelete }: Props = $props();
+	let { id, pinned = false, archived = false, onClose, onDelete }: Props = $props();
 
 	/**
 	 * Offer the transcript, don't file it.
@@ -48,8 +60,13 @@
 	}
 </script>
 
-<MenuItem icon={pinned ? PinOff : Pin} onclick={() => void toggleSessionPin(id)}>
-	{pinned ? $LL.unpin() : $LL.pin()}
+{#if !archived}
+	<MenuItem icon={pinned ? PinOff : Pin} onclick={() => void toggleSessionPin(id)}>
+		{pinned ? $LL.unpin() : $LL.pin()}
+	</MenuItem>
+{/if}
+<MenuItem icon={archived ? ArchiveRestore : Archive} onclick={() => void toggleSessionArchive(id)}>
+	{archived ? $LL.unarchiveSession() : $LL.archiveSession()}
 </MenuItem>
 <MenuItem icon={Brain} onclick={() => void saveAsKnowledge()}>
 	{$LL.saveAsKnowledge()}
@@ -65,6 +82,18 @@
 <MenuItem icon={Braces} onclick={() => void copyAs('json')}>
 	{$LL.copyAsJson()}
 </MenuItem>
+
+{#if onClose}
+	<div class="my-1 h-px bg-shade-3" role="none"></div>
+
+	<!-- Ends the conversation without ending anything else: the persona goes back to
+	     being unstarted and the transcript stays where it was, as an ordinary
+	     conversation in the list. Deleting is the entry below, and it is the only one
+	     that loses anything. -->
+	<MenuItem icon={ArchiveRestore} onclick={onClose}>
+		{$LL.closePersonaConversation()}
+	</MenuItem>
+{/if}
 
 {#if onDelete}
 	<div class="my-1 h-px bg-shade-3" role="none"></div>

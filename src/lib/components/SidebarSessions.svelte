@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Archive } from '@lucide/svelte';
+
 	import LL from '$i18n/i18n-svelte';
 	import { serversStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
@@ -12,6 +14,7 @@
 	} from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
+	import ArchiveModal from './ArchiveModal.svelte';
 	import EmptyMessage from './EmptyMessage.svelte';
 	import PersonaAvatar from './PersonaAvatar.svelte';
 	import SectionListItem from './SectionListItem.svelte';
@@ -51,6 +54,9 @@
 			if (el) onScroll?.(el);
 		});
 	}
+
+	let archiveOpen = $state(false);
+	const archivedCount = $derived(sessions.filter((s) => s.archived).length);
 
 	const filtered = $derived(
 		q ? sessions.filter((s) => resolveSessionTitle(s).toLowerCase().includes(q)) : sessions
@@ -122,5 +128,23 @@
 		{#if groups.length === 0 && !hasPersonaMatches}
 			<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
 		{/if}
+
+		<!-- At the foot of the list, because that is where you are once you have
+		     scrolled past everything you actually have. Quiet, and absent entirely
+		     when there is nothing in it: a permanent link to an empty room is a
+		     control that teaches nothing. -->
+		{#if archivedCount > 0 && !q}
+			<button
+				type="button"
+				onclick={() => (archiveOpen = true)}
+				class="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted transition-colors hover:bg-shade-0 hover:text-active"
+			>
+				<Archive class="h-3.5 w-3.5 shrink-0" />
+				<span class="truncate">{$LL.archivedSessions()}</span>
+				<span class="ml-auto shrink-0">{archivedCount}</span>
+			</button>
+		{/if}
 	</div>
 </div>
+
+<ArchiveModal bind:open={archiveOpen} />

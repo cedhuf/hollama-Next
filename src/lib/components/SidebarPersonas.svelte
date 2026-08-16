@@ -5,10 +5,12 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { settingsStore } from '$lib/localStorage';
-	import { launchPersona, type Persona } from '$lib/personas';
+	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import { launchPersona, unbindPersonaSession, type Persona } from '$lib/personas';
 
+	import ContextMenu from './ContextMenu.svelte';
 	import PersonaAvatar from './PersonaAvatar.svelte';
+	import SessionMenu from './SessionMenu.svelte';
 
 	interface Props {
 		personas: Persona[];
@@ -47,6 +49,35 @@
 	function launch(persona: Persona) {
 		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
 	}
+
+	/**
+	 * A launcher is a conversation, so it answers a right-click like one.
+	 *
+	 * Everything a conversation offers, plus the one thing only a persona has:
+	 * ending it. That is not deletion and must not read as it, which is why they
+	 * are separate entries with the destructive one last. Ending puts the persona
+	 * back to unstarted and leaves the transcript in the list as an ordinary
+	 * conversation; deleting is what loses it.
+	 *
+	 * The menu is only drawn once the persona has a conversation. Before that there
+	 * is nothing to pin, export, end or delete.
+	 */
+	const sessionOf = (persona: Persona) =>
+		persona.sessionId
+			? ($sessionsStore ?? []).find((session) => session.id === persona.sessionId)
+			: undefined;
+
+	function endConversation(persona: Persona) {
+		unbindPersonaSession(persona.sessionId ?? '');
+	}
+
+	function deleteConversation(persona: Persona) {
+		if (!persona.sessionId) return;
+		const isOpen = pathname.includes(persona.sessionId);
+		sessionsStore.remove(persona.sessionId);
+		unbindPersonaSession(persona.sessionId);
+		if (isOpen) void goto(resolve('/sessions'));
+	}
 </script>
 
 {#if personas.length > 0}
@@ -64,30 +95,46 @@
 				<!-- iOS Messages-style grid: five to a row, a partial row centred. -->
 				<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
 					{#each personas as persona (persona.id)}
-						<button
-							type="button"
-							onclick={() => launch(persona)}
-							style="flex: 0 0 calc(100% / {COLUMNS} - 0.25rem)"
-							class="group flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 outline-none"
-							title={persona.tagline || persona.name}
-						>
-							<span
-								class="relative inline-flex rounded-full ring-offset-2 ring-offset-shade-1 transition duration-150 group-hover:scale-105 motion-reduce:transition-none {isActive(
-									persona
-								)
-									? 'ring-2 ring-accent'
-									: 'group-hover:ring-2 group-hover:ring-shade-4 group-focus-visible:ring-2 group-focus-visible:ring-accent'}"
-							>
-								<PersonaAvatar {persona} size={44} />
-							</span>
-							<span
-								class="w-full truncate text-center text-xs transition-colors {isActive(persona)
-									? 'font-medium text-active'
-									: 'text-muted group-hover:text-active'}"
-							>
-								{persona.name}
-							</span>
-						</button>
+						{@const session = sessionOf(persona)}
+						<ContextMenu>
+							{#snippet trigger({ props })}
+								<button
+									{...props}
+									type="button"
+									onclick={() => launch(persona)}
+									style="flex: 0 0 calc(100% / {COLUMNS} - 0.25rem)"
+									class="persona-launcher group flex flex-col items-center gap-1.5 rounded-xl px-1 py-2 outline-none"
+									title={persona.tagline || persona.name}
+								>
+									<span
+										class="relative inline-flex rounded-full ring-offset-2 ring-offset-shade-1 transition duration-150 group-hover:scale-105 motion-reduce:transition-none {isActive(
+											persona
+										)
+											? 'ring-2 ring-accent'
+											: 'group-hover:ring-2 group-hover:ring-shade-4 group-focus-visible:ring-2 group-focus-visible:ring-accent'}"
+									>
+										<PersonaAvatar {persona} size={44} />
+									</span>
+									<span
+										class="w-full truncate text-center text-xs transition-colors {isActive(persona)
+											? 'font-medium text-active'
+											: 'text-muted group-hover:text-active'}"
+									>
+										{persona.name}
+									</span>
+								</button>
+							{/snippet}
+
+							{#if session}
+								<SessionMenu
+									id={session.id}
+									pinned={session.pinned}
+									archived={session.archived}
+									onClose={() => endConversation(persona)}
+									onDelete={() => deleteConversation(persona)}
+								/>
+							{/if}
+						</ContextMenu>
 					{/each}
 				</div>
 			{/if}
@@ -104,20 +151,47 @@
 		     leaves the room, and the same on each side so nothing sits off-centre. -->
 		<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 py-2">
 			{#each personas as persona (persona.id)}
-				<button
-					type="button"
-					onclick={() => launch(persona)}
-					title={persona.name}
-					aria-label={persona.name}
-					class="shrink-0 rounded-full outline-none ring-offset-2 ring-offset-shade-1 transition duration-150 hover:scale-105 motion-reduce:transition-none {isActive(
-						persona
-					)
-						? 'ring-2 ring-accent'
-						: 'hover:ring-2 hover:ring-shade-4 focus-visible:ring-2 focus-visible:ring-accent'}"
-				>
-					<PersonaAvatar {persona} size={28} />
-				</button>
+				{@const session = sessionOf(persona)}
+				<ContextMenu>
+					{#snippet trigger({ props })}
+						<button
+							{...props}
+							type="button"
+							onclick={() => launch(persona)}
+							title={persona.name}
+							aria-label={persona.name}
+							class="persona-launcher shrink-0 rounded-full outline-none ring-offset-2 ring-offset-shade-1 transition duration-150 hover:scale-105 motion-reduce:transition-none {isActive(
+								persona
+							)
+								? 'ring-2 ring-accent'
+								: 'hover:ring-2 hover:ring-shade-4 focus-visible:ring-2 focus-visible:ring-accent'}"
+						>
+							<PersonaAvatar {persona} size={28} />
+						</button>
+					{/snippet}
+
+					{#if session}
+						<SessionMenu
+							id={session.id}
+							pinned={session.pinned}
+							archived={session.archived}
+							onClose={() => endConversation(persona)}
+							onDelete={() => deleteConversation(persona)}
+						/>
+					{/if}
+				</ContextMenu>
 			{/each}
 		</div>
 	{/if}
 {/if}
+
+<style>
+	/* The same reason the list rows do it: iOS answers a long press on an image
+	   with its own preview sheet, which swallows the press before the context menu
+	   can open. A launcher is a target, not a passage. */
+	.persona-launcher {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
+	}
+</style>

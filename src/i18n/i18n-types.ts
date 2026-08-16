@@ -1212,6 +1212,26 @@ type RootTranslation = {
 	 */
 	pin: string
 	/**
+	 * A​r​c​h​i​v​e
+	 */
+	archiveSession: string
+	/**
+	 * R​e​s​t​o​r​e
+	 */
+	unarchiveSession: string
+	/**
+	 * A​r​c​h​i​v​e​d
+	 */
+	archivedSessions: string
+	/**
+	 * N​o​t​h​i​n​g​ ​a​r​c​h​i​v​e​d​.
+	 */
+	archivedSessionsEmpty: string
+	/**
+	 * E​n​d​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	closePersonaConversation: string
+	/**
 	 * U​n​p​i​n
 	 */
 	unpin: string
@@ -3495,6 +3515,26 @@ The completion in progress will stop
 	 * Pin
 	 */
 	pin: () => LocalizedString
+	/**
+	 * Archive
+	 */
+	archiveSession: () => LocalizedString
+	/**
+	 * Restore
+	 */
+	unarchiveSession: () => LocalizedString
+	/**
+	 * Archived
+	 */
+	archivedSessions: () => LocalizedString
+	/**
+	 * Nothing archived.
+	 */
+	archivedSessionsEmpty: () => LocalizedString
+	/**
+	 * End this conversation
+	 */
+	closePersonaConversation: () => LocalizedString
 	/**
 	 * Unpin
 	 */

@@ -110,6 +110,15 @@ export interface Session {
 	personaId?: string;
 	/** Pinned to the top of the sidebar, regardless of recency. */
 	pinned?: boolean;
+	/**
+	 * Out of the list, but not gone.
+	 *
+	 * The middle answer between keeping a conversation in the way and deleting it,
+	 * which is the only thing on offer for something you are finished with and do
+	 * not want to lose. Archived conversations keep everything and are reachable
+	 * from the foot of the list.
+	 */
+	archived?: boolean;
 }
 
 export interface Editor {
@@ -212,6 +221,13 @@ export async function toggleSessionPin(id: string): Promise<void> {
 	saveSession({ ...session, pinned: !summary.pinned });
 }
 
+/** Out of the list, or back into it. Reads and writes the conversation, like pinning. */
+export async function toggleSessionArchive(id: string): Promise<void> {
+	const session = await repository.loadSession(id);
+	if (!session) return;
+	saveSession({ ...session, archived: !session.archived, pinned: false });
+}
+
 export type SessionGroupKey =
 	| 'pinned'
 	| 'today'
@@ -232,8 +248,11 @@ export interface SessionGroup {
  * `updatedAt` descending (as `sortStore` keeps it).
  */
 export function groupSessions(sessions: SessionSummary[]): SessionGroup[] {
-	const pinned = sessions.filter((s) => s.pinned);
-	const rest = sessions.filter((s) => !s.pinned);
+	// Archived conversations are not a group at the bottom: they are not in the
+	// list at all, which is the whole of what archiving is for.
+	const active = sessions.filter((s) => !s.archived);
+	const pinned = active.filter((s) => s.pinned);
+	const rest = active.filter((s) => !s.pinned);
 
 	const now = new Date();
 	const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
