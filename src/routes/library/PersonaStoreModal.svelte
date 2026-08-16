@@ -7,6 +7,7 @@
 		List,
 		LoaderCircle,
 		RefreshCw,
+		RotateCcw,
 		Search,
 		Users,
 		X
@@ -611,28 +612,14 @@
 							     not who published it. Provenance stays where it is a choice rather
 							     than a decoration: the filter above. -->
 							{#snippet actions()}
-								<!-- The same footer in every view: what you can do with the persona,
-								     then the control that hands it out. "My personas" had a wide
-								     labelled button of its own, which made one of the three views
-								     look like a different page. Nothing about a persona you wrote
-								     needs a different shape from one you installed. -->
-								{#if offer.update}
-									<button
-										type="button"
-										disabled={installing !== null}
-										onclick={() => run(offer, true)}
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
-									>
-										{#if installing === offer.key}
-											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-										{:else}
-											<ArrowDownToLine class="h-3.5 w-3.5" />
-										{/if}
-										{offer.state === 'outdated'
-											? $LL.personaStoreUpdate()
-											: $LL.personaStoreReset()}
-									</button>
-								{:else if offer.state}
+								<!-- Installing belongs to the store, restoring belongs to your copy,
+								     and they were the same button. So a persona you had edited
+								     offered "restore" where "install" should have been, and the store
+								     stopped being a place you could take a persona from.
+								     Now the store always offers its persona, and the copy's own
+								     controls sit beside it as icons: update it, or put the published
+								     text back over your edits. -->
+								{#if offer.state}
 									<span
 										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
 									>
@@ -655,6 +642,36 @@
 										{/if}
 										{$LL.install()}
 									</button>
+								{/if}
+
+								{#if offer.update}
+									{@const outdated = offer.state === 'outdated'}
+									{@const label = outdated
+										? $LL.personaStoreUpdateTooltip()
+										: $LL.personaStoreResetTooltip()}
+									<Tooltip>
+										{#snippet trigger({ props })}
+											<button
+												{...props}
+												type="button"
+												disabled={installing !== null}
+												onclick={() => run(offer, true)}
+												aria-label={label}
+												class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {outdated
+													? 'bg-accent/10 text-accent hover:bg-accent/20'
+													: 'text-muted hover:bg-shade-2 hover:text-active'}"
+											>
+												{#if installing === offer.key}
+													<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+												{:else if outdated}
+													<ArrowDownToLine class="h-3.5 w-3.5" />
+												{:else}
+													<RotateCcw class="h-3.5 w-3.5" />
+												{/if}
+											</button>
+										{/snippet}
+										{label}
+									</Tooltip>
 								{/if}
 
 								{#if offer.toggleRelay}

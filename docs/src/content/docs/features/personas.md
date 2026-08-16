@@ -128,9 +128,10 @@ questions:
 Editing a persona back to what it was makes it the store's persona again. That is why it is a
 fingerprint rather than a flag: a flag would stay lit and lie.
 
-The button reads _Update_ when a newer version exists and _Restore the published version_ when only
-your edits stand between the two. It is the same action either way: the published text replaces what
-is there. It asks first whenever there is something of yours to lose.
+Installing belongs to the store; updating and restoring belong to your copy. So a store card always
+offers its persona, whatever you already have, and your copy's own controls sit beside it as icons:
+update it to a newer published version, or put the published text back over your edits. Both replace
+what is there and both ask first whenever there is something of yours to lose.
 
 **Update all**, next to the refresh control, takes every waiting revision at once. It skips the ones
 you have edited, deliberately: a single press that quietly overwrote everything someone had rewritten

@@ -1409,6 +1409,14 @@ type RootTranslation = {
 	 */
 	personaStoreReset: string
 	/**
+	 * R​e​s​t​o​r​e​ ​y​o​u​r​ ​c​o​p​y​ ​f​r​o​m​ ​t​h​e​ ​s​t​o​r​e​,​ ​r​e​p​l​a​c​i​n​g​ ​y​o​u​r​ ​e​d​i​t​s
+	 */
+	personaStoreResetTooltip: string
+	/**
+	 * U​p​d​a​t​e​ ​y​o​u​r​ ​c​o​p​y​ ​t​o​ ​t​h​e​ ​v​e​r​s​i​o​n​ ​p​u​b​l​i​s​h​e​d​ ​i​n​ ​t​h​e​ ​s​t​o​r​e
+	 */
+	personaStoreUpdateTooltip: string
+	/**
 	 * R​e​p​l​a​c​e​ ​y​o​u​r​ ​v​e​r​s​i​o​n​ ​o​f​ ​“​{​n​a​m​e​}​”​ ​w​i​t​h​ ​t​h​e​ ​p​u​b​l​i​s​h​e​d​ ​o​n​e​?​ ​Y​o​u​r​ ​c​h​a​n​g​e​s​ ​a​r​e​ ​l​o​s​t​.
 	 * @param {string} name
 	 */
@@ -3801,6 +3809,14 @@ The completion in progress will stop
 	 * Restore
 	 */
 	personaStoreReset: () => LocalizedString
+	/**
+	 * Restore your copy from the store, replacing your edits
+	 */
+	personaStoreResetTooltip: () => LocalizedString
+	/**
+	 * Update your copy to the version published in the store
+	 */
+	personaStoreUpdateTooltip: () => LocalizedString
 	/**
 	 * Replace your version of “{name}” with the published one? Your changes are lost.
 	 */

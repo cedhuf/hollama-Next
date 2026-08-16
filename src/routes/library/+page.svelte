@@ -315,11 +315,12 @@
 							     whether it still says what it said when it arrived. One badge, and
 							     none at all in the ordinary case. -->
 							{#if state === 'edited' || state === 'outdated' || state === 'edited-outdated'}
-								<!-- Thin and quiet: an annotation on the card, not a label competing
-								     with the name. Barely filled, so it reads at the weight of a
-								     footnote rather than of a status. -->
+								<!-- Thin, and tinted rather than grey. Kept at the weight of a
+								     footnote, but in the accent: it is the one thing on the card that
+								     is worth catching an eye, and a grey annotation on a grey card
+								     catches none. -->
 								<span
-									class="rounded border border-shade-3 bg-shade-1/70 px-1 text-[9px] font-normal leading-[15px] text-muted"
+									class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
 								>
 									{state === 'edited'
 										? $LL.personaStateEdited()
