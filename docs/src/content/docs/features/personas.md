@@ -175,17 +175,21 @@ own count, under _Settings → Interface → Home screen_.
 
 ## Sharing them (server mode)
 
-All of it happens in the store, which for an admin has three views:
+All of it happens in the store, which has two views for everyone and a third for an administrator:
 
-| View            | What it holds                                                     |
-| --------------- | ----------------------------------------------------------------- |
-| **Store**       | The public catalogue, to browse and to relay                      |
-| **My personas** | The ones they wrote, and the ones they installed and then changed |
-| **Shared**      | Everything the instance currently shares, whichever way           |
+| View            | What it holds                                                    |
+| --------------- | ---------------------------------------------------------------- |
+| **Store**       | What you can install: the catalogue, and what your instance adds |
+| **My personas** | The ones you wrote, and the ones you installed and then changed  |
+| **Shared**      | Everything the instance currently shares (admin only)            |
 
-One button in all three, and one list that answers "what am I actually sharing?". There is no share
-switch in a persona's editor any more: a checkbox buried there meant remembering which personas had
-been ticked, with nowhere to go and look.
+The cards are the same in all of them, and so are their controls: what someone is not allowed to do
+is drawn and refused rather than removed, because a card that loses a button depending on who is
+looking is a second card to design.
+
+One list answers "what am I actually sharing?". There is no share switch in a persona's editor any
+more: a checkbox buried there meant remembering which personas had been ticked, with nowhere to go
+and look.
 
 Underneath, the two cases behave differently, and the difference is worth knowing.
 

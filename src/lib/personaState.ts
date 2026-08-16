@@ -1,6 +1,5 @@
 import { contentDigest, personaAuthored } from '$lib/personaDigest';
 import type { Persona } from '$lib/personas';
-import type { CatalogEntry } from '$lib/personaStore';
 
 /**
  * What a persona is, relative to where it came from.
@@ -60,29 +59,4 @@ export function personaState(persona: Persona, published?: string): PersonaState
 	if (edited) return 'edited';
 	if (moved) return 'outdated';
 	return 'clean';
-}
-
-/**
- * Whether what an admin offers is the store's persona or their rewrite of it.
- *
- * Read from the listing alone: recompute the digest of what they are handing out
- * and compare it with the published one. No install digest needed, because the
- * question is not "have they edited it since installing" but "is what my users
- * would get the same text the store has".
- *
- * `same` is worth surfacing too: an admin distributing a byte-identical copy is
- * better served by relaying it, which keeps their users on the store's revisions
- * instead of on a photograph of one.
- */
-export function offeredVersion(
-	persona: Persona,
-	entries: CatalogEntry[]
-): 'own' | 'same' | 'modified' {
-	const from = persona.source?.id;
-	if (!from) return 'own';
-
-	const entry = entries.find((candidate) => candidate.id === from);
-	if (!entry?.contentDigest) return 'own';
-
-	return contentDigest(personaAuthored(persona)) === entry.contentDigest ? 'same' : 'modified';
 }

@@ -1,13 +1,16 @@
 <script lang="ts">
 	import {
+		ArrowDownToLine,
 		ChevronDown,
 		FileText,
 		Folder,
 		FolderOpen,
 		FolderPlus,
+		LoaderCircle,
 		MessageSquare,
 		Pencil,
 		Plus,
+		RotateCcw,
 		Store,
 		Trash2,
 		Upload,
@@ -34,8 +37,13 @@
 		type Knowledge
 	} from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
-	import { installPersonaBundle, parsePersonaBundle, type PersonaBundle } from '$lib/personaBundle';
-	import { catalogState, loadCatalog } from '$lib/personaCatalog';
+	import {
+		applyBundleToPersona,
+		installPersonaBundle,
+		parsePersonaBundle,
+		type PersonaBundle
+	} from '$lib/personaBundle';
+	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
 	import {
 		launchPersona,
 		newPersona,
@@ -142,8 +150,48 @@
 		$catalogState.status === 'ready' ? $catalogState.catalog.entries : []
 	);
 
-	const publishedDigest = (persona: Persona) =>
-		catalogEntries.find((entry) => entry.id === personaOrigin(persona))?.contentDigest;
+	const entryFor = (persona: Persona) =>
+		catalogEntries.find((entry) => entry.id === personaOrigin(persona));
+
+	const publishedDigest = (persona: Persona) => entryFor(persona)?.contentDigest;
+
+	/**
+	 * Take the published version back, from the card that owns the copy.
+	 *
+	 * Here as well as in the store, and not by duplication: a user who is not an
+	 * administrator has no "my personas" view, so this is the only place their own
+	 * copy is drawn. An action that lives on an object has to be reachable wherever
+	 * that object is.
+	 */
+	let restoring = $state<string | null>(null);
+
+	async function restore(persona: Persona) {
+		const entry = entryFor(persona);
+		if (!entry) return;
+		if (
+			personaState(persona, entry.contentDigest) !== 'outdated' &&
+			!confirm($LL.personaStoreUpdateConfirm({ name: persona.name }))
+		) {
+			return;
+		}
+
+		restoring = persona.id;
+		try {
+			const bundle = await fetchBundle(entry);
+			applyBundleToPersona(persona, bundle, {
+				origin: entry.origin,
+				id: entry.id,
+				revision: entry.revision
+			});
+			toast.success($LL.personaStoreUpdated({ name: entry.name }));
+		} catch (error) {
+			toast.error($LL.personaStoreInstallFailed(), {
+				description: error instanceof Error ? error.message : undefined
+			});
+		} finally {
+			restoring = null;
+		}
+	}
 
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
@@ -332,6 +380,32 @@
 						{/snippet}
 
 						{#snippet actions()}
+							{#if state === 'edited' || state === 'outdated' || state === 'edited-outdated'}
+								{@const outdated = state === 'outdated'}
+								<button
+									type="button"
+									disabled={restoring !== null}
+									onclick={() => restore(persona)}
+									title={outdated
+										? $LL.personaStoreUpdateTooltip()
+										: $LL.personaStoreResetTooltip()}
+									aria-label={outdated
+										? $LL.personaStoreUpdateTooltip()
+										: $LL.personaStoreResetTooltip()}
+									class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {outdated
+										? 'text-accent hover:bg-accent/10'
+										: 'text-muted hover:bg-shade-2 hover:text-active'}"
+								>
+									{#if restoring === persona.id}
+										<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+									{:else if outdated}
+										<ArrowDownToLine class="h-3.5 w-3.5" />
+									{:else}
+										<RotateCcw class="h-3.5 w-3.5" />
+									{/if}
+								</button>
+							{/if}
+
 							<!-- Both of them, spelled out. Talking to a persona is the frequent
 							     act and editing it the rare one, but the Library is where you
 							     manage them, so neither is left to a control that only exists

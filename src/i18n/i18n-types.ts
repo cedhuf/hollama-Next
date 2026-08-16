@@ -1372,6 +1372,10 @@ type RootTranslation = {
 	 */
 	personaStoreUnshare: string
 	/**
+	 * O​n​l​y​ ​a​n​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​c​a​n​ ​s​h​a​r​e​ ​a​ ​p​e​r​s​o​n​a​ ​w​i​t​h​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	personaStoreShareForbidden: string
+	/**
 	 * U​p​d​a​t​e​ ​i​n​s​t​a​l​l​e​d​ ​p​e​r​s​o​n​a​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
 	 */
 	personaAutoUpdate: string
@@ -1527,14 +1531,6 @@ type RootTranslation = {
 	 * @param {string} name
 	 */
 	personaStoreUpdateConfirm: RequiredParams<'name'>
-	/**
-	 * I​d​e​n​t​i​c​a​l​ ​t​o​ ​t​h​e​ ​s​t​o​r​e​ ​v​e​r​s​i​o​n
-	 */
-	personaOfferedVersionSame: string
-	/**
-	 * Y​o​u​r​ ​v​e​r​s​i​o​n​ ​o​f​ ​t​h​e​ ​s​t​o​r​e​ ​p​e​r​s​o​n​a
-	 */
-	personaOfferedVersionModified: string
 	/**
 	 * R​e​f​r​e​s​h
 	 */
@@ -3774,6 +3770,10 @@ The completion in progress will stop
 	 */
 	personaStoreUnshare: () => LocalizedString
 	/**
+	 * Only an administrator can share a persona with this instance
+	 */
+	personaStoreShareForbidden: () => LocalizedString
+	/**
 	 * Update installed personas automatically
 	 */
 	personaAutoUpdate: () => LocalizedString
@@ -3925,14 +3925,6 @@ The completion in progress will stop
 	 * You have edited “{name}”. Updating replaces your changes with the published version. Continue?
 	 */
 	personaStoreUpdateConfirm: (arg: { name: string }) => LocalizedString
-	/**
-	 * Identical to the store version
-	 */
-	personaOfferedVersionSame: () => LocalizedString
-	/**
-	 * Your version of the store persona
-	 */
-	personaOfferedVersionModified: () => LocalizedString
 	/**
 	 * Refresh
 	 */

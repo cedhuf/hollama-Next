@@ -350,6 +350,7 @@ const fr = extendDictionary(en, {
 	personaStoreCreate: 'Créer un persona',
 	personaStoreShare: 'Partager avec vos utilisateurs',
 	personaStoreUnshare: 'Ne plus le partager',
+	personaStoreShareForbidden: 'Seul un administrateur peut partager un persona avec cette instance',
 	personaAutoUpdate: 'Mettre à jour les personas installés automatiquement',
 	personaAutoUpdateHelp:
 		"Prend la nouvelle version dès sa publication, pour les personas que vous n'avez pas modifiés. Ceux que vous avez changés restent proposés sur leur carte.",
@@ -399,8 +400,6 @@ const fr = extendDictionary(en, {
 	personaStoreUpdated: '« {name:string} » mis à jour',
 	personaStoreUpdateConfirm:
 		'Vous avez modifié « {name:string} ». La mise à jour remplacera vos changements par la version publiée. Continuer ?',
-	personaOfferedVersionSame: 'Identique à la version de la boutique',
-	personaOfferedVersionModified: 'Votre version du persona de la boutique',
 	personaStoreRefresh: 'Actualiser',
 	personaStoreInstallFailed: "Ce persona n'a pas pu être installé",
 	personaStoreUnreachable: 'La boutique de personas est injoignable',

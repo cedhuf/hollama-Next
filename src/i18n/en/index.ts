@@ -356,6 +356,7 @@ const en = {
 	personaStoreCreate: 'Create a persona',
 	personaStoreShare: 'Share with your users',
 	personaStoreUnshare: 'Stop sharing it',
+	personaStoreShareForbidden: 'Only an administrator can share a persona with this instance',
 	personaAutoUpdate: 'Update installed personas automatically',
 	personaAutoUpdateHelp:
 		'Takes a new version as soon as it is published, for the personas you have not edited. The ones you have changed keep being offered instead, on their card.',
@@ -404,8 +405,6 @@ const en = {
 	personaStoreUpdated: '“{name:string}” updated',
 	personaStoreUpdateConfirm:
 		'You have edited “{name:string}”. Updating replaces your changes with the published version. Continue?',
-	personaOfferedVersionSame: 'Identical to the store version',
-	personaOfferedVersionModified: 'Your version of the store persona',
 	personaStoreRefresh: 'Refresh',
 	personaStoreInstallFailed: 'This persona could not be installed',
 	personaStoreUnreachable: 'The persona store could not be reached',

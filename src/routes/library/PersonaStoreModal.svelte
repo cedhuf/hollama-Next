@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		ArrowDownToLine,
-		Check,
 		Download,
 		LayoutGrid,
 		List,
@@ -15,6 +14,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import Modal from '$lib/components/Modal.svelte';
 	import PersonaCard from '$lib/components/PersonaCard.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
@@ -24,7 +24,7 @@
 	import { contentDigest, personaAuthored } from '$lib/personaDigest';
 	import { installPersona, personaOrigin, savePersona, type Persona } from '$lib/personas';
 	import { personasConfig, publishSharedPersonas, relayCatalogPersona } from '$lib/personasConfig';
-	import { offeredVersion, personaState, type PersonaState } from '$lib/personaState';
+	import { personaState, type PersonaState } from '$lib/personaState';
 	import type { CatalogEntry } from '$lib/personaStore';
 
 	interface Props {
@@ -47,6 +47,18 @@
 
 	interface Offer {
 		key: string;
+		/**
+		 * Which of the two things this card shows.
+		 *
+		 * A store persona and a copy of one are different objects, and the actions
+		 * that make sense on them are different: you install the store's, and you
+		 * update or restore yours. Fusing them put "restore" where "install" belonged
+		 * and made the store somewhere you could not take a persona from.
+		 *
+		 * One rule, read from the offer rather than from the view it appears in, so
+		 * the same card in two places behaves the same way.
+		 */
+		kind: 'store' | 'copy';
 		name: string;
 		tagline: string;
 		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
@@ -64,8 +76,6 @@
 		install: () => Promise<void>;
 		/** Take the published version over the installed one. */
 		update?: () => Promise<void>;
-		/** For an admin's own offer: is this the store's persona, or their rewrite. */
-		version?: 'own' | 'same' | 'modified';
 		/**
 		 * Whether this instance relays it, for an admin, and only for the store's
 		 * own: what an admin wrote is shared from its own editor, and what is already
@@ -92,7 +102,6 @@
 
 	let view = $state<View>('store');
 	let query = $state('');
-	let origin = $state<Origin | 'all'>('all');
 	/** The card being worked on, so only its own button spins. */
 	let installing = $state<string | null>(null);
 	let relaying = $state<string | null>(null);
@@ -204,6 +213,7 @@
 
 				return {
 					key: `catalog:${entry.id}`,
+					kind: 'store',
 					name: entry.name,
 					tagline: entry.tagline,
 					avatar: avatarFields(entry.avatar, entry.name),
@@ -215,9 +225,7 @@
 					update:
 						stale && copy ? () => updateEntry(entry, copy, state === 'edited-outdated') : undefined,
 					relayed: relayed.has(entry.id),
-					toggleRelay: $personasConfig.canShare
-						? () => relayCatalogPersona(entry.id, !relayed.has(entry.id))
-						: undefined
+					toggleRelay: () => relayCatalogPersona(entry.id, !relayed.has(entry.id))
 				};
 			})
 	);
@@ -264,6 +272,9 @@
 		$personasConfig.shared.map(
 			(persona): Offer => ({
 				key: `admin:${persona.id}`,
+				// What an admin shares is offered to you, so it is the store's side of
+				// the exchange whoever wrote it.
+				kind: 'store',
 				name: persona.name,
 				tagline: persona.tagline,
 				avatar: {
@@ -293,12 +304,7 @@
 							const own = ($personasStore ?? []).find((p) => p.id === persona.id);
 							if (own) await toggleOwn(own);
 						}
-					: undefined,
-				// Deduced from the listing alone: recompute what they are handing out and
-				// compare it with what the store publishes. No flag to set, and editing
-				// it back makes it the store's persona again instead of leaving a mark
-				// that lies.
-				version: offeredVersion(persona, entries)
+					: undefined
 			})
 		)
 	);
@@ -318,6 +324,7 @@
 				const entry = matchingEntry(persona);
 				return {
 					key: `mine:${persona.id}`,
+					kind: 'copy',
 					name: persona.name,
 					tagline: persona.tagline,
 					avatar: {
@@ -333,8 +340,7 @@
 					state: personaState(persona, entry?.contentDigest),
 					install: async () => {},
 					relayed: persona.shared,
-					toggleRelay: () => toggleOwn(persona),
-					version: entry ? 'modified' : 'own'
+					toggleRelay: () => toggleOwn(persona)
 				};
 			})
 	);
@@ -363,33 +369,21 @@
 	/**
 	 * What the grid shows.
 	 *
-	 * An admin picks a view. Everyone else gets one list, composed for them: the
-	 * catalogue their instance allows, plus whatever it offers on top.
+	 * Two views for everyone and a third for an administrator, which is the honest
+	 * split: "what can I add" and "what have I got" are questions anyone has, while
+	 * "what am I handing out" is one only somebody who hands things out can ask.
+	 *
+	 * `mine` was admin-only for a while, for no reason that survived being stated:
+	 * a user writes personas and edits the ones they install exactly as an admin
+	 * does, and the only thing they cannot do with them is share them.
 	 */
 	const offers = $derived(
-		!$personasConfig.canShare
-			? [...fromAdmin, ...fromCatalog]
-			: view === 'mine'
-				? mine
-				: view === 'shared'
-					? offered
-					: fromCatalog
+		view === 'mine' ? mine : view === 'shared' ? offered : [...fromAdmin, ...fromCatalog]
 	);
-
-	/**
-	 * Only offered when there is something to choose between.
-	 *
-	 * There is no language filter, and that is a decision rather than an omission:
-	 * a persona is written in one language and answers in whichever you ask it to,
-	 * so what it was written in tells a reader nothing about whether it is for
-	 * them. Models stopped being monolingual; the filter followed.
-	 */
-	const origins = $derived([...new Set(offers.map((o) => o.origin))]);
 
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		return offers.filter((offer) => {
-			if (origin !== 'all' && offer.origin !== origin) return false;
 			if (!q) return true;
 			return (
 				offer.name.toLowerCase().includes(q) ||
@@ -398,11 +392,6 @@
 			);
 		});
 	});
-
-	function originLabel(value: Origin): string {
-		if (value === 'admin') return $LL.sharedByAdmin();
-		return value === 'community' ? $LL.personaStoreCommunity() : $LL.personaStoreOfficial();
-	}
 
 	async function run(offer: Offer, update = false) {
 		installing = offer.key;
@@ -510,26 +499,22 @@
 
 			<div class="mt-2 flex items-start gap-2">
 				<div class="flex min-w-0 flex-1 flex-wrap gap-1.5">
-					<!-- An admin gets views, everyone else gets filters. They are not the
-					     same control wearing two hats: a view decides what the page is
-					     about, a filter narrows what is already there. -->
+					<!-- Views, not filters. They are not the same control wearing two hats:
+					     a view decides what the page is about, a filter narrows what is
+					     already there. The third is an administrator's, because only
+					     somebody who hands personas out has a list of what they hand out. -->
+					{@render chip($LL.personaStoreViewStore(), view === 'store', () => (view = 'store'))}
+					{@render chip(
+						`${$LL.personaStoreViewMine()}${mine.length ? ` · ${mine.length}` : ''}`,
+						view === 'mine',
+						() => (view = 'mine')
+					)}
 					{#if $personasConfig.canShare}
-						{@render chip($LL.personaStoreViewStore(), view === 'store', () => (view = 'store'))}
-						{@render chip(
-							`${$LL.personaStoreViewMine()}${mine.length ? ` · ${mine.length}` : ''}`,
-							view === 'mine',
-							() => (view = 'mine')
-						)}
 						{@render chip(
 							`${$LL.personaStoreViewShared()}${offered.length ? ` · ${offered.length}` : ''}`,
 							view === 'shared',
 							() => (view = 'shared')
 						)}
-					{:else if origins.length > 1}
-						{@render chip($LL.personaStoreAll(), origin === 'all', () => (origin = 'all'))}
-						{#each origins as value (value)}
-							{@render chip(originLabel(value), origin === value, () => (origin = value))}
-						{/each}
 					{/if}
 				</div>
 
@@ -599,36 +584,33 @@
 							tagline={offer.tagline}
 							avatar={offer.avatar}
 							tags={offer.tags}
-							meta={offer.version === 'modified'
-								? $LL.personaOfferedVersionModified()
-								: offer.version === 'same'
-									? $LL.personaOfferedVersionSame()
-									: undefined}
 							layout={$settingsStore.personaStoreLayout}
 						>
-							<!-- No badge at all. An admin's three views each hold one kind of
-							     thing, so a label repeating the view is noise; and for a user, what
-							     a persona is called and what it says is what they are choosing on,
-							     not who published it. Provenance stays where it is a choice rather
-							     than a decoration: the filter above. -->
-							{#snippet actions()}
-								<!-- Installing belongs to the store, restoring belongs to your copy,
-								     and they were the same button. So a persona you had edited
-								     offered "restore" where "install" should have been, and the store
-								     stopped being a place you could take a persona from.
-								     Now the store always offers its persona, and the copy's own
-								     controls sit beside it as icons: update it, or put the published
-								     text back over your edits. -->
-								{#if offer.state}
+							<!-- The same pill the Library draws, in the same words, because it
+							     answers the same question. What it does not carry is provenance:
+							     an admin's three views each hold one kind of thing, so a label
+							     repeating the view is noise, and for a user what a persona is
+							     called is what they are choosing on, not who published it. That
+							     stays in the filter, where it is a choice rather than a decoration. -->
+							{#snippet badges()}
+								{#if offer.state && offer.state !== 'own'}
 									<span
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
+										class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
 									>
-										<Check class="h-3.5 w-3.5" />
-										{offer.state === 'edited'
-											? $LL.personaStoreInstalledEdited()
-											: $LL.personaStoreInstalled()}
+										{offer.state === 'clean'
+											? $LL.personaStoreInstalled()
+											: offer.state === 'outdated'
+												? $LL.personaStateOutdated()
+												: $LL.personaStoreInstalledEdited()}
 									</span>
-								{:else}
+								{/if}
+							{/snippet}
+							{#snippet actions()}
+								<!-- One rule, from the offer rather than from the view: the store's
+								     persona can be installed, yours can be updated or restored. Both
+								     versions are allowed to exist, which is why installing stays
+								     available on a persona you already have a copy of. -->
+								{#if offer.kind === 'store'}
 									<button
 										type="button"
 										disabled={installing !== null}
@@ -642,48 +624,52 @@
 										{/if}
 										{$LL.install()}
 									</button>
-								{/if}
-
-								{#if offer.update}
+								{:else if offer.update}
 									{@const outdated = offer.state === 'outdated'}
-									{@const label = outdated
-										? $LL.personaStoreUpdateTooltip()
-										: $LL.personaStoreResetTooltip()}
-									<Tooltip>
-										{#snippet trigger({ props })}
-											<button
-												{...props}
-												type="button"
-												disabled={installing !== null}
-												onclick={() => run(offer, true)}
-												aria-label={label}
-												class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {outdated
-													? 'bg-accent/10 text-accent hover:bg-accent/20'
-													: 'text-muted hover:bg-shade-2 hover:text-active'}"
-											>
-												{#if installing === offer.key}
-													<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-												{:else if outdated}
-													<ArrowDownToLine class="h-3.5 w-3.5" />
-												{:else}
-													<RotateCcw class="h-3.5 w-3.5" />
-												{/if}
-											</button>
-										{/snippet}
-										{label}
-									</Tooltip>
+									<button
+										type="button"
+										disabled={installing !== null}
+										onclick={() => run(offer, true)}
+										title={outdated
+											? $LL.personaStoreUpdateTooltip()
+											: $LL.personaStoreResetTooltip()}
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs transition-colors disabled:opacity-50 {outdated
+											? 'border border-accent text-accent hover:bg-accent/10'
+											: 'text-muted hover:bg-shade-2 hover:text-active'}"
+									>
+										{#if installing === offer.key}
+											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+										{:else if outdated}
+											<ArrowDownToLine class="h-3.5 w-3.5" />
+										{:else}
+											<RotateCcw class="h-3.5 w-3.5" />
+										{/if}
+										{outdated ? $LL.personaStoreUpdate() : $LL.personaStoreReset()}
+									</button>
+								{:else}
+									<!-- Yours, and identical to what was published. Nothing to do, so
+									     the slot holds the footer's shape rather than a control. -->
+									<span class="flex-1"></span>
 								{/if}
 
-								{#if offer.toggleRelay}
-									{@const label = offer.relayed
-										? $LL.personaStoreUnshare()
-										: $LL.personaStoreShare()}
+								<!-- Drawn for everyone and refused where it is not allowed, rather
+								     than absent: a card that loses a control depending on who is
+								     looking is a different card, and the two then have to be
+								     designed twice. Hidden only where sharing is not a thing at
+								     all, which is local mode: one person, nobody to share with. -->
+								{#if offer.toggleRelay && isServerMode}
+									{@const allowed = $personasConfig.canShare}
+									{@const label = !allowed
+										? $LL.personaStoreShareForbidden()
+										: offer.relayed
+											? $LL.personaStoreUnshare()
+											: $LL.personaStoreShare()}
 									<Tooltip>
 										{#snippet trigger({ props })}
 											<button
 												{...props}
 												type="button"
-												disabled={relaying !== null}
+												disabled={relaying !== null || !allowed}
 												onclick={() => relay(offer)}
 												aria-pressed={offer.relayed}
 												aria-label={label}
