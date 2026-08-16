@@ -11,7 +11,6 @@
 				"id": "heart",
 				"color": "#D4537E"
 			},
-			"locale": "en",
 			"tags": [
 				"wellbeing",
 				"companionship"
@@ -32,7 +31,6 @@
 				"id": "pot",
 				"color": "#BA7517"
 			},
-			"locale": "en",
 			"tags": [
 				"cooking",
 				"recipes",
@@ -54,7 +52,6 @@
 				"id": "dumbbell",
 				"color": "#D85A30"
 			},
-			"locale": "en",
 			"tags": [
 				"fitness",
 				"health",
@@ -76,7 +73,6 @@
 				"id": "sparkle",
 				"color": "#378ADD"
 			},
-			"locale": "en",
 			"tags": [
 				"assistant",
 				"writing",
@@ -98,7 +94,6 @@
 				"id": "gamepad",
 				"color": "#7F77DD"
 			},
-			"locale": "en",
 			"tags": [
 				"games",
 				"news",

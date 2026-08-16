@@ -66,7 +66,13 @@ export interface PersonaBundle {
 	id?: string;
 	/** Bumped whenever the bundle's contents change. */
 	revision?: number;
-	/** BCP 47, as written. What the persona speaks, not what the reader does. */
+	/**
+	 * BCP 47, informational: the language the prompt is written in.
+	 *
+	 * Not what the persona answers in, which is the reader's setting, and not
+	 * something the listing carries any more. Models are not monolingual, so what a
+	 * prompt happens to be written in tells nobody whether the persona is for them.
+	 */
 	locale?: string;
 	author?: string;
 	license?: string;

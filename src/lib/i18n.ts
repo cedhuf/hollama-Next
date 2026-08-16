@@ -15,7 +15,7 @@ import { locales } from '$i18n/i18n-util';
  *
  * Labels for locales that aren't installed are simply ignored.
  */
-const LANGUAGE_LABELS: Record<string, string> = {
+export const LANGUAGE_LABELS: Record<string, string> = {
 	en: 'English',
 	fr: 'Français',
 	de: 'Deutsch',

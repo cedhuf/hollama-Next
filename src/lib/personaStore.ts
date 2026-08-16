@@ -38,8 +38,6 @@ export interface CatalogEntry {
 	name: string;
 	tagline: string;
 	avatar: BundleAvatar;
-	/** BCP 47. What the persona speaks. */
-	locale: string;
 	tags: string[];
 	author?: string;
 	revision: number;
@@ -96,7 +94,6 @@ function parseEntry(value: unknown): CatalogEntry | undefined {
 		name,
 		tagline: typeof o.tagline === 'string' ? o.tagline : '',
 		avatar,
-		locale: typeof o.locale === 'string' ? o.locale : 'en',
 		tags: Array.isArray(o.tags) ? o.tags.filter((t): t is string => typeof t === 'string') : [],
 		author: typeof o.author === 'string' ? o.author : undefined,
 		revision: typeof o.revision === 'number' ? o.revision : 1,

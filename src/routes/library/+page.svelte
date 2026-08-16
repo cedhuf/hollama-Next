@@ -287,7 +287,7 @@
 				</button>
 			</div>
 
-			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+			<div class="mb-3 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
 					{@const state = personaState(persona)}
 					<PersonaCard
@@ -295,7 +295,6 @@
 						tagline={persona.tagline}
 						avatar={persona}
 						tags={persona.tags}
-						meta={persona.modelName}
 						onclick={() => chatWith(persona)}
 					>
 						{#snippet badges()}
@@ -337,12 +336,14 @@
 						{/snippet}
 					</PersonaCard>
 				{/each}
+			</div>
 
-				<!-- The two ways to gain one, in one control, the way adding knowledge and
-				     adding a collection share theirs. Nothing is installed for you any
-				     more, so on a fresh library this is the whole section, and it should
-				     read as the answer to "where do personas come from" rather than as two
-				     empty tiles. -->
+			<!-- On a row of its own after the cards, not among them. A grid stretches
+			     every cell in a row to the tallest, so among the personas this control
+			     was as tall as a card, which is neither what it is nor what its twin in
+			     the knowledge section looks like. Its own grid gives it one column of
+			     the same width and its natural height. -->
+			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				<div
 					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
 				>

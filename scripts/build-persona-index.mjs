@@ -94,7 +94,6 @@ for (const file of readdirSync(BUNDLES)
 		name: bundle.persona?.name,
 		tagline: bundle.persona?.tagline ?? '',
 		avatar: indexAvatar(bundle.persona?.avatar),
-		locale: bundle.locale ?? 'en',
 		tags: bundle.persona?.tags ?? [],
 		author: bundle.author,
 		revision: bundle.revision ?? 1,

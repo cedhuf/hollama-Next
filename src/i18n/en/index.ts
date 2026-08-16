@@ -358,6 +358,10 @@ const en = {
 	personaStateEditedOutdated: 'edited, update available',
 	personaStoreInstalledEdited: 'Installed, edited',
 	personaStoreUpdate: 'Update',
+	personaDefaultModel: 'Your default model',
+	personaLanguageLabel: 'Reply language',
+	personaLanguageHint:
+		'What it answers in, whatever language it was written in. Empty follows the interface.',
 	personaStoreUpdated: '“{name:string}” updated',
 	personaStoreUpdateConfirm:
 		'You have edited “{name:string}”. Updating replaces your changes with the published version. Continue?',

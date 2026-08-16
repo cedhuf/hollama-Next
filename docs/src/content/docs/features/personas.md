@@ -15,18 +15,31 @@ what your backup contains.
 
 ## What a persona holds
 
-| Field         | What it does                                                               |
-| ------------- | -------------------------------------------------------------------------- |
-| Name          | Shown in the Library, the sidebar and the conversation title               |
-| Tagline       | One line under the name, for your own benefit                              |
-| Avatar        | A glyph the app draws, an image, or initials on a colour from a fixed set  |
-| System prompt | The whole of the character. This is the part that matters                  |
-| Greeting      | Posted as the first assistant message, so the chat opens rather than waits |
-| Model         | Resolved to a concrete server when the conversation starts                 |
-| Temperature   | Optional, applied to the conversation                                      |
-| Suggestions   | Starter prompts offered on the home screen                                 |
-| Knowledge     | Pieces of [knowledge](/features/knowledge/) attached to every chat         |
-| Web search    | Whether the conversation starts with search on                             |
+| Field          | What it does                                                               |
+| -------------- | -------------------------------------------------------------------------- |
+| Name           | Shown in the Library, the sidebar and the conversation title               |
+| Tagline        | One line under the name, for your own benefit                              |
+| Avatar         | A glyph the app draws, an image, or initials on a colour from a fixed set  |
+| System prompt  | The whole of the character. This is the part that matters                  |
+| Greeting       | Posted as the first assistant message, so the chat opens rather than waits |
+| Model          | Yours by default; name one only if this persona needs a particular model   |
+| Reply language | What it answers in, whatever language it was written in                    |
+| Temperature    | Optional, applied to the conversation                                      |
+| Suggestions    | Starter prompts offered on the home screen                                 |
+| Knowledge      | Pieces of [knowledge](/features/knowledge/) attached to every chat         |
+| Web search     | Whether the conversation starts with search on                             |
+
+### The reply language
+
+A persona answers in the language you choose for it, not the one its prompt happens to be written
+in. Empty means the interface's language, so it follows you; type anything else and it follows that
+instead. Reading Llooma in French and wanting this one assistant to answer in Spanish is an ordinary
+thing to want.
+
+It is written into the conversation's system prompt when the chat starts, as a sentence, rather than
+left to the model to work out. Inferring it is exactly what goes wrong: an English prompt makes an
+English answer feel right to the model even when everything around it is French. The sentence itself
+is editable under _Settings → Tools → System instructions_, like the others the app builds.
 
 ## One persona, one conversation
 
@@ -54,8 +67,12 @@ Installing **copies**. The persona lands in your Library with a new identity and
 delete; it only remembers where it came from, so the store can show it as already installed. Any
 knowledge attached to it is copied in too, which is what a bundle is for.
 
-Cards or a list, whichever suits: the toggle sits at the end of the filters, and the choice is
-remembered.
+Search it, filter it by where a persona came from, and read it as cards or as a list: the toggle
+sits at the end of the filters and the choice is remembered.
+
+There is no language filter, and that is a decision rather than an omission. A persona is written in
+one language and answers in whichever you ask it to, so what it happens to be written in tells you
+nothing about whether it is for you. Models stopped being monolingual; the filter followed.
 
 The public store is served from this site, at [llooma.eu/personas](/personas/), and its contents
 live in the
@@ -79,7 +96,8 @@ it is specific to us.
 
 A model is never named in a store persona. There are hundreds of them across nearly as many
 providers, all naming them differently and all revising them constantly, so installing uses **your**
-default model. Change it afterwards if it does not suit.
+default model. Change it afterwards if it does not suit; leaving it as _your default model_ is a
+perfectly good answer, and the one that survives you changing providers.
 
 ### If the store cannot be reached
 

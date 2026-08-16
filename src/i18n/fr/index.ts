@@ -351,6 +351,10 @@ const fr = extendDictionary(en, {
 	personaStateEditedOutdated: 'modifié, mise à jour disponible',
 	personaStoreInstalledEdited: 'Installé, modifié',
 	personaStoreUpdate: 'Mettre à jour',
+	personaDefaultModel: 'Votre modèle par défaut',
+	personaLanguageLabel: 'Langue des réponses',
+	personaLanguageHint:
+		"La langue dans laquelle il répond, quelle que soit celle dans laquelle il a été écrit. Vide, il suit l'interface.",
 	personaStoreUpdated: '« {name:string} » mis à jour',
 	personaStoreUpdateConfirm:
 		'Vous avez modifié « {name:string} ». La mise à jour remplacera vos changements par la version publiée. Continuer ?',

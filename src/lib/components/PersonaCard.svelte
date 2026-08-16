@@ -24,7 +24,7 @@
 		tagline?: string;
 		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
 		tags?: string[];
-		/** A quiet third line: the model, the author, whatever the caller has. */
+		/** A quiet third line: the author, whatever the caller has to add. */
 		meta?: string;
 		layout?: 'grid' | 'list';
 		/** Makes the body itself the primary action. Without it the card is inert. */

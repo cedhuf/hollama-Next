@@ -1372,6 +1372,18 @@ type RootTranslation = {
 	 */
 	personaStoreUpdate: string
 	/**
+	 * Y​o​u​r​ ​d​e​f​a​u​l​t​ ​m​o​d​e​l
+	 */
+	personaDefaultModel: string
+	/**
+	 * R​e​p​l​y​ ​l​a​n​g​u​a​g​e
+	 */
+	personaLanguageLabel: string
+	/**
+	 * W​h​a​t​ ​i​t​ ​a​n​s​w​e​r​s​ ​i​n​,​ ​w​h​a​t​e​v​e​r​ ​l​a​n​g​u​a​g​e​ ​i​t​ ​w​a​s​ ​w​r​i​t​t​e​n​ ​i​n​.​ ​E​m​p​t​y​ ​f​o​l​l​o​w​s​ ​t​h​e​ ​i​n​t​e​r​f​a​c​e​.
+	 */
+	personaLanguageHint: string
+	/**
 	 * “​{​n​a​m​e​}​”​ ​u​p​d​a​t​e​d
 	 * @param {string} name
 	 */
@@ -3627,6 +3639,18 @@ The completion in progress will stop
 	 * Update
 	 */
 	personaStoreUpdate: () => LocalizedString
+	/**
+	 * Your default model
+	 */
+	personaDefaultModel: () => LocalizedString
+	/**
+	 * Reply language
+	 */
+	personaLanguageLabel: () => LocalizedString
+	/**
+	 * What it answers in, whatever language it was written in. Empty follows the interface.
+	 */
+	personaLanguageHint: () => LocalizedString
 	/**
 	 * “{name}” updated
 	 */

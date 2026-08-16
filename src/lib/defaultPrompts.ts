@@ -7,6 +7,7 @@
 
 export type PromptKey =
 	| 'currentDate'
+	| 'personaLanguage'
 	| 'searchRouter'
 	| 'toolPolicy'
 	| 'searchNone'
@@ -36,6 +37,13 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Anchors the model in the present so it trusts recent facts.',
 		default:
 			'The current date and time is {datetime}. Treat this as the authoritative present — it overrides any date you would infer from your training data. Do not reject something as impossible, fake, or a rumour merely because it postdates your training cutoff; weigh it on its own merits and on any sources you are given.'
+	},
+	personaLanguage: {
+		label: 'Persona language',
+		placeholders: ['{language}'],
+		hint: 'Fixes the language a persona answers in, added to its own prompt.',
+		default:
+			'Always reply in {language}, whatever language the user writes to you in, unless they explicitly ask for another language.'
 	},
 	searchRouter: {
 		label: 'Web search — query',
@@ -205,6 +213,7 @@ Write in the language of the conversation. Be concise but never lossy: prefer a 
 /** Order shown in the Settings dropdown. */
 export const PROMPT_KEYS: PromptKey[] = [
 	'currentDate',
+	'personaLanguage',
 	'searchRouter',
 	'toolPolicy',
 	'searchNone',

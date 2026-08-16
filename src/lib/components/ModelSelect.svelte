@@ -25,10 +25,18 @@
 		 *   header has to spare.
 		 */
 		variant?: 'default' | 'hero' | 'attached';
+		/**
+		 * The label for choosing no model at all.
+		 *
+		 * A persona that names none is not misconfigured: it runs on whatever the
+		 * reader's default is, which is the sane thing for one that travels between
+		 * installs. Without an entry saying so, an empty field reads as unfinished.
+		 */
+		emptyLabel?: string;
 		onSelect?: (name: string) => void;
 	}
 
-	let { value = $bindable(), variant = 'default', onSelect }: Props = $props();
+	let { value = $bindable(), variant = 'default', emptyLabel, onSelect }: Props = $props();
 
 	/** Badge for a model's connection — honours the colour set on that connection. */
 	function badgeFor(serverId: string) {
@@ -67,6 +75,7 @@
 <Select
 	bind:value
 	{options}
+	{emptyLabel}
 	searchable
 	allowClear
 	placeholder={$LL.availableModels()}

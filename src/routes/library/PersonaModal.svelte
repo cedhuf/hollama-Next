@@ -2,12 +2,14 @@
 	import { Download, Trash2, X } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
+	import LL from '$i18n/i18n-svelte';
 	import { env } from '$env/dynamic/public';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import { knowledgeStore } from '$lib/localStorage';
+	import { LANGUAGE_LABELS } from '$lib/i18n';
+	import { knowledgeStore, settingsStore } from '$lib/localStorage';
 	import { personaToBundle } from '$lib/personaBundle';
 	import {
 		deletePersona,
@@ -32,6 +34,10 @@
 	const initials = $derived(personaInitials(persona.name));
 	const attached = $derived(persona.knowledgeIds ?? []);
 	const canShare = $derived(env.PUBLIC_MODE === 'server' && $currentRole === 'admin');
+	/** What an empty language field means, spelled out where it is left empty. */
+	const interfaceLanguage = $derived(
+		LANGUAGE_LABELS[$settingsStore.userLanguage as keyof typeof LANGUAGE_LABELS] ?? 'English'
+	);
 
 	function onShareChange() {
 		persist();
@@ -139,7 +145,28 @@
 
 				<SettingsSection title="Behaviour" card>
 					<SettingsField label="Model">
-						<ModelSelect bind:value={persona.modelName} onSelect={persist} />
+						<!-- Naming no model is a legitimate answer, and the common one for a
+						     persona that travels: it runs on whatever the reader's default is.
+						     Said in the list rather than left as an empty field, which reads as
+						     unfinished. -->
+						<ModelSelect
+							bind:value={persona.modelName}
+							emptyLabel={$LL.personaDefaultModel()}
+							onSelect={persist}
+						/>
+					</SettingsField>
+
+					<SettingsField label={$LL.personaLanguageLabel()} hint={$LL.personaLanguageHint()}>
+						<!-- Free text, not the list of locales the interface is translated into:
+						     those are two different things. Empty follows the interface, and the
+						     placeholder shows what that currently resolves to. -->
+						<input
+							class="settings-field"
+							bind:value={persona.language}
+							oninput={persist}
+							placeholder={interfaceLanguage}
+							spellcheck="false"
+						/>
 					</SettingsField>
 
 					<SettingsField label="System prompt" hint="The persona's personality lives here.">

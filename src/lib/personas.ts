@@ -1,6 +1,8 @@
 import { get } from 'svelte/store';
 
-import { personasStore, sessionsStore } from '$lib/localStorage';
+import { resolvePrompt } from '$lib/defaultPrompts';
+import { LANGUAGE_LABELS } from '$lib/i18n';
+import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 import { saveSession, type Session, type SessionSummary } from '$lib/sessions';
 import type { Model } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
@@ -72,8 +74,21 @@ export interface Persona {
 	systemPrompt: string;
 	/** Opening line, shown as the first assistant bubble when the chat starts. */
 	greeting?: string;
-	/** Model name; resolved to a concrete server when a chat is created. */
+	/** Model name; resolved to a concrete server when a chat is created. Empty = your default. */
 	modelName: string;
+	/**
+	 * The language it answers in, whatever language it was written in.
+	 *
+	 * Free text rather than a list, because the point is that it is not tied to the
+	 * interface: someone reading Llooma in French can perfectly well want this one
+	 * assistant to answer in Spanish, and the list of locales the app is translated
+	 * into has nothing to do with the languages a model speaks.
+	 *
+	 * Empty means the interface's language, resolved when a conversation starts.
+	 * Not stored resolved, so changing the interface language moves the personas
+	 * that never said otherwise.
+	 */
+	language?: string;
 	params?: PersonaParams;
 	webSearch?: boolean;
 	suggestions?: string[];
@@ -157,6 +172,27 @@ export const deletePersona = (id: string): void => {
  * into the session here, so the chat stays self-contained afterwards. Returns the
  * session id for the caller to navigate to.
  */
+/**
+ * The language a persona answers in, and the line that says so.
+ *
+ * Written into the conversation's system prompt rather than left to the model to
+ * infer, because inferring it is exactly what goes wrong: a prompt written in
+ * English makes an English answer feel right to the model even when everything
+ * around it is French. One sentence removes the guess.
+ *
+ * Resolved when the conversation starts, like everything else a persona
+ * contributes, so it is a snapshot and not a live setting reaching into a chat
+ * already under way.
+ */
+function languageInstruction(persona: Persona): string {
+	const settings = get(settingsStore);
+	const language =
+		persona.language?.trim() ||
+		LANGUAGE_LABELS[settings.userLanguage as keyof typeof LANGUAGE_LABELS] ||
+		'English';
+	return resolvePrompt('personaLanguage', settings.promptOverrides, { language });
+}
+
 export function launchPersona(persona: Persona, models: Model[]): string {
 	const sessions = get(sessionsStore) || [];
 	if (persona.sessionId && sessions.some((s) => s.id === persona.sessionId)) {
@@ -168,7 +204,12 @@ export function launchPersona(persona: Persona, models: Model[]): string {
 	const session: Session = {
 		id,
 		messages: persona.greeting?.trim() ? [{ role: 'assistant', content: persona.greeting }] : [],
-		systemPrompt: { role: 'system', content: persona.systemPrompt },
+		systemPrompt: {
+			role: 'system',
+			content: [persona.systemPrompt.trim(), languageInstruction(persona)]
+				.filter(Boolean)
+				.join('\n\n')
+		},
 		systemPromptEdited: true, // fixed by the persona — don't auto-resolve over it
 		options: persona.params?.temperature != null ? { temperature: persona.params.temperature } : {},
 		model,

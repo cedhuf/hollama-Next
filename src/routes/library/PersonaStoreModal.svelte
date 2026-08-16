@@ -48,7 +48,6 @@
 		tagline: string;
 		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
 		tags: string[];
-		locale?: string;
 		author?: string;
 		origin: Origin;
 		/**
@@ -75,7 +74,6 @@
 
 	let query = $state('');
 	let origin = $state<Origin | 'all'>('all');
-	let locale = $state('all');
 	/** The card being worked on, so only its own button spins. */
 	let installing = $state<string | null>(null);
 	let relaying = $state<string | null>(null);
@@ -191,7 +189,6 @@
 					tagline: entry.tagline,
 					avatar: avatarFields(entry.avatar, entry.name),
 					tags: entry.tags,
-					locale: entry.locale,
 					author: entry.author,
 					origin: entry.origin,
 					state,
@@ -252,15 +249,20 @@
 
 	const offers = $derived([...fromAdmin, ...fromCatalog]);
 
-	/** Only offered when there is something to choose between. */
+	/**
+	 * Only offered when there is something to choose between.
+	 *
+	 * There is no language filter, and that is a decision rather than an omission:
+	 * a persona is written in one language and answers in whichever you ask it to,
+	 * so what it was written in tells a reader nothing about whether it is for
+	 * them. Models stopped being monolingual; the filter followed.
+	 */
 	const origins = $derived([...new Set(offers.map((o) => o.origin))]);
-	const locales = $derived([...new Set(offers.map((o) => o.locale).filter(Boolean))] as string[]);
 
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		return offers.filter((offer) => {
 			if (origin !== 'all' && offer.origin !== origin) return false;
-			if (locale !== 'all' && offer.locale !== locale) return false;
 			if (!q) return true;
 			return (
 				offer.name.toLowerCase().includes(q) ||
@@ -366,13 +368,6 @@
 						{@render chip($LL.personaStoreAll(), origin === 'all', () => (origin = 'all'))}
 						{#each origins as value (value)}
 							{@render chip(originLabel(value), origin === value, () => (origin = value))}
-						{/each}
-					{/if}
-					{#if locales.length > 1}
-						{#each locales as value (value)}
-							{@render chip(value.toUpperCase(), locale === value, () =>
-								locale === value ? (locale = 'all') : (locale = value)
-							)}
 						{/each}
 					{/if}
 				</div>
