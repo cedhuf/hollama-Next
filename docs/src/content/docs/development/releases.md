@@ -52,6 +52,19 @@ This is the one thing in the release process that cannot be automated away, beca
 to people whose data is at stake. See the note in
 [Installation](/guides/installation/).
 
+## Changes that move data
+
+A release that changes **where a conversation travels** must say so in its notes, in as many words,
+and must name the setting that turns it back.
+
+There is one so far: server-side generation, which in local mode routes a turn through the llooma
+server on its way to the model, where the browser used to reach Ollama directly. The server is the
+user's own machine, and the setting (_Chat → Generate on the server_) restores the old path
+exactly. None of that makes it something to discover afterwards.
+
+Same reasoning as the migration note above. Both are promises to people who cannot read the diff,
+and neither can be generated from a commit log.
+
 ## The documentation site
 
 Built from `docs/` and published to GitHub Pages by its own workflow, on push. It is a separate

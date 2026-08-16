@@ -38,6 +38,9 @@ chat with them from an app that is yours.
   server mode.
 - **Tools that stay yours.** Web search, page reading, interactive choices. Every instruction behind
   them is a text box you can rewrite.
+- **Replies that survive the page.** A generation runs in the server, so reloading, navigating away
+  or letting your phone sleep no longer costs you the answer: the conversation picks it back up
+  where it was. Switch it off in one click if you would rather nothing left the tab.
 - **Compaction.** When a conversation gets too long, `/compact` replaces what was said with a
   structured summary so it keeps fitting. Nothing is deleted, and one click puts it all back.
 - **Full-text search** across every conversation, answering with the passage itself.
