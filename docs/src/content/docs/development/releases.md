@@ -36,6 +36,7 @@ What it does, in order:
    in `package.json`.
 3. The image workflow builds from `main`, which by then includes that commit, and publishes
    `ghcr.io/cedhuf/llooma` tagged `:latest`, `:x.y.z` and with the commit SHA.
+4. The documentation workflow builds from the same `main` and publishes the site.
 
 Images are published per release rather than per push. A multi-arch build takes around twenty
 minutes, and `:latest` is only meaningful if the version it carries is the one that was tagged.
@@ -67,8 +68,16 @@ and neither can be generated from a commit log.
 
 ## The documentation site
 
-Built from `docs/` and published to GitHub Pages by its own workflow, on push. It is a separate
-pnpm workspace:
+Built from `docs/` and published to GitHub Pages as part of cutting a release, alongside the image.
+
+It used to publish on every push to `main` that touched `docs/`, which sounds right and is not: the
+documentation describes the code, so it changes in the same commits the code does, and publishing
+it on push meant the site described a version nobody could install yet. Tied to the release, the
+two always agree, and the changelog page finds the release it is meant to list.
+
+Run the workflow on its own to fix a typo without cutting a version.
+
+It is a separate pnpm workspace:
 
 ```shell
 cd docs

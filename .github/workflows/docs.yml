@@ -1,23 +1,23 @@
 name: Documentation
 
-# Published on every push to `main` that touches the docs, the API routes or the
-# OpenAPI spec: the spec is rendered into the site, so a route change that
-# updates it has to reach the published pages too.
+# Published when a release is cut, and otherwise on request.
 #
-# Also on every published release, because the changelog page is built from the
-# GitHub releases. Without this it would only pick up a new version the next time
-# something else happened to touch the docs.
+# It used to publish on every push to `main` that touched the docs, which sounds
+# right and is not: the documentation describes the code, so it changes in the
+# same commits the code does, and publishing it on push meant the site described
+# a version nobody could install yet. Tying it to the release makes the two
+# always agree, and gives the changelog page the release it is meant to list,
+# since `versioning.yml` calls this after `semantic-release` has published it.
+#
+# `workflow_dispatch` stays, for fixing a typo without cutting a version.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'src/routes/api/**'
-      - 'scripts/api-routes.mjs'
-      - 'scripts/check-api-docs.mjs'
-      - '.github/workflows/docs.yml'
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit, branch or tag to build. Defaults to the triggering ref.
+        type: string
+        required: false
+        default: ''
   workflow_dispatch:
 
 # One publication at a time, and never cancel one in flight: a half-deployed site
@@ -31,7 +31,12 @@ jobs:
     name: Build the site
     runs-on: ubuntu-latest
     steps:
+      # `inputs.ref` is only set when called from another workflow, where
+      # `github.sha` still points at the caller's commit — the one *before* the
+      # release bump, so the version the site shows would be the previous one.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v6

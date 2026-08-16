@@ -50,3 +50,18 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+  docs:
+    name: Publish the documentation
+    needs: version
+    # Same `main`, and for the same reason: the site reads the version out of the
+    # checkout. Alongside the image rather than after it, since neither needs the
+    # other and a twenty-minute multi-arch build is no reason to keep the
+    # documentation waiting.
+    uses: ./.github/workflows/docs.yml
+    with:
+      ref: main
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
