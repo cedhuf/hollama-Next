@@ -136,6 +136,40 @@ const migrations: Migration[] = [
 			WHERE json_extract(m.value, '$.content') IS NOT NULL
 			  AND json_extract(m.value, '$.content') <> '';
 		`
+	},
+	{
+		version: 7,
+		up: `
+			-- Where a conversation's context was cut, extracted once per write.
+			--
+			-- Search needs to know which hits are behind a clear or are a compaction
+			-- summary, and it was asking by unfolding every matched conversation's
+			-- messages array with json_each, at query time, on every keystroke. That is
+			-- megabytes of JSON reparsed to answer a question about a handful of
+			-- integers. Here the answer is written when the conversation is, which is
+			-- the direction the arrow should point: rarely written, constantly read.
+			CREATE TABLE session_markers (
+				session_id    TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+				user_id       TEXT NOT NULL,
+				message_index INTEGER NOT NULL,
+				kind          TEXT NOT NULL, -- 'cleared' | 'compaction'
+				PRIMARY KEY (session_id, message_index)
+			);
+
+			CREATE INDEX idx_session_markers_session ON session_markers(session_id);
+
+			-- Backfill from the same expression the incremental write uses, so the two
+			-- cannot describe different things.
+			INSERT INTO session_markers (session_id, user_id, message_index, kind)
+			SELECT s.id,
+			       s.user_id,
+			       m.key,
+			       CASE WHEN json_extract(m.value, '$.cleared') IS NOT NULL
+			            THEN 'cleared' ELSE 'compaction' END
+			FROM sessions s, json_each(s.data, '$.messages') m
+			WHERE json_extract(m.value, '$.cleared') IS NOT NULL
+			   OR json_extract(m.value, '$.compaction') IS NOT NULL;
+		`
 	}
 ];
 

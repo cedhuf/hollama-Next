@@ -58,3 +58,8 @@ set aside.
 
 Both come back with the **layers** button beside the search field. Nothing is ever excluded from
 the index itself: the switch changes the question, not what is stored.
+
+Where the boundaries are is recorded when a conversation is saved, in a small table beside the
+full-text index and filled by the same walk over the messages. Asking at search time instead meant
+unfolding every matched conversation's whole message array to answer a question about a handful of
+integers, which is fine on one machine and is not fine on a busy instance.

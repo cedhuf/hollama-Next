@@ -63,9 +63,35 @@
 	 */
 	const boundary = $derived(contextBoundary(session.messages));
 	const clearedAt = $derived(boundary.kind === 'cleared' ? boundary.index : -1);
-	const clearedMessages = $derived(
-		clearedAt === -1 ? [] : session.messages.slice(0, clearedAt).filter((m) => !m.cleared)
-	);
+
+	/**
+	 * The list actually drawn, cut before it is walked.
+	 *
+	 * Iterating the whole conversation and rendering nothing for the folded part
+	 * still costs a block per message: two thousand messages behind a clear were
+	 * two thousand empty blocks created and kept. Slicing first means the folded
+	 * stretch is not iterated at all.
+	 *
+	 * `offset` puts the original indices back, since anchors, retries and edits all
+	 * address a message by its position in the conversation and not by its position
+	 * in what happens to be on screen.
+	 */
+	const offset = $derived(clearedAt === -1 ? 0 : clearedAt);
+	const visible = $derived(clearedAt === -1 ? session.messages : session.messages.slice(clearedAt));
+
+	/**
+	 * What the divider holds, computed from the boundary rather than from the
+	 * conversation.
+	 *
+	 * Keyed on the index alone: `session.messages` changes on every streamed token,
+	 * and this used to allocate a copy of the whole folded stretch each time. The
+	 * folded stretch, by definition, is the part that is not changing.
+	 */
+	let clearedMessages = $state<Message[]>([]);
+	$effect(() => {
+		const at = clearedAt;
+		clearedMessages = at === -1 ? [] : session.messages.slice(0, at).filter((m) => !m.cleared);
+	});
 
 	// While the model is streaming an <ask> block the visible text is empty — show
 	// a choices skeleton instead of a bare "…".
@@ -116,10 +142,9 @@
 	<EmptyMessage>{$LL.writePromptToStart()}</EmptyMessage>
 {/if}
 
-{#each session.messages as message, i (session.id + i)}
-	{#if clearedAt !== -1 && i < clearedAt}
-		<!-- Behind the line: drawn inside the divider below, not here. -->
-	{:else if message.cleared}
+{#each visible as message, index (session.id + (index + offset))}
+	{@const i = index + offset}
+	{#if message.cleared}
 		{#if i === clearedAt}
 			<ClearedDivider
 				{message}

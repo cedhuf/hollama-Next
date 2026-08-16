@@ -28,6 +28,23 @@ export interface SearchHit {
  * backfill in migration 6 are the same SELECT — so the index cannot drift from
  * what the stored data actually contains.
  */
+/**
+ * The markers a conversation carries, extracted from the same walk.
+ *
+ * Written beside the index rather than derived at search time. Both statements
+ * live here, next to each other, so the one that says where a boundary is and
+ * the one that says where a word is are updated by the same call and cannot fall
+ * out of step.
+ */
+const MARKERS_SELECT = `
+	SELECT s.id, s.user_id, m.key,
+	       CASE WHEN json_extract(m.value, '$.cleared') IS NOT NULL
+	            THEN 'cleared' ELSE 'compaction' END
+	FROM sessions s, json_each(s.data, '$.messages') m
+	WHERE %WHERE%
+	  AND (json_extract(m.value, '$.cleared') IS NOT NULL
+	       OR json_extract(m.value, '$.compaction') IS NOT NULL)`;
+
 export function reindexSession(userId: string, sessionId: string): void {
 	const db = getDb();
 	db.prepare('DELETE FROM sessions_fts WHERE session_id = ?').run(sessionId);
@@ -40,10 +57,18 @@ export function reindexSession(userId: string, sessionId: string): void {
 		   AND json_extract(m.value, '$.content') IS NOT NULL
 		   AND json_extract(m.value, '$.content') <> ''`
 	).run(sessionId, userId);
+
+	db.prepare('DELETE FROM session_markers WHERE session_id = ?').run(sessionId);
+	db.prepare(
+		`INSERT INTO session_markers (session_id, user_id, message_index, kind)
+		 ${MARKERS_SELECT.replace('%WHERE%', 's.id = ? AND s.user_id = ?')}`
+	).run(sessionId, userId);
 }
 
 export function dropSessionFromIndex(sessionId: string): void {
-	getDb().prepare('DELETE FROM sessions_fts WHERE session_id = ?').run(sessionId);
+	const db = getDb();
+	db.prepare('DELETE FROM sessions_fts WHERE session_id = ?').run(sessionId);
+	db.prepare('DELETE FROM session_markers WHERE session_id = ?').run(sessionId);
 }
 
 /** Rebuild every conversation of one user — after restoring a backup. */
@@ -58,6 +83,12 @@ export function reindexAllSessions(userId: string): void {
 		 WHERE s.user_id = ?
 		   AND json_extract(m.value, '$.content') IS NOT NULL
 		   AND json_extract(m.value, '$.content') <> ''`
+	).run(userId);
+
+	db.prepare('DELETE FROM session_markers WHERE user_id = ?').run(userId);
+	db.prepare(
+		`INSERT INTO session_markers (session_id, user_id, message_index, kind)
+		 ${MARKERS_SELECT.replace('%WHERE%', 's.user_id = ?')}`
 	).run(userId);
 }
 
@@ -154,11 +185,12 @@ export function getSessionHeaders(userId: string, ids: string[]): Map<string, Se
 /**
  * The boundaries a conversation carries, for hiding what is behind them.
  *
- * Read from the stored JSON rather than kept in the index, which would have
- * needed a column and a migration for something that changes every time a
- * conversation does. The index answers "where does this word appear"; this
- * answers "is that still part of the conversation", and the two are different
- * questions asked at different moments.
+ * A read of `session_markers`, which is a handful of integers per conversation
+ * and indexed by conversation. It used to unfold every matched conversation's
+ * messages array with `json_each` on each search: correct, and megabytes of JSON
+ * reparsed to answer a question about a few numbers. The extraction moved to the
+ * write, where it happens once and where the same walk was already being done
+ * for the full-text index.
  */
 export interface SessionBoundaries {
 	/** Index of the last clear marker, or -1. Everything below it is set aside. */
@@ -173,32 +205,25 @@ export function sessionBoundaries(
 ): Map<string, SessionBoundaries> {
 	const found = new Map<string, SessionBoundaries>();
 	if (!sessionIds.length) return found;
+	for (const id of sessionIds) found.set(id, { clearedAt: -1, markers: [] });
 
 	const rows = getDb()
 		.prepare(
-			`SELECT s.id AS session_id, m.key AS message_index,
-			        json_extract(m.value, '$.cleared') IS NOT NULL AS is_cleared,
-			        json_extract(m.value, '$.compaction') IS NOT NULL AS is_compaction
-			 FROM sessions s, json_each(s.data, '$.messages') m
-			 WHERE s.user_id = ?
-			   AND s.id IN (${sessionIds.map(() => '?').join(',')})
-			   AND (json_extract(m.value, '$.cleared') IS NOT NULL
-			        OR json_extract(m.value, '$.compaction') IS NOT NULL)`
+			`SELECT session_id, message_index, kind
+			 FROM session_markers
+			 WHERE user_id = ? AND session_id IN (${sessionIds.map(() => '?').join(',')})`
 		)
 		.all(userId, ...sessionIds) as {
 		session_id: string;
 		message_index: number;
-		is_cleared: number;
-		is_compaction: number;
+		kind: string;
 	}[];
-
-	for (const id of sessionIds) found.set(id, { clearedAt: -1, markers: [] });
 
 	for (const row of rows) {
 		const entry = found.get(row.session_id);
 		if (!entry) continue;
 		entry.markers.push(row.message_index);
-		if (row.is_cleared && row.message_index > entry.clearedAt) {
+		if (row.kind === 'cleared' && row.message_index > entry.clearedAt) {
 			entry.clearedAt = row.message_index;
 		}
 	}
