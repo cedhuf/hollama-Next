@@ -1376,6 +1376,10 @@ type RootTranslation = {
 	 */
 	personaDefaultModel: string
 	/**
+	 * C​h​a​t
+	 */
+	personaChat: string
+	/**
 	 * R​e​p​l​y​ ​l​a​n​g​u​a​g​e
 	 */
 	personaLanguageLabel: string
@@ -3643,6 +3647,10 @@ The completion in progress will stop
 	 * Your default model
 	 */
 	personaDefaultModel: () => LocalizedString
+	/**
+	 * Chat
+	 */
+	personaChat: () => LocalizedString
 	/**
 	 * Reply language
 	 */

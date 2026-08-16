@@ -52,9 +52,14 @@ export async function GET(event) {
 	const path = event.params.path;
 	if (!isSafeCatalogPath(path)) throw error(400, 'Bad catalog path');
 
+	// The refresh control in the interface says so here, and the held copy is
+	// skipped. Without it, pressing Refresh did nothing for up to fifteen minutes
+	// and there was no way to tell that from the store simply not having changed.
+	const fresh = event.url.searchParams.get('fresh') === '1';
+
 	const url = `${store()}${path}`;
 	const hit = cache.get(url);
-	if (hit && Date.now() - hit.at < TTL_MS) {
+	if (!fresh && hit && Date.now() - hit.at < TTL_MS) {
 		return new Response(hit.body, { headers: { 'content-type': hit.type } });
 	}
 

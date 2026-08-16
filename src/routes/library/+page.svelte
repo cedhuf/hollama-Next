@@ -5,6 +5,7 @@
 		Folder,
 		FolderOpen,
 		FolderPlus,
+		MessageSquare,
 		Pencil,
 		Plus,
 		Store,
@@ -319,17 +320,17 @@
 						tagline={persona.tagline}
 						avatar={persona}
 						tags={persona.tags}
-						onclick={() => chatWith(persona)}
+						actionLabel={$LL.editPersona()}
+						onclick={() => editPersona(persona)}
 					>
 						{#snippet badges()}
 							<!-- Where it came from, and whether it is still what arrived. Both
 							     deduced: a persona you wrote has no source and says nothing, which
-							     is right, since "written by you" is the ordinary case and
-							     labelling it would be noise on every card. -->
+							     is right, since "written by you" is the ordinary case and labelling
+							     it would be noise on every card. -->
 							{#if state !== 'own'}
 								<span
 									class="rounded-full bg-shade-2 px-2 py-0.5 text-[10px] font-medium text-muted"
-									title={sourceLabel(persona)}
 								>
 									{state === 'clean'
 										? sourceLabel(persona)
@@ -347,13 +348,25 @@
 							{/if}
 						{/snippet}
 
-						{#snippet corner()}
+						{#snippet actions()}
+							<!-- Both of them, spelled out. Talking to a persona is the frequent
+							     act and editing it the rare one, but the Library is where you
+							     manage them, so neither is left to a control that only exists
+							     under a pointer. -->
 							<button
 								type="button"
-								aria-label={$LL.editPersona()}
-								title={$LL.edit()}
+								onclick={() => chatWith(persona)}
+								class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							>
+								<MessageSquare class="h-3.5 w-3.5" />
+								{$LL.personaChat()}
+							</button>
+							<button
+								type="button"
 								onclick={() => editPersona(persona)}
-								class="rounded p-0.5 text-muted transition-colors hover:text-active"
+								title={$LL.edit()}
+								aria-label={$LL.editPersona()}
+								class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
 							>
 								<Pencil class="h-3.5 w-3.5" />
 							</button>

@@ -352,6 +352,7 @@ const fr = extendDictionary(en, {
 	personaStoreInstalledEdited: 'Installé, modifié',
 	personaStoreUpdate: 'Mettre à jour',
 	personaDefaultModel: 'Votre modèle par défaut',
+	personaChat: 'Discuter',
 	personaLanguageLabel: 'Langue des réponses',
 	personaLanguageHint:
 		"La langue dans laquelle il répond, quelle que soit celle dans laquelle il a été écrit. Vide, il suit l'interface.",

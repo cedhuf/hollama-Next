@@ -359,6 +359,7 @@ const en = {
 	personaStoreInstalledEdited: 'Installed, edited',
 	personaStoreUpdate: 'Update',
 	personaDefaultModel: 'Your default model',
+	personaChat: 'Chat',
 	personaLanguageLabel: 'Reply language',
 	personaLanguageHint:
 		'What it answers in, whatever language it was written in. Empty follows the interface.',

@@ -100,8 +100,12 @@ export async function loadCatalog(force = false): Promise<void> {
 	else state.set({ status: 'loading' });
 
 	try {
-		const response = await fetch(`${base()}index.json`, {
-			headers: { accept: 'application/json' }
+		// A forced reload says so to the server as well as to the browser: the
+		// instance holds its own copy, and refreshing past one cache into another is
+		// not refreshing.
+		const response = await fetch(`${base()}index.json${force ? '?fresh=1' : ''}`, {
+			headers: { accept: 'application/json' },
+			cache: force ? 'no-store' : 'default'
 		});
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
 		const entries = parseCatalogIndex(await response.json());
