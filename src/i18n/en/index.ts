@@ -367,7 +367,7 @@ const en = {
 	personaStoreUpdateAll: 'Update all',
 	personaStoreUpdatedAll: '{count:number} persona{{s}} updated',
 	personaStoreNothingToUpdate: 'Everything is up to date.',
-	personaStoreReset: 'Restore the published version',
+	personaStoreReset: 'Restore',
 	personaStoreResetConfirm:
 		'Replace your version of “{name:string}” with the published one? Your changes are lost.',
 	personaStoreModeLabel: 'What the persona store shows your users',

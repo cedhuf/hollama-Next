@@ -611,96 +611,78 @@
 							     not who published it. Provenance stays where it is a choice rather
 							     than a decoration: the filter above. -->
 							{#snippet actions()}
-								<!-- In "my personas" there is nothing to install: it is already
-								     yours, and the only control that matters is the one that hands
-								     it out. So it takes the whole footer and says what it does in
-								     words rather than in an icon. -->
-								{#if view === 'mine'}
+								<!-- The same footer in every view: what you can do with the persona,
+								     then the control that hands it out. "My personas" had a wide
+								     labelled button of its own, which made one of the three views
+								     look like a different page. Nothing about a persona you wrote
+								     needs a different shape from one you installed. -->
+								{#if offer.update}
 									<button
 										type="button"
-										disabled={relaying !== null}
-										onclick={() => relay(offer)}
-										aria-pressed={offer.relayed}
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs transition-colors disabled:opacity-50 {offer.relayed
-											? 'bg-accent/10 text-accent hover:bg-accent/20'
-											: 'text-muted hover:bg-shade-2 hover:text-active'}"
+										disabled={installing !== null}
+										onclick={() => run(offer, true)}
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
 									>
-										{#if relaying === offer.key}
+										{#if installing === offer.key}
 											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
 										{:else}
-											<Users class="h-3.5 w-3.5" />
+											<ArrowDownToLine class="h-3.5 w-3.5" />
 										{/if}
-										{offer.relayed ? $LL.shared() : $LL.share()}
+										{offer.state === 'outdated'
+											? $LL.personaStoreUpdate()
+											: $LL.personaStoreReset()}
 									</button>
+								{:else if offer.state}
+									<span
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
+									>
+										<Check class="h-3.5 w-3.5" />
+										{offer.state === 'edited'
+											? $LL.personaStoreInstalledEdited()
+											: $LL.personaStoreInstalled()}
+									</span>
 								{:else}
-									{#if offer.update}
-										<button
-											type="button"
-											disabled={installing !== null}
-											onclick={() => run(offer, true)}
-											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
-										>
-											{#if installing === offer.key}
-												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-											{:else}
-												<ArrowDownToLine class="h-3.5 w-3.5" />
-											{/if}
-											{offer.state === 'outdated'
-												? $LL.personaStoreUpdate()
-												: $LL.personaStoreReset()}
-										</button>
-									{:else if offer.state}
-										<span
-											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
-										>
-											<Check class="h-3.5 w-3.5" />
-											{offer.state === 'edited'
-												? $LL.personaStoreInstalledEdited()
-												: $LL.personaStoreInstalled()}
-										</span>
-									{:else}
-										<button
-											type="button"
-											disabled={installing !== null}
-											onclick={() => run(offer)}
-											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
-										>
-											{#if installing === offer.key}
-												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-											{:else}
-												<Download class="h-3.5 w-3.5" />
-											{/if}
-											{$LL.install()}
-										</button>
-									{/if}
+									<button
+										type="button"
+										disabled={installing !== null}
+										onclick={() => run(offer)}
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+									>
+										{#if installing === offer.key}
+											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+										{:else}
+											<Download class="h-3.5 w-3.5" />
+										{/if}
+										{$LL.install()}
+									</button>
+								{/if}
 
-									{#if offer.toggleRelay}
-										{@const label = offer.relayed
-											? $LL.personaStoreUnshare()
-											: $LL.personaStoreShare()}
-										<Tooltip>
-											{#snippet trigger({ props })}
-												<button
-													{...props}
-													type="button"
-													disabled={relaying !== null}
-													onclick={() => relay(offer)}
-													aria-pressed={offer.relayed}
-													aria-label={label}
-													class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
-														? 'bg-accent/10 text-accent hover:bg-accent/20'
-														: 'text-muted hover:bg-shade-2 hover:text-active'}"
-												>
-													{#if relaying === offer.key}
-														<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-													{:else}
-														<Users class="h-3.5 w-3.5" />
-													{/if}
-												</button>
-											{/snippet}
-											{label}
-										</Tooltip>
-									{/if}
+								{#if offer.toggleRelay}
+									{@const label = offer.relayed
+										? $LL.personaStoreUnshare()
+										: $LL.personaStoreShare()}
+									<Tooltip>
+										{#snippet trigger({ props })}
+											<button
+												{...props}
+												type="button"
+												disabled={relaying !== null}
+												onclick={() => relay(offer)}
+												aria-pressed={offer.relayed}
+												aria-label={label}
+												class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
+													? 'bg-accent/10 text-accent hover:bg-accent/20'
+													: 'text-muted hover:bg-shade-2 hover:text-active'}"
+											>
+												{#if relaying === offer.key}
+													<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+												{:else}
+													<Users class="h-3.5 w-3.5" />
+												{/if}
+											</button>
+										{/snippet}
+										{label}
+									</Tooltip>
 								{/if}
 							{/snippet}
 						</PersonaCard>

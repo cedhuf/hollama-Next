@@ -1405,7 +1405,7 @@ type RootTranslation = {
 	 */
 	personaStoreNothingToUpdate: string
 	/**
-	 * R​e​s​t​o​r​e​ ​t​h​e​ ​p​u​b​l​i​s​h​e​d​ ​v​e​r​s​i​o​n
+	 * R​e​s​t​o​r​e
 	 */
 	personaStoreReset: string
 	/**
@@ -3798,7 +3798,7 @@ The completion in progress will stop
 	 */
 	personaStoreNothingToUpdate: () => LocalizedString
 	/**
-	 * Restore the published version
+	 * Restore
 	 */
 	personaStoreReset: () => LocalizedString
 	/**

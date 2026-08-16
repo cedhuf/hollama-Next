@@ -361,7 +361,7 @@ const fr = extendDictionary(en, {
 	personaStoreUpdateAll: 'Tout mettre à jour',
 	personaStoreUpdatedAll: '{count:number} persona{{s}} mis à jour',
 	personaStoreNothingToUpdate: 'Tout est à jour.',
-	personaStoreReset: 'Restaurer la version publiée',
+	personaStoreReset: 'Restaurer',
 	personaStoreResetConfirm:
 		'Remplacer votre version de « {name:string} » par celle publiée ? Vos changements seront perdus.',
 	personaStoreModeLabel: 'Ce que la boutique montre à vos utilisateurs',
