@@ -67,6 +67,23 @@ export interface Settings {
 	 * self-hosted OpenAI-compatible server that supports it without any way to say so.
 	 */
 	nativeTools: 'off' | 'auto' | 'force';
+	/**
+	 * Run a turn in the server rather than in this tab.
+	 *
+	 * On by default, because the alternative loses answers: a generation that
+	 * lives in the page dies with it, and a reload, a navigation or iOS reclaiming
+	 * a backgrounded tab all count. Run in the server it survives all three, and a
+	 * tab that comes back reattaches to it.
+	 *
+	 * The trade is worth stating plainly, and it is the reason this is a setting
+	 * at all rather than simply how the app works: in local mode the conversation
+	 * then passes through the llooma server on its way to the model, where talking
+	 * to Ollama straight from the browser never touched it. That server is the
+	 * user's own machine or their own container, so it is a short trip, but it is
+	 * not the same promise. Turned off, everything runs in the tab exactly as it
+	 * used to.
+	 */
+	serverSideGeneration: boolean;
 	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
 	webFetchEnabled: boolean;
 	webFetchByDefault: boolean;
@@ -209,6 +226,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	// Off by default: the text protocols work everywhere and have the mileage, and
 	// a small model that calls tools badly fails in ways a user did not ask for.
 	nativeTools: 'off',
+	serverSideGeneration: true,
 	webFetchEnabled: true,
 	webFetchByDefault: true,
 	webFetchMaxPages: 3,

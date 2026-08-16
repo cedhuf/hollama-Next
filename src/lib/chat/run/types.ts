@@ -69,6 +69,17 @@ export interface RunInput {
 		model: string;
 		serverId?: string;
 	};
+	/**
+	 * Configuration the browser owns, and only in local mode.
+	 *
+	 * Ignored outright in server mode, where the same questions are answered by
+	 * the instance's own settings: a client that sends a search endpoint there is
+	 * a client trying to choose one, which is not its call.
+	 */
+	local?: {
+		search?: { url: string; backend: string; token: string };
+		fetch?: { maxPages: number; maxChars: number };
+	};
 	/** Set when the conversation is due for compaction once this turn lands. */
 	compact?: {
 		model: string;

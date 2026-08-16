@@ -274,6 +274,9 @@ const fr = extendDictionary(en, {
 	generateTitlesWithAI: 'Générer les titres par IA',
 	generateTitlesWithAIHelp:
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
+	serverSideGeneration: 'Générer sur le serveur',
+	serverSideGenerationHelp:
+		"Garde une réponse en cours quand vous rechargez, changez de page ou que le téléphone met l'application en veille, et la reprend à votre retour. Désactivez pour générer dans cet onglet, afin que rien ne passe par le serveur llooma en route vers le modèle.",
 	theme: 'Thème',
 	surfaceTransparency: 'Surfaces translucides',
 	surfaceTransparencyStrength: 'Quantité de transparence',

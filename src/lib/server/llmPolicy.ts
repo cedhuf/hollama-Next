@@ -13,7 +13,7 @@ import { getSharedModels, type ServerRow } from '$lib/server/db/servers';
  */
 
 /** Request bodies we understand well enough to police. */
-interface ChatBody {
+export interface ChatBody {
 	model?: unknown;
 	messages?: unknown;
 	[key: string]: unknown;
@@ -46,8 +46,7 @@ export function applyChatPolicy(
 	path: string,
 	body: string | undefined
 ): string | undefined {
-	// Only system servers carry admin policy; a user's own connection is theirs.
-	if (isAdmin || !body || server.owner_user_id !== null || !isChatPath(path)) return body;
+	if (!body || !isChatPath(path)) return body;
 
 	let parsed: ChatBody;
 	try {
@@ -57,6 +56,27 @@ export function applyChatPolicy(
 		// shape we didn't anticipate.
 		return body;
 	}
+
+	const vetted = policeChatBody(server, isAdmin, parsed);
+	return vetted === parsed ? body : JSON.stringify(vetted);
+}
+
+/**
+ * The rules themselves, over a parsed request.
+ *
+ * Split out from the proxy's string handling because the proxy is no longer the
+ * only path a request can take: a turn running in this process addresses the
+ * provider itself, and an admin's rules that only lived in the proxy would be
+ * rules a server-side run quietly dropped. One implementation, two callers.
+ */
+export function policeChatBody<T extends ChatBody>(
+	server: ServerRow,
+	isAdmin: boolean,
+	parsed: T
+): T {
+	// Only system servers carry admin policy; a user's own connection is theirs.
+	// Admins are exempt: they set these rules.
+	if (isAdmin || server.owner_user_id !== null) return parsed;
 
 	// --- The model has to be one the admin actually shared ---------------------
 	// An empty list denies everything, deliberately: `/api/providers` already
@@ -72,19 +92,19 @@ export function applyChatPolicy(
 	// system messages of its own (search results, fetched pages, the persona,
 	// the date). Prepending is what makes a protective instruction impossible to
 	// drop — including from under a persona, which is the case that motivated it.
-	if (getConfig('systemPromptsSharing') === 'locked') {
-		const locked = (getConfig('systemPromptsGlobal') ?? '').trim();
-		if (locked && Array.isArray(parsed.messages)) {
-			const already = parsed.messages.some(
-				(m) =>
-					typeof m === 'object' &&
-					m !== null &&
-					(m as { role?: string }).role === 'system' &&
-					(m as { content?: string }).content === locked
-			);
-			if (!already) parsed.messages = [{ role: 'system', content: locked }, ...parsed.messages];
-		}
-	}
+	if (getConfig('systemPromptsSharing') !== 'locked') return parsed;
 
-	return JSON.stringify(parsed);
+	const locked = (getConfig('systemPromptsGlobal') ?? '').trim();
+	if (!locked || !Array.isArray(parsed.messages)) return parsed;
+
+	const already = parsed.messages.some(
+		(m) =>
+			typeof m === 'object' &&
+			m !== null &&
+			(m as { role?: string }).role === 'system' &&
+			(m as { content?: string }).content === locked
+	);
+	if (already) return parsed;
+
+	return { ...parsed, messages: [{ role: 'system', content: locked }, ...parsed.messages] };
 }

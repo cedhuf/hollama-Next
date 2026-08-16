@@ -7,31 +7,7 @@ import { serversStore, settingsStore } from '$lib/localStorage';
 import { stripThinkTags, type ChatStrategy } from './index';
 import { OllamaStrategy } from './ollama';
 import { OpenAIStrategy } from './openai';
-
-const TITLE_SYSTEM_PROMPT =
-	'Generate a short, descriptive title (3 to 6 words) for a conversation that starts with the ' +
-	'following message. Reply with only the title — no quotes, no markdown, no trailing punctuation.';
-
-/**
- * Session titles render as plain text, so any markdown the model returns despite
- * the instruction (e.g. `**Bold**`, `# Heading`, `` `code` ``) would show as raw
- * markup. Strip the common inline/block markers while keeping the text, then tidy
- * surrounding quotes, trailing punctuation and whitespace.
- */
-function stripTitleMarkdown(raw: string): string {
-	return raw
-		.trim()
-		.replace(/^title\s*[:\-—]\s*/i, '') // drop a "Title:" prefix some models add
-		.replace(/^\s*(?:#{1,6}\s+|>\s+|[-*+]\s+|\d+[.)]\s+)/, '') // leading heading/quote/list marker
-		.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → link text
-		.replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
-		.replace(/(\*|_)(.*?)\1/g, '$2') // italic
-		.replace(/`+([^`]*)`+/g, '$1') // inline code
-		.replace(/^["'“”']+|["'“”']+$/g, '') // surrounding quotes
-		.replace(/[.\s]+$/, '') // trailing dots / whitespace
-		.replace(/\s+/g, ' ') // collapse internal whitespace / newlines
-		.trim();
-}
+import { stripTitleMarkdown, TITLE_SYSTEM_PROMPT } from './titleText';
 
 /**
  * Generates a concise session title from the first user message using the

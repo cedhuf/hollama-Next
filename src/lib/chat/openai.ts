@@ -8,7 +8,7 @@ import type {
 import { supportsThinkingRequest, type Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
-import { openaiClientConfig } from './endpoint';
+import { openaiClientConfig, type EndpointOptions } from './endpoint';
 import {
 	stripThinkTags,
 	type ChatChunk,
@@ -20,8 +20,11 @@ import {
 export class OpenAIStrategy implements ChatStrategy {
 	private openai: OpenAI;
 
-	constructor(private server: Server) {
-		const config = openaiClientConfig(this.server);
+	constructor(
+		private server: Server,
+		options: EndpointOptions = {}
+	) {
+		const config = openaiClientConfig(this.server, options);
 		this.openai = new OpenAI({
 			baseURL: config.baseURL,
 			apiKey: config.apiKey,

@@ -145,3 +145,19 @@ export async function compactSession(
 		replacedCount: active.length
 	};
 }
+
+/**
+ * The transcript a summariser is handed, from messages alone.
+ *
+ * Exported because a turn running server-side compacts too, and it must produce
+ * the same text: a summary written from a different rendering of the same
+ * conversation is a different summary, and which one you got would depend on
+ * where the turn happened to run.
+ */
+export function compactTranscript(messages: Message[]): string {
+	const active = messagesInContext(messages);
+	if (!active.length) return '';
+	// An earlier summary is part of what gets summarised: compacting twice must
+	// carry the first summary's facts forward, not drop them for being old.
+	return active.map(transcribe).join('\n\n');
+}

@@ -11,8 +11,18 @@
 	import { formatAskAnswer } from '$lib/askChoice';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
-	import { messagesInContext } from '$lib/chat/context';
+	import { contextUsage, messagesInContext } from '$lib/chat/context';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
+	import {
+		cancelRun,
+		followRun,
+		forgetRun,
+		rememberedRun,
+		rememberRun,
+		runForSession,
+		startRun
+	} from '$lib/chat/run/client';
 	import { runLocally } from '$lib/chat/run/local';
 	import type { RunInput } from '$lib/chat/run/types';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
@@ -195,10 +205,17 @@
 	onMount(async () => {
 		handleSessionChange();
 		messagesWindow?.addEventListener('scroll', handleScroll);
+		// The reason any of this exists: a turn that was still going when the page
+		// went away is picked back up here, transcript and all.
+		void reattach();
 	});
 
 	beforeNavigate((navigation) => {
-		if (editor.isCompletionInProgress) {
+		// Only a turn running in this tab is at risk from leaving it. One running in
+		// the server keeps going and is waiting when the conversation is opened
+		// again, so asking whether to abandon it would be asking about a danger that
+		// no longer exists.
+		if (editor.isCompletionInProgress && !activeRun) {
 			const userConfirmed = confirm($LL.areYouSureYouWantToLeave());
 			if (userConfirmed) {
 				stopCompletion();
@@ -207,6 +224,9 @@
 			navigation.cancel();
 			return;
 		}
+
+		// Leaving a server-side turn only stops watching it.
+		if (activeRun) stopFollowing?.();
 
 		// Only show confirmation when navigating outside of /sessions/ path
 		if (
@@ -410,9 +430,13 @@
 		// it ever had, and only what leaves for the model is cut back to the last
 		// summary. Without a marker this returns the array untouched, which is what
 		// every conversation written before compaction existed gets.
+		const onServer = $settingsStore.serverSideGeneration;
+
 		const input: RunInput = {
 			sessionId: session.id,
-			server: { kind: 'inline', server },
+			// Server mode names a connection and lets the instance resolve it, keys
+			// included. Local mode owns its connections, so it hands one over.
+			server: isServerMode ? { kind: 'id', id: server.id } : { kind: 'inline', server },
 			model: session.model.name,
 			options: session.options,
 			think: editor.thinking !== false,
@@ -430,7 +454,21 @@
 				search: searchAvailable,
 				fetch: $webFetchConfig.available
 			},
-			promptOverrides: $settingsStore.promptOverrides
+			promptOverrides: $settingsStore.promptOverrides,
+			// Only local mode sends these: they are the browser's own configuration,
+			// and in server mode the instance answers the same questions itself.
+			local: isServerMode
+				? undefined
+				: {
+						search: {
+							url: $searchConfig.url,
+							backend: $searchConfig.backend,
+							// The token is deliberately not in the view the interface reads: it
+							// is a credential, so it is taken from where it is stored.
+							token: $settingsStore.searchToken ?? ''
+						},
+						fetch: { maxPages: $webFetchConfig.maxPages, maxChars: $webFetchConfig.maxChars }
+					}
 		};
 
 		// Both are asked for before the turn goes out, because both are about the
@@ -445,13 +483,98 @@
 			compact: compactConfig.autoCompact && !isCompacting
 		};
 
-		await runLocally(
-			input,
-			session,
-			wants,
-			(event) => applyRunEvent(event, surface),
-			editor.abortController.signal
-		);
+		if (!onServer) {
+			await runLocally(
+				input,
+				session,
+				wants,
+				(event) => applyRunEvent(event, surface),
+				editor.abortController.signal
+			);
+			return;
+		}
+
+		// The server writes the title and the summary itself, so it has to be told
+		// which model to use for each: the browser is where that configuration lives.
+		if (wants.title && $chatDefaultsConfig.title.titleModel) {
+			input.title = {
+				model: $chatDefaultsConfig.title.titleModel,
+				serverId: $chatDefaultsConfig.title.titleServerId || session.model.serverId
+			};
+		}
+		if (wants.compact && contextUsage(session, compactConfig.compactThreshold).ratio >= 1) {
+			input.compact = {
+				model: compactConfig.compactModel || session.model.name,
+				serverId: compactConfig.compactServerId || session.model.serverId,
+				keepRecent: 0
+			};
+		}
+
+		try {
+			const run = await startRun(input);
+			await follow(run.id, 0);
+		} catch (error) {
+			// The handover itself failed, which is different from the turn failing:
+			// nothing has been started, so the tab runs it rather than losing the
+			// message. A server that is down should cost a promise, not an answer.
+			console.warn('Falling back to a local run:', error);
+			await runLocally(
+				input,
+				session,
+				wants,
+				(event) => applyRunEvent(event, surface),
+				editor.abortController.signal
+			);
+		}
+	}
+
+	/** The id of the run this page is watching, if it is watching one. */
+	let activeRun = $state<string | null>(null);
+	let stopFollowing: (() => void) | null = null;
+
+	/**
+	 * Watch a server-side run and apply what it sends.
+	 *
+	 * The same reducer the local path uses, from the same events, which is what
+	 * makes reattaching after a reload identical to having watched it all along.
+	 */
+	async function follow(runId: string, from: number) {
+		activeRun = runId;
+		rememberRun(session.id, runId);
+		editor.isCompletionInProgress = true;
+
+		const { done, stop } = followRun(runId, from, (event) => applyRunEvent(event, surface));
+		stopFollowing = stop;
+		try {
+			await done;
+		} finally {
+			stopFollowing = null;
+			activeRun = null;
+			forgetRun(session.id);
+		}
+	}
+
+	/**
+	 * Pick up a turn that was already running when this page loaded.
+	 *
+	 * The whole point of the exercise, and deliberately asked of the server rather
+	 * than trusted from what this browser remembers: the note in local storage is
+	 * only a hint that there may be something to collect.
+	 */
+	async function reattach() {
+		if (!$settingsStore.serverSideGeneration) return;
+		if (editor.isCompletionInProgress || activeRun) return;
+
+		const hint = rememberedRun(session.id);
+		const run = await runForSession(session.id).catch(() => null);
+		if (!run) {
+			if (hint) forgetRun(session.id);
+			return;
+		}
+
+		// From zero: the log is replayed in full, so what the tab missed and what it
+		// would have seen are the same thing.
+		await follow(run.id, 0);
 	}
 
 	/** Where a run's events land, whether the run is in this tab or in the server. */
@@ -554,6 +677,9 @@
 	 */
 	function stopCompletion() {
 		editor.abortController?.abort();
+		// A server-side turn does not hear an AbortController in this tab, so the
+		// stop has to travel. What it wrote so far still comes back as an ending.
+		if (activeRun) void cancelRun(activeRun);
 	}
 
 	function handleError(error: Error) {

@@ -10,7 +10,7 @@ import type {
 import type { Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
-import { ollamaBaseUrl } from './endpoint';
+import { ollamaBaseUrl, type EndpointOptions } from './endpoint';
 import {
 	stripThinkTags,
 	type ChatRequest as AppChatRequest,
@@ -85,8 +85,11 @@ export class OllamaStrategy implements ChatStrategy {
 	/** The same, for `tools`. */
 	private static toolSupport = new Map<string, boolean>();
 
-	constructor(private server: Server) {
-		this.base = ollamaBaseUrl(server);
+	constructor(
+		private server: Server,
+		options: EndpointOptions = {}
+	) {
+		this.base = ollamaBaseUrl(server, options);
 	}
 
 	/**

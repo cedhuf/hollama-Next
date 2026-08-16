@@ -269,6 +269,65 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
+  /api/runs:
+    get:
+      tags: [runs]
+      summary: The generation still running for a conversation, if there is one.
+      description: >
+        What a page asks on load so it can pick a turn back up. Returns null when
+        the conversation has nothing in flight and nothing recent to collect.
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: A run summary, or null. }
+    post:
+      tags: [runs]
+      summary: Start a generation that outlives the page that asked for it.
+      description: >
+        Returns as soon as the run has an identity, not when the model has
+        answered: the turn then belongs to the server, and the client follows it
+        over the event stream. Answers 409 with the existing run when the
+        conversation already has one going.
+      responses:
+        '201': { description: The run that was started. }
+        '409': { description: That conversation is already generating. }
+  /api/runs/{id}/cancel:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [runs]
+      summary: Stop a generation.
+      description: >
+        Whatever the model had already written still comes back through the
+        stream, as an ending rather than as nothing.
+      responses:
+        '200': { description: The run, now cancelled. }
+  /api/runs/{id}/events:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+      - name: from
+        in: query
+        required: false
+        schema: { type: integer }
+    get:
+      tags: [runs]
+      summary: Follow a generation, from wherever the client left off.
+      description: >
+        Server-sent events. Every event carries its sequence number, so a client
+        that reconnects sends Last-Event-ID and receives exactly what it missed;
+        `from=0` replays the whole log, which is what a freshly loaded page wants.
+        A finished run replays its log and closes.
+      responses:
+        '200': { description: A text/event-stream of run events. }
   /api/search:
     get:
       tags: [search]
