@@ -65,6 +65,20 @@ export async function cancelRun(runId: string): Promise<void> {
 	});
 }
 
+export interface FollowOptions {
+	/**
+	 * The last event that had already happened when the client asked.
+	 *
+	 * Everything up to and including it is history and is handed over marked as
+	 * such; everything after it is the turn still being written. The number comes
+	 * from the run's own summary, so the boundary is the server's, not a guess made
+	 * from how fast the events arrive.
+	 */
+	replayThrough?: number;
+	/** Called once the backlog has been delivered, and only if there was one. */
+	onCaughtUp?: () => void;
+}
+
 /**
  * Follow a run until it ends.
  *
@@ -75,7 +89,8 @@ export async function cancelRun(runId: string): Promise<void> {
 export function followRun(
 	runId: string,
 	from: number,
-	onEvent: (event: RunEvent) => void
+	onEvent: (event: RunEvent, replay: boolean) => void,
+	{ replayThrough = 0, onCaughtUp }: FollowOptions = {}
 ): { done: Promise<void>; stop: () => void } {
 	const source = new EventSource(`/api/runs/${runId}/events?from=${from}`);
 	let settle: () => void = () => {};
@@ -86,6 +101,8 @@ export function followRun(
 		settle();
 	};
 
+	let caughtUp = replayThrough === 0;
+
 	source.onmessage = (message) => {
 		let event: RunEvent;
 		try {
@@ -93,7 +110,16 @@ export function followRun(
 		} catch {
 			return;
 		}
-		onEvent(event);
+
+		const id = Number(message.lastEventId) || 0;
+		const replay = !caughtUp && id <= replayThrough;
+		onEvent(event, replay);
+
+		if (replay && id >= replayThrough) {
+			caughtUp = true;
+			onCaughtUp?.();
+		}
+
 		if (event.type === 'done' || event.type === 'error') close();
 	};
 

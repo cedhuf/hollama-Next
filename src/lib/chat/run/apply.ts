@@ -29,18 +29,38 @@ export interface RunSurface {
 	setCompacting?(active: boolean): void;
 }
 
-export function applyRunEvent(event: RunEvent, surface: RunSurface): void {
+export interface ApplyOptions {
+	/**
+	 * Whether this event already happened before anyone was watching.
+	 *
+	 * It changes nothing about what the event means, and everything about what is
+	 * worth doing while it is applied. A hundred fragments of a reply that was
+	 * finished minutes ago are handed over in a single flush: following each one to
+	 * the bottom of the conversation is a hundred answers to a question nobody
+	 * asked. The caller scrolls once, at the end, when it knows where the end is.
+	 */
+	replay?: boolean;
+}
+
+export function applyRunEvent(
+	event: RunEvent,
+	surface: RunSurface,
+	{ replay = false }: ApplyOptions = {}
+): void {
 	const { editor, session } = surface;
+	const progress = () => {
+		if (!replay) surface.onProgress?.();
+	};
 
 	switch (event.type) {
 		case 'content':
 			editor.completion = (editor.completion ?? '') + event.text;
-			surface.onProgress?.();
+			progress();
 			return;
 
 		case 'thinking':
 			editor.reasoning = (editor.reasoning ?? '') + event.text;
-			surface.onProgress?.();
+			progress();
 			return;
 
 		case 'round':
@@ -84,7 +104,7 @@ export function applyRunEvent(event: RunEvent, surface: RunSurface): void {
 			editor.reasoning = '';
 			editor.reasoningTrace = undefined;
 			surface.save();
-			surface.onProgress?.();
+			progress();
 			return;
 		}
 

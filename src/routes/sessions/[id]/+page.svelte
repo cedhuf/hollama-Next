@@ -582,17 +582,28 @@
 	 * The same reducer the local path uses, from the same events, which is what
 	 * makes reattaching after a reload identical to having watched it all along.
 	 */
-	async function follow(runId: string, from: number) {
+	async function follow(runId: string, from: number, replayThrough = 0) {
 		activeRun = runId;
 		runLocation = 'server';
 		rememberRun(session.id, runId);
 		editor.isCompletionInProgress = true;
 
 		let ended = false;
-		const { done, stop } = followRun(runId, from, (event) => {
-			if (event.type === 'done' || event.type === 'error') ended = true;
-			applyRunEvent(event, surface);
-		});
+		const { done, stop } = followRun(
+			runId,
+			from,
+			(event, replay) => {
+				if (event.type === 'done' || event.type === 'error') ended = true;
+				applyRunEvent(event, surface, { replay });
+			},
+			{
+				replayThrough,
+				// The backlog lands in one flush, so there is exactly one place the
+				// conversation should be: at the end of it. Following each fragment on
+				// the way would be answering a question nobody asked, a hundred times.
+				onCaughtUp: () => void scrollToBottom(true)
+			}
+		);
 		stopFollowing = stop;
 
 		try {
@@ -641,8 +652,11 @@
 		}
 
 		// From zero: the log is replayed in full, so what the tab missed and what it
-		// would have seen are the same thing.
-		await follow(run.id, 0);
+		// would have seen are the same thing. What the run had already written by the
+		// time it answered is history, and is applied as history rather than
+		// performed: on a local model at ten tokens a second, a reply worth leaving
+		// the room for is not worth watching a second time.
+		await follow(run.id, 0, run.lastEventId);
 	}
 
 	/** Where a run's events land, whether the run is in this tab or in the server. */
