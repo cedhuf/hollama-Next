@@ -986,10 +986,20 @@
 		     Its scrollbar gutter is reserved whether or not there is a scrollbar to
 		     put in it, because the two floating bars live inside this box: otherwise
 		     they would be a scrollbar narrower on a long conversation than on a short
-		     one, and would shift sideways the moment a reply made the page overflow. -->
+		     one, and would shift sideways the moment a reply made the page overflow.
+		     A no-op where scrollbars are drawn over the content and take no room, which
+		     is the case this now asks for.
+
+		     The scrollbar itself is the platform's, deliberately, where the rest of the
+		     app styles its own. Styling one at all is what opts an element out of the
+		     overlay behaviour macOS and iOS give it: any width, any colour, and the bar
+		     stops fading away and sits there for the length of the conversation. That
+		     trade is worth it on a code block, where a bar is how you learn the line
+		     runs past the edge. It is not worth it down the side of the thing you are
+		     reading. -->
 		<div class="relative flex min-h-0 flex-grow flex-col">
 			<div
-				class="session__history overflow-scrollbar flex flex-grow flex-col px-4 surface-pane lg:px-6 xl:px-8"
+				class="session__history flex flex-grow flex-col overflow-auto px-4 surface-pane lg:px-6 xl:px-8"
 				style="scrollbar-gutter: stable"
 				bind:this={messagesWindow}
 			>
