@@ -89,6 +89,31 @@ ramps on the top row, dark on the bottom._
 | ![A conversation](static/screenshots/mobile_conversation.png) | ![Your conversations](static/screenshots/mobile_sidebar.png) | ![The home screen](static/screenshots/mobile_home.png) |
 | ------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
 
+## Similar projects
+
+Llooma is not trying to be the biggest of these. It is meant to be small enough to read, to run in
+one container, and to have accounts only when you actually need them. If that is not what you are
+after, one of these probably is.
+
+- **[Hollama](https://github.com/fmaclen/hollama)** is what this is forked from: smaller still, no
+  accounts, no server. If you want one person, one browser, nothing else, start there. What we
+  changed is listed in [Changes from Hollama](https://llooma.eu/changes-from-hollama/).
+- **[hollama-spark](https://github.com/cwright814/hollama-spark)** is another fork of it, aimed at
+  running local models well.
+- **[OrionChat](https://github.com/EliasPereirah/OrionChat)** runs in the browser with no build
+  step, talks to many providers, and does things we do not: text to speech, speech to text, and
+  previewing HTML a model writes.
+- **[Open WebUI](https://github.com/open-webui/open-webui)**,
+  **[LibreChat](https://github.com/danny-avila/LibreChat)** and
+  **[Lobe Chat](https://github.com/lobehub/lobe-chat)** are the large ones. They do far more than
+  this: pipelines, plugin ecosystems, retrieval over your documents, whole admin surfaces. They also
+  ask more of you to run and to keep running.
+- **[AnythingLLM](https://github.com/Mintplex-Labs/anything-llm)** and
+  **[Jan](https://github.com/menloresearch/jan)** come at it from the desktop instead of the server.
+
+[every-chatgpt-gui](https://github.com/billmei/every-chatgpt-gui) keeps the exhaustive list, which
+is longer than anyone expects.
+
 ## License
 
 [MIT](LICENSE)
