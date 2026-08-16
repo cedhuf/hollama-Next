@@ -41,6 +41,7 @@
 
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
+	let allowUserStoreInstall = $state(true);
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
 	/** Until the first `load()` settles, the empty states below would be lies. */
@@ -130,6 +131,7 @@
 			]);
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
+			allowUserStoreInstall = config.allowUserStoreInstall ?? true;
 			searchSharing = config.searchSharing ?? 'off';
 			shareEnabled = searchSharing !== 'off';
 			sharedUrl = config.searchUrl ?? '';
@@ -261,6 +263,10 @@
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
 	}
 
+	async function toggleAllowUserStoreInstall() {
+		await api('/api/admin/config', 'PUT', { allowUserStoreInstall });
+	}
+
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
 	}
@@ -304,6 +310,14 @@
 			label={$LL.allowUserPersonas()}
 			bind:checked={allowUserPersonas}
 			onChange={toggleAllowUserPersonas}
+		/>
+		<!-- Two switches rather than one, because writing a persona and taking one
+		     are different things to allow. A curated instance may well want people
+		     installing from the store and authoring nothing. -->
+		<FieldCheckbox
+			label={$LL.allowUserStoreInstall()}
+			bind:checked={allowUserStoreInstall}
+			onChange={toggleAllowUserStoreInstall}
 		/>
 	</SettingsSection>
 

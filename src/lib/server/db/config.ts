@@ -36,6 +36,21 @@ export function setAllowUserPersonas(value: boolean): void {
 }
 
 /**
+ * Whether users may install from the persona store (default: true).
+ *
+ * Separate from `allowUserPersonas`, which is about writing one. An instance can
+ * reasonably want people to install from a curated store without being able to
+ * author their own, or the reverse, so the two are not one switch.
+ */
+export function allowUserStoreInstall(): boolean {
+	return getConfig('allowUserStoreInstall') !== 'false';
+}
+
+export function setAllowUserStoreInstall(value: boolean): void {
+	setConfig('allowUserStoreInstall', value ? 'true' : 'false');
+}
+
+/**
  * Where the persona store is read from.
  *
  * The instance's, not each person's: the server is what fetches it, so the

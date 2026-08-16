@@ -4,10 +4,12 @@ import { requireAdmin } from '$lib/server/api';
 import {
 	allowUserKeys,
 	allowUserPersonas,
+	allowUserStoreInstall,
 	getConfig,
 	personaStoreUrl,
 	setAllowUserKeys,
 	setAllowUserPersonas,
+	setAllowUserStoreInstall,
 	setConfig,
 	setPersonaStoreUrl
 } from '$lib/server/db/config';
@@ -18,6 +20,7 @@ export async function GET(event) {
 	return json({
 		allowUserKeys: allowUserKeys(),
 		allowUserPersonas: allowUserPersonas(),
+		allowUserStoreInstall: allowUserStoreInstall(),
 		personaStoreUrl: personaStoreUrl() ?? '',
 		searchUrl: getConfig('searchUrl') ?? '',
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
@@ -40,6 +43,9 @@ export async function PUT(event) {
 
 	if (typeof body?.allowUserKeys === 'boolean') setAllowUserKeys(body.allowUserKeys);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
+	if (typeof body?.allowUserStoreInstall === 'boolean') {
+		setAllowUserStoreInstall(body.allowUserStoreInstall);
+	}
 	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {

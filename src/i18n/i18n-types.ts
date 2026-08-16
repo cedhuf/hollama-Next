@@ -1304,6 +1304,22 @@ type RootTranslation = {
 	 */
 	personaStoreInstalled: string
 	/**
+	 * O​f​f​e​r​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	personaStoreShare: string
+	/**
+	 * S​t​o​p​ ​o​f​f​e​r​i​n​g​ ​i​t
+	 */
+	personaStoreUnshare: string
+	/**
+	 * I​n​s​t​a​l​l​i​n​g​ ​i​s​ ​t​u​r​n​e​d​ ​o​f​f​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.​ ​A​s​k​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
+	 */
+	personaStoreInstallDisabled: string
+	/**
+	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e
+	 */
+	allowUserStoreInstall: string
+	/**
 	 * R​e​f​r​e​s​h
 	 */
 	personaStoreRefresh: string
@@ -3473,6 +3489,22 @@ The completion in progress will stop
 	 * Installed
 	 */
 	personaStoreInstalled: () => LocalizedString
+	/**
+	 * Offer to everyone on this instance
+	 */
+	personaStoreShare: () => LocalizedString
+	/**
+	 * Stop offering it
+	 */
+	personaStoreUnshare: () => LocalizedString
+	/**
+	 * Installing is turned off on this instance. Ask your administrator.
+	 */
+	personaStoreInstallDisabled: () => LocalizedString
+	/**
+	 * Allow users to install from the persona store
+	 */
+	allowUserStoreInstall: () => LocalizedString
 	/**
 	 * Refresh
 	 */

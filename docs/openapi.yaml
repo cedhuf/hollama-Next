@@ -47,10 +47,33 @@ paths:
   /api/admin/personas:
     put:
       tags: [admin]
-      summary: TODO
-      x-status: todo
+      summary: Republish what an admin's library contributes to the shared set
+      description: >
+        Body is `{ shared, libraryIds }`. Only the personas whose ids are in
+        `libraryIds` are rewritten, so entries shared straight from the store,
+        which are in nobody's library, survive. A bare array is read as the older
+        form, where sharing and owning were the same thing.
       responses:
-        '200': { description: TODO }
+        '204': { description: Republished. }
+        '400': { description: No array of personas in the body. }
+    post:
+      tags: [admin]
+      summary: Offer one persona from the store, without installing it
+      responses:
+        '204': { description: Shared. }
+        '400': { description: The body is not a persona. }
+  /api/admin/personas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [admin]
+      summary: Stop offering one shared persona
+      description: Copies people have already installed are theirs and are not touched.
+      responses:
+        '204': { description: No longer shared. }
   /api/admin/servers:
     get:
       tags: [admin]

@@ -332,6 +332,11 @@ const fr = extendDictionary(en, {
 	personaStoreOfficial: 'Officiel',
 	personaStoreCommunity: 'Communauté',
 	personaStoreInstalled: 'Installé',
+	personaStoreShare: 'Proposer à tout le monde sur cette instance',
+	personaStoreUnshare: 'Ne plus le proposer',
+	personaStoreInstallDisabled:
+		"L'installation est désactivée sur cette instance. Contactez votre administrateur.",
+	allowUserStoreInstall: 'Autoriser les utilisateurs à installer depuis la boutique',
 	personaStoreRefresh: 'Actualiser',
 	personaStoreInstallFailed: "Ce persona n'a pas pu être installé",
 	personaStoreUnreachable: 'La boutique de personas est injoignable',

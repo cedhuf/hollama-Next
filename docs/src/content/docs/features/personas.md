@@ -94,13 +94,34 @@ own count, under _Settings → Interface → Home screen_.
 
 ## Sharing them (server mode)
 
-An admin can mark a persona **shared**. It then appears for every user in the _Persona store_,
-labelled _Shared by admin_ and alongside the public ones, with an _Install_ action that makes an
-editable personal copy. The copy remembers what it came from, so the original stops being offered
-twice.
+An admin offers a persona to everyone on the instance in one of two ways:
+
+- **From their own library**, by marking it _shared_ in its editor. This is the persona they wrote.
+- **From the store**, with the _Offer to everyone_ button on a card. This does **not** install it
+  for the admin: sharing something and owning it are different acts, and an admin curating what
+  their instance offers should not have to collect it all first.
+
+Either way it appears for every user in the _Persona store_, labelled _Shared by admin_ and
+alongside the public ones, with an _Install_ action that makes an editable personal copy. The copy
+remembers what it came from, so the original stops being offered twice.
 
 Installing copies. It does not subscribe: an admin editing the shared persona afterwards does not
-reach into the copies people are already talking to.
+reach into the copies people are already talking to, and un-sharing one does not take back the
+copies people already have.
 
-An admin can also stop users creating personas of their own, under
-_Settings → Admin → User permissions_. Shared personas stay installable either way.
+A shared persona does not carry attached knowledge. Its documents live in the library it was shared
+from, and their ids mean nothing in anyone else's. Share a bundle file if the documents matter.
+
+### What users are allowed
+
+Two switches under _Settings → Admin → User permissions_, deliberately separate, because writing a
+persona and taking one are different things to allow:
+
+| Switch                                | Default | What it governs                         |
+| ------------------------------------- | ------- | --------------------------------------- |
+| Allow users to create personas        | on      | Writing one of their own in the Library |
+| Allow users to install from the store | on      | Taking one from the public store        |
+
+With installing turned off, users still **see** the store: the cards are there, disabled, with a
+note pointing at their administrator. A store that silently emptied itself would just look broken.
+Personas the admin has shared stay installable either way.

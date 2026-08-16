@@ -221,18 +221,35 @@ export function installPersonaBundle(bundle: PersonaBundle, source: PersonaSourc
 		knowledgeIds.push(item.id);
 	}
 
+	const persona = personaFromBundle(bundle, source);
+	if (knowledgeIds.length) persona.knowledgeIds = knowledgeIds;
+
+	savePersona(persona);
+	return persona;
+}
+
+/**
+ * The persona a bundle describes, without putting it anywhere.
+ *
+ * For the one case that is not an install: an admin offering a persona from the
+ * store to everyone on their instance, without adding it to their own library
+ * first. Sharing and owning stopped being the same act, so building and saving
+ * had to stop being the same call.
+ *
+ * No documents, because there is nowhere to put them: a shared persona's
+ * knowledge ids would name documents in the admin's store, which mean nothing to
+ * anyone else. Already true of everything shared from a library, and the reason
+ * a bundle carries its documents in the first place.
+ */
+export function personaFromBundle(bundle: PersonaBundle, source: PersonaSource): Persona {
 	const { avatar, ...authored } = bundle.persona;
-	const persona: Persona = {
+	return {
 		...newPersona(),
 		...authored,
 		...avatarFields(avatar, bundle.persona.name),
 		modelName: defaultModelName(),
-		knowledgeIds: knowledgeIds.length ? knowledgeIds : undefined,
 		source
 	};
-
-	savePersona(persona);
-	return persona;
 }
 
 /**

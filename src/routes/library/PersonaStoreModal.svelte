@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Download, LoaderCircle, RefreshCw, Search, X } from '@lucide/svelte';
+	import { Check, Download, LoaderCircle, Lock, RefreshCw, Search, Users, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -7,10 +7,10 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { personasStore } from '$lib/localStorage';
-	import { avatarFields, installPersonaBundle } from '$lib/personaBundle';
+	import { avatarFields, installPersonaBundle, personaFromBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
 	import { installPersona, personaOrigin, type Persona } from '$lib/personas';
-	import { personasConfig } from '$lib/personasConfig';
+	import { personasConfig, sharePersona, unsharePersona } from '$lib/personasConfig';
 	import type { CatalogEntry } from '$lib/personaStore';
 
 	interface Props {
@@ -43,6 +43,13 @@
 		/** Already in the library, so the card says so instead of offering it again. */
 		installed: boolean;
 		install: () => Promise<void>;
+		/**
+		 * Offering it to everyone on the instance, for an admin, and only for the
+		 * ones that came from the store: what is already shared is being offered by
+		 * definition, and what an admin owns is shared from its own editor.
+		 */
+		shared?: boolean;
+		toggleShare?: () => Promise<void>;
 	}
 
 	let query = $state('');
@@ -50,6 +57,7 @@
 	let locale = $state('all');
 	/** The one being fetched, so only its own button spins. */
 	let installing = $state<string | null>(null);
+	let sharing = $state<string | null>(null);
 
 	// Opening is what asks for the listing, not mounting: the modal lives on the
 	// Library page whether or not anyone opens it, and a page load is not a reason
@@ -100,6 +108,19 @@
 	 * than a persona id: two of them can name the same persona, one shared by the
 	 * instance and one in the store, and both would have spun.
 	 */
+	async function share(offer: Offer) {
+		sharing = offer.key;
+		try {
+			await offer.toggleShare?.();
+		} catch (error) {
+			toast.error($LL.requestFailed(), {
+				description: error instanceof Error ? error.message : undefined
+			});
+		} finally {
+			sharing = null;
+		}
+	}
+
 	async function run(offer: Offer) {
 		installing = offer.key;
 		try {
@@ -111,6 +132,28 @@
 		} finally {
 			installing = null;
 		}
+	}
+
+	/** What the instance already offers, by the store id it was taken from. */
+	const sharedIds = $derived(
+		new Map(
+			$personasConfig.shared
+				.map((persona) => [personaOrigin(persona), persona.id] as const)
+				.filter(([from]) => !!from) as [string, string][]
+		)
+	);
+
+	async function toggleShare(entry: CatalogEntry) {
+		const already = sharedIds.get(entry.id);
+		if (already) return unsharePersona(already);
+		const bundle = await fetchBundle(entry);
+		await sharePersona(
+			personaFromBundle(bundle, {
+				origin: entry.origin,
+				id: entry.id,
+				revision: entry.revision
+			})
+		);
 	}
 
 	const fromCatalog = $derived(
@@ -125,7 +168,9 @@
 				author: entry.author,
 				origin: entry.origin,
 				installed: isInstalled(entry.id, entry.name),
-				install: () => installEntry(entry)
+				install: () => installEntry(entry),
+				shared: $personasConfig.canShare ? sharedIds.has(entry.id) : undefined,
+				toggleShare: $personasConfig.canShare ? () => toggleShare(entry) : undefined
 			})
 		)
 	);
@@ -306,28 +351,63 @@
 								</div>
 							{/if}
 
-							{#if offer.installed}
-								<span
-									class="mt-auto flex items-center justify-center gap-1.5 rounded-lg border border-transparent px-2 py-1.5 text-xs text-muted"
-								>
-									<Check class="h-3.5 w-3.5" />
-									{$LL.personaStoreInstalled()}
-								</span>
-							{:else}
-								<button
-									type="button"
-									disabled={installing !== null}
-									onclick={() => run(offer)}
-									class="mt-auto flex items-center justify-center gap-1.5 rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active disabled:opacity-50"
-								>
-									{#if installing === offer.key}
-										<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-									{:else}
-										<Download class="h-3.5 w-3.5" />
-									{/if}
-									{$LL.install()}
-								</button>
-							{/if}
+							<!-- The row of actions, and on a card this narrow there is room for two
+							     at most: taking it, and for an admin, handing it out. -->
+							<div class="mt-auto flex items-stretch gap-1.5">
+								{#if offer.installed}
+									<span
+										class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted"
+									>
+										<Check class="h-3.5 w-3.5" />
+										{$LL.personaStoreInstalled()}
+									</span>
+								{:else if !$personasConfig.canInstall}
+									<!-- Shown rather than hidden. Someone who cannot install still benefits
+									     from seeing what exists, and from being told who to ask; a store
+									     that silently loses most of its contents just looks broken. -->
+									<span
+										class="flex flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted opacity-50"
+										title={$LL.personaStoreInstallDisabled()}
+									>
+										<Lock class="h-3.5 w-3.5" />
+										{$LL.install()}
+									</span>
+								{:else}
+									<button
+										type="button"
+										disabled={installing !== null}
+										onclick={() => run(offer)}
+										class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active disabled:opacity-50"
+									>
+										{#if installing === offer.key}
+											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+										{:else}
+											<Download class="h-3.5 w-3.5" />
+										{/if}
+										{$LL.install()}
+									</button>
+								{/if}
+
+								{#if offer.toggleShare}
+									<button
+										type="button"
+										disabled={sharing !== null}
+										onclick={() => share(offer)}
+										aria-pressed={offer.shared}
+										title={offer.shared ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
+										aria-label={offer.shared ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
+										class="flex shrink-0 items-center justify-center rounded-lg border px-2 py-1.5 transition-colors disabled:opacity-50 {offer.shared
+											? 'border-accent bg-accent/10 text-accent'
+											: 'border-shade-3 text-muted hover:border-accent hover:text-active'}"
+									>
+										{#if sharing === offer.key}
+											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+										{:else}
+											<Users class="h-3.5 w-3.5" />
+										{/if}
+									</button>
+								{/if}
+							</div>
 						</div>
 					{/each}
 				</div>
