@@ -11,8 +11,7 @@
 		Store,
 		Trash2,
 		Upload,
-		UserRound,
-		Users
+		UserRound
 	} from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -337,15 +336,9 @@
 										: `${sourceLabel(persona)}, ${$LL.personaStateEdited()}`}
 								</span>
 							{/if}
-							{#if persona.shared}
-								<span
-									class="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent"
-									title={$LL.sharedWithUsers()}
-								>
-									<Users class="h-3 w-3" />
-									{$LL.shared()}
-								</span>
-							{/if}
+							<!-- Nothing about sharing here. What an instance offers is decided and
+							     listed in the store, so repeating it on a card in the Library was a
+							     second place to read a state that could only be changed elsewhere. -->
 						{/snippet}
 
 						{#snippet actions()}

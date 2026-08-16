@@ -21,7 +21,7 @@
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
 	import { contentDigest, personaAuthored } from '$lib/personaDigest';
 	import { installPersona, personaOrigin, savePersona, type Persona } from '$lib/personas';
-	import { personasConfig, relayCatalogPersona } from '$lib/personasConfig';
+	import { personasConfig, publishSharedPersonas, relayCatalogPersona } from '$lib/personasConfig';
 	import { offeredVersion, personaState, type PersonaState } from '$lib/personaState';
 	import type { CatalogEntry } from '$lib/personaStore';
 
@@ -73,6 +73,22 @@
 		toggleRelay?: () => Promise<void>;
 	}
 
+	/**
+	 * What an admin is looking at, and the whole of the curation interface.
+	 *
+	 * Sharing used to be two gestures in two places, a checkbox in a persona's
+	 * editor and a button on a store card, with nowhere at all that listed the
+	 * result. So nobody could answer "what am I actually offering?", which is the
+	 * only question an administrator has.
+	 *
+	 * One place now, with three views: the store to browse, their own personas to
+	 * hand out, and everything currently offered. The same button in all three.
+	 *
+	 * A user sees none of this. Their store is one list, composed for them.
+	 */
+	type View = 'store' | 'mine' | 'shared';
+
+	let view = $state<View>('store');
 	let query = $state('');
 	let origin = $state<Origin | 'all'>('all');
 	/** The card being worked on, so only its own button spins. */
@@ -116,8 +132,20 @@
 		return installedIds.get(id) ?? byName.get(name.trim().toLowerCase());
 	}
 
-	/** The store personas this instance relays, so a card can say so and untick it. */
+	/** The store personas this instance relays, so a card can untick it. */
 	const relayed = $derived(new Set($personasConfig.sharedFromStore));
+
+	/**
+	 * Offer one of your own personas, or stop.
+	 *
+	 * The flag lives on the persona, as it always did; what changed is where it is
+	 * reached from. It was a checkbox buried in an editor, which is why an admin
+	 * had to remember which of their personas they had ticked.
+	 */
+	async function toggleOwn(persona: Persona) {
+		savePersona({ ...persona, shared: !persona.shared });
+		await publishSharedPersonas();
+	}
 
 	async function installEntry(entry: CatalogEntry) {
 		const bundle = await fetchBundle(entry);
@@ -249,7 +277,58 @@
 		)
 	);
 
-	const offers = $derived([...fromAdmin, ...fromCatalog]);
+	/**
+	 * The admin's own personas, offered or not.
+	 *
+	 * Untouched installs are left out on purpose: handing out a byte-identical copy
+	 * of a store persona is worse than relaying it, since the copy freezes and its
+	 * takers never see the next revision. Those are already in the store view, with
+	 * the same button, doing the better thing.
+	 */
+	const mine = $derived(
+		($personasStore ?? [])
+			.filter((persona) => personaState(persona, publishedDigest(persona)) !== 'clean')
+			.map(
+				(persona): Offer => ({
+					key: `mine:${persona.id}`,
+					name: persona.name,
+					tagline: persona.tagline,
+					avatar: {
+						avatarColor: persona.avatarColor,
+						avatarGlyph: persona.avatarGlyph,
+						avatarImage: persona.avatarImage
+					},
+					tags: persona.tags ?? [],
+					origin: 'admin',
+					install: async () => {},
+					relayed: persona.shared,
+					toggleRelay: () => toggleOwn(persona),
+					version: offeredVersion(persona, entries)
+				})
+			)
+	);
+
+	const publishedDigest = (persona: Persona) =>
+		entries.find((entry) => entry.id === personaOrigin(persona))?.contentDigest;
+
+	/** Everything this instance currently offers, whichever way it got there. */
+	const offered = $derived([...fromAdmin, ...fromCatalog.filter((offer) => offer.relayed)]);
+
+	/**
+	 * What the grid shows.
+	 *
+	 * An admin picks a view. Everyone else gets one list, composed for them: the
+	 * catalogue their instance allows, plus whatever it offers on top.
+	 */
+	const offers = $derived(
+		!$personasConfig.canShare
+			? [...fromAdmin, ...fromCatalog]
+			: view === 'mine'
+				? mine
+				: view === 'shared'
+					? offered
+					: fromCatalog
+	);
 
 	/**
 	 * Only offered when there is something to choose between.
@@ -366,7 +445,22 @@
 
 			<div class="mt-2 flex items-start gap-2">
 				<div class="flex min-w-0 flex-1 flex-wrap gap-1.5">
-					{#if origins.length > 1}
+					<!-- An admin gets views, everyone else gets filters. They are not the
+					     same control wearing two hats: a view decides what the page is
+					     about, a filter narrows what is already there. -->
+					{#if $personasConfig.canShare}
+						{@render chip($LL.personaStoreViewStore(), view === 'store', () => (view = 'store'))}
+						{@render chip(
+							`${$LL.personaStoreViewMine()}${mine.length ? ` · ${mine.length}` : ''}`,
+							view === 'mine',
+							() => (view = 'mine')
+						)}
+						{@render chip(
+							`${$LL.personaStoreViewShared()}${offered.length ? ` · ${offered.length}` : ''}`,
+							view === 'shared',
+							() => (view = 'shared')
+						)}
+					{:else if origins.length > 1}
 						{@render chip($LL.personaStoreAll(), origin === 'all', () => (origin = 'all'))}
 						{#each origins as value (value)}
 							{@render chip(originLabel(value), origin === value, () => (origin = value))}
@@ -417,7 +511,17 @@
 					</button>
 				</div>
 			{:else if filtered.length === 0}
-				<p class="pt-8 text-center text-sm text-muted">{$LL.noMatches()}</p>
+				<p class="pt-8 text-center text-sm text-muted">
+					{#if query.trim()}
+						{$LL.noMatches()}
+					{:else if view === 'shared'}
+						{$LL.personaStoreNothingOffered()}
+					{:else if view === 'mine'}
+						{$LL.personaStoreNothingMine()}
+					{:else}
+						{$LL.noMatches()}
+					{/if}
+				</p>
 			{:else}
 				<div
 					class={$settingsStore.personaStoreLayout === 'list'
@@ -446,78 +550,91 @@
 								>
 									{originLabel(offer.origin)}
 								</span>
-								{#if offer.relayed}
-									<span
-										class="rounded-full bg-positive/10 px-2 py-0.5 text-[10px] font-medium text-positive"
-										title={$LL.personaStoreRelayed()}
-									>
-										{$LL.personaStoreRelayedShort()}
-									</span>
-								{/if}
 							{/snippet}
 
 							{#snippet actions()}
-								<!-- Four things "installed" can mean once a persona can be edited and
-								     the store can publish again, and the card says which. Only the two
-								     that have moved on carry a button, because the other two have
-								     nothing to do. -->
-								{#if offer.update}
-									<button
-										type="button"
-										disabled={installing !== null}
-										onclick={() => run(offer, true)}
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
-									>
-										{#if installing === offer.key}
-											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-										{:else}
-											<ArrowDownToLine class="h-3.5 w-3.5" />
-										{/if}
-										{$LL.personaStoreUpdate()}
-									</button>
-								{:else if offer.state}
-									<span
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs text-muted"
-									>
-										<Check class="h-3.5 w-3.5" />
-										{offer.state === 'edited'
-											? $LL.personaStoreInstalledEdited()
-											: $LL.personaStoreInstalled()}
-									</span>
-								{:else}
-									<button
-										type="button"
-										disabled={installing !== null}
-										onclick={() => run(offer)}
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active disabled:opacity-50"
-									>
-										{#if installing === offer.key}
-											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-										{:else}
-											<Download class="h-3.5 w-3.5" />
-										{/if}
-										{$LL.install()}
-									</button>
-								{/if}
-
-								{#if offer.toggleRelay}
+								<!-- In "my personas" there is nothing to install: it is already
+								     yours, and the only control that matters is the one that hands
+								     it out. So it takes the whole footer and says what it does in
+								     words rather than in an icon. -->
+								{#if view === 'mine'}
 									<button
 										type="button"
 										disabled={relaying !== null}
 										onclick={() => relay(offer)}
 										aria-pressed={offer.relayed}
-										title={offer.relayed ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
-										aria-label={offer.relayed ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
-										class="flex shrink-0 items-center justify-center rounded-lg border px-2 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
-											? 'border-accent bg-accent/10 text-accent'
-											: 'border-shade-3 text-muted hover:border-accent hover:text-active'}"
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs transition-colors disabled:opacity-50 {offer.relayed
+											? 'bg-accent/10 text-accent hover:bg-accent/20'
+											: 'text-muted hover:bg-shade-2 hover:text-active'}"
 									>
 										{#if relaying === offer.key}
 											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
 										{:else}
 											<Users class="h-3.5 w-3.5" />
 										{/if}
+										{offer.relayed ? $LL.personaStoreOffered() : $LL.personaStoreOffer()}
 									</button>
+								{:else}
+									{#if offer.update}
+										<button
+											type="button"
+											disabled={installing !== null}
+											onclick={() => run(offer, true)}
+											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
+										>
+											{#if installing === offer.key}
+												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+											{:else}
+												<ArrowDownToLine class="h-3.5 w-3.5" />
+											{/if}
+											{$LL.personaStoreUpdate()}
+										</button>
+									{:else if offer.state}
+										<span
+											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
+										>
+											<Check class="h-3.5 w-3.5" />
+											{offer.state === 'edited'
+												? $LL.personaStoreInstalledEdited()
+												: $LL.personaStoreInstalled()}
+										</span>
+									{:else}
+										<button
+											type="button"
+											disabled={installing !== null}
+											onclick={() => run(offer)}
+											class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+										>
+											{#if installing === offer.key}
+												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+											{:else}
+												<Download class="h-3.5 w-3.5" />
+											{/if}
+											{$LL.install()}
+										</button>
+									{/if}
+
+									{#if offer.toggleRelay}
+										<button
+											type="button"
+											disabled={relaying !== null}
+											onclick={() => relay(offer)}
+											aria-pressed={offer.relayed}
+											title={offer.relayed ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
+											aria-label={offer.relayed
+												? $LL.personaStoreUnshare()
+												: $LL.personaStoreShare()}
+											class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
+												? 'bg-accent/10 text-accent hover:bg-accent/20'
+												: 'text-muted hover:bg-shade-2 hover:text-active'}"
+										>
+											{#if relaying === offer.key}
+												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+											{:else}
+												<Users class="h-3.5 w-3.5" />
+											{/if}
+										</button>
+									{/if}
 								{/if}
 							{/snippet}
 						</PersonaCard>

@@ -3,7 +3,6 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
-	import { env } from '$env/dynamic/public';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Modal from '$lib/components/Modal.svelte';
@@ -19,7 +18,6 @@
 		type Persona
 	} from '$lib/personas';
 	import { publishSharedPersonas } from '$lib/personasConfig';
-	import { currentRole } from '$lib/stores/auth';
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
@@ -33,16 +31,10 @@
 
 	const initials = $derived(personaInitials(persona.name));
 	const attached = $derived(persona.knowledgeIds ?? []);
-	const canShare = $derived(env.PUBLIC_MODE === 'server' && $currentRole === 'admin');
 	/** What an empty language field means, spelled out where it is left empty. */
 	const interfaceLanguage = $derived(
 		LANGUAGE_LABELS[$settingsStore.userLanguage as keyof typeof LANGUAGE_LABELS] ?? 'English'
 	);
-
-	function onShareChange() {
-		persist();
-		void publishSharedPersonas();
-	}
 
 	/**
 	 * A shared persona that has been edited has to be republished.
@@ -218,13 +210,11 @@
 						bind:checked={persona.webSearch}
 						onChange={persist}
 					/>
-					{#if canShare}
-						<FieldCheckbox
-							label="Share with users"
-							bind:checked={persona.shared}
-							onChange={onShareChange}
-						/>
-					{/if}
+					<!-- No share switch here any more. Offering a persona to an instance is
+					     done in the store, in one place, beside the button that offers the
+					     store's own and beside the list of what is currently offered. A
+					     checkbox buried in an editor meant an admin had to remember which of
+					     their personas they had ticked, with nowhere to go and look. -->
 				</SettingsSection>
 
 				{#if $knowledgeStore.length > 0}

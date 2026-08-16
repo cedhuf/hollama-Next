@@ -162,28 +162,36 @@ own count, under _Settings → Interface → Home screen_.
 
 ## Sharing them (server mode)
 
-An admin offers a persona to everyone on the instance in two genuinely different ways, and the
-difference is worth knowing.
+All of it happens in the store, which for an admin has three views:
 
-**Sharing their own.** Mark a persona _shared_ in its editor. Users get a copy of it, labelled
-_Shared by admin_. This is the one for a persona they wrote, and equally for one they installed from
-the store and then rewrote: it is theirs now, and the store's original goes on being listed beside
-it.
+| View            | What it holds                                                     |
+| --------------- | ----------------------------------------------------------------- |
+| **Store**       | The public catalogue, to browse and to relay                      |
+| **My personas** | The ones they wrote, and the ones they installed and then changed |
+| **Offered**     | Everything the instance currently offers, whichever way           |
 
-**Relaying one from the store.** The _Offer to everyone_ button on a store card. Nothing is
-installed and nothing is copied: what is recorded is the store's id, so the card stays one card,
-keeps its _Official_ badge and gains an _offered_ one, and what users install is the store's own
-bundle. A later revision reaches them the same way it reaches everyone else.
+One button in all three, and one list that answers "what am I actually offering?". There is no share
+switch in a persona's editor any more: a checkbox buried there meant remembering which personas had
+been ticked, with nowhere to go and look.
 
-Relaying costs the admin nothing: their library does not gain a persona they never wanted, and the
-catalogue does not gain a second face with the same name.
+Underneath, the two cases behave differently, and the difference is worth knowing.
 
-Editing a shared persona republishes it, so what the store offers is what the admin currently has,
-not a photograph taken the day they ticked the box. Deleting it stops offering it.
+**Their own persona** is handed out as a copy. Editing it republishes, so what the store offers is
+what they currently have rather than a photograph taken the day they first offered it. Deleting it
+stops offering it.
 
-Installing still copies, and does not subscribe: an admin editing the shared persona afterwards does
-not reach into the copies people are already talking to, and un-sharing one does not take back the
-copies people already have. What it does instead is **offer** the newer version, in the store, as an
+**A store persona** is handed out as a reference. Nothing is installed and nothing is copied: what
+is recorded is the store's id, so the catalogue keeps listing it once, and what users install is the
+store's own bundle, later revisions included. It costs the admin nothing: their library does not
+gain a persona they never wanted.
+
+Which is why _My personas_ leaves out installs nobody has touched. Handing out a byte-identical copy
+of a store persona freezes it for whoever takes it; relaying does the same job better, and those are
+already in the store view with the same button.
+
+Installing copies, either way, and does not subscribe: an admin editing what they offer does not
+reach into the copies people are already talking to, and withdrawing something does not take back
+the copies people have. What it does instead is **offer** the newer version, in the store, as an
 update you take or leave, exactly as a store revision is offered.
 
 A persona shared **from a library** does not carry its attached knowledge: the documents live in

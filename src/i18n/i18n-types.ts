@@ -1260,10 +1260,6 @@ type RootTranslation = {
 	 */
 	librarySubtitle: string
 	/**
-	 * S​h​a​r​e​d​ ​w​i​t​h​ ​u​s​e​r​s
-	 */
-	sharedWithUsers: string
-	/**
 	 * S​h​a​r​e​d
 	 */
 	shared: string
@@ -1292,6 +1288,34 @@ type RootTranslation = {
 	 */
 	personaStoreAll: string
 	/**
+	 * S​t​o​r​e
+	 */
+	personaStoreViewStore: string
+	/**
+	 * M​y​ ​p​e​r​s​o​n​a​s
+	 */
+	personaStoreViewMine: string
+	/**
+	 * O​f​f​e​r​e​d
+	 */
+	personaStoreViewShared: string
+	/**
+	 * O​f​f​e​r
+	 */
+	personaStoreOffer: string
+	/**
+	 * O​f​f​e​r​e​d
+	 */
+	personaStoreOffered: string
+	/**
+	 * Y​o​u​ ​a​r​e​ ​n​o​t​ ​o​f​f​e​r​i​n​g​ ​a​n​y​t​h​i​n​g​ ​y​e​t​.
+	 */
+	personaStoreNothingOffered: string
+	/**
+	 * N​o​t​h​i​n​g​ ​h​e​r​e​ ​y​e​t​.​ ​W​r​i​t​e​ ​o​n​e​,​ ​o​r​ ​e​d​i​t​ ​o​n​e​ ​y​o​u​ ​i​n​s​t​a​l​l​e​d​.
+	 */
+	personaStoreNothingMine: string
+	/**
 	 * O​f​f​i​c​i​a​l
 	 */
 	personaStoreOfficial: string
@@ -1311,14 +1335,6 @@ type RootTranslation = {
 	 * L​i​s​t
 	 */
 	personaStoreListView: string
-	/**
-	 * O​f​f​e​r​e​d​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
-	 */
-	personaStoreRelayed: string
-	/**
-	 * o​f​f​e​r​e​d
-	 */
-	personaStoreRelayedShort: string
 	/**
 	 * C​r​e​a​t​e​ ​a​ ​p​e​r​s​o​n​a
 	 */
@@ -3532,10 +3548,6 @@ The completion in progress will stop
 	 */
 	librarySubtitle: () => LocalizedString
 	/**
-	 * Shared with users
-	 */
-	sharedWithUsers: () => LocalizedString
-	/**
 	 * Shared
 	 */
 	shared: () => LocalizedString
@@ -3564,6 +3576,34 @@ The completion in progress will stop
 	 */
 	personaStoreAll: () => LocalizedString
 	/**
+	 * Store
+	 */
+	personaStoreViewStore: () => LocalizedString
+	/**
+	 * My personas
+	 */
+	personaStoreViewMine: () => LocalizedString
+	/**
+	 * Offered
+	 */
+	personaStoreViewShared: () => LocalizedString
+	/**
+	 * Offer
+	 */
+	personaStoreOffer: () => LocalizedString
+	/**
+	 * Offered
+	 */
+	personaStoreOffered: () => LocalizedString
+	/**
+	 * You are not offering anything yet.
+	 */
+	personaStoreNothingOffered: () => LocalizedString
+	/**
+	 * Nothing here yet. Write one, or edit one you installed.
+	 */
+	personaStoreNothingMine: () => LocalizedString
+	/**
 	 * Official
 	 */
 	personaStoreOfficial: () => LocalizedString
@@ -3583,14 +3623,6 @@ The completion in progress will stop
 	 * List
 	 */
 	personaStoreListView: () => LocalizedString
-	/**
-	 * Offered to everyone on this instance
-	 */
-	personaStoreRelayed: () => LocalizedString
-	/**
-	 * offered
-	 */
-	personaStoreRelayedShort: () => LocalizedString
 	/**
 	 * Create a persona
 	 */
