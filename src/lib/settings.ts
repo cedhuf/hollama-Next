@@ -107,6 +107,8 @@ export interface Settings {
 	 * relative to this address.
 	 */
 	personaStoreUrl: string;
+	/** How the persona store draws its entries: cards to browse, rows to scan. */
+	personaStoreLayout: 'grid' | 'list';
 	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
 	knowledgeCollections: KnowledgeCollection[];
 	/** Ids of the collections folded shut in the Library, so the page opens as it was left. */
@@ -243,6 +245,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	promptOverrides: {},
 	systemPrompts: { global: '', perModel: {} },
 	personaStoreUrl: '',
+	personaStoreLayout: 'grid',
 	knowledgeCollections: [],
 	collapsedCollections: [],
 	homeShowHeader: true,

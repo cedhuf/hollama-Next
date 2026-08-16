@@ -1304,6 +1304,26 @@ type RootTranslation = {
 	 */
 	personaStoreInstalled: string
 	/**
+	 * C​a​r​d​s
+	 */
+	personaStoreGridView: string
+	/**
+	 * L​i​s​t
+	 */
+	personaStoreListView: string
+	/**
+	 * O​f​f​e​r​e​d​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	personaStoreRelayed: string
+	/**
+	 * o​f​f​e​r​e​d
+	 */
+	personaStoreRelayedShort: string
+	/**
+	 * C​r​e​a​t​e​ ​a​ ​p​e​r​s​o​n​a
+	 */
+	personaStoreCreate: string
+	/**
 	 * O​f​f​e​r​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
 	 */
 	personaStoreShare: string
@@ -1316,9 +1336,13 @@ type RootTranslation = {
 	 */
 	personaStoreInstallDisabled: string
 	/**
-	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e
+	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​t​h​e​ ​p​u​b​l​i​c​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e
 	 */
 	allowUserStoreInstall: string
+	/**
+	 * G​o​v​e​r​n​s​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​ ​o​n​l​y​.​ ​P​e​r​s​o​n​a​s​ ​y​o​u​ ​s​h​a​r​e​,​ ​a​n​d​ ​t​h​e​ ​o​n​e​s​ ​y​o​u​ ​o​f​f​e​r​ ​f​r​o​m​ ​t​h​e​ ​s​t​o​r​e​,​ ​s​t​a​y​ ​i​n​s​t​a​l​l​a​b​l​e​ ​e​i​t​h​e​r​ ​w​a​y​.​ ​T​u​r​n​e​d​ ​o​f​f​,​ ​u​s​e​r​s​ ​g​e​t​ ​e​x​a​c​t​l​y​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r​ ​t​h​e​m​ ​a​n​d​ ​n​o​t​h​i​n​g​ ​e​l​s​e​.
+	 */
+	allowUserStoreInstallHelp: string
 	/**
 	 * R​e​f​r​e​s​h
 	 */
@@ -3490,6 +3514,26 @@ The completion in progress will stop
 	 */
 	personaStoreInstalled: () => LocalizedString
 	/**
+	 * Cards
+	 */
+	personaStoreGridView: () => LocalizedString
+	/**
+	 * List
+	 */
+	personaStoreListView: () => LocalizedString
+	/**
+	 * Offered to everyone on this instance
+	 */
+	personaStoreRelayed: () => LocalizedString
+	/**
+	 * offered
+	 */
+	personaStoreRelayedShort: () => LocalizedString
+	/**
+	 * Create a persona
+	 */
+	personaStoreCreate: () => LocalizedString
+	/**
 	 * Offer to everyone on this instance
 	 */
 	personaStoreShare: () => LocalizedString
@@ -3502,9 +3546,13 @@ The completion in progress will stop
 	 */
 	personaStoreInstallDisabled: () => LocalizedString
 	/**
-	 * Allow users to install from the persona store
+	 * Allow users to install from the public persona store
 	 */
 	allowUserStoreInstall: () => LocalizedString
+	/**
+	 * Governs the public store only. Personas you share, and the ones you offer from the store, stay installable either way. Turned off, users get exactly what you offer them and nothing else.
+	 */
+	allowUserStoreInstallHelp: () => LocalizedString
 	/**
 	 * Refresh
 	 */

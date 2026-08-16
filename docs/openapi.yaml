@@ -47,33 +47,36 @@ paths:
   /api/admin/personas:
     put:
       tags: [admin]
-      summary: Republish what an admin's library contributes to the shared set
+      summary: Publish the personas an admin wrote and flagged shared
       description: >
-        Body is `{ shared, libraryIds }`. Only the personas whose ids are in
-        `libraryIds` are rewritten, so entries shared straight from the store,
-        which are in nobody's library, survive. A bare array is read as the older
-        form, where sharing and owning were the same thing.
+        The body is the complete answer to "which of my personas are shared", so
+        it replaces the list. What the instance relays from the store is a
+        separate list of ids and is untouched.
       responses:
-        '204': { description: Republished. }
-        '400': { description: No array of personas in the body. }
-    post:
-      tags: [admin]
-      summary: Offer one persona from the store, without installing it
-      responses:
-        '204': { description: Shared. }
-        '400': { description: The body is not a persona. }
-  /api/admin/personas/{id}:
+        '204': { description: Published. }
+        '400': { description: The body is not an array. }
+  /api/admin/personas/store/{id}:
     parameters:
       - name: id
         in: path
         required: true
         schema: { type: string }
+        description: The persona's id in the store's listing.
+    put:
+      tags: [admin]
+      summary: Relay one of the store's personas to this instance's users
+      description: >
+        A reference, not a copy: nothing is installed and nothing is snapshotted,
+        so the catalogue keeps listing it once and users install the store's own
+        bundle.
+      responses:
+        '204': { description: Relayed. }
     delete:
       tags: [admin]
-      summary: Stop offering one shared persona
+      summary: Stop relaying one
       description: Copies people have already installed are theirs and are not touched.
       responses:
-        '204': { description: No longer shared. }
+        '204': { description: No longer relayed. }
   /api/admin/servers:
     get:
       tags: [admin]

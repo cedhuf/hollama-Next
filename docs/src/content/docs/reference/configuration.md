@@ -9,18 +9,18 @@ Copy `.env.example` to `.env` and adjust. Everything here is read at startup.
 
 ## Both modes
 
-| Variable                    | Default     | Description                                                                                                                                                  |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                     |
-| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                              |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any**. See [Security](/guides/security/)                                                   |
-| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                    |
-| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                               |
-| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                               |
-| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI |
-| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                        |
-| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                   |
-| `PERSONA_STORE_URL`         | _(public)_  | Where the [persona store](/features/personas/) is read from (server mode). The instance fetches it, so browsers with no way out still get a catalogue        |
+| Variable                    | Default     | Description                                                                                                                                                                                 |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                                                    |
+| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                                                             |
+| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any**. See [Security](/guides/security/)                                                                                  |
+| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                                                   |
+| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                                                              |
+| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                                                              |
+| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI                                |
+| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                                                       |
+| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                                                  |
+| `PERSONA_STORE_URL`         | _(public)_  | Starting address of the [persona store](/features/personas/) (server mode). The instance fetches it, so browsers with no way out still get a catalogue; an admin can change it in the panel |
 
 ## Documents and OCR
 

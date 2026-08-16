@@ -3,61 +3,61 @@ import type { Persona } from '$lib/personas';
 import { getConfig, setConfig } from './config';
 
 /**
- * The personas an instance offers its users, as a collection of its own.
+ * What an instance offers its users, which is two lists and not one.
  *
- * It used to be a snapshot of the admin's library: every republication rebuilt
- * the whole list from whatever they had flagged `shared`. That works exactly as
- * long as sharing something means owning it, and it stopped being true the day
- * an admin could hand out a persona straight from the store without installing
- * it first. Under the old rule, the next time they toggled anything in their
- * library the store-shared entry vanished, silently, from everyone.
+ * An admin shares in two different senses, and collapsing them was a mistake
+ * worth spelling out. Sharing **their** persona means handing out a thing they
+ * wrote: it lives in their library, they edit it, and what users get is a copy of
+ * that. Sharing one **from the store** means saying "this instance also offers
+ * Maïté", which is not a thing they wrote at all.
  *
- * So the list is the thing, and the library is one of two ways to add to it. A
- * republication from the library refreshes what the library contributed and
- * leaves the rest standing, which is why it has to be told which ids are in that
- * library rather than inferring it from what it was sent.
+ * Made into one list, the second became a copy of the store's persona sitting
+ * beside the store's persona: the same face twice in the catalogue, one badged
+ * official and one badged shared. And a copy freezes, so the store's next
+ * revision never reached the people who took the admin's.
+ *
+ * So a relay is a reference. `sharedPersonas` holds the personas an admin
+ * actually wrote; `sharedCatalogIds` holds the store ids they have chosen to
+ * relay. Which also means an admin can install Maïté, rewrite half of her, and
+ * share that as their own, with the store's original still listed beside it.
  *
  * Note what a shared persona does not carry: attached knowledge. The documents
- * live in whoever's store they were created in, and the ids on the persona mean
- * nothing to anyone else. That was already true of library sharing and is not
- * made worse here, but it is the next thing to fix if personas start shipping
- * documents.
+ * live in the library it was shared from, and their ids mean nothing in anyone
+ * else's. A relay has no such problem, since what users install is the bundle.
  */
-const KEY = 'sharedPersonas';
+const PERSONAS = 'sharedPersonas';
+const CATALOG_IDS = 'sharedCatalogIds';
 
+/** The personas an admin wrote and flagged `shared`, as a snapshot of their library. */
 export function sharedPersonas(): Persona[] {
 	try {
-		const raw = getConfig(KEY);
+		const raw = getConfig(PERSONAS);
 		return raw ? (JSON.parse(raw) as Persona[]) : [];
 	} catch {
 		return [];
 	}
 }
 
-function write(list: Persona[]): void {
-	setConfig(KEY, JSON.stringify(list));
+export function setSharedPersonas(list: Persona[]): void {
+	setConfig(PERSONAS, JSON.stringify(list));
 }
 
-/**
- * Refresh what one admin's library contributes, and leave everything else.
- *
- * `libraryIds` is every persona in that library, shared or not, which is what
- * makes removal work: an entry whose id is in the library but not in `shared` is
- * one whose flag was just turned off.
- */
-export function syncSharedFromLibrary(shared: Persona[], libraryIds: string[]): void {
-	const ids = new Set(libraryIds);
-	const kept = sharedPersonas().filter((persona) => !ids.has(persona.id));
-	write([...kept, ...shared]);
+/** The store personas this instance relays, by their catalogue id. */
+export function sharedCatalogIds(): string[] {
+	try {
+		const raw = getConfig(CATALOG_IDS);
+		const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+		return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+	} catch {
+		return [];
+	}
 }
 
-/** Add one, or replace it where it already is, keeping the order stable. */
-export function upsertSharedPersona(persona: Persona): void {
-	const list = sharedPersonas();
-	const index = list.findIndex((existing) => existing.id === persona.id);
-	write(index === -1 ? [...list, persona] : list.with(index, persona));
+export function relayCatalogPersona(id: string): void {
+	const ids = sharedCatalogIds();
+	if (!ids.includes(id)) setConfig(CATALOG_IDS, JSON.stringify([...ids, id]));
 }
 
-export function removeSharedPersona(id: string): void {
-	write(sharedPersonas().filter((persona) => persona.id !== id));
+export function stopRelayingCatalogPersona(id: string): void {
+	setConfig(CATALOG_IDS, JSON.stringify(sharedCatalogIds().filter((it) => it !== id)));
 }

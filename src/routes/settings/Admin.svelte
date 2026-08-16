@@ -12,6 +12,7 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
+	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
@@ -313,12 +314,13 @@
 		/>
 		<!-- Two switches rather than one, because writing a persona and taking one
 		     are different things to allow. A curated instance may well want people
-		     installing from the store and authoring nothing. -->
+		     installing what it offers and authoring nothing. -->
 		<FieldCheckbox
 			label={$LL.allowUserStoreInstall()}
 			bind:checked={allowUserStoreInstall}
 			onChange={toggleAllowUserStoreInstall}
 		/>
+		<SettingsHint>{$LL.allowUserStoreInstallHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->

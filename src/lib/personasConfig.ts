@@ -31,6 +31,14 @@ export interface PersonasConfig {
 	canInstall: boolean;
 	/** Whether the current user may offer a persona to everyone on the instance. */
 	canShare: boolean;
+	/**
+	 * Store personas this instance relays, by catalogue id.
+	 *
+	 * References rather than copies, which is what keeps the catalogue showing one
+	 * Maïté instead of two and what lets the store's next revision reach the people
+	 * who took the instance's word for it.
+	 */
+	sharedFromStore: string[];
 }
 
 const DEFAULT: PersonasConfig = {
@@ -41,7 +49,8 @@ const DEFAULT: PersonasConfig = {
 	// Local mode has one person, who is therefore allowed everything and has
 	// nobody to share with.
 	canInstall: true,
-	canShare: false
+	canShare: false,
+	sharedFromStore: []
 };
 
 const serverPersonas = writable<PersonasConfig | null>(null);
@@ -74,21 +83,22 @@ export async function saveStoreUrl(url: string): Promise<void> {
 }
 
 /**
- * Admin: republish what this library contributes to the shared set.
+ * Admin: publish the personas they wrote and flagged `shared`.
  *
- * The library's ids travel with it, and that is the whole of the change: the
- * server rewrites only those, so a persona shared straight from the store, which
- * is in nobody's library, is no longer wiped by the next toggle here.
+ * Only their own. What they relay from the store is a separate list of ids, so a
+ * toggle here cannot disturb it, and their own edited copy of a store persona is
+ * published from here like anything else they wrote.
  */
 export async function publishSharedPersonas(): Promise<void> {
 	if (!isServer) return;
-	const library = get(personasStore) || [];
-	const shared = library.filter((p) => p.shared).map((p) => ({ ...p, sessionId: undefined }));
+	const shared = (get(personasStore) || [])
+		.filter((p) => p.shared)
+		.map((p) => ({ ...p, sessionId: undefined }));
 	try {
 		await fetch('/api/admin/personas', {
 			method: 'PUT',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ shared, libraryIds: library.map((p) => p.id) })
+			body: JSON.stringify(shared)
 		});
 		await loadServerPersonas();
 	} catch {
@@ -96,20 +106,16 @@ export async function publishSharedPersonas(): Promise<void> {
 	}
 }
 
-/** Admin: offer a persona from the store, without installing it here first. */
-export async function sharePersona(persona: Persona): Promise<void> {
+/**
+ * Admin: relay one of the store's personas, or stop.
+ *
+ * Nothing is installed and nothing is copied. Stopping does not take back what
+ * people already installed, which is theirs.
+ */
+export async function relayCatalogPersona(id: string, relay: boolean): Promise<void> {
 	if (!isServer) return;
-	await fetch('/api/admin/personas', {
-		method: 'POST',
-		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ ...persona, sessionId: undefined, shared: true })
+	await fetch(`/api/admin/personas/store/${encodeURIComponent(id)}`, {
+		method: relay ? 'PUT' : 'DELETE'
 	});
-	await loadServerPersonas();
-}
-
-/** Admin: stop offering one. Copies already installed are not touched. */
-export async function unsharePersona(id: string): Promise<void> {
-	if (!isServer) return;
-	await fetch(`/api/admin/personas/${id}`, { method: 'DELETE' });
 	await loadServerPersonas();
 }

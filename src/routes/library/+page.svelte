@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		ChevronDown,
-		Cpu,
 		FileText,
 		Folder,
 		FolderOpen,
@@ -24,7 +23,7 @@
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
-	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import PersonaCard from '$lib/components/PersonaCard.svelte';
 	import {
 		createCollection,
 		deleteCollection,
@@ -254,88 +253,77 @@
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
 
 			<!-- Personas -->
-			<div class="mb-3 flex items-baseline justify-between gap-2">
-				<div class="flex items-baseline gap-2">
-					<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
-					<span class="text-xs text-muted">{$personasStore.length}</span>
-				</div>
-				<button
-					type="button"
-					onclick={() => (storeOpen = true)}
-					class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
-				>
-					<Store class="h-3.5 w-3.5" />
-					{$LL.personaStore()}
-				</button>
+			<!-- No shortcut in the heading: the store is one half of the control at the
+			     end of the grid, exactly where adding knowledge and adding a collection
+			     are. Two doors to one room is how a page stops being learnable. -->
+			<div class="mb-3 flex items-baseline gap-2">
+				<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
+				<span class="text-xs text-muted">{$personasStore.length}</span>
 			</div>
 
-			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
+			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
-					<div class="group relative">
-						<button
-							type="button"
-							onclick={() => chatWith(persona)}
-							class="flex h-full w-full flex-col rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
-						>
-							<div class="mb-2.5 flex items-start justify-between gap-2">
-								<PersonaAvatar {persona} size={40} />
-								{#if persona.shared}
-									<span
-										class="flex shrink-0 items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition-opacity group-hover:opacity-0 [@media(hover:none)]:opacity-0"
-										title={$LL.sharedWithUsers()}
-									>
-										<Users class="h-3 w-3" />
-										{$LL.shared()}
-									</span>
-								{/if}
-							</div>
-							<p class="truncate text-sm font-medium text-active">
-								{persona.name || $LL.untitled()}
-							</p>
-							{#if persona.tagline}
-								<p class="mb-2 line-clamp-2 text-xs text-muted">{persona.tagline}</p>
-							{/if}
-							{#if persona.modelName}
-								<span class="mt-auto flex items-center gap-1 truncate pt-1 text-[11px] text-muted">
-									<Cpu class="h-3 w-3 shrink-0" />{persona.modelName}
+					<PersonaCard
+						name={persona.name || $LL.untitled()}
+						tagline={persona.tagline}
+						avatar={persona}
+						tags={persona.tags}
+						meta={persona.modelName}
+						onclick={() => chatWith(persona)}
+					>
+						{#snippet badges()}
+							{#if persona.shared}
+								<span
+									class="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent"
+									title={$LL.sharedWithUsers()}
+								>
+									<Users class="h-3 w-3" />
+									{$LL.shared()}
 								</span>
 							{/if}
-						</button>
-						<button
-							type="button"
-							aria-label={$LL.editPersona()}
-							title={$LL.edit()}
-							onclick={() => editPersona(persona)}
-							class="absolute right-2 top-2.5 rounded p-0.5 text-muted transition hover:text-active [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
-						>
-							<Pencil class="h-3.5 w-3.5" />
-						</button>
-					</div>
+						{/snippet}
+
+						{#snippet corner()}
+							<button
+								type="button"
+								aria-label={$LL.editPersona()}
+								title={$LL.edit()}
+								onclick={() => editPersona(persona)}
+								class="rounded p-0.5 text-muted transition-colors hover:text-active"
+							>
+								<Pencil class="h-3.5 w-3.5" />
+							</button>
+						{/snippet}
+					</PersonaCard>
 				{/each}
 
-				<!-- The two ways to gain one, side by side. Nothing is installed for you
-				     any more, so on a fresh library these two cards are the whole section,
-				     which is exactly what it should say: here is where they come from. -->
-				<button
-					type="button"
-					onclick={() => (storeOpen = true)}
-					class="flex min-h-[118px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+				<!-- The two ways to gain one, in one control, the way adding knowledge and
+				     adding a collection share theirs. Nothing is installed for you any
+				     more, so on a fresh library this is the whole section, and it should
+				     read as the answer to "where do personas come from" rather than as two
+				     empty tiles. -->
+				<div
+					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
 				>
-					<Store class="h-5 w-5" />
-					<span class="text-xs">{$LL.personaStoreBrowse()}</span>
-				</button>
-
-				<!-- New persona -->
-				{#if canCreate}
 					<button
 						type="button"
 						onclick={createPersona}
-						class="flex min-h-[118px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+						disabled={!canCreate}
+						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<Plus class="h-5 w-5" />
-						<span class="text-xs">{$LL.newPersona()}</span>
+						<Plus class="h-4 w-4" />
+						<span class="text-xs">{$LL.personaStoreCreate()}</span>
 					</button>
-				{/if}
+					<button
+						type="button"
+						onclick={() => (storeOpen = true)}
+						title={$LL.personaStoreBrowse()}
+						aria-label={$LL.personaStoreBrowse()}
+						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+					>
+						<Store class="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<!-- Knowledge -->

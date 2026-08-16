@@ -54,9 +54,28 @@ Installing **copies**. The persona lands in your Library with a new identity and
 delete; it only remembers where it came from, so the store can show it as already installed. Any
 knowledge attached to it is copied in too, which is what a bundle is for.
 
+Cards or a list, whichever suits: the toggle sits at the end of the filters, and the choice is
+remembered.
+
 The public store is served from this site, at [llooma.eu/personas](/personas/), and its contents
 live in the
 [`personas/` folder of the repository](https://github.com/cedhuf/llooma/tree/main/personas).
+
+### Running your own store
+
+The app knows one address, and every path in the listing is relative to it, so pointing it somewhere
+else is a single change with nothing to migrate. Copy the `personas/` folder, serve it over HTTP,
+and give the app its address.
+
+That address is under _Settings → Tools → Personas_:
+
+- **Local mode**: yours, in your own settings.
+- **Server mode**: the instance's. Everyone sees it, only an admin changes it, and the server is
+  what fetches it. `PERSONA_STORE_URL` sets what it starts as; the admin panel overrides that.
+
+A store is a folder with an `index.json` and the bundles it names. Anything that serves static files
+will do: a web server, an object bucket, a Pages site, a share on the local network. Nothing about
+it is specific to us.
 
 A model is never named in a store persona. There are hundreds of them across nearly as many
 providers, all naming them differently and all revising them constantly, so installing uses **your**
@@ -94,34 +113,42 @@ own count, under _Settings → Interface → Home screen_.
 
 ## Sharing them (server mode)
 
-An admin offers a persona to everyone on the instance in one of two ways:
+An admin offers a persona to everyone on the instance in two genuinely different ways, and the
+difference is worth knowing.
 
-- **From their own library**, by marking it _shared_ in its editor. This is the persona they wrote.
-- **From the store**, with the _Offer to everyone_ button on a card. This does **not** install it
-  for the admin: sharing something and owning it are different acts, and an admin curating what
-  their instance offers should not have to collect it all first.
+**Sharing their own.** Mark a persona _shared_ in its editor. Users get a copy of it, labelled
+_Shared by admin_. This is the one for a persona they wrote, and equally for one they installed from
+the store and then rewrote: it is theirs now, and the store's original goes on being listed beside
+it.
 
-Either way it appears for every user in the _Persona store_, labelled _Shared by admin_ and
-alongside the public ones, with an _Install_ action that makes an editable personal copy. The copy
-remembers what it came from, so the original stops being offered twice.
+**Relaying one from the store.** The _Offer to everyone_ button on a store card. Nothing is
+installed and nothing is copied: what is recorded is the store's id, so the card stays one card,
+keeps its _Official_ badge and gains an _offered_ one, and what users install is the store's own
+bundle. A later revision reaches them the same way it reaches everyone else.
+
+Relaying costs the admin nothing: their library does not gain a persona they never wanted, and the
+catalogue does not gain a second face with the same name.
 
 Installing copies. It does not subscribe: an admin editing the shared persona afterwards does not
 reach into the copies people are already talking to, and un-sharing one does not take back the
 copies people already have.
 
-A shared persona does not carry attached knowledge. Its documents live in the library it was shared
-from, and their ids mean nothing in anyone else's. Share a bundle file if the documents matter.
+A persona shared **from a library** does not carry its attached knowledge: the documents live in
+that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A
+relayed one has no such problem, since what users install is the bundle itself.
 
 ### What users are allowed
 
 Two switches under _Settings → Admin → User permissions_, deliberately separate, because writing a
 persona and taking one are different things to allow:
 
-| Switch                                | Default | What it governs                         |
-| ------------------------------------- | ------- | --------------------------------------- |
-| Allow users to create personas        | on      | Writing one of their own in the Library |
-| Allow users to install from the store | on      | Taking one from the public store        |
+| Switch                                       | Default | What it governs                         |
+| -------------------------------------------- | ------- | --------------------------------------- |
+| Allow users to create personas               | on      | Writing one of their own in the Library |
+| Allow users to install from the public store | on      | Taking one from the public store        |
 
-With installing turned off, users still **see** the store: the cards are there, disabled, with a
-note pointing at their administrator. A store that silently emptied itself would just look broken.
-Personas the admin has shared stay installable either way.
+The second governs the **public** store only. What the admin shares, and what they relay from it,
+stays installable either way: turning it off says "take what I offer you", not "take nothing".
+
+Users still **see** the rest of the store with it off. The cards are there, disabled, with a note
+pointing at their administrator: a store that silently emptied itself would just look broken.
