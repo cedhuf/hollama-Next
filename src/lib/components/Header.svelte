@@ -1,9 +1,5 @@
 <script lang="ts">
-	import { PanelLeft } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
-
-	import LL from '$i18n/i18n-svelte';
-	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
 	import SidebarToggle from './SidebarToggle.svelte';
 
@@ -72,14 +68,7 @@
 			     this conversation. What is between them is left to the conversation,
 			     which shows through it. -->
 			<div class="flex w-full items-center justify-between gap-2 lg:hidden">
-				<button
-					type="button"
-					onclick={() => mobileDrawerOpen.set(true)}
-					aria-label={$LL.expandSidebar()}
-					class="surface-floating pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-shade-3 text-muted shadow-lg transition-colors [--surface-tint:66%] hover:text-active"
-				>
-					<PanelLeft class="h-5 w-5" />
-				</button>
+				<SidebarToggle variant="floating" />
 
 				<div
 					class="surface-floating pointer-events-auto flex h-12 items-center gap-1 rounded-full border border-shade-3 px-1.5 shadow-lg [--surface-tint:66%] {confirmDeletion
