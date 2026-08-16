@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import { env as privateEnv } from '$env/dynamic/private';
 import { DEFAULT_PERSONA_STORE } from '$lib/personaStore';
 import { requireUser } from '$lib/server/api';
-import { allowUserPersonas, allowUserStoreInstall, personaStoreUrl } from '$lib/server/db/config';
+import { allowUserPersonas, personaStoreMode, personaStoreUrl } from '$lib/server/db/config';
 import { sharedCatalogIds, sharedPersonas } from '$lib/server/db/sharedPersonas';
 
 export async function GET(event) {
@@ -20,12 +20,9 @@ export async function GET(event) {
 		shared: sharedPersonas(),
 		sharedFromStore: relayed,
 		canCreate: isAdmin || allowUserPersonas(),
-		// An admin installs for themselves like anyone else; the switch is about the
-		// people they administer.
-		// A relayed persona is offered on purpose, so it stays installable even where
-		// the store at large is not: refusing it would make the admin's own choice
-		// unreachable.
-		canInstall: isAdmin || allowUserStoreInstall(),
+		// An admin always sees the whole catalogue: it is the source they choose
+		// from. What the mode decides is what everyone else's store contains.
+		storeMode: isAdmin ? 'open' : personaStoreMode(),
 		canShare: isAdmin,
 		storeUrl: personaStoreUrl() ?? privateEnv.PERSONA_STORE_URL ?? DEFAULT_PERSONA_STORE,
 		canEditStore: isAdmin

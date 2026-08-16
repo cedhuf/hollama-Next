@@ -4,13 +4,13 @@ import { requireAdmin } from '$lib/server/api';
 import {
 	allowUserKeys,
 	allowUserPersonas,
-	allowUserStoreInstall,
 	getConfig,
+	personaStoreMode,
 	personaStoreUrl,
 	setAllowUserKeys,
 	setAllowUserPersonas,
-	setAllowUserStoreInstall,
 	setConfig,
+	setPersonaStoreMode,
 	setPersonaStoreUrl
 } from '$lib/server/db/config';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
@@ -20,7 +20,7 @@ export async function GET(event) {
 	return json({
 		allowUserKeys: allowUserKeys(),
 		allowUserPersonas: allowUserPersonas(),
-		allowUserStoreInstall: allowUserStoreInstall(),
+		personaStoreMode: personaStoreMode(),
 		personaStoreUrl: personaStoreUrl() ?? '',
 		searchUrl: getConfig('searchUrl') ?? '',
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
@@ -43,8 +43,8 @@ export async function PUT(event) {
 
 	if (typeof body?.allowUserKeys === 'boolean') setAllowUserKeys(body.allowUserKeys);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
-	if (typeof body?.allowUserStoreInstall === 'boolean') {
-		setAllowUserStoreInstall(body.allowUserStoreInstall);
+	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
+		setPersonaStoreMode(body.personaStoreMode);
 	}
 	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());

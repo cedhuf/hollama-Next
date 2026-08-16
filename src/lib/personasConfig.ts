@@ -22,13 +22,13 @@ export interface PersonasConfig {
 	/** Whether the current user may change that address. */
 	canEditStore: boolean;
 	/**
-	 * Whether the current user may install from the store.
+	 * What this person's store contains.
 	 *
-	 * Distinct from `canCreate`: one is about writing a persona, the other about
-	 * taking one. An instance can want either without the other, so an admin has
-	 * two switches rather than one that means both.
+	 * `open` is the public catalogue plus what the instance offers; `curated` is
+	 * what the instance offers and nothing else. An admin always gets `open`,
+	 * because the catalogue is what they choose from.
 	 */
-	canInstall: boolean;
+	storeMode: 'open' | 'curated';
 	/** Whether the current user may offer a persona to everyone on the instance. */
 	canShare: boolean;
 	/**
@@ -48,7 +48,7 @@ const DEFAULT: PersonasConfig = {
 	canEditStore: false,
 	// Local mode has one person, who is therefore allowed everything and has
 	// nobody to share with.
-	canInstall: true,
+	storeMode: 'open',
 	canShare: false,
 	sharedFromStore: []
 };

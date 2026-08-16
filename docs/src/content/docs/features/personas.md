@@ -91,6 +91,37 @@ The address is under _Settings → Tools → Personas_. In local mode it is your
 the instance's: everyone sees it, only an admin can change it, and `PERSONA_STORE_URL` sets what it
 starts as.
 
+### Is it still the one I installed?
+
+Every persona in the store carries a fingerprint of what it says: its prompt, its greeting, its
+name, its avatar, its suggestions. Nothing else, so changing the model it runs on is not a change to
+the persona.
+
+The same fingerprint is recorded when you install it, and comparing the two answers two different
+questions:
+
+| The card says       | What happened                                              |
+| ------------------- | ---------------------------------------------------------- |
+| _Installed_         | Exactly as published                                       |
+| _Installed, edited_ | You have changed it since                                  |
+| _Update_            | A newer version has been published                         |
+| _Update_ + edited   | Both, and updating replaces your changes, so it asks first |
+
+Editing a persona back to what it was makes it the store's persona again. That is why it is a
+fingerprint rather than a flag: a flag would stay lit and lie.
+
+Updating replaces what was written and keeps what is yours: the same id, the model you chose, the
+conversation you are having with it, the knowledge you attached. Updating is not reinstalling.
+
+The same reading tells an admin whether what they are handing out is the store's persona or their
+own rewrite of it, without anyone having to declare which.
+
+The listing also carries a `sha256` of each bundle, checked when you install it. It is not a defence
+against the store itself, since a listing and a bundle come from the same place over the same
+connection: it catches a mirror that has drifted, a cache that has rotted, and a bundle edited
+without the listing being rebuilt. Whoever contributes a persona writes plain JSON and never has to
+know it exists.
+
 ## Importing a file
 
 The Library reads three formats from the same _Import_ button:
@@ -131,24 +162,30 @@ catalogue does not gain a second face with the same name.
 
 Installing copies. It does not subscribe: an admin editing the shared persona afterwards does not
 reach into the copies people are already talking to, and un-sharing one does not take back the
-copies people already have.
+copies people already have. What it does instead is **offer** the newer version, in the store, as an
+update you take or leave.
 
 A persona shared **from a library** does not carry its attached knowledge: the documents live in
 that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A
 relayed one has no such problem, since what users install is the bundle itself.
 
-### What users are allowed
+### What a user's store contains
 
-Two switches under _Settings → Admin → User permissions_, deliberately separate, because writing a
-persona and taking one are different things to allow:
+A store is the door people already know, from every phone they own, so the door stays where it is
+and works the way it works. What an instance decides is what is behind it.
 
-| Switch                                       | Default | What it governs                         |
-| -------------------------------------------- | ------- | --------------------------------------- |
-| Allow users to create personas               | on      | Writing one of their own in the Library |
-| Allow users to install from the public store | on      | Taking one from the public store        |
+Under _Settings → Admin → User permissions_:
 
-The second governs the **public** store only. What the admin shares, and what they relay from it,
-stays installable either way: turning it off says "take what I offer you", not "take nothing".
+| What the store shows                  | What users get                                          |
+| ------------------------------------- | ------------------------------------------------------- |
+| The public store, plus what you offer | The whole public catalogue, alongside your own personas |
+| Only what you offer                   | Your personas and your relays, and nothing else         |
 
-Users still **see** the rest of the store with it off. The cards are there, disabled, with a note
-pointing at their administrator: a store that silently emptied itself would just look broken.
+The second is not a locked version of the first: it is a different store. There is no disabled card
+and no note about asking an administrator, because nothing is being refused. An instance run for
+children, with persona creation turned off as well, shows exactly the six personas it was given.
+
+An admin always sees the whole public catalogue, whatever the mode: it is what they choose from.
+
+The other switch, _Allow users to create personas_, is unchanged and independent: writing one and
+taking one are different things to allow.

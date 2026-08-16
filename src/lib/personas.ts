@@ -27,6 +27,16 @@ export interface PersonaSource {
 	id?: string;
 	/** The revision installed, so a newer one can be noticed later. */
 	revision?: number;
+	/**
+	 * What it said when it was installed, from `personaDigest`.
+	 *
+	 * Two comparisons rather than one, and they answer different questions.
+	 * Against the persona as it stands now: have *you* changed it. Against the
+	 * store's current listing: has the *store* changed it. Without this one, a new
+	 * revision upstream would make an untouched persona look edited, which is the
+	 * wrong thing to tell someone and the wrong thing to offer them.
+	 */
+	digest?: string;
 }
 
 /**

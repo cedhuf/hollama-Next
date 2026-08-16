@@ -46,6 +46,24 @@ export interface CatalogEntry {
 	origin: CatalogOrigin;
 	/** Relative to the store's address. */
 	path: string;
+	/**
+	 * `sha256-<base64>` over the bundle's bytes, as npm records a package's.
+	 *
+	 * Not inside the bundle, because a file cannot contain its own hash, and not a
+	 * defence against the store itself: whoever can serve a bad bundle can serve a
+	 * bad listing over the same connection. What it catches is a mirror that has
+	 * drifted, a cache that has rotted, and a bundle edited without the listing
+	 * being rebuilt.
+	 */
+	integrity?: string;
+	/**
+	 * The fingerprint of what the persona says, from `personaDigest`.
+	 *
+	 * Here as well as in the bundle's own fields so the "you have edited this" and
+	 * "the store's version has moved on" states can be read from the listing alone,
+	 * without downloading anything.
+	 */
+	contentDigest?: string;
 }
 
 export interface Catalog {
@@ -83,7 +101,9 @@ function parseEntry(value: unknown): CatalogEntry | undefined {
 		author: typeof o.author === 'string' ? o.author : undefined,
 		revision: typeof o.revision === 'number' ? o.revision : 1,
 		origin: o.origin === 'community' ? 'community' : 'official',
-		path
+		path,
+		integrity: typeof o.integrity === 'string' ? o.integrity : undefined,
+		contentDigest: typeof o.contentDigest === 'string' ? o.contentDigest : undefined
 	};
 }
 

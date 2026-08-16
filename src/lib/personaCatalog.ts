@@ -117,13 +117,41 @@ export async function loadCatalog(force = false): Promise<void> {
 	}
 }
 
-/** Fetch one persona whole, at the moment it is being installed. */
+/**
+ * `sha256-<base64>` over some bytes, the way the listing writes it.
+ *
+ * `crypto.subtle` is only available over HTTPS and on localhost. Anywhere else
+ * it is missing entirely, which is a reason to skip the check rather than to
+ * refuse the install: the check is about a mirror having drifted, not about
+ * trusting the connection, and an insecure origin has larger problems.
+ */
+async function sha256(bytes: ArrayBuffer): Promise<string | undefined> {
+	if (!globalThis.crypto?.subtle) return undefined;
+	const digest = await crypto.subtle.digest('SHA-256', bytes);
+	return `sha256-${btoa(String.fromCharCode(...new Uint8Array(digest)))}`;
+}
+
+/**
+ * Fetch one persona whole, at the moment it is being installed.
+ *
+ * The listing's `integrity` is checked here when there is one, against the bytes
+ * as they arrived. A mismatch is refused: the two came from the same place and
+ * disagreeing means one of them is stale, which is exactly the case where
+ * carrying on installs something nobody published.
+ */
 export async function fetchBundle(entry: CatalogEntry): Promise<PersonaBundle> {
 	const response = await fetch(`${base()}${entry.path}`, {
 		headers: { accept: 'application/json' }
 	});
 	if (!response.ok) throw new Error(`HTTP ${response.status}`);
-	const bundle = parsePersonaBundle(await response.json());
+
+	const bytes = await response.arrayBuffer();
+	if (entry.integrity) {
+		const actual = await sha256(bytes);
+		if (actual && actual !== entry.integrity) throw new Error('integrity check failed');
+	}
+
+	const bundle = parsePersonaBundle(JSON.parse(new TextDecoder().decode(bytes)));
 	if (!bundle) throw new Error('not a persona bundle');
 	return bundle;
 }

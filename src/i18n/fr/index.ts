@@ -339,11 +339,23 @@ const fr = extendDictionary(en, {
 	personaStoreCreate: 'Créer un persona',
 	personaStoreShare: 'Proposer à tout le monde sur cette instance',
 	personaStoreUnshare: 'Ne plus le proposer',
-	personaStoreInstallDisabled:
-		"L'installation est désactivée sur cette instance. Contactez votre administrateur.",
-	allowUserStoreInstall: 'Autoriser les utilisateurs à installer depuis la boutique publique',
-	allowUserStoreInstallHelp:
-		"Ne concerne que la boutique publique. Les personas que vous partagez, et ceux que vous proposez depuis la boutique, restent installables dans tous les cas : désactivé, les utilisateurs ont exactement ce que vous leur proposez, et rien d'autre.",
+	personaStoreModeLabel: 'Ce que la boutique montre à vos utilisateurs',
+	personaStoreModeOpen: 'La boutique publique, plus ce que vous proposez',
+	personaStoreModeCurated: 'Uniquement ce que vous proposez',
+	personaStoreModeOpenHelp:
+		'Les utilisateurs parcourent tout le catalogue public et y installent, à côté des personas que vous proposez.',
+	personaStoreModeCuratedHelp:
+		"Les utilisateurs ne voient que les personas que vous proposez, au même endroit que d'habitude. Le catalogue public reste le vôtre, pour choisir.",
+	personaStateEdited: 'modifié',
+	personaStateOutdated: 'mise à jour disponible',
+	personaStateEditedOutdated: 'modifié, mise à jour disponible',
+	personaStoreInstalledEdited: 'Installé, modifié',
+	personaStoreUpdate: 'Mettre à jour',
+	personaStoreUpdated: '« {name:string} » mis à jour',
+	personaStoreUpdateConfirm:
+		'Vous avez modifié « {name:string} ». La mise à jour remplacera vos changements par la version publiée. Continuer ?',
+	personaOfferedVersionSame: 'Identique à la version de la boutique',
+	personaOfferedVersionModified: 'Votre version du persona de la boutique',
 	personaStoreRefresh: 'Actualiser',
 	personaStoreInstallFailed: "Ce persona n'a pas pu être installé",
 	personaStoreUnreachable: 'La boutique de personas est injoignable',

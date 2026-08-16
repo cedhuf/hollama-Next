@@ -346,10 +346,23 @@ const en = {
 	personaStoreCreate: 'Create a persona',
 	personaStoreShare: 'Offer to everyone on this instance',
 	personaStoreUnshare: 'Stop offering it',
-	personaStoreInstallDisabled: 'Installing is turned off on this instance. Ask your administrator.',
-	allowUserStoreInstall: 'Allow users to install from the public persona store',
-	allowUserStoreInstallHelp:
-		'Governs the public store only. Personas you share, and the ones you offer from the store, stay installable either way. Turned off, users get exactly what you offer them and nothing else.',
+	personaStoreModeLabel: 'What the persona store shows your users',
+	personaStoreModeOpen: 'The public store, plus what you offer',
+	personaStoreModeCurated: 'Only what you offer',
+	personaStoreModeOpenHelp:
+		'Users browse the whole public catalogue and install from it, alongside the personas you offer.',
+	personaStoreModeCuratedHelp:
+		'Users see only the personas you offer, in the same place they always look. The public catalogue stays yours, to choose from.',
+	personaStateEdited: 'edited',
+	personaStateOutdated: 'update available',
+	personaStateEditedOutdated: 'edited, update available',
+	personaStoreInstalledEdited: 'Installed, edited',
+	personaStoreUpdate: 'Update',
+	personaStoreUpdated: '“{name:string}” updated',
+	personaStoreUpdateConfirm:
+		'You have edited “{name:string}”. Updating replaces your changes with the published version. Continue?',
+	personaOfferedVersionSame: 'Identical to the store version',
+	personaOfferedVersionModified: 'Your version of the store persona',
 	personaStoreRefresh: 'Refresh',
 	personaStoreInstallFailed: 'This persona could not be installed',
 	personaStoreUnreachable: 'The persona store could not be reached',

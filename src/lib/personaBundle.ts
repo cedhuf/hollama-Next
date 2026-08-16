@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 
 import { saveKnowledge, type Knowledge } from '$lib/knowledge';
 import { knowledgeStore, settingsStore } from '$lib/localStorage';
+import { bundleAuthored, contentDigest } from '$lib/personaDigest';
 import {
 	newPersona,
 	pickAvatarColor,
@@ -248,7 +249,10 @@ export function personaFromBundle(bundle: PersonaBundle, source: PersonaSource):
 		...authored,
 		...avatarFields(avatar, bundle.persona.name),
 		modelName: defaultModelName(),
-		source
+		// What it said on the way in, so "you edited this" and "the store moved on"
+		// can be told apart later. Taken from the bundle rather than from the persona
+		// just built, so the two sides hash the same thing.
+		source: { ...source, digest: source.digest ?? contentDigest(bundleAuthored(bundle)) }
 	};
 }
 

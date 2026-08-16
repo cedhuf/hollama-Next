@@ -11,9 +11,15 @@
  * generated and checked in. `pnpm personas:index`, and the CI check below fails
  * the build if it was forgotten.
  */
+import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+// The application's own digest, not a copy of it. Written twice it would drift
+// once, and the day it drifted every installed persona would be reported as
+// modified. Node reads TypeScript directly, so importing it costs nothing.
+import { bundleAuthored, contentDigest } from '../src/lib/personaDigest.ts';
 
 const ROOT = fileURLToPath(new URL('../personas/', import.meta.url));
 const BUNDLES = join(ROOT, 'bundles');
@@ -39,6 +45,20 @@ function indexAvatar(avatar) {
 	return avatar;
 }
 
+/**
+ * Two digests, two jobs, and conflating them would break both.
+ *
+ * `integrity` is SHA-256 over the file's bytes and answers "is this the bundle
+ * the store published". It lives here rather than inside the file for the obvious
+ * reason: a hash of a file cannot be written into that file. Putting it in the
+ * listing is what npm does with a package's integrity, and it means whoever
+ * contributes a persona writes plain JSON and never has to know the algorithm.
+ *
+ * `contentDigest` is over the authored fields only, and answers "is this persona
+ * still the one that was published". That is a different question, asked against
+ * a persona in someone's library rather than against a file, which is why it
+ * cannot be a hash of the bytes.
+ */
 const entries = [];
 const problems = [];
 
@@ -47,8 +67,10 @@ for (const file of readdirSync(BUNDLES)
 	.sort()) {
 	const path = join(BUNDLES, file);
 	let bundle;
+	let raw;
 	try {
-		bundle = JSON.parse(readFileSync(path, 'utf8'));
+		raw = readFileSync(path);
+		bundle = JSON.parse(raw.toString('utf8'));
 	} catch (error) {
 		problems.push(`${file}: not valid JSON (${error.message})`);
 		continue;
@@ -77,7 +99,9 @@ for (const file of readdirSync(BUNDLES)
 		author: bundle.author,
 		revision: bundle.revision ?? 1,
 		origin: ORIGIN,
-		path: `bundles/${file}`
+		path: `bundles/${file}`,
+		integrity: `sha256-${createHash('sha256').update(raw).digest('base64')}`,
+		contentDigest: contentDigest(bundleAuthored(bundle))
 	});
 }
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import {
+		ArrowDownToLine,
 		Check,
 		Download,
 		LayoutGrid,
 		List,
 		LoaderCircle,
-		Lock,
 		RefreshCw,
 		Search,
 		Users,
@@ -17,10 +17,11 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import PersonaCard from '$lib/components/PersonaCard.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
-	import { avatarFields, installPersonaBundle } from '$lib/personaBundle';
+	import { avatarFields, installPersonaBundle, personaFromBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
-	import { installPersona, personaOrigin, type Persona } from '$lib/personas';
+	import { installPersona, personaOrigin, savePersona, type Persona } from '$lib/personas';
 	import { personasConfig, relayCatalogPersona } from '$lib/personasConfig';
+	import { offeredVersion, personaState, type PersonaState } from '$lib/personaState';
 	import type { CatalogEntry } from '$lib/personaStore';
 
 	interface Props {
@@ -50,9 +51,19 @@
 		locale?: string;
 		author?: string;
 		origin: Origin;
-		/** Already in the library, so the card says so instead of offering it again. */
-		installed: boolean;
+		/**
+		 * What the library holds of it, if anything.
+		 *
+		 * Not a boolean any more: "installed" is four states once a persona can be
+		 * edited and the store can publish a new revision, and the card has something
+		 * different to say in each.
+		 */
+		state?: PersonaState;
 		install: () => Promise<void>;
+		/** Take the published version over the installed one. */
+		update?: () => Promise<void>;
+		/** For an admin's own offer: is this the store's persona, or their rewrite. */
+		version?: 'own' | 'same' | 'modified';
 		/**
 		 * Whether this instance relays it, for an admin, and only for the store's
 		 * own: what an admin wrote is shared from its own editor, and what is already
@@ -60,14 +71,6 @@
 		 */
 		relayed?: boolean;
 		toggleRelay?: () => Promise<void>;
-		/**
-		 * Whether this one may be taken.
-		 *
-		 * Per offer rather than once for the page: an instance that has turned the
-		 * public store off is saying "take what I offer you", not "take nothing", so
-		 * what the admin shares or relays stays reachable inside the same catalogue.
-		 */
-		installable: boolean;
 	}
 
 	let query = $state('');
@@ -89,7 +92,11 @@
 
 	/** What the library already holds, by the id it was installed from. */
 	const installedIds = $derived(
-		new Set(($personasStore ?? []).map((p) => personaOrigin(p)).filter((id): id is string => !!id))
+		new Map(
+			($personasStore ?? [])
+				.map((p) => [personaOrigin(p), p] as const)
+				.filter((pair): pair is [string, Persona] => !!pair[0])
+		)
 	);
 
 	/**
@@ -101,12 +108,14 @@
 	 * is a poor showing from a page whose whole job is to say what you have and
 	 * what you do not.
 	 */
-	const installedNames = $derived(
-		new Set(($personasStore ?? []).map((p) => p.name.trim().toLowerCase()).filter(Boolean))
+	const byName = $derived(
+		new Map(($personasStore ?? []).map((p) => [p.name.trim().toLowerCase(), p] as const))
 	);
 
-	const isInstalled = (id: string, name: string) =>
-		installedIds.has(id) || installedNames.has(name.trim().toLowerCase());
+	/** The copy in the library that answers for a catalogue entry, if there is one. */
+	function installedCopy(id: string, name: string): Persona | undefined {
+		return installedIds.get(id) ?? byName.get(name.trim().toLowerCase());
+	}
 
 	/** The store personas this instance relays, so a card can say so and untick it. */
 	const relayed = $derived(new Set($personasConfig.sharedFromStore));
@@ -117,26 +126,84 @@
 		toast.success($LL.installedPersona({ name: entry.name }));
 	}
 
+	/**
+	 * Take the published version over the one in the library.
+	 *
+	 * The authored fields are replaced and everything of yours is kept: the id, the
+	 * model you chose, the conversation you are having with it, the knowledge you
+	 * attached. Updating a persona is not reinstalling it.
+	 *
+	 * When you have edited it, this replaces your edits, so it asks first. There is
+	 * no merge to offer and pretending otherwise would be worse than the question.
+	 */
+	async function updateEntry(entry: CatalogEntry, persona: Persona, edited: boolean) {
+		if (edited && !confirm($LL.personaStoreUpdateConfirm({ name: persona.name }))) return;
+
+		const bundle = await fetchBundle(entry);
+		const fresh = personaFromBundle(bundle, {
+			origin: entry.origin,
+			id: entry.id,
+			revision: entry.revision
+		});
+
+		savePersona({
+			...persona,
+			name: fresh.name,
+			tagline: fresh.tagline,
+			avatarColor: fresh.avatarColor,
+			avatarGlyph: fresh.avatarGlyph,
+			avatarImage: fresh.avatarImage,
+			systemPrompt: fresh.systemPrompt,
+			greeting: fresh.greeting,
+			params: fresh.params,
+			webSearch: fresh.webSearch,
+			suggestions: fresh.suggestions,
+			tags: fresh.tags,
+			source: fresh.source
+		});
+		toast.success($LL.personaStoreUpdated({ name: fresh.name }));
+	}
+
+	/**
+	 * What the catalogue contributes, which is not always all of it.
+	 *
+	 * On a curated instance a user's store holds what their administrator offers
+	 * and nothing else. The door is the same door, in the same place, with the same
+	 * gestures; only what is behind it is the instance's decision. That is what
+	 * replaced a permission switch and a grid of locked cards, which showed people
+	 * a catalogue in order to refuse it to them.
+	 *
+	 * An admin always gets the whole thing, because it is what they choose from.
+	 */
+	const curated = $derived($personasConfig.storeMode === 'curated');
+
 	const fromCatalog = $derived(
-		entries.map(
-			(entry): Offer => ({
-				key: `catalog:${entry.id}`,
-				name: entry.name,
-				tagline: entry.tagline,
-				avatar: avatarFields(entry.avatar, entry.name),
-				tags: entry.tags,
-				locale: entry.locale,
-				author: entry.author,
-				origin: entry.origin,
-				installed: isInstalled(entry.id, entry.name),
-				install: () => installEntry(entry),
-				installable: $personasConfig.canInstall || relayed.has(entry.id),
-				relayed: relayed.has(entry.id),
-				toggleRelay: $personasConfig.canShare
-					? () => relayCatalogPersona(entry.id, !relayed.has(entry.id))
-					: undefined
+		entries
+			.filter((entry) => !curated || relayed.has(entry.id))
+			.map((entry): Offer => {
+				const copy = installedCopy(entry.id, entry.name);
+				const state = copy ? personaState(copy, entry) : undefined;
+				const stale = state === 'outdated' || state === 'edited-outdated';
+
+				return {
+					key: `catalog:${entry.id}`,
+					name: entry.name,
+					tagline: entry.tagline,
+					avatar: avatarFields(entry.avatar, entry.name),
+					tags: entry.tags,
+					locale: entry.locale,
+					author: entry.author,
+					origin: entry.origin,
+					state,
+					install: () => installEntry(entry),
+					update:
+						stale && copy ? () => updateEntry(entry, copy, state === 'edited-outdated') : undefined,
+					relayed: relayed.has(entry.id),
+					toggleRelay: $personasConfig.canShare
+						? () => relayCatalogPersona(entry.id, !relayed.has(entry.id))
+						: undefined
+				};
 			})
-		)
 	);
 
 	/**
@@ -163,13 +230,22 @@
 				},
 				tags: persona.tags ?? [],
 				origin: 'admin',
-				installed:
-					installedIds.has(persona.id) || ($personasStore ?? []).some((p) => p.id === persona.id),
+				state: (() => {
+					const copy =
+						installedIds.get(persona.id) ?? ($personasStore ?? []).find((p) => p.id === persona.id);
+					// No catalogue row for it: it is the admin's, so "edited" here means
+					// the admin has moved on since you took your copy.
+					return copy ? personaState(copy) : undefined;
+				})(),
 				install: async () => {
 					installPersona(persona);
 					toast.success($LL.installedPersona({ name: persona.name }));
 				},
-				installable: true
+				// Deduced from the listing alone: recompute what they are handing out and
+				// compare it with what the store publishes. No flag to set, and editing
+				// it back makes it the store's persona again instead of leaving a mark
+				// that lies.
+				version: offeredVersion(persona, entries)
 			})
 		)
 	);
@@ -199,10 +275,10 @@
 		return value === 'community' ? $LL.personaStoreCommunity() : $LL.personaStoreOfficial();
 	}
 
-	async function run(offer: Offer) {
+	async function run(offer: Offer, update = false) {
 		installing = offer.key;
 		try {
-			await offer.install();
+			await (update ? offer.update?.() : offer.install());
 		} catch (error) {
 			toast.error($LL.personaStoreInstallFailed(), {
 				description: error instanceof Error ? error.message : undefined
@@ -377,27 +453,43 @@
 										{$LL.personaStoreRelayedShort()}
 									</span>
 								{/if}
+								{#if offer.version === 'modified'}
+									<span
+										class="rounded-full bg-shade-2 px-2 py-0.5 text-[10px] font-medium text-muted"
+										title={$LL.personaOfferedVersionModified()}
+									>
+										{$LL.personaStateEdited()}
+									</span>
+								{/if}
 							{/snippet}
 
 							{#snippet actions()}
-								{#if offer.installed}
+								<!-- Four things "installed" can mean once a persona can be edited and
+								     the store can publish again, and the card says which. Only the two
+								     that have moved on carry a button, because the other two have
+								     nothing to do. -->
+								{#if offer.update}
+									<button
+										type="button"
+										disabled={installing !== null}
+										onclick={() => run(offer, true)}
+										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-accent px-2 py-1.5 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
+									>
+										{#if installing === offer.key}
+											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+										{:else}
+											<ArrowDownToLine class="h-3.5 w-3.5" />
+										{/if}
+										{$LL.personaStoreUpdate()}
+									</button>
+								{:else if offer.state}
 									<span
 										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs text-muted"
 									>
 										<Check class="h-3.5 w-3.5" />
-										{$LL.personaStoreInstalled()}
-									</span>
-								{:else if !offer.installable}
-									<!-- Shown rather than hidden. Someone who cannot install still
-									     benefits from seeing what exists and from being told who to
-									     ask; a store that silently loses most of its contents just
-									     looks broken. -->
-									<span
-										class="flex flex-1 cursor-not-allowed items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-shade-3 px-2 py-1.5 text-xs text-muted opacity-50"
-										title={$LL.personaStoreInstallDisabled()}
-									>
-										<Lock class="h-3.5 w-3.5" />
-										{$LL.install()}
+										{offer.state === 'edited'
+											? $LL.personaStoreInstalledEdited()
+											: $LL.personaStoreInstalled()}
 									</span>
 								{:else}
 									<button

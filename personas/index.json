@@ -19,7 +19,9 @@
 			"author": "Llooma",
 			"revision": 1,
 			"origin": "official",
-			"path": "bundles/lou.json"
+			"path": "bundles/lou.json",
+			"integrity": "sha256-+JQYk9ZRLgCBOFfEwrgAV9jGFBZvSctAXQX8G0LutAk=",
+			"contentDigest": "5bdce88dda3bea1a"
 		},
 		{
 			"id": "maite",
@@ -39,7 +41,9 @@
 			"author": "Llooma",
 			"revision": 1,
 			"origin": "official",
-			"path": "bundles/maite.json"
+			"path": "bundles/maite.json",
+			"integrity": "sha256-kkM6n0pBX4dykWF1CoWDTLJssj6zZ3TFju0fzg6JMrs=",
+			"contentDigest": "e639cf3d68fc5da1"
 		},
 		{
 			"id": "max",
@@ -59,7 +63,9 @@
 			"author": "Llooma",
 			"revision": 1,
 			"origin": "official",
-			"path": "bundles/max.json"
+			"path": "bundles/max.json",
+			"integrity": "sha256-/wIbZHZ82ghGdOtzhESaWFLrz/GI0gpsJcppvVzgHzU=",
+			"contentDigest": "7217d5d635d7b440"
 		},
 		{
 			"id": "nova",
@@ -79,7 +85,9 @@
 			"author": "Llooma",
 			"revision": 1,
 			"origin": "official",
-			"path": "bundles/nova.json"
+			"path": "bundles/nova.json",
+			"integrity": "sha256-nDxyjDZwVKpW+pKCbb7djrZ7Bd+kDuwl1GGB3XuWD/I=",
+			"contentDigest": "9f99f422fcc2f963"
 		},
 		{
 			"id": "pixel",
@@ -99,7 +107,9 @@
 			"author": "Llooma",
 			"revision": 1,
 			"origin": "official",
-			"path": "bundles/pixel.json"
+			"path": "bundles/pixel.json",
+			"integrity": "sha256-i3bZmDV3EEfSGHqVfb0WdHtWrtGeeuMIteTygar8h3o=",
+			"contentDigest": "dce6304df510c4be"
 		}
 	]
 }

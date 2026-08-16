@@ -36,18 +36,29 @@ export function setAllowUserPersonas(value: boolean): void {
 }
 
 /**
- * Whether users may install from the persona store (default: true).
+ * What a user's persona store contains (default: the public one).
  *
- * Separate from `allowUserPersonas`, which is about writing one. An instance can
- * reasonably want people to install from a curated store without being able to
- * author their own, or the reverse, so the two are not one switch.
+ * Not a permission but a composition, and that is what makes it readable. A
+ * store is the door people already know, so the door stays; what an instance
+ * decides is what is behind it.
+ *
+ * `open`: the public catalogue, plus whatever the admin offers.
+ * `curated`: only what the admin offers. The public catalogue remains the
+ * admin's own source for choosing, and is never shown to a user.
+ *
+ * A boolean was tried first and said nothing useful: "may install from the
+ * store" left the reader unable to tell whether that meant everything public or
+ * only what had been handed to them, and gave an instance no middle ground
+ * between all of it and none.
  */
-export function allowUserStoreInstall(): boolean {
-	return getConfig('allowUserStoreInstall') !== 'false';
+export type PersonaStoreMode = 'open' | 'curated';
+
+export function personaStoreMode(): PersonaStoreMode {
+	return getConfig('personaStoreMode') === 'curated' ? 'curated' : 'open';
 }
 
-export function setAllowUserStoreInstall(value: boolean): void {
-	setConfig('allowUserStoreInstall', value ? 'true' : 'false');
+export function setPersonaStoreMode(value: PersonaStoreMode): void {
+	setConfig('personaStoreMode', value);
 }
 
 /**

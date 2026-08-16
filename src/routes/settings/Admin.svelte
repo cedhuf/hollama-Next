@@ -12,6 +12,7 @@
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
 
+	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -21,6 +22,12 @@
 	// and toggles whether users may add their own providers.
 
 	/** The governance choice repeated by every "share this with users" control. */
+	/** What a user's store is made of. See `personaStoreMode` on the server. */
+	const personaStoreModes = $derived([
+		{ value: 'open', label: $LL.personaStoreModeOpen() },
+		{ value: 'curated', label: $LL.personaStoreModeCurated() }
+	]);
+
 	const sharingOptions = $derived([
 		{ value: 'locked', label: $LL.lockedForUsers() },
 		{ value: 'overridable', label: $LL.overridableForUsers() }
@@ -42,7 +49,7 @@
 
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
-	let allowUserStoreInstall = $state(true);
+	let personaStoreMode = $state<'open' | 'curated'>('open');
 	let servers = $state<SystemServer[]>([]);
 	let users = $state<UserRow[]>([]);
 	/** Until the first `load()` settles, the empty states below would be lies. */
@@ -132,7 +139,7 @@
 			]);
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
-			allowUserStoreInstall = config.allowUserStoreInstall ?? true;
+			personaStoreMode = config.personaStoreMode ?? 'open';
 			searchSharing = config.searchSharing ?? 'off';
 			shareEnabled = searchSharing !== 'off';
 			sharedUrl = config.searchUrl ?? '';
@@ -264,8 +271,8 @@
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
 	}
 
-	async function toggleAllowUserStoreInstall() {
-		await api('/api/admin/config', 'PUT', { allowUserStoreInstall });
+	async function savePersonaStoreMode() {
+		await api('/api/admin/config', 'PUT', { personaStoreMode });
 	}
 
 	async function saveShared(server: SystemServer) {
@@ -312,15 +319,21 @@
 			bind:checked={allowUserPersonas}
 			onChange={toggleAllowUserPersonas}
 		/>
-		<!-- Two switches rather than one, because writing a persona and taking one
-		     are different things to allow. A curated instance may well want people
-		     installing what it offers and authoring nothing. -->
-		<FieldCheckbox
-			label={$LL.allowUserStoreInstall()}
-			bind:checked={allowUserStoreInstall}
-			onChange={toggleAllowUserStoreInstall}
-		/>
-		<SettingsHint>{$LL.allowUserStoreInstallHelp()}</SettingsHint>
+		<!-- Not a permission but a composition, which is why it is a choice of two
+		     rather than a switch. A store is the door people already know; what an
+		     instance decides is what is behind it. -->
+		<SettingsField label={$LL.personaStoreModeLabel()}>
+			<Select
+				bind:value={personaStoreMode}
+				options={personaStoreModes}
+				onChange={savePersonaStoreMode}
+			/>
+		</SettingsField>
+		<SettingsHint>
+			{personaStoreMode === 'curated'
+				? $LL.personaStoreModeCuratedHelp()
+				: $LL.personaStoreModeOpenHelp()}
+		</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->

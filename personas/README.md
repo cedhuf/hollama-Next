@@ -36,6 +36,11 @@ pnpm personas:index
 The file name and the `id` inside have to match. `pnpm personas:check` verifies
 the committed index still describes the bundles, and runs in CI.
 
+The index carries two digests per persona, both computed for you: a `sha256` of the bundle's bytes,
+checked when someone installs it, and a fingerprint of what the persona says, which is how the app
+knows whether an installed copy has been edited or a new version has been published. Neither goes in
+the bundle, and neither is yours to write.
+
 ## The bundle format
 
 ```jsonc

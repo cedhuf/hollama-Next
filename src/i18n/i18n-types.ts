@@ -1332,17 +1332,63 @@ type RootTranslation = {
 	 */
 	personaStoreUnshare: string
 	/**
-	 * I​n​s​t​a​l​l​i​n​g​ ​i​s​ ​t​u​r​n​e​d​ ​o​f​f​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.​ ​A​s​k​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
+	 * W​h​a​t​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e​ ​s​h​o​w​s​ ​y​o​u​r​ ​u​s​e​r​s
 	 */
-	personaStoreInstallDisabled: string
+	personaStoreModeLabel: string
 	/**
-	 * A​l​l​o​w​ ​u​s​e​r​s​ ​t​o​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​t​h​e​ ​p​u​b​l​i​c​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e
+	 * T​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​,​ ​p​l​u​s​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r
 	 */
-	allowUserStoreInstall: string
+	personaStoreModeOpen: string
 	/**
-	 * G​o​v​e​r​n​s​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​ ​o​n​l​y​.​ ​P​e​r​s​o​n​a​s​ ​y​o​u​ ​s​h​a​r​e​,​ ​a​n​d​ ​t​h​e​ ​o​n​e​s​ ​y​o​u​ ​o​f​f​e​r​ ​f​r​o​m​ ​t​h​e​ ​s​t​o​r​e​,​ ​s​t​a​y​ ​i​n​s​t​a​l​l​a​b​l​e​ ​e​i​t​h​e​r​ ​w​a​y​.​ ​T​u​r​n​e​d​ ​o​f​f​,​ ​u​s​e​r​s​ ​g​e​t​ ​e​x​a​c​t​l​y​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r​ ​t​h​e​m​ ​a​n​d​ ​n​o​t​h​i​n​g​ ​e​l​s​e​.
+	 * O​n​l​y​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r
 	 */
-	allowUserStoreInstallHelp: string
+	personaStoreModeCurated: string
+	/**
+	 * U​s​e​r​s​ ​b​r​o​w​s​e​ ​t​h​e​ ​w​h​o​l​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​a​n​d​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​i​t​,​ ​a​l​o​n​g​s​i​d​e​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​o​f​f​e​r​.
+	 */
+	personaStoreModeOpenHelp: string
+	/**
+	 * U​s​e​r​s​ ​s​e​e​ ​o​n​l​y​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​o​f​f​e​r​,​ ​i​n​ ​t​h​e​ ​s​a​m​e​ ​p​l​a​c​e​ ​t​h​e​y​ ​a​l​w​a​y​s​ ​l​o​o​k​.​ ​T​h​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​s​t​a​y​s​ ​y​o​u​r​s​,​ ​t​o​ ​c​h​o​o​s​e​ ​f​r​o​m​.
+	 */
+	personaStoreModeCuratedHelp: string
+	/**
+	 * e​d​i​t​e​d
+	 */
+	personaStateEdited: string
+	/**
+	 * u​p​d​a​t​e​ ​a​v​a​i​l​a​b​l​e
+	 */
+	personaStateOutdated: string
+	/**
+	 * e​d​i​t​e​d​,​ ​u​p​d​a​t​e​ ​a​v​a​i​l​a​b​l​e
+	 */
+	personaStateEditedOutdated: string
+	/**
+	 * I​n​s​t​a​l​l​e​d​,​ ​e​d​i​t​e​d
+	 */
+	personaStoreInstalledEdited: string
+	/**
+	 * U​p​d​a​t​e
+	 */
+	personaStoreUpdate: string
+	/**
+	 * “​{​n​a​m​e​}​”​ ​u​p​d​a​t​e​d
+	 * @param {string} name
+	 */
+	personaStoreUpdated: RequiredParams<'name'>
+	/**
+	 * Y​o​u​ ​h​a​v​e​ ​e​d​i​t​e​d​ ​“​{​n​a​m​e​}​”​.​ ​U​p​d​a​t​i​n​g​ ​r​e​p​l​a​c​e​s​ ​y​o​u​r​ ​c​h​a​n​g​e​s​ ​w​i​t​h​ ​t​h​e​ ​p​u​b​l​i​s​h​e​d​ ​v​e​r​s​i​o​n​.​ ​C​o​n​t​i​n​u​e​?
+	 * @param {string} name
+	 */
+	personaStoreUpdateConfirm: RequiredParams<'name'>
+	/**
+	 * I​d​e​n​t​i​c​a​l​ ​t​o​ ​t​h​e​ ​s​t​o​r​e​ ​v​e​r​s​i​o​n
+	 */
+	personaOfferedVersionSame: string
+	/**
+	 * Y​o​u​r​ ​v​e​r​s​i​o​n​ ​o​f​ ​t​h​e​ ​s​t​o​r​e​ ​p​e​r​s​o​n​a
+	 */
+	personaOfferedVersionModified: string
 	/**
 	 * R​e​f​r​e​s​h
 	 */
@@ -3542,17 +3588,61 @@ The completion in progress will stop
 	 */
 	personaStoreUnshare: () => LocalizedString
 	/**
-	 * Installing is turned off on this instance. Ask your administrator.
+	 * What the persona store shows your users
 	 */
-	personaStoreInstallDisabled: () => LocalizedString
+	personaStoreModeLabel: () => LocalizedString
 	/**
-	 * Allow users to install from the public persona store
+	 * The public store, plus what you offer
 	 */
-	allowUserStoreInstall: () => LocalizedString
+	personaStoreModeOpen: () => LocalizedString
 	/**
-	 * Governs the public store only. Personas you share, and the ones you offer from the store, stay installable either way. Turned off, users get exactly what you offer them and nothing else.
+	 * Only what you offer
 	 */
-	allowUserStoreInstallHelp: () => LocalizedString
+	personaStoreModeCurated: () => LocalizedString
+	/**
+	 * Users browse the whole public catalogue and install from it, alongside the personas you offer.
+	 */
+	personaStoreModeOpenHelp: () => LocalizedString
+	/**
+	 * Users see only the personas you offer, in the same place they always look. The public catalogue stays yours, to choose from.
+	 */
+	personaStoreModeCuratedHelp: () => LocalizedString
+	/**
+	 * edited
+	 */
+	personaStateEdited: () => LocalizedString
+	/**
+	 * update available
+	 */
+	personaStateOutdated: () => LocalizedString
+	/**
+	 * edited, update available
+	 */
+	personaStateEditedOutdated: () => LocalizedString
+	/**
+	 * Installed, edited
+	 */
+	personaStoreInstalledEdited: () => LocalizedString
+	/**
+	 * Update
+	 */
+	personaStoreUpdate: () => LocalizedString
+	/**
+	 * “{name}” updated
+	 */
+	personaStoreUpdated: (arg: { name: string }) => LocalizedString
+	/**
+	 * You have edited “{name}”. Updating replaces your changes with the published version. Continue?
+	 */
+	personaStoreUpdateConfirm: (arg: { name: string }) => LocalizedString
+	/**
+	 * Identical to the store version
+	 */
+	personaOfferedVersionSame: () => LocalizedString
+	/**
+	 * Your version of the store persona
+	 */
+	personaOfferedVersionModified: () => LocalizedString
 	/**
 	 * Refresh
 	 */

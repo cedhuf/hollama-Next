@@ -43,6 +43,7 @@
 		type Persona
 	} from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
+	import { personaState } from '$lib/personaState';
 	import { openKnowledge } from '$lib/stores/modal';
 	import { formatTimestampToNow } from '$lib/utils';
 
@@ -134,6 +135,20 @@
 	function editPersona(persona: Persona) {
 		editing = { ...persona };
 		modalOpen = true;
+	}
+
+	/** What its provenance is called, for the badge on its card. */
+	function sourceLabel(persona: Persona): string {
+		switch (persona.source?.origin) {
+			case 'official':
+				return $LL.personaStoreOfficial();
+			case 'community':
+				return $LL.personaStoreCommunity();
+			case 'admin':
+				return $LL.sharedByAdmin();
+			default:
+				return $LL.import();
+		}
 	}
 
 	function chatWith(persona: Persona) {
@@ -274,6 +289,7 @@
 
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
+					{@const state = personaState(persona)}
 					<PersonaCard
 						name={persona.name || $LL.untitled()}
 						tagline={persona.tagline}
@@ -283,6 +299,20 @@
 						onclick={() => chatWith(persona)}
 					>
 						{#snippet badges()}
+							<!-- Where it came from, and whether it is still what arrived. Both
+							     deduced: a persona you wrote has no source and says nothing, which
+							     is right, since "written by you" is the ordinary case and
+							     labelling it would be noise on every card. -->
+							{#if state !== 'own'}
+								<span
+									class="rounded-full bg-shade-2 px-2 py-0.5 text-[10px] font-medium text-muted"
+									title={sourceLabel(persona)}
+								>
+									{state === 'clean'
+										? sourceLabel(persona)
+										: `${sourceLabel(persona)}, ${$LL.personaStateEdited()}`}
+								</span>
+							{/if}
 							{#if persona.shared}
 								<span
 									class="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent"
