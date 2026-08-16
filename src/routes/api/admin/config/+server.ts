@@ -5,12 +5,14 @@ import {
 	allowUserKeys,
 	allowUserPersonas,
 	getConfig,
+	personaAutoUpdateForced,
 	personaStoreMode,
 	personaStoreUrl,
 	resetOnboarding,
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
+	setPersonaAutoUpdateForced,
 	setPersonaStoreMode,
 	setPersonaStoreUrl,
 	themeSharing
@@ -23,6 +25,7 @@ export async function GET(event) {
 		allowUserKeys: allowUserKeys(),
 		allowUserPersonas: allowUserPersonas(),
 		personaStoreMode: personaStoreMode(),
+		personaAutoUpdateForced: personaAutoUpdateForced(),
 		themeSharing: themeSharing(),
 		themeMode: getConfig('themeMode') ?? 'system',
 		themeStyle: getConfig('themeStyle') ?? 'classic',
@@ -65,6 +68,9 @@ export async function PUT(event) {
 	// A stamp, so every browser can tell on its next load whether it has already
 	// acknowledged this one. Nothing here has to know who has seen what.
 	if (body?.resetOnboarding === true) resetOnboarding();
+	if (typeof body?.personaAutoUpdateForced === 'boolean') {
+		setPersonaAutoUpdateForced(body.personaAutoUpdateForced);
+	}
 	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {

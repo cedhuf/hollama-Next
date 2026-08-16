@@ -127,9 +127,9 @@ The middle answer between a conversation in the way and a conversation gone. Arc
 of the list and keeps everything: the messages, the model, the settings, the persona it belonged to.
 
 Archived conversations are reached from a link at the foot of the list, which appears only once there
-is something in it, and each one can be restored or deleted from there. Nothing else in the app shows
-them: they are not a group at the bottom of the sidebar, because being out of the way is the whole
-point.
+is something in it. Each one can be restored or deleted from there, and the whole archive can be
+restored or emptied at once. Nothing else in the app shows them: they are not a group at the bottom
+of the sidebar, because being out of the way is the whole point.
 
 The same pin and delete can sit on every row instead, one click closer:
 _Settings → Interface → Sidebar → Show quick actions_. They are off by default, because they hover

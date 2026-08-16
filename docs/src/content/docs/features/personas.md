@@ -128,6 +128,18 @@ questions:
 Editing a persona back to what it was makes it the store's persona again. That is why it is a
 fingerprint rather than a flag: a flag would stay lit and lie.
 
+The button reads _Update_ when a newer version exists and _Restore the published version_ when only
+your edits stand between the two. It is the same action either way: the published text replaces what
+is there. It asks first whenever there is something of yours to lose.
+
+**Update all**, next to the refresh control, takes every waiting revision at once. It skips the ones
+you have edited, deliberately: a single press that quietly overwrote everything someone had rewritten
+would be the one press nobody could undo.
+
+**Automatically**, under _Settings → Tools → Personas_, does the same thing whenever the listing is
+read, and to the same restricted set. An admin can turn it on for a whole instance under
+_Settings → Admin → User permissions_, whatever each account chose for itself.
+
 Updating replaces what was written and keeps what is yours: the same id, the model you chose, the
 conversation you are having with it, the knowledge you attached. Updating is not reinstalling.
 

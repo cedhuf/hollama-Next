@@ -3,8 +3,11 @@ import { get, writable } from 'svelte/store';
 import { env } from '$env/dynamic/public';
 import { browser } from '$app/environment';
 import { LOCAL_STORAGE_PREFIX } from '$lib/data/keys';
-import { settingsStore } from '$lib/localStorage';
-import { parsePersonaBundle, type PersonaBundle } from '$lib/personaBundle';
+import { personasStore, settingsStore } from '$lib/localStorage';
+import { applyBundleToPersona, parsePersonaBundle, type PersonaBundle } from '$lib/personaBundle';
+import { personaOrigin } from '$lib/personas';
+import { personasConfig } from '$lib/personasConfig';
+import { personaState } from '$lib/personaState';
 import {
 	DEFAULT_PERSONA_STORE,
 	parseCatalogIndex,
@@ -114,6 +117,10 @@ export async function loadCatalog(force = false): Promise<void> {
 		const catalog: Catalog = { entries, fetchedAt: new Date().toISOString() };
 		writeCache(catalog);
 		state.set({ status: 'ready', catalog, stale: false });
+
+		// Here rather than at the call sites, so it happens wherever the listing is
+		// read and nobody has to remember to ask for it.
+		await autoUpdate(entries);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		if (cached) state.set({ status: 'ready', catalog: cached, stale: true });
@@ -158,4 +165,42 @@ export async function fetchBundle(entry: CatalogEntry): Promise<PersonaBundle> {
 	const bundle = parsePersonaBundle(JSON.parse(new TextDecoder().decode(bytes)));
 	if (!bundle) throw new Error('not a persona bundle');
 	return bundle;
+}
+
+/**
+ * Take the new revisions, for the personas nobody has touched.
+ *
+ * Only those. A persona you have edited is yours, and replacing your text
+ * because someone upstream changed theirs is not an update, it is a loss. Those
+ * keep being offered on their card instead, which is where the choice belongs.
+ *
+ * Off by default, and an instance can force it on: an administrator who wants
+ * their people on the current version of what they hand out should not have to
+ * hope each of them ticked a box.
+ */
+async function autoUpdate(entries: CatalogEntry[]): Promise<void> {
+	if (!browser) return;
+	const config = get(personasConfig);
+	if (!config.autoUpdateForced && !get(settingsStore).personaAutoUpdate) return;
+
+	const byId = new Map(entries.map((entry) => [entry.id, entry]));
+
+	for (const persona of get(personasStore) ?? []) {
+		const from = personaOrigin(persona);
+		const entry = from ? byId.get(from) : undefined;
+		if (!entry) continue;
+		if (personaState(persona, entry.contentDigest) !== 'outdated') continue;
+
+		try {
+			const bundle = await fetchBundle(entry);
+			applyBundleToPersona(persona, bundle, {
+				origin: entry.origin,
+				id: entry.id,
+				revision: entry.revision
+			});
+		} catch {
+			// One that cannot be fetched is not a reason to abandon the others, and
+			// not a reason to interrupt anyone: it will be offered on its card.
+		}
+	}
 }

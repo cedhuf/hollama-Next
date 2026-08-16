@@ -89,7 +89,7 @@
 {/snippet}
 
 <article
-	class="flex overflow-hidden rounded-xl border border-shade-3 bg-shade-0 transition-colors hover:border-shade-4
+	class="relative flex overflow-hidden rounded-xl border border-shade-3 bg-shade-0 transition-colors hover:border-shade-4
 		{list ? 'items-stretch' : 'flex-col'}"
 >
 	<!-- The body is a button when it does something and a plain box when it does
@@ -106,9 +106,6 @@
 				{@render identity(34)}
 			{:else}
 				<div class="flex w-full items-start gap-3">{@render identity(40)}</div>
-				{#if badges}
-					<div class="flex flex-wrap gap-1">{@render badges()}</div>
-				{/if}
 				{@render tagRow(3)}
 				{#if meta}
 					<span class="mt-auto pt-0.5 text-[11px] leading-snug text-muted">{meta}</span>
@@ -125,14 +122,23 @@
 				{@render identity(34)}
 			{:else}
 				<div class="flex w-full items-start gap-3">{@render identity(40)}</div>
-				{#if badges}
-					<div class="flex flex-wrap gap-1">{@render badges()}</div>
-				{/if}
 				{@render tagRow(3)}
 				{#if meta}
 					<span class="mt-auto pt-0.5 text-[11px] leading-snug text-muted">{meta}</span>
 				{/if}
 			{/if}
+		</div>
+	{/if}
+
+	{#if !list && badges}
+		<!-- Over the corner rather than on a line of its own.
+		     A row of labels between the name and the tags took the space the
+		     description needed and made a card of three short fields look like a
+		     card of five. Floated, it annotates the card instead of being part of
+		     what the card says. `pointer-events-none` so it never intercepts the
+		     click the body is there to receive. -->
+		<div class="pointer-events-none absolute right-2 top-2 flex flex-wrap justify-end gap-1">
+			{@render badges()}
 		</div>
 	{/if}
 

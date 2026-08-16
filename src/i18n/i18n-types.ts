@@ -1228,6 +1228,14 @@ type RootTranslation = {
 	 */
 	archivedSessionsEmpty: string
 	/**
+	 * R​e​s​t​o​r​e​ ​a​l​l
+	 */
+	archiveRestoreAll: string
+	/**
+	 * D​e​l​e​t​e​ ​a​l​l
+	 */
+	archiveDeleteAll: string
+	/**
 	 * E​n​d​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
 	 */
 	closePersonaConversation: string
@@ -1363,6 +1371,48 @@ type RootTranslation = {
 	 * S​t​o​p​ ​s​h​a​r​i​n​g​ ​i​t
 	 */
 	personaStoreUnshare: string
+	/**
+	 * U​p​d​a​t​e​ ​i​n​s​t​a​l​l​e​d​ ​p​e​r​s​o​n​a​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	personaAutoUpdate: string
+	/**
+	 * T​a​k​e​s​ ​a​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​a​s​ ​s​o​o​n​ ​a​s​ ​i​t​ ​i​s​ ​p​u​b​l​i​s​h​e​d​,​ ​f​o​r​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​h​a​v​e​ ​n​o​t​ ​e​d​i​t​e​d​.​ ​T​h​e​ ​o​n​e​s​ ​y​o​u​ ​h​a​v​e​ ​c​h​a​n​g​e​d​ ​k​e​e​p​ ​b​e​i​n​g​ ​o​f​f​e​r​e​d​ ​i​n​s​t​e​a​d​,​ ​o​n​ ​t​h​e​i​r​ ​c​a​r​d​.
+	 */
+	personaAutoUpdateHelp: string
+	/**
+	 * T​u​r​n​e​d​ ​o​n​ ​f​o​r​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.​ ​P​e​r​s​o​n​a​s​ ​y​o​u​ ​h​a​v​e​ ​e​d​i​t​e​d​ ​a​r​e​ ​n​e​v​e​r​ ​r​e​p​l​a​c​e​d​.
+	 */
+	personaAutoUpdateForcedHelp: string
+	/**
+	 * U​p​d​a​t​e​ ​e​v​e​r​y​o​n​e​'​s​ ​p​e​r​s​o​n​a​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	personaAutoUpdateForce: string
+	/**
+	 * A​p​p​l​i​e​s​ ​t​o​ ​e​v​e​r​y​ ​a​c​c​o​u​n​t​,​ ​w​h​a​t​e​v​e​r​ ​t​h​e​y​ ​c​h​o​s​e​ ​f​o​r​ ​t​h​e​m​s​e​l​v​e​s​.​ ​P​e​r​s​o​n​a​s​ ​s​o​m​e​o​n​e​ ​h​a​s​ ​e​d​i​t​e​d​ ​a​r​e​ ​n​e​v​e​r​ ​r​e​p​l​a​c​e​d​.
+	 */
+	personaAutoUpdateForceHelp: string
+	/**
+	 * U​p​d​a​t​e​ ​a​l​l
+	 */
+	personaStoreUpdateAll: string
+	/**
+	 * {​c​o​u​n​t​}​ ​p​e​r​s​o​n​a​{​{​s​}​}​ ​u​p​d​a​t​e​d
+	 * @param {number} count
+	 */
+	personaStoreUpdatedAll: RequiredParams<'count'>
+	/**
+	 * E​v​e​r​y​t​h​i​n​g​ ​i​s​ ​u​p​ ​t​o​ ​d​a​t​e​.
+	 */
+	personaStoreNothingToUpdate: string
+	/**
+	 * R​e​s​t​o​r​e​ ​t​h​e​ ​p​u​b​l​i​s​h​e​d​ ​v​e​r​s​i​o​n
+	 */
+	personaStoreReset: string
+	/**
+	 * R​e​p​l​a​c​e​ ​y​o​u​r​ ​v​e​r​s​i​o​n​ ​o​f​ ​“​{​n​a​m​e​}​”​ ​w​i​t​h​ ​t​h​e​ ​p​u​b​l​i​s​h​e​d​ ​o​n​e​?​ ​Y​o​u​r​ ​c​h​a​n​g​e​s​ ​a​r​e​ ​l​o​s​t​.
+	 * @param {string} name
+	 */
+	personaStoreResetConfirm: RequiredParams<'name'>
 	/**
 	 * W​h​a​t​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​s​t​o​r​e​ ​s​h​o​w​s​ ​y​o​u​r​ ​u​s​e​r​s
 	 */
@@ -3572,6 +3622,14 @@ The completion in progress will stop
 	 */
 	archivedSessionsEmpty: () => LocalizedString
 	/**
+	 * Restore all
+	 */
+	archiveRestoreAll: () => LocalizedString
+	/**
+	 * Delete all
+	 */
+	archiveDeleteAll: () => LocalizedString
+	/**
 	 * End this conversation
 	 */
 	closePersonaConversation: () => LocalizedString
@@ -3707,6 +3765,46 @@ The completion in progress will stop
 	 * Stop sharing it
 	 */
 	personaStoreUnshare: () => LocalizedString
+	/**
+	 * Update installed personas automatically
+	 */
+	personaAutoUpdate: () => LocalizedString
+	/**
+	 * Takes a new version as soon as it is published, for the personas you have not edited. The ones you have changed keep being offered instead, on their card.
+	 */
+	personaAutoUpdateHelp: () => LocalizedString
+	/**
+	 * Turned on for this instance by your administrator. Personas you have edited are never replaced.
+	 */
+	personaAutoUpdateForcedHelp: () => LocalizedString
+	/**
+	 * Update everyone's personas automatically
+	 */
+	personaAutoUpdateForce: () => LocalizedString
+	/**
+	 * Applies to every account, whatever they chose for themselves. Personas someone has edited are never replaced.
+	 */
+	personaAutoUpdateForceHelp: () => LocalizedString
+	/**
+	 * Update all
+	 */
+	personaStoreUpdateAll: () => LocalizedString
+	/**
+	 * {count} persona{{s}} updated
+	 */
+	personaStoreUpdatedAll: (arg: { count: number }) => LocalizedString
+	/**
+	 * Everything is up to date.
+	 */
+	personaStoreNothingToUpdate: () => LocalizedString
+	/**
+	 * Restore the published version
+	 */
+	personaStoreReset: () => LocalizedString
+	/**
+	 * Replace your version of “{name}” with the published one? Your changes are lost.
+	 */
+	personaStoreResetConfirm: (arg: { name: string }) => LocalizedString
 	/**
 	 * What the persona store shows your users
 	 */

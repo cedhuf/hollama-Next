@@ -209,6 +209,20 @@
 			/>
 		</SettingsField>
 		<SettingsHint>{$LL.personaStoreUrlHelp()}</SettingsHint>
+
+		<!-- Forced by the instance: shown as on and not offered, rather than hidden,
+		     so the behaviour is explained rather than merely happening. -->
+		<FieldCheckbox
+			label={$LL.personaAutoUpdate()}
+			checked={$personasConfig.autoUpdateForced || $settingsStore.personaAutoUpdate}
+			disabled={$personasConfig.autoUpdateForced}
+			onChange={(value) => ($settingsStore.personaAutoUpdate = value)}
+		/>
+		<SettingsHint>
+			{$personasConfig.autoUpdateForced
+				? $LL.personaAutoUpdateForcedHelp()
+				: $LL.personaAutoUpdateHelp()}
+		</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection

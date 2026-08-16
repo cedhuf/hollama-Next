@@ -109,6 +109,14 @@ export interface Settings {
 	personaStoreUrl: string;
 	/** How the persona store draws its entries: cards to browse, rows to scan. */
 	personaStoreLayout: 'grid' | 'list';
+	/**
+	 * Take a new revision of an installed persona as soon as one is published.
+	 *
+	 * Only for the ones you have not touched. A persona you have edited is yours,
+	 * and replacing your text because someone upstream changed theirs is not an
+	 * update, it is a loss; those keep being offered rather than applied.
+	 */
+	personaAutoUpdate: boolean;
 	/** Named groups of knowledge. Kept here so an empty one survives and no table is needed. */
 	knowledgeCollections: KnowledgeCollection[];
 	/** Ids of the collections folded shut in the Library, so the page opens as it was left. */
@@ -261,6 +269,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	systemPrompts: { global: '', perModel: {} },
 	personaStoreUrl: '',
 	personaStoreLayout: 'grid',
+	personaAutoUpdate: false,
 	knowledgeCollections: [],
 	collapsedCollections: [],
 	homeShowHeader: true,

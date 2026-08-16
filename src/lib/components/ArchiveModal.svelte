@@ -32,11 +32,24 @@
 
 	/** Which one is waiting for a second click, since deleting here loses the transcript. */
 	let confirming = $state<string | null>(null);
+	/** The same, for the one press that would take all of them at once. */
+	let confirmingAll = $state(false);
 
 	const archived = $derived(($sessionsStore ?? []).filter((session) => session.archived));
 
 	function restore(session: SessionSummary) {
 		void toggleSessionArchive(session.id);
+	}
+
+	async function restoreAll() {
+		// Sequential rather than parallel: each one reads its conversation and writes
+		// it back, and the store is not something to have several writers in at once.
+		for (const session of [...archived]) await toggleSessionArchive(session.id);
+	}
+
+	function removeAll() {
+		for (const session of [...archived]) remove(session);
+		confirmingAll = false;
 	}
 
 	function remove(session: SessionSummary) {
@@ -57,14 +70,51 @@
 					<span class="font-normal text-muted">· {archived.length}</span>
 				{/if}
 			</span>
-			<button
-				type="button"
-				onclick={() => (open = false)}
-				aria-label={$LL.close()}
-				class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
-			>
-				<X class="h-4 w-4" />
-			</button>
+			<div class="flex shrink-0 items-center gap-1">
+				{#if archived.length > 0}
+					{#if confirmingAll}
+						<!-- Asks where it acts, the way a single row does, rather than in a
+						     dialog stacked on this one. -->
+						<button
+							type="button"
+							onclick={removeAll}
+							class="rounded-lg px-2.5 py-1 text-xs text-negative transition-colors hover:bg-shade-2"
+						>
+							{$LL.confirmDeletion()}
+						</button>
+						<button
+							type="button"
+							onclick={() => (confirmingAll = false)}
+							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2"
+						>
+							{$LL.cancel()}
+						</button>
+					{:else}
+						<button
+							type="button"
+							onclick={restoreAll}
+							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						>
+							{$LL.archiveRestoreAll()}
+						</button>
+						<button
+							type="button"
+							onclick={() => (confirmingAll = true)}
+							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-negative"
+						>
+							{$LL.archiveDeleteAll()}
+						</button>
+					{/if}
+				{/if}
+				<button
+					type="button"
+					onclick={() => (open = false)}
+					aria-label={$LL.close()}
+					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+				>
+					<X class="h-4 w-4" />
+				</button>
+			</div>
 		</div>
 
 		<div class="min-h-0 flex-1 overflow-auto p-3">

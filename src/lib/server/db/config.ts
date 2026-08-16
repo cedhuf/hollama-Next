@@ -62,6 +62,21 @@ export function setPersonaStoreMode(value: PersonaStoreMode): void {
 }
 
 /**
+ * Whether the instance updates everyone's personas for them.
+ *
+ * Forced rather than merely defaulted: an administrator who wants their people
+ * on the current version of what they hand out should not have to hope each of
+ * them ticked a box. Untouched personas only, here as everywhere.
+ */
+export function personaAutoUpdateForced(): boolean {
+	return getConfig('personaAutoUpdateForced') === 'true';
+}
+
+export function setPersonaAutoUpdateForced(value: boolean): void {
+	setConfig('personaAutoUpdateForced', value ? 'true' : 'false');
+}
+
+/**
  * Where the persona store is read from.
  *
  * The instance's, not each person's: the server is what fetches it, so the

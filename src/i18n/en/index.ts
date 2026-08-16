@@ -317,6 +317,8 @@ const en = {
 	unarchiveSession: 'Restore',
 	archivedSessions: 'Archived',
 	archivedSessionsEmpty: 'Nothing archived.',
+	archiveRestoreAll: 'Restore all',
+	archiveDeleteAll: 'Delete all',
 	closePersonaConversation: 'End this conversation',
 	unpin: 'Unpin',
 	connected: 'Connected',
@@ -354,6 +356,20 @@ const en = {
 	personaStoreCreate: 'Create a persona',
 	personaStoreShare: 'Share with your users',
 	personaStoreUnshare: 'Stop sharing it',
+	personaAutoUpdate: 'Update installed personas automatically',
+	personaAutoUpdateHelp:
+		'Takes a new version as soon as it is published, for the personas you have not edited. The ones you have changed keep being offered instead, on their card.',
+	personaAutoUpdateForcedHelp:
+		'Turned on for this instance by your administrator. Personas you have edited are never replaced.',
+	personaAutoUpdateForce: "Update everyone's personas automatically",
+	personaAutoUpdateForceHelp:
+		'Applies to every account, whatever they chose for themselves. Personas someone has edited are never replaced.',
+	personaStoreUpdateAll: 'Update all',
+	personaStoreUpdatedAll: '{count:number} persona{{s}} updated',
+	personaStoreNothingToUpdate: 'Everything is up to date.',
+	personaStoreReset: 'Restore the published version',
+	personaStoreResetConfirm:
+		'Replace your version of “{name:string}” with the published one? Your changes are lost.',
 	personaStoreModeLabel: 'What the persona store shows your users',
 	personaStoreModeOpen: 'The public store, plus what you share',
 	personaStoreModeCurated: 'Only what you share',

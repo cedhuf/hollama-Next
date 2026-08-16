@@ -310,6 +310,8 @@ const fr = extendDictionary(en, {
 	unarchiveSession: 'Restaurer',
 	archivedSessions: 'Archivées',
 	archivedSessionsEmpty: 'Rien dans les archives.',
+	archiveRestoreAll: 'Tout restaurer',
+	archiveDeleteAll: 'Tout supprimer',
 	closePersonaConversation: 'Terminer cette discussion',
 	unpin: 'Désépingler',
 	connected: 'Connecté',
@@ -348,6 +350,20 @@ const fr = extendDictionary(en, {
 	personaStoreCreate: 'Créer un persona',
 	personaStoreShare: 'Partager avec vos utilisateurs',
 	personaStoreUnshare: 'Ne plus le partager',
+	personaAutoUpdate: 'Mettre à jour les personas installés automatiquement',
+	personaAutoUpdateHelp:
+		"Prend la nouvelle version dès sa publication, pour les personas que vous n'avez pas modifiés. Ceux que vous avez changés restent proposés sur leur carte.",
+	personaAutoUpdateForcedHelp:
+		'Activé pour cette instance par votre administrateur. Les personas que vous avez modifiés ne sont jamais remplacés.',
+	personaAutoUpdateForce: 'Mettre à jour les personas de tout le monde automatiquement',
+	personaAutoUpdateForceHelp:
+		"S'applique à tous les comptes, quel que soit leur propre réglage. Un persona modifié par quelqu'un n'est jamais remplacé.",
+	personaStoreUpdateAll: 'Tout mettre à jour',
+	personaStoreUpdatedAll: '{count:number} persona{{s}} mis à jour',
+	personaStoreNothingToUpdate: 'Tout est à jour.',
+	personaStoreReset: 'Restaurer la version publiée',
+	personaStoreResetConfirm:
+		'Remplacer votre version de « {name:string} » par celle publiée ? Vos changements seront perdus.',
 	personaStoreModeLabel: 'Ce que la boutique montre à vos utilisateurs',
 	personaStoreModeOpen: 'La boutique publique, plus ce que vous partagez',
 	personaStoreModeCurated: 'Uniquement ce que vous partagez',

@@ -18,7 +18,7 @@
 	import PersonaCard from '$lib/components/PersonaCard.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
-	import { avatarFields, installPersonaBundle, personaFromBundle } from '$lib/personaBundle';
+	import { applyBundleToPersona, avatarFields, installPersonaBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
 	import { contentDigest, personaAuthored } from '$lib/personaDigest';
 	import { installPersona, personaOrigin, savePersona, type Persona } from '$lib/personas';
@@ -157,37 +157,23 @@
 	/**
 	 * Take the published version over the one in the library.
 	 *
-	 * The authored fields are replaced and everything of yours is kept: the id, the
-	 * model you chose, the conversation you are having with it, the knowledge you
-	 * attached. Updating a persona is not reinstalling it.
+	 * One action for two situations that look different and are not: a newer
+	 * revision has been published, or you have edited yours and want the original
+	 * back. Both end with the published text in place of what is there, and both
+	 * keep everything of yours that is not text: the id, the model you chose, the
+	 * conversation you are having with it, the knowledge you attached.
 	 *
-	 * When you have edited it, this replaces your edits, so it asks first. There is
-	 * no merge to offer and pretending otherwise would be worse than the question.
+	 * It asks whenever there is something of yours to lose. There is no merge to
+	 * offer and pretending otherwise would be worse than the question.
 	 */
 	async function updateEntry(entry: CatalogEntry, persona: Persona, edited: boolean) {
 		if (edited && !confirm($LL.personaStoreUpdateConfirm({ name: persona.name }))) return;
 
 		const bundle = await fetchBundle(entry);
-		const fresh = personaFromBundle(bundle, {
+		const fresh = applyBundleToPersona(persona, bundle, {
 			origin: entry.origin,
 			id: entry.id,
 			revision: entry.revision
-		});
-
-		savePersona({
-			...persona,
-			name: fresh.name,
-			tagline: fresh.tagline,
-			avatarColor: fresh.avatarColor,
-			avatarGlyph: fresh.avatarGlyph,
-			avatarImage: fresh.avatarImage,
-			systemPrompt: fresh.systemPrompt,
-			greeting: fresh.greeting,
-			params: fresh.params,
-			webSearch: fresh.webSearch,
-			suggestions: fresh.suggestions,
-			tags: fresh.tags,
-			source: fresh.source
 		});
 		toast.success($LL.personaStoreUpdated({ name: fresh.name }));
 	}
@@ -211,7 +197,9 @@
 			.map((entry): Offer => {
 				const copy = installedCopy(entry.id, entry.name);
 				const state = copy ? personaState(copy, entry.contentDigest) : undefined;
-				const stale = state === 'outdated' || state === 'edited-outdated';
+				// Anything that is not exactly what was published can take what was
+				// published: a newer revision, or the original back over your edits.
+				const stale = !!state && state !== 'clean';
 
 				return {
 					key: `catalog:${entry.id}`,
@@ -232,6 +220,33 @@
 				};
 			})
 	);
+
+	/**
+	 * Every persona that could take a published version right now.
+	 *
+	 * Untouched ones only. Offering "update all" and having it quietly overwrite
+	 * everything someone had rewritten would be the one press nobody could undo.
+	 */
+	const updatable = $derived(fromCatalog.filter((offer) => offer.state === 'outdated'));
+
+	let updatingAll = $state(false);
+	async function updateAll() {
+		updatingAll = true;
+		let done = 0;
+		try {
+			for (const offer of updatable) {
+				try {
+					await offer.update?.();
+					done += 1;
+				} catch {
+					// One that will not fetch is not a reason to stop the rest.
+				}
+			}
+			toast.success($LL.personaStoreUpdatedAll({ count: done }));
+		} finally {
+			updatingAll = false;
+		}
+	}
 
 	/**
 	 * The personas the admin wrote and shared, which are objects of their own.
@@ -269,6 +284,15 @@
 					installPersona(persona);
 					toast.success($LL.installedPersona({ name: persona.name }));
 				},
+				// The same control the store's own cards carry, for the same reason: the
+				// place you see what you are sharing has to be the place you stop.
+				relayed: $personasConfig.canShare ? true : undefined,
+				toggleRelay: $personasConfig.canShare
+					? async () => {
+							const own = ($personasStore ?? []).find((p) => p.id === persona.id);
+							if (own) await toggleOwn(own);
+						}
+					: undefined,
 				// Deduced from the listing alone: recompute what they are handing out and
 				// compare it with what the store publishes. No flag to set, and editing
 				// it back makes it the store's persona again instead of leaving a mark
@@ -289,8 +313,9 @@
 	const mine = $derived(
 		($personasStore ?? [])
 			.filter((persona) => personaState(persona, publishedDigest(persona)) !== 'clean')
-			.map(
-				(persona): Offer => ({
+			.map((persona): Offer => {
+				const entry = matchingEntry(persona);
+				return {
 					key: `mine:${persona.id}`,
 					name: persona.name,
 					tagline: persona.tagline,
@@ -301,16 +326,35 @@
 					},
 					tags: persona.tags ?? [],
 					origin: 'admin',
+					// A persona you wrote is in your library, which is what every other
+					// card here means by "installed". Saying it reads the same way in all
+					// three views, and having said it there is nothing to install.
+					state: personaState(persona, entry?.contentDigest),
 					install: async () => {},
 					relayed: persona.shared,
 					toggleRelay: () => toggleOwn(persona),
-					version: offeredVersion(persona, entries)
-				})
-			)
+					version: entry ? 'modified' : 'own'
+				};
+			})
 	);
 
-	const publishedDigest = (persona: Persona) =>
-		entries.find((entry) => entry.id === personaOrigin(persona))?.contentDigest;
+	/**
+	 * The catalogue row a persona answers to, by provenance or, failing that, by name.
+	 *
+	 * The name is what rescues the four personas the app used to write into every
+	 * library at boot: they carry no provenance at all, so nothing links them to the
+	 * store, and without this they read as written-from-scratch while the store
+	 * simultaneously calls them installed. They are neither: they are old copies of
+	 * store personas, and saying "your version of it" is the true answer.
+	 */
+	const matchingEntry = (persona: Persona) => {
+		const from = personaOrigin(persona);
+		if (from) return entries.find((entry) => entry.id === from);
+		const name = persona.name.trim().toLowerCase();
+		return entries.find((entry) => entry.name.trim().toLowerCase() === name);
+	};
+
+	const publishedDigest = (persona: Persona) => matchingEntry(persona)?.contentDigest;
 
 	/** Everything this instance currently offers, whichever way it got there. */
 	const offered = $derived([...fromAdmin, ...fromCatalog.filter((offer) => offer.relayed)]);
@@ -410,6 +454,25 @@
 		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
 			<span class="truncate text-sm font-semibold text-active">{$LL.personaStore()}</span>
 			<div class="flex shrink-0 items-center gap-1">
+				<!-- Only when there is something to do, and never for the ones you have
+				     edited: a single press that quietly overwrote everything someone had
+				     rewritten would be the one nobody could undo. -->
+				{#if updatable.length > 0}
+					<button
+						type="button"
+						disabled={updatingAll}
+						onclick={updateAll}
+						class="flex items-center gap-1.5 rounded-lg border border-accent px-2.5 py-1 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
+					>
+						{#if updatingAll}
+							<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+						{:else}
+							<ArrowDownToLine class="h-3.5 w-3.5" />
+						{/if}
+						{$LL.personaStoreUpdateAll()}
+						<span class="opacity-70">{updatable.length}</span>
+					</button>
+				{/if}
 				<button
 					type="button"
 					onclick={() => loadCatalog(true)}
@@ -582,7 +645,9 @@
 											{:else}
 												<ArrowDownToLine class="h-3.5 w-3.5" />
 											{/if}
-											{$LL.personaStoreUpdate()}
+											{offer.state === 'outdated'
+												? $LL.personaStoreUpdate()
+												: $LL.personaStoreReset()}
 										</button>
 									{:else if offer.state}
 										<span

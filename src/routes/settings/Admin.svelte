@@ -51,6 +51,7 @@
 	let allowUserPersonas = $state(true);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
 
+	let personaAutoUpdateForced = $state(false);
 	let themeSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let themeShareEnabled = $state(false);
 	let resettingOnboarding = $state(false);
@@ -144,6 +145,7 @@
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
 			personaStoreMode = config.personaStoreMode ?? 'open';
+			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
 			themeSharing = config.themeSharing ?? 'off';
 			themeShareEnabled = themeSharing !== 'off';
 			searchSharing = config.searchSharing ?? 'off';
@@ -281,6 +283,10 @@
 		await api('/api/admin/config', 'PUT', { personaStoreMode });
 	}
 
+	async function savePersonaAutoUpdate() {
+		await api('/api/admin/config', 'PUT', { personaAutoUpdateForced });
+	}
+
 	/**
 	 * The admin shares the theme they are using, the way they share their search
 	 * engine and their prompts: the panel decides who gets it, the values come
@@ -376,6 +382,16 @@
 				? $LL.personaStoreModeCuratedHelp()
 				: $LL.personaStoreModeOpenHelp()}
 		</SettingsHint>
+
+		<!-- Forced rather than defaulted: an admin who wants their people on the
+		     current version of what they hand out should not have to hope each of
+		     them ticked a box. Untouched personas only, here as everywhere. -->
+		<FieldCheckbox
+			label={$LL.personaAutoUpdateForce()}
+			bind:checked={personaAutoUpdateForced}
+			onChange={savePersonaAutoUpdate}
+		/>
+		<SettingsHint>{$LL.personaAutoUpdateForceHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->

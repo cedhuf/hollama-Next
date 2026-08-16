@@ -236,6 +236,43 @@ export function installPersonaBundle(bundle: PersonaBundle, source: PersonaSourc
 }
 
 /**
+ * Take the published version over the one in the library.
+ *
+ * The authored fields are replaced and everything of yours is kept: the id, the
+ * model you chose, the conversation you are having with it, the knowledge you
+ * attached. Updating a persona is not reinstalling it, and the difference is the
+ * whole reason this is not `installPersonaBundle` with a different name.
+ *
+ * Here rather than in the dialog that used to hold it, because it is now called
+ * from three places: the update button, the reset button, and the automatic pass
+ * that runs when the listing arrives.
+ */
+export function applyBundleToPersona(
+	persona: Persona,
+	bundle: PersonaBundle,
+	source: PersonaSource
+): Persona {
+	const fresh = personaFromBundle(bundle, source);
+	const updated: Persona = {
+		...persona,
+		name: fresh.name,
+		tagline: fresh.tagline,
+		avatarColor: fresh.avatarColor,
+		avatarGlyph: fresh.avatarGlyph,
+		avatarImage: fresh.avatarImage,
+		systemPrompt: fresh.systemPrompt,
+		greeting: fresh.greeting,
+		params: fresh.params,
+		webSearch: fresh.webSearch,
+		suggestions: fresh.suggestions,
+		tags: fresh.tags,
+		source: fresh.source
+	};
+	savePersona(updated);
+	return updated;
+}
+
+/**
  * The persona a bundle describes, without putting it anywhere.
  *
  * For the one case that is not an install: an admin offering a persona from the

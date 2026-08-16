@@ -31,6 +31,8 @@ export interface PersonasConfig {
 	storeMode: 'open' | 'curated';
 	/** Whether the current user may offer a persona to everyone on the instance. */
 	canShare: boolean;
+	/** The instance updates installed personas for everyone, whatever they chose. */
+	autoUpdateForced: boolean;
 	/**
 	 * Store personas this instance relays, by catalogue id.
 	 *
@@ -50,6 +52,7 @@ const DEFAULT: PersonasConfig = {
 	// nobody to share with.
 	storeMode: 'open',
 	canShare: false,
+	autoUpdateForced: false,
 	sharedFromStore: []
 };
 
