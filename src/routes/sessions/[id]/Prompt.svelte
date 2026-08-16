@@ -505,7 +505,7 @@
 					<div
 						bind:this={mirror}
 						aria-hidden="true"
-						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 overflow-hidden px-4 pt-3.5"
+						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 px-4 pt-3.5"
 					>
 						<!-- Written on one line, and it has to stay on one line. The mirror
 						     renders with `pre-wrap`, so the newlines and indentation between
@@ -634,11 +634,30 @@
 		overflow-wrap: break-word;
 		word-break: normal;
 		tab-size: 4;
+		/* Reserved on both, always, so the two never wrap at different widths.
+		   Without it the textarea takes a gutter the moment it overflows and the
+		   mirror does not, which is a drift that only appears on a long prompt and
+		   only on the platforms that draw classic scrollbars. */
+		scrollbar-gutter: stable;
 	}
 
 	/* The mirror is what is read, so it carries the theme's ink. The textarea on
-	   top keeps its caret and its selection and nothing else. */
+	   top keeps its caret and its selection and nothing else.
+
+	   `display: block`, and that is not a detail: it borrows `base-input` to be sure
+	   it resolves the same padding as the textarea does, and `base-input` is a flex
+	   container. Laid out as flex, every mention became a flex item and the
+	   whitespace-only text nodes between them were dropped outright, which is why two
+	   mentions ended up stuck together and everything after them sat in the wrong
+	   place. Text has to be laid out as text.
+
+	   `overflow-y: auto` rather than hidden, so a prompt long enough to scroll
+	   reserves the same scrollbar gutter the textarea reserves, and both wrap at the
+	   same width. It is never scrolled by hand: the pointer goes through it, and its
+	   position is copied from the textarea. */
 	.prompt-editor__mirror {
+		display: block;
+		overflow-y: auto;
 		color: var(--color-active);
 	}
 
