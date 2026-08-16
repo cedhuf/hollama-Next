@@ -42,6 +42,19 @@ export interface ApplyOptions {
 	replay?: boolean;
 }
 
+/**
+ * Whether a message the run produced is already in the conversation.
+ *
+ * By the instant it was created, which the run stamps once and never rewrites, so
+ * it identifies that message across every delivery of the event carrying it.
+ * Compared against the tail rather than the whole conversation: a run appends,
+ * always, so anything it produced is at the end or is not there at all.
+ */
+function alreadyApplied(session: Session, createdAt: string | undefined): boolean {
+	if (!createdAt) return false;
+	return session.messages.some((message) => message.createdAt === createdAt);
+}
+
 export function applyRunEvent(
 	event: RunEvent,
 	surface: RunSurface,
@@ -100,6 +113,30 @@ export function applyRunEvent(
 			return;
 
 		case 'message': {
+			// Already here: this event has been applied before.
+			//
+			// Which happens for an ordinary reason, not an exotic one. A finished run
+			// is kept for a few minutes so a tab that was closed mid-answer can still
+			// collect it, and coming back to the conversation in that window replays
+			// the log from the start. The tab that watched it live had already applied
+			// and saved every one of those events, so the reply landed a second time,
+			// and a third on the next visit.
+			//
+			// Identity rather than a guard: the timestamp is stamped once, by the run,
+			// when the message is built, so the same event carries the same one however
+			// many times it is delivered. That is what makes replay idempotent, which
+			// is the property this whole file claims and did not have.
+			//
+			// The streaming state is still cleared, because the event still happened:
+			// applying it twice has to land in the same place as applying it once, and
+			// that includes the half-written bubble it closes.
+			if (alreadyApplied(session, event.message.createdAt)) {
+				editor.completion = '';
+				editor.reasoning = '';
+				editor.reasoningTrace = undefined;
+				return;
+			}
+
 			// The live reasoning panel's state is stamped on at this point rather than
 			// after the message mounts, so the completed article appears with the panel
 			// already in the right state instead of re-opening a frame later.
@@ -129,6 +166,10 @@ export function applyRunEvent(
 			return;
 
 		case 'compaction':
+			// Same reasoning as `message`: a replayed compaction would append a second
+			// marker, and two boundaries where there is one is a conversation that
+			// hides half of itself twice over.
+			if (alreadyApplied(session, event.marker.createdAt)) return;
 			session.messages = [...session.messages, event.marker];
 			session.updatedAt = new Date().toISOString();
 			surface.save();

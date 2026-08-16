@@ -63,6 +63,12 @@ Honest limits, since a promise half-kept is worse than none.
 in flight is lost. It is not written to disk, deliberately: the failure it would protect against
 is a restart landing inside the few seconds a model takes to answer.
 
+**Applying the same answer twice.** A finished run is kept for a few minutes so a tab that was
+closed mid-answer can still collect it, and coming back to the conversation inside that window
+replays its log from the start. Every message a run produces carries the instant it was created,
+stamped once and never rewritten, so an event delivered twice is recognised and applied once.
+Without that, revisiting a conversation put the same reply in it again.
+
 **Several replicas.** If you run llooma behind a load balancer with more than one instance, each
 one keeps its own runs, and a browser that reconnects to a different replica will not find its
 turn. Single-instance deployments, which is nearly all of them, are unaffected.
