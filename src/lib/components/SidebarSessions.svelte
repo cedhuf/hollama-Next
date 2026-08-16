@@ -90,7 +90,7 @@
 	     Sideways overflow is hidden rather than scrolled, since while the column
 	     narrows this box is wider than what holds it and a scrollbar would appear for
 	     the length of the animation. -->
-	<div class="w-full px-2 py-2 lg:w-96">
+	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-96">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
 				<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">

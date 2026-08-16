@@ -114,7 +114,7 @@
      the page slides aside to uncover it and the sidebar itself never moves.
      Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
 <nav
-	class="fixed inset-y-0 left-0 h-full w-[min(84vw,22rem)] shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[env(safe-area-inset-left)] lg:relative lg:z-30 lg:mr-4 lg:max-w-none lg:translate-x-0
+	class="fixed inset-y-0 left-0 h-full w-full shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[env(safe-area-inset-left)] lg:relative lg:z-30 lg:mr-4 lg:max-w-none lg:translate-x-0
 		{$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"

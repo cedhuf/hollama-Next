@@ -27,7 +27,7 @@
 	     is still narrowing; laid out at the frame's width, it re-wraps itself sixty
 	     times a second on the way there. -->
 	<div
-		class="flex h-full w-full shrink-0 items-center px-4 max-lg:pt-[env(safe-area-inset-top)] {rail
+		class="flex h-full w-full shrink-0 items-center px-4 max-lg:w-[var(--drawer-w)] max-lg:pt-[env(safe-area-inset-top)] {rail
 			? 'lg:w-16'
 			: 'lg:w-96'}"
 	>

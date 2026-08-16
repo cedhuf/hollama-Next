@@ -44,6 +44,23 @@
 		/* Single source of truth for the top-bar height, shared by the sidebar
 		   header and every chat/persona Header so they line up exactly. */
 		--app-header-h: 4rem;
+
+		/* How far the page slides to uncover the drawer, and therefore how wide the
+		   column's contents are laid out on a phone.
+
+		   One number because three things have to agree on it: the distance the card
+		   travels, the width its contents stop at, and nothing else. Written in three
+		   places it was a decoration that had to be kept in step with what it covered,
+		   which is the fault this file has already been bitten by more than once. */
+		--drawer-w: min(84vw, 22rem);
+
+		/* How the page travels when the drawer opens.
+
+		   Slow enough to be followed rather than noticed, and landing softly: the
+		   picture rides along with the page, so the movement is large, and a large
+		   movement is only comfortable when it is unhurried. */
+		--drawer-ms: 340ms;
+		--drawer-ease: cubic-bezier(0.32, 0.72, 0, 1);
 	}
 
 	body {
@@ -625,6 +642,98 @@
 		background-repeat: no-repeat;
 		background-size: cover;
 		filter: blur(var(--wallpaper-blur));
+	}
+
+	/*
+	 * The picture, again, under a phone's page.
+	 *
+	 * On a phone the page is an opaque card that slides aside to uncover the column,
+	 * and that opacity is not decoration: it is the lid. Take it away and the page
+	 * shows the column through itself, which is why every attempt to make the card
+	 * translucent ended in a state-dependent background and a flash at the moment it
+	 * switched.
+	 *
+	 * So the card keeps its lid and paints the picture itself. It stops being a
+	 * question of what shows through and becomes a question of what is drawn, which
+	 * has no state and therefore no moment to get wrong. The panes inside then filter
+	 * this the way they filter the canvas everywhere else, and the top bar gets its
+	 * translucency back for the same reason it has it on a desktop.
+	 *
+	 * Only on a phone. On a desktop the card is a transparent frame standing on the
+	 * canvas, and a second copy of the picture inside it would be the picture twice.
+	 */
+	@media (max-width: 1023px) {
+		/*
+		 * The picture belongs to the card, so the card paints it.
+		 *
+		 * Not a layer of its own carrying `filter: blur()`, which is what this was and
+		 * what WebKit would not cut to the corner. A filtered layer is composited
+		 * separately, and neither the card's rounded `overflow` nor a radius given to
+		 * the layer itself reached it: the picture kept a square corner and sat in the
+		 * notch the card had just cut. Firefox honoured both, which is how this looked
+		 * right everywhere except the one engine every phone in the house runs.
+		 *
+		 * A background painted by an element is clipped by that element's own
+		 * border-radius, by construction, with nothing composited in between. The blur
+		 * then comes from `backdrop-filter` on a plain overlay, which is the mechanism
+		 * every surface in this app already uses and which WebKit has been clipping
+		 * correctly all along. The bug is not worked around: the thing it affects is no
+		 * longer used.
+		 */
+		:root[data-wallpaper='on'] .app-card {
+			background-image: var(--wallpaper);
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+
+		/* Inset by nothing, so there is no overhang needing a corner of its own and the
+		   edges of the blur are the card's own edges. */
+		:root[data-wallpaper='on'] .app-card::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			backdrop-filter: blur(var(--wallpaper-blur));
+		}
+
+		/*
+		 * The slide itself, and the only place its timing is written.
+		 *
+		 * `translate`, not `transform`: Tailwind v4 writes its translate utilities to
+		 * the standalone property, so naming `transform` here transitions something
+		 * nothing sets, and the card arrives instantly with no complaint from anyone.
+		 * The blanket `transition-all` this replaced covered it by covering everything,
+		 * which is exactly how the difference stayed invisible.
+		 */
+		.app-card {
+			transition:
+				translate var(--drawer-ms) var(--drawer-ease),
+				border-radius var(--drawer-ms) var(--drawer-ease),
+				box-shadow var(--drawer-ms) var(--drawer-ease);
+		}
+
+		/* A long, travelling animation is exactly the kind someone turns off. */
+		@media (prefers-reduced-motion: reduce) {
+			.app-card {
+				transition: none;
+			}
+		}
+
+		/*
+		 * The page carries its picture with it, and that is the honest version.
+		 *
+		 * Holding the picture still while the page moved over it meant translating the
+		 * layer back by exactly what the card moved forward, every frame, with a
+		 * heavily blurred layer on one side of the subtraction. The arithmetic is
+		 * right and the result is not: the two never quite cancel on a real device,
+		 * and what you see is the background drifting under a page that is supposed to
+		 * be sliding over it.
+		 *
+		 * So nothing is compensated. The page is a sheet with the picture printed on
+		 * it, it travels as one thing, and the only thing that has to be right is the
+		 * travelling itself.
+		 */
 	}
 
 	/* Over a flat canvas a hairline border separates the columns; over a picture it

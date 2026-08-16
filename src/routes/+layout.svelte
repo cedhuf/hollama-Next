@@ -551,14 +551,18 @@
 		     corners (matching the phone's screen radius) + a left-edge shadow make it read
 		     as a sheet lifted above the menu. The rounding and the shadow are painted only
 		     while it is open, and travel with the slide: a corner cut into a card that
-		     covers the whole screen shows whatever is behind it, which on a phone whose
-		     display has no rounding of its own, or in a browser tab, is a notch of
-		     wallpaper in the corner of the page. The shadow was already conditional — otherwise it would bleed through the rounded corner
-		     notch and reveal the rounding even when the page covers the whole screen.
+		     covers the whole screen shows whatever is behind it, which with the drawer
+		     shut is the page's own background in the corner of the screen.
+
+		     With it open, what the corner shows is the column, and by construction
+		     rather than by arrangement: the column paints the full width of the display
+		     and only lays its contents out to `--drawer-w`, so the card slides onto its
+		     own material and the notch cannot land past its edge. The shadow falls on
+		     that same material, exactly as it does along the rest of the edge.
 		     A no-op on desktop, where the sidebar lives in flow. -->
 		<div
-			class="relative z-10 flex min-w-0 flex-1 flex-col transition-all duration-200 ease-in-out max-lg:overflow-hidden max-lg:bg-shade-1 {$mobileDrawerOpen
-				? 'max-lg:translate-x-[min(84vw,22rem)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
+			class="app-card relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden max-lg:bg-shade-1 {$mobileDrawerOpen
+				? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
 				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 		>
 			<!-- Each route now owns the single sidebar toggle at its top-left (inside its

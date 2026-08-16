@@ -40,7 +40,7 @@
      are neighbours in a column, and the column does the arithmetic. -->
 <div class="shrink-0 border-b border-shade-3/40 surface-column">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div class="w-full shrink-0 lg:w-96">
+	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-96">
 		<div class="flex flex-col px-3 py-3">
 			<!-- Two New chat buttons rather than one that moves: a single button would have
 		     to cross a flex line break, and a line break is the one thing CSS cannot
