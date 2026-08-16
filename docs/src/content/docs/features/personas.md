@@ -178,10 +178,13 @@ bundle. A later revision reaches them the same way it reaches everyone else.
 Relaying costs the admin nothing: their library does not gain a persona they never wanted, and the
 catalogue does not gain a second face with the same name.
 
-Installing copies. It does not subscribe: an admin editing the shared persona afterwards does not
-reach into the copies people are already talking to, and un-sharing one does not take back the
+Editing a shared persona republishes it, so what the store offers is what the admin currently has,
+not a photograph taken the day they ticked the box. Deleting it stops offering it.
+
+Installing still copies, and does not subscribe: an admin editing the shared persona afterwards does
+not reach into the copies people are already talking to, and un-sharing one does not take back the
 copies people already have. What it does instead is **offer** the newer version, in the store, as an
-update you take or leave.
+update you take or leave, exactly as a store revision is offered.
 
 A persona shared **from a library** does not carry its attached knowledge: the documents live in
 that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A

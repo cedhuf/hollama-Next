@@ -19,6 +19,7 @@
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { avatarFields, installPersonaBundle, personaFromBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
+	import { contentDigest, personaAuthored } from '$lib/personaDigest';
 	import { installPersona, personaOrigin, savePersona, type Persona } from '$lib/personas';
 	import { personasConfig, relayCatalogPersona } from '$lib/personasConfig';
 	import { offeredVersion, personaState, type PersonaState } from '$lib/personaState';
@@ -180,7 +181,7 @@
 			.filter((entry) => !curated || relayed.has(entry.id))
 			.map((entry): Offer => {
 				const copy = installedCopy(entry.id, entry.name);
-				const state = copy ? personaState(copy, entry) : undefined;
+				const state = copy ? personaState(copy, entry.contentDigest) : undefined;
 				const stale = state === 'outdated' || state === 'edited-outdated';
 
 				return {
@@ -227,12 +228,13 @@
 				},
 				tags: persona.tags ?? [],
 				origin: 'admin',
+				// The published fingerprint is the admin's persona as it stands now, so
+				// their edits reach the people who installed it exactly the way a store
+				// revision does: as an update on offer, never applied behind anyone.
 				state: (() => {
 					const copy =
 						installedIds.get(persona.id) ?? ($personasStore ?? []).find((p) => p.id === persona.id);
-					// No catalogue row for it: it is the admin's, so "edited" here means
-					// the admin has moved on since you took your copy.
-					return copy ? personaState(copy) : undefined;
+					return copy ? personaState(copy, contentDigest(personaAuthored(persona))) : undefined;
 				})(),
 				install: async () => {
 					installPersona(persona);
@@ -428,7 +430,11 @@
 							tagline={offer.tagline}
 							avatar={offer.avatar}
 							tags={offer.tags}
-							meta={offer.author}
+							meta={offer.version === 'modified'
+								? $LL.personaOfferedVersionModified()
+								: offer.version === 'same'
+									? $LL.personaOfferedVersionSame()
+									: offer.author}
 							layout={$settingsStore.personaStoreLayout}
 						>
 							{#snippet badges()}
@@ -446,14 +452,6 @@
 										title={$LL.personaStoreRelayed()}
 									>
 										{$LL.personaStoreRelayedShort()}
-									</span>
-								{/if}
-								{#if offer.version === 'modified'}
-									<span
-										class="rounded-full bg-shade-2 px-2 py-0.5 text-[10px] font-medium text-muted"
-										title={$LL.personaOfferedVersionModified()}
-									>
-										{$LL.personaStateEdited()}
 									</span>
 								{/if}
 							{/snippet}

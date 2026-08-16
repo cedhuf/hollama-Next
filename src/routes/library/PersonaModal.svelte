@@ -41,12 +41,32 @@
 
 	function onShareChange() {
 		persist();
-		publishSharedPersonas();
+		void publishSharedPersonas();
+	}
+
+	/**
+	 * A shared persona that has been edited has to be republished.
+	 *
+	 * What users are offered is a snapshot taken when it was shared, and it was
+	 * only ever retaken when the share switch itself moved. So renaming a shared
+	 * persona, or rewriting its prompt, changed nothing for anybody: the store went
+	 * on offering the old name and the old text, and the card comparing it with the
+	 * store's original still found them identical, because the snapshot was still
+	 * the original.
+	 *
+	 * Debounced, since this runs on every keystroke in every field.
+	 */
+	let publishTimer: ReturnType<typeof setTimeout> | undefined;
+	function schedulePublish() {
+		clearTimeout(publishTimer);
+		publishTimer = setTimeout(() => void publishSharedPersonas(), 600);
 	}
 
 	/** Persist only once the persona has a name, so empty drafts never clutter the Library. */
 	function persist() {
-		if (persona.name.trim()) savePersona(persona);
+		if (!persona.name.trim()) return;
+		savePersona(persona);
+		if (persona.shared) schedulePublish();
 	}
 
 	function toggleKnowledge(id: string) {
@@ -78,7 +98,11 @@
 
 	function remove() {
 		if (!confirm(`Delete “${persona.name.trim() || 'this persona'}”?`)) return;
+		const wasShared = persona.shared;
 		deletePersona(persona.id);
+		// Deleting a shared persona has to stop offering it too, or it lingers in
+		// everyone else's store with nothing behind it.
+		if (wasShared) void publishSharedPersonas();
 		toast.info('Persona deleted');
 		open = false;
 	}

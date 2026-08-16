@@ -35,10 +35,12 @@
 	} from '$lib/knowledge';
 	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
 	import { installPersonaBundle, parsePersonaBundle, type PersonaBundle } from '$lib/personaBundle';
+	import { catalogState, loadCatalog } from '$lib/personaCatalog';
 	import {
 		launchPersona,
 		newPersona,
 		parsePersonasImport,
+		personaOrigin,
 		savePersona,
 		type Persona
 	} from '$lib/personas';
@@ -120,6 +122,28 @@
 		deleteCollection(id);
 		confirmingDeleteId = null;
 	}
+
+	/**
+	 * The listing, for the badges on your own cards.
+	 *
+	 * Without it a persona installed before the fingerprint existed has nothing to
+	 * be compared against and is reported as untouched, whatever you have done to
+	 * it. With it the comparison falls back to what the store publishes today,
+	 * which answers the question for every copy, however old.
+	 *
+	 * Cached after the first fetch, and this page is about personas, so asking for
+	 * it here is not a request anyone is paying for twice.
+	 */
+	$effect(() => {
+		void loadCatalog();
+	});
+
+	const catalogEntries = $derived(
+		$catalogState.status === 'ready' ? $catalogState.catalog.entries : []
+	);
+
+	const publishedDigest = (persona: Persona) =>
+		catalogEntries.find((entry) => entry.id === personaOrigin(persona))?.contentDigest;
 
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
@@ -289,7 +313,7 @@
 
 			<div class="mb-3 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
-					{@const state = personaState(persona)}
+					{@const state = personaState(persona, publishedDigest(persona))}
 					<PersonaCard
 						name={persona.name || $LL.untitled()}
 						tagline={persona.tagline}

@@ -27,20 +27,23 @@ export type PersonaState =
 	| 'edited-outdated';
 
 /**
- * Classify one persona against the listing.
+ * Classify one persona against what is published.
  *
- * `entry` is the catalogue row it came from, when there is one. Without it, a
- * persona that has a source is still classifiable against its install digest,
- * which is what happens when the store is unreachable: you can still be told
- * whether you edited it.
+ * `published` is the fingerprint of the version on offer today, wherever it comes
+ * from: a catalogue row, or the persona an administrator is currently sharing.
+ * A digest rather than an entry, so both sources answer the same question with
+ * the same call and neither has to be dressed up as the other.
+ *
+ * Without it, a persona that has a source is still classifiable against its
+ * install digest, which is what happens when the store is unreachable: you can
+ * still be told whether you edited it.
  */
-export function personaState(persona: Persona, entry?: CatalogEntry): PersonaState {
+export function personaState(persona: Persona, published?: string): PersonaState {
 	const source = persona.source;
 	if (!source?.id) return 'own';
 
 	const now = contentDigest(personaAuthored(persona));
 	const installed = source.digest;
-	const published = entry?.contentDigest;
 
 	// Nothing recorded at install: everything before this existed, and personas
 	// installed then have no digest. Compare against the listing and say the
