@@ -161,20 +161,6 @@
 		modalOpen = true;
 	}
 
-	/** What its provenance is called, for the badge on its card. */
-	function sourceLabel(persona: Persona): string {
-		switch (persona.source?.origin) {
-			case 'official':
-				return $LL.personaStoreOfficial();
-			case 'community':
-				return $LL.personaStoreCommunity();
-			case 'admin':
-				return $LL.sharedByAdmin();
-			default:
-				return $LL.import();
-		}
-	}
-
 	function chatWith(persona: Persona) {
 		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
 	}
@@ -323,22 +309,22 @@
 						onclick={() => editPersona(persona)}
 					>
 						{#snippet badges()}
-							<!-- Where it came from, and whether it is still what arrived. Both
-							     deduced: a persona you wrote has no source and says nothing, which
-							     is right, since "written by you" is the ordinary case and labelling
-							     it would be noise on every card. -->
-							{#if state !== 'own'}
+							<!-- What it is now, not where it came from.
+							     "Official" said nothing on a card in your own library: everything
+							     here is either the store's or yours, and the useful signal is
+							     whether it still says what it said when it arrived. One badge, and
+							     none at all in the ordinary case. -->
+							{#if state === 'edited' || state === 'outdated' || state === 'edited-outdated'}
 								<span
 									class="rounded-full bg-shade-2 px-2 py-0.5 text-[10px] font-medium text-muted"
 								>
-									{state === 'clean'
-										? sourceLabel(persona)
-										: `${sourceLabel(persona)}, ${$LL.personaStateEdited()}`}
+									{state === 'edited'
+										? $LL.personaStateEdited()
+										: state === 'outdated'
+											? $LL.personaStateOutdated()
+											: $LL.personaStateEditedOutdated()}
 								</span>
 							{/if}
-							<!-- Nothing about sharing here. What an instance offers is decided and
-							     listed in the store, so repeating it on a card in the Library was a
-							     second place to read a state that could only be changed elsewhere. -->
 						{/snippet}
 
 						{#snippet actions()}

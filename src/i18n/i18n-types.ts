@@ -1296,19 +1296,15 @@ type RootTranslation = {
 	 */
 	personaStoreViewMine: string
 	/**
-	 * O​f​f​e​r​e​d
+	 * S​h​a​r​e​d
 	 */
 	personaStoreViewShared: string
 	/**
-	 * O​f​f​e​r
+	 * S​h​a​r​e
 	 */
-	personaStoreOffer: string
+	share: string
 	/**
-	 * O​f​f​e​r​e​d
-	 */
-	personaStoreOffered: string
-	/**
-	 * Y​o​u​ ​a​r​e​ ​n​o​t​ ​o​f​f​e​r​i​n​g​ ​a​n​y​t​h​i​n​g​ ​y​e​t​.
+	 * Y​o​u​ ​a​r​e​ ​n​o​t​ ​s​h​a​r​i​n​g​ ​a​n​y​t​h​i​n​g​ ​y​e​t​.
 	 */
 	personaStoreNothingOffered: string
 	/**
@@ -1340,11 +1336,11 @@ type RootTranslation = {
 	 */
 	personaStoreCreate: string
 	/**
-	 * O​f​f​e​r​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 * S​h​a​r​e​ ​w​i​t​h​ ​y​o​u​r​ ​u​s​e​r​s
 	 */
 	personaStoreShare: string
 	/**
-	 * S​t​o​p​ ​o​f​f​e​r​i​n​g​ ​i​t
+	 * S​t​o​p​ ​s​h​a​r​i​n​g​ ​i​t
 	 */
 	personaStoreUnshare: string
 	/**
@@ -1352,19 +1348,19 @@ type RootTranslation = {
 	 */
 	personaStoreModeLabel: string
 	/**
-	 * T​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​,​ ​p​l​u​s​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r
+	 * T​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​,​ ​p​l​u​s​ ​w​h​a​t​ ​y​o​u​ ​s​h​a​r​e
 	 */
 	personaStoreModeOpen: string
 	/**
-	 * O​n​l​y​ ​w​h​a​t​ ​y​o​u​ ​o​f​f​e​r
+	 * O​n​l​y​ ​w​h​a​t​ ​y​o​u​ ​s​h​a​r​e
 	 */
 	personaStoreModeCurated: string
 	/**
-	 * U​s​e​r​s​ ​b​r​o​w​s​e​ ​t​h​e​ ​w​h​o​l​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​a​n​d​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​i​t​,​ ​a​l​o​n​g​s​i​d​e​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​o​f​f​e​r​.
+	 * U​s​e​r​s​ ​b​r​o​w​s​e​ ​t​h​e​ ​w​h​o​l​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​a​n​d​ ​i​n​s​t​a​l​l​ ​f​r​o​m​ ​i​t​,​ ​a​l​o​n​g​s​i​d​e​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​s​h​a​r​e​.
 	 */
 	personaStoreModeOpenHelp: string
 	/**
-	 * U​s​e​r​s​ ​s​e​e​ ​o​n​l​y​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​o​f​f​e​r​,​ ​i​n​ ​t​h​e​ ​s​a​m​e​ ​p​l​a​c​e​ ​t​h​e​y​ ​a​l​w​a​y​s​ ​l​o​o​k​.​ ​T​h​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​s​t​a​y​s​ ​y​o​u​r​s​,​ ​t​o​ ​c​h​o​o​s​e​ ​f​r​o​m​.
+	 * U​s​e​r​s​ ​s​e​e​ ​o​n​l​y​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​s​h​a​r​e​,​ ​i​n​ ​t​h​e​ ​s​a​m​e​ ​p​l​a​c​e​ ​t​h​e​y​ ​a​l​w​a​y​s​ ​l​o​o​k​.​ ​T​h​e​ ​p​u​b​l​i​c​ ​c​a​t​a​l​o​g​u​e​ ​s​t​a​y​s​ ​y​o​u​r​s​,​ ​t​o​ ​c​h​o​o​s​e​ ​f​r​o​m​.
 	 */
 	personaStoreModeCuratedHelp: string
 	/**
@@ -3584,19 +3580,15 @@ The completion in progress will stop
 	 */
 	personaStoreViewMine: () => LocalizedString
 	/**
-	 * Offered
+	 * Shared
 	 */
 	personaStoreViewShared: () => LocalizedString
 	/**
-	 * Offer
+	 * Share
 	 */
-	personaStoreOffer: () => LocalizedString
+	share: () => LocalizedString
 	/**
-	 * Offered
-	 */
-	personaStoreOffered: () => LocalizedString
-	/**
-	 * You are not offering anything yet.
+	 * You are not sharing anything yet.
 	 */
 	personaStoreNothingOffered: () => LocalizedString
 	/**
@@ -3628,11 +3620,11 @@ The completion in progress will stop
 	 */
 	personaStoreCreate: () => LocalizedString
 	/**
-	 * Offer to everyone on this instance
+	 * Share with your users
 	 */
 	personaStoreShare: () => LocalizedString
 	/**
-	 * Stop offering it
+	 * Stop sharing it
 	 */
 	personaStoreUnshare: () => LocalizedString
 	/**
@@ -3640,19 +3632,19 @@ The completion in progress will stop
 	 */
 	personaStoreModeLabel: () => LocalizedString
 	/**
-	 * The public store, plus what you offer
+	 * The public store, plus what you share
 	 */
 	personaStoreModeOpen: () => LocalizedString
 	/**
-	 * Only what you offer
+	 * Only what you share
 	 */
 	personaStoreModeCurated: () => LocalizedString
 	/**
-	 * Users browse the whole public catalogue and install from it, alongside the personas you offer.
+	 * Users browse the whole public catalogue and install from it, alongside the personas you share.
 	 */
 	personaStoreModeOpenHelp: () => LocalizedString
 	/**
-	 * Users see only the personas you offer, in the same place they always look. The public catalogue stays yours, to choose from.
+	 * Users see only the personas you share, in the same place they always look. The public catalogue stays yours, to choose from.
 	 */
 	personaStoreModeCuratedHelp: () => LocalizedString
 	/**

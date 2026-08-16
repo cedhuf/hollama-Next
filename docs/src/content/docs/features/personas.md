@@ -168,17 +168,17 @@ All of it happens in the store, which for an admin has three views:
 | --------------- | ----------------------------------------------------------------- |
 | **Store**       | The public catalogue, to browse and to relay                      |
 | **My personas** | The ones they wrote, and the ones they installed and then changed |
-| **Offered**     | Everything the instance currently offers, whichever way           |
+| **Shared**      | Everything the instance currently shares, whichever way           |
 
-One button in all three, and one list that answers "what am I actually offering?". There is no share
+One button in all three, and one list that answers "what am I actually sharing?". There is no share
 switch in a persona's editor any more: a checkbox buried there meant remembering which personas had
 been ticked, with nowhere to go and look.
 
 Underneath, the two cases behave differently, and the difference is worth knowing.
 
 **Their own persona** is handed out as a copy. Editing it republishes, so what the store offers is
-what they currently have rather than a photograph taken the day they first offered it. Deleting it
-stops offering it.
+what they currently have rather than a photograph taken the day they first shared it. Deleting it
+stops sharing it.
 
 **A store persona** is handed out as a reference. Nothing is installed and nothing is copied: what
 is recorded is the store's id, so the catalogue keeps listing it once, and what users install is the
@@ -189,10 +189,10 @@ Which is why _My personas_ leaves out installs nobody has touched. Handing out a
 of a store persona freezes it for whoever takes it; relaying does the same job better, and those are
 already in the store view with the same button.
 
-Installing copies, either way, and does not subscribe: an admin editing what they offer does not
+Installing copies, either way, and does not subscribe: an admin editing what they share does not
 reach into the copies people are already talking to, and withdrawing something does not take back
 the copies people have. What it does instead is **offer** the newer version, in the store, as an
-update you take or leave, exactly as a store revision is offered.
+update you take or leave, exactly as a store revision is.
 
 A persona shared **from a library** does not carry its attached knowledge: the documents live in
 that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A
@@ -207,8 +207,8 @@ Under _Settings → Admin → User permissions_:
 
 | What the store shows                  | What users get                                          |
 | ------------------------------------- | ------------------------------------------------------- |
-| The public store, plus what you offer | The whole public catalogue, alongside your own personas |
-| Only what you offer                   | Your personas and your relays, and nothing else         |
+| The public store, plus what you share | The whole public catalogue, alongside your own personas |
+| Only what you share                   | Your personas and your relays, and nothing else         |
 
 The second is not a locked version of the first: it is a different store. There is no disabled card
 and no note about asking an administrator, because nothing is being refused. An instance run for

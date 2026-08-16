@@ -16,6 +16,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import PersonaCard from '$lib/components/PersonaCard.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { avatarFields, installPersonaBundle, personaFromBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
@@ -538,20 +539,14 @@
 								? $LL.personaOfferedVersionModified()
 								: offer.version === 'same'
 									? $LL.personaOfferedVersionSame()
-									: offer.author}
+									: undefined}
 							layout={$settingsStore.personaStoreLayout}
 						>
-							{#snippet badges()}
-								<span
-									class="rounded-full px-2 py-0.5 text-[10px] font-medium {offer.origin ===
-									'official'
-										? 'bg-accent/10 text-accent'
-										: 'bg-shade-2 text-muted'}"
-								>
-									{originLabel(offer.origin)}
-								</span>
-							{/snippet}
-
+							<!-- No badge at all. An admin's three views each hold one kind of
+							     thing, so a label repeating the view is noise; and for a user, what
+							     a persona is called and what it says is what they are choosing on,
+							     not who published it. Provenance stays where it is a choice rather
+							     than a decoration: the filter above. -->
 							{#snippet actions()}
 								<!-- In "my personas" there is nothing to install: it is already
 								     yours, and the only control that matters is the one that hands
@@ -572,7 +567,7 @@
 										{:else}
 											<Users class="h-3.5 w-3.5" />
 										{/if}
-										{offer.relayed ? $LL.personaStoreOffered() : $LL.personaStoreOffer()}
+										{offer.relayed ? $LL.shared() : $LL.share()}
 									</button>
 								{:else}
 									{#if offer.update}
@@ -615,25 +610,31 @@
 									{/if}
 
 									{#if offer.toggleRelay}
-										<button
-											type="button"
-											disabled={relaying !== null}
-											onclick={() => relay(offer)}
-											aria-pressed={offer.relayed}
-											title={offer.relayed ? $LL.personaStoreUnshare() : $LL.personaStoreShare()}
-											aria-label={offer.relayed
-												? $LL.personaStoreUnshare()
-												: $LL.personaStoreShare()}
-											class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
-												? 'bg-accent/10 text-accent hover:bg-accent/20'
-												: 'text-muted hover:bg-shade-2 hover:text-active'}"
-										>
-											{#if relaying === offer.key}
-												<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-											{:else}
-												<Users class="h-3.5 w-3.5" />
-											{/if}
-										</button>
+										{@const label = offer.relayed
+											? $LL.personaStoreUnshare()
+											: $LL.personaStoreShare()}
+										<Tooltip>
+											{#snippet trigger({ props })}
+												<button
+													{...props}
+													type="button"
+													disabled={relaying !== null}
+													onclick={() => relay(offer)}
+													aria-pressed={offer.relayed}
+													aria-label={label}
+													class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.relayed
+														? 'bg-accent/10 text-accent hover:bg-accent/20'
+														: 'text-muted hover:bg-shade-2 hover:text-active'}"
+												>
+													{#if relaying === offer.key}
+														<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+													{:else}
+														<Users class="h-3.5 w-3.5" />
+													{/if}
+												</button>
+											{/snippet}
+											{label}
+										</Tooltip>
 									{/if}
 								{/if}
 							{/snippet}
