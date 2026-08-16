@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CornerDownLeft, Search } from '@lucide/svelte';
+	import { CornerDownLeft, Layers, Search } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -65,9 +65,21 @@
 		}
 	});
 
+	/**
+	 * Whether to answer from the whole transcript or only from what is live.
+	 *
+	 * Off by default. A compaction summary repeats what is said elsewhere, so it
+	 * doubles every result it touches, and a conversation you cleared is one you
+	 * deliberately set aside. Neither is what you are looking for, until it is,
+	 * which is what this is for rather than a reason to search everything always.
+	 */
+	let everything = $state(false);
+
 	let timer: ReturnType<typeof setTimeout>;
 	$effect(() => {
 		const current = query.trim();
+		// Read so the search re-runs when the switch moves, not only when typing.
+		const all = everything;
 		clearTimeout(timer);
 
 		if (!current) {
@@ -80,7 +92,7 @@
 		loading = true;
 		timer = setTimeout(async () => {
 			try {
-				results = await repository.searchSessions(current);
+				results = await repository.searchSessions(current, all);
 				failed = false;
 			} catch {
 				results = [];
@@ -156,6 +168,21 @@
 					class="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border border-shade-3 border-t-active"
 				></div>
 			{/if}
+
+			<!-- Beside the field rather than under the results: it changes what is
+			     being searched, so it belongs with the question and not with the
+			     answer. -->
+			<button
+				type="button"
+				onclick={() => (everything = !everything)}
+				aria-pressed={everything}
+				title={$LL.searchEverything()}
+				class="shrink-0 rounded-lg px-2 py-1 text-[11px] transition-colors {everything
+					? 'bg-accent/10 text-accent'
+					: 'text-muted hover:bg-shade-2 hover:text-active'}"
+			>
+				<Layers class="h-3.5 w-3.5" />
+			</button>
 		</div>
 
 		<div bind:this={list} class="flex-1 overflow-y-auto px-2 py-2" role="listbox" tabindex="-1">

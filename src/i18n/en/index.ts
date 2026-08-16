@@ -647,6 +647,16 @@ const en = {
 	compactFailed: 'The conversation could not be compacted',
 	slashCommands: 'Commands',
 	slashRun: 'Run',
+	clearCommandDescription:
+		'Start again: fold this conversation away and give the model a blank slate',
+	nothingToClear: 'Nothing to clear',
+	contextCleared: 'Context cleared · {count:number} message{{s}}',
+	clearedExplain:
+		'The model no longer reads anything above this line. Nothing has been deleted: unfold to read it, restore to hand it back.',
+	undoClear: 'Restore',
+	undoClearHelp: 'Give the model everything above this line back',
+	clearedShowAll: 'Show all {count:number}',
+	searchEverything: 'Search cleared and compacted messages too',
 	compactCommandDescription: 'Summarise the conversation so far to free up context',
 	nothingToCompact: 'This conversation is too short to be worth compacting',
 	shortcutsCommands: 'Slash commands',

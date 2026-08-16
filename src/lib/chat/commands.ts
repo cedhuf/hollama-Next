@@ -8,7 +8,7 @@
  * being swallowed with an error. `//` at the start escapes to a literal `/`.
  */
 
-export type CommandName = 'compact';
+export type CommandName = 'compact' | 'clear';
 
 export interface SlashCommand {
 	name: CommandName;

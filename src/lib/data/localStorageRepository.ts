@@ -147,8 +147,8 @@ export class LocalStorageRepository implements DataRepository {
 		);
 	}
 
-	async searchSessions(query: string): Promise<ConversationResult[]> {
-		return searchSessionsLocally(this.#read<Session[]>(StorageKey.Sessions, []), query);
+	async searchSessions(query: string, everything = false): Promise<ConversationResult[]> {
+		return searchSessionsLocally(this.#read<Session[]>(StorageKey.Sessions, []), query, everything);
 	}
 
 	async exportBackup(): Promise<Backup> {

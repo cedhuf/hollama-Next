@@ -150,3 +150,58 @@ export function getSessionHeaders(userId: string, ids: string[]): Map<string, Se
 
 	return headers;
 }
+
+/**
+ * The boundaries a conversation carries, for hiding what is behind them.
+ *
+ * Read from the stored JSON rather than kept in the index, which would have
+ * needed a column and a migration for something that changes every time a
+ * conversation does. The index answers "where does this word appear"; this
+ * answers "is that still part of the conversation", and the two are different
+ * questions asked at different moments.
+ */
+export interface SessionBoundaries {
+	/** Index of the last clear marker, or -1. Everything below it is set aside. */
+	clearedAt: number;
+	/** Indices of the markers themselves: summaries and clears are not messages. */
+	markers: number[];
+}
+
+export function sessionBoundaries(
+	userId: string,
+	sessionIds: string[]
+): Map<string, SessionBoundaries> {
+	const found = new Map<string, SessionBoundaries>();
+	if (!sessionIds.length) return found;
+
+	const rows = getDb()
+		.prepare(
+			`SELECT s.id AS session_id, m.key AS message_index,
+			        json_extract(m.value, '$.cleared') IS NOT NULL AS is_cleared,
+			        json_extract(m.value, '$.compaction') IS NOT NULL AS is_compaction
+			 FROM sessions s, json_each(s.data, '$.messages') m
+			 WHERE s.user_id = ?
+			   AND s.id IN (${sessionIds.map(() => '?').join(',')})
+			   AND (json_extract(m.value, '$.cleared') IS NOT NULL
+			        OR json_extract(m.value, '$.compaction') IS NOT NULL)`
+		)
+		.all(userId, ...sessionIds) as {
+		session_id: string;
+		message_index: number;
+		is_cleared: number;
+		is_compaction: number;
+	}[];
+
+	for (const id of sessionIds) found.set(id, { clearedAt: -1, markers: [] });
+
+	for (const row of rows) {
+		const entry = found.get(row.session_id);
+		if (!entry) continue;
+		entry.markers.push(row.message_index);
+		if (row.is_cleared && row.message_index > entry.clearedAt) {
+			entry.clearedAt = row.message_index;
+		}
+	}
+
+	return found;
+}

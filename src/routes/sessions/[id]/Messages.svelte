@@ -1,13 +1,14 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { stripAskBlock } from '$lib/askChoice';
-	import { compactionSavings, lastCompactionIndex } from '$lib/chat/context';
+	import { compactionSavings, contextBoundary, lastCompactionIndex } from '$lib/chat/context';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { stripReadBlock } from '$lib/readProtocol';
 	import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 
 	import Article from './Article.svelte';
+	import ClearedDivider from './ClearedDivider.svelte';
 	import CompactionDivider from './CompactionDivider.svelte';
 
 	interface Props {
@@ -47,6 +48,24 @@
 		isCompacting ? session.messages.length : lastCompactionIndex(session.messages)
 	);
 	const fade = $derived($settingsStore.fadeCompactedMessages);
+
+	/**
+	 * Where a clear was drawn, and what is behind it.
+	 *
+	 * Compaction leaves its history on screen, faded; clearing takes it off, into
+	 * the divider. The difference is deliberate: a summary is an aside about a
+	 * conversation you are still in, while a clear says you are done with that one,
+	 * and leaving it in the way would be ignoring what you just asked for.
+	 *
+	 * Only the last one folds. An earlier clear is inside a stretch that a later
+	 * one has already put away, so folding it again would nest two boxes saying the
+	 * same thing.
+	 */
+	const boundary = $derived(contextBoundary(session.messages));
+	const clearedAt = $derived(boundary.kind === 'cleared' ? boundary.index : -1);
+	const clearedMessages = $derived(
+		clearedAt === -1 ? [] : session.messages.slice(0, clearedAt).filter((m) => !m.cleared)
+	);
 
 	// While the model is streaming an <ask> block the visible text is empty — show
 	// a choices skeleton instead of a bare "…".
@@ -98,7 +117,17 @@
 {/if}
 
 {#each session.messages as message, i (session.id + i)}
-	{#if message.compaction}
+	{#if clearedAt !== -1 && i < clearedAt}
+		<!-- Behind the line: drawn inside the divider below, not here. -->
+	{:else if message.cleared}
+		{#if i === clearedAt}
+			<ClearedDivider
+				{message}
+				cleared={clearedMessages}
+				onUndo={() => handleUndoCompaction(message)}
+			/>
+		{/if}
+	{:else if message.compaction}
 		<!-- Not a turn: the boundary where the context above was summarised away. -->
 		<CompactionDivider
 			{message}

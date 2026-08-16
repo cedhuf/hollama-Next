@@ -73,14 +73,46 @@ export function lastCompactionIndex(messages: Message[]): number {
 	return -1;
 }
 
+/** Index of the last clear marker, or `-1`. */
+export function lastClearedIndex(messages: Message[]): number {
+	for (let i = messages.length - 1; i >= 0; i--) {
+		if (messages[i].cleared) return i;
+	}
+	return -1;
+}
+
 /**
- * The messages actually sent to the model: the last compaction summary, then
- * everything after it. Without a marker, the whole conversation — which is what
- * every session did before compaction existed.
+ * Where the conversation the model reads begins, and which kind of line it is.
+ *
+ * Two markers, one boundary: whichever came last wins, because a clear after a
+ * compaction throws the summary away too, and a compaction after a clear starts
+ * from what is left. Asking "which is later" is the only comparison that gives
+ * the right answer in both orders.
+ */
+export function contextBoundary(messages: Message[]): {
+	index: number;
+	kind: 'none' | 'compaction' | 'cleared';
+} {
+	const compacted = lastCompactionIndex(messages);
+	const cleared = lastClearedIndex(messages);
+	if (compacted === -1 && cleared === -1) return { index: -1, kind: 'none' };
+	return cleared > compacted
+		? { index: cleared, kind: 'cleared' }
+		: { index: compacted, kind: 'compaction' };
+}
+
+/**
+ * The messages actually sent to the model.
+ *
+ * From the last compaction summary onwards, since the summary is what stands in
+ * for what it replaced; or from just after the last clear, since a clear leaves
+ * nothing standing in for anything. Without either, the whole conversation,
+ * which is what every session did before markers existed.
  */
 export function messagesInContext(messages: Message[]): Message[] {
-	const marker = lastCompactionIndex(messages);
-	return marker === -1 ? messages : messages.slice(marker);
+	const { index, kind } = contextBoundary(messages);
+	if (kind === 'none') return messages;
+	return kind === 'cleared' ? messages.slice(index + 1) : messages.slice(index);
 }
 
 export interface CompactionSavings {

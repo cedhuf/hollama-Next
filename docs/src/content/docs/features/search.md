@@ -46,9 +46,15 @@ time. An excerpt is message content, and building HTML out of it would hand any 
 containing markup a way into the page.
 :::
 
-## Known limitation
+## What is searched
 
-A compaction summary is stored as a message, so a conversation that has been
-[compacted](/features/compaction/) can return the same passage twice: once from the original
-message and once from inside the summary that stands in for it. Teaching the index to skip
-compaction markers is on the [roadmap](/roadmap/).
+The live conversation, by default: what the model would read if you sent a message now.
+
+Two things are left out for the same reason, that they are not where you would look for what you
+are looking for. A [compaction](/features/compaction/) summary repeats what is said elsewhere in
+the conversation, so including it returned the same passage twice, once from the message and once
+from the summary standing in for it. And a conversation you have `/clear`ed is one you deliberately
+set aside.
+
+Both come back with the **layers** button beside the search field. Nothing is ever excluded from
+the index itself: the switch changes the question, not what is stored.

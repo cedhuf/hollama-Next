@@ -97,3 +97,26 @@ changing it also affects summaries written earlier.
 An admin can share the compaction model, the automatic toggle and the threshold with everyone on
 the instance, as `locked` or `overridable`, the same three states as title generation. See
 [Administration](/guides/administration/).
+
+## Clearing instead
+
+`/clear` is the other way to give the model less to read, and the blunt one: it draws a line and
+hands the model nothing at all from above it. No summary, no request, nothing to wait for.
+
+|                      | `/compact`                    | `/clear`                     |
+| -------------------- | ----------------------------- | ---------------------------- |
+| What the model gets  | A summary of what came before | Nothing from before the line |
+| Costs a request      | Yes                           | No                           |
+| The transcript above | Stays on screen, faded        | Folds under the marker       |
+| Undo                 | Remove the marker             | Remove the marker            |
+
+Neither deletes anything, and both are the same kind of object: a marker that moves where the sent
+context begins. Whichever is later wins, so clearing after compacting throws the summary away too.
+
+Unfolding a cleared stretch gives an **index** rather than a transcript: one line per message, in a
+box with its own scrollbar, and any single line opens where it sits. Two hundred messages poured
+back into the page would be the wall you cleared them to get away from. To read it properly, restore
+it: the conversation is what the page is for.
+
+Cleared messages are also left out of [search](/features/search/) by default, and come back with the
+same switch that brings back compaction summaries.

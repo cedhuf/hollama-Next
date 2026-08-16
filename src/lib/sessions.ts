@@ -94,6 +94,26 @@ export interface Message {
 		/** True when the app compacted on its own, at the configured threshold. */
 		automatic?: boolean;
 	};
+	/**
+	 * Set on a clear marker: a `system` message with nothing in it, marking where
+	 * the conversation starts again as far as the model is concerned.
+	 *
+	 * The sibling of `compaction`, and the difference is the whole point.
+	 * Compaction hands the model a summary of what came before; clearing hands it
+	 * nothing. Both are markers rather than rewrites, so neither destroys
+	 * anything: the messages are still there, still yours, still searchable, and
+	 * removing the marker gives the model all of it back.
+	 *
+	 * What clearing does take away is the reading: everything before it folds
+	 * under the marker, because a conversation you have deliberately set aside is
+	 * not what you want to scroll past to reach the one you are having.
+	 */
+	cleared?: {
+		/** ISO timestamp of when the line was drawn. */
+		generatedAt: string;
+		/** How many messages are behind it. */
+		replacedCount: number;
+	};
 }
 
 export interface Session {

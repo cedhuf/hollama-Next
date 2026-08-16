@@ -666,6 +666,16 @@ const fr = extendDictionary(en, {
 	compactFailed: 'La conversation n’a pas pu être compactée',
 	slashCommands: 'Commandes',
 	slashRun: 'Lancer',
+	clearCommandDescription:
+		'Repartir de zéro : replier cette conversation et rendre au modèle une page blanche',
+	nothingToClear: 'Rien à effacer',
+	contextCleared: 'Contexte effacé · {count:number} message{{s}}',
+	clearedExplain:
+		"Le modèle ne lit plus rien au-dessus de cette ligne. Rien n'a été supprimé : dépliez pour relire, restaurez pour le lui rendre.",
+	undoClear: 'Restaurer',
+	undoClearHelp: 'Rendre au modèle tout ce qui est au-dessus de cette ligne',
+	clearedShowAll: 'Tout afficher ({count:number})',
+	searchEverything: 'Chercher aussi dans les messages effacés et compactés',
 	compactCommandDescription: 'Résumer la conversation pour libérer du contexte',
 	nothingToCompact: 'Cette conversation est trop courte pour valoir une compaction',
 	shortcutsCommands: 'Commandes',

@@ -108,8 +108,10 @@ export class ApiRepository implements DataRepository {
 		// TODO (step 5): persist a user's personal servers.
 	}
 
-	async searchSessions(query: string): Promise<ConversationResult[]> {
-		const response = await fetch(`/api/search/sessions?q=${encodeURIComponent(query)}`);
+	async searchSessions(query: string, everything = false): Promise<ConversationResult[]> {
+		const response = await fetch(
+			`/api/search/sessions?q=${encodeURIComponent(query)}${everything ? '&all=1' : ''}`
+		);
 		if (!response.ok) throw new Error(`Search failed: HTTP ${response.status}`);
 		return response.json();
 	}

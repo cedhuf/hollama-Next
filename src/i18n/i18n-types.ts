@@ -2362,6 +2362,40 @@ type RootTranslation = {
 	 */
 	slashRun: string
 	/**
+	 * S​t​a​r​t​ ​a​g​a​i​n​:​ ​f​o​l​d​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​a​w​a​y​ ​a​n​d​ ​g​i​v​e​ ​t​h​e​ ​m​o​d​e​l​ ​a​ ​b​l​a​n​k​ ​s​l​a​t​e
+	 */
+	clearCommandDescription: string
+	/**
+	 * N​o​t​h​i​n​g​ ​t​o​ ​c​l​e​a​r
+	 */
+	nothingToClear: string
+	/**
+	 * C​o​n​t​e​x​t​ ​c​l​e​a​r​e​d​ ​·​ ​{​c​o​u​n​t​}​ ​m​e​s​s​a​g​e​{​{​s​}​}
+	 * @param {number} count
+	 */
+	contextCleared: RequiredParams<'count'>
+	/**
+	 * T​h​e​ ​m​o​d​e​l​ ​n​o​ ​l​o​n​g​e​r​ ​r​e​a​d​s​ ​a​n​y​t​h​i​n​g​ ​a​b​o​v​e​ ​t​h​i​s​ ​l​i​n​e​.​ ​N​o​t​h​i​n​g​ ​h​a​s​ ​b​e​e​n​ ​d​e​l​e​t​e​d​:​ ​u​n​f​o​l​d​ ​t​o​ ​r​e​a​d​ ​i​t​,​ ​r​e​s​t​o​r​e​ ​t​o​ ​h​a​n​d​ ​i​t​ ​b​a​c​k​.
+	 */
+	clearedExplain: string
+	/**
+	 * R​e​s​t​o​r​e
+	 */
+	undoClear: string
+	/**
+	 * G​i​v​e​ ​t​h​e​ ​m​o​d​e​l​ ​e​v​e​r​y​t​h​i​n​g​ ​a​b​o​v​e​ ​t​h​i​s​ ​l​i​n​e​ ​b​a​c​k
+	 */
+	undoClearHelp: string
+	/**
+	 * S​h​o​w​ ​a​l​l​ ​{​c​o​u​n​t​}
+	 * @param {number} count
+	 */
+	clearedShowAll: RequiredParams<'count'>
+	/**
+	 * S​e​a​r​c​h​ ​c​l​e​a​r​e​d​ ​a​n​d​ ​c​o​m​p​a​c​t​e​d​ ​m​e​s​s​a​g​e​s​ ​t​o​o
+	 */
+	searchEverything: string
+	/**
 	 * S​u​m​m​a​r​i​s​e​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​o​ ​f​a​r​ ​t​o​ ​f​r​e​e​ ​u​p​ ​c​o​n​t​e​x​t
 	 */
 	compactCommandDescription: string
@@ -4733,6 +4767,38 @@ The completion in progress will stop
 	 * Run
 	 */
 	slashRun: () => LocalizedString
+	/**
+	 * Start again: fold this conversation away and give the model a blank slate
+	 */
+	clearCommandDescription: () => LocalizedString
+	/**
+	 * Nothing to clear
+	 */
+	nothingToClear: () => LocalizedString
+	/**
+	 * Context cleared · {count} message{{s}}
+	 */
+	contextCleared: (arg: { count: number }) => LocalizedString
+	/**
+	 * The model no longer reads anything above this line. Nothing has been deleted: unfold to read it, restore to hand it back.
+	 */
+	clearedExplain: () => LocalizedString
+	/**
+	 * Restore
+	 */
+	undoClear: () => LocalizedString
+	/**
+	 * Give the model everything above this line back
+	 */
+	undoClearHelp: () => LocalizedString
+	/**
+	 * Show all {count}
+	 */
+	clearedShowAll: (arg: { count: number }) => LocalizedString
+	/**
+	 * Search cleared and compacted messages too
+	 */
+	searchEverything: () => LocalizedString
 	/**
 	 * Summarise the conversation so far to free up context
 	 */

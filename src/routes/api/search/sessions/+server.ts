@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 
 import type { ConversationResult } from '$lib/conversationSearch';
 import { requireUser } from '$lib/server/api';
-import { getSessionHeaders, searchSessions } from '$lib/server/db/search';
+import { getSessionHeaders, searchSessions, sessionBoundaries } from '$lib/server/db/search';
 
 /** Conversations to return at most; each still carries all of its matches. */
 const MAX_CONVERSATIONS = 30;
@@ -20,9 +20,32 @@ export async function GET(event) {
 	const query = event.url.searchParams.get('q')?.trim() ?? '';
 	if (!query) return json([] satisfies ConversationResult[]);
 
+	/**
+	 * Whether to answer from the whole transcript or only from what is live.
+	 *
+	 * Off by default, and that is the useful default: a summary repeats what is
+	 * already said elsewhere, so it doubles every result, and a conversation you
+	 * cleared is one you deliberately set aside. Neither is what you are looking
+	 * for when you search, until it is, which is what the switch is for.
+	 */
+	const everything = event.url.searchParams.get('all') === '1';
+
+	const hits = searchSessions(user.id, query);
+	const boundaries = everything
+		? new Map<string, { clearedAt: number; markers: number[] }>()
+		: sessionBoundaries(user.id, [...new Set(hits.map((hit) => hit.sessionId))]);
+
+	const visible = (sessionId: string, index: number) => {
+		if (everything) return true;
+		const found = boundaries.get(sessionId);
+		if (!found) return true;
+		return index > found.clearedAt && !found.markers.includes(index);
+	};
+
 	const grouped = new Map<string, ConversationResult>();
 
-	for (const hit of searchSessions(user.id, query)) {
+	for (const hit of hits) {
+		if (!visible(hit.sessionId, hit.messageIndex)) continue;
 		const existing = grouped.get(hit.sessionId);
 		if (existing) {
 			existing.matches.push({

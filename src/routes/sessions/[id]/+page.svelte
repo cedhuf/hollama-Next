@@ -692,6 +692,42 @@
 	);
 
 	/**
+	 * Something to fold away, and nothing already running.
+	 *
+	 * A lower bar than compaction's: clearing costs no request and frees whatever
+	 * is there, so one message is enough to be worth it.
+	 */
+	const canClear = $derived(
+		!isCompacting &&
+			!editor.isCompletionInProgress &&
+			messagesInContext(session.messages).length > 0
+	);
+
+	/**
+	 * Draw a line and start again.
+	 *
+	 * Nothing is deleted. A marker is appended, everything before it folds under
+	 * it, and the model is handed the conversation from that point on. Removing
+	 * the marker gives all of it back, which is what makes this safe to reach for:
+	 * it costs the model its memory of the exchange, and costs you nothing.
+	 */
+	function clearContext() {
+		const cleared = messagesInContext(session.messages).length;
+		if (!cleared) return;
+
+		session.messages = [
+			...session.messages,
+			{
+				role: 'system',
+				content: '',
+				createdAt: new Date().toISOString(),
+				cleared: { generatedAt: new Date().toISOString(), replacedCount: cleared }
+			}
+		];
+		saveSession(session);
+	}
+
+	/**
 	 * Compact now, and say what happened.
 	 *
 	 * The waiting and the result are both drawn in the conversation, at the spot
@@ -739,6 +775,16 @@
 	}
 
 	function runCommand(name: CommandName) {
+		if (name === 'clear') {
+			// The menu hides it when there is nothing to fold, but the name can still
+			// be typed in full, so the refusal lives here rather than only in the menu.
+			if (!canClear) {
+				toast.info($LL.nothingToClear());
+				return;
+			}
+			clearContext();
+			return;
+		}
 		if (name !== 'compact') return;
 		// The menu hides `/compact` when there is nothing to compact, but the name
 		// can still be typed in full — so the refusal lives here rather than only in
@@ -961,6 +1007,7 @@
 		{chooseAnswer}
 		{runCommand}
 		{canCompact}
+		{canClear}
 		contextThreshold={compactConfig.compactThreshold}
 	/>
 {/snippet}

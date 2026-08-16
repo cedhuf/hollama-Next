@@ -105,7 +105,11 @@ function markTerm(text: string, term: string): string {
  * anyway. Ordered by how many messages matched, then by recency, which is the
  * closest honest approximation of a relevance ranking without a scorer.
  */
-export function searchSessionsLocally(sessions: Session[], query: string): ConversationResult[] {
+export function searchSessionsLocally(
+	sessions: Session[],
+	query: string,
+	everything = false
+): ConversationResult[] {
 	const terms = words(query);
 	if (!terms.length) return [];
 
@@ -114,7 +118,18 @@ export function searchSessionsLocally(sessions: Session[], query: string): Conve
 	for (const session of sessions) {
 		const matches: ConversationMatch[] = [];
 
+		// Where the live conversation begins. Everything below it was deliberately
+		// set aside, and a summary repeats what is already said elsewhere, so both
+		// are out unless the search was asked to include them.
+		const clearedAt = everything
+			? -1
+			: (session.messages ?? []).reduce((last, m, i) => (m.cleared ? i : last), -1);
+
 		session.messages?.forEach((message, messageIndex) => {
+			if (!everything) {
+				if (messageIndex <= clearedAt) return;
+				if (message.compaction || message.cleared) return;
+			}
 			const content = message.content ?? '';
 			if (!content) return;
 			const haystack = content.toLowerCase();

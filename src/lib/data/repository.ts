@@ -110,7 +110,8 @@ export interface DataRepository {
 	 * in memory. Same result shape either way — the caller doesn't get to know
 	 * which, and the modal renders one thing.
 	 */
-	searchSessions(query: string): Promise<ConversationResult[]>;
+	/** `everything` includes what a clear set aside and what a compaction replaced. */
+	searchSessions(query: string, everything?: boolean): Promise<ConversationResult[]>;
 
 	exportBackup(): Promise<Backup>;
 	importBackup(backup: Backup): Promise<void>;

@@ -47,6 +47,8 @@
 		runCommand: (name: CommandName, args: string) => void;
 		/** Token ceiling the load meter measures against. */
 		contextThreshold: number;
+		/** False when there is nothing before the last line to fold away. */
+		canClear: boolean;
 		/** False while a compaction is already running, or when there is nothing to compact. */
 		canCompact: boolean;
 	}
@@ -61,7 +63,8 @@
 		chooseAnswer,
 		runCommand,
 		contextThreshold,
-		canCompact
+		canCompact,
+		canClear
 	}: Props = $props();
 
 	// --- slash commands -------------------------------------------------------
@@ -72,6 +75,12 @@
 			description: $LL.compactCommandDescription(),
 			available: canCompact,
 			unavailableReason: canCompact ? undefined : $LL.nothingToCompact()
+		},
+		{
+			name: 'clear',
+			description: $LL.clearCommandDescription(),
+			available: canClear,
+			unavailableReason: canClear ? undefined : $LL.nothingToClear()
 		}
 	]);
 	const knownCommands = $derived(commands.map((c) => c.name));
