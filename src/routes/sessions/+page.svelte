@@ -174,8 +174,8 @@
 <Head title={$LL.sessions()} />
 
 <div class="flex h-full flex-col">
-	<MobileMenuBar />
 	<div class="flex min-h-0 flex-1 flex-col overflow-auto">
+		<MobileMenuBar />
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			{#if $settingsStore.homeShowHeader}
 				<div class="mb-8 text-center">

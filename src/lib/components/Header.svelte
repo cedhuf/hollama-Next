@@ -58,9 +58,7 @@
 {#if floating}
 	<!-- The gutter beside the pill belongs to the conversation, not to the bar: it
 	     lets pointer events through so a message showing there stays reachable. -->
-	<div
-		class="pointer-events-none flex px-4 pb-2 pt-[calc(1rem+env(safe-area-inset-top))] lg:px-6 lg:pt-4 xl:px-8"
-	>
+	<div class="floating-band pointer-events-none flex lg:px-6 lg:pt-4 xl:px-8">
 		{#if compact}
 			<!-- Two objects rather than one bar, because they answer to two different
 			     places, and pushed to opposite edges for the same reason: the round one

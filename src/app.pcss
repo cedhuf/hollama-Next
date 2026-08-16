@@ -736,6 +736,24 @@
 		 */
 	}
 
+	/*
+	 * The room a floating bar keeps from the edges of the page it stands on.
+	 *
+	 * One rule because there is one band, whichever page you are on: the
+	 * conversation's pill and the round control the headerless pages carry sit at
+	 * the same height and the same distance from the side. They said so by both
+	 * spelling out the same four values, which is an agreement only for as long as
+	 * nobody edits one of them.
+	 *
+	 * A wide screen widens the gutter, and that stays where it is used, since it is
+	 * the conversation's own margin rather than anything about the bar.
+	 */
+	.floating-band {
+		padding-inline: 1rem;
+		padding-top: calc(1rem + env(safe-area-inset-top));
+		padding-bottom: 0.5rem;
+	}
+
 	/* Over a flat canvas a hairline border separates the columns; over a picture it
 	   does not, and they read as holes cut in it rather than as panels on it. */
 	:root[data-wallpaper='on'] .app-panel {

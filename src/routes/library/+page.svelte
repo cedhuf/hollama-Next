@@ -208,8 +208,8 @@
 <div
 	class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex h-full flex-col surface-pane lg:rounded-xl"
 >
-	<MobileMenuBar />
 	<div class="min-h-0 flex-1 overflow-auto">
+		<MobileMenuBar />
 		<div class="mx-auto w-full max-w-4xl px-6 py-8">
 			<!-- Header -->
 			<div class="mb-1 flex items-center justify-between gap-3">
