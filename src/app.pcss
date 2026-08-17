@@ -129,15 +129,25 @@
  * a category colour to be read, and a library in four colours is a toybox.
  */
 @utility library-section {
-	--section: var(--color-accent);
-
-	@supports (color: oklch(from red l c h)) {
+	/* The turn is a plain number, not an angle. In relative colour syntax `h` is a
+	   <number>, so `calc(h + 150deg)` is a type error: the colour is invalid at
+	   computed-value time, `color-mix` fails with it, and the border falls back to
+	   `currentColor` — which is how a faint tint came out as a black outline on
+	   every card. `calc(h + 150)` is the same rotation and is valid. */
+	@supports (color: oklch(from red l c calc(h + 1))) {
 		--section: oklch(from var(--color-accent) l c calc(h + var(--section-turn, 0)));
 	}
 }
 
 @utility section-tint {
-	border-color: color-mix(in srgb, var(--section) 22%, var(--color-shade-3));
+	/* Guarded at the point of use as well as at the definition: without a
+	   `--section` the mix is invalid rather than merely absent, and an invalid
+	   border-color is not the border-color you had before. */
+	border-color: var(--color-shade-3);
+
+	@supports (color: oklch(from red l c calc(h + 1))) {
+		border-color: color-mix(in oklch, var(--section) 12%, var(--color-shade-3));
+	}
 }
 
 @utility field-grow {

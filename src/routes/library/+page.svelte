@@ -376,7 +376,7 @@
 			     alignment. -->
 			<div
 				class="library-section mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"
-				style="--section-turn: 0deg"
+				style="--section-turn: 0"
 			>
 				{#each $personasStore as persona (persona.id)}
 					{@const state = personaState(persona, publishedDigest(persona))}
@@ -515,7 +515,7 @@
 
 			<div
 				class="library-section mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"
-				style="--section-turn: 150deg"
+				style="--section-turn: 150"
 			>
 				{#each $playbooksStore as playbook (playbook.id)}
 					<LibraryCard
@@ -564,7 +564,7 @@
 			<div class="mb-6">
 				<div
 					class="library-section grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3"
-					style="--section-turn: -110deg"
+					style="--section-turn: -110"
 				>
 					{#each looseKnowledge as knowledge (knowledge.id)}
 						{@render knowledgeCard(knowledge)}
@@ -697,7 +697,7 @@
 					{#if !collapsed}
 						<div
 							class="library-section grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3"
-							style="--section-turn: -110deg"
+							style="--section-turn: -110"
 						>
 							{#each items as knowledge (knowledge.id)}
 								{@render knowledgeCard(knowledge)}
