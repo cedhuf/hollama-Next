@@ -120,3 +120,30 @@ it: the conversation is what the page is for.
 
 Cleared messages are also left out of [search](/features/search/) by default, and come back with the
 same switch that brings back compaction summaries.
+
+## Looking before deciding
+
+`/context` writes down what the model is actually being sent, at the moment you ask. It costs no
+request and changes nothing: it is a note in the conversation, for you.
+
+It reports the estimate as a whole, then what the estimate is made of, since knowing a conversation
+weighs 12k says nothing about what to do next:
+
+| Line              | What it is                                                               |
+| ----------------- | ------------------------------------------------------------------------ |
+| **System prompt** | The instructions in front of every request, including a persona's        |
+| **Messages**      | The turns still in context, the compaction summary among them            |
+| **Sources index** | The list of earlier web results, built at send time and easy to forget   |
+| **Heaviest**      | The single biggest message, named, because it is usually one pasted file |
+
+The ceiling it measures against is the model's own `num_ctx` when the app knows it, and your
+threshold from _Settings → Chat_ when it does not. The report says which, because "60% full" means
+two different things depending on the answer.
+
+The figures are the same ones the load ring in the composer shows, from the same function, so the
+two cannot disagree. Like every token figure in Llooma they are estimated from text length rather
+than counted by the provider.
+
+A report is a **snapshot**, not a live reading. It keeps saying what the context held when you asked
+it, which is what makes running it before and after a `/compact` worth doing. It is never sent to
+the model, and it never turns up in search.

@@ -11,7 +11,7 @@
 	import { formatAskAnswer } from '$lib/askChoice';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
-	import { contextUsage } from '$lib/chat/context';
+	import { contextSnapshot, contextUsage } from '$lib/chat/context';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { mentionedPersonas } from '$lib/chat/mentions';
 	import { messagesInContext } from '$lib/chat/notes';
@@ -816,6 +816,28 @@
 	}
 
 	/**
+	 * Write down what the context holds, for the reader alone.
+	 *
+	 * A note like the others, so it folds into the conversation where it was
+	 * asked for and survives a reload. The model never sees it: `messagesInContext`
+	 * drops every note that is not the boundary, and its content is empty, which
+	 * is also why it never turns up in a search.
+	 */
+	function reportContext() {
+		session.messages = [
+			...session.messages,
+			{
+				role: 'system',
+				content: '',
+				createdAt: new Date().toISOString(),
+				note: contextSnapshot(session, compactConfig.compactThreshold)
+			}
+		];
+		saveSession(session);
+		void scrollToBottom(true);
+	}
+
+	/**
 	 * Compact now, and say what happened.
 	 *
 	 * The waiting and the result are both drawn in the conversation, at the spot
@@ -863,6 +885,10 @@
 	}
 
 	function runCommand(name: CommandName) {
+		if (name === 'context') {
+			reportContext();
+			return;
+		}
 		if (name === 'clear') {
 			// The menu hides it when there is nothing to fold, but the name can still
 			// be typed in full, so the refusal lives here rather than only in the menu.

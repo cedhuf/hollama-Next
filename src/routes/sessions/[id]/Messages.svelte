@@ -11,6 +11,7 @@
 	import Article from './Article.svelte';
 	import ClearedDivider from './ClearedDivider.svelte';
 	import CompactionDivider from './CompactionDivider.svelte';
+	import ContextDivider from './ContextDivider.svelte';
 
 	interface Props {
 		session: Session;
@@ -166,22 +167,28 @@
 
 {#each visible as message, index (session.id + (index + offset))}
 	{@const i = index + offset}
-	{#if message.note?.kind === 'cleared'}
-		{#if i === clearedAt}
-			<ClearedDivider
+	{#if message.note}
+		<!-- Not a turn: something that happened to the conversation. A kind this
+		     build does not know how to draw is drawn as nothing, which is the same
+		     answer the context builder gives it. -->
+		{#if message.note.kind === 'cleared'}
+			{#if i === clearedAt}
+				<ClearedDivider
+					note={message.note}
+					cleared={clearedMessages}
+					onUndo={() => handleUndoCompaction(message)}
+				/>
+			{/if}
+		{:else if message.note.kind === 'compaction'}
+			<CompactionDivider
 				note={message.note}
-				cleared={clearedMessages}
+				summary={message.content}
+				savings={compactionSavings(session.messages, i)}
 				onUndo={() => handleUndoCompaction(message)}
 			/>
+		{:else if message.note.kind === 'context'}
+			<ContextDivider note={message.note} />
 		{/if}
-	{:else if message.note?.kind === 'compaction'}
-		<!-- Not a turn: the boundary where the context above was summarised away. -->
-		<CompactionDivider
-			note={message.note}
-			summary={message.content}
-			savings={compactionSavings(session.messages, i)}
-			onUndo={() => handleUndoCompaction(message)}
-		/>
 	{:else if message !== pendingChoice}
 		{#key message.role}
 			<Article

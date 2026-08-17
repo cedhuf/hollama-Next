@@ -2455,6 +2455,38 @@ type RootTranslation = {
 	 */
 	compactCommandDescription: string
 	/**
+	 * S​h​o​w​ ​w​h​a​t​ ​t​h​e​ ​m​o​d​e​l​ ​i​s​ ​c​u​r​r​e​n​t​l​y​ ​b​e​i​n​g​ ​s​e​n​t
+	 */
+	contextCommandDescription: string
+	/**
+	 * C​o​n​t​e​x​t​ ​·​ ​~​{​t​o​k​e​n​s​}​ ​(​{​p​e​r​c​e​n​t​}​%​)
+	 * @param {number} percent
+	 * @param {string} tokens
+	 */
+	contextReport: RequiredParams<'percent' | 'tokens'>
+	/**
+	 * S​y​s​t​e​m​ ​p​r​o​m​p​t
+	 */
+	contextPartSystem: string
+	/**
+	 * M​e​s​s​a​g​e​s
+	 */
+	contextPartMessages: string
+	/**
+	 * S​o​u​r​c​e​s​ ​i​n​d​e​x
+	 */
+	contextPartSources: string
+	/**
+	 * {​c​o​u​n​t​}​ ​o​f​ ​{​t​o​t​a​l​}​ ​{​{​m​e​s​s​a​g​e​|​m​e​s​s​a​g​e​s​}​}​ ​s​e​n​t​ ​w​i​t​h​ ​t​h​e​ ​n​e​x​t​ ​r​e​q​u​e​s​t
+	 * @param {number} count
+	 * @param {number} total
+	 */
+	contextMessagesOfTotal: RequiredParams<'count' | 'total'>
+	/**
+	 * H​e​a​v​i​e​s​t​:
+	 */
+	contextHeaviest: string
+	/**
 	 * T​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​i​s​ ​t​o​o​ ​s​h​o​r​t​ ​t​o​ ​b​e​ ​w​o​r​t​h​ ​c​o​m​p​a​c​t​i​n​g
 	 */
 	nothingToCompact: string
@@ -4910,6 +4942,34 @@ The completion in progress will stop
 	 * Summarise the conversation so far to free up context
 	 */
 	compactCommandDescription: () => LocalizedString
+	/**
+	 * Show what the model is currently being sent
+	 */
+	contextCommandDescription: () => LocalizedString
+	/**
+	 * Context · ~{tokens} ({percent}%)
+	 */
+	contextReport: (arg: { percent: number, tokens: string }) => LocalizedString
+	/**
+	 * System prompt
+	 */
+	contextPartSystem: () => LocalizedString
+	/**
+	 * Messages
+	 */
+	contextPartMessages: () => LocalizedString
+	/**
+	 * Sources index
+	 */
+	contextPartSources: () => LocalizedString
+	/**
+	 * {count} of {total} {{message|messages}} sent with the next request
+	 */
+	contextMessagesOfTotal: (arg: { count: number, total: number }) => LocalizedString
+	/**
+	 * Heaviest:
+	 */
+	contextHeaviest: () => LocalizedString
 	/**
 	 * This conversation is too short to be worth compacting
 	 */

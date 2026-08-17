@@ -13,18 +13,18 @@ For the full list of everything this fork changed from
 
 ## Done
 
-| Feature                             | What it means                                                                                                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Running modes](/guides/running-modes/)                                        |
-| **Sharing enforced server-side**    | Shared tools, model allow-lists and locked prompts are applied in the endpoints, so a hand-crafted request is policed too                                     |
-| **Locked prompts survive personas** | A locked instance prompt is prepended in the proxy, so a persona's own prompt adds to it instead of replacing it                                              |
-| **Translations reworked**           | English and French are complete, and adding a locale no longer means auditing every key. See [Translations](/development/translations/)                       |
-| **Conversation compaction**         | `/compact` summarises a long conversation so it keeps fitting, and `/clear` sets one aside entirely. Both reversible. See [Compaction](/features/compaction/) |
-| **Documentation site**              | This site, published from `docs/`, with the HTTP API kept in step with the routes by CI                                                                       |
-| **Generation on the server**        | A reply survives a reload, a navigation or a backgrounded tab, and the conversation picks it back up. See [Generation](/features/generation/)                 |
-| **Calling a persona**               | Mention one with `@` in any conversation and it answers that turn, with its own model and everything else it carries. See [Personas](/features/personas/)     |
-| **Wallpapers**                      | A picture behind the app, on a phone as well as a desktop, with the translucency of every surface following it                                                |
-| **A store for personas**            | Personas are read from a store over the network rather than shipped in the app, so one is added by a pull request. See [Personas](/features/personas/)        |
+| Feature                             | What it means                                                                                                                                                                    |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Running modes](/guides/running-modes/)                                                           |
+| **Sharing enforced server-side**    | Shared tools, model allow-lists and locked prompts are applied in the endpoints, so a hand-crafted request is policed too                                                        |
+| **Locked prompts survive personas** | A locked instance prompt is prepended in the proxy, so a persona's own prompt adds to it instead of replacing it                                                                 |
+| **Translations reworked**           | English and French are complete, and adding a locale no longer means auditing every key. See [Translations](/development/translations/)                                          |
+| **Conversation compaction**         | `/compact` summarises a long conversation so it keeps fitting, `/clear` sets one aside entirely, and `/context` says what is being sent. See [Compaction](/features/compaction/) |
+| **Documentation site**              | This site, published from `docs/`, with the HTTP API kept in step with the routes by CI                                                                                          |
+| **Generation on the server**        | A reply survives a reload, a navigation or a backgrounded tab, and the conversation picks it back up. See [Generation](/features/generation/)                                    |
+| **Calling a persona**               | Mention one with `@` in any conversation and it answers that turn, with its own model and everything else it carries. See [Personas](/features/personas/)                        |
+| **Wallpapers**                      | A picture behind the app, on a phone as well as a desktop, with the translucency of every surface following it                                                                   |
+| **A store for personas**            | Personas are read from a store over the network rather than shipped in the app, so one is added by a pull request. See [Personas](/features/personas/)                           |
 
 ## Next
 

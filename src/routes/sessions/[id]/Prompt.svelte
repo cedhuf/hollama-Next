@@ -85,7 +85,10 @@
 			description: $LL.clearCommandDescription(),
 			available: canClear,
 			unavailableReason: canClear ? undefined : $LL.nothingToClear()
-		}
+		},
+		// Always available: there is always a context, and a report saying it is
+		// nearly empty is a perfectly good answer to the question.
+		{ name: 'context', description: $LL.contextCommandDescription(), available: true }
 	]);
 	const knownCommands = $derived(commands.map((c) => c.name));
 

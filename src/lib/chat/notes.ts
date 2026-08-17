@@ -26,7 +26,7 @@ import type { Message } from '$lib/sessions';
  * an empty one. That is a property of the design, not a filter to remember.
  */
 
-export type NoteKind = 'compaction' | 'cleared';
+export type NoteKind = 'compaction' | 'cleared' | 'context';
 
 /**
  * Where the model starts reading, for a conversation ending at this note.
@@ -60,11 +60,42 @@ export interface ClearedNote extends NoteBase {
 	replacedCount: number;
 }
 
-export type ConversationNote = CompactionNote | ClearedNote;
+/**
+ * What the context held when someone asked, and nothing else.
+ *
+ * The first note that is purely for the reader: it moves no boundary and the
+ * model never sees it. Which is why it is a snapshot rather than a live reading
+ * of the conversation it sits in. A panel that recomputed itself would show
+ * today's figures under yesterday's question, and the reason to ask is almost
+ * always to compare a before with an after.
+ *
+ * The figures come from `contextSnapshot`, which takes them from `contextUsage`
+ * so the report and the ring in the composer cannot disagree.
+ */
+export interface ContextNote extends NoteBase {
+	kind: 'context';
+	/** Estimated tokens in what would have been sent at that moment. */
+	tokens: number;
+	limit: number;
+	limitSource: 'model' | 'threshold';
+	/** The three things the estimate is made of. They add up to `tokens`. */
+	systemTokens: number;
+	messageTokens: number;
+	sourceTokens: number;
+	/** Messages in context, and in the conversation as a whole. */
+	messageCount: number;
+	totalCount: number;
+	/** The single heaviest message, because "why is it full" usually has one answer. */
+	heaviest?: { role: string; tokens: number; preview: string };
+	model?: string;
+}
+
+export type ConversationNote = CompactionNote | ClearedNote | ContextNote;
 
 export const NOTE_KINDS: Record<NoteKind, { boundary: NoteBoundary }> = {
 	compaction: { boundary: 'from' },
-	cleared: { boundary: 'after' }
+	cleared: { boundary: 'after' },
+	context: { boundary: 'none' }
 };
 
 /** Every kind there is, for the callers that have to enumerate them (the SQL does). */

@@ -1,6 +1,6 @@
 import type { Message, Session } from '$lib/sessions';
 
-import { conversationBoundary, messagesInContext } from './notes';
+import { conversationBoundary, messagesInContext, type ContextNote } from './notes';
 import { formatSourceIndex, recallSearches } from './sourceIndex';
 
 /**
@@ -176,4 +176,60 @@ export function formatTokens(tokens: number): string {
 	if (tokens < 1000) return String(tokens);
 	if (tokens < 10_000) return `${(tokens / 1000).toFixed(1)}k`;
 	return `${Math.round(tokens / 1000)}k`;
+}
+
+/**
+ * What a message is called in the report, in eighty characters or fewer.
+ *
+ * A document's name rather than its text: a message carrying a PDF holds the
+ * whole of it in `content`, and quoting the first line of a parsed PDF says
+ * nothing about which file it is.
+ */
+function preview(message: Message): string {
+	if (message.document?.name) return message.document.name;
+	const text = (message.content ?? '').trim().replace(/\s+/g, ' ');
+	return text.length > 80 ? `${text.slice(0, 79)}\u2026` : text;
+}
+
+/**
+ * Freeze what the context holds right now, for `/context`.
+ *
+ * The totals come from `contextUsage`, the same function the ring in the
+ * composer reads, so the two can never report different numbers for the same
+ * conversation. What is added here is the breakdown: which of the three parts
+ * the weight is in, and which single message carries the most of it, because
+ * "why is my context full" almost always has one answer and it is usually a file
+ * somebody pasted.
+ */
+export function contextSnapshot(session: Session, threshold: number): ContextNote {
+	const usage = contextUsage(session, threshold);
+	const active = messagesInContext(session.messages);
+
+	const systemTokens = estimateTokens(session.systemPrompt?.content ?? '');
+	const sourceTokens = estimateSourceIndexTokens(active);
+
+	let messageTokens = 0;
+	let heaviest: ContextNote['heaviest'];
+	for (const message of active) {
+		const tokens = estimateMessageTokens(message);
+		messageTokens += tokens;
+		if (!heaviest || tokens > heaviest.tokens) {
+			heaviest = { role: message.role, tokens, preview: preview(message) };
+		}
+	}
+
+	return {
+		kind: 'context',
+		generatedAt: new Date().toISOString(),
+		tokens: usage.tokens,
+		limit: usage.limit,
+		limitSource: usage.limitSource,
+		systemTokens,
+		messageTokens,
+		sourceTokens,
+		messageCount: usage.messageCount,
+		totalCount: session.messages.filter((message) => !message.note).length,
+		heaviest: heaviest?.preview ? heaviest : undefined,
+		model: session.model?.name
+	};
 }
