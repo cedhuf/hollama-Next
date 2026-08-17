@@ -1209,6 +1209,68 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * N​e​w​ ​p​l​a​y​b​o​o​k
+	 */
+	newPlaybook: string
+	/**
+	 * I​d​e​n​t​i​t​y
+	 */
+	playbookIdentity: string
+	/**
+	 * N​a​m​e​ ​(​e​.​g​.​ ​W​e​e​k​l​y​ ​m​e​a​l​ ​p​l​a​n​)
+	 */
+	playbookNamePlaceholder: string
+	/**
+	 * W​h​e​n​ ​t​o​ ​u​s​e​ ​i​t
+	 */
+	playbookSummary: string
+	/**
+	 * O​n​e​ ​l​i​n​e​,​ ​w​r​i​t​t​e​n​ ​f​o​r​ ​t​h​e​ ​m​o​m​e​n​t​ ​s​o​m​e​b​o​d​y​ ​i​s​ ​d​e​c​i​d​i​n​g​.​ ​T​h​i​s​ ​i​s​ ​w​h​a​t​ ​/​p​l​a​y​b​o​o​k​s​ ​s​h​o​w​s​.
+	 */
+	playbookSummaryHelp: string
+	/**
+	 * P​l​a​n​ ​a​ ​w​e​e​k​ ​o​f​ ​m​e​a​l​s​ ​f​r​o​m​ ​w​h​a​t​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​e​ ​k​i​t​c​h​e​n
+	 */
+	playbookSummaryPlaceholder: string
+	/**
+	 * T​a​g​s
+	 */
+	playbookTags: string
+	/**
+	 * C​o​m​m​a​ ​s​e​p​a​r​a​t​e​d​.​ ​U​s​e​d​ ​t​o​ ​f​i​l​t​e​r​ ​t​h​e​ ​s​t​o​r​e​ ​a​n​d​ ​t​h​e​ ​l​i​b​r​a​r​y​.
+	 */
+	playbookTagsHelp: string
+	/**
+	 * C​o​l​o​u​r​ ​a​n​d​ ​m​a​r​k
+	 */
+	playbookMark: string
+	/**
+	 * T​h​e​ ​p​r​o​c​e​d​u​r​e
+	 */
+	playbookInstructions: string
+	/**
+	 * M​a​r​k​d​o​w​n​,​ ​r​e​a​d​ ​b​y​ ​t​h​e​ ​m​o​d​e​l​ ​a​s​ ​i​n​s​t​r​u​c​t​i​o​n​s​.​ ​W​r​i​t​e​ ​t​h​e​ ​s​t​e​p​s​,​ ​w​h​a​t​ ​t​o​ ​a​s​k​ ​f​o​r​ ​w​h​e​n​ ​s​o​m​e​t​h​i​n​g​ ​i​s​ ​m​i​s​s​i​n​g​,​ ​a​n​d​ ​w​h​a​t​ ​a​ ​g​o​o​d​ ​a​n​s​w​e​r​ ​l​o​o​k​s​ ​l​i​k​e​.
+	 */
+	playbookInstructionsHelp: string
+	/**
+	 * #​#​ ​S​t​e​p​s​
+​
+​1​.​ ​A​s​k​ ​w​h​a​t​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​e​ ​f​r​i​d​g​e​…
+	 */
+	playbookInstructionsPlaceholder: string
+	/**
+	 * D​e​l​e​t​e​ ​t​h​i​s​ ​p​l​a​y​b​o​o​k
+	 */
+	deletePlaybook: string
+	/**
+	 * P​l​a​y​b​o​o​k​ ​d​e​l​e​t​e​d
+	 */
+	playbookDeleted: string
+	/**
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​t​h​i​s​ ​p​l​a​y​b​o​o​k​?
+	 */
+	areYouSureYouWantToDeleteThisPlaybook: string
+	/**
 	 * P​i​n​n​e​d
 	 */
 	groupPinned: string
@@ -3763,6 +3825,68 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * New playbook
+	 */
+	newPlaybook: () => LocalizedString
+	/**
+	 * Identity
+	 */
+	playbookIdentity: () => LocalizedString
+	/**
+	 * Name (e.g. Weekly meal plan)
+	 */
+	playbookNamePlaceholder: () => LocalizedString
+	/**
+	 * When to use it
+	 */
+	playbookSummary: () => LocalizedString
+	/**
+	 * One line, written for the moment somebody is deciding. This is what /playbooks shows.
+	 */
+	playbookSummaryHelp: () => LocalizedString
+	/**
+	 * Plan a week of meals from what is already in the kitchen
+	 */
+	playbookSummaryPlaceholder: () => LocalizedString
+	/**
+	 * Tags
+	 */
+	playbookTags: () => LocalizedString
+	/**
+	 * Comma separated. Used to filter the store and the library.
+	 */
+	playbookTagsHelp: () => LocalizedString
+	/**
+	 * Colour and mark
+	 */
+	playbookMark: () => LocalizedString
+	/**
+	 * The procedure
+	 */
+	playbookInstructions: () => LocalizedString
+	/**
+	 * Markdown, read by the model as instructions. Write the steps, what to ask for when something is missing, and what a good answer looks like.
+	 */
+	playbookInstructionsHelp: () => LocalizedString
+	/**
+	 * ## Steps
+
+1. Ask what is already in the fridge…
+	 */
+	playbookInstructionsPlaceholder: () => LocalizedString
+	/**
+	 * Delete this playbook
+	 */
+	deletePlaybook: () => LocalizedString
+	/**
+	 * Playbook deleted
+	 */
+	playbookDeleted: () => LocalizedString
+	/**
+	 * Are you sure you want to delete this playbook?
+	 */
+	areYouSureYouWantToDeleteThisPlaybook: () => LocalizedString
 	/**
 	 * Pinned
 	 */

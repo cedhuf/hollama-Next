@@ -27,6 +27,7 @@
 	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import PersonaCard from '$lib/components/PersonaCard.svelte';
+	import PlaybookCard from '$lib/components/PlaybookCard.svelte';
 	import {
 		createCollection,
 		deleteCollection,
@@ -36,7 +37,7 @@
 		saveKnowledge,
 		type Knowledge
 	} from '$lib/knowledge';
-	import { knowledgeStore, personasStore, settingsStore } from '$lib/localStorage';
+	import { knowledgeStore, personasStore, playbooksStore, settingsStore } from '$lib/localStorage';
 	import {
 		applyBundleToPersona,
 		installPersonaBundle,
@@ -54,11 +55,13 @@
 	} from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
 	import { personaState } from '$lib/personaState';
+	import { newPlaybook, type Playbook } from '$lib/playbooks';
 	import { openKnowledge } from '$lib/stores/modal';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	import PersonaModal from './PersonaModal.svelte';
 	import PersonaStoreModal from './PersonaStoreModal.svelte';
+	import PlaybookModal from './PlaybookModal.svelte';
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
@@ -256,6 +259,24 @@
 			for (const persona of personas) savePersona(persona);
 			toast.success($LL.importedPersonas({ count: personas.length }));
 		});
+	}
+
+	let playbookModalOpen = $state(false);
+	let editingPlaybook = $state<Playbook>(newPlaybook());
+
+	function editPlaybook(playbook: Playbook) {
+		editingPlaybook = playbook;
+		playbookModalOpen = true;
+	}
+
+	/**
+	 * A new playbook is saved as soon as it is named, like a persona: the modal
+	 * writes through on every keystroke, so there is no draft to lose and no Save
+	 * button to forget.
+	 */
+	function createPlaybook() {
+		editingPlaybook = newPlaybook();
+		playbookModalOpen = true;
 	}
 
 	function onImportKnowledge(event: Event) {
@@ -462,6 +483,35 @@
 				</div>
 			</div>
 
+			<!-- Playbooks -->
+			<!-- Between the personas and the knowledge on purpose: who answers, how the
+			     job is done, what it is done with. That is the order somebody builds
+			     things up in. -->
+			<div class="mb-3 flex items-baseline justify-between gap-2">
+				<div class="flex items-baseline gap-2">
+					<h2 class="text-sm font-medium text-active">{$LL.playbooks()}</h2>
+					<span class="text-xs text-muted">{$playbooksStore.length}</span>
+				</div>
+			</div>
+
+			<!-- One column rather than a grid of tiles: a playbook is chosen on its
+			     summary, and a summary is a sentence. Two columns on a wide screen,
+			     because thirty of them in a single stack is a scroll. -->
+			<div class="mb-9 grid gap-3 lg:grid-cols-2">
+				{#each $playbooksStore as playbook (playbook.id)}
+					<PlaybookCard {playbook} onclick={() => editPlaybook(playbook)} />
+				{/each}
+
+				<button
+					type="button"
+					onclick={createPlaybook}
+					class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+				>
+					<Plus class="h-4 w-4" />
+					<span class="text-xs">{$LL.newPlaybook()}</span>
+				</button>
+			</div>
+
 			<!-- Knowledge -->
 			<div class="mb-3 flex items-baseline gap-2">
 				<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
@@ -632,6 +682,7 @@
 
 {#if editing}
 	<PersonaModal bind:open={modalOpen} bind:persona={editing} />
+	<PlaybookModal bind:open={playbookModalOpen} bind:playbook={editingPlaybook} />
 {/if}
 
 <PersonaStoreModal bind:open={storeOpen} />
