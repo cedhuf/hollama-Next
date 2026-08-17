@@ -1,6 +1,6 @@
 {
 	"name": "llooma",
-	"version": "0.17.0",
+	"version": "0.18.0",
 	"private": true,
 	"homepage": "https://github.com/cedhuf/llooma",
 	"description": "A minimal LLM chat app that runs entirely in your browser",
