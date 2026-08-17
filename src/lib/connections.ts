@@ -84,6 +84,14 @@ export interface ModelPrice {
 	input?: number;
 	/** Per million tokens returned. */
 	output?: number;
+	/**
+	 * What this model is billed in, when it is not the connection's currency.
+	 *
+	 * Per model because one account can be billed in more than one, and because a
+	 * limit that adds currencies together should at least be able to know that it
+	 * is doing so. Nothing is converted, here or anywhere.
+	 */
+	currency?: string;
 }
 
 /** What one model costs here, or nothing when it has never been priced. */

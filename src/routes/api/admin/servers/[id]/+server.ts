@@ -5,6 +5,7 @@ import {
 	deleteServer,
 	getServer,
 	setModelLabels,
+	setModelPricing,
 	setSharedModels,
 	updateServer
 } from '$lib/server/db/servers';
@@ -32,6 +33,9 @@ export async function PUT(event) {
 	});
 	if (body.modelLabels && typeof body.modelLabels === 'object') {
 		setModelLabels(event.params.id, body.modelLabels);
+	}
+	if (body.modelPricing && typeof body.modelPricing === 'object') {
+		setModelPricing(event.params.id, body.modelPricing);
 	}
 	if (Array.isArray(body.sharedModels)) setSharedModels(event.params.id, body.sharedModels);
 

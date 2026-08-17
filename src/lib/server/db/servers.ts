@@ -175,13 +175,22 @@ export function setModelLabels(serverId: string, labels: Record<string, string>)
 /** What a million tokens costs on this connection, keyed by the real model id. */
 export function getModelPricing(serverId: string): Record<string, ModelPrice> {
 	const rows = getDb()
-		.prepare('SELECT model_name, input, output FROM model_pricing WHERE server_id = ?')
-		.all(serverId) as { model_name: string; input: number | null; output: number | null }[];
+		.prepare('SELECT model_name, input, output, currency FROM model_pricing WHERE server_id = ?')
+		.all(serverId) as {
+		model_name: string;
+		input: number | null;
+		output: number | null;
+		currency: string | null;
+	}[];
 
 	return Object.fromEntries(
 		rows.map((row) => [
 			row.model_name,
-			{ input: row.input ?? undefined, output: row.output ?? undefined }
+			{
+				input: row.input ?? undefined,
+				output: row.output ?? undefined,
+				currency: row.currency ?? undefined
+			}
 		])
 	);
 }
@@ -198,11 +207,12 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 	try {
 		db.prepare('DELETE FROM model_pricing WHERE server_id = ?').run(serverId);
 		const insert = db.prepare(
-			'INSERT INTO model_pricing (server_id, model_name, input, output) VALUES (?, ?, ?, ?)'
+			`INSERT INTO model_pricing (server_id, model_name, input, output, currency)
+			 VALUES (?, ?, ?, ?, ?)`
 		);
 		for (const [name, price] of Object.entries(pricing)) {
 			if (price?.input == null && price?.output == null) continue;
-			insert.run(serverId, name, price.input ?? null, price.output ?? null);
+			insert.run(serverId, name, price.input ?? null, price.output ?? null, price.currency ?? null);
 		}
 		db.exec('COMMIT');
 	} catch (error) {

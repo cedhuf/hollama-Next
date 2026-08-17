@@ -112,6 +112,9 @@
 		await load();
 	}
 
+	/** No ceiling, written as the one character that says exactly that. */
+	const UNLIMITED = '\u221e';
+
 	const money = (value: number) =>
 		value.toLocaleString(undefined, { maximumFractionDigits: value < 1 ? 3 : 2 });
 
@@ -172,20 +175,39 @@
 					<span class="tabular-nums">
 						{$LL.usageSpent({ spent: money(user.spend.cost) })}
 					</span>
+					<!-- The ceiling as a figure, or the sign for not having one. Zero is
+					     what "no limit" is stored as, and printing a bare 0 next to a spend
+					     reads as an allowance of nothing, which is the opposite. -->
 					<span class="opacity-60">
-						{user.effectiveLimit > 0 ? money(user.effectiveLimit) : $LL.usageUnlimited()}
+						{user.effectiveLimit > 0 ? money(user.effectiveLimit) : UNLIMITED}
 					</span>
-					<input
-						class="settings-field ml-auto w-24 py-1 text-right text-xs tabular-nums"
-						type="number"
-						min="0"
-						step="0.01"
-						inputmode="decimal"
-						value={user.credit_limit ?? ''}
-						placeholder={instanceLimit > 0 ? money(instanceLimit) : $LL.usageUnlimited()}
-						aria-label="{user.email} · {$LL.creditLimit()}"
-						onchange={(e) => setLimit(user, e.currentTarget.value)}
-					/>
+
+					<div class="ml-auto flex items-center gap-1">
+						<input
+							class="settings-field w-24 py-1 text-right text-xs tabular-nums"
+							type="number"
+							min="0"
+							step="0.01"
+							inputmode="decimal"
+							value={user.credit_limit ?? ''}
+							placeholder={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
+							aria-label="{user.email} · {$LL.creditLimit()}"
+							onchange={(e) => setLimit(user, e.currentTarget.value)}
+						/>
+						<!-- Back to following the instance. A number field can be walked down
+						     to zero, and zero is a decision — "no limit at all" — not the
+						     absence of one, so there has to be a way out that is not a value. -->
+						<button
+							type="button"
+							disabled={user.credit_limit == null}
+							onclick={() => setLimit(user, '')}
+							title={$LL.creditLimitInherit()}
+							aria-label="{user.email} · {$LL.creditLimitInherit()}"
+							class="rounded-md p-1 text-muted transition-colors hover:text-active disabled:opacity-30"
+						>
+							<X class="h-3.5 w-3.5" />
+						</button>
+					</div>
 				</div>
 			</div>
 		{/each}
@@ -254,7 +276,7 @@
 					inputmode="decimal"
 					bind:value={instanceLimitField}
 					onchange={saveInstance}
-					placeholder={$LL.usageUnlimited()}
+					placeholder={UNLIMITED}
 				/>
 			</label>
 			<label class="flex flex-col gap-1 text-sm">

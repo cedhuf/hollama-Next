@@ -282,6 +282,16 @@ const migrations: Migration[] = [
 			-- administrator decides otherwise.
 			ALTER TABLE users ADD COLUMN credit_limit REAL;
 		`
+	},
+	{
+		version: 12,
+		up: `
+			-- What one model is billed in, when it differs from its connection's.
+			-- Kept per model rather than only per connection because a single account
+			-- can be billed in more than one currency, and because a total that adds
+			-- currencies together has to at least know it is doing it.
+			ALTER TABLE model_pricing ADD COLUMN currency TEXT;
+		`
 	}
 ];
 

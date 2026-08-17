@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { ArrowDownLeft, ArrowUpRight, Coins, RotateCcw, Search, X } from '@lucide/svelte';
+	import { ChevronDown, Coins, RotateCcw, Search, X } from '@lucide/svelte';
+	import { quadInOut } from 'svelte/easing';
+	import { SvelteSet } from 'svelte/reactivity';
+	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
-	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { modelPrice, serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsBack } from '$lib/stores/modal';
@@ -24,12 +26,22 @@
 	 */
 	interface Props {
 		server: Server;
+		/**
+		 * The models this instance offers its users.
+		 *
+		 * Only these are coloured. An unpriced model matters when somebody else can
+		 * reach it — a model nobody is offered is nobody's allowance, and marking it
+		 * red would be an alarm about nothing.
+		 */
+		shared?: string[];
 		onBack: () => void;
 		/** Called after each edit so the parent can persist the connection. */
 		onChange: () => void;
 	}
 
-	let { server, onBack, onChange }: Props = $props();
+	let { server, shared = [], onBack, onChange }: Props = $props();
+
+	const isShared = $derived((name: string) => shared.includes(name));
 
 	// Hand the way out to the modal header for as long as this view is mounted.
 	// Leaving by any route (back, another tab, closing the dialog) unmounts it,
@@ -41,8 +53,17 @@
 
 	let query = $state('');
 	let confirmingReset = $state(false);
-	/** Folded until asked for, and what it reveals is the fields on every row. */
-	let pricingOpen = $state(false);
+	/**
+	 * Which model has its prices open, by id.
+	 *
+	 * One at a time and per model, not a switch over the whole list: pricing is
+	 * something you do to the two or three models you actually share, and two
+	 * hundred rows of number fields is a list nobody can rename in any more.
+	 */
+	const priced = new SvelteSet<string>();
+
+	/** Enough to cover what people actually run, and free text is not a menu. */
+	const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD'];
 
 	const badge = $derived(serverBadge(server));
 	// The catalogue is already loaded for the model picker; just take this server's.
@@ -95,6 +116,24 @@
 		onChange();
 	}
 
+	/** Back to unpriced, which is not the same as priced at zero. */
+	function clearPrice(name: string) {
+		const pricing = { ...(server.modelPricing ?? {}) };
+		delete pricing[name];
+		server.modelPricing = pricing;
+		onChange();
+	}
+
+	/** The currency this model is billed in, cleared when set back to nothing. */
+	function setCurrency(name: string, code: string) {
+		const pricing = { ...(server.modelPricing ?? {}) };
+		const next = { ...(pricing[name] ?? {}), currency: code || undefined };
+		if (next.input == null && next.output == null && !next.currency) delete pricing[name];
+		else pricing[name] = next;
+		server.modelPricing = pricing;
+		onChange();
+	}
+
 	function resetAll() {
 		server.modelLabels = {};
 		confirmingReset = false;
@@ -122,33 +161,6 @@
 	</div>
 
 	{#if models.length}
-		<!-- What a million tokens costs, folded: most connections never get a price,
-		     and the row says how many have one so opening it is a decision. The unit
-		     is stated once here rather than beside two hundred pairs of fields. -->
-		<Collapsible
-			title={$LL.pricing()}
-			description={$LL.pricingHelp()}
-			summary={$LL.pricedOf({ priced: pricedCount, total: models.length })}
-			icon={Coins}
-			bind:open={pricingOpen}
-		>
-			<label class="flex items-center gap-2 text-sm">
-				<span class="shrink-0 text-muted">{$LL.currency()}</span>
-				<input
-					class="settings-field w-24 uppercase"
-					value={server.currency ?? ''}
-					maxlength="6"
-					placeholder="EUR"
-					aria-label={$LL.currency()}
-					oninput={(e) => {
-						server.currency = e.currentTarget.value.trim() || undefined;
-						onChange();
-					}}
-				/>
-				<span class="min-w-0 flex-1 text-xs text-muted">{$LL.currencyHelp()}</span>
-			</label>
-		</Collapsible>
-
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
 		     reach one. -->
 		<div class="flex items-center gap-2">
@@ -206,9 +218,17 @@
 			<div class="flex flex-col gap-1.5">
 				{#each visible as name (name)}
 					{@const label = server.modelLabels?.[name] ?? ''}
+					{@const price = server.modelPricing?.[name]}
+					{@const hasPrice = price?.input != null || price?.output != null}
+					<!-- Green when a shared model has a price, red when it has none: while
+					     an allowance is in force an unpriced shared model is refused, so the
+					     colour is the state of something that works rather than decoration.
+					     A model nobody is offered is left alone. -->
 					<div
-						class="flex flex-col gap-1 rounded-lg border p-2 transition-colors {label.trim()
-							? 'border-accent/40 bg-shade-0'
+						class="flex flex-col gap-1 rounded-lg border p-2 transition-colors {isShared(name)
+							? hasPrice
+								? 'border-positive/50 bg-positive/5'
+								: 'border-negative/50 bg-negative/5'
 							: 'border-shade-3'}"
 					>
 						<div class="flex items-center gap-1.5">
@@ -231,26 +251,53 @@
 								</button>
 							{/if}
 						</div>
-						<span class="truncate px-1 font-mono text-[11px] text-muted" title={name}>{name}</span>
+						<div class="flex items-center gap-2 px-1">
+							<span class="min-w-0 flex-1 truncate font-mono text-[11px] text-muted" title={name}>
+								{name}
+							</span>
 
-						{#if pricingOpen}
-							<!-- Only while the pricing block is open, so a list somebody came
-							     to rename is a list of names. The arrows say which way the
-							     tokens go, the words say it in full on hover and to a screen
-							     reader, and the unit is stated once above. -->
-							<div class="flex items-center gap-2 pt-1">
-								{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownLeft, label: $LL.pricePerMillionOut() }] as field (field.side)}
-									{@const Icon = field.icon}
-									<div
-										class="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-shade-3 bg-shade-1 py-1 pl-2 pr-1 focus-within:border-accent"
-										title="{field.label} · {$LL.perMillionTokens()}"
-									>
-										<Icon class="h-3.5 w-3.5 shrink-0 text-muted" />
-										<span class="shrink-0 text-[10px] uppercase tracking-wide text-muted">
-											{field.label}
-										</span>
+							<!-- The way in to the prices, on the row it prices. Says what it
+							     holds when closed, so a shared model with nothing set is
+							     readable without opening anything. -->
+							<button
+								type="button"
+								onclick={() => (priced.has(name) ? priced.delete(name) : priced.add(name))}
+								aria-expanded={priced.has(name)}
+								class="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] transition-colors hover:bg-shade-2 {hasPrice
+									? 'text-active'
+									: 'text-muted'}"
+								title={$LL.pricingHelp()}
+							>
+								<Coins class="h-3 w-3" />
+								{#if hasPrice}
+									<span class="tabular-nums">
+										{price?.input ?? '—'} / {price?.output ?? '—'}
+										{#if price?.currency}<span class="uppercase">{price.currency}</span>{/if}
+									</span>
+								{:else}
+									{$LL.priceUnset()}
+								{/if}
+								<ChevronDown
+									class="h-3 w-3 transition-transform {priced.has(name) ? 'rotate-180' : ''}"
+								/>
+							</button>
+						</div>
+
+						{#if priced.has(name)}
+							<!-- Labels outside the field, not inside it: a placeholder disappears
+							     the moment somebody types, and "1.25" with nothing beside it is a
+							     number whose meaning has just been deleted. The unit is on the
+							     row too, because a provider that publishes per 10K prices exists
+							     and the field cannot be read without it. -->
+							<div
+								class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-shade-1 p-2"
+								transition:slide={{ duration: 160, easing: quadInOut }}
+							>
+								{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
+									<label class="flex min-w-0 flex-1 items-center gap-1.5">
+										<span class="shrink-0 text-[11px] text-muted">{field.label}</span>
 										<input
-											class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+											class="settings-field w-full min-w-16 py-1 text-right text-xs tabular-nums"
 											type="number"
 											min="0"
 											step="0.01"
@@ -260,13 +307,35 @@
 											aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
 											oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
 										/>
-										{#if server.currency}
-											<span class="shrink-0 text-[10px] uppercase text-muted">
-												{server.currency}
-											</span>
-										{/if}
-									</div>
+									</label>
 								{/each}
+
+								<select
+									class="settings-field w-auto shrink-0 py-1 text-xs uppercase"
+									value={server.modelPricing?.[name]?.currency ?? ''}
+									aria-label="{name} · {$LL.currency()}"
+									onchange={(e) => setCurrency(name, e.currentTarget.value)}
+								>
+									<option value="">{$LL.currency()}</option>
+									{#each CURRENCIES as code (code)}
+										<option value={code}>{code}</option>
+									{/each}
+								</select>
+
+								<span class="flex w-full items-center gap-2 text-[11px] text-muted">
+									{$LL.perMillionTokens()}
+									<!-- Zero is a price: free, and counted as such. Clearing is the
+									     other answer — nobody has said — and a number field cannot
+									     be walked back to it. -->
+									<button
+										type="button"
+										disabled={!hasPrice && !price?.currency}
+										onclick={() => clearPrice(name)}
+										class="ml-auto rounded-md px-1.5 py-0.5 transition-colors hover:bg-shade-2 hover:text-active disabled:opacity-30"
+									>
+										{$LL.clearPrice()}
+									</button>
+								</span>
 							</div>
 						{/if}
 					</div>

@@ -1,4 +1,9 @@
-import { getModelLabels, getSharedModels, type ServerRow } from '$lib/server/db/servers';
+import {
+	getModelLabels,
+	getModelPricing,
+	getSharedModels,
+	type ServerRow
+} from '$lib/server/db/servers';
 
 /** Admin view of a system server: full config minus the (never-exposed) key. */
 export function toAdminView(row: ServerRow) {
@@ -13,7 +18,8 @@ export function toAdminView(row: ServerRow) {
 		color: row.color,
 		hasApiKey: !!row.api_key_enc,
 		sharedModels: getSharedModels(row.id),
-		modelLabels: getModelLabels(row.id)
+		modelLabels: getModelLabels(row.id),
+		modelPricing: getModelPricing(row.id)
 	};
 }
 

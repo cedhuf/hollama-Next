@@ -42,6 +42,8 @@
 		verifiedAt?: string | null;
 		color?: string | null;
 		modelLabels?: Record<string, string>;
+		modelPricing?: Record<string, { input?: number; output?: number; currency?: string }>;
+		sharedModels?: string[];
 		/** A stored key is never returned; this is all the browser gets to know. */
 		hasApiKey?: boolean;
 		scope?: string;
@@ -90,6 +92,7 @@
 			isVerified: v.verifiedAt ? new Date(v.verifiedAt) : null,
 			color: v.color ?? undefined,
 			modelLabels: v.modelLabels ?? undefined,
+			modelPricing: v.modelPricing ?? undefined,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -125,6 +128,7 @@
 					});
 			servers = list.map(toServer);
 			storedKeys = Object.fromEntries(list.map((v) => [v.id, !!v.hasApiKey]));
+			sharedByServer = Object.fromEntries(list.map((v) => [v.id, v.sharedModels ?? []]));
 		} finally {
 			loading = false;
 		}
@@ -236,6 +240,7 @@
 							: (server.isVerified ?? null),
 					color: server.color ?? null,
 					modelLabels: server.modelLabels ?? {},
+					modelPricing: server.modelPricing ?? {},
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			}).then(() => afterSave?.());
@@ -245,6 +250,15 @@
 	/** When set, the tab shows the model-name editor for that connection instead. */
 	let renamingId = $state<string | null>(null);
 	const renaming = $derived(servers.find((s) => s.id === renamingId));
+	/**
+	 * Which of this connection's models the instance offers its users.
+	 *
+	 * Kept beside the connections rather than on them: it is the admin's curation
+	 * and not part of what a connection is. The pricing view needs it because an
+	 * unpriced model only matters when somebody else can reach it.
+	 */
+	let sharedByServer = $state<Record<string, string[]>>({});
+	const sharedHere = $derived(renamingId ? (sharedByServer[renamingId] ?? []) : []);
 
 	async function removeServer(id: string) {
 		await api(`${base}/${id}`, 'DELETE');
@@ -255,6 +269,7 @@
 {#if renaming}
 	<ModelNames
 		server={renaming}
+		shared={sharedHere}
 		onBack={() => (renamingId = null)}
 		onChange={() => persist(renaming, refreshCatalogue)}
 	/>
