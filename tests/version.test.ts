@@ -116,17 +116,13 @@ test('performs automatic update check on navigation when enabled', async ({ page
 
 	await page.goto('/settings');
 	const autoUpdateCheckbox = page.getByLabel('Automatically check for updates');
-	let localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	let localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	expect(autoUpdateCheckbox).not.toBeChecked();
 	expect(localStorageValue).toContain('"autoCheckForUpdates":false');
 
 	// Check it toggles the local storage setting
 	await autoUpdateCheckbox.click();
-	localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	await expect(autoUpdateCheckbox).toBeChecked();
 	expect(localStorageValue).toContain('"autoCheckForUpdates":true');
 
@@ -144,9 +140,7 @@ test('performs automatic update check on navigation when enabled', async ({ page
 	// we can't use a click event to navigate to the knowledge page, so we have to
 	// use a page.goto() which refreshes the page. Then we can click on another section.
 	await page.goto('/knowledge');
-	localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	expect(localStorageValue).toContain('"autoCheckForUpdates":true');
 	expect(localStorageValue).toContain('"lastUpdateCheck":null');
 	await expect(autoUpdateCheckbox).not.toBeVisible();
@@ -159,9 +153,7 @@ test('performs automatic update check on navigation when enabled', async ({ page
 	await expect(settingsLink).toHaveClass(/before:bg-warning/);
 	await expect(page.getByText('A newer version is available')).not.toBeVisible();
 
-	localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	expect(localStorageValue).not.toContain('"lastUpdateCheck":null');
 
 	await settingsLink.click();
@@ -186,9 +178,7 @@ test('skips automatic update check on navigation when disabled', async ({ page }
 	);
 
 	await page.goto('/sessions');
-	let localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	let localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	expect(localStorageValue).toContain('"autoCheckForUpdates":false');
 	expect(localStorageValue).toContain('"lastUpdateCheck":null');
 
@@ -206,9 +196,7 @@ test('skips automatic update check on navigation when disabled', async ({ page }
 	await page.getByText('Check now').click();
 	await expect(page.getByText('A newer version is available')).toBeVisible();
 
-	localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
+	localStorageValue = await page.evaluate(() => window.localStorage.getItem('llooma-settings'));
 	expect(localStorageValue).toContain('"autoCheckForUpdates":false');
 	expect(localStorageValue).not.toContain('"lastUpdateCheck":null');
 });

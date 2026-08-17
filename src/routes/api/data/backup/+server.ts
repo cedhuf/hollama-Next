@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
-import { readBackupEntry, StorageKey } from '$lib/data/keys';
+import { StorageKey } from '$lib/data/keys';
 import { requireUser } from '$lib/server/api';
 import {
 	getKnowledge,
@@ -33,12 +33,10 @@ export async function POST(event) {
 	const backup = await event.request.json();
 	if (typeof backup !== 'object' || backup === null) throw error(400, 'Expected an object');
 
-	// Read through the legacy keys too: a file exported before the rename to
-	// Llooma has no way of knowing the app is now called something else.
-	const sessions = readBackupEntry(backup, StorageKey.Sessions);
-	const knowledge = readBackupEntry(backup, StorageKey.Knowledge);
-	const personas = readBackupEntry(backup, StorageKey.Personas);
-	const settings = readBackupEntry<Settings>(backup, StorageKey.Preferences);
+	const sessions = backup[StorageKey.Sessions];
+	const knowledge = backup[StorageKey.Knowledge];
+	const personas = backup[StorageKey.Personas];
+	const settings = backup[StorageKey.Preferences] as Settings | undefined;
 
 	if (Array.isArray(sessions)) replaceSessions(user.id, sessions);
 	if (Array.isArray(knowledge)) replaceKnowledge(user.id, knowledge);

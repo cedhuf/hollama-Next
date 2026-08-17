@@ -230,7 +230,7 @@ export async function mockOllamaModelsResponse(page: Page) {
 
 	// Add the default server to the servers list
 	await page.evaluate(
-		(data) => window.localStorage.setItem('hollamanext-servers', JSON.stringify(data)),
+		(data) => window.localStorage.setItem('llooma-servers', JSON.stringify(data)),
 		[{ ...getDefaultServer(ConnectionType.Ollama) }]
 	);
 
@@ -488,7 +488,7 @@ export const MOCK_KNOWLEDGE: Knowledge[] = [
 export async function seedKnowledgeAndReload(page: Page) {
 	// To generate the knowledge we need to pass the mocked data to the browser context
 	await page.evaluate(
-		(data) => window.localStorage.setItem('hollamanext-knowledge', JSON.stringify(data)),
+		(data) => window.localStorage.setItem('llooma-knowledge', JSON.stringify(data)),
 		MOCK_KNOWLEDGE
 	);
 

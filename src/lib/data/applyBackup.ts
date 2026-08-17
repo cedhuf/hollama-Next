@@ -6,7 +6,7 @@ import {
 	settingsStore
 } from '$lib/localStorage';
 
-import { readBackupEntry, StorageKey } from './keys';
+import { StorageKey } from './keys';
 import type { Backup } from './repository';
 
 /**
@@ -38,14 +38,10 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 
 /**
  * Apply a full backup, skipping categories the file doesn't contain.
- *
- * Entries are looked up under both the current and the pre-rename keys, so a
- * file exported when the app was still called Hollama Next restores exactly the
- * same way as one written today.
  */
 export function applyBackupToStores(backup: Backup) {
 	for (const storageKey of Object.values(StorageKey)) {
-		const data = readBackupEntry(backup, storageKey);
+		const data = backup[storageKey];
 		if (data === undefined) continue;
 		applyToStore(storageKey, data);
 	}

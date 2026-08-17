@@ -9,7 +9,7 @@ import type { Session } from '$lib/sessions';
 import { normalizeSession, summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
-import { LEGACY_STORAGE_KEYS, StorageKey } from './keys';
+import { StorageKey } from './keys';
 import type { AppData, Backup, DataRepository } from './repository';
 
 /**
@@ -18,35 +18,6 @@ import type { AppData, Backup, DataRepository } from './repository';
  * satisfy the shared `DataRepository` contract (the server repo needs them).
  */
 export class LocalStorageRepository implements DataRepository {
-	constructor() {
-		this.#migrateLegacyKeys();
-	}
-
-	/**
-	 * Move data written under the pre-rename keys, once.
-	 *
-	 * Runs in the constructor, so it is done before `hydrate()` reads anything.
-	 * Only ever copies into a key that doesn't exist yet: if both are present —
-	 * an old tab still writing the legacy key while a new one writes the current
-	 * one — the current data wins and nothing is overwritten.
-	 *
-	 * TODO (rename cleanup) — removable with the other one-shot migrations; see
-	 * `adoptLegacyDatabase` in `src/lib/server/db/index.ts` for the full list and
-	 * the note each release must carry when they go.
-	 */
-	#migrateLegacyKeys(): void {
-		if (!browser) return;
-
-		for (const key of Object.values(StorageKey)) {
-			const legacyKey = LEGACY_STORAGE_KEYS[key];
-			const legacy = localStorage.getItem(legacyKey);
-			if (legacy === null) continue;
-
-			if (localStorage.getItem(key) === null) localStorage.setItem(key, legacy);
-			localStorage.removeItem(legacyKey);
-		}
-	}
-
 	hydrate(): AppData {
 		return {
 			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.Preferences, {}) },

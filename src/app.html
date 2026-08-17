@@ -35,14 +35,7 @@
 	<script>
 		// We check and apply the color theme preference on initial load
 		// to prevent a flash of unstyled content.
-		// This runs before any module, so on the first load after the rename the
-		// settings still sit under the old key — read it as a fallback, or the
-		// theme would flash exactly once, on the update everyone notices.
-		// TODO (rename cleanup): drop the fallback with the other one-shot
-		// migrations — see adoptLegacyDatabase in src/lib/server/db/index.ts.
-		let settings = JSON.parse(
-			localStorage.getItem('llooma-settings') ?? localStorage.getItem('hollamanext-settings')
-		);
+		let settings = JSON.parse(localStorage.getItem('llooma-settings'));
 		let themeMode = settings?.themeMode;
 		let themeStyle = settings?.themeStyle;
 		let theme;

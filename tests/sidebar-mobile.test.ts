@@ -102,7 +102,7 @@ test.describe('Sidebar on mobile', () => {
 			}
 		];
 		await page.evaluate(
-			(data) => window.localStorage.setItem('hollamanext-sessions', JSON.stringify(data)),
+			(data) => window.localStorage.setItem('llooma-sessions', JSON.stringify(data)),
 			MOCK_SESSION
 		);
 

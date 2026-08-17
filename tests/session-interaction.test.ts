@@ -608,7 +608,7 @@ test.describe('Session interaction', () => {
 		// Mock a session with LaTeX math content
 		await page.evaluate(() =>
 			window.localStorage.setItem(
-				'hollamanext-sessions',
+				'llooma-sessions',
 				JSON.stringify([
 					{
 						id: 'math123',

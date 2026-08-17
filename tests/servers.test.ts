@@ -75,17 +75,17 @@ test.describe('Servers', () => {
 		await expect(page).toHaveURL('/settings');
 		await expect(toastMessage).not.toBeVisible();
 
-		await page.evaluate(() => window.localStorage.removeItem('hollamanext-servers'));
+		await page.evaluate(() => window.localStorage.removeItem('llooma-servers'));
 		let localStorageServers = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-servers')
+			window.localStorage.getItem('llooma-servers')
 		);
 		expect(localStorageServers).toBeNull();
 
 		const localStorageSettings = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-settings')
+			window.localStorage.getItem('llooma-settings')
 		);
 		await page.evaluate(
-			(data) => window.localStorage.setItem('hollamanext-settings', JSON.stringify(data)),
+			(data) => window.localStorage.setItem('llooma-settings', JSON.stringify(data)),
 			{
 				// Keep the existing settings
 				...JSON.parse(localStorageSettings ?? '{}'),
@@ -102,9 +102,7 @@ test.describe('Servers', () => {
 
 		// Need to reload for the migrations in `<root>/+layout.svelte` to run
 		await page.reload();
-		localStorageServers = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-servers')
-		);
+		localStorageServers = await page.evaluate(() => window.localStorage.getItem('llooma-servers'));
 		expect(localStorageServers).toContain('http://localhost:42069');
 		expect(localStorageServers).toContain('https://api.openai.com/v1');
 		expect(localStorageServers).toContain('sk-validapikey');
@@ -125,7 +123,7 @@ test.describe('Servers', () => {
 	test('it redirects to sessions if at least one server is verified', async ({ page }) => {
 		await page.goto('/');
 		let localStorageServers = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-servers')
+			window.localStorage.getItem('llooma-servers')
 		);
 		expect(localStorageServers).toContain('[]');
 		await expect(page).toHaveURL('/settings');
@@ -135,9 +133,7 @@ test.describe('Servers', () => {
 		await page.goto('/');
 		await expect(page).toHaveURL('/sessions');
 
-		localStorageServers = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-servers')
-		);
+		localStorageServers = await page.evaluate(() => window.localStorage.getItem('llooma-servers'));
 		expect(localStorageServers).toContain('isVerified');
 		expect(localStorageServers).not.toContain('"isVerified":null');
 	});
@@ -288,7 +284,7 @@ test.describe('Servers', () => {
 
 		// Check localStorage for correct format
 		const serversLocalStorage = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-servers')
+			window.localStorage.getItem('llooma-servers')
 		);
 		const servers = JSON.parse(serversLocalStorage || '[]');
 		expect(servers).toHaveLength(1);
@@ -301,7 +297,7 @@ test.describe('Servers', () => {
 
 		// Verify the settings has the correct serverId reference
 		const settingsLocalStorage = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-settings')
+			window.localStorage.getItem('llooma-settings')
 		);
 		const settings = JSON.parse(settingsLocalStorage || '{}');
 		expect(settings.models).toBeDefined();
