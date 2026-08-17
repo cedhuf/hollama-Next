@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { ChevronDown, Coins, RotateCcw, Search, X } from '@lucide/svelte';
+	import {
+		ArrowDownLeft,
+		ArrowUpRight,
+		ChevronDown,
+		Coins,
+		RotateCcw,
+		Search,
+		X
+	} from '@lucide/svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
@@ -105,8 +113,14 @@
 	 */
 	function setPrice(name: string, side: 'input' | 'output', raw: string) {
 		const pricing = { ...(server.modelPricing ?? {}) };
-		const value = raw.trim() === '' ? undefined : Number(raw);
-		if (value !== undefined && !Number.isFinite(value)) return;
+		// A comma is the decimal separator most of Europe types, and `type="number"`
+		// simply reports an empty value for it: "0,2" silently set nothing at all.
+		// The field is text now, and both separators are read.
+		const text = raw.trim().replace(',', '.');
+		const value = text === '' ? undefined : Number(text);
+		// A negative price is not a price. Refused rather than clamped, so a stray
+		// minus does not quietly become zero, which is a figure that gets counted.
+		if (value !== undefined && (!Number.isFinite(value) || value < 0)) return;
 
 		const next = { ...(pricing[name] ?? {}), [side]: value };
 		if (next.input == null && next.output == null) delete pricing[name];
@@ -159,6 +173,16 @@
 			</span>
 		{/if}
 	</div>
+
+	{#if models.length}
+		<!-- The unit, before anything is opened. It was stated on the labels inside
+		     each model's price panel, which is a panel nobody has opened yet: from
+		     the list, there was nothing anywhere saying what a figure would mean. -->
+		<p class="-mt-1 flex items-center gap-1.5 text-xs text-muted">
+			<Coins class="h-3.5 w-3.5 shrink-0" />
+			{$LL.pricingIntro()}
+		</p>
+	{/if}
 
 	{#if models.length}
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
@@ -289,33 +313,37 @@
 								class="mt-1 flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
 								transition:slide={{ duration: 160, easing: quadInOut }}
 							>
-								<!-- The unit first, before the fields it applies to, and not as a
-								     footnote underneath them. Providers publish per million, per
-								     thousand and per ten thousand; a number typed into a box that
-								     does not say which is a number nobody can check later. -->
-								<span class="text-xs font-medium text-active">{$LL.perMillionTokens()}</span>
-
 								<!-- Everything about this price on one row: what it costs going
 								     out, coming back, in what, and the way back to nothing.
 								     Labels outside the fields, because a placeholder disappears the
 								     moment somebody types and "1.25" alone has lost its meaning. -->
 								<div class="flex flex-wrap items-center gap-2">
-									{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
-										<label class="flex min-w-40 flex-1 items-center gap-1.5">
-											<span class="shrink-0 whitespace-nowrap text-[11px] text-muted">
-												{field.label}
+									{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownLeft, label: $LL.pricePerMillionOut() }] as field (field.side)}
+										{@const Icon = field.icon}
+										<label class="flex min-w-0 flex-1 items-center gap-1.5">
+											<!-- The arrow says which way the tokens go, the word says it in
+											     one, and the unit is in the box where the figure is typed.
+											     Spelling the unit out on the label pushed the row off the
+											     panel and said it twice. -->
+											<Icon class="h-3.5 w-3.5 shrink-0 text-muted" />
+											<span class="shrink-0 text-[11px] text-muted">{field.label}</span>
+
+											<span
+												class="flex min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 py-1 pl-1.5 pr-2 focus-within:border-accent"
+											>
+												<input
+													class="w-full min-w-10 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+													type="text"
+													inputmode="decimal"
+													value={server.modelPricing?.[name]?.[field.side] ?? ''}
+													placeholder={$LL.priceUnset()}
+													aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
+													oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
+												/>
+												<span class="shrink-0 whitespace-nowrap text-[10px] text-muted">
+													{$LL.perMillionShort()}
+												</span>
 											</span>
-											<input
-												class="settings-field no-spinner w-full min-w-16 py-1 text-right text-xs tabular-nums"
-												type="number"
-												min="0"
-												step="0.01"
-												inputmode="decimal"
-												value={server.modelPricing?.[name]?.[field.side] ?? ''}
-												placeholder={$LL.priceUnset()}
-												aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
-												oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
-											/>
 										</label>
 									{/each}
 
