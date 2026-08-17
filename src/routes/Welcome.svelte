@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ArrowLeft, ArrowRight, MessagesSquare, Palette, Sparkles } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 
 	import { APP_NAME } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
@@ -41,9 +41,9 @@
 		if (step === 2) void loadCatalog();
 	});
 
-	const showcase = $derived(
+	const cast = $derived(
 		$catalogState.status === 'ready'
-			? $catalogState.catalog.entries.slice(0, 3).map((entry) => ({
+			? $catalogState.catalog.entries.map((entry) => ({
 					id: entry.id,
 					name: entry.name,
 					line: entry.tagline,
@@ -51,6 +51,72 @@
 				}))
 			: []
 	);
+
+	/**
+	 * Two speak, the rest wait in the store.
+	 *
+	 * Two rather than three because what the step demonstrates is a mention turn,
+	 * and a mention turn's whole point is legible with two: you name them, they
+	 * answer one after the other, each under its own name. A third repeats the
+	 * lesson and costs a beat and a half of someone's attention on the way to the
+	 * button. The others are better spent as a row of faces saying how many more
+	 * there are.
+	 */
+	const speakers = $derived(cast.slice(0, 2));
+	const stack = $derived(cast.slice(speakers.length, speakers.length + 5));
+	const waiting = $derived(Math.max(cast.length - speakers.length, 0));
+
+	/**
+	 * Only a listing that actually failed says so.
+	 *
+	 * The step used to show the "could not be reached" panel for as long as the
+	 * fetch took, because the absence of entries was read as a failure. On a first
+	 * connection that is the normal case for a second or two, and telling someone
+	 * their store is unreachable and then quietly contradicting yourself is worse
+	 * than showing nothing.
+	 */
+	const failed = $derived($catalogState.status === 'error');
+
+	/**
+	 * How far the little conversation has got.
+	 *
+	 * 1 is what you typed, then each persona takes two beats (thinking, then
+	 * answering), and the last stage is the store. A stage counter rather than a
+	 * flag per bubble because the thing being played is a sequence, and a sequence
+	 * with one number in it cannot get into a state where the second persona has
+	 * answered before the first.
+	 *
+	 * The beats are real ones: the pause before an answer is the pause a model
+	 * actually takes, and the dots during it are the dots the composer shows. The
+	 * step is a small honest replay of a turn, not a cartoon of one.
+	 */
+	let stage = $state(0);
+	const finalStage = $derived(2 + speakers.length * 2);
+
+	$effect(() => {
+		if (step !== 2 || speakers.length === 0) return;
+
+		// Someone who asked for less motion asked for less motion, not for a slower
+		// version of it: the whole thread is simply already there.
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			stage = finalStage;
+			return;
+		}
+
+		stage = 1;
+		const timers: ReturnType<typeof setTimeout>[] = [];
+		let at = 0;
+		for (let i = 0; i < speakers.length; i++) {
+			at += 560;
+			timers.push(setTimeout(() => (stage = i * 2 + 2), at));
+			at += 880;
+			timers.push(setTimeout(() => (stage = i * 2 + 3), at));
+		}
+		at += 420;
+		timers.push(setTimeout(() => (stage = finalStage), at));
+
+		return () => timers.forEach(clearTimeout);
+	});
 
 	function finish() {
 		$settingsStore.welcomeComplete = true;
@@ -115,59 +181,106 @@
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">Meet your personas</h2>
 				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
-					A persona is a character with its own voice and expertise, and its own ongoing
-					conversation. A few of them, to give you the idea.
+					A persona is a character with its own voice, its own expertise, and its own ongoing
+					conversation. Type <span class="font-medium text-accent">@</span> to call one into any chat,
+					or name several and let them answer in turn.
 				</p>
 			</div>
 
-			<!-- Bubbles rather than rows, because that is what a persona actually is:
-			     someone who says something. They arrive one after another, from the side
-			     the speaker is on, which reads as a conversation filling up rather than a
-			     list rendering. Each carries its own greeting, so what lands on screen is
-			     the persona's own voice rather than a description of it. -->
-			<!-- Bubbles rather than rows, because that is what a persona is: someone who
-			     says something. They arrive one after another, and each avatar keeps
-			     breathing afterwards, so the step is alive while it is read rather than
-			     animated once and then still. The float is tiny and slow on purpose: at
-			     this size anything larger reads as a glitch, not as life. -->
-			{#if showcase.length}
-				<div class="flex flex-col gap-3">
-					{#each showcase as persona, i (persona.id)}
-						<div
-							class="flex items-end gap-2.5"
-							in:fly={{ x: -14, y: 8, duration: 340, delay: 160 * i, easing: cubicOut }}
-						>
-							<!-- The halo takes the persona's own colour, so three of them together
-							     read as three characters rather than three cards. -->
-							<span class="persona-bob relative shrink-0" style="animation-delay:{i * 0.7}s">
-								<span
-									class="persona-halo absolute inset-0 rounded-full"
-									style="background-color:{persona.avatarColor};animation-delay:{i * 0.7}s"
-								></span>
-								<PersonaAvatar {persona} size={34} />
-							</span>
-
-							<div class="min-w-0 flex-1">
-								<span class="mb-0.5 block pl-1 text-[11px] font-medium text-muted">
-									{persona.name}
-								</span>
-								<!-- A tail on the corner nearest its avatar, which is the whole of what
-								     makes a rounded box read as speech. -->
-								<p
-									class="rounded-2xl rounded-bl-sm border border-shade-3 bg-shade-0 px-3 py-2 text-xs leading-relaxed text-active"
-								>
-									{persona.line}
-								</p>
-							</div>
+			<!-- The step plays the feature instead of describing it: a message with two
+			     names in it, then two answers arriving one after the other, each under
+			     its own face. Bubbles rather than rows, because that is what a persona
+			     is: someone who says something. -->
+			{#if speakers.length}
+				<div class="flex flex-col gap-3 rounded-2xl border border-shade-3 bg-shade-0/50 p-3">
+					{#if stage >= 1}
+						<div class="flex justify-end" in:fly={{ y: 8, duration: 300, easing: cubicOut }}>
+							<p
+								class="max-w-[85%] rounded-2xl rounded-br-sm bg-accent/10 px-3 py-2 text-xs leading-relaxed text-active"
+							>
+								{#each speakers as persona (persona.id)}
+									<span class="mr-1 font-medium text-accent">@{persona.name}</span>
+								{/each}
+								who are you two?
+							</p>
 						</div>
+					{/if}
+
+					{#each speakers as persona, i (persona.id)}
+						{#if stage >= i * 2 + 2}
+							<div
+								class="flex items-end gap-2.5"
+								in:fly={{ x: -14, y: 8, duration: 320, easing: cubicOut }}
+							>
+								<!-- The halo takes the persona's own colour, so two of them together
+								     read as two characters rather than two cards. Both loops keep
+								     running once the answer has landed, so the step is alive while it
+								     is read rather than animated once and then still. -->
+								<span class="persona-bob relative shrink-0" style="animation-delay:{i * 0.7}s">
+									<span
+										class="persona-halo absolute inset-0 rounded-full"
+										style="background-color:{persona.avatarColor};animation-delay:{i * 0.7}s"
+									></span>
+									<PersonaAvatar {persona} size={32} />
+								</span>
+
+								<div class="min-w-0 flex-1">
+									<span class="mb-0.5 block pl-1 text-[11px] font-medium text-muted">
+										{persona.name}
+									</span>
+									<!-- A tail on the corner nearest its avatar, which is the whole of
+									     what makes a rounded box read as speech. -->
+									<p
+										class="inline-block max-w-full rounded-2xl rounded-bl-sm border border-shade-3 bg-shade-0 px-3 py-2 text-xs leading-relaxed text-active"
+									>
+										{#if stage >= i * 2 + 3}
+											{persona.line}
+										{:else}
+											<span class="flex items-center gap-1 py-1" aria-label="Thinking">
+												{#each [0, 1, 2] as dot (dot)}
+													<span
+														class="typing-dot h-1.5 w-1.5 rounded-full bg-muted"
+														style="animation-delay:{dot * 0.16}s"
+													></span>
+												{/each}
+											</span>
+										{/if}
+									</p>
+								</div>
+							</div>
+						{/if}
 					{/each}
 				</div>
 
-				<p class="text-center text-xs text-muted">
-					More of them live in the <strong class="font-medium text-active">Library</strong>, under
-					<strong class="font-medium text-active">Persona store</strong>. Install the ones you like.
-				</p>
-			{:else}
+				{#if stage >= finalStage}
+					<div
+						class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-center text-xs text-muted"
+						in:fade={{ duration: 260 }}
+					>
+						{#if stack.length}
+							<span class="flex -space-x-2">
+								{#each stack as persona, i (persona.id)}
+									<span
+										class="persona-join rounded-full ring-2 ring-shade-1"
+										style="animation-delay:{i * 0.06}s"
+									>
+										<PersonaAvatar {persona} size={22} />
+									</span>
+								{/each}
+							</span>
+						{/if}
+						<span>
+							{#if waiting}
+								{waiting} more in the
+							{:else}
+								More live in the
+							{/if}
+							<strong class="font-medium text-active">Persona store</strong>, and you can write your
+							own.
+						</span>
+					</div>
+				{/if}
+			{:else if failed}
 				<div
 					class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-shade-4 p-6 text-center"
 				>
@@ -176,6 +289,25 @@
 						The store could not be reached just now. You can chat normally without one, and the
 						Library will offer them as soon as it can read it.
 					</p>
+				</div>
+			{:else}
+				<!-- The thread's own shape while the listing is on its way, so the step
+				     settles into place rather than jumping when it lands. -->
+				<div
+					class="flex animate-pulse flex-col gap-3 rounded-2xl border border-shade-3 bg-shade-0/50 p-3"
+				>
+					{#each [0, 1] as row (row)}
+						<div class="flex items-end gap-2.5">
+							<span class="h-8 w-8 shrink-0 rounded-full bg-shade-2"></span>
+							<div class="flex min-w-0 flex-1 flex-col gap-1.5">
+								<span class="h-2 w-16 rounded-full bg-shade-2"></span>
+								<span
+									class="h-8 rounded-2xl rounded-bl-sm bg-shade-2"
+									style="width:{78 - row * 16}%"
+								></span>
+							</div>
+						</div>
+					{/each}
 				</div>
 			{/if}
 
@@ -186,7 +318,7 @@
 
 <style lang="postcss">
 	/* Two motions, deliberately out of step with each other: the avatar drifts, the
-	   halo breathes, and neither loop divides the other, so three of them side by
+	   halo breathes, and neither loop divides the other, so two of them side by
 	   side never fall into lockstep. Each row offsets both by its own delay. */
 	.persona-bob {
 		display: inline-flex;
@@ -221,10 +353,44 @@
 		}
 	}
 
+	/* The pause before an answer, drawn the way the conversation itself draws it. */
+	.typing-dot {
+		animation: typing-dot 1.2s ease-in-out infinite;
+	}
+
+	@keyframes typing-dot {
+		0%,
+		60%,
+		100% {
+			opacity: 0.3;
+			transform: translateY(0);
+		}
+		30% {
+			opacity: 0.9;
+			transform: translateY(-2px);
+		}
+	}
+
+	/* The faces still in the store arrive as a row rather than all at once, which
+	   is the one place a stagger costs nothing: it happens after the reading. */
+	.persona-join {
+		display: inline-flex;
+		animation: persona-join 320ms cubic-bezier(0.32, 0.72, 0, 1) backwards;
+	}
+
+	@keyframes persona-join {
+		from {
+			opacity: 0;
+			transform: translateX(-6px) scale(0.8);
+		}
+	}
+
 	/* A loop that never stops is the first thing someone turns off. */
 	@media (prefers-reduced-motion: reduce) {
 		.persona-bob,
-		.persona-halo {
+		.persona-halo,
+		.typing-dot,
+		.persona-join {
 			animation: none;
 		}
 	}
