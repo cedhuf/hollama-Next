@@ -97,8 +97,11 @@
 	{/if}
 {/snippet}
 
+<!-- `h-full` so the card fills the row it is in. The grids below give every row
+     the same height; without this the border would stop at the content and the
+     equal rows would be invisible. -->
 <article
-	class="relative flex overflow-hidden rounded-xl border border-shade-3 bg-shade-0 transition-colors hover:border-shade-4
+	class="relative flex h-full overflow-hidden rounded-xl border border-shade-3 bg-shade-0 transition-colors hover:border-shade-4
 		{list ? 'items-stretch' : 'flex-col'}"
 >
 	<!-- The body is a button when it does something and a plain box when it does

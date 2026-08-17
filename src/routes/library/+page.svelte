@@ -367,7 +367,12 @@
 				</button>
 			</div>
 
-			<div class="mb-3 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+			<!-- Equal rows: a card's height comes from how many lines its tags wrap
+			     onto, so two rows of personas ended up visibly different heights. Only
+			     within a section — the three hold different things and forcing a
+			     knowledge card to the height of a persona card would be padding, not
+			     alignment. -->
+			<div class="mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
 					{@const state = personaState(persona, publishedDigest(persona))}
 					<LibraryCard
@@ -503,7 +508,7 @@
 				</button>
 			</div>
 
-			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+			<div class="mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $playbooksStore as playbook (playbook.id)}
 					<LibraryCard
 						name={playbook.name || $LL.untitled()}
@@ -513,7 +518,9 @@
 						onclick={() => editPlaybook(playbook)}
 					/>
 				{/each}
+			</div>
 
+			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				<div
 					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
 				>
@@ -547,7 +554,7 @@
 			     you came to look at. No heading over it, because "everything not filed
 			     anywhere" is not a category anyone thinks in. -->
 			<div class="mb-6">
-				<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+				<div class="grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
 					{#each looseKnowledge as knowledge (knowledge.id)}
 						{@render knowledgeCard(knowledge)}
 					{/each}
@@ -677,7 +684,7 @@
 					</div>
 
 					{#if !collapsed}
-						<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+						<div class="grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
 							{#each items as knowledge (knowledge.id)}
 								{@render knowledgeCard(knowledge)}
 							{/each}
