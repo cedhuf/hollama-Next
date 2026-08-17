@@ -10,5 +10,6 @@ export enum StorageKey {
 	Servers = `${LOCAL_STORAGE_PREFIX}-servers`,
 	Sessions = `${LOCAL_STORAGE_PREFIX}-sessions`,
 	Knowledge = `${LOCAL_STORAGE_PREFIX}-knowledge`,
-	Personas = `${LOCAL_STORAGE_PREFIX}-personas`
+	Personas = `${LOCAL_STORAGE_PREFIX}-personas`,
+	Playbooks = `${LOCAL_STORAGE_PREFIX}-playbooks`
 }

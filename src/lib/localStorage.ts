@@ -5,6 +5,7 @@ import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
+import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
 import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
@@ -139,7 +140,8 @@ const seed = repository.hydrate?.() ?? {
 	servers: [] as Server[],
 	sessions: [] as SessionSummary[],
 	knowledge: [] as Knowledge[],
-	personas: [] as Persona[]
+	personas: [] as Persona[],
+	playbooks: [] as Playbook[]
 };
 
 export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SETTINGS, (v) =>
@@ -165,6 +167,12 @@ export const personasStore = collectionStore<Persona>(seed.personas, {
 	remove: (id) => repository.deletePersona(id),
 	replaceAll: (personas) => repository.replacePersonas(personas),
 	summarize: (persona) => persona
+});
+export const playbooksStore = collectionStore<Playbook>(seed.playbooks, {
+	save: (playbook) => repository.savePlaybook(playbook),
+	remove: (id) => repository.deletePlaybook(id),
+	replaceAll: (playbooks) => repository.replacePlaybooks(playbooks),
+	summarize: (playbook) => playbook
 });
 
 /**
@@ -212,6 +220,7 @@ export async function refreshStores(): Promise<void> {
 		sessionsStore.setQuiet(local.sessions);
 		knowledgeStore.setQuiet(local.knowledge);
 		personasStore.setQuiet(local.personas);
+		playbooksStore.setQuiet(local.playbooks);
 		return;
 	}
 
@@ -224,12 +233,16 @@ export async function refreshStores(): Promise<void> {
 	// the read failing is the expected case, not the exotic one. Emptying the
 	// stores here would arm the next `saveSession` to replace every stored session
 	// with the single one still open on screen.
-	let sessions: SessionSummary[], knowledge: Knowledge[], personas: Persona[];
+	let sessions: SessionSummary[],
+		knowledge: Knowledge[],
+		personas: Persona[],
+		playbooks: Playbook[];
 	try {
-		[sessions, knowledge, personas] = await Promise.all([
+		[sessions, knowledge, personas, playbooks] = await Promise.all([
 			repository.loadSessions(),
 			repository.loadKnowledge(),
-			repository.loadPersonas()
+			repository.loadPersonas(),
+			repository.loadPlaybooks()
 		]);
 	} catch (error) {
 		reportLoadFailure(error);
@@ -239,6 +252,7 @@ export async function refreshStores(): Promise<void> {
 	sessionsStore.setQuiet(sessions);
 	knowledgeStore.setQuiet(knowledge);
 	personasStore.setQuiet(personas);
+	playbooksStore.setQuiet(playbooks);
 }
 
 /**
@@ -263,12 +277,13 @@ function reportLoadFailure(error: unknown): void {
 
 /** The network load shared by the boot and the refresh. */
 async function loadIntoStores(): Promise<void> {
-	const [settings, servers, sessions, knowledge, personas] = await Promise.all([
+	const [settings, servers, sessions, knowledge, personas, playbooks] = await Promise.all([
 		repository.loadSettings(),
 		repository.loadServers(),
 		repository.loadSessions(),
 		repository.loadKnowledge(),
-		repository.loadPersonas()
+		repository.loadPersonas(),
+		repository.loadPlaybooks()
 	]);
 
 	if (settings) settingsStore.setQuiet(settings);
@@ -276,4 +291,5 @@ async function loadIntoStores(): Promise<void> {
 	sessionsStore.setQuiet(sessions);
 	knowledgeStore.setQuiet(knowledge);
 	personasStore.setQuiet(personas);
+	playbooksStore.setQuiet(playbooks);
 }

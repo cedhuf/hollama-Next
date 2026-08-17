@@ -1,5 +1,6 @@
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
+import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
 import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import type { Settings } from '$lib/settings';
@@ -7,7 +8,7 @@ import type { Settings } from '$lib/settings';
 import { getDb } from './index';
 import { dropSessionFromIndex, reindexAllSessions, reindexSession } from './search';
 
-type CollectionTable = 'sessions' | 'knowledge' | 'personas';
+type CollectionTable = 'sessions' | 'knowledge' | 'personas' | 'playbooks';
 
 /**
  * Write one row, leaving every other row alone.
@@ -45,7 +46,7 @@ export function deleteItem(table: CollectionTable, userId: string, id: string): 
 
 /** Replace every row of a per-user JSON collection in one transaction. */
 function replaceCollection(
-	table: 'sessions' | 'knowledge' | 'personas',
+	table: CollectionTable,
 	userId: string,
 	items: { id: string; updatedAt?: string }[]
 ): void {
@@ -89,7 +90,7 @@ export function getSessionSummaries(userId: string): SessionSummary[] {
 	return readCollection<Session>('sessions', userId).map(summarizeSession);
 }
 
-function readCollection<T>(table: 'sessions' | 'knowledge' | 'personas', userId: string): T[] {
+function readCollection<T>(table: CollectionTable, userId: string): T[] {
 	const rows = getDb()
 		.prepare(`SELECT data FROM ${table} WHERE user_id = ? ORDER BY updated_at DESC`)
 		.all(userId) as { data: string }[];
@@ -111,6 +112,11 @@ export const getPersonas = (userId: string): Persona[] =>
 export const replacePersonas = (userId: string, personas: Persona[]): void =>
 	replaceCollection('personas', userId, personas);
 
+export const getPlaybooks = (userId: string): Playbook[] =>
+	readCollection<Playbook>('playbooks', userId);
+export const replacePlaybooks = (userId: string, playbooks: Playbook[]): void =>
+	replaceCollection('playbooks', userId, playbooks);
+
 export function getSettings(userId: string): Settings | null {
 	const row = getDb().prepare('SELECT data FROM settings WHERE user_id = ?').get(userId) as
 		| { data: string }
@@ -127,7 +133,7 @@ export function replaceSettings(userId: string, settings: Settings): void {
 		.run(userId, JSON.stringify(settings));
 }
 
-/** Wipe a user's own data (sessions, knowledge, personas, settings). */
+/** Wipe a user's own data (sessions, knowledge, personas, playbooks, settings). */
 export function resetUserData(userId: string): void {
 	const db = getDb();
 	db.exec('BEGIN');
@@ -136,6 +142,7 @@ export function resetUserData(userId: string): void {
 		db.prepare('DELETE FROM sessions_fts WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM knowledge WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM personas WHERE user_id = ?').run(userId);
+		db.prepare('DELETE FROM playbooks WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
 		db.exec('COMMIT');
 	} catch (error) {

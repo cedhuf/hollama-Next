@@ -305,6 +305,7 @@ const fr = extendDictionary(en, {
 	searchChatsPersonas: 'Rechercher chats et personas',
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
+	playbooks: 'Playbooks',
 	groupPinned: 'Épinglés',
 	groupToday: "Aujourd'hui",
 	groupYesterday: 'Hier',
@@ -524,6 +525,8 @@ const fr = extendDictionary(en, {
 	byCategoryDescription: 'Exportez, importez ou supprimez chaque type de donnée séparément.',
 	personasDescription: 'Vos personnages enregistrés et leurs réglages',
 	areYouSureYouWantToDeleteAllPersonas: 'Êtes-vous sûr de vouloir supprimer tous les personas ?',
+	playbooksDescription: 'Vos procédures enregistrées et ce qu\u2019elles contiennent',
+	areYouSureYouWantToDeleteAllPlaybooks: 'Voulez-vous vraiment supprimer tous les playbooks ?',
 	confirmResetEverything: 'Êtes-vous sûr ? Cette action est irréversible.',
 	yesDeleteEverything: 'Oui, tout supprimer',
 

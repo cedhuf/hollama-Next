@@ -6,6 +6,7 @@ import type { Server } from '$lib/connections';
 import { searchSessionsLocally, type ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
+import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
 import { normalizeSession, summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
@@ -59,7 +60,8 @@ export class LocalStorageRepository implements DataRepository {
 			servers: this.#read<Server[]>(StorageKey.Servers, []),
 			sessions: this.#readSummaries(),
 			knowledge: this.#read<Knowledge[]>(StorageKey.Knowledge, []),
-			personas: this.#read<Persona[]>(StorageKey.Personas, [])
+			personas: this.#read<Persona[]>(StorageKey.Personas, []),
+			playbooks: this.#read<Playbook[]>(StorageKey.Playbooks, [])
 		};
 	}
 
@@ -96,6 +98,9 @@ export class LocalStorageRepository implements DataRepository {
 	async loadPersonas(): Promise<Persona[]> {
 		return this.#read<Persona[]>(StorageKey.Personas, []);
 	}
+	async loadPlaybooks(): Promise<Playbook[]> {
+		return this.#read<Playbook[]>(StorageKey.Playbooks, []);
+	}
 
 	async saveSettings(value: Settings): Promise<void> {
 		this.#write(StorageKey.Preferences, value);
@@ -121,6 +126,12 @@ export class LocalStorageRepository implements DataRepository {
 	async deletePersona(id: string): Promise<void> {
 		this.#remove(StorageKey.Personas, id);
 	}
+	async savePlaybook(playbook: Playbook): Promise<void> {
+		this.#upsert(StorageKey.Playbooks, playbook);
+	}
+	async deletePlaybook(id: string): Promise<void> {
+		this.#remove(StorageKey.Playbooks, id);
+	}
 
 	async replaceSessions(value: Session[]): Promise<void> {
 		this.#write(StorageKey.Sessions, value);
@@ -130,6 +141,9 @@ export class LocalStorageRepository implements DataRepository {
 	}
 	async replacePersonas(value: Persona[]): Promise<void> {
 		this.#write(StorageKey.Personas, value);
+	}
+	async replacePlaybooks(value: Playbook[]): Promise<void> {
+		this.#write(StorageKey.Playbooks, value);
 	}
 
 	/**

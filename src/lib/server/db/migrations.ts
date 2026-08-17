@@ -225,6 +225,21 @@ const migrations: Migration[] = [
 				WHERE json_extract(m.value, '$.note.kind') IN ('cleared', 'compaction')
 			`);
 		}
+	},
+	{
+		version: 10,
+		up: `
+			-- Playbooks: a procedure written once and switched on in any conversation.
+			-- Same shape as the personas table because it is the same kind of thing to
+			-- the database, a per-user JSON collection, and the accessors are shared.
+			CREATE TABLE playbooks (
+				id         TEXT PRIMARY KEY,
+				user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				data       TEXT NOT NULL,                 -- JSON Playbook
+				updated_at TEXT NOT NULL
+			);
+			CREATE INDEX idx_playbooks_user ON playbooks(user_id);
+		`
 	}
 ];
 

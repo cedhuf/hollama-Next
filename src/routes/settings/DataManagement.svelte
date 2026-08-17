@@ -19,12 +19,14 @@
 	import {
 		knowledgeStore,
 		personasStore,
+		playbooksStore,
 		serversStore,
 		sessionsStore,
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
+	import type { Playbook } from '$lib/playbooks';
 	import type { Session } from '$lib/sessions';
 	import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
@@ -43,7 +45,8 @@
 		[StorageKey.Servers]: (value) => serversStore.set(value as Server[]),
 		[StorageKey.Sessions]: (value) => sessionsStore.replaceAll(value as Session[]),
 		[StorageKey.Knowledge]: (value) => knowledgeStore.replaceAll(value as Knowledge[]),
-		[StorageKey.Personas]: (value) => personasStore.replaceAll(value as Persona[])
+		[StorageKey.Personas]: (value) => personasStore.replaceAll(value as Persona[]),
+		[StorageKey.Playbooks]: (value) => playbooksStore.replaceAll(value as Playbook[])
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -97,6 +100,12 @@
 			fileName: `${APP_SLUG}-personas.json`,
 			label: $LL.personas(),
 			description: $LL.personasDescription()
+		},
+		{
+			storageKey: StorageKey.Playbooks,
+			fileName: `${APP_SLUG}-playbooks.json`,
+			label: $LL.playbooks(),
+			description: $LL.playbooksDescription()
 		}
 	]);
 
@@ -106,7 +115,8 @@
 		[StorageKey.Servers]: [],
 		[StorageKey.Sessions]: [],
 		[StorageKey.Knowledge]: [],
-		[StorageKey.Personas]: []
+		[StorageKey.Personas]: [],
+		[StorageKey.Playbooks]: []
 	};
 
 	/**
@@ -187,7 +197,8 @@
 			[StorageKey.Servers]: $LL.areYouSureYouWantToDeleteAllServers(),
 			[StorageKey.Sessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
 			[StorageKey.Knowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
-			[StorageKey.Personas]: $LL.areYouSureYouWantToDeleteAllPersonas()
+			[StorageKey.Personas]: $LL.areYouSureYouWantToDeleteAllPersonas(),
+			[StorageKey.Playbooks]: $LL.areYouSureYouWantToDeleteAllPlaybooks()
 		};
 
 		if (confirm(confirmMessages[storageKey])) {

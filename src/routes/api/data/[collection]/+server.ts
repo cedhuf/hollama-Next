@@ -4,10 +4,12 @@ import { requireUser } from '$lib/server/api';
 import {
 	getKnowledge,
 	getPersonas,
+	getPlaybooks,
 	getSessionSummaries,
 	getSettings,
 	replaceKnowledge,
 	replacePersonas,
+	replacePlaybooks,
 	replaceSessions,
 	replaceSettings
 } from '$lib/server/db/collections';
@@ -22,6 +24,8 @@ export async function GET(event) {
 			return json(getKnowledge(user.id));
 		case 'personas':
 			return json(getPersonas(user.id));
+		case 'playbooks':
+			return json(getPlaybooks(user.id));
 		case 'settings':
 			return json(getSettings(user.id));
 		default:
@@ -52,6 +56,10 @@ export async function PUT(event) {
 		case 'personas':
 			if (!Array.isArray(body)) throw error(400, 'Expected an array');
 			replacePersonas(user.id, body);
+			break;
+		case 'playbooks':
+			if (!Array.isArray(body)) throw error(400, 'Expected an array');
+			replacePlaybooks(user.id, body);
 			break;
 		case 'settings':
 			if (typeof body !== 'object' || body === null) throw error(400, 'Expected an object');

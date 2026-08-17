@@ -6,10 +6,12 @@ import { requireUser } from '$lib/server/api';
 import {
 	getKnowledge,
 	getPersonas,
+	getPlaybooks,
 	getSessions,
 	getSettings,
 	replaceKnowledge,
 	replacePersonas,
+	replacePlaybooks,
 	replaceSessions,
 	replaceSettings
 } from '$lib/server/db/collections';
@@ -25,6 +27,7 @@ export async function GET(event) {
 		[StorageKey.Sessions]: getSessions(user.id),
 		[StorageKey.Knowledge]: getKnowledge(user.id),
 		[StorageKey.Personas]: getPersonas(user.id),
+		[StorageKey.Playbooks]: getPlaybooks(user.id),
 		[StorageKey.Preferences]: getSettings(user.id) ?? {}
 	});
 }
@@ -37,6 +40,7 @@ export async function POST(event) {
 	const sessions = backup[StorageKey.Sessions];
 	const knowledge = backup[StorageKey.Knowledge];
 	const personas = backup[StorageKey.Personas];
+	const playbooks = backup[StorageKey.Playbooks];
 	const settings = backup[StorageKey.Preferences] as Settings | undefined;
 
 	// An exported file never ages out: one written before notes became a single
@@ -47,6 +51,7 @@ export async function POST(event) {
 	}
 	if (Array.isArray(knowledge)) replaceKnowledge(user.id, knowledge);
 	if (Array.isArray(personas)) replacePersonas(user.id, personas);
+	if (Array.isArray(playbooks)) replacePlaybooks(user.id, playbooks);
 	if (settings && typeof settings === 'object') replaceSettings(user.id, settings);
 
 	return new Response(null, { status: 204 });

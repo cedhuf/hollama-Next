@@ -10,7 +10,7 @@ import { deleteItem, getItem, upsertItem } from '$lib/server/db/collections';
  * write and delete a single row, which is what a save and a delete actually are.
  * Both are scoped to the signed-in user, so an id from elsewhere reaches nothing.
  */
-const TABLES = ['sessions', 'knowledge', 'personas'] as const;
+const TABLES = ['sessions', 'knowledge', 'personas', 'playbooks'] as const;
 type Table = (typeof TABLES)[number];
 
 function tableFor(collection: string | undefined): Table {

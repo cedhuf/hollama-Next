@@ -1205,6 +1205,10 @@ type RootTranslation = {
 	 */
 	personas: string
 	/**
+	 * P​l​a​y​b​o​o​k​s
+	 */
+	playbooks: string
+	/**
 	 * P​i​n​n​e​d
 	 */
 	groupPinned: string
@@ -1870,6 +1874,14 @@ type RootTranslation = {
 	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​a​l​l​ ​p​e​r​s​o​n​a​s​?
 	 */
 	areYouSureYouWantToDeleteAllPersonas: string
+	/**
+	 * Y​o​u​r​ ​s​a​v​e​d​ ​p​r​o​c​e​d​u​r​e​s​ ​a​n​d​ ​w​h​a​t​ ​t​h​e​y​ ​c​o​n​t​a​i​n
+	 */
+	playbooksDescription: string
+	/**
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​a​l​l​ ​p​l​a​y​b​o​o​k​s​?
+	 */
+	areYouSureYouWantToDeleteAllPlaybooks: string
 	/**
 	 * A​r​e​ ​y​o​u​ ​s​u​r​e​?​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.
 	 */
@@ -3748,6 +3760,10 @@ The completion in progress will stop
 	 */
 	personas: () => LocalizedString
 	/**
+	 * Playbooks
+	 */
+	playbooks: () => LocalizedString
+	/**
 	 * Pinned
 	 */
 	groupPinned: () => LocalizedString
@@ -4403,6 +4419,14 @@ The completion in progress will stop
 	 * Are you sure you want to delete all personas?
 	 */
 	areYouSureYouWantToDeleteAllPersonas: () => LocalizedString
+	/**
+	 * Your saved procedures and what they contain
+	 */
+	playbooksDescription: () => LocalizedString
+	/**
+	 * Are you sure you want to delete all playbooks?
+	 */
+	areYouSureYouWantToDeleteAllPlaybooks: () => LocalizedString
 	/**
 	 * Are you sure? This cannot be undone.
 	 */

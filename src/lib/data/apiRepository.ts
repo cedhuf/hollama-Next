@@ -5,6 +5,7 @@ import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
+import type { Playbook } from '$lib/playbooks';
 import { fetchProviders, providerToServer } from '$lib/providers';
 import type { Session } from '$lib/sessions';
 import { normalizeSession, type SessionSummary } from '$lib/sessionShape';
@@ -12,7 +13,7 @@ import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { NotAuthenticatedError, type Backup, type DataRepository } from './repository';
 
-type Collection = 'sessions' | 'knowledge' | 'personas' | 'settings';
+type Collection = 'sessions' | 'knowledge' | 'personas' | 'playbooks' | 'settings';
 
 const DEBOUNCE_MS = 800;
 
@@ -62,6 +63,9 @@ export class ApiRepository implements DataRepository {
 	async loadPersonas(): Promise<Persona[]> {
 		return this.#get<Persona[]>('personas', []);
 	}
+	async loadPlaybooks(): Promise<Playbook[]> {
+		return this.#get<Playbook[]>('playbooks', []);
+	}
 	async loadServers(): Promise<Server[]> {
 		const { servers } = await fetchProviders(true);
 		return servers.map(providerToServer);
@@ -93,6 +97,12 @@ export class ApiRepository implements DataRepository {
 	async deletePersona(id: string): Promise<void> {
 		await this.#delete(`/api/data/personas/${id}`);
 	}
+	async savePlaybook(playbook: Playbook): Promise<void> {
+		this.#schedule(`/api/data/playbooks/${playbook.id}`, playbook);
+	}
+	async deletePlaybook(id: string): Promise<void> {
+		await this.#delete(`/api/data/playbooks/${id}`);
+	}
 
 	async replaceSessions(value: Session[]): Promise<void> {
 		await this.#put('/api/data/sessions', value);
@@ -102,6 +112,9 @@ export class ApiRepository implements DataRepository {
 	}
 	async replacePersonas(value: Persona[]): Promise<void> {
 		await this.#put('/api/data/personas', value);
+	}
+	async replacePlaybooks(value: Playbook[]): Promise<void> {
+		await this.#put('/api/data/playbooks', value);
 	}
 
 	async saveServers(): Promise<void> {

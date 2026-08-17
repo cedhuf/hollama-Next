@@ -2,6 +2,7 @@ import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
 import {
 	knowledgeStore,
 	personasStore,
+	playbooksStore,
 	serversStore,
 	sessionsStore,
 	settingsStore
@@ -37,6 +38,9 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 			break;
 		case StorageKey.Personas:
 			personasStore.replaceAll(data as Parameters<typeof personasStore.replaceAll>[0]);
+			break;
+		case StorageKey.Playbooks:
+			playbooksStore.replaceAll(data as Parameters<typeof playbooksStore.replaceAll>[0]);
 			break;
 	}
 }

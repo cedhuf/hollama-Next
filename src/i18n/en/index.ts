@@ -312,6 +312,7 @@ const en = {
 	searchChatsPersonas: 'Search chats & personas',
 	noMatches: 'No matches',
 	personas: 'Personas',
+	playbooks: 'Playbooks',
 	groupPinned: 'Pinned',
 	groupToday: 'Today',
 	groupYesterday: 'Yesterday',
@@ -507,6 +508,8 @@ const en = {
 	byCategoryDescription: 'Export, import or delete each kind of data on its own.',
 	personasDescription: 'Your saved characters and their settings',
 	areYouSureYouWantToDeleteAllPersonas: 'Are you sure you want to delete all personas?',
+	playbooksDescription: 'Your saved procedures and what they contain',
+	areYouSureYouWantToDeleteAllPlaybooks: 'Are you sure you want to delete all playbooks?',
 	confirmResetEverything: 'Are you sure? This cannot be undone.',
 	yesDeleteEverything: 'Yes, delete everything',
 

@@ -2,6 +2,7 @@ import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
 import type { Persona } from '$lib/personas';
+import type { Playbook } from '$lib/playbooks';
 import type { Session, SessionSummary } from '$lib/sessions';
 import type { Settings } from '$lib/settings';
 
@@ -34,6 +35,7 @@ export interface AppData {
 	sessions: SessionSummary[];
 	knowledge: Knowledge[];
 	personas: Persona[];
+	playbooks: Playbook[];
 }
 
 /**
@@ -73,6 +75,7 @@ export interface DataRepository {
 	loadSession(id: string, fetchFn?: typeof fetch): Promise<Session | null>;
 	loadKnowledge(): Promise<Knowledge[]>;
 	loadPersonas(): Promise<Persona[]>;
+	loadPlaybooks(): Promise<Playbook[]>;
 
 	saveSettings(value: Settings): Promise<void>;
 	saveServers(value: Server[]): Promise<void>;
@@ -94,6 +97,8 @@ export interface DataRepository {
 	deleteKnowledgeItem(id: string): Promise<void>;
 	savePersona(persona: Persona): Promise<void>;
 	deletePersona(id: string): Promise<void>;
+	savePlaybook(playbook: Playbook): Promise<void>;
+	deletePlaybook(id: string): Promise<void>;
 
 	/**
 	 * Wholesale replacement, for restoring a backup — the one case where the
@@ -102,6 +107,7 @@ export interface DataRepository {
 	replaceSessions(sessions: Session[]): Promise<void>;
 	replaceKnowledge(knowledge: Knowledge[]): Promise<void>;
 	replacePersonas(personas: Persona[]): Promise<void>;
+	replacePlaybooks(playbooks: Playbook[]): Promise<void>;
 
 	/**
 	 * Conversations matching a content search, best first.
