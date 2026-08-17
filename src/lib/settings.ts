@@ -133,6 +133,17 @@ export interface Settings {
 	 */
 	personaAutoUpdate: boolean;
 	/**
+	 * Where to read the playbook store, when it is not the public one.
+	 *
+	 * Empty means `DEFAULT_PLAYBOOK_STORE`. Its own setting rather than one
+	 * address for both: the two stores are separate folders today and separate
+	 * repositories tomorrow, and an instance mirroring one has no reason to be
+	 * forced to mirror the other.
+	 */
+	playbookStoreUrl: string;
+	/** Take a new revision of an installed playbook, for the ones you have not touched. */
+	playbookAutoUpdate: boolean;
+	/**
 	 * Whether personas called in one message read each other.
 	 *
 	 * On: they answer in the order they were named, each having read the ones
@@ -296,6 +307,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	personaStoreUrl: '',
 	personaStoreLayout: 'grid',
 	personaAutoUpdate: false,
+	playbookStoreUrl: '',
+	playbookAutoUpdate: false,
 	mentionsSequential: true,
 	knowledgeCollections: [],
 	collapsedCollections: [],

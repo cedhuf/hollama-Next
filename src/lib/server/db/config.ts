@@ -91,6 +91,14 @@ export function setPersonaStoreUrl(value: string): void {
 	setConfig('personaStoreUrl', value.trim());
 }
 
+export function playbookStoreUrl(): string | undefined {
+	return getConfig('playbookStoreUrl')?.trim() || undefined;
+}
+
+export function setPlaybookStoreUrl(value: string): void {
+	setConfig('playbookStoreUrl', value.trim());
+}
+
 /**
  * The theme an instance gives its users, and how firmly.
  *
