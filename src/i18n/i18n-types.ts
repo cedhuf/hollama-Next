@@ -1209,6 +1209,31 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * P​l​a​y​b​o​o​k​ ​s​t​o​r​e
+	 */
+	playbookStore: string
+	/**
+	 * S​e​a​r​c​h​ ​p​l​a​y​b​o​o​k​s
+	 */
+	playbookStoreSearch: string
+	/**
+	 * N​o​t​h​i​n​g​ ​h​e​r​e​ ​y​e​t​.​ ​W​r​i​t​e​ ​o​n​e​,​ ​o​r​ ​i​n​s​t​a​l​l​ ​o​n​e​ ​f​r​o​m​ ​t​h​e​ ​s​t​o​r​e​.
+	 */
+	playbookStoreNothingMine: string
+	/**
+	 * T​h​e​ ​p​l​a​y​b​o​o​k​ ​s​t​o​r​e​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​r​e​a​c​h​e​d​.
+	 */
+	playbookStoreUnreachable: string
+	/**
+	 * {​n​a​m​e​}​ ​i​n​s​t​a​l​l​e​d
+	 * @param {string} name
+	 */
+	playbookInstalled: RequiredParams<'name'>
+	/**
+	 * B​r​o​w​s​e​ ​t​h​e​ ​p​l​a​y​b​o​o​k​ ​s​t​o​r​e
+	 */
+	playbookStoreBrowse: string
+	/**
 	 * S​t​o​r​e
 	 */
 	store: string
@@ -3870,6 +3895,30 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * Playbook store
+	 */
+	playbookStore: () => LocalizedString
+	/**
+	 * Search playbooks
+	 */
+	playbookStoreSearch: () => LocalizedString
+	/**
+	 * Nothing here yet. Write one, or install one from the store.
+	 */
+	playbookStoreNothingMine: () => LocalizedString
+	/**
+	 * The playbook store could not be reached.
+	 */
+	playbookStoreUnreachable: () => LocalizedString
+	/**
+	 * {name} installed
+	 */
+	playbookInstalled: (arg: { name: string }) => LocalizedString
+	/**
+	 * Browse the playbook store
+	 */
+	playbookStoreBrowse: () => LocalizedString
 	/**
 	 * Store
 	 */

@@ -313,6 +313,12 @@ const en = {
 	noMatches: 'No matches',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	playbookStore: 'Playbook store',
+	playbookStoreSearch: 'Search playbooks',
+	playbookStoreNothingMine: 'Nothing here yet. Write one, or install one from the store.',
+	playbookStoreUnreachable: 'The playbook store could not be reached.',
+	playbookInstalled: '{name:string} installed',
+	playbookStoreBrowse: 'Browse the playbook store',
 	store: 'Store',
 	storeDescription:
 		'Where personas, playbooks and anything else installable are read from. One address for all of them.',

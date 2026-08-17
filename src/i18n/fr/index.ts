@@ -306,6 +306,13 @@ const fr = extendDictionary(en, {
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	playbookStore: 'Store de playbooks',
+	playbookStoreSearch: 'Rechercher un playbook',
+	playbookStoreNothingMine:
+		'Rien ici pour l\u2019instant. Écrivez-en un, ou installez-en un depuis le store.',
+	playbookStoreUnreachable: 'Le store de playbooks est injoignable.',
+	playbookInstalled: '{name} installé',
+	playbookStoreBrowse: 'Parcourir le store de playbooks',
 	store: 'Store',
 	storeDescription:
 		'Où sont lus les personas, les playbooks et tout ce qui s\u2019installe. Une seule adresse pour tout.',

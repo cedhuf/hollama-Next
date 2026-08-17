@@ -62,6 +62,7 @@
 	import PersonaModal from './PersonaModal.svelte';
 	import PersonaStoreModal from './PersonaStoreModal.svelte';
 	import PlaybookModal from './PlaybookModal.svelte';
+	import PlaybookStoreModal from './PlaybookStoreModal.svelte';
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
@@ -262,6 +263,7 @@
 	}
 
 	let playbookModalOpen = $state(false);
+	let playbookStoreOpen = $state(false);
 	let editingPlaybook = $state<Playbook>(newPlaybook());
 
 	function editPlaybook(playbook: Playbook) {
@@ -492,6 +494,14 @@
 					<h2 class="text-sm font-medium text-active">{$LL.playbooks()}</h2>
 					<span class="text-xs text-muted">{$playbooksStore.length}</span>
 				</div>
+				<button
+					type="button"
+					onclick={() => (playbookStoreOpen = true)}
+					class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
+				>
+					<Store class="h-3.5 w-3.5" />
+					{$LL.playbookStoreBrowse()}
+				</button>
 			</div>
 
 			<!-- One column rather than a grid of tiles: a playbook is chosen on its
@@ -502,14 +512,27 @@
 					<PlaybookCard {playbook} onclick={() => editPlaybook(playbook)} />
 				{/each}
 
-				<button
-					type="button"
-					onclick={createPlaybook}
-					class="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-shade-4 p-3.5 text-muted transition-colors hover:border-accent hover:text-active"
+				<div
+					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
 				>
-					<Plus class="h-4 w-4" />
-					<span class="text-xs">{$LL.newPlaybook()}</span>
-				</button>
+					<button
+						type="button"
+						onclick={createPlaybook}
+						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+					>
+						<Plus class="h-4 w-4" />
+						<span class="text-xs">{$LL.newPlaybook()}</span>
+					</button>
+					<button
+						type="button"
+						onclick={() => (playbookStoreOpen = true)}
+						title={$LL.playbookStoreBrowse()}
+						aria-label={$LL.playbookStoreBrowse()}
+						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+					>
+						<Store class="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<!-- Knowledge -->
@@ -683,6 +706,7 @@
 {#if editing}
 	<PersonaModal bind:open={modalOpen} bind:persona={editing} />
 	<PlaybookModal bind:open={playbookModalOpen} bind:playbook={editingPlaybook} />
+	<PlaybookStoreModal bind:open={playbookStoreOpen} />
 {/if}
 
 <PersonaStoreModal bind:open={storeOpen} />
