@@ -81,7 +81,7 @@ export async function runTurn(
 		// how to treat it are put around it here, so they follow the current prompt
 		// override rather than whatever it said the day the summary was written.
 		const framed = input.messages.map((message) => {
-			if (message.compaction) {
+			if (message.note?.kind === 'compaction') {
 				return {
 					...message,
 					content: resolvePrompt('compactContext', overrides, { summary: message.content })

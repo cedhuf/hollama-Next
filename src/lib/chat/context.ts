@@ -1,5 +1,6 @@
 import type { Message, Session } from '$lib/sessions';
 
+import { conversationBoundary, messagesInContext } from './notes';
 import { formatSourceIndex, recallSearches } from './sourceIndex';
 
 /**
@@ -62,59 +63,6 @@ export function estimateSourceIndexTokens(messages: Message[]): number {
 	return estimateTokens(formatSourceIndex(searches));
 }
 
-/**
- * Index of the last compaction marker, or `-1` when the conversation has never
- * been compacted. Everything before it is history the model no longer sees.
- */
-export function lastCompactionIndex(messages: Message[]): number {
-	for (let i = messages.length - 1; i >= 0; i--) {
-		if (messages[i].compaction) return i;
-	}
-	return -1;
-}
-
-/** Index of the last clear marker, or `-1`. */
-export function lastClearedIndex(messages: Message[]): number {
-	for (let i = messages.length - 1; i >= 0; i--) {
-		if (messages[i].cleared) return i;
-	}
-	return -1;
-}
-
-/**
- * Where the conversation the model reads begins, and which kind of line it is.
- *
- * Two markers, one boundary: whichever came last wins, because a clear after a
- * compaction throws the summary away too, and a compaction after a clear starts
- * from what is left. Asking "which is later" is the only comparison that gives
- * the right answer in both orders.
- */
-export function contextBoundary(messages: Message[]): {
-	index: number;
-	kind: 'none' | 'compaction' | 'cleared';
-} {
-	const compacted = lastCompactionIndex(messages);
-	const cleared = lastClearedIndex(messages);
-	if (compacted === -1 && cleared === -1) return { index: -1, kind: 'none' };
-	return cleared > compacted
-		? { index: cleared, kind: 'cleared' }
-		: { index: compacted, kind: 'compaction' };
-}
-
-/**
- * The messages actually sent to the model.
- *
- * From the last compaction summary onwards, since the summary is what stands in
- * for what it replaced; or from just after the last clear, since a clear leaves
- * nothing standing in for anything. Without either, the whole conversation,
- * which is what every session did before markers existed.
- */
-export function messagesInContext(messages: Message[]): Message[] {
-	const { index, kind } = contextBoundary(messages);
-	if (kind === 'none') return messages;
-	return kind === 'cleared' ? messages.slice(index + 1) : messages.slice(index);
-}
-
 export interface CompactionSavings {
 	/** Estimated tokens the replaced stretch of conversation was worth. */
 	before: number;
@@ -136,13 +84,13 @@ export interface CompactionSavings {
  */
 export function compactionSavings(messages: Message[], markerIndex: number): CompactionSavings {
 	const marker = messages[markerIndex];
-	if (!marker?.compaction) return { before: 0, after: 0, saved: 0, ratio: 0 };
+	if (marker?.note?.kind !== 'compaction') return { before: 0, after: 0, saved: 0, ratio: 0 };
 
 	// Back to the previous marker, inclusive: an earlier summary was part of what
 	// this compaction was handed, so it is part of what this one replaced.
 	let start = 0;
 	for (let i = markerIndex - 1; i >= 0; i--) {
-		if (messages[i].compaction) {
+		if (messages[i].note?.kind === 'compaction') {
 			start = i;
 			break;
 		}
@@ -197,7 +145,8 @@ export function resolveContextLimit(
 }
 
 export function contextUsage(session: Session, threshold: number): ContextUsage {
-	const marker = lastCompactionIndex(session.messages);
+	const boundary = conversationBoundary(session.messages);
+	const compacted = boundary.note?.kind === 'compaction' ? boundary.index : -1;
 	const active = messagesInContext(session.messages);
 
 	let tokens = estimateTokens(session.systemPrompt?.content ?? '');
@@ -217,8 +166,8 @@ export function contextUsage(session: Session, threshold: number): ContextUsage 
 		limitSource,
 		ratio,
 		level: ratio >= 0.85 ? 'high' : ratio >= 0.6 ? 'warn' : 'ok',
-		messageCount: active.length - (marker === -1 ? 0 : 1),
-		compactedCount: marker === -1 ? 0 : marker
+		messageCount: active.length - (compacted === -1 ? 0 : 1),
+		compactedCount: compacted === -1 ? 0 : compacted
 	};
 }
 

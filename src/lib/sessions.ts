@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 
+import type { ConversationNote } from '$lib/chat/notes';
 import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { modelLabel, type Server } from '$lib/connections';
@@ -88,43 +89,20 @@ export interface Message {
 	personaId?: string;
 	personaName?: string;
 	/**
-	 * Set on a compaction marker: a `system` message holding a summary of the
-	 * messages before it, which is what the model receives in their place.
+	 * Set when this is not a turn in the conversation but something that happened
+	 * to it: a compaction, a clear, and whatever comes next.
 	 *
-	 * Nothing is deleted — the marker only moves where the sent context starts —
-	 * so removing it restores the full history. That is what makes `/compact`
-	 * reversible, and why compaction is a marker rather than a rewrite.
+	 * One field with the kind inside it rather than one field per kind. What the
+	 * app has to know about a note (does the model read it, does it move where the
+	 * conversation starts) lives in `chat/notes`, so adding a kind is an entry in
+	 * a table rather than an edit to the context builder, the search, the SQL and
+	 * the renderer. See that module for the whole of the reasoning.
+	 *
+	 * Nothing is ever deleted by one: a note only moves where the sent context
+	 * starts, so removing it gives the full history back. That is what makes
+	 * `/compact` and `/clear` reversible.
 	 */
-	compaction?: {
-		/** ISO timestamp of when the summary was written. */
-		generatedAt: string;
-		/** How many messages it stands in for. */
-		replacedCount: number;
-		/** The model that wrote it, for the divider's tooltip. */
-		model?: string;
-		/** True when the app compacted on its own, at the configured threshold. */
-		automatic?: boolean;
-	};
-	/**
-	 * Set on a clear marker: a `system` message with nothing in it, marking where
-	 * the conversation starts again as far as the model is concerned.
-	 *
-	 * The sibling of `compaction`, and the difference is the whole point.
-	 * Compaction hands the model a summary of what came before; clearing hands it
-	 * nothing. Both are markers rather than rewrites, so neither destroys
-	 * anything: the messages are still there, still yours, still searchable, and
-	 * removing the marker gives the model all of it back.
-	 *
-	 * What clearing does take away is the reading: everything before it folds
-	 * under the marker, because a conversation you have deliberately set aside is
-	 * not what you want to scroll past to reach the one you are having.
-	 */
-	cleared?: {
-		/** ISO timestamp of when the line was drawn. */
-		generatedAt: string;
-		/** How many messages are behind it. */
-		replacedCount: number;
-	};
+	note?: ConversationNote;
 }
 
 export interface Session {

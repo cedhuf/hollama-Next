@@ -6,8 +6,8 @@ import { resolvePrompt } from '$lib/defaultPrompts';
 import { serversStore, settingsStore } from '$lib/localStorage';
 import type { Message, Session } from '$lib/sessions';
 
-import { messagesInContext } from './context';
 import type { ChatStrategy } from './index';
+import { messagesInContext } from './notes';
 import { OllamaStrategy } from './ollama';
 import { OpenAIStrategy } from './openai';
 
@@ -135,7 +135,8 @@ export async function compactSession(
 			// conversation forever.
 			content: summary,
 			createdAt: new Date().toISOString(),
-			compaction: {
+			note: {
+				kind: 'compaction',
 				generatedAt: new Date().toISOString(),
 				replacedCount: active.length,
 				model: model.name,

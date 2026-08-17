@@ -21,30 +21,35 @@
 </script>
 
 <script lang="ts">
-	import { ChevronDown, ChevronUp, FoldVertical, TrendingDown, Undo2, X } from '@lucide/svelte';
-	import { slide } from 'svelte/transition';
+	import { FoldVertical, TrendingDown, Undo2, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { formatTokens, type CompactionSavings } from '$lib/chat/context';
+	import type { CompactionNote } from '$lib/chat/notes';
 	import Markdown from '$lib/components/Markdown.svelte';
-	import type { Message } from '$lib/sessions';
 	import { formatTimestampToNow } from '$lib/utils';
+
+	import NoteDivider from './NoteDivider.svelte';
 
 	/**
 	 * Where a compaction happened: everything above is still on screen, but the
 	 * model now reads the summary instead.
 	 *
-	 * A rule rather than a bubble — it marks a boundary in the conversation, it is
-	 * not a turn in it. The summary is foldable because it is normally not what
-	 * you came to read, and undoable because compaction only moves this boundary:
-	 * dropping the marker hands the model the full history back.
+	 * The summary is foldable because it is normally not what you came to read,
+	 * and undoable because compaction only moves a boundary: dropping the note
+	 * hands the model the full history back.
 	 *
 	 * The same component draws the wait: while the summary is being written the
 	 * pill is already there, at the exact spot it will end up, saying so. A toast
 	 * put the news in a corner of the screen, away from the thing it was about.
+	 * That one pill is why this supplies its own rather than taking the shell's:
+	 * there is no note yet, nothing to unfold, and a way out where the chevron
+	 * goes.
 	 */
 	interface Props {
-		message?: Message;
+		note?: CompactionNote;
+		/** The summary itself, which is the message's content. */
+		summary?: string;
 		onUndo?: () => void;
 		/** Draw the waiting state instead: no summary yet, and an out. */
 		pending?: boolean;
@@ -53,159 +58,99 @@
 		savings?: CompactionSavings;
 	}
 
-	let { message, onUndo, pending = false, onCancel, savings }: Props = $props();
-
-	let expanded = $state(false);
-
-	const info = $derived(message?.compaction);
-	const when = $derived(info ? formatTimestampToNow(info.generatedAt) : '');
+	let { note, summary, onUndo, pending = false, onCancel, savings }: Props = $props();
 </script>
 
-<div
-	class="my-4 flex flex-col gap-2"
-	data-testid={pending ? 'compaction-pending' : 'compaction-divider'}
->
-	<div class="flex items-center gap-3">
-		<div class="rule h-px flex-1" class:rule--pending={pending} class:rule--reverse={pending}></div>
+<NoteDivider
+	icon={FoldVertical}
+	label={pending ? $LL.compacting() : $LL.contextCompacted({ count: note?.replacedCount ?? 0 })}
+	when={note ? formatTimestampToNow(note.generatedAt) : undefined}
+	testid={pending ? 'compaction-pending' : 'compaction-divider'}
+	{pending}
+	pill={pending ? waiting : undefined}
+	pillIn={(node) => receive(node, { key: CROSSFADE_KEY })}
+	panel={!pending && note ? panel : undefined}
+/>
 
-		{#if pending}
-			<div
-				out:send={{ key: CROSSFADE_KEY }}
-				class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted"
-				role="status"
+{#snippet waiting()}
+	<div
+		out:send={{ key: CROSSFADE_KEY }}
+		class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted"
+		role="status"
+	>
+		<span class="folding inline-flex shrink-0">
+			<FoldVertical class="h-3.5 w-3.5" />
+		</span>
+		<span>{$LL.compacting()}</span>
+		{#if onCancel}
+			<button
+				type="button"
+				onclick={onCancel}
+				aria-label={$LL.cancel()}
+				title={$LL.cancel()}
+				class="-mr-1 rounded-full p-0.5 transition-colors hover:text-active"
 			>
-				<span class="folding inline-flex shrink-0">
-					<FoldVertical class="h-3.5 w-3.5" />
-				</span>
-				<span>{$LL.compacting()}</span>
-				{#if onCancel}
+				<X class="h-3.5 w-3.5" />
+			</button>
+		{/if}
+	</div>
+{/snippet}
+
+{#snippet panel()}
+	<!-- `markdown--aside` steps the summary down to the size reasoning is shown
+	     at: it is background to the conversation, not a turn in it, and it was
+	     reading as loudly as the answers around it. -->
+	<div class="markdown--aside rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5">
+		<!-- Three things that each want the full width on a phone: what happened,
+		     what it saved, and the way back. Side by side they truncated the first
+		     one down to nothing, so below `sm` they stack and the figures sit on
+		     their own line under the sentence they belong to. -->
+		<div class="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+			<span class="min-w-0 truncate text-xs text-muted">
+				{note?.automatic ? $LL.compactedAutomatically() : $LL.compactedManually()}
+				{#if note?.model}· {note.model}{/if}
+			</span>
+
+			<div class="flex items-center gap-2 sm:ml-auto">
+				{#if savings && savings.saved > 0}
+					<!-- The point of the whole operation, on the right of its own header: a
+					     figure to glance at, not a banner across the summary it introduces.
+					     Estimated like every token figure in the app, hence the tilde, with
+					     the before and after on hover rather than spelled out here. -->
+					<span
+						class="flex shrink-0 items-center gap-1 rounded-full border border-shade-3 bg-shade-0 px-2 py-0.5 text-[11px] font-medium text-positive shadow-sm"
+						title="{$LL.tokensFreedDetail({
+							before: formatTokens(savings.before),
+							after: formatTokens(savings.after)
+						})} {$LL.contextEstimateNote()}"
+					>
+						<TrendingDown class="h-3 w-3 shrink-0" aria-hidden="true" />
+						<span class="tabular-nums">
+							{$LL.tokensFreed({ tokens: formatTokens(savings.saved) })}
+						</span>
+						<span class="tabular-nums text-muted">{Math.round(savings.ratio * 100)}%</span>
+					</span>
+				{/if}
+
+				{#if onUndo}
 					<button
 						type="button"
-						onclick={onCancel}
-						aria-label={$LL.cancel()}
-						title={$LL.cancel()}
-						class="-mr-1 rounded-full p-0.5 transition-colors hover:text-active"
+						onclick={onUndo}
+						class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
+						title={$LL.undoCompactionHelp()}
 					>
-						<X class="h-3.5 w-3.5" />
+						<Undo2 class="h-3.5 w-3.5" />
+						{$LL.undoCompaction()}
 					</button>
 				{/if}
 			</div>
-		{:else if info}
-			<button
-				type="button"
-				in:receive={{ key: CROSSFADE_KEY }}
-				onclick={() => (expanded = !expanded)}
-				aria-expanded={expanded}
-				class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted transition-colors hover:border-shade-4 hover:text-active"
-			>
-				<FoldVertical class="h-3.5 w-3.5 shrink-0" />
-				<span>{$LL.contextCompacted({ count: info.replacedCount })}</span>
-				<span class="opacity-60">· {when}</span>
-				{#if expanded}
-					<ChevronUp class="h-3.5 w-3.5 shrink-0" />
-				{:else}
-					<ChevronDown class="h-3.5 w-3.5 shrink-0" />
-				{/if}
-			</button>
-		{/if}
-
-		<div class="rule h-px flex-1" class:rule--pending={pending}></div>
-	</div>
-
-	{#if expanded && message && info}
-		<!-- `markdown--aside` steps the summary down to the size reasoning is shown
-		     at: it is background to the conversation, not a turn in it, and it was
-		     reading as loudly as the answers around it. -->
-		<div
-			class="markdown--aside rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5"
-			transition:slide={{ duration: 200, easing: quadInOut }}
-		>
-			<!-- Three things that each want the full width on a phone: what happened,
-			     what it saved, and the way back. Side by side they truncated the first
-			     one down to nothing, so below `sm` they stack and the figures sit on
-			     their own line under the sentence they belong to. -->
-			<div class="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-				<span class="min-w-0 truncate text-xs text-muted">
-					{info.automatic ? $LL.compactedAutomatically() : $LL.compactedManually()}
-					{#if info.model}· {info.model}{/if}
-				</span>
-
-				<div class="flex items-center gap-2 sm:ml-auto">
-					{#if savings && savings.saved > 0}
-						<!-- The point of the whole operation, on the right of its own header: a
-						     figure to glance at, not a banner across the summary it introduces.
-						     Estimated like every token figure in the app, hence the tilde, with
-						     the before and after on hover rather than spelled out here. -->
-						<span
-							class="flex shrink-0 items-center gap-1 rounded-full border border-shade-3 bg-shade-0 px-2 py-0.5 text-[11px] font-medium text-positive shadow-sm"
-							title="{$LL.tokensFreedDetail({
-								before: formatTokens(savings.before),
-								after: formatTokens(savings.after)
-							})} {$LL.contextEstimateNote()}"
-						>
-							<TrendingDown class="h-3 w-3 shrink-0" aria-hidden="true" />
-							<span class="tabular-nums">
-								{$LL.tokensFreed({ tokens: formatTokens(savings.saved) })}
-							</span>
-							<span class="tabular-nums text-muted">{Math.round(savings.ratio * 100)}%</span>
-						</span>
-					{/if}
-
-					{#if onUndo}
-						<button
-							type="button"
-							onclick={onUndo}
-							class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
-							title={$LL.undoCompactionHelp()}
-						>
-							<Undo2 class="h-3.5 w-3.5" />
-							{$LL.undoCompaction()}
-						</button>
-					{/if}
-				</div>
-			</div>
-
-			<Markdown markdown={message.content} />
 		</div>
-	{/if}
-</div>
+
+		<Markdown markdown={summary ?? ''} />
+	</div>
+{/snippet}
 
 <style>
-	.rule {
-		background-color: var(--color-shade-3);
-	}
-
-	/* While the summary is being written, the rules carry a highlight that travels
-	   outwards from the pill. Slow and low-contrast on purpose: it says "still
-	   working" from the corner of the eye without competing with the text above. */
-	.rule--pending {
-		background-image: linear-gradient(
-			90deg,
-			transparent 0%,
-			var(--color-accent) 50%,
-			transparent 100%
-		);
-		background-size: 40% 100%;
-		background-repeat: no-repeat;
-		animation: compaction-sweep 1.8s ease-in-out infinite;
-		opacity: 0.7;
-	}
-
-	/* The rule on the left runs the other way, so the highlight leaves the pill in
-	   both directions rather than crossing the whole row like a progress bar. */
-	.rule--reverse {
-		animation-direction: reverse;
-	}
-
-	@keyframes compaction-sweep {
-		from {
-			background-position: -40% 0;
-		}
-		to {
-			background-position: 140% 0;
-		}
-	}
-
 	/* The icon is two arrows meeting; folding it is the operation itself. */
 	.folding {
 		animation: compaction-fold 1.6s ease-in-out infinite;
@@ -222,7 +167,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.rule--pending,
 		.folding {
 			animation: none;
 		}

@@ -1,5 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
+import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
 import { StorageKey } from '$lib/data/keys';
 import { requireUser } from '$lib/server/api';
 import {
@@ -38,7 +39,12 @@ export async function POST(event) {
 	const personas = backup[StorageKey.Personas];
 	const settings = backup[StorageKey.Preferences] as Settings | undefined;
 
-	if (Array.isArray(sessions)) replaceSessions(user.id, sessions);
+	// An exported file never ages out: one written before notes became a single
+	// field is converted on the way in, not left for the reader to trip over.
+	if (Array.isArray(sessions)) {
+		adoptLegacyNotes(sessions);
+		replaceSessions(user.id, sessions);
+	}
 	if (Array.isArray(knowledge)) replaceKnowledge(user.id, knowledge);
 	if (Array.isArray(personas)) replacePersonas(user.id, personas);
 	if (settings && typeof settings === 'object') replaceSettings(user.id, settings);

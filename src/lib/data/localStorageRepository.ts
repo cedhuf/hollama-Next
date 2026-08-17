@@ -1,6 +1,7 @@
 import { toast } from 'svelte-sonner';
 
 import { browser } from '$app/environment';
+import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
 import type { Server } from '$lib/connections';
 import { searchSessionsLocally, type ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
@@ -18,6 +19,40 @@ import type { AppData, Backup, DataRepository } from './repository';
  * satisfy the shared `DataRepository` contract (the server repo needs them).
  */
 export class LocalStorageRepository implements DataRepository {
+	constructor() {
+		this.#adoptLegacyNotes();
+	}
+
+	/**
+	 * Bring stored conversations onto the single `note` field, once.
+	 *
+	 * The browser's half of the server's migration 9, running the same conversion
+	 * so the two cannot disagree. In the constructor, so it is done before
+	 * `hydrate()` reads anything, and it writes only when something actually
+	 * changed: on the overwhelmingly common load where there is nothing to do it
+	 * costs one parse and no write.
+	 *
+	 * TODO (note migration) — removable a few versions after this shipped, along
+	 * with `chat/legacyNotes`.
+	 */
+	#adoptLegacyNotes(): void {
+		if (!browser) return;
+
+		const stored = localStorage.getItem(StorageKey.Sessions);
+		if (!stored) return;
+
+		try {
+			const sessions = JSON.parse(stored);
+			if (!Array.isArray(sessions)) return;
+			if (adoptLegacyNotes(sessions) === 0) return;
+			localStorage.setItem(StorageKey.Sessions, JSON.stringify(sessions));
+		} catch {
+			// Unreadable storage is not this method's problem to solve: `hydrate`
+			// falls back to an empty collection, and failing here would take the app
+			// down on a load that would otherwise merely start empty.
+		}
+	}
+
 	hydrate(): AppData {
 		return {
 			settings: { ...DEFAULT_SETTINGS, ...this.#read(StorageKey.Preferences, {}) },

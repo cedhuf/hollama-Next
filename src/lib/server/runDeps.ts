@@ -261,7 +261,8 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 								role: 'system',
 								content: summary.trim(),
 								createdAt: new Date().toISOString(),
-								compaction: {
+								note: {
+									kind: 'compaction',
 									generatedAt: new Date().toISOString(),
 									replacedCount: messages.length,
 									model: input.compact!.model,

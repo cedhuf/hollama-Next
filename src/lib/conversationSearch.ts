@@ -1,3 +1,4 @@
+import { isNote } from '$lib/chat/notes';
 import type { Session } from '$lib/sessions';
 import { resolveSessionTitle } from '$lib/sessionShape';
 
@@ -123,12 +124,15 @@ export function searchSessionsLocally(
 		// are out unless the search was asked to include them.
 		const clearedAt = everything
 			? -1
-			: (session.messages ?? []).reduce((last, m, i) => (m.cleared ? i : last), -1);
+			: (session.messages ?? []).reduce(
+					(last, m, i) => (m.note?.kind === 'cleared' ? i : last),
+					-1
+				);
 
 		session.messages?.forEach((message, messageIndex) => {
 			if (!everything) {
 				if (messageIndex <= clearedAt) return;
-				if (message.compaction || message.cleared) return;
+				if (isNote(message)) return;
 			}
 			const content = message.content ?? '';
 			if (!content) return;

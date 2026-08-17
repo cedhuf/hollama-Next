@@ -1,7 +1,8 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { stripAskBlock } from '$lib/askChoice';
-	import { compactionSavings, contextBoundary, lastCompactionIndex } from '$lib/chat/context';
+	import { compactionSavings } from '$lib/chat/context';
+	import { conversationBoundary } from '$lib/chat/notes';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { stripReadBlock } from '$lib/readProtocol';
@@ -38,18 +39,6 @@
 	}: Props = $props();
 
 	/**
-	 * Everything before the last marker is out of context: on screen, but not sent.
-	 *
-	 * While a compaction runs, every message qualifies in advance — the summary
-	 * covers all of them — so the fade lands with the pending pill rather than
-	 * after it, and the two read as one action.
-	 */
-	const foldedBefore = $derived(
-		isCompacting ? session.messages.length : lastCompactionIndex(session.messages)
-	);
-	const fade = $derived($settingsStore.fadeCompactedMessages);
-
-	/**
 	 * Where a clear was drawn, and what is behind it.
 	 *
 	 * Compaction leaves its history on screen, faded; clearing takes it off, into
@@ -61,8 +50,24 @@
 	 * one has already put away, so folding it again would nest two boxes saying the
 	 * same thing.
 	 */
-	const boundary = $derived(contextBoundary(session.messages));
-	const clearedAt = $derived(boundary.kind === 'cleared' ? boundary.index : -1);
+	const boundary = $derived(conversationBoundary(session.messages));
+	const clearedAt = $derived(boundary.note?.kind === 'cleared' ? boundary.index : -1);
+
+	/**
+	 * Everything before the last marker is out of context: on screen, but not sent.
+	 *
+	 * While a compaction runs, every message qualifies in advance — the summary
+	 * covers all of them — so the fade lands with the pending pill rather than
+	 * after it, and the two read as one action.
+	 */
+	const foldedBefore = $derived(
+		isCompacting
+			? session.messages.length
+			: boundary.note?.kind === 'compaction'
+				? boundary.index
+				: -1
+	);
+	const fade = $derived($settingsStore.fadeCompactedMessages);
 
 	/**
 	 * The list actually drawn, cut before it is walked.
@@ -90,7 +95,8 @@
 	let clearedMessages = $state<Message[]>([]);
 	$effect(() => {
 		const at = clearedAt;
-		clearedMessages = at === -1 ? [] : session.messages.slice(0, at).filter((m) => !m.cleared);
+		clearedMessages =
+			at === -1 ? [] : session.messages.slice(0, at).filter((m) => m.note?.kind !== 'cleared');
 	});
 
 	// While the model is streaming an <ask> block the visible text is empty — show
@@ -160,18 +166,19 @@
 
 {#each visible as message, index (session.id + (index + offset))}
 	{@const i = index + offset}
-	{#if message.cleared}
+	{#if message.note?.kind === 'cleared'}
 		{#if i === clearedAt}
 			<ClearedDivider
-				{message}
+				note={message.note}
 				cleared={clearedMessages}
 				onUndo={() => handleUndoCompaction(message)}
 			/>
 		{/if}
-	{:else if message.compaction}
+	{:else if message.note?.kind === 'compaction'}
 		<!-- Not a turn: the boundary where the context above was summarised away. -->
 		<CompactionDivider
-			{message}
+			note={message.note}
+			summary={message.content}
 			savings={compactionSavings(session.messages, i)}
 			onUndo={() => handleUndoCompaction(message)}
 		/>

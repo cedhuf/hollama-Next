@@ -1,0 +1,136 @@
+import type { Message } from '$lib/sessions';
+
+/**
+ * The messages that are not turns in the conversation.
+ *
+ * A conversation carries two sorts of thing. Most of it is what was said. The
+ * rest is what happened *to* it: it was compacted, it was set aside, it was
+ * inspected. Those are notes, and they had been growing one hardcoded field
+ * each — `compaction`, then `cleared` — with the question "does the model read
+ * this?" answered separately in four places, in three languages: two backwards
+ * loops here, a `reduce` in the client search, and `json_extract` in SQL.
+ *
+ * Adding a third kind meant editing all four and finding a fifth later. So the
+ * kind is data now, not a field name, and everything else asks this module.
+ *
+ * Two properties, which used to be one:
+ *
+ * **Boundary.** Compaction and clearing move where the sent conversation starts;
+ * a report of what the context contains moves nothing. `NOTE_KINDS` says which,
+ * and how, and it is the only place that knows.
+ *
+ * **Content.** A note's `content` is what the model reads *in its place*, which
+ * for a compaction is the summary and for everything else is nothing at all. An
+ * empty note is therefore invisible to search without anyone arranging it: the
+ * FTS index only takes rows with content, and the client search returns early on
+ * an empty one. That is a property of the design, not a filter to remember.
+ */
+
+export type NoteKind = 'compaction' | 'cleared';
+
+/**
+ * Where the model starts reading, for a conversation ending at this note.
+ *
+ * `from` includes the note, because its content stands in for what came before.
+ * `after` excludes it, because nothing stands in for anything. `none` is a note
+ * that leaves the boundary exactly where it was.
+ */
+export type NoteBoundary = 'from' | 'after' | 'none';
+
+interface NoteBase {
+	/** ISO timestamp of when the line was drawn. */
+	generatedAt: string;
+}
+
+/** A summary of the messages before it, which is what the model receives instead. */
+export interface CompactionNote extends NoteBase {
+	kind: 'compaction';
+	/** How many messages it stands in for. */
+	replacedCount: number;
+	/** The model that wrote it, for the divider's tooltip. */
+	model?: string;
+	/** True when the app compacted on its own, at the configured threshold. */
+	automatic?: boolean;
+}
+
+/** A line drawn under everything before it, with nothing put in its place. */
+export interface ClearedNote extends NoteBase {
+	kind: 'cleared';
+	/** How many messages are behind it. */
+	replacedCount: number;
+}
+
+export type ConversationNote = CompactionNote | ClearedNote;
+
+export const NOTE_KINDS: Record<NoteKind, { boundary: NoteBoundary }> = {
+	compaction: { boundary: 'from' },
+	cleared: { boundary: 'after' }
+};
+
+/** Every kind there is, for the callers that have to enumerate them (the SQL does). */
+export const ALL_NOTE_KINDS = Object.keys(NOTE_KINDS) as NoteKind[];
+
+/** The kinds that move where the model starts reading. */
+export const BOUNDARY_NOTE_KINDS = ALL_NOTE_KINDS.filter(
+	(kind) => NOTE_KINDS[kind].boundary !== 'none'
+);
+
+/**
+ * What a kind does to the boundary, including the kinds this build has never
+ * heard of.
+ *
+ * A conversation can arrive carrying a note written by a newer version, or by a
+ * plugin that is not installed here. Reading the table directly threw on those,
+ * from inside the function that decides what to send, which is the worst place
+ * to discover an unknown value. Unknown means `none`: it moves nothing, and it
+ * is still a note, so it is not fed to the model. Both halves of that are the
+ * safe answer rather than a convenient one.
+ */
+export function boundaryOf(kind: NoteKind): NoteBoundary {
+	return NOTE_KINDS[kind]?.boundary ?? 'none';
+}
+
+export function noteOf(message: Message): ConversationNote | undefined {
+	return message.note;
+}
+
+export function isNote(message: Message): boolean {
+	return message.note !== undefined;
+}
+
+/**
+ * The last note that moves the boundary, and where it sits.
+ *
+ * Whichever came last wins, because a clear after a compaction throws the
+ * summary away too, and a compaction after a clear starts from what is left.
+ * Asking "which is later" is the only comparison that gives the right answer in
+ * both orders, and it keeps giving it as kinds are added.
+ */
+export function conversationBoundary(messages: Message[]): {
+	index: number;
+	note?: ConversationNote;
+} {
+	for (let i = messages.length - 1; i >= 0; i--) {
+		const note = messages[i].note;
+		if (note && boundaryOf(note.kind) !== 'none') return { index: i, note };
+	}
+	return { index: -1 };
+}
+
+/**
+ * The messages actually sent to the model.
+ *
+ * From the boundary or just after it, depending on what the note put there, and
+ * without the notes that are only for the reader. That filter is the part a
+ * slice alone cannot do: a boundary can only be the last of its kind, but a
+ * report of the context sits wherever it was asked for, which is in the middle
+ * of the live conversation.
+ */
+export function messagesInContext(messages: Message[]): Message[] {
+	const { index, note } = conversationBoundary(messages);
+	if (!note) return messages.filter((message) => !message.note);
+
+	const boundary = messages[index];
+	const from = boundaryOf(note.kind) === 'from' ? index : index + 1;
+	return messages.slice(from).filter((message) => message === boundary || !message.note);
+}

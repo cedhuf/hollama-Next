@@ -11,9 +11,10 @@
 	import { formatAskAnswer } from '$lib/askChoice';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
-	import { contextUsage, messagesInContext } from '$lib/chat/context';
+	import { contextUsage } from '$lib/chat/context';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import { mentionedPersonas } from '$lib/chat/mentions';
+	import { messagesInContext } from '$lib/chat/notes';
 	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
 	import {
 		cancelRun,
@@ -804,7 +805,11 @@
 				role: 'system',
 				content: '',
 				createdAt: new Date().toISOString(),
-				cleared: { generatedAt: new Date().toISOString(), replacedCount: cleared }
+				note: {
+					kind: 'cleared',
+					generatedAt: new Date().toISOString(),
+					replacedCount: cleared
+				}
 			}
 		];
 		saveSession(session);

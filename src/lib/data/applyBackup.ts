@@ -1,3 +1,4 @@
+import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
 import {
 	knowledgeStore,
 	personasStore,
@@ -24,7 +25,11 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 			break;
 		// Restoring really does mean "this is now the whole collection" — the one
 		// place the wholesale write is the correct operation.
+		//
+		// An exported file never ages out, so a backup written before notes became
+		// one field is converted here rather than assumed away.
 		case StorageKey.Sessions:
+			if (Array.isArray(data)) adoptLegacyNotes(data);
 			sessionsStore.replaceAll(data as Parameters<typeof sessionsStore.replaceAll>[0]);
 			break;
 		case StorageKey.Knowledge:

@@ -1,3 +1,4 @@
+import { BOUNDARY_NOTE_KINDS } from '$lib/chat/notes';
 import { MATCH_CLOSE, MATCH_OPEN } from '$lib/conversationSearch';
 import type { Session } from '$lib/sessions';
 import { resolveSessionTitle } from '$lib/sessionShape';
@@ -35,15 +36,20 @@ export interface SearchHit {
  * live here, next to each other, so the one that says where a boundary is and
  * the one that says where a word is are updated by the same call and cannot fall
  * out of step.
+ *
+ * The list of kinds comes from the registry rather than being spelled out. This
+ * used to be a `CASE` naming one field per kind, which is the third place the
+ * same idea was written and the one nobody would have remembered to edit. Now
+ * the kind is a value in the JSON, so SQL reads it like any other column and a
+ * new kind reaches the database by existing.
  */
 const MARKERS_SELECT = `
-	SELECT s.id, s.user_id, m.key,
-	       CASE WHEN json_extract(m.value, '$.cleared') IS NOT NULL
-	            THEN 'cleared' ELSE 'compaction' END
+	SELECT s.id, s.user_id, m.key, json_extract(m.value, '$.note.kind')
 	FROM sessions s, json_each(s.data, '$.messages') m
 	WHERE %WHERE%
-	  AND (json_extract(m.value, '$.cleared') IS NOT NULL
-	       OR json_extract(m.value, '$.compaction') IS NOT NULL)`;
+	  AND json_extract(m.value, '$.note.kind') IN (${BOUNDARY_NOTE_KINDS.map(
+			(kind) => `'${kind}'`
+		).join(', ')})`;
 
 export function reindexSession(userId: string, sessionId: string): void {
 	const db = getDb();

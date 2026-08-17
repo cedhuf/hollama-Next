@@ -1,8 +1,20 @@
 import type { DatabaseSync } from 'node:sqlite';
 
+import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
+
 interface Migration {
 	version: number;
-	up: string;
+	/** Schema changes, which is what almost all of them are. */
+	up?: string;
+	/**
+	 * A migration that has to read and rewrite stored JSON.
+	 *
+	 * SQLite can do it, with `json_group_array` over `json_each` and a `CASE` per
+	 * field, and the result is a statement nobody can check by reading. These run
+	 * inside the same transaction as `up`, so the choice costs nothing but
+	 * legibility, and legibility is the whole reason to prefer it.
+	 */
+	run?: (db: DatabaseSync) => void;
 }
 
 /**
@@ -182,6 +194,37 @@ const migrations: Migration[] = [
 			-- seen" would be a plausible lie, which is worse than a blank.
 			ALTER TABLE users ADD COLUMN last_seen_at TEXT;
 		`
+	},
+	{
+		version: 9,
+		// Two fields become one, with the kind inside it. See `chat/notes` for why,
+		// and `chat/legacyNotes` for the conversion itself, which is shared with the
+		// browser's own storage so both sides cannot read the old shape differently.
+		//
+		// The markers table is rebuilt afterwards rather than migrated: it is derived
+		// data, the expression that fills it has just changed, and re-deriving it is
+		// both shorter and impossible to get subtly wrong.
+		run: (db) => {
+			const rows = db.prepare('SELECT id, data FROM sessions').all() as {
+				id: string;
+				data: string;
+			}[];
+			const update = db.prepare('UPDATE sessions SET data = ? WHERE id = ?');
+
+			for (const row of rows) {
+				const session = JSON.parse(row.data) as { messages?: [] };
+				if (adoptLegacyNotes([session]) === 0) continue;
+				update.run(JSON.stringify(session), row.id);
+			}
+
+			db.exec('DELETE FROM session_markers');
+			db.exec(`
+				INSERT INTO session_markers (session_id, user_id, message_index, kind)
+				SELECT s.id, s.user_id, m.key, json_extract(m.value, '$.note.kind')
+				FROM sessions s, json_each(s.data, '$.messages') m
+				WHERE json_extract(m.value, '$.note.kind') IN ('cleared', 'compaction')
+			`);
+		}
 	}
 ];
 
@@ -204,7 +247,8 @@ export function runMigrations(db: DatabaseSync): void {
 
 		db.exec('BEGIN');
 		try {
-			db.exec(migration.up);
+			if (migration.up) db.exec(migration.up);
+			migration.run?.(db);
 			db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)').run(
 				migration.version,
 				new Date().toISOString()
