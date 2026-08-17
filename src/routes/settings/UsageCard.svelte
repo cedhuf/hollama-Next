@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import Meter from '$lib/components/Meter.svelte';
 
 	/**
 	 * What you have spent this period, and what you are allowed.
@@ -35,12 +36,6 @@
 		}
 	});
 
-	const ratio = $derived(usage?.limit ? Math.min(usage.spend.cost / usage.limit, 1) : 0);
-	const percent = $derived(Math.round(ratio * 100));
-
-	/** Warm past two thirds, red at the top: the same reading as the context ring. */
-	const tone = $derived(ratio >= 0.9 ? 'bg-red-500' : ratio >= 0.66 ? 'bg-amber-500' : 'bg-accent');
-
 	const money = (value: number) =>
 		value.toLocaleString(undefined, { maximumFractionDigits: value < 1 ? 3 : 2 });
 
@@ -69,9 +64,15 @@
 		</div>
 
 		{#if usage.limit > 0}
-			<div class="h-1.5 overflow-hidden rounded-full bg-shade-3">
-				<div class="h-full transition-[width] duration-500 {tone}" style="width:{percent}%"></div>
-			</div>
+			<Meter
+				value={usage.spend.cost}
+				max={usage.limit}
+				label={$LL.usageTitle()}
+				valueLabel={$LL.usageOfLimit({
+					spent: money(usage.spend.cost),
+					limit: money(usage.limit)
+				})}
+			/>
 		{/if}
 
 		<div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs text-muted">

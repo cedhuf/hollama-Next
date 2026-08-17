@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Plus, Trash2, TriangleAlert, X } from '@lucide/svelte';
+	import { Plus, Trash2, TriangleAlert, Wallet, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import Collapsible from '$lib/components/Collapsible.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -141,58 +142,6 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title={$LL.credits()} description={$LL.creditsDescription()}>
-		<div class="flex flex-wrap items-end gap-2">
-			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditLimitDefault()}</span>
-				<!-- Empty rather than a zero sitting in the field: "nobody has set one"
-				     and "somebody typed nought" read the same on screen, and only one of
-				     them is what an untouched instance has. -->
-				<input
-					class="settings-field tabular-nums"
-					type="number"
-					min="0"
-					step="0.01"
-					inputmode="decimal"
-					bind:value={instanceLimitField}
-					onchange={saveInstance}
-					placeholder={$LL.usageUnlimited()}
-				/>
-			</label>
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditPeriod()}</span>
-				<Select
-					bind:value={period}
-					options={[
-						{ value: 'month', label: $LL.creditPeriodMonth() },
-						{ value: 'week', label: $LL.creditPeriodWeek() }
-					]}
-					onChange={saveInstance}
-				/>
-			</label>
-		</div>
-		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
-
-		{#if unpriced.length}
-			<!-- Not a nicety. While a limit is in force these models are refused, and
-			     the reason is here rather than in a log the person who set the limit
-			     will never read. -->
-			<div class="flex flex-col gap-1 rounded-md border border-warning/40 bg-warning/10 p-3">
-				<span class="flex items-center gap-1.5 text-sm font-medium text-active">
-					<TriangleAlert class="h-4 w-4 shrink-0" />
-					{$LL.unpricedModels()}
-				</span>
-				<p class="text-xs text-muted">{$LL.unpricedModelsHelp()}</p>
-				{#each unpriced as entry (entry.serverId)}
-					<p class="text-xs text-muted">
-						<span class="text-active">{entry.label}</span>
-						<span class="font-mono">{entry.models.join(', ')}</span>
-					</p>
-				{/each}
-			</div>
-		{/if}
-	</SettingsSection>
-
 	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
 		{#if loading}
 			<Skeleton variant="row" count={3} />
@@ -281,4 +230,64 @@
 			</button>
 		{/if}
 	</SettingsSection>
+
+	<!-- After the accounts, and folded: an allowance is a rule about the list above
+	     rather than the first thing to read, and most instances never set one. What
+	     it is set to is on the closed row, so opening it is a decision. -->
+	<Collapsible
+		title={$LL.credits()}
+		description={$LL.creditsDescription()}
+		summary={instanceLimit > 0 ? money(instanceLimit) : unpriced.length ? '' : $LL.usageUnlimited()}
+		icon={Wallet}
+	>
+		<div class="flex flex-wrap items-end gap-2">
+			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+				<span class="text-muted">{$LL.creditLimitDefault()}</span>
+				<!-- Empty rather than a zero sitting in the field: "nobody has set one"
+				     and "somebody typed nought" read the same on screen, and only one of
+				     them is what an untouched instance has. -->
+				<input
+					class="settings-field tabular-nums"
+					type="number"
+					min="0"
+					step="0.01"
+					inputmode="decimal"
+					bind:value={instanceLimitField}
+					onchange={saveInstance}
+					placeholder={$LL.usageUnlimited()}
+				/>
+			</label>
+			<label class="flex flex-col gap-1 text-sm">
+				<span class="text-muted">{$LL.creditPeriod()}</span>
+				<Select
+					bind:value={period}
+					options={[
+						{ value: 'month', label: $LL.creditPeriodMonth() },
+						{ value: 'week', label: $LL.creditPeriodWeek() }
+					]}
+					onChange={saveInstance}
+				/>
+			</label>
+		</div>
+		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
+
+		{#if unpriced.length}
+			<!-- Not a nicety. While a limit is in force these models are refused, and
+			     the reason is here rather than in a log the person who set the limit
+			     will never read. -->
+			<div class="flex flex-col gap-1 rounded-lg border border-warning/40 bg-warning/10 p-3">
+				<span class="flex items-center gap-1.5 text-sm font-medium text-active">
+					<TriangleAlert class="h-4 w-4 shrink-0" />
+					{$LL.unpricedModels()}
+				</span>
+				<p class="text-xs leading-relaxed text-muted">{$LL.unpricedModelsHelp()}</p>
+				{#each unpriced as entry (entry.serverId)}
+					<p class="text-xs text-muted">
+						<span class="text-active">{entry.label}</span>
+						<span class="font-mono">{entry.models.join(', ')}</span>
+					</p>
+				{/each}
+			</div>
+		{/if}
+	</Collapsible>
 </SettingsPanel>

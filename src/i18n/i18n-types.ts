@@ -128,15 +128,37 @@ type RootTranslation = {
 	 */
 	currency: string
 	/**
+	 * P​r​i​c​i​n​g
+	 */
+	pricing: string
+	/**
+	 * W​h​a​t​ ​a​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s​ ​c​o​s​t​s​ ​h​e​r​e​,​ ​f​o​r​ ​t​h​e​ ​c​r​e​d​i​t​ ​l​i​m​i​t​s​.
+	 */
+	pricingHelp: string
+	/**
+	 * {​p​r​i​c​e​d​}​ ​o​f​ ​{​t​o​t​a​l​}​ ​p​r​i​c​e​d
+	 * @param {number} priced
+	 * @param {number} total
+	 */
+	pricedOf: RequiredParams<'priced' | 'total'>
+	/**
+	 * p​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s
+	 */
+	perMillionTokens: string
+	/**
+	 * W​h​a​t​ ​t​h​i​s​ ​p​r​o​v​i​d​e​r​ ​b​i​l​l​s​ ​i​n​.​ ​N​o​t​h​i​n​g​ ​i​s​ ​c​o​n​v​e​r​t​e​d​.
+	 */
+	currencyHelp: string
+	/**
 	 * n​o​t​ ​s​e​t
 	 */
 	priceUnset: string
 	/**
-	 * I​n
+	 * S​e​n​t
 	 */
 	pricePerMillionIn: string
 	/**
-	 * O​u​t
+	 * R​e​t​u​r​n​e​d
 	 */
 	pricePerMillionOut: string
 	/**
@@ -2974,15 +2996,35 @@ The completion in progress will stop
 	 */
 	currency: () => LocalizedString
 	/**
+	 * Pricing
+	 */
+	pricing: () => LocalizedString
+	/**
+	 * What a million tokens costs here, for the credit limits.
+	 */
+	pricingHelp: () => LocalizedString
+	/**
+	 * {priced} of {total} priced
+	 */
+	pricedOf: (arg: { priced: number, total: number }) => LocalizedString
+	/**
+	 * per million tokens
+	 */
+	perMillionTokens: () => LocalizedString
+	/**
+	 * What this provider bills in. Nothing is converted.
+	 */
+	currencyHelp: () => LocalizedString
+	/**
 	 * not set
 	 */
 	priceUnset: () => LocalizedString
 	/**
-	 * In
+	 * Sent
 	 */
 	pricePerMillionIn: () => LocalizedString
 	/**
-	 * Out
+	 * Returned
 	 */
 	pricePerMillionOut: () => LocalizedString
 	/**

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { RotateCcw, Search, X } from '@lucide/svelte';
+	import { ArrowDownLeft, ArrowUpRight, Coins, RotateCcw, Search, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import Collapsible from '$lib/components/Collapsible.svelte';
 	import { modelPrice, serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsBack } from '$lib/stores/modal';
@@ -40,6 +41,8 @@
 
 	let query = $state('');
 	let confirmingReset = $state(false);
+	/** Folded until asked for, and what it reveals is the fields on every row. */
+	let pricingOpen = $state(false);
 
 	const badge = $derived(serverBadge(server));
 	// The catalogue is already loaded for the model picker; just take this server's.
@@ -112,32 +115,40 @@
 			{server.label || badge.id || server.baseUrl}
 		</span>
 		{#if models.length}
-			<!-- What this provider bills in. One field for the connection rather than
-			     one per model: a single account is billed in a single currency, and the
-			     app converts nothing, ever. -->
-			<label class="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-muted">
-				{$LL.currency()}
+			<span class="ml-auto shrink-0 text-xs tabular-nums text-muted">
+				{$LL.modelsSummary({ renamed: renamedCount, priced: pricedCount, total: models.length })}
+			</span>
+		{/if}
+	</div>
+
+	{#if models.length}
+		<!-- What a million tokens costs, folded: most connections never get a price,
+		     and the row says how many have one so opening it is a decision. The unit
+		     is stated once here rather than beside two hundred pairs of fields. -->
+		<Collapsible
+			title={$LL.pricing()}
+			description={$LL.pricingHelp()}
+			summary={$LL.pricedOf({ priced: pricedCount, total: models.length })}
+			icon={Coins}
+			bind:open={pricingOpen}
+		>
+			<label class="flex items-center gap-2 text-sm">
+				<span class="shrink-0 text-muted">{$LL.currency()}</span>
 				<input
-					class="settings-field w-20 py-1 text-center text-xs uppercase"
+					class="settings-field w-24 uppercase"
 					value={server.currency ?? ''}
 					maxlength="6"
 					placeholder="EUR"
+					aria-label={$LL.currency()}
 					oninput={(e) => {
 						server.currency = e.currentTarget.value.trim() || undefined;
 						onChange();
 					}}
 				/>
+				<span class="min-w-0 flex-1 text-xs text-muted">{$LL.currencyHelp()}</span>
 			</label>
-		{/if}
-	</div>
+		</Collapsible>
 
-	{#if models.length}
-		<p class="-mt-1 text-xs text-muted">
-			{$LL.modelsSummary({ renamed: renamedCount, priced: pricedCount, total: models.length })}
-		</p>
-	{/if}
-
-	{#if models.length}
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
 		     reach one. -->
 		<div class="flex items-center gap-2">
@@ -222,29 +233,42 @@
 						</div>
 						<span class="truncate px-1 font-mono text-[11px] text-muted" title={name}>{name}</span>
 
-						<!-- Per million tokens, in and out, the units every provider
-						     publishes. Side by side because the pair is what a price is: one
-						     of the two alone says nothing about what a conversation costs. -->
-						<div class="flex items-center gap-1.5 px-0.5 pt-0.5">
-							{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
-								<label class="flex min-w-0 flex-1 items-center gap-1.5">
-									<span class="shrink-0 text-[10px] uppercase tracking-wide text-muted">
-										{field.label}
-									</span>
-									<input
-										class="settings-field w-full py-1 text-right text-xs tabular-nums"
-										type="number"
-										min="0"
-										step="0.01"
-										inputmode="decimal"
-										value={server.modelPricing?.[name]?.[field.side] ?? ''}
-										placeholder={$LL.priceUnset()}
-										aria-label="{name} · {field.label}"
-										oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
-									/>
-								</label>
-							{/each}
-						</div>
+						{#if pricingOpen}
+							<!-- Only while the pricing block is open, so a list somebody came
+							     to rename is a list of names. The arrows say which way the
+							     tokens go, the words say it in full on hover and to a screen
+							     reader, and the unit is stated once above. -->
+							<div class="flex items-center gap-2 pt-1">
+								{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownLeft, label: $LL.pricePerMillionOut() }] as field (field.side)}
+									{@const Icon = field.icon}
+									<div
+										class="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-shade-3 bg-shade-1 py-1 pl-2 pr-1 focus-within:border-accent"
+										title="{field.label} · {$LL.perMillionTokens()}"
+									>
+										<Icon class="h-3.5 w-3.5 shrink-0 text-muted" />
+										<span class="shrink-0 text-[10px] uppercase tracking-wide text-muted">
+											{field.label}
+										</span>
+										<input
+											class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+											type="number"
+											min="0"
+											step="0.01"
+											inputmode="decimal"
+											value={server.modelPricing?.[name]?.[field.side] ?? ''}
+											placeholder={$LL.priceUnset()}
+											aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
+											oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
+										/>
+										{#if server.currency}
+											<span class="shrink-0 text-[10px] uppercase text-muted">
+												{server.currency}
+											</span>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
