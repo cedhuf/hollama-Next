@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {
-		ArrowDownLeft,
+		ArrowDownRight,
 		ArrowUpRight,
 		ChevronDown,
 		Coins,
@@ -71,7 +71,9 @@
 	const priced = new SvelteSet<string>();
 
 	/** Enough to cover what people actually run, and free text is not a menu. */
-	const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD'];
+	const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF', 'CAD'];
+	/** What providers publish in, so a price typed without a thought is right. */
+	const DEFAULT_CURRENCY = 'USD';
 
 	const badge = $derived(serverBadge(server));
 	// The catalogue is already loaded for the model picker; just take this server's.
@@ -138,12 +140,18 @@
 		onChange();
 	}
 
-	/** The currency this model is billed in, cleared when set back to nothing. */
+	/**
+	 * The currency this model is billed in.
+	 *
+	 * Written only alongside a price: a currency on a model nobody has priced is a
+	 * row in the table saying nothing, and it would make "unpriced" stop meaning
+	 * unpriced.
+	 */
 	function setCurrency(name: string, code: string) {
 		const pricing = { ...(server.modelPricing ?? {}) };
-		const next = { ...(pricing[name] ?? {}), currency: code || undefined };
-		if (next.input == null && next.output == null && !next.currency) delete pricing[name];
-		else pricing[name] = next;
+		const current = pricing[name];
+		if (!current || (current.input == null && current.output == null)) return;
+		pricing[name] = { ...current, currency: code };
 		server.modelPricing = pricing;
 		onChange();
 	}
@@ -318,27 +326,28 @@
 								     across the width rather than bunched at the left — each field
 								     hugs its own value, so left to themselves they pile up in a
 								     corner of a panel that is mostly empty. -->
-								<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-									{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownLeft, label: $LL.pricePerMillionOut() }] as field (field.side)}
+								<div class="flex flex-wrap items-center gap-2">
+									{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownRight, label: $LL.pricePerMillionOut() }] as field (field.side)}
 										{@const Icon = field.icon}
-										<!-- The arrow is the whole label: up is what you send, down is
-										     what comes back. The words are on the tooltip and on the
-										     accessible name, where they cost no width. -->
+										<!-- The arrow is the whole label: up for what you send, down for
+										     what comes back, both leaning the same way so the pair reads as
+										     one movement rather than two opposed ones. The words are on the
+										     tooltip and the accessible name, where they cost no width. -->
 										<label
-											class="flex shrink-0 items-center gap-1.5"
+											class="flex min-w-0 flex-1 items-center gap-1.5"
 											title="{field.label} · {$LL.perMillionTokens()}"
 										>
 											<Icon class="h-4 w-4 shrink-0 text-muted" />
 
 											<!-- The unit sits immediately after the figure, inside the box,
-											     so the field reads as one thing: 0,2 /M Tokens. The input is
-											     sized by its content, which is what keeps the two together
-											     instead of leaving the unit adrift at the far edge. -->
+											     so the field reads as one thing: 0,2 /M Tokens. The figure is
+											     right-aligned in a box that takes its share of the row, which
+											     keeps the two together while the pair fills the line. -->
 											<span
-												class="flex items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 focus-within:border-accent"
+												class="flex min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 focus-within:border-accent"
 											>
 												<input
-													class="field-grow w-14 min-w-8 bg-transparent text-xs tabular-nums text-active outline-none placeholder:text-muted"
+													class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
 													type="text"
 													inputmode="decimal"
 													value={server.modelPricing?.[name]?.[field.side] ?? ''}
@@ -353,13 +362,15 @@
 										</label>
 									{/each}
 
+									<!-- No empty option: a price without a currency is a number nobody
+									     can add up, and USD is what providers publish in. Same box as
+									     the fields beside it, so the row sits on one line. -->
 									<select
-										class="settings-field w-auto shrink-0 py-1 text-xs uppercase"
-										value={server.modelPricing?.[name]?.currency ?? ''}
+										class="w-auto shrink-0 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs uppercase text-active outline-none focus:border-accent"
+										value={server.modelPricing?.[name]?.currency ?? DEFAULT_CURRENCY}
 										aria-label="{name} · {$LL.currency()}"
 										onchange={(e) => setCurrency(name, e.currentTarget.value)}
 									>
-										<option value="">{$LL.currency()}</option>
 										{#each CURRENCIES as code (code)}
 											<option value={code}>{code}</option>
 										{/each}
