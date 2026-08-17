@@ -16,8 +16,8 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { isServerMode } from '$lib/chat/endpoint';
+	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import PersonaCard from '$lib/components/PersonaCard.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { applyBundleToPersona, avatarFields, installPersonaBundle } from '$lib/personaBundle';
@@ -532,7 +532,7 @@
 						: 'grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3'}
 				>
 					{#each filtered as offer (offer.key)}
-						<PersonaCard
+						<LibraryCard
 							name={offer.name}
 							tagline={offer.tagline}
 							avatar={offer.avatar}
@@ -629,7 +629,7 @@
 									</Tooltip>
 								{/if}
 							{/snippet}
-						</PersonaCard>
+						</LibraryCard>
 					{/each}
 				</div>
 			{/if}

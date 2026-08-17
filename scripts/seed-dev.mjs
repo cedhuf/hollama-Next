@@ -71,8 +71,6 @@ const playbooks = bundles('playbooks').map((bundle, i) => ({
 	name: bundle.playbook.name,
 	summary: bundle.playbook.summary ?? '',
 	instructions: bundle.playbook.instructions,
-	color: bundle.playbook.color ?? '#888780',
-	glyph: bundle.playbook.glyph,
 	tags: bundle.playbook.tags,
 	source: { origin: 'official', id: bundle.id, revision: bundle.revision ?? 1 },
 	createdAt: at(60 * 24 * (i + 2)),

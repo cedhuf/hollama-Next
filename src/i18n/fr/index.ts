@@ -306,6 +306,7 @@ const fr = extendDictionary(en, {
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	playbookSections: '{count} section{{s}}',
 	playbookStore: 'Boutique de playbooks',
 	playbookStoreSearch: 'Rechercher un playbook',
 	playbookStoreNothingMine:

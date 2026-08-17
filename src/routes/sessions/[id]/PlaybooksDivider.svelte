@@ -4,7 +4,6 @@
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
 	import { playbooksStore } from '$lib/localStorage';
-	import { personaGlyph } from '$lib/personaGlyphs';
 
 	import NoteDivider from './NoteDivider.svelte';
 
@@ -43,29 +42,12 @@
 			<div class="flex flex-col">
 				{#each $playbooksStore as playbook (playbook.id)}
 					{@const on = active.includes(playbook.id)}
-					{@const glyph = personaGlyph(playbook.glyph)}
 					<button
 						type="button"
 						onclick={() => onToggle(playbook.id)}
 						aria-pressed={on}
-						class="flex items-start gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-shade-2"
+						class="flex items-start gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-shade-2"
 					>
-						<span
-							class="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-semibold text-shade-0 {on
-								? ''
-								: 'opacity-40'}"
-							style="background-color:{playbook.color};--persona-glyph-cut:{playbook.color}"
-						>
-							{#if glyph}
-								<svg viewBox="0 0 64 64" class="h-4 w-4" role="presentation">
-									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-									{@html glyph.body}
-								</svg>
-							{:else}
-								{(playbook.name.trim()[0] ?? '?').toUpperCase()}
-							{/if}
-						</span>
-
 						<span class="flex min-w-0 flex-1 flex-col">
 							<span class="truncate text-xs font-medium {on ? 'text-active' : 'text-muted'}">
 								{playbook.name.trim() || '—'}

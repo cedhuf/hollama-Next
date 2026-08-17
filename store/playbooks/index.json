@@ -6,8 +6,6 @@
 			"id": "decide-it",
 			"name": "Help me decide",
 			"summary": "Work through a decision you keep going round in circles on, and end with one recommendation.",
-			"color": "#7F77DD",
-			"glyph": "compass",
 			"tags": [
 				"thinking",
 				"everyday"
@@ -17,15 +15,13 @@
 			"origin": "official",
 			"path": "bundles/decide-it.json",
 			"steps": 3,
-			"integrity": "sha256-UXA7txBnLOXsVYyuDHoBZYEzFmCRXT8Uc+J/R5APghM=",
-			"contentDigest": "8a065dc6fd66395e"
+			"integrity": "sha256-y6iRFUfKB56+XGvUtm5oZF30WusHVXmqduqDpf7xl38=",
+			"contentDigest": "c75b3bbef7081243"
 		},
 		{
 			"id": "plain-language",
 			"name": "Say it plainly",
 			"summary": "Rewrite an official letter, a contract clause or a form so an ordinary person can act on it.",
-			"color": "#378ADD",
-			"glyph": "book",
 			"tags": [
 				"writing",
 				"admin",
@@ -36,15 +32,13 @@
 			"origin": "official",
 			"path": "bundles/plain-language.json",
 			"steps": 3,
-			"integrity": "sha256-7w6OAlmx4fwnZcm/QtP7myVvAb3DwT/KqUcw7qLLqr4=",
-			"contentDigest": "2946b96891b0f6b6"
+			"integrity": "sha256-wVs+hi2OwTJtSnh5tpZfmmfxg9Qy+RjD6roRAiY2Olk=",
+			"contentDigest": "7bf0cfbbeea34fd2"
 		},
 		{
 			"id": "weekly-meals",
 			"name": "Meals for the week",
 			"summary": "Plan a week of dinners around what is already in the kitchen, and come out with one shopping list.",
-			"color": "#1D9E75",
-			"glyph": "face-chef",
 			"tags": [
 				"cooking",
 				"weekly",
@@ -55,15 +49,13 @@
 			"origin": "official",
 			"path": "bundles/weekly-meals.json",
 			"steps": 3,
-			"integrity": "sha256-mHyzAyZnVV7w3DUb3Qhwyjv+fxTBppkaPJ3TCbfLHOc=",
-			"contentDigest": "e1f3806acbd2923c"
+			"integrity": "sha256-KuPeI3vzwGe6BjurVFA28TBz15BSs7pa0S3+ylP0Vc8=",
+			"contentDigest": "1bdb063698608fbc"
 		},
 		{
 			"id": "what-broke",
 			"name": "Something stopped working",
 			"summary": "Track down why a device, an app or a connection at home broke, without taking anything apart first.",
-			"color": "#BA7517",
-			"glyph": "face-headset",
 			"tags": [
 				"troubleshooting",
 				"home",
@@ -74,8 +66,8 @@
 			"origin": "official",
 			"path": "bundles/what-broke.json",
 			"steps": 3,
-			"integrity": "sha256-5k5tLnEwx0eo29zq5qOlzsWQSrZ/zU9gW61iWpmkKZo=",
-			"contentDigest": "4d56e1c9d0624ddc"
+			"integrity": "sha256-OXhta3scDruSXd2ARY9nx12Jtg5PRakn/0OGq7CpvCw=",
+			"contentDigest": "3c032497c5e9b758"
 		}
 	]
 }

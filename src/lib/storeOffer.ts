@@ -34,7 +34,7 @@ export type OfferView = 'store' | 'mine' | 'shared';
 /** How an installed copy stands against what the store publishes. */
 export type InstalledState = 'own' | 'clean' | 'edited' | 'outdated' | 'edited-outdated';
 
-export interface Offer<T = unknown> {
+export interface Offer {
 	key: string;
 	kind: OfferKind;
 	name: string;
@@ -48,8 +48,11 @@ export interface Offer<T = unknown> {
 	edited: boolean;
 	shared: boolean;
 	toggleShare: () => Promise<void>;
-	/** Whatever the card needs to draw itself. The shell never looks inside. */
-	item: T;
+	/**
+	 * A quiet line under the rest: how long a procedure is, who wrote it, whatever
+	 * the kind has to add. The shell passes it to the card and never reads it.
+	 */
+	meta?: string;
 }
 
 /** A copy that says something other than what was published. */

@@ -20,8 +20,6 @@ export interface PlaybookCatalogEntry {
 	id: string;
 	name: string;
 	summary: string;
-	color?: string;
-	glyph?: string;
 	tags: string[];
 	author?: string;
 	revision: number;
@@ -53,8 +51,6 @@ function parseEntry(value: unknown): PlaybookCatalogEntry | undefined {
 		id,
 		name,
 		summary: typeof o.summary === 'string' ? o.summary : '',
-		color: typeof o.color === 'string' ? o.color : undefined,
-		glyph: typeof o.glyph === 'string' ? o.glyph : undefined,
 		tags: Array.isArray(o.tags) ? o.tags.filter((t): t is string => typeof t === 'string') : [],
 		author: typeof o.author === 'string' ? o.author : undefined,
 		revision: typeof o.revision === 'number' ? o.revision : 1,
@@ -86,8 +82,6 @@ export interface PlaybookBundle {
 		name: string;
 		summary?: string;
 		instructions: string;
-		color?: string;
-		glyph?: string;
 		tags?: string[];
 	};
 }

@@ -313,6 +313,7 @@ const en = {
 	noMatches: 'No matches',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	playbookSections: '{count:number} {{section|sections}}',
 	playbookStore: 'Playbooks store',
 	playbookStoreSearch: 'Search playbooks',
 	playbookStoreNothingMine: 'Nothing here yet. Write one, or install one from the store.',

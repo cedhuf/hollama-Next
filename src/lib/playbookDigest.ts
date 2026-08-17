@@ -23,8 +23,6 @@ export interface AuthoredPlaybook {
 	name: string;
 	summary?: string;
 	instructions: string;
-	color?: string;
-	glyph?: string;
 	tags?: string[];
 }
 
@@ -32,7 +30,9 @@ export function playbookDigest(playbook: AuthoredPlaybook): string {
 	return contentDigest({
 		name: playbook.name,
 		tagline: playbook.summary,
-		avatar: { color: playbook.color, glyph: playbook.glyph },
+		// A playbook has no avatar. The slot stays because the shared hash walks a
+		// fixed list of fields, and leaving it empty is what keeps that list fixed.
+		avatar: {},
 		systemPrompt: playbook.instructions,
 		tags: playbook.tags
 	});
@@ -40,6 +40,6 @@ export function playbookDigest(playbook: AuthoredPlaybook): string {
 
 /** The authored fields of a bundle, whatever else it carries. */
 export function bundlePlaybookAuthored(bundle: { playbook: AuthoredPlaybook }): AuthoredPlaybook {
-	const { name, summary, instructions, color, glyph, tags } = bundle.playbook;
-	return { name, summary, instructions, color, glyph, tags };
+	const { name, summary, instructions, tags } = bundle.playbook;
+	return { name, summary, instructions, tags };
 }

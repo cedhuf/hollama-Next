@@ -6,10 +6,16 @@
 	import PersonaAvatar from './PersonaAvatar.svelte';
 
 	/**
-	 * One persona, drawn the same way wherever it is shown.
+	 * One thing in the library, drawn the same way wherever it is shown.
 	 *
 	 * The Library and the store had a card each, written weeks apart, and the two
-	 * had already drifted. They show the same object, so they draw it from here.
+	 * had already drifted. Then the playbooks arrived with a card of their own,
+	 * bigger, in a grid of its own, and the page stopped reading as one library.
+	 *
+	 * So there is one card. A persona wears a face; a playbook does not, and that
+	 * is the whole of the difference between them here. Everything else — the size,
+	 * the clamped description, the tags, the footer, the two layouts — is the same
+	 * because there was never a reason for it not to be.
 	 *
 	 * Three rules, each of them a fault this replaced:
 	 *
@@ -29,7 +35,8 @@
 	interface Props {
 		name: string;
 		tagline?: string;
-		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
+		/** A face. Absent for the things that are not somebody. */
+		avatar?: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
 		tags?: string[];
 		/** A quiet line under the rest: a relationship, an author, a note. */
 		meta?: string;
@@ -47,7 +54,7 @@
 	let {
 		name,
 		tagline,
-		avatar,
+		avatar = undefined,
 		tags = [],
 		meta,
 		layout = 'grid',
@@ -61,7 +68,9 @@
 </script>
 
 {#snippet identity(size: number)}
-	<PersonaAvatar persona={{ name, ...avatar }} {size} />
+	{#if avatar}
+		<PersonaAvatar persona={{ name, ...avatar }} {size} />
+	{/if}
 	<div class="flex min-w-0 flex-1 flex-col">
 		<span class="truncate text-sm font-medium leading-tight text-active">{name}</span>
 		{#if tagline}

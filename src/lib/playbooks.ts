@@ -12,11 +12,10 @@ import { generateRandomId } from '$lib/utils';
  * model follows, with no voice, no model and no conversation. You do not talk to
  * a playbook; you switch one on and it changes how the answer is produced.
  *
- * Which is why the two are drawn differently even though they travel through the
- * same machinery. A persona's card is a face and a tagline, because you are
- * choosing somebody. A playbook's is a name, the sentence saying when it
- * applies, and the shape of the procedure inside it, because you are choosing a
- * method.
+ * Which is why a playbook has no face. It is drawn on the same card as
+ * everything else in the library, at the same size, with the space a portrait
+ * would have taken given back to the sentence that says when to use it. You are
+ * choosing a method, and a method does not look like anyone.
  *
  * The instructions are Markdown, and they are the whole of it. No templating, no
  * variables, no steps the app interprets: what makes a playbook reusable is that
@@ -37,10 +36,6 @@ export interface Playbook {
 	summary: string;
 	/** The procedure itself, in Markdown. */
 	instructions: string;
-	/** Accent for the card and the chip; stable per playbook. */
-	color: string;
-	/** One of `PERSONA_GLYPHS`, drawn on the accent. Optional: most wear none. */
-	glyph?: string;
 	tags?: string[];
 	/** Admin-shared with users (server mode). */
 	shared?: boolean;
@@ -55,24 +50,6 @@ export interface Playbook {
 	updatedAt: string;
 }
 
-/** Theme-safe accents, from the same family as the personas, so a library reads as one thing. */
-export const PLAYBOOK_COLORS = [
-	'#5DCAA5',
-	'#378ADD',
-	'#7F77DD',
-	'#BA7517',
-	'#1D9E75',
-	'#D4537E',
-	'#D85A30',
-	'#888780'
-];
-
-export function pickPlaybookColor(seed: string): string {
-	let hash = 0;
-	for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-	return PLAYBOOK_COLORS[hash % PLAYBOOK_COLORS.length];
-}
-
 export function newPlaybook(id: string = generateRandomId()): Playbook {
 	const now = new Date().toISOString();
 	return {
@@ -80,7 +57,6 @@ export function newPlaybook(id: string = generateRandomId()): Playbook {
 		name: '',
 		summary: '',
 		instructions: '',
-		color: pickPlaybookColor(id),
 		createdAt: now,
 		updatedAt: now
 	};
@@ -122,4 +98,17 @@ export function playbookInstructions(playbooks: Playbook[]): string {
 		)
 		.filter(Boolean)
 		.join('\n\n');
+}
+
+/**
+ * How long a procedure is, counted the way it is written.
+ *
+ * Headings first, since a playbook with sections is organised by them; failing
+ * that, numbered or bulleted lines. Not words or characters: what somebody wants
+ * to know before switching one on is how much of a procedure it is.
+ */
+export function playbookSteps(instructions: string): number {
+	const headings = (instructions.match(/^#{1,6}\s+\S/gm) ?? []).length;
+	if (headings) return headings;
+	return (instructions.match(/^\s*(?:[-*+]|\d+[.)])\s+\S/gm) ?? []).length;
 }

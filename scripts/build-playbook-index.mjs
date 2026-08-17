@@ -26,7 +26,9 @@ const playbookDigest = (playbook) =>
 	contentDigest({
 		name: playbook.name,
 		tagline: playbook.summary,
-		avatar: { color: playbook.color, glyph: playbook.glyph },
+		// A playbook has no avatar. The slot stays because the shared hash walks a
+		// fixed list of fields, and leaving it empty is what keeps that list fixed.
+		avatar: {},
 		systemPrompt: playbook.instructions,
 		tags: playbook.tags
 	});
@@ -73,8 +75,6 @@ for (const file of readdirSync(BUNDLES)
 		id: bundle.id,
 		name: bundle.playbook?.name,
 		summary: bundle.playbook?.summary ?? '',
-		color: bundle.playbook?.color,
-		glyph: bundle.playbook?.glyph,
 		tags: bundle.playbook?.tags ?? [],
 		author: bundle.author,
 		revision: bundle.revision ?? 1,

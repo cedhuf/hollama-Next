@@ -1209,6 +1209,11 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * {​c​o​u​n​t​}​ ​{​{​s​e​c​t​i​o​n​|​s​e​c​t​i​o​n​s​}​}
+	 * @param {number} count
+	 */
+	playbookSections: RequiredParams<'count'>
+	/**
 	 * P​l​a​y​b​o​o​k​s​ ​s​t​o​r​e
 	 */
 	playbookStore: string
@@ -3891,6 +3896,10 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * {count} {{section|sections}}
+	 */
+	playbookSections: (arg: { count: number }) => LocalizedString
 	/**
 	 * Playbooks store
 	 */

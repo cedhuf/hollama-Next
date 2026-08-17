@@ -23,11 +23,10 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import Head from '$lib/components/Head.svelte';
+	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
-	import PersonaCard from '$lib/components/PersonaCard.svelte';
-	import PlaybookCard from '$lib/components/PlaybookCard.svelte';
 	import {
 		createCollection,
 		deleteCollection,
@@ -55,7 +54,7 @@
 	} from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
 	import { personaState } from '$lib/personaState';
-	import { newPlaybook, type Playbook } from '$lib/playbooks';
+	import { newPlaybook, playbookSteps, type Playbook } from '$lib/playbooks';
 	import { openKnowledge } from '$lib/stores/modal';
 	import { formatTimestampToNow } from '$lib/utils';
 
@@ -371,7 +370,7 @@
 			<div class="mb-3 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $personasStore as persona (persona.id)}
 					{@const state = personaState(persona, publishedDigest(persona))}
-					<PersonaCard
+					<LibraryCard
 						name={persona.name || $LL.untitled()}
 						tagline={persona.tagline}
 						avatar={persona}
@@ -451,7 +450,7 @@
 								<Pencil class="h-3.5 w-3.5" />
 							</button>
 						{/snippet}
-					</PersonaCard>
+					</LibraryCard>
 				{/each}
 			</div>
 
@@ -504,12 +503,15 @@
 				</button>
 			</div>
 
-			<!-- One column rather than a grid of tiles: a playbook is chosen on its
-			     summary, and a summary is a sentence. Two columns on a wide screen,
-			     because thirty of them in a single stack is a scroll. -->
-			<div class="mb-9 grid gap-3 lg:grid-cols-2">
+			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				{#each $playbooksStore as playbook (playbook.id)}
-					<PlaybookCard {playbook} onclick={() => editPlaybook(playbook)} />
+					<LibraryCard
+						name={playbook.name || $LL.untitled()}
+						tagline={playbook.summary}
+						tags={playbook.tags}
+						meta={$LL.playbookSections({ count: playbookSteps(playbook.instructions) })}
+						onclick={() => editPlaybook(playbook)}
+					/>
 				{/each}
 
 				<div

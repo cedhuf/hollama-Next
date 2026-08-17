@@ -5,7 +5,7 @@ import { browser } from '$app/environment';
 import { LOCAL_STORAGE_PREFIX } from '$lib/data/keys';
 import { playbooksStore, settingsStore } from '$lib/localStorage';
 import { playbookDigest } from '$lib/playbookDigest';
-import { newPlaybook, pickPlaybookColor, savePlaybook, type Playbook } from '$lib/playbooks';
+import { newPlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
 import {
 	parsePlaybookBundle,
 	parsePlaybookIndex,
@@ -149,8 +149,6 @@ function fromBundle(bundle: PlaybookBundle, base: Playbook): Playbook {
 		name: bundle.playbook.name,
 		summary: bundle.playbook.summary ?? '',
 		instructions: bundle.playbook.instructions,
-		color: bundle.playbook.color || pickPlaybookColor(bundle.id),
-		glyph: bundle.playbook.glyph,
 		tags: bundle.playbook.tags?.length ? bundle.playbook.tags : undefined
 	};
 }
@@ -171,14 +169,7 @@ export function installPlaybookBundle(
 	const playbook = fromBundle(bundle, newPlaybook());
 	playbook.source = {
 		...source,
-		digest: playbookDigest({
-			name: bundle.playbook.name,
-			summary: bundle.playbook.summary,
-			instructions: bundle.playbook.instructions,
-			color: bundle.playbook.color,
-			glyph: bundle.playbook.glyph,
-			tags: bundle.playbook.tags
-		})
+		digest: playbookDigest(bundle.playbook)
 	};
 	savePlaybook(playbook);
 	return playbook;
@@ -193,14 +184,7 @@ export function applyBundleToPlaybook(
 	const updated = fromBundle(bundle, playbook);
 	updated.source = {
 		...source,
-		digest: playbookDigest({
-			name: bundle.playbook.name,
-			summary: bundle.playbook.summary,
-			instructions: bundle.playbook.instructions,
-			color: bundle.playbook.color,
-			glyph: bundle.playbook.glyph,
-			tags: bundle.playbook.tags
-		})
+		digest: playbookDigest(bundle.playbook)
 	};
 	savePlaybook(updated);
 }

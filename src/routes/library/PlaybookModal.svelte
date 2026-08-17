@@ -4,8 +4,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
-	import { PERSONA_GLYPHS } from '$lib/personaGlyphs';
-	import { deletePlaybook, PLAYBOOK_COLORS, savePlaybook, type Playbook } from '$lib/playbooks';
+	import { deletePlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
@@ -92,67 +91,6 @@
 								oninput={(event) => setTags(event.currentTarget.value)}
 								placeholder="cooking, weekly"
 							/>
-						</SettingsField>
-
-						<!-- Colour and mark together on one row: they are the same decision,
-						     which is what this looks like in a list of thirty. -->
-						<SettingsField label={$LL.playbookMark()}>
-							<div class="flex flex-col gap-2">
-								<div class="flex flex-wrap gap-2">
-									{#each PLAYBOOK_COLORS as color (color)}
-										<button
-											type="button"
-											aria-label={color}
-											onclick={() => {
-												playbook.color = color;
-												persist();
-											}}
-											class="h-7 w-7 rounded-lg ring-2 ring-offset-2 ring-offset-shade-0 transition-all {playbook.color ===
-											color
-												? 'ring-accent'
-												: 'ring-transparent hover:ring-shade-4'}"
-											style="background-color:{color}"
-										></button>
-									{/each}
-								</div>
-
-								<div class="flex flex-wrap gap-2">
-									<button
-										type="button"
-										onclick={() => {
-											playbook.glyph = undefined;
-											persist();
-										}}
-										class="flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold text-shade-0 ring-2 ring-offset-2 ring-offset-shade-0 transition-all {playbook.glyph
-											? 'ring-transparent hover:ring-shade-4'
-											: 'ring-accent'}"
-										style="background-color:{playbook.color}"
-									>
-										{(playbook.name.trim()[0] ?? '?').toUpperCase()}
-									</button>
-									{#each PERSONA_GLYPHS as option (option.id)}
-										<button
-											type="button"
-											title={option.label}
-											aria-label={option.label}
-											onclick={() => {
-												playbook.glyph = option.id;
-												persist();
-											}}
-											class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg text-shade-0 ring-2 ring-offset-2 ring-offset-shade-0 transition-all {playbook.glyph ===
-											option.id
-												? 'ring-accent'
-												: 'ring-transparent hover:ring-shade-4'}"
-											style="background-color:{playbook.color};--persona-glyph-cut:{playbook.color}"
-										>
-											<svg viewBox="0 0 64 64" class="h-full w-full" role="presentation">
-												<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-												{@html option.body}
-											</svg>
-										</button>
-									{/each}
-								</div>
-							</div>
 						</SettingsField>
 					</div>
 				</SettingsSection>

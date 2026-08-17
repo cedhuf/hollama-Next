@@ -2,7 +2,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
-	import PlaybookCard from '$lib/components/PlaybookCard.svelte';
+	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import StoreModal from '$lib/components/StoreModal.svelte';
 	import { playbooksStore, settingsStore } from '$lib/localStorage';
 	import {
@@ -13,7 +13,7 @@
 		playbookCatalogState,
 		playbookState
 	} from '$lib/playbookCatalog';
-	import { savePlaybook, type Playbook } from '$lib/playbooks';
+	import { playbookSteps, savePlaybook, type Playbook } from '$lib/playbooks';
 	import type { PlaybookCatalogEntry } from '$lib/playbookStore';
 	import { copyAction, isEdited, packageAction, type Offer, type OfferView } from '$lib/storeOffer';
 
@@ -89,7 +89,7 @@
 		savePlaybook({ ...playbook, shared: !playbook.shared });
 	}
 
-	function packageOffer(entry: PlaybookCatalogEntry): Offer<Playbook> {
+	function packageOffer(entry: PlaybookCatalogEntry): Offer {
 		const copies = copiesOf(entry);
 		const untouched = copies.some((playbook) => !isEdited(stateOf(playbook)));
 
@@ -104,23 +104,14 @@
 			edited: false,
 			shared: false,
 			toggleShare: async () => {},
-			// Enough of a playbook for the card, without the procedure: the listing
-			// does not carry it, and a card never shows it.
-			item: {
-				id: entry.id,
-				name: entry.name,
-				summary: entry.summary,
-				instructions: '#\n'.repeat(entry.steps ?? 0),
-				color: entry.color ?? '#888780',
-				glyph: entry.glyph,
-				tags: entry.tags,
-				createdAt: '',
-				updatedAt: ''
-			}
+			// How long the procedure is, which is all a card shows of it. The listing
+			// carries the count rather than the text, so nothing has to be downloaded
+			// to draw the shelf.
+			meta: $LL.playbookSections({ count: entry.steps ?? 0 })
 		};
 	}
 
-	function copyOffer(playbook: Playbook): Offer<Playbook> {
+	function copyOffer(playbook: Playbook): Offer {
 		const state = stateOf(playbook);
 		const edited = isEdited(state);
 		const outdated = state === 'outdated';
@@ -136,7 +127,7 @@
 			edited,
 			shared: !!playbook.shared,
 			toggleShare: () => toggleOwn(playbook),
-			item: playbook
+			meta: $LL.playbookSections({ count: playbookSteps(playbook.instructions) })
 		};
 	}
 
@@ -172,10 +163,26 @@
 	{card}
 />
 
-{#snippet card(offer: Offer, actions: import('svelte').Snippet<[Offer]>)}
-	<PlaybookCard playbook={offer.item as Playbook}>
-		{#snippet trailing()}
-			<span class="flex w-28 shrink-0 justify-end">{@render actions(offer)}</span>
+{#snippet card(offer: Offer, storeActions: import('svelte').Snippet<[Offer]>)}
+	<LibraryCard
+		name={offer.name}
+		tagline={offer.line}
+		tags={offer.tags}
+		meta={offer.meta}
+		layout={$settingsStore.personaStoreLayout}
+	>
+		{#snippet badges()}
+			{#if offer.edited}
+				<span
+					class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
+				>
+					{$LL.personaStateEdited()}
+				</span>
+			{/if}
 		{/snippet}
-	</PlaybookCard>
+
+		{#snippet actions()}
+			{@render storeActions(offer)}
+		{/snippet}
+	</LibraryCard>
 {/snippet}
