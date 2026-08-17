@@ -681,6 +681,8 @@ const fr = extendDictionary(en, {
 	noModelsCheckServersTab: "Aucun modèle disponible — vérifiez ce serveur dans l'onglet Serveurs.",
 	usageSpent: '{spent} dépensé',
 	credits: 'Plafonds de crédit',
+	creditsApproximate:
+		'Approximatif : chaque fournisseur déclare ses propres chiffres, et des tarifs en devises différentes sont additionnés.',
 	creditsDescription:
 		'Un garde-fou contre une boucle qui s’emballe ou un onglet oublié, pas un système de facturation.',
 	creditPeriod: 'Remise à zéro',

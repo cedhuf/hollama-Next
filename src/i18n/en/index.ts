@@ -660,6 +660,8 @@ const en = {
 	noModelsCheckServersTab: 'No models available — check this server in the Servers tab.',
 	usageSpent: '{spent:string} spent',
 	credits: 'Credit limits',
+	creditsApproximate:
+		'Approximate: providers report their own figures, and prices in different currencies are added together.',
 	creditsDescription:
 		'A guardrail against a runaway loop or a forgotten tab, not an accounting system.',
 	creditPeriod: 'Resets',

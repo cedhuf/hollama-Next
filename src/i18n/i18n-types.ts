@@ -2402,6 +2402,10 @@ type RootTranslation = {
 	 */
 	credits: string
 	/**
+	 * A​p​p​r​o​x​i​m​a​t​e​:​ ​p​r​o​v​i​d​e​r​s​ ​r​e​p​o​r​t​ ​t​h​e​i​r​ ​o​w​n​ ​f​i​g​u​r​e​s​,​ ​a​n​d​ ​p​r​i​c​e​s​ ​i​n​ ​d​i​f​f​e​r​e​n​t​ ​c​u​r​r​e​n​c​i​e​s​ ​a​r​e​ ​a​d​d​e​d​ ​t​o​g​e​t​h​e​r​.
+	 */
+	creditsApproximate: string
+	/**
 	 * A​ ​g​u​a​r​d​r​a​i​l​ ​a​g​a​i​n​s​t​ ​a​ ​r​u​n​a​w​a​y​ ​l​o​o​p​ ​o​r​ ​a​ ​f​o​r​g​o​t​t​e​n​ ​t​a​b​,​ ​n​o​t​ ​a​n​ ​a​c​c​o​u​n​t​i​n​g​ ​s​y​s​t​e​m​.
 	 */
 	creditsDescription: string
@@ -5251,6 +5255,10 @@ The completion in progress will stop
 	 * Credit limits
 	 */
 	credits: () => LocalizedString
+	/**
+	 * Approximate: providers report their own figures, and prices in different currencies are added together.
+	 */
+	creditsApproximate: () => LocalizedString
 	/**
 	 * A guardrail against a runaway loop or a forgotten tab, not an accounting system.
 	 */

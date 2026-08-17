@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { ChevronDown, Plus, RotateCcw, Trash2, TriangleAlert, Wallet, X } from '@lucide/svelte';
+	import {
+		ChevronDown,
+		Info,
+		Plus,
+		RotateCcw,
+		Trash2,
+		TriangleAlert,
+		Wallet,
+		X
+	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { quadInOut } from 'svelte/easing';
@@ -184,10 +193,21 @@
 			     one, and what it is set to is on the closed row. -->
 		<Collapsible
 			title={$LL.credits()}
-			description={$LL.creditsDescription()}
 			summary={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
 			icon={Wallet}
 		>
+			<!-- What the figures are worth, before the fields that set them. Short on
+			     purpose: what somebody needs to know here is that this counts well
+			     enough to catch a runaway, not well enough to bill anyone. -->
+			<p
+				class="flex items-start gap-1.5 rounded-md border border-shade-3 bg-shade-1 p-2 text-xs text-muted"
+			>
+				<Info class="mt-0.5 h-3.5 w-3.5 shrink-0" />
+				{$LL.creditsApproximate()}
+			</p>
+			<!-- The same two controls the per-account panel shows, in the same boxes:
+			     one is the default for everybody, the other is one person's override,
+			     and two layouts for one decision is how they stop matching. -->
 			<div class="flex flex-wrap items-end gap-2">
 				<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
 					<span class="text-muted">{$LL.creditLimitDefault()}</span>
@@ -195,26 +215,36 @@
 					     and "somebody typed nought" read the same on screen, and only one of
 					     them is what an untouched instance has. -->
 					<input
-						class="settings-field tabular-nums"
+						class="settings-field text-right tabular-nums"
 						type="text"
 						inputmode="decimal"
 						bind:value={instanceLimitField}
 						onchange={saveInstance}
 						placeholder={UNLIMITED}
+						aria-label={$LL.creditLimitDefault()}
 					/>
 				</label>
-				<label class="flex flex-col gap-1 text-sm">
+
+				<!-- Not a <label>: it forwards its click to the control it labels, which
+				     on a menu trigger is a second click — the menu opens and shuts in the
+				     same gesture. Sized for the longest option, so choosing a short one
+				     does not move everything beside it. -->
+				<div class="flex flex-col gap-1 text-sm">
 					<span class="text-muted">{$LL.creditPeriod()}</span>
-					<Select
-						bind:value={period}
-						options={[
-							{ value: 'month', label: $LL.creditPeriodMonth() },
-							{ value: 'week', label: $LL.creditPeriodWeek() }
-						]}
-						onChange={saveInstance}
-					/>
-				</label>
+					<div class="w-52">
+						<Select
+							bind:value={period}
+							options={[
+								{ value: 'month', label: $LL.creditPeriodMonth() },
+								{ value: 'week', label: $LL.creditPeriodWeek() },
+								{ value: 'day', label: $LL.creditPeriodDay() }
+							]}
+							onChange={saveInstance}
+						/>
+					</div>
+				</div>
 			</div>
+
 			<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
 
 			{#if unpriced.length}
@@ -305,14 +335,14 @@
 						class="flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
 						transition:slide={{ duration: 160, easing: quadInOut }}
 					>
-						<div class="flex flex-wrap items-end gap-2">
-							<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-								<span class="text-muted">{$LL.creditLimit()}</span>
-								<!-- The same box as the select beside it: `Select`'s trigger is
-								     `px-2.5 py-1.5 text-sm`, so a smaller field next to it lands a
-								     couple of pixels short and the row reads as broken. -->
+						<!-- Labels beside their control rather than above it: this panel opens
+						     inside a row of a list, and two stacked captions push every account
+						     under it down a line for nothing. -->
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+							<label class="flex min-w-0 flex-1 items-center gap-2 text-xs">
+								<span class="shrink-0 text-muted">{$LL.creditLimit()}</span>
 								<input
-									class="settings-field text-right tabular-nums"
+									class="settings-field min-w-0 flex-1 text-right tabular-nums"
 									type="text"
 									inputmode="decimal"
 									value={user.credit_limit ?? ''}
@@ -322,8 +352,11 @@
 								/>
 							</label>
 
-							<label class="flex flex-col gap-1 text-sm">
-								<span class="text-muted">{$LL.creditPeriod()}</span>
+							<!-- Not a <label>: it forwards its click to the control it labels,
+							     which on a menu trigger is a second click, so the menu opens and
+							     shuts in the same gesture. -->
+							<div class="flex shrink-0 items-center gap-2 text-xs">
+								<span class="shrink-0 text-muted">{$LL.creditPeriod()}</span>
 								<div class="w-52">
 									<Select
 										value={user.credit_period ?? ''}
@@ -336,7 +369,7 @@
 										onChange={(option) => setPeriod(user, option.value)}
 									/>
 								</div>
-							</label>
+							</div>
 						</div>
 
 						<p class="text-[11px] text-muted">{$LL.creditOverrideHelp()}</p>

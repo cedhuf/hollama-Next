@@ -38,9 +38,13 @@
 	}: Props = $props();
 </script>
 
-<Collapsible.Root bind:open class="rounded-xl border border-shade-3 bg-shade-0">
+<!-- `overflow-hidden` so the trigger's hover fill is clipped by the rounded
+     border rather than squaring off its top corners. -->
+<Collapsible.Root bind:open class="overflow-hidden rounded-xl border border-shade-3 bg-shade-0">
+	<!-- A fixed height, so a block with a description and one without are the same
+	     size: a row that shrinks when its subtitle goes moves everything under it. -->
 	<Collapsible.Trigger
-		class="flex w-full items-center gap-2.5 px-3.5 py-3 text-left transition-colors hover:bg-shade-1"
+		class="flex h-14 w-full items-center gap-2.5 px-3.5 text-left transition-colors hover:bg-shade-1"
 	>
 		{#if Icon}
 			<Icon class="h-4 w-4 shrink-0 text-muted" />
