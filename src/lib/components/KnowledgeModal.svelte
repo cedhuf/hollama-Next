@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, Code, Download, Trash2, Type } from '@lucide/svelte';
+	import { Code, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -9,10 +9,9 @@
 	import { knowledgeDraft, knowledgeModalOpen } from '$lib/stores/modal';
 	import { formatTimestampToNow, generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
-	import Button from './Button.svelte';
 	import CodeEditor from './CodeEditor.svelte';
 	import CollectionSelect from './CollectionSelect.svelte';
-	import Modal from './Modal.svelte';
+	import EditorModal from './EditorModal.svelte';
 
 	/**
 	 * Writing down a piece of knowledge, wherever you happen to be.
@@ -21,20 +20,36 @@
 	 * the fields start empty, which is not enough to justify a second screen. It
 	 * opens prefilled too, which is how a conversation becomes knowledge without a
 	 * round trip through the clipboard.
+	 *
+	 * It writes as you type, like every other editor in the app, and that is a
+	 * repair rather than a preference. It used to hold a draft behind a Save
+	 * button, which meant the cross, Escape and a click on the backdrop all threw
+	 * the work away without a word — three of the four ways out of a dialog. A
+	 * draft model has to guard every exit to be worth anything, and this one
+	 * guarded none.
 	 */
 	let id = $state('');
 	let name = $state('');
 	let content = $state('');
 	let updatedAt = $state('');
 	let collectionId = $state('');
-	let confirmingDelete = $state(false);
 	let nameInput = $state<HTMLInputElement | null>(null);
 
 	/** Kept across openings: whoever wants the code view usually wants it every time. */
 	let view = $state<'text' | 'code'>('text');
 
+	/**
+	 * The collection is chosen rather than typed, so nothing fires an input event
+	 * on it. Watched instead, and only once there is a record to move: without the
+	 * guard, opening the dialog would write an empty document before a key is
+	 * pressed.
+	 */
+	$effect(() => {
+		void collectionId;
+		if (updatedAt) persist();
+	});
+
 	const isNew = $derived(!updatedAt);
-	const canSave = $derived(!!name.trim() && !!content.trim());
 	// Same estimate the context meter uses, so its weight is stated in
 	// the units the rest of the app talks about.
 	const tokens = $derived(Math.ceil(content.length / 3.7));
@@ -51,15 +66,21 @@
 		content = draft.content ?? existing?.content ?? '';
 		collectionId = draft.collectionId ?? existing?.collectionId ?? '';
 		updatedAt = existing?.updatedAt ?? '';
-		confirmingDelete = false;
 
 		void tick().then(() => {
 			if (!name) nameInput?.focus();
 		});
 	});
 
-	function save() {
-		if (!canSave) return;
+	/**
+	 * Write it down, as it is written.
+	 *
+	 * Nothing is stored until there is something to store: an empty document
+	 * created by opening the dialog and closing it again would be a row nobody
+	 * asked for, in a list nobody wants to tidy.
+	 */
+	function persist() {
+		if (!name.trim() && !content.trim()) return;
 		saveKnowledge({
 			id,
 			name: name.trim(),
@@ -67,8 +88,7 @@
 			collectionId: collectionId || undefined,
 			updatedAt: getUpdatedAtDate()
 		});
-		toast.success($LL.knowledgeSaved());
-		$knowledgeModalOpen = false;
+		updatedAt = getUpdatedAtDate();
 	}
 
 	/**
@@ -92,149 +112,78 @@
 	}
 
 	function remove() {
+		if (!confirm($LL.areYouSureYouWantToDeleteThisKnowledge())) return;
 		knowledgeStore.remove(id);
+		toast.info($LL.knowledgeDeleted());
 		$knowledgeModalOpen = false;
-	}
-
-	function onKeydown(event: KeyboardEvent) {
-		if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-			event.preventDefault();
-			save();
-		}
 	}
 </script>
 
-<Modal bind:open={$knowledgeModalOpen}>
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<form
-		class="flex h-full w-full flex-col"
-		onsubmit={(event) => {
-			event.preventDefault();
-			save();
-		}}
-		onkeydown={onKeydown}
-	>
-		<!-- Header: what this is, and when it was last touched. The close button the
-		     dialog draws itself sits to the right of it, hence the padding. -->
-		<header class="flex items-center gap-3 border-b border-shade-3 px-5 py-4 pr-14">
-			<span
-				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-shade-2 text-muted"
-				aria-hidden="true"
-			>
-				<Brain class="h-5 w-5" />
-			</span>
-			<div class="flex min-w-0 flex-col">
-				<h2 class="text-sm font-semibold text-active">
-					{isNew ? $LL.newKnowledge() : $LL.knowledge()}
-				</h2>
-				<p class="truncate text-xs text-muted">
-					{isNew ? $LL.knowledgeModalHint() : formatTimestampToNow(updatedAt)}
-				</p>
-			</div>
-		</header>
+<EditorModal
+	bind:open={$knowledgeModalOpen}
+	title={name}
+	placeholder={$LL.newKnowledge()}
+	onExport={isNew ? undefined : exportThis}
+	onDelete={isNew ? undefined : remove}
+>
+	<!-- The name reads as the title of the thing rather than as a form field, but
+	     a title with nothing in it reads as a heading nobody can type in. A border
+	     on hover and focus says otherwise without turning it back into a box that
+	     sits there all day. -->
+	<input
+		bind:this={nameInput}
+		bind:value={name}
+		oninput={persist}
+		name="name"
+		placeholder={$LL.knowledgeNamePlaceholder()}
+		spellcheck="false"
+		class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-active outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 focus:border-accent focus:bg-shade-0"
+	/>
 
-		<div class="flex min-h-0 flex-1 flex-col gap-3 px-5 py-4">
-			<!-- The name reads as the title of the thing rather than as a form field,
-			     but a title with nothing in it reads as a heading nobody can type in.
-			     A border on hover and focus says otherwise without turning it back
-			     into a box that sits there all day. -->
-			<input
-				bind:this={nameInput}
-				bind:value={name}
-				name="name"
-				placeholder={$LL.knowledgeNamePlaceholder()}
-				spellcheck="false"
-				class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-active outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 focus:border-accent focus:bg-shade-0"
-			/>
+	<div class="flex items-center justify-between gap-3">
+		<!-- Always there, including when no collection exists yet: the way to make
+		     the first one is inside it, so hiding it until one exists would hide the
+		     only door to it. -->
+		<CollectionSelect bind:value={collectionId} class="max-w-48" />
 
-			<!-- Two ways to write the same field. Plain text is the default because
-			     most knowledge is prose; the code view is for the ones that are a
-			     schema or a config, where line numbers and a monospace grid are the
-			     difference between readable and not. -->
-			<div class="flex items-center justify-between gap-3">
-				<!-- Always there, including when no collection exists yet: the way to make
-				     the first one is inside it, so hiding it until one exists would hide
-				     the only door to it. -->
-				<CollectionSelect bind:value={collectionId} class="max-w-48" />
-
-				<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
-					{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
-						{@const Icon = tab.icon}
-						<button
-							type="button"
-							onclick={() => (view = tab.id as 'text' | 'code')}
-							aria-pressed={view === tab.id}
-							class="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors {view ===
-							tab.id
-								? 'bg-shade-0 text-active shadow-sm'
-								: 'text-muted hover:text-active'}"
-						>
-							<Icon class="h-3.5 w-3.5" />
-							{tab.label}
-						</button>
-					{/each}
-				</div>
-			</div>
-
-			{#if view === 'code'}
-				<CodeEditor bind:value={content} onSubmit={save} />
-			{:else}
-				<textarea
-					bind:value={content}
-					placeholder={$LL.knowledgeContentPlaceholder()}
-					class="min-h-0 w-full flex-1 resize-none rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
-				></textarea>
-			{/if}
+		<!-- Two ways to write the same field. Plain text is the default because most
+		     knowledge is prose; the code view is for the ones that are a schema or a
+		     config, where line numbers and a monospace grid are the difference
+		     between readable and not. -->
+		<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
+			{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
+				{@const Icon = tab.icon}
+				<button
+					type="button"
+					onclick={() => (view = tab.id as 'text' | 'code')}
+					aria-pressed={view === tab.id}
+					class="flex items-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition-colors {view ===
+					tab.id
+						? 'bg-shade-0 text-active shadow-sm'
+						: 'text-muted hover:text-active'}"
+				>
+					<Icon class="h-3.5 w-3.5" />
+					{tab.label}
+				</button>
+			{/each}
 		</div>
+	</div>
 
-		<footer class="flex items-center gap-2 border-t border-shade-3 px-5 py-3">
-			{#if !isNew}
-				<!-- Two steps, in place: a dialog that closes behind a deletion gives
-				     nowhere to change your mind. -->
-				{#if confirmingDelete}
-					<Button variant="outline" class="text-negative" onclick={remove}>
-						{$LL.confirmDeletion()}
-					</Button>
-					<Button variant="outline" onclick={() => (confirmingDelete = false)}>
-						{$LL.cancel()}
-					</Button>
-				{:else}
-					<Button
-						variant="icon"
-						title={$LL.deleteKnowledge()}
-						aria-label={$LL.deleteKnowledge()}
-						class="hover:text-negative"
-						onclick={() => (confirmingDelete = true)}
-					>
-						<Trash2 class="base-icon" />
-					</Button>
-				{/if}
-			{/if}
+	{#if view === 'code'}
+		<CodeEditor bind:value={content} onSubmit={persist} />
+	{:else}
+		<textarea
+			bind:value={content}
+			oninput={persist}
+			placeholder={$LL.knowledgeContentPlaceholder()}
+			class="field-grow min-h-[24rem] w-full rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
+		></textarea>
+	{/if}
 
-			{#if !isNew}
-				<!-- Beside the delete rather than in the header: this dialog keeps its
-				     controls in a footer because it has a Save to keep there, and
-				     scattering them across two bars to match another dialog's shape
-				     would be consistency with nothing. -->
-				<Button variant="icon" title={$LL.export()} aria-label={$LL.export()} onclick={exportThis}>
-					<Download class="base-icon" />
-				</Button>
-			{/if}
-
-			{#if content.trim()}
-				<span class="text-xs tabular-nums text-muted">
-					{$LL.knowledgeTokens({ tokens: tokens.toLocaleString() })}
-				</span>
-			{/if}
-
-			<div class="ml-auto flex items-center gap-2">
-				<Button variant="outline" onclick={() => ($knowledgeModalOpen = false)}>
-					{$LL.cancel()}
-				</Button>
-				<!-- Explicitly wired: `Button` sets `type="button"` after spreading its
-				     props, so asking it for a submit button quietly gets a dead one. -->
-				<Button onclick={save} disabled={!canSave}>{$LL.save()}</Button>
-			</div>
-		</footer>
-	</form>
-</Modal>
+	<p class="flex items-center justify-between gap-3 text-xs text-muted">
+		<span>{isNew ? $LL.knowledgeModalHint() : formatTimestampToNow(updatedAt)}</span>
+		{#if content.trim()}
+			<span class="tabular-nums">{$LL.knowledgeTokens({ tokens: tokens.toLocaleString() })}</span>
+		{/if}
+	</p>
+</EditorModal>

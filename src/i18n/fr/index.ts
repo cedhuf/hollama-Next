@@ -143,6 +143,8 @@ const fr = extendDictionary(en, {
 	isCurrentVersionLatest: 'Vous êtes sur la dernière version',
 	isLatestVersion: 'Une version plus récente est disponible',
 	knowledge: 'Connaissance',
+	knowledgeDeleted: 'Connaissance supprimée',
+	areYouSureYouWantToDeleteThisKnowledge: 'Voulez-vous vraiment supprimer cette connaissance ?',
 	knowledgeSaved: 'Connaissance sauvegardée',
 	label: 'Étiquette',
 	language: 'Langue',

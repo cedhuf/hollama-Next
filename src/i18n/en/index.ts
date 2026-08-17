@@ -138,6 +138,8 @@ const en = {
 	isCurrentVersionLatest: 'You are on the latest version',
 	isLatestVersion: 'A newer version is available',
 	knowledge: 'Knowledge',
+	knowledgeDeleted: 'Knowledge deleted',
+	areYouSureYouWantToDeleteThisKnowledge: 'Are you sure you want to delete this knowledge?',
 	knowledgeSaved: 'Knowledge saved',
 	label: 'Label',
 	language: 'Language',

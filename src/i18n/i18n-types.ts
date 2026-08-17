@@ -540,6 +540,14 @@ type RootTranslation = {
 	 */
 	knowledge: string
 	/**
+	 * K​n​o​w​l​e​d​g​e​ ​d​e​l​e​t​e​d
+	 */
+	knowledgeDeleted: string
+	/**
+	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​t​h​i​s​ ​k​n​o​w​l​e​d​g​e​?
+	 */
+	areYouSureYouWantToDeleteThisKnowledge: string
+	/**
 	 * K​n​o​w​l​e​d​g​e​ ​s​a​v​e​d
 	 */
 	knowledgeSaved: string
@@ -3236,6 +3244,14 @@ The completion in progress will stop
 	 * Knowledge
 	 */
 	knowledge: () => LocalizedString
+	/**
+	 * Knowledge deleted
+	 */
+	knowledgeDeleted: () => LocalizedString
+	/**
+	 * Are you sure you want to delete this knowledge?
+	 */
+	areYouSureYouWantToDeleteThisKnowledge: () => LocalizedString
 	/**
 	 * Knowledge saved
 	 */
