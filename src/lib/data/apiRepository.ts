@@ -63,8 +63,22 @@ export class ApiRepository implements DataRepository {
 	async loadPersonas(): Promise<Persona[]> {
 		return this.#get<Persona[]>('personas', []);
 	}
+	/**
+	 * Playbooks, and nothing if this server has never heard of them.
+	 *
+	 * A 404 here means the server predates the collection, which happens on every
+	 * rolling deploy and every browser left open across one. Treated as an error it
+	 * took the whole boot down: the load is a single `Promise.all`, so one unknown
+	 * route meant no conversations, no personas and a page saying the data could
+	 * not be read.
+	 *
+	 * Empty rather than absent is safe here, and only because a collection is
+	 * persisted one item at a time: an empty store cannot write an empty
+	 * collection back. Anything other than a 404 still throws, so a server that is
+	 * merely down is never mistaken for one that is simply older.
+	 */
 	async loadPlaybooks(): Promise<Playbook[]> {
-		return this.#get<Playbook[]>('playbooks', []);
+		return this.#getOptional<Playbook[]>('playbooks', []);
 	}
 	async loadServers(): Promise<Server[]> {
 		const { servers } = await fetchProviders(true);
@@ -158,6 +172,15 @@ export class ApiRepository implements DataRepository {
 	 * the caller has to be able to distinguish the two and leave the data alone.
 	 * `null`/absent from the server is a genuine empty, and keeps the fallback.
 	 */
+	/** As `#get`, but a collection this server does not know about is simply empty. */
+	async #getOptional<T>(collection: Collection, fallback: T): Promise<T> {
+		const response = await fetch(`/api/data/${collection}`);
+		if (response.status === 401) throw new NotAuthenticatedError();
+		if (response.status === 404) return fallback;
+		if (!response.ok) throw new Error(`GET /api/data/${collection}: HTTP ${response.status}`);
+		return ((await response.json()) as T) ?? fallback;
+	}
+
 	async #get<T>(collection: Collection, fallback: T): Promise<T> {
 		const response = await fetch(`/api/data/${collection}`);
 		if (response.status === 401) throw new NotAuthenticatedError();
