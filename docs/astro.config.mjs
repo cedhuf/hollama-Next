@@ -78,7 +78,8 @@ export default defineConfig({
 				{
 					label: 'Project',
 					items: [
-						{ label: 'Persona store', link: '/personas/' },
+						{ label: 'Personas store', link: '/personas/' },
+						{ label: 'Playbooks store', link: '/playbooks/' },
 						{ label: 'Roadmap', link: '/roadmap/' },
 						{ label: 'Changelog', link: '/changelog/' },
 						{ label: 'Changes from Hollama', link: '/changes-from-hollama/' }

@@ -1,0 +1,172 @@
+---
+// Imported by path rather than from `@astrojs/starlight/components`, which does
+// not re-export it in Starlight 0.41.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+// The glyph set, imported from the application rather than copied. One table
+// draws these marks in the app, in the persona listing and here.
+import { PERSONA_GLYPHS } from '../../../src/lib/personaGlyphs';
+// Written into `public/` by `scripts/copy-store.mjs`, which the dev and build
+// scripts both run first. The listing is generated from the bundles, so this page
+// cannot describe a playbook the store does not actually serve.
+import index from '../../public/store/playbooks/index.json';
+
+const glyphs = Object.fromEntries(PERSONA_GLYPHS.map((glyph) => [glyph.id, glyph.body]));
+
+const entries = [...index.entries].sort((a, b) => a.name.localeCompare(b.name));
+
+const title = 'Playbooks store';
+const description = 'The playbooks you can install into Llooma, and how to add one.';
+---
+
+<StarlightPage frontmatter={{ title, description, tableOfContents: false }}>
+	<p>
+		A playbook is a procedure the model follows: how a job gets done, written once and switched on in
+		any conversation. Where a <a href="/personas/">persona</a> is <em>who</em> is answering, a
+		playbook is <em>how</em>. Open the Library, choose <strong>Playbooks store</strong>, and install
+		what you want.
+	</p>
+
+	<div class="playbook-list not-content">
+		{
+			entries.map((entry) => (
+				<article class="playbook-card">
+					<div class="playbook-mark" style={`background-color:${entry.color ?? '#888780'}`}>
+						{entry.glyph && glyphs[entry.glyph] ? (
+							<svg
+								viewBox="0 0 64 64"
+								role="presentation"
+								style={`--persona-glyph-cut:${entry.color ?? '#888780'}`}
+								set:html={glyphs[entry.glyph]}
+							/>
+						) : (
+							<span>{entry.name.slice(0, 1).toUpperCase()}</span>
+						)}
+					</div>
+
+					<div class="playbook-body">
+						<h2>{entry.name}</h2>
+						<p class="playbook-summary">{entry.summary}</p>
+						{entry.tags.length > 0 && (
+							<ul class="playbook-tags">
+								{entry.tags.map((tag) => (
+									<li>{tag}</li>
+								))}
+							</ul>
+						)}
+						<p class="playbook-meta">
+							<span>{entry.origin}</span>
+							{entry.steps ? <span>{entry.steps} sections</span> : null}
+							{entry.author && <span>{entry.author}</span>}
+							<a href={`/store/playbooks/${entry.path}`}>bundle</a>
+						</p>
+					</div>
+				</article>
+			))
+		}
+	</div>
+
+	<h2>Adding one</h2>
+
+	<p>
+		Write a bundle in <a href="https://github.com/cedhuf/llooma/tree/main/store/playbooks"
+			><code>store/playbooks/bundles/</code></a
+		>, run <code>pnpm playbooks:index</code>, and open a pull request. The format and the rules are
+		in the
+		<a href="https://github.com/cedhuf/llooma/blob/main/store/playbooks/README.md"
+			>folder's README</a
+		>.
+	</p>
+
+	<p>
+		The ones worth writing say what to establish before starting, what the answer should look like,
+		and what <em>not</em> to do — the failure mode is usually specific. A playbook that only says
+		"be helpful" is not a procedure.
+	</p>
+
+	<p>
+		Playbooks are written in English, for the same reason personas are: the store is read by
+		everyone, and a listing half in one language is one nobody can browse. A playbook answers in the
+		language of the conversation it is switched on in.
+	</p>
+</StarlightPage>
+
+<style>
+	.playbook-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-block: 1.5rem;
+	}
+
+	.playbook-card {
+		display: flex;
+		gap: 0.875rem;
+		padding: 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.75rem;
+		background: var(--sl-color-black);
+	}
+
+	/* A rounded square, not a disc: the disc is how a person is drawn, and a
+	   playbook is a thing rather than somebody. */
+	.playbook-mark {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.6rem;
+		color: #fff;
+		font-weight: 600;
+	}
+
+	.playbook-mark svg {
+		width: 1.75rem;
+		height: 1.75rem;
+	}
+
+	.playbook-body {
+		min-width: 0;
+	}
+
+	.playbook-body h2 {
+		margin: 0;
+		font-size: var(--sl-text-base);
+		line-height: 1.3;
+		border: 0;
+	}
+
+	.playbook-summary {
+		margin: 0.25rem 0 0;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.playbook-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		margin: 0.5rem 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.playbook-tags li {
+		padding: 0.05rem 0.4rem;
+		border-radius: 0.25rem;
+		background: var(--sl-color-gray-6);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-2);
+	}
+
+	.playbook-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin: 0.6rem 0 0;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+</style>

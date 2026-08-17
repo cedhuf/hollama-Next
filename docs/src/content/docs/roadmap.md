@@ -25,12 +25,12 @@ For the full list of everything this fork changed from
 | **Calling a persona**               | Mention one with `@` in any conversation and it answers that turn, with its own model and everything else it carries. See [Personas](/features/personas/)                        |
 | **Wallpapers**                      | A picture behind the app, on a phone as well as a desktop, with the translucency of every surface following it                                                                   |
 | **A store for personas**            | Personas are read from a store over the network rather than shipped in the app, so one is added by a pull request. See [Personas](/features/personas/)                           |
+| **Reusable playbooks**              | A procedure written once in Markdown and switched on in any conversation with `/playbooks`, installed from the same store. See [Playbooks](/features/playbooks/)                 |
 
 ## Next
 
 | Feature                  | What it would be                                                                                                                                   |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Reusable playbooks**   | Step-by-step instructions written once in Markdown and reused in any conversation: a how-to the model follows, separate from a persona's prompt    |
 | **Slash shortcuts**      | Save instructions you use often and fire them with `/shortcut`, with an optional form for variables. The menu and parser exist; the entries do not |
 | **User groups**          | Per-group default prompts and models                                                                                                               |
 | **Tauri desktop builds** | Native builds for macOS, Windows and Linux, replacing the current download                                                                         |
