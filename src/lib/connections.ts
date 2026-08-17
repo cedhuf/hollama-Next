@@ -24,6 +24,28 @@ export interface Server {
 	 * never persisted on sessions — `model.name` stays the single identifier.
 	 */
 	modelLabels?: Record<string, string>;
+	/**
+	 * What a million tokens costs on this connection, keyed by the real model id.
+	 *
+	 * On the connection rather than on the model name, because the price is a fact
+	 * about *where* the model runs: the same id is billed differently by two
+	 * providers and costs nothing at all on an Ollama in the next room. Keyed like
+	 * `modelLabels`, so both answer "what do I know about this model here" from the
+	 * same place.
+	 *
+	 * Absent means unpriced, which is not the same as free: a conversation on an
+	 * unpriced model is not counted rather than counted as zero.
+	 */
+	modelPricing?: Record<string, ModelPrice>;
+	/**
+	 * What this provider bills in, as a currency code.
+	 *
+	 * Per connection, because that is where it is true: an account with one
+	 * provider is billed in dollars and another in euros, and a single figure
+	 * across both would be an addition nobody can defend. Free text, since the app
+	 * does no conversion and never should on its own.
+	 */
+	currency?: string;
 }
 
 /** Default badge colour and short id per provider, dark-mode safe. */
@@ -48,6 +70,31 @@ export const SERVER_COLORS = [
 	'#eab308',
 	'#888780'
 ] as const;
+
+/**
+ * The price of a million tokens, in the connection's currency.
+ *
+ * Two numbers because that is how every provider publishes them, and because the
+ * ratio between them is the whole reason a long conversation costs what it does.
+ * Optional each: a provider that bills one and not the other is a provider, not
+ * an error.
+ */
+export interface ModelPrice {
+	/** Per million tokens sent. */
+	input?: number;
+	/** Per million tokens returned. */
+	output?: number;
+}
+
+/** What one model costs here, or nothing when it has never been priced. */
+export function modelPrice(
+	server: Pick<Server, 'modelPricing'> | undefined,
+	name: string
+): ModelPrice | undefined {
+	const price = server?.modelPricing?.[name];
+	if (!price) return undefined;
+	return price.input == null && price.output == null ? undefined : price;
+}
 
 /** How a model should read on screen: its custom label when set, its id otherwise. */
 export function modelLabel(server: Pick<Server, 'modelLabels'> | undefined, name: string): string {

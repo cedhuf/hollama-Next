@@ -124,7 +124,26 @@ type RootTranslation = {
 	 */
 	noModelsToRename: string
 	/**
-	 * M​o​d​e​l​ ​n​a​m​e​s
+	 * C​u​r​r​e​n​c​y
+	 */
+	currency: string
+	/**
+	 * I​n
+	 */
+	pricePerMillionIn: string
+	/**
+	 * O​u​t
+	 */
+	pricePerMillionOut: string
+	/**
+	 * {​r​e​n​a​m​e​d​}​ ​r​e​n​a​m​e​d​,​ ​{​p​r​i​c​e​d​}​ ​p​r​i​c​e​d​,​ ​o​f​ ​{​t​o​t​a​l​}
+	 * @param {number} priced
+	 * @param {number} renamed
+	 * @param {number} total
+	 */
+	modelsSummary: RequiredParams<'priced' | 'renamed' | 'total'>
+	/**
+	 * M​o​d​e​l​s​ ​a​n​d​ ​p​r​i​c​i​n​g
 	 */
 	modelNames: string
 	/**
@@ -2867,7 +2886,23 @@ The completion in progress will stop
 	 */
 	noModelsToRename: () => LocalizedString
 	/**
-	 * Model names
+	 * Currency
+	 */
+	currency: () => LocalizedString
+	/**
+	 * In
+	 */
+	pricePerMillionIn: () => LocalizedString
+	/**
+	 * Out
+	 */
+	pricePerMillionOut: () => LocalizedString
+	/**
+	 * {renamed} renamed, {priced} priced, of {total}
+	 */
+	modelsSummary: (arg: { priced: number, renamed: number, total: number }) => LocalizedString
+	/**
+	 * Models and pricing
 	 */
 	modelNames: () => LocalizedString
 	/**

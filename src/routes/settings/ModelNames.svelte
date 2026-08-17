@@ -2,18 +2,24 @@
 	import { RotateCcw, Search, X } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { serverBadge, type Server } from '$lib/connections';
+	import { modelPrice, serverBadge, type Server } from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsBack } from '$lib/stores/modal';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 
 	/**
-	 * Rename a connection's models for display only — the real id is still what gets
-	 * sent to the provider, matched by `modelFilter` and stored on sessions.
+	 * What this connection knows about each of its models: what to call it, and
+	 * what it costs.
 	 *
-	 * Rendered as a sub-view of the Servers tab rather than a second modal: the
-	 * settings panel is already a dialog, and stacking dialogs reads badly.
+	 * The name is display only — the real id is still what gets sent to the
+	 * provider, matched by `modelFilter` and stored on sessions. The price is two
+	 * numbers per million tokens, which is how every provider publishes them.
+	 *
+	 * Both live on one row because they answer the same question about the same
+	 * model, and splitting them would mean finding the same model twice in a list
+	 * of two hundred. Rendered as a sub-view of the Servers tab rather than a
+	 * second modal: the settings panel is already a dialog.
 	 */
 	interface Props {
 		server: Server;
@@ -44,6 +50,7 @@
 			.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
 	);
 	const renamedCount = $derived(models.filter((name) => server.modelLabels?.[name]?.trim()).length);
+	const pricedCount = $derived(models.filter((name) => !!modelPrice(server, name)).length);
 
 	// Match on the id *and* the custom name: once a model is renamed, its new name
 	// is the only one you remember.
@@ -62,6 +69,26 @@
 		if (value.trim()) labels[name] = value;
 		else delete labels[name];
 		server.modelLabels = labels;
+		onChange();
+	}
+
+	/**
+	 * Write one half of a price, or clear it.
+	 *
+	 * An empty field means unpriced, not zero: a model nobody has given a figure
+	 * for must not be counted as free, so the key is removed rather than set to 0.
+	 * A model priced at genuinely nothing is written as 0 and stays counted.
+	 */
+	function setPrice(name: string, side: 'input' | 'output', raw: string) {
+		const pricing = { ...(server.modelPricing ?? {}) };
+		const value = raw.trim() === '' ? undefined : Number(raw);
+		if (value !== undefined && !Number.isFinite(value)) return;
+
+		const next = { ...(pricing[name] ?? {}), [side]: value };
+		if (next.input == null && next.output == null) delete pricing[name];
+		else pricing[name] = next;
+
+		server.modelPricing = pricing;
 		onChange();
 	}
 
@@ -85,11 +112,30 @@
 			{server.label || badge.id || server.baseUrl}
 		</span>
 		{#if models.length}
-			<span class="ml-auto shrink-0 text-xs tabular-nums text-muted">
-				{renamedCount} / {models.length}
-			</span>
+			<!-- What this provider bills in. One field for the connection rather than
+			     one per model: a single account is billed in a single currency, and the
+			     app converts nothing, ever. -->
+			<label class="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-muted">
+				{$LL.currency()}
+				<input
+					class="settings-field w-20 py-1 text-center text-xs uppercase"
+					value={server.currency ?? ''}
+					maxlength="6"
+					placeholder="EUR"
+					oninput={(e) => {
+						server.currency = e.currentTarget.value.trim() || undefined;
+						onChange();
+					}}
+				/>
+			</label>
 		{/if}
 	</div>
+
+	{#if models.length}
+		<p class="-mt-1 text-xs text-muted">
+			{$LL.modelsSummary({ renamed: renamedCount, priced: pricedCount, total: models.length })}
+		</p>
+	{/if}
 
 	{#if models.length}
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
@@ -175,6 +221,30 @@
 							{/if}
 						</div>
 						<span class="truncate px-1 font-mono text-[11px] text-muted" title={name}>{name}</span>
+
+						<!-- Per million tokens, in and out, the units every provider
+						     publishes. Side by side because the pair is what a price is: one
+						     of the two alone says nothing about what a conversation costs. -->
+						<div class="flex items-center gap-1.5 px-0.5 pt-0.5">
+							{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
+								<label class="flex min-w-0 flex-1 items-center gap-1.5">
+									<span class="shrink-0 text-[10px] uppercase tracking-wide text-muted">
+										{field.label}
+									</span>
+									<input
+										class="settings-field w-full py-1 text-right text-xs tabular-nums"
+										type="number"
+										min="0"
+										step="0.01"
+										inputmode="decimal"
+										value={server.modelPricing?.[name]?.[field.side] ?? ''}
+										placeholder="—"
+										aria-label="{name} · {field.label}"
+										oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
+									/>
+								</label>
+							{/each}
+						</div>
 					</div>
 				{/each}
 			</div>
