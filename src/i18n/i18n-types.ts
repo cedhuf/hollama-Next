@@ -2455,6 +2455,10 @@ type RootTranslation = {
 	 */
 	compactCommandDescription: string
 	/**
+	 * <​w​h​a​t​ ​t​o​ ​k​e​e​p​>
+	 */
+	compactArgsHint: string
+	/**
 	 * S​h​o​w​ ​w​h​a​t​ ​t​h​e​ ​m​o​d​e​l​ ​i​s​ ​c​u​r​r​e​n​t​l​y​ ​b​e​i​n​g​ ​s​e​n​t
 	 */
 	contextCommandDescription: string
@@ -4963,6 +4967,10 @@ The completion in progress will stop
 	 * Summarise the conversation so far to free up context
 	 */
 	compactCommandDescription: () => LocalizedString
+	/**
+	 * <what to keep>
+	 */
+	compactArgsHint: () => LocalizedString
 	/**
 	 * Show what the model is currently being sent
 	 */

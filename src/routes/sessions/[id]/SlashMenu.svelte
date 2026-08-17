@@ -46,6 +46,12 @@
 		>
 			<span class="shrink-0 font-mono text-sm {command.available ? 'text-active' : 'text-muted'}">
 				/{command.name}
+				{#if command.argsHint}
+					<!-- What may follow the name, in the place it would be typed. A command
+					     with something optional to say about itself says it here rather than
+					     in a paragraph nobody reads. -->
+					<span class="text-muted opacity-70">{command.argsHint}</span>
+				{/if}
 			</span>
 			<span class="min-w-0 flex-1 truncate text-xs text-muted">
 				{command.available ? command.description : (command.unavailableReason ?? '')}

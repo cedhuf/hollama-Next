@@ -51,6 +51,8 @@ export interface CompactionNote extends NoteBase {
 	model?: string;
 	/** True when the app compacted on its own, at the configured threshold. */
 	automatic?: boolean;
+	/** What was typed after `/compact`, when anything was. */
+	instruction?: string;
 }
 
 /** A line drawn under everything before it, with nothing put in its place. */

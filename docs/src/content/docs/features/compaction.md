@@ -92,6 +92,24 @@ Both the prompt that writes the summary and the one that frames it for the model
 under _Settings → Tools → System instructions_. The framing prompt is applied at send time, so
 changing it also affects summaries written earlier.
 
+## Saying what to keep
+
+`/compact` takes an optional instruction: `/compact keep every decision about the database schema`.
+It is appended to the summariser's rules rather than replacing them, so the summary is still a
+summary; what changes is what it protects when it has to choose.
+
+Picking `/compact` from the command menu now writes it into the composer with a space after it
+instead of running it, since the point of picking it from a list is that you were not going to type
+the name yourself. Press Enter again to compact with no instruction.
+
+The instruction is kept in the note and shown above the summary when it is unfolded. A summary
+written to an instruction is not the same object as one written to the default rules, and reading it
+without knowing that is how you conclude the summariser lost the plot.
+
+The wrapper around it is the `Compaction — what the user asked for` prompt in _Settings → Tools →
+System instructions_. Commands that take no arguments only match when given none, so `/clear the air
+before we start` is the sentence it looks like.
+
 ## Sharing it
 
 An admin can share the compaction model, the automatic toggle and the threshold with everyone on

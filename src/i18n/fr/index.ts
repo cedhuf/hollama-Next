@@ -704,6 +704,7 @@ const fr = extendDictionary(en, {
 	mentionAddHelp:
 		'Reprendre cet échange ici, pour que le modèle l\u2019ait en tête à partir de maintenant',
 	mentionAlreadyAdded: 'Ajouté à cette conversation',
+	compactArgsHint: '<ce qu\u2019il faut garder>',
 	compactCommandDescription: 'Résumer la conversation pour libérer du contexte',
 	nothingToCompact: 'Cette conversation est trop courte pour valoir une compaction',
 	shortcutsCommands: 'Commandes',

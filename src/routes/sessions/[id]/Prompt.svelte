@@ -78,7 +78,9 @@
 			name: 'compact',
 			description: $LL.compactCommandDescription(),
 			available: canCompact,
-			unavailableReason: canCompact ? undefined : $LL.nothingToCompact()
+			unavailableReason: canCompact ? undefined : $LL.nothingToCompact(),
+			takesArgs: true,
+			argsHint: $LL.compactArgsHint()
 		},
 		{
 			name: 'clear',
@@ -90,7 +92,7 @@
 		// nearly empty is a perfectly good answer to the question.
 		{ name: 'context', description: $LL.contextCommandDescription(), available: true }
 	]);
-	const knownCommands = $derived(commands.map((c) => c.name));
+	const knownCommands = $derived(commands.map((c) => ({ name: c.name, takesArgs: c.takesArgs })));
 
 	// The menu is open only while the prompt is a bare `/word`: as soon as a space
 	// or a newline is typed, the user is writing a message that starts with a
@@ -122,11 +124,20 @@
 		selectedCommand = selectable[next];
 	}
 
+	/**
+	 * Choosing a command from the menu.
+	 *
+	 * One that takes arguments is written into the composer with a space after it
+	 * rather than run, because the whole point of picking it from a list is that
+	 * you were not going to type the name yourself, and running it there and then
+	 * would take away the only moment you had to say anything. Enter again sends it
+	 * with no arguments, which is what it did before.
+	 */
 	function pickCommand(command: SlashCommand) {
 		if (!command.available) return;
-		editor.prompt = `/${command.name}`;
+		editor.prompt = command.takesArgs ? `/${command.name} ` : `/${command.name}`;
 		editor.promptTextarea?.focus();
-		submit();
+		if (!command.takesArgs) submit();
 	}
 
 	// --- mentions -------------------------------------------------------------

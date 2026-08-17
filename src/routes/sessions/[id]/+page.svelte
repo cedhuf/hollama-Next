@@ -887,7 +887,7 @@
 	 * full-length — silently letting them believe otherwise is how a conversation
 	 * hits a provider's wall.
 	 */
-	async function runCompaction(automatic = false): Promise<boolean> {
+	async function runCompaction(automatic = false, instruction = ''): Promise<boolean> {
 		if (isCompacting) return false;
 		isCompacting = true;
 		compactAbort = new AbortController();
@@ -897,7 +897,7 @@
 		await scrollToBottom(true, true);
 
 		try {
-			const { marker } = await compactSession(session, { automatic, signal });
+			const { marker } = await compactSession(session, { automatic, signal, instruction });
 			session.messages = [...session.messages, marker];
 			session.updatedAt = new Date().toISOString();
 			saveSession(session);
@@ -924,7 +924,7 @@
 		compactAbort?.abort();
 	}
 
-	function runCommand(name: CommandName) {
+	function runCommand(name: CommandName, args: string) {
 		if (name === 'context') {
 			reportContext();
 			return;
@@ -947,7 +947,7 @@
 			toast.info($LL.nothingToCompact());
 			return;
 		}
-		void runCompaction();
+		void runCompaction(false, args);
 	}
 
 	/**

@@ -146,6 +146,16 @@
 			</div>
 		</div>
 
+		{#if note?.instruction}
+			<!-- What was asked for, above what it produced, in the words it was asked
+			     in. A summary written to an instruction is not the same object as one
+			     written to the default rules, and reading it without knowing that is
+			     how you conclude the summariser lost the plot. -->
+			<p class="mb-2 border-l-2 border-shade-3 pl-2.5 text-xs italic leading-relaxed text-muted">
+				{note.instruction}
+			</p>
+		{/if}
+
 		<Markdown markdown={summary ?? ''} />
 	</div>
 {/snippet}

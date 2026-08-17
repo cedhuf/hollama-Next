@@ -80,7 +80,7 @@ export interface CompactionOutcome {
  */
 export async function compactSession(
 	session: Session,
-	options: { signal?: AbortSignal; automatic?: boolean } = {}
+	options: { signal?: AbortSignal; automatic?: boolean; instruction?: string } = {}
 ): Promise<CompactionOutcome> {
 	const model = resolveCompactModel(session);
 	if (!model) throw new Error('No model available to compact with');
@@ -92,6 +92,9 @@ export async function compactSession(
 	if (!active.length) throw new Error('Nothing to compact');
 
 	const overrides = get(settingsStore).promptOverrides;
+	const instruction = options.instruction?.trim()
+		? resolvePrompt('compactInstruction', overrides, { instruction: options.instruction.trim() })
+		: '';
 	// An earlier summary is part of what gets summarised: compacting twice must
 	// carry the first summary's facts forward, not drop them for being old.
 	const transcript = active.map(transcribe).join('\n\n');
@@ -109,7 +112,14 @@ export async function compactSession(
 		{
 			model: model.name,
 			messages: [
-				{ role: 'system', content: resolvePrompt('compact', overrides) },
+				{
+					role: 'system',
+					// Anything typed after `/compact` is appended to the instructions rather
+					// than replacing them: someone asking to keep the code decisions wants
+					// that *as well as* a usable summary, and a replaced prompt would drop
+					// every rule about length, tense and what a summary is for.
+					content: [resolvePrompt('compact', overrides), instruction].filter(Boolean).join('\n\n')
+				},
 				{ role: 'user', content: transcript }
 			],
 			// A summary does not need reasoning, and asking for it doubles the wait on
@@ -140,7 +150,10 @@ export async function compactSession(
 				generatedAt: new Date().toISOString(),
 				replacedCount: active.length,
 				model: model.name,
-				automatic: options.automatic
+				automatic: options.automatic,
+				// Kept as the user typed it, not as it was wrapped: the divider says what
+				// was asked for, and the framing around it is ours.
+				instruction: options.instruction?.trim() || undefined
 			}
 		},
 		replacedCount: active.length

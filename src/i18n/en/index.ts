@@ -673,6 +673,7 @@ const en = {
 	clearedShowAll: 'Show all {count:number}',
 	searchEverything: 'Search cleared and compacted messages too',
 	compactCommandDescription: 'Summarise the conversation so far to free up context',
+	compactArgsHint: '<what to keep>',
 	contextCommandDescription: 'Show what the model is currently being sent',
 	contextReport: 'Context · ~{tokens:string} ({percent:number}%)',
 	contextPartSystem: 'System prompt',

@@ -20,6 +20,7 @@ export type PromptKey =
 	| 'searchRead'
 	| 'interactiveChoices'
 	| 'compact'
+	| 'compactInstruction'
 	| 'compactContext';
 
 export interface PromptDef {
@@ -194,6 +195,16 @@ Rules:
 - Do NOT use it for factual or direct questions, when the user already gave enough constraints, or when they are asking for YOUR opinion between options.
 - When you use it, the block must be the entire message — no greeting, no explanation, no answer.`
 	},
+	compactInstruction: {
+		label: 'Compaction — what the user asked for',
+		placeholders: ['{instruction}'],
+		hint: 'Wraps anything typed after /compact, so the summariser treats it as a priority rather than as conversation.',
+		default: `The person compacting this conversation has asked for the following, and it takes precedence over the section order above wherever the two disagree:
+
+{instruction}
+
+Keep everything else the rules ask for. This adds an emphasis; it does not licence a shorter or looser summary.`
+	},
 	compact: {
 		label: 'Compaction — write the summary',
 		hint: 'Condenses the earlier part of a conversation so it keeps fitting in the context.',
@@ -249,6 +260,7 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'pageContext',
 	'interactiveChoices',
 	'compact',
+	'compactInstruction',
 	'compactContext'
 ];
 
