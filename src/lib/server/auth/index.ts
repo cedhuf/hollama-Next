@@ -133,6 +133,27 @@ function buildProviders(): Provider[] {
 			issuer: env.OIDC_ISSUER,
 			clientId: env.OIDC_CLIENT_ID,
 			clientSecret: env.OIDC_CLIENT_SECRET,
+			/**
+			 * PKCE *and* `state`, because Auth.js sends neither by default here.
+			 *
+			 * Its default for a provider that does not say otherwise is `["pkce"]`
+			 * alone, and OAuth 2.1 agrees that PKCE covers what `state` was for. Not
+			 * every identity provider does: PocketID refuses an authorization request
+			 * without it, answering on the callback with
+			 * `error=invalid_state&error_description=The state is missing`.
+			 *
+			 * That failure was unreadable from this side for three weeks. The callback
+			 * error surfaces as `Configuration` in Auth.js v5, which reads like "the
+			 * provider could not be built", and `oauth4webapi` validated the missing
+			 * `iss` parameter before looking at `error`, so the log complained about
+			 * `iss` and never mentioned the state. The provider's side of that is a
+			 * genuine RFC 9207 violation; ours is that we were not sending a parameter
+			 * every server is entitled to require.
+			 *
+			 * Sending it costs one more short-lived cookie, on a path the PKCE cookie
+			 * already proves works.
+			 */
+			checks: ['pkce', 'state'],
 			// Request profile + email by default; add e.g. "groups" to expose the
 			// role claim (OIDC_ROLE_CLAIM). Override fully via OIDC_SCOPE.
 			authorization: { params: { scope: env.OIDC_SCOPE?.trim() || 'openid profile email' } }

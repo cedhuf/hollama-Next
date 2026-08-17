@@ -20,6 +20,18 @@
 				: null
 	);
 
+	/**
+	 * The code Auth.js sent back, shown under the message.
+	 *
+	 * "Sign-in failed" is what somebody can act on; the code is what whoever runs
+	 * the instance can act on, and it was being dropped. `Configuration` means the
+	 * provider could not be built or its discovery document could not be fetched
+	 * *from the server* — which looks identical, from a browser that can reach the
+	 * identity provider perfectly well. Hiding that turns a one-line diagnosis
+	 * into an evening.
+	 */
+	const errorCode = $derived(data.error && data.error !== 'CredentialsSignin' ? data.error : null);
+
 	const inputClass =
 		'rounded-md border border-shade-3 bg-shade-0 px-3 py-2 text-sm outline-none focus:border-accent';
 </script>
@@ -36,6 +48,9 @@
 				class="rounded-md border border-negative/40 bg-negative/10 px-3 py-2 text-sm text-negative"
 			>
 				{errorMessage}
+				{#if errorCode}
+					<span class="mt-1 block font-mono text-xs opacity-70">{errorCode}</span>
+				{/if}
 			</div>
 		{/if}
 
