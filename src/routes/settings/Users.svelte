@@ -184,7 +184,7 @@
 
 					<div class="ml-auto flex items-center gap-1">
 						<input
-							class="settings-field w-24 py-1 text-right text-xs tabular-nums"
+							class="settings-field no-spinner w-24 py-1 text-right text-xs tabular-nums"
 							type="number"
 							min="0"
 							step="0.01"
@@ -269,7 +269,7 @@
 				     and "somebody typed nought" read the same on screen, and only one of
 				     them is what an untouched instance has. -->
 				<input
-					class="settings-field tabular-nums"
+					class="settings-field no-spinner tabular-nums"
 					type="number"
 					min="0"
 					step="0.01"

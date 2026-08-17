@@ -132,7 +132,11 @@ type RootTranslation = {
 	 */
 	pricingHelp: string
 	/**
-	 * P​r​i​c​e​s​ ​a​r​e​ ​p​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s​.
+	 * /​ ​1​M
+	 */
+	perMillionShort: string
+	/**
+	 * P​r​i​c​e​ ​p​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s
 	 */
 	perMillionTokens: string
 	/**
@@ -148,11 +152,11 @@ type RootTranslation = {
 	 */
 	priceUnset: string
 	/**
-	 * S​e​n​t
+	 * S​e​n​t​,​ ​p​e​r​ ​1​M​ ​t​o​k​e​n​s
 	 */
 	pricePerMillionIn: string
 	/**
-	 * R​e​t​u​r​n​e​d
+	 * R​e​t​u​r​n​e​d​,​ ​p​e​r​ ​1​M​ ​t​o​k​e​n​s
 	 */
 	pricePerMillionOut: string
 	/**
@@ -2998,7 +3002,11 @@ The completion in progress will stop
 	 */
 	pricingHelp: () => LocalizedString
 	/**
-	 * Prices are per million tokens.
+	 * / 1M
+	 */
+	perMillionShort: () => LocalizedString
+	/**
+	 * Price per million tokens
 	 */
 	perMillionTokens: () => LocalizedString
 	/**
@@ -3014,11 +3022,11 @@ The completion in progress will stop
 	 */
 	priceUnset: () => LocalizedString
 	/**
-	 * Sent
+	 * Sent, per 1M tokens
 	 */
 	pricePerMillionIn: () => LocalizedString
 	/**
-	 * Returned
+	 * Returned, per 1M tokens
 	 */
 	pricePerMillionOut: () => LocalizedString
 	/**

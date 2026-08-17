@@ -273,6 +273,7 @@
 									<span class="tabular-nums">
 										{price?.input ?? '—'} / {price?.output ?? '—'}
 										{#if price?.currency}<span class="uppercase">{price.currency}</span>{/if}
+										<span class="opacity-70">{$LL.perMillionShort()}</span>
 									</span>
 								{:else}
 									{$LL.priceUnset()}
@@ -284,58 +285,65 @@
 						</div>
 
 						{#if priced.has(name)}
-							<!-- Labels outside the field, not inside it: a placeholder disappears
-							     the moment somebody types, and "1.25" with nothing beside it is a
-							     number whose meaning has just been deleted. The unit is on the
-							     row too, because a provider that publishes per 10K prices exists
-							     and the field cannot be read without it. -->
 							<div
-								class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-shade-1 p-2"
+								class="mt-1 flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
 								transition:slide={{ duration: 160, easing: quadInOut }}
 							>
-								{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
-									<label class="flex min-w-0 flex-1 items-center gap-1.5">
-										<span class="shrink-0 text-[11px] text-muted">{field.label}</span>
-										<input
-											class="settings-field w-full min-w-16 py-1 text-right text-xs tabular-nums"
-											type="number"
-											min="0"
-											step="0.01"
-											inputmode="decimal"
-											value={server.modelPricing?.[name]?.[field.side] ?? ''}
-											placeholder={$LL.priceUnset()}
-											aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
-											oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
-										/>
-									</label>
-								{/each}
+								<!-- The unit first, before the fields it applies to, and not as a
+								     footnote underneath them. Providers publish per million, per
+								     thousand and per ten thousand; a number typed into a box that
+								     does not say which is a number nobody can check later. -->
+								<span class="text-xs font-medium text-active">{$LL.perMillionTokens()}</span>
 
-								<select
-									class="settings-field w-auto shrink-0 py-1 text-xs uppercase"
-									value={server.modelPricing?.[name]?.currency ?? ''}
-									aria-label="{name} · {$LL.currency()}"
-									onchange={(e) => setCurrency(name, e.currentTarget.value)}
-								>
-									<option value="">{$LL.currency()}</option>
-									{#each CURRENCIES as code (code)}
-										<option value={code}>{code}</option>
+								<!-- Everything about this price on one row: what it costs going
+								     out, coming back, in what, and the way back to nothing.
+								     Labels outside the fields, because a placeholder disappears the
+								     moment somebody types and "1.25" alone has lost its meaning. -->
+								<div class="flex flex-wrap items-center gap-2">
+									{#each [{ side: 'input' as const, label: $LL.pricePerMillionIn() }, { side: 'output' as const, label: $LL.pricePerMillionOut() }] as field (field.side)}
+										<label class="flex min-w-40 flex-1 items-center gap-1.5">
+											<span class="shrink-0 whitespace-nowrap text-[11px] text-muted">
+												{field.label}
+											</span>
+											<input
+												class="settings-field no-spinner w-full min-w-16 py-1 text-right text-xs tabular-nums"
+												type="number"
+												min="0"
+												step="0.01"
+												inputmode="decimal"
+												value={server.modelPricing?.[name]?.[field.side] ?? ''}
+												placeholder={$LL.priceUnset()}
+												aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
+												oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
+											/>
+										</label>
 									{/each}
-								</select>
 
-								<span class="flex w-full items-center gap-2 text-[11px] text-muted">
-									{$LL.perMillionTokens()}
+									<select
+										class="settings-field w-auto shrink-0 py-1 text-xs uppercase"
+										value={server.modelPricing?.[name]?.currency ?? ''}
+										aria-label="{name} · {$LL.currency()}"
+										onchange={(e) => setCurrency(name, e.currentTarget.value)}
+									>
+										<option value="">{$LL.currency()}</option>
+										{#each CURRENCIES as code (code)}
+											<option value={code}>{code}</option>
+										{/each}
+									</select>
+
 									<!-- Zero is a price: free, and counted as such. Clearing is the
-									     other answer — nobody has said — and a number field cannot
-									     be walked back to it. -->
+									     other answer — nobody has said — and a field cannot be walked
+									     back to it. -->
 									<button
 										type="button"
-										disabled={!hasPrice && !price?.currency}
 										onclick={() => clearPrice(name)}
-										class="ml-auto rounded-md px-1.5 py-0.5 transition-colors hover:bg-shade-2 hover:text-active disabled:opacity-30"
+										title={$LL.clearPrice()}
+										aria-label="{name} · {$LL.clearPrice()}"
+										class="shrink-0 rounded-md border border-shade-3 p-1.5 text-muted transition-colors hover:border-shade-4 hover:text-active"
 									>
-										{$LL.clearPrice()}
+										<RotateCcw class="h-3.5 w-3.5" />
 									</button>
-								</span>
+								</div>
 							</div>
 						{/if}
 					</div>

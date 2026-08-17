@@ -159,6 +159,23 @@
 	}
 }
 
+/*
+ * A number field without the browser's own steppers.
+ *
+ * They are drawn by the platform, not by the page: white in a dark theme, a
+ * different shape in every engine, and sized for a spinner nobody uses to reach
+ * 1.25 from zero. A price is typed, not walked to.
+ */
+@utility no-spinner {
+	appearance: textfield;
+
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+		appearance: none;
+		margin: 0;
+	}
+}
+
 @utility field-grow {
 	/* Where `field-sizing` is not implemented the field keeps its floor and can be
 	   dragged taller, which is what it did before. The handle is dropped only
