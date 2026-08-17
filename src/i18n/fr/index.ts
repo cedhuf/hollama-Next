@@ -39,6 +39,7 @@ const fr = extendDictionary(en, {
 	clear: 'Effacer',
 	noModelsToRename: 'Aucun modèle disponible. Synchronisez d’abord cette connexion.',
 	currency: 'Devise',
+	priceUnset: 'non défini',
 	pricePerMillionIn: 'Entrée',
 	pricePerMillionOut: 'Sortie',
 	modelsSummary: '{renamed} renommé{{s}}, {priced} tarifé{{s}}, sur {total}',
@@ -681,6 +682,7 @@ const fr = extendDictionary(en, {
 	creditPeriodWeek: 'Chaque semaine',
 	creditsHelp:
 		'Zéro signifie sans limite. Chaque compte peut avoir le sien dans l’onglet Utilisateurs. Une conversation en cours n’est jamais interrompue : le plafond est vérifié avant le tour suivant, et un modèle sans tarif n’est pas compté du tout.',
+	creditLimitDefault: 'Plafond par défaut',
 	creditLimit: 'Plafond',
 	usageTitle: 'Consommation',
 	usageOfLimit: '{spent} sur {limit}',

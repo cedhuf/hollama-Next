@@ -11,9 +11,10 @@
 	 * instance's decision and the card says so. A limit nobody can see is a limit
 	 * that arrives as a surprise the day it stops you.
 	 *
-	 * Absent entirely in local mode and on an instance that has set no limit and
-	 * priced no model — there is nothing true to say, and a bar at zero out of
-	 * zero would be an invention.
+	 * Shown whether or not there is a limit, and to administrators as much as to
+	 * anyone: somebody who can raise their own ceiling still wants to know what
+	 * they are spending under it. Without a limit there is no bar, because a bar
+	 * needs two numbers — the figure alone is the whole answer.
 	 */
 	interface Usage {
 		period: 'month' | 'week';
@@ -53,7 +54,7 @@
 	);
 </script>
 
-{#if usage && (usage.limit > 0 || usage.spend.cost > 0)}
+{#if usage}
 	<div class="flex flex-col gap-2 rounded-xl border border-shade-3 bg-shade-0 p-4">
 		<div class="flex items-baseline justify-between gap-2">
 			<span class="text-sm font-medium text-active">{$LL.usageTitle()}</span>
@@ -61,8 +62,8 @@
 				{#if usage.limit > 0}
 					{$LL.usageOfLimit({ spent: money(usage.spend.cost), limit: money(usage.limit) })}
 				{:else}
-					<!-- No limit at all, said as it is rather than as an empty bar. -->
-					{$LL.usageUnlimited()}
+					<!-- No ceiling, so what is spent is the whole answer. -->
+					{$LL.usageSpent({ spent: money(usage.spend.cost) })} · {$LL.usageUnlimited()}
 				{/if}
 			</span>
 		</div>

@@ -45,6 +45,8 @@
 	let users = $state<UserRow[]>([]);
 	let period = $state<'month' | 'week'>('month');
 	let instanceLimit = $state(0);
+	/** Empty is how "no limit" is written, so nothing shows a bare 0 as a value. */
+	let instanceLimitField = $state('');
 	/** Until the first load settles, the empty state below would be a lie. */
 	let loading = $state(true);
 	let showCreate = $state(false);
@@ -70,6 +72,7 @@
 			users = data.users;
 			period = data.period;
 			instanceLimit = data.instanceLimit;
+			instanceLimitField = instanceLimit > 0 ? String(instanceLimit) : '';
 		} finally {
 			loading = false;
 		}
@@ -86,6 +89,22 @@
 		const value = raw.trim() === '' ? null : Number(raw);
 		if (value !== null && !Number.isFinite(value)) return;
 		await api(`/api/admin/users/${user.id}`, 'PUT', { creditLimit: value });
+		await load();
+	}
+
+	/**
+	 * The instance's allowance, and how often it starts again.
+	 *
+	 * Here rather than in Admin, above the accounts it applies to. Admin is
+	 * governance in the abstract; a default allowance is a fact about this list,
+	 * and reading it a screen away from the column it fills in is how a number
+	 * ends up set twice.
+	 */
+	async function saveInstance() {
+		const value = instanceLimitField.trim() === '' ? 0 : Number(instanceLimitField);
+		if (!Number.isFinite(value) || value < 0) return;
+		instanceLimit = value;
+		await api('/api/admin/config', 'PUT', { creditLimit: value, creditPeriod: period });
 		await load();
 	}
 
@@ -119,12 +138,40 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection
-		title={$LL.users()}
-		description="{$LL.usersDescription()} {period === 'week'
-			? $LL.usagePerWeek()
-			: $LL.usagePerMonth()}."
-	>
+	<SettingsSection title={$LL.credits()} description={$LL.creditsDescription()}>
+		<div class="flex flex-wrap items-end gap-2">
+			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+				<span class="text-muted">{$LL.creditLimitDefault()}</span>
+				<!-- Empty rather than a zero sitting in the field: "nobody has set one"
+				     and "somebody typed nought" read the same on screen, and only one of
+				     them is what an untouched instance has. -->
+				<input
+					class="settings-field tabular-nums"
+					type="number"
+					min="0"
+					step="0.01"
+					inputmode="decimal"
+					bind:value={instanceLimitField}
+					onchange={saveInstance}
+					placeholder={$LL.usageUnlimited()}
+				/>
+			</label>
+			<label class="flex flex-col gap-1 text-sm">
+				<span class="text-muted">{$LL.creditPeriod()}</span>
+				<Select
+					bind:value={period}
+					options={[
+						{ value: 'month', label: $LL.creditPeriodMonth() },
+						{ value: 'week', label: $LL.creditPeriodWeek() }
+					]}
+					onChange={saveInstance}
+				/>
+			</label>
+		</div>
+		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
+	</SettingsSection>
+
+	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
 		{#if loading}
 			<Skeleton variant="row" count={3} />
 		{/if}

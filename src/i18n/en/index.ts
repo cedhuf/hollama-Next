@@ -30,6 +30,7 @@ const en = {
 	clear: 'Clear',
 	noModelsToRename: 'No models available. Sync this connection first.',
 	currency: 'Currency',
+	priceUnset: 'not set',
 	pricePerMillionIn: 'In',
 	pricePerMillionOut: 'Out',
 	modelsSummary: '{renamed:number} renamed, {priced:number} priced, of {total:number}',
@@ -660,6 +661,7 @@ const en = {
 	creditPeriodWeek: 'Every week',
 	creditsHelp:
 		'Zero means no limit. Each account can be given its own in the Users tab. A conversation already under way is never interrupted: the limit is checked before the next turn starts, and a model with no price set is not counted at all.',
+	creditLimitDefault: 'Default allowance',
 	creditLimit: 'Credit limit',
 	usageTitle: 'Usage',
 	usageOfLimit: '{spent:string} of {limit:string}',

@@ -128,6 +128,10 @@ type RootTranslation = {
 	 */
 	currency: string
 	/**
+	 * n​o​t​ ​s​e​t
+	 */
+	priceUnset: string
+	/**
 	 * I​n
 	 */
 	pricePerMillionIn: string
@@ -2394,6 +2398,10 @@ type RootTranslation = {
 	 */
 	creditsHelp: string
 	/**
+	 * D​e​f​a​u​l​t​ ​a​l​l​o​w​a​n​c​e
+	 */
+	creditLimitDefault: string
+	/**
 	 * C​r​e​d​i​t​ ​l​i​m​i​t
 	 */
 	creditLimit: string
@@ -2957,6 +2965,10 @@ The completion in progress will stop
 	 * Currency
 	 */
 	currency: () => LocalizedString
+	/**
+	 * not set
+	 */
+	priceUnset: () => LocalizedString
 	/**
 	 * In
 	 */
@@ -5179,6 +5191,10 @@ The completion in progress will stop
 	 * Zero means no limit. Each account can be given its own in the Users tab. A conversation already under way is never interrupted: the limit is checked before the next turn starts, and a model with no price set is not counted at all.
 	 */
 	creditsHelp: () => LocalizedString
+	/**
+	 * Default allowance
+	 */
+	creditLimitDefault: () => LocalizedString
 	/**
 	 * Credit limit
 	 */

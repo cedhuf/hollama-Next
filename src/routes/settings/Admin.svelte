@@ -50,8 +50,6 @@
 	 * whose question is who is still around.
 	 */
 	let allowUserKeys = $state(false);
-	let creditLimit = $state(0);
-	let creditPeriod = $state<'month' | 'week'>('month');
 	let allowUserPersonas = $state(true);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
 
@@ -143,8 +141,6 @@
 				fetch('/api/admin/servers').then((r) => r.json())
 			]);
 			allowUserKeys = config.allowUserKeys;
-			creditLimit = config.creditLimit ?? 0;
-			creditPeriod = config.creditPeriod ?? 'month';
 			allowUserPersonas = config.allowUserPersonas ?? true;
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
@@ -327,10 +323,6 @@
 		} finally {
 			resettingOnboarding = false;
 		}
-	}
-
-	async function saveCredits() {
-		await api('/api/admin/config', 'PUT', { creditLimit, creditPeriod });
 	}
 
 	async function saveShared(server: SystemServer) {
@@ -577,37 +569,6 @@
 				{/if}
 			</div>
 		{/each}
-	</SettingsSection>
-
-	<!-- Credits -->
-	<SettingsSection title={$LL.credits()} description={$LL.creditsDescription()}>
-		<div class="flex flex-wrap items-end gap-2">
-			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditLimit()}</span>
-				<input
-					class="settings-field tabular-nums"
-					type="number"
-					min="0"
-					step="0.01"
-					inputmode="decimal"
-					bind:value={creditLimit}
-					onchange={saveCredits}
-					placeholder="0"
-				/>
-			</label>
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditPeriod()}</span>
-				<Select
-					bind:value={creditPeriod}
-					options={[
-						{ value: 'month', label: $LL.creditPeriodMonth() },
-						{ value: 'week', label: $LL.creditPeriodWeek() }
-					]}
-					onChange={saveCredits}
-				/>
-			</label>
-		</div>
-		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
 	</SettingsSection>
 
 	<!-- Developer options -->

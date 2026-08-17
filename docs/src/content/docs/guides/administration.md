@@ -68,6 +68,57 @@ heading that reads "last seen" would be a plausible lie, and a blank is not.
 Deleting a user deletes their data with them. Their conversations, knowledge and personas are theirs
 alone, and nothing of it is shared with the instance.
 
+## Credit limits
+
+A guardrail, not an accounting system. It exists so an instance run for a handful of people catches
+the runaway loop and the forgotten tab; it is not built to invoice anybody, and it says so on every
+screen it appears on.
+
+Set the default allowance and how often it starts again in _Settings → Users_, above the list, and
+give an account its own in the row beside its name. An empty field on a row means **follow the
+instance**, which is not the same as typing the same number: an account that inherits follows the
+default when you change it.
+
+Zero means no limit, and is what an instance nobody has configured has. Nothing changes for anyone
+until you decide otherwise.
+
+### What is counted
+
+What each provider reports it used, and nothing else. Llooma's own token estimate divides characters
+by 3.7 — it exists to colour the load ring and to decide when to compact, and charging somebody with
+it would be inventing a figure and then acting on it.
+
+A model with **no price set** is not counted at all. That is deliberate, and it is not the same as
+counting it as free: a model nobody got round to pricing would otherwise let somebody run for ever
+without ever approaching a limit, and the total would quietly be a lie. Prices go in
+_Settings → Servers → Models and pricing_, per connection, in that provider's own currency.
+
+Every account can see its own figure in _Settings → Profile_: what it has spent, what it is allowed,
+that the allowance was set by an administrator, and when the counter starts again. Administrators
+see theirs too — being able to raise your own ceiling is not a reason to be unable to see it.
+
+### It never cuts a conversation
+
+The limit is checked **before a turn starts**, in the relay every request passes through. A turn
+already under way always finishes, even if it goes over. Someone over their allowance is told so
+when they send the next message, and listing models still works — an app that cannot draw its own
+settings page is broken rather than restrained.
+
+### What it is approximate about
+
+Currencies. A price belongs to the connection that charges it, because the same model costs
+different amounts at two providers and nothing on an Ollama in the next room. The limit, though, is
+one number: on an instance mixing a provider billing in euros with one billing in dollars, the total
+adds currencies together, and no conversion happens anywhere.
+
+For catching abuse and inattention that is good enough, and it is the trade the feature was asked
+for. If a figure ever has to be defended rather than glanced at, it needs either one currency for
+the instance or one limit per currency.
+
+Usage is recorded per day, so the period is a question asked when the figure is read. Switching from
+monthly to weekly gives a weekly figure for the weeks that have already happened, rather than a
+counter that restarts at zero.
+
 ## Sharing is enforced, not suggested
 
 This is the part worth trusting. Shared tools, model allow-lists and locked prompts are applied in

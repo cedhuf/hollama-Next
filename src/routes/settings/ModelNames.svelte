@@ -238,7 +238,7 @@
 										step="0.01"
 										inputmode="decimal"
 										value={server.modelPricing?.[name]?.[field.side] ?? ''}
-										placeholder="—"
+										placeholder={$LL.priceUnset()}
 										aria-label="{name} · {field.label}"
 										oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
 									/>
