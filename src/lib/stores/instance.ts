@@ -17,6 +17,8 @@ export interface InstanceConfig {
 	themeStyle: string;
 	/** When an admin last asked everyone to see the welcome tour again. */
 	onboardingEpoch: number;
+	/** Who to write to when the instance refuses something. Null if nobody qualifies. */
+	adminEmail: string | null;
 }
 
 const state = writable<InstanceConfig | null>(null);

@@ -1155,6 +1155,23 @@ type RootTranslation = {
 	 */
 	generateTitlesWithAI: string
 	/**
+	 * Y​o​u​ ​h​a​v​e​ ​r​e​a​c​h​e​d​ ​t​h​e​ ​c​r​e​d​i​t​ ​a​l​l​o​w​a​n​c​e​ ​f​o​r​ ​t​h​i​s​ ​p​e​r​i​o​d​.
+	 */
+	refusedCreditLimit: string
+	/**
+	 * N​o​ ​p​r​i​c​e​ ​i​s​ ​s​e​t​ ​f​o​r​ ​{​m​o​d​e​l​}​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​,​ ​s​o​ ​i​t​ ​c​a​n​n​o​t​ ​b​e​ ​c​o​u​n​t​e​d​ ​a​g​a​i​n​s​t​ ​y​o​u​r​ ​a​l​l​o​w​a​n​c​e​.
+	 * @param {string} model
+	 */
+	refusedUnpricedModel: RequiredParams<'model'>
+	/**
+	 * T​h​i​s​ ​i​n​s​t​a​n​c​e​ ​s​t​o​p​p​e​d​ ​t​h​e​ ​r​e​q​u​e​s​t
+	 */
+	refusedTitle: string
+	/**
+	 * N​o​t​ ​a​ ​f​a​i​l​u​r​e​:​ ​s​o​m​e​b​o​d​y​ ​s​e​t​ ​a​ ​r​u​l​e​,​ ​a​n​d​ ​t​r​y​i​n​g​ ​a​g​a​i​n​ ​w​i​l​l​ ​d​o​ ​t​h​e​ ​s​a​m​e​ ​t​h​i​n​g​.​ ​A​s​k​ ​w​h​o​e​v​e​r​ ​r​u​n​s​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	refusedBody: string
+	/**
 	 * N​a​m​e​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​a​g​a​i​n​ ​o​n​c​e​ ​i​t​ ​h​a​s​ ​g​r​o​w​n
 	 */
 	regenerateTitle: string
@@ -4021,6 +4038,22 @@ The completion in progress will stop
 	 * Generate titles with AI
 	 */
 	generateTitlesWithAI: () => LocalizedString
+	/**
+	 * You have reached the credit allowance for this period.
+	 */
+	refusedCreditLimit: () => LocalizedString
+	/**
+	 * No price is set for {model} on this instance, so it cannot be counted against your allowance.
+	 */
+	refusedUnpricedModel: (arg: { model: string }) => LocalizedString
+	/**
+	 * This instance stopped the request
+	 */
+	refusedTitle: () => LocalizedString
+	/**
+	 * Not a failure: somebody set a rule, and trying again will do the same thing. Ask whoever runs this instance.
+	 */
+	refusedBody: () => LocalizedString
 	/**
 	 * Name the conversation again once it has grown
 	 */

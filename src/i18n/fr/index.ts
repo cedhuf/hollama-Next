@@ -285,6 +285,12 @@ const fr = extendDictionary(en, {
 	defaultModel: 'Modèle par défaut',
 	titleModel: 'Modèle pour les titres',
 	generateTitlesWithAI: 'Générer les titres par IA',
+	refusedCreditLimit: 'Vous avez atteint le plafond de crédit de la période.',
+	refusedUnpricedModel:
+		'Aucun tarif n’est défini pour {model} sur cette instance, il ne peut donc pas être décompté de votre plafond.',
+	refusedTitle: 'L’instance a arrêté la requête',
+	refusedBody:
+		'Ce n’est pas une panne : quelqu’un a posé une règle, et réessayer donnera la même chose. Demandez à qui administre cette instance.',
 	regenerateTitle: "Renommer la conversation une fois qu'elle a pris forme",
 	regenerateTitleHelp:
 		"Le premier titre est écrit à partir d'un seul message, avant toute réponse : il nomme la question, pas la conversation. Ceci lui donne un second nom après quelques échanges. Une seule fois, et jamais par-dessus un titre que vous avez saisi.",

@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 
+import { refusal } from '$lib/chat/refusal';
 import { requireUser } from '$lib/server/api';
 import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
@@ -63,7 +64,7 @@ const proxy: RequestHandler = async (event) => {
 		// Asked before the turn starts, never during one: a conversation already
 		// under way always finishes. This is the only moment a limit is allowed to
 		// interrupt anything.
-		if (isOverLimit(user.id)) throw error(402, 'Credit limit reached');
+		if (isOverLimit(user.id)) throw error(402, refusal('credit-limit'));
 
 		/**
 		 * A model with no price is refused while a limit is in force.
@@ -75,7 +76,7 @@ const proxy: RequestHandler = async (event) => {
 		 * administrator rather than concluding the app is broken.
 		 */
 		if (model && !getModelPricing(server.id)[model]) {
-			throw error(402, `No price is set for ${model} on this instance`);
+			throw error(402, refusal('unpriced-model', model));
 		}
 	}
 

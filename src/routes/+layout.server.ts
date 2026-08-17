@@ -1,5 +1,6 @@
 import { env as publicEnv } from '$env/dynamic/public';
 import { getConfig, themeSharing } from '$lib/server/db/config';
+import { adminContact } from '$lib/server/db/users';
 
 import type { LayoutServerLoad } from './$types';
 
@@ -29,7 +30,16 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 					 * shows the tour once and then stops, for everybody, without the server
 					 * tracking who has seen what.
 					 */
-					onboardingEpoch: Number(getConfig('onboardingEpoch') ?? 0)
+					onboardingEpoch: Number(getConfig('onboardingEpoch') ?? 0),
+					/**
+					 * Who to ask when the instance refuses something.
+					 *
+					 * A limit reached and a model nobody priced are both somebody else's
+					 * decision to change, and "contact your administrator" without an
+					 * address is advice nobody can act on. The instance knows the address;
+					 * it is the account it was bootstrapped with.
+					 */
+					adminEmail: adminContact()
 				}
 			: null
 	};

@@ -16,6 +16,7 @@
 	import { recordMention } from '$lib/chat/mentionRecord';
 	import { mentionedPersonas } from '$lib/chat/mentions';
 	import { messagesInContext } from '$lib/chat/notes';
+	import { refusalIn } from '$lib/chat/refusal';
 	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
 	import {
 		cancelRun,
@@ -36,6 +37,7 @@
 	import Menu from '$lib/components/Menu.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import RefusalDialog from '$lib/components/RefusalDialog.svelte';
 	import SessionMenu from '$lib/components/SessionMenu.svelte';
 	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
@@ -1009,13 +1011,38 @@
 	}
 
 	function handleError(error: Error) {
+		/**
+		 * A refusal is not a failure, and a toast is the wrong shape for it.
+		 *
+		 * A toast says "that did not work, try again", which is right when a server
+		 * did not answer and wrong when somebody set a rule: trying again does the
+		 * same thing. So a refusal stops the page and says who to ask.
+		 */
+		const refused = refusalIn(error.message);
+		if (refused) {
+			refusalDetail =
+				refused.reason === 'unpriced-model' && refused.detail
+					? $LL.refusedUnpricedModel({ model: refused.detail })
+					: $LL.refusedCreditLimit();
+			refusalOpen = true;
+			restorePrompt();
+			return;
+		}
+
 		if (error.message === 'Failed to fetch') {
 			toast.error($LL.genericError(), { description: $LL.cantConnectToOllamaServer() });
 		} else {
 			toast.error($LL.genericError(), { description: error.toString() });
 		}
 
-		// For errors, restore the prompt so user can retry
+		restorePrompt();
+	}
+
+	let refusalOpen = $state(false);
+	let refusalDetail = $state<string | undefined>();
+
+	/** Put the message back in the composer and stand the turn down. */
+	function restorePrompt() {
 		const lastUserMessage = session.messages.filter((m) => m.role === 'user').at(-1);
 		if (lastUserMessage) {
 			editor.prompt = lastUserMessage.content;
@@ -1394,3 +1421,4 @@
 </div>
 
 <SessionModal bind:open={sessionModalOpen} bind:session bind:modelName />
+<RefusalDialog bind:open={refusalOpen} detail={refusalDetail} />

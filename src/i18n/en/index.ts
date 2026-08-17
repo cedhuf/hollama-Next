@@ -293,6 +293,12 @@ const en = {
 	defaultModel: 'Default model',
 	titleModel: 'Title model',
 	generateTitlesWithAI: 'Generate titles with AI',
+	refusedCreditLimit: 'You have reached the credit allowance for this period.',
+	refusedUnpricedModel:
+		'No price is set for {model:string} on this instance, so it cannot be counted against your allowance.',
+	refusedTitle: 'This instance stopped the request',
+	refusedBody:
+		'Not a failure: somebody set a rule, and trying again will do the same thing. Ask whoever runs this instance.',
 	regenerateTitle: 'Name the conversation again once it has grown',
 	regenerateTitleHelp:
 		'The first title is written from one message, before anything has been answered, so it names the question rather than the conversation. This gives it a second name a few exchanges in. Once only, and never over a title you typed yourself.',

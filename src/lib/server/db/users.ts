@@ -118,3 +118,17 @@ export function touchLastSeen(id: string): void {
 export function deleteUser(id: string): void {
 	getDb().prepare('DELETE FROM users WHERE id = ?').run(id);
 }
+
+/**
+ * An address for "ask your administrator".
+ *
+ * The first admin by creation date, which on every instance is the one it was
+ * bootstrapped with. One address rather than all of them: this is a person to
+ * write to, not a list to publish, and it is shown to every signed-in user.
+ */
+export function adminContact(): string | null {
+	const row = getDb()
+		.prepare("SELECT email FROM users WHERE role = 'admin' ORDER BY created_at LIMIT 1")
+		.get() as { email: string } | undefined;
+	return row?.email ?? null;
+}
