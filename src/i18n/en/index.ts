@@ -663,11 +663,17 @@ const en = {
 	creditsDescription:
 		'A guardrail against a runaway loop or a forgotten tab, not an accounting system.',
 	creditPeriod: 'Resets',
+	creditPeriodDay: 'Every day',
 	creditPeriodMonth: 'Every calendar month',
 	creditPeriodWeek: 'Every week',
 	creditsHelp:
 		'Zero means no limit. Each account can be given its own in the Users tab. A conversation already under way is never interrupted: the limit is checked before the next turn starts, and a model with no price set is not counted at all.',
 	creditLimitInherit: 'Follow the instance default',
+	creditLimitInherited: 'Instance default',
+	creditLimitOwn: 'Own allowance',
+	creditPeriodInherit: 'Instance default',
+	creditOverrideHelp:
+		'Overrides the instance default for this account only. Empty follows the instance.',
 	creditLimitDefault: 'Default allowance',
 	creditLimit: 'Credit limit',
 	unpricedModels: 'Shared models with no price',

@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 import { requireAdmin } from '$lib/server/api';
-import { setCreditLimit } from '$lib/server/db/usage';
+import { setCreditLimit, setCreditPeriodFor, type CreditPeriod } from '$lib/server/db/usage';
 import { deleteUser, getUserById } from '$lib/server/db/users';
 
 /**
@@ -16,6 +16,15 @@ export async function PUT(event) {
 	if (!getUserById(event.params.id)) throw error(404, 'User not found');
 
 	const body = await event.request.json();
+
+	if ('creditPeriod' in (body ?? {})) {
+		const raw = body.creditPeriod;
+		if (raw !== null && !['month', 'week', 'day'].includes(raw)) {
+			throw error(400, 'creditPeriod must be month, week or day');
+		}
+		setCreditPeriodFor(event.params.id, raw as CreditPeriod | null);
+	}
+
 	if ('creditLimit' in (body ?? {})) {
 		const raw = body.creditLimit;
 		if (raw !== null && typeof raw !== 'number') throw error(400, 'creditLimit must be a number');

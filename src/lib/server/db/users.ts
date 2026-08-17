@@ -21,6 +21,8 @@ export interface UserRow {
 	 * raise theirs, and it cannot if inheriting was recorded as a number.
 	 */
 	credit_limit: number | null;
+	/** This account's own period, or null to follow the instance's. */
+	credit_period: string | null;
 }
 
 export function getUserByEmail(email: string): UserRow | undefined {
@@ -65,13 +67,14 @@ export function setUserRole(id: string, role: Role): void {
 
 export type UserSummary = Pick<
 	UserRow,
-	'id' | 'email' | 'role' | 'created_at' | 'last_seen_at' | 'credit_limit'
+	'id' | 'email' | 'role' | 'created_at' | 'last_seen_at' | 'credit_limit' | 'credit_period'
 >;
 
 export function listUsers(): UserSummary[] {
 	return getDb()
 		.prepare(
-			'SELECT id, email, role, created_at, last_seen_at, credit_limit FROM users ORDER BY created_at'
+			`SELECT id, email, role, created_at, last_seen_at, credit_limit, credit_period
+			 FROM users ORDER BY created_at`
 		)
 		.all() as unknown as UserSummary[];
 }

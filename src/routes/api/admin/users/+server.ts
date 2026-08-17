@@ -3,7 +3,13 @@ import { error, json } from '@sveltejs/kit';
 import { requireAdmin } from '$lib/server/api';
 import { hashPassword } from '$lib/server/auth/password';
 import { unpricedSharedModels } from '$lib/server/db/servers';
-import { creditPeriod, instanceCreditLimit, periodStart, spendForAll } from '$lib/server/db/usage';
+import {
+	creditPeriod,
+	instanceCreditLimit,
+	periodStart,
+	spendForAll,
+	spendSince
+} from '$lib/server/db/usage';
 import { createUser, getUserByEmail, listUsers } from '$lib/server/db/users';
 
 /**
@@ -17,6 +23,9 @@ export async function GET(event) {
 	await requireAdmin(event);
 
 	const period = creditPeriod();
+	// Each account is summed over its own period, since it may not be the
+	// instance's; the shared query would otherwise report a month of spend against
+	// somebody's daily allowance.
 	const from = periodStart(period);
 	const spend = spendForAll(from);
 	const fallback = instanceCreditLimit();
@@ -43,7 +52,10 @@ export async function GET(event) {
 			// `null` is "whatever the instance says", which is a different answer from
 			// a limit that happens to equal it, and the field has to say which.
 			effectiveLimit: user.credit_limit ?? fallback,
-			spend: spend[user.id] ?? { inputTokens: 0, outputTokens: 0, cost: 0 }
+			effectivePeriod: (user.credit_period ?? period) as typeof period,
+			spend: user.credit_period
+				? spendSince(user.id, periodStart(user.credit_period as typeof period))
+				: (spend[user.id] ?? { inputTokens: 0, outputTokens: 0, cost: 0 })
 		}))
 	});
 }

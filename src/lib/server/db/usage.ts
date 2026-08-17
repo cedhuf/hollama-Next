@@ -14,7 +14,7 @@ import { getDb } from './index';
  * always finishes; the limit is asked about before the next one starts.
  */
 
-export type CreditPeriod = 'month' | 'week';
+export type CreditPeriod = 'month' | 'week' | 'day';
 
 const LIMIT = 'creditLimit';
 const PERIOD = 'creditPeriod';
@@ -35,8 +35,11 @@ export function setInstanceCreditLimit(value: number): void {
 		.run(LIMIT, String(Number.isFinite(value) && value > 0 ? value : 0));
 }
 
+const PERIODS: CreditPeriod[] = ['month', 'week', 'day'];
+
 export function creditPeriod(): CreditPeriod {
-	return getConfig(PERIOD) === 'week' ? 'week' : 'month';
+	const stored = getConfig(PERIOD) as CreditPeriod | null;
+	return stored && PERIODS.includes(stored) ? stored : 'month';
 }
 
 export function setCreditPeriod(period: CreditPeriod): void {
@@ -45,18 +48,20 @@ export function setCreditPeriod(period: CreditPeriod): void {
 			`INSERT INTO app_config (key, value) VALUES (?, ?)
 			 ON CONFLICT(key) DO UPDATE SET value = excluded.value`
 		)
-		.run(PERIOD, period === 'week' ? 'week' : 'month');
+		.run(PERIOD, PERIODS.includes(period) ? period : 'month');
 }
 
 /**
  * The first day of the period a moment falls in, as `YYYY-MM-DD`.
  *
- * Calendar months and ISO weeks (Monday), in UTC. UTC because the rows are
+ * Calendar months, ISO weeks (Monday) and plain days, in UTC. UTC because the rows are
  * written in UTC and a boundary that moves with the reader is a boundary two
  * people disagree about; for a monthly guardrail the hours of drift are noise.
  */
 export function periodStart(period: CreditPeriod, at = new Date()): string {
 	const date = new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()));
+	// A day is the row the usage is written into, so its start is that same day.
+	if (period === 'day') return date.toISOString().slice(0, 10);
 	if (period === 'month') date.setUTCDate(1);
 	else {
 		// getUTCDay(): Sunday is 0, and the week starts on Monday.
@@ -129,6 +134,21 @@ export function addUsage(userId: string, usage: Spend): void {
 		.run(userId, today(), usage.inputTokens, usage.outputTokens, usage.cost);
 }
 
+/** The period one account is measured over: its own when set, the instance's otherwise. */
+export function creditPeriodFor(userId: string): CreditPeriod {
+	const row = getDb().prepare('SELECT credit_period FROM users WHERE id = ?').get(userId) as
+		| { credit_period: string | null }
+		| undefined;
+	const own = row?.credit_period as CreditPeriod | null;
+	return own && PERIODS.includes(own) ? own : creditPeriod();
+}
+
+export function setCreditPeriodFor(userId: string, period: CreditPeriod | null): void {
+	getDb()
+		.prepare('UPDATE users SET credit_period = ? WHERE id = ?')
+		.run(period && PERIODS.includes(period) ? period : null, userId);
+}
+
 /** The allowance for one account: its own when set, the instance's otherwise. */
 export function creditLimitFor(userId: string): number {
 	const row = getDb().prepare('SELECT credit_limit FROM users WHERE id = ?').get(userId) as
@@ -154,5 +174,5 @@ export function setCreditLimit(userId: string, limit: number | null): void {
 export function isOverLimit(userId: string): boolean {
 	const limit = creditLimitFor(userId);
 	if (!limit) return false;
-	return spendSince(userId, periodStart(creditPeriod())).cost >= limit;
+	return spendSince(userId, periodStart(creditPeriodFor(userId))).cost >= limit;
 }

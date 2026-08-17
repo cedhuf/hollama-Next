@@ -63,9 +63,7 @@ export async function PUT(event) {
 	// The allowance everybody gets unless their own account says otherwise. Zero
 	// is no limit, and is what an instance nobody has configured has.
 	if (typeof body?.creditLimit === 'number') setInstanceCreditLimit(body.creditLimit);
-	if (body?.creditPeriod === 'month' || body?.creditPeriod === 'week') {
-		setCreditPeriod(body.creditPeriod);
-	}
+	if (['month', 'week', 'day'].includes(body?.creditPeriod)) setCreditPeriod(body.creditPeriod);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
 	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
 		setPersonaStoreMode(body.personaStoreMode);

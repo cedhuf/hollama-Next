@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import { requireUser } from '$lib/server/api';
 import {
 	creditLimitFor,
-	creditPeriod,
+	creditPeriodFor,
 	periodStart,
 	spendSince,
 	type CreditPeriod
@@ -20,7 +20,7 @@ import {
 export async function GET(event) {
 	const user = await requireUser(event);
 
-	const period = creditPeriod();
+	const period = creditPeriodFor(user.id);
 	const from = periodStart(period);
 
 	return json({
@@ -36,6 +36,6 @@ export async function GET(event) {
 function nextPeriodStart(period: CreditPeriod, from: string): string {
 	const start = new Date(`${from}T00:00:00.000Z`);
 	if (period === 'month') start.setUTCMonth(start.getUTCMonth() + 1);
-	else start.setUTCDate(start.getUTCDate() + 7);
+	else start.setUTCDate(start.getUTCDate() + (period === 'week' ? 7 : 1));
 	return start.toISOString();
 }

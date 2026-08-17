@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { Plus, Trash2, TriangleAlert, Wallet, X } from '@lucide/svelte';
+	import { ChevronDown, Plus, RotateCcw, Trash2, TriangleAlert, Wallet, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { quadInOut } from 'svelte/easing';
+	import { SvelteSet } from 'svelte/reactivity';
+	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -39,7 +42,9 @@
 		last_seen_at: string | null;
 		/** Null means the instance's allowance, which is what most accounts have. */
 		credit_limit: number | null;
+		credit_period: 'month' | 'week' | 'day' | null;
 		effectiveLimit: number;
+		effectivePeriod: 'month' | 'week' | 'day';
 		spend: { inputTokens: number; outputTokens: number; cost: number };
 	}
 
@@ -50,6 +55,8 @@
 	let instanceLimitField = $state('');
 	/** Shared models nobody has priced, which a limit in force turns into a hole. */
 	let unpriced = $state<{ serverId: string; label: string; models: string[] }[]>([]);
+	/** Which account has its allowance open. Folded by default, like a model's price. */
+	const opened = new SvelteSet<string>();
 	/** Until the first load settles, the empty state below would be a lie. */
 	let loading = $state(true);
 	let showCreate = $state(false);
@@ -90,8 +97,13 @@
 	 * figure changes.
 	 */
 	async function setLimit(user: UserRow, raw: string) {
-		const value = raw.trim() === '' ? null : Number(raw);
-		if (value !== null && !Number.isFinite(value)) return;
+		// A comma is the decimal separator most of Europe types, and a `number` field
+		// reports an empty value for it: typing "0,5" did not set a limit of a half,
+		// it silently put the account back on the instance's. Text field, both
+		// separators read, like every other price in the app.
+		const text = raw.trim().replace(',', '.');
+		const value = text === '' ? null : Number(text);
+		if (value !== null && (!Number.isFinite(value) || value < 0)) return;
 		await api(`/api/admin/users/${user.id}`, 'PUT', { creditLimit: value });
 		await load();
 	}
@@ -105,7 +117,8 @@
 	 * ends up set twice.
 	 */
 	async function saveInstance() {
-		const value = instanceLimitField.trim() === '' ? 0 : Number(instanceLimitField);
+		const text = instanceLimitField.trim().replace(',', '.');
+		const value = text === '' ? 0 : Number(text);
 		if (!Number.isFinite(value) || value < 0) return;
 		instanceLimit = value;
 		await api('/api/admin/config', 'PUT', { creditLimit: value, creditPeriod: period });
@@ -114,6 +127,25 @@
 
 	/** No ceiling, written as the one character that says exactly that. */
 	const UNLIMITED = '\u221e';
+
+	/** One account's own period, or back to the instance's when cleared. */
+	async function setPeriod(user: UserRow, value: string) {
+		await api(`/api/admin/users/${user.id}`, 'PUT', { creditPeriod: value || null });
+		await load();
+	}
+
+	/** Both fields back to following the instance, in one gesture. */
+	async function resetUser(user: UserRow) {
+		await api(`/api/admin/users/${user.id}`, 'PUT', { creditLimit: null, creditPeriod: null });
+		await load();
+	}
+
+	const periodLabel = (value: 'month' | 'week' | 'day') =>
+		value === 'week'
+			? $LL.creditPeriodWeek()
+			: value === 'day'
+				? $LL.creditPeriodDay()
+				: $LL.creditPeriodMonth();
 
 	const money = (value: number) =>
 		value.toLocaleString(undefined, { maximumFractionDigits: value < 1 ? 3 : 2 });
@@ -146,6 +178,65 @@
 
 <SettingsPanel>
 	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
+		<!-- Under the heading and above the rows it governs: an allowance is read as
+			     a property of this list, and a screen away from the column it fills in is
+			     how a number ends up set twice. Folded, because most instances never set
+			     one, and what it is set to is on the closed row. -->
+		<Collapsible
+			title={$LL.credits()}
+			description={$LL.creditsDescription()}
+			summary={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
+			icon={Wallet}
+		>
+			<div class="flex flex-wrap items-end gap-2">
+				<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+					<span class="text-muted">{$LL.creditLimitDefault()}</span>
+					<!-- Empty rather than a zero sitting in the field: "nobody has set one"
+					     and "somebody typed nought" read the same on screen, and only one of
+					     them is what an untouched instance has. -->
+					<input
+						class="settings-field tabular-nums"
+						type="text"
+						inputmode="decimal"
+						bind:value={instanceLimitField}
+						onchange={saveInstance}
+						placeholder={UNLIMITED}
+					/>
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					<span class="text-muted">{$LL.creditPeriod()}</span>
+					<Select
+						bind:value={period}
+						options={[
+							{ value: 'month', label: $LL.creditPeriodMonth() },
+							{ value: 'week', label: $LL.creditPeriodWeek() }
+						]}
+						onChange={saveInstance}
+					/>
+				</label>
+			</div>
+			<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
+
+			{#if unpriced.length}
+				<!-- Not a nicety. While a limit is in force these models are refused, and
+				     the reason is here rather than in a log the person who set the limit
+				     will never read. -->
+				<div class="flex flex-col gap-1 rounded-lg border border-warning/40 bg-warning/10 p-3">
+					<span class="flex items-center gap-1.5 text-sm font-medium text-active">
+						<TriangleAlert class="h-4 w-4 shrink-0" />
+						{$LL.unpricedModels()}
+					</span>
+					<p class="text-xs leading-relaxed text-muted">{$LL.unpricedModelsHelp()}</p>
+					{#each unpriced as entry (entry.serverId)}
+						<p class="text-xs text-muted">
+							<span class="text-active">{entry.label}</span>
+							<span class="font-mono">{entry.models.join(', ')}</span>
+						</p>
+					{/each}
+				</div>
+			{/if}
+		</Collapsible>
+
 		{#if loading}
 			<Skeleton variant="row" count={3} />
 		{/if}
@@ -171,6 +262,9 @@
 
 				<!-- What they have spent this period, and what they may. An empty field
 				     follows the instance; a figure overrides it; zero is no limit. -->
+				<!-- What this account has spent, and what it is allowed. The allowance
+				     itself is folded away: most accounts follow the instance, and a row of
+				     controls on every one of them is a list nobody can read down. -->
 				<div class="flex items-center gap-2 text-xs text-muted">
 					<span class="tabular-nums">
 						{$LL.usageSpent({ spent: money(user.spend.cost) })}
@@ -180,35 +274,85 @@
 					     reads as an allowance of nothing, which is the opposite. -->
 					<span class="opacity-60">
 						{user.effectiveLimit > 0 ? money(user.effectiveLimit) : UNLIMITED}
+						· {periodLabel(user.effectivePeriod)}
 					</span>
 
-					<div class="ml-auto flex items-center gap-1">
-						<input
-							class="settings-field no-spinner w-24 py-1 text-right text-xs tabular-nums"
-							type="number"
-							min="0"
-							step="0.01"
-							inputmode="decimal"
-							value={user.credit_limit ?? ''}
-							placeholder={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
-							aria-label="{user.email} · {$LL.creditLimit()}"
-							onchange={(e) => setLimit(user, e.currentTarget.value)}
+					<button
+						type="button"
+						onclick={() => (opened.has(user.id) ? opened.delete(user.id) : opened.add(user.id))}
+						aria-expanded={opened.has(user.id)}
+						class="ml-auto flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors hover:bg-shade-2 {user.credit_limit ==
+							null && user.credit_period == null
+							? 'text-muted'
+							: 'text-active'}"
+					>
+						<Wallet class="h-3 w-3" />
+						{user.credit_limit == null && user.credit_period == null
+							? $LL.creditLimitInherited()
+							: $LL.creditLimitOwn()}
+						<ChevronDown
+							class="h-3 w-3 transition-transform {opened.has(user.id) ? 'rotate-180' : ''}"
 						/>
-						<!-- Back to following the instance. A number field can be walked down
-						     to zero, and zero is a decision — "no limit at all" — not the
-						     absence of one, so there has to be a way out that is not a value. -->
-						<button
-							type="button"
-							disabled={user.credit_limit == null}
-							onclick={() => setLimit(user, '')}
-							title={$LL.creditLimitInherit()}
-							aria-label="{user.email} · {$LL.creditLimitInherit()}"
-							class="rounded-md p-1 text-muted transition-colors hover:text-active disabled:opacity-30"
-						>
-							<X class="h-3.5 w-3.5" />
-						</button>
-					</div>
+					</button>
 				</div>
+
+				{#if opened.has(user.id)}
+					<!-- The same two controls as the instance's, because it is the same
+					     decision made for one person. Empty and "follow the instance" are
+					     what an account has until somebody decides otherwise, and the note
+					     says which one is winning. -->
+					<div
+						class="flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
+						transition:slide={{ duration: 160, easing: quadInOut }}
+					>
+						<div class="flex flex-wrap items-end gap-2">
+							<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+								<span class="text-muted">{$LL.creditLimit()}</span>
+								<!-- The same box as the select beside it: `Select`'s trigger is
+								     `px-2.5 py-1.5 text-sm`, so a smaller field next to it lands a
+								     couple of pixels short and the row reads as broken. -->
+								<input
+									class="settings-field text-right tabular-nums"
+									type="text"
+									inputmode="decimal"
+									value={user.credit_limit ?? ''}
+									placeholder={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
+									aria-label="{user.email} · {$LL.creditLimit()}"
+									onchange={(e) => setLimit(user, e.currentTarget.value)}
+								/>
+							</label>
+
+							<label class="flex flex-col gap-1 text-sm">
+								<span class="text-muted">{$LL.creditPeriod()}</span>
+								<div class="w-52">
+									<Select
+										value={user.credit_period ?? ''}
+										options={[
+											{ value: '', label: $LL.creditPeriodInherit() },
+											{ value: 'month', label: $LL.creditPeriodMonth() },
+											{ value: 'week', label: $LL.creditPeriodWeek() },
+											{ value: 'day', label: $LL.creditPeriodDay() }
+										]}
+										onChange={(option) => setPeriod(user, option.value)}
+									/>
+								</div>
+							</label>
+						</div>
+
+						<p class="text-[11px] text-muted">{$LL.creditOverrideHelp()}</p>
+
+						{#if user.credit_limit != null || user.credit_period != null}
+							<button
+								type="button"
+								onclick={() => resetUser(user)}
+								class="flex items-center gap-1.5 self-start rounded-md border border-shade-3 px-2 py-1 text-[11px] text-muted transition-colors hover:border-shade-4 hover:text-active"
+							>
+								<RotateCcw class="h-3 w-3" />
+								{$LL.creditLimitInherit()}
+							</button>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		{/each}
 
@@ -252,64 +396,4 @@
 			</button>
 		{/if}
 	</SettingsSection>
-
-	<!-- After the accounts, and folded: an allowance is a rule about the list above
-	     rather than the first thing to read, and most instances never set one. What
-	     it is set to is on the closed row, so opening it is a decision. -->
-	<Collapsible
-		title={$LL.credits()}
-		description={$LL.creditsDescription()}
-		summary={instanceLimit > 0 ? money(instanceLimit) : unpriced.length ? '' : $LL.usageUnlimited()}
-		icon={Wallet}
-	>
-		<div class="flex flex-wrap items-end gap-2">
-			<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditLimitDefault()}</span>
-				<!-- Empty rather than a zero sitting in the field: "nobody has set one"
-				     and "somebody typed nought" read the same on screen, and only one of
-				     them is what an untouched instance has. -->
-				<input
-					class="settings-field no-spinner tabular-nums"
-					type="number"
-					min="0"
-					step="0.01"
-					inputmode="decimal"
-					bind:value={instanceLimitField}
-					onchange={saveInstance}
-					placeholder={UNLIMITED}
-				/>
-			</label>
-			<label class="flex flex-col gap-1 text-sm">
-				<span class="text-muted">{$LL.creditPeriod()}</span>
-				<Select
-					bind:value={period}
-					options={[
-						{ value: 'month', label: $LL.creditPeriodMonth() },
-						{ value: 'week', label: $LL.creditPeriodWeek() }
-					]}
-					onChange={saveInstance}
-				/>
-			</label>
-		</div>
-		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
-
-		{#if unpriced.length}
-			<!-- Not a nicety. While a limit is in force these models are refused, and
-			     the reason is here rather than in a log the person who set the limit
-			     will never read. -->
-			<div class="flex flex-col gap-1 rounded-lg border border-warning/40 bg-warning/10 p-3">
-				<span class="flex items-center gap-1.5 text-sm font-medium text-active">
-					<TriangleAlert class="h-4 w-4 shrink-0" />
-					{$LL.unpricedModels()}
-				</span>
-				<p class="text-xs leading-relaxed text-muted">{$LL.unpricedModelsHelp()}</p>
-				{#each unpriced as entry (entry.serverId)}
-					<p class="text-xs text-muted">
-						<span class="text-active">{entry.label}</span>
-						<span class="font-mono">{entry.models.join(', ')}</span>
-					</p>
-				{/each}
-			</div>
-		{/if}
-	</Collapsible>
 </SettingsPanel>

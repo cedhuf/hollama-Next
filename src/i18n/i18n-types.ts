@@ -2410,6 +2410,10 @@ type RootTranslation = {
 	 */
 	creditPeriod: string
 	/**
+	 * E​v​e​r​y​ ​d​a​y
+	 */
+	creditPeriodDay: string
+	/**
 	 * E​v​e​r​y​ ​c​a​l​e​n​d​a​r​ ​m​o​n​t​h
 	 */
 	creditPeriodMonth: string
@@ -2425,6 +2429,22 @@ type RootTranslation = {
 	 * F​o​l​l​o​w​ ​t​h​e​ ​i​n​s​t​a​n​c​e​ ​d​e​f​a​u​l​t
 	 */
 	creditLimitInherit: string
+	/**
+	 * I​n​s​t​a​n​c​e​ ​d​e​f​a​u​l​t
+	 */
+	creditLimitInherited: string
+	/**
+	 * O​w​n​ ​a​l​l​o​w​a​n​c​e
+	 */
+	creditLimitOwn: string
+	/**
+	 * I​n​s​t​a​n​c​e​ ​d​e​f​a​u​l​t
+	 */
+	creditPeriodInherit: string
+	/**
+	 * O​v​e​r​r​i​d​e​s​ ​t​h​e​ ​i​n​s​t​a​n​c​e​ ​d​e​f​a​u​l​t​ ​f​o​r​ ​t​h​i​s​ ​a​c​c​o​u​n​t​ ​o​n​l​y​.​ ​E​m​p​t​y​ ​f​o​l​l​o​w​s​ ​t​h​e​ ​i​n​s​t​a​n​c​e​.
+	 */
+	creditOverrideHelp: string
 	/**
 	 * D​e​f​a​u​l​t​ ​a​l​l​o​w​a​n​c​e
 	 */
@@ -5240,6 +5260,10 @@ The completion in progress will stop
 	 */
 	creditPeriod: () => LocalizedString
 	/**
+	 * Every day
+	 */
+	creditPeriodDay: () => LocalizedString
+	/**
 	 * Every calendar month
 	 */
 	creditPeriodMonth: () => LocalizedString
@@ -5255,6 +5279,22 @@ The completion in progress will stop
 	 * Follow the instance default
 	 */
 	creditLimitInherit: () => LocalizedString
+	/**
+	 * Instance default
+	 */
+	creditLimitInherited: () => LocalizedString
+	/**
+	 * Own allowance
+	 */
+	creditLimitOwn: () => LocalizedString
+	/**
+	 * Instance default
+	 */
+	creditPeriodInherit: () => LocalizedString
+	/**
+	 * Overrides the instance default for this account only. Empty follows the instance.
+	 */
+	creditOverrideHelp: () => LocalizedString
 	/**
 	 * Default allowance
 	 */

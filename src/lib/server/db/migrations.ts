@@ -292,6 +292,18 @@ const migrations: Migration[] = [
 			-- currencies together has to at least know it is doing it.
 			ALTER TABLE model_pricing ADD COLUMN currency TEXT;
 		`
+	},
+	{
+		version: 13,
+		up: `
+			-- An account's own period, when it is not the instance's.
+			--
+			-- Null means "whatever the instance says", the same answer its allowance
+			-- gives: raising or shortening the instance's period should move everyone
+			-- who never asked for anything else, and it cannot if inheriting were
+			-- recorded as a value.
+			ALTER TABLE users ADD COLUMN credit_period TEXT;
+		`
 	}
 ];
 

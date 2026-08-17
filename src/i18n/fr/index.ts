@@ -684,11 +684,17 @@ const fr = extendDictionary(en, {
 	creditsDescription:
 		'Un garde-fou contre une boucle qui s’emballe ou un onglet oublié, pas un système de facturation.',
 	creditPeriod: 'Remise à zéro',
+	creditPeriodDay: 'Chaque jour',
 	creditPeriodMonth: 'Chaque mois calendaire',
 	creditPeriodWeek: 'Chaque semaine',
 	creditsHelp:
 		'Zéro signifie sans limite. Chaque compte peut avoir le sien dans l’onglet Utilisateurs. Une conversation en cours n’est jamais interrompue : le plafond est vérifié avant le tour suivant, et un modèle sans tarif n’est pas compté du tout.',
 	creditLimitInherit: 'Suivre le plafond de l’instance',
+	creditLimitInherited: 'Plafond de l’instance',
+	creditLimitOwn: 'Plafond propre',
+	creditPeriodInherit: 'Celle de l’instance',
+	creditOverrideHelp:
+		'Remplace le réglage de l’instance pour ce compte seulement. Vide, il suit l’instance.',
 	creditLimitDefault: 'Plafond par défaut',
 	creditLimit: 'Plafond',
 	unpricedModels: 'Modèles partagés sans tarif',
