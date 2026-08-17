@@ -500,7 +500,7 @@
 					class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
 				>
 					<Store class="h-3.5 w-3.5" />
-					{$LL.playbookStoreBrowse()}
+					{$LL.playbookStore()}
 				</button>
 			</div>
 
@@ -526,8 +526,8 @@
 					<button
 						type="button"
 						onclick={() => (playbookStoreOpen = true)}
-						title={$LL.playbookStoreBrowse()}
-						aria-label={$LL.playbookStoreBrowse()}
+						title={$LL.playbookStore()}
+						aria-label={$LL.playbookStore()}
 						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
 					>
 						<Store class="h-4 w-4" />
@@ -705,8 +705,8 @@
 
 {#if editing}
 	<PersonaModal bind:open={modalOpen} bind:persona={editing} />
-	<PlaybookModal bind:open={playbookModalOpen} bind:playbook={editingPlaybook} />
-	<PlaybookStoreModal bind:open={playbookStoreOpen} />
 {/if}
 
 <PersonaStoreModal bind:open={storeOpen} />
+<PlaybookModal bind:open={playbookModalOpen} bind:playbook={editingPlaybook} />
+<PlaybookStoreModal bind:open={playbookStoreOpen} />

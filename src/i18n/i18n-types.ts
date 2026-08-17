@@ -1209,7 +1209,7 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
-	 * P​l​a​y​b​o​o​k​ ​s​t​o​r​e
+	 * P​l​a​y​b​o​o​k​s​ ​s​t​o​r​e
 	 */
 	playbookStore: string
 	/**
@@ -1229,10 +1229,6 @@ type RootTranslation = {
 	 * @param {string} name
 	 */
 	playbookInstalled: RequiredParams<'name'>
-	/**
-	 * B​r​o​w​s​e​ ​t​h​e​ ​p​l​a​y​b​o​o​k​ ​s​t​o​r​e
-	 */
-	playbookStoreBrowse: string
 	/**
 	 * S​t​o​r​e
 	 */
@@ -1457,7 +1453,7 @@ type RootTranslation = {
 	 */
 	sharedByAdmin: string
 	/**
-	 * P​e​r​s​o​n​a​ ​s​t​o​r​e
+	 * P​e​r​s​o​n​a​s​ ​s​t​o​r​e
 	 */
 	personaStore: string
 	/**
@@ -3896,7 +3892,7 @@ The completion in progress will stop
 	 */
 	playbooks: () => LocalizedString
 	/**
-	 * Playbook store
+	 * Playbooks store
 	 */
 	playbookStore: () => LocalizedString
 	/**
@@ -3915,10 +3911,6 @@ The completion in progress will stop
 	 * {name} installed
 	 */
 	playbookInstalled: (arg: { name: string }) => LocalizedString
-	/**
-	 * Browse the playbook store
-	 */
-	playbookStoreBrowse: () => LocalizedString
 	/**
 	 * Store
 	 */
@@ -4142,7 +4134,7 @@ The completion in progress will stop
 	 */
 	sharedByAdmin: () => LocalizedString
 	/**
-	 * Persona store
+	 * Personas store
 	 */
 	personaStore: () => LocalizedString
 	/**
