@@ -1,26 +1,15 @@
 import type { BundleAvatar } from '$lib/personaBundle';
+import { isSafeCatalogPath } from '$lib/store';
 
 /**
- * The contract of the persona store: its address and the shape of its listing.
+ * The shape of the persona catalogue's listing.
  *
- * Its own module because both sides of the app read it. The browser needs it to
- * draw and filter the catalogue, and the server route that fetches on an
- * instance's behalf needs the address. Neither should have to import the other's
- * machinery to get at a constant, which is the same reason `data/keys` exists.
+ * Its own module because both sides of the app read it. The address it used to
+ * carry now lives in `store`, which is the one place a store is addressed from,
+ * whatever it holds.
  *
  * Nothing here touches a store or the browser, so it is safe to import anywhere.
  */
-
-/**
- * Where the personas live.
- *
- * Served from the documentation site, which is published from this repository
- * and already sits behind a domain of ours. Moving the store to a repository of
- * its own later changes this line and nothing else: every path in the listing is
- * relative to this address, so no installed persona and no cached listing has to
- * be migrated.
- */
-export const DEFAULT_PERSONA_STORE = 'https://llooma.eu/personas/';
 
 /** Where a persona came from, as the listing declares it. */
 export type CatalogOrigin = 'official' | 'community';
@@ -68,14 +57,6 @@ export interface Catalog {
 	entries: CatalogEntry[];
 	/** When the entries were fetched, or read back from the cache. */
 	fetchedAt: string;
-}
-
-/**
- * A path is joined onto the store's address, so one that escaped it would let a
- * listing point the app anywhere. It cannot be absolute and it cannot climb.
- */
-export function isSafeCatalogPath(path: string): boolean {
-	return !!path && !path.includes('..') && !path.includes('://') && !path.startsWith('/');
 }
 
 function parseEntry(value: unknown): CatalogEntry | undefined {

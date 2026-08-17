@@ -7,14 +7,14 @@ import {
 	getConfig,
 	personaAutoUpdateForced,
 	personaStoreMode,
-	personaStoreUrl,
 	resetOnboarding,
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
 	setPersonaAutoUpdateForced,
 	setPersonaStoreMode,
-	setPersonaStoreUrl,
+	setStoreUrl,
+	storeUrl,
 	themeSharing
 } from '$lib/server/db/config';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
@@ -30,7 +30,7 @@ export async function GET(event) {
 		themeMode: getConfig('themeMode') ?? 'system',
 		themeStyle: getConfig('themeStyle') ?? 'classic',
 		onboardingEpoch: Number(getConfig('onboardingEpoch') ?? 0),
-		personaStoreUrl: personaStoreUrl() ?? '',
+		storeUrl: storeUrl() ?? '',
 		searchUrl: getConfig('searchUrl') ?? '',
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
 		searchSharing: getConfig('searchSharing') ?? 'off',
@@ -71,7 +71,7 @@ export async function PUT(event) {
 	if (typeof body?.personaAutoUpdateForced === 'boolean') {
 		setPersonaAutoUpdateForced(body.personaAutoUpdateForced);
 	}
-	if (typeof body?.personaStoreUrl === 'string') setPersonaStoreUrl(body.personaStoreUrl);
+	if (typeof body?.storeUrl === 'string') setStoreUrl(body.storeUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {
 		setConfig('searchBackend', body.searchBackend);

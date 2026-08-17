@@ -1209,6 +1209,34 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * S​t​o​r​e
+	 */
+	store: string
+	/**
+	 * W​h​e​r​e​ ​p​e​r​s​o​n​a​s​,​ ​p​l​a​y​b​o​o​k​s​ ​a​n​d​ ​a​n​y​t​h​i​n​g​ ​e​l​s​e​ ​i​n​s​t​a​l​l​a​b​l​e​ ​a​r​e​ ​r​e​a​d​ ​f​r​o​m​.​ ​O​n​e​ ​a​d​d​r​e​s​s​ ​f​o​r​ ​a​l​l​ ​o​f​ ​t​h​e​m​.
+	 */
+	storeDescription: string
+	/**
+	 * S​t​o​r​e​ ​a​d​d​r​e​s​s
+	 */
+	storeUrl: string
+	/**
+	 * L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​.​ ​A​ ​c​l​o​s​e​d​ ​n​e​t​w​o​r​k​ ​c​a​n​ ​p​o​i​n​t​ ​t​h​i​s​ ​a​t​ ​i​t​s​ ​o​w​n​ ​m​i​r​r​o​r​:​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​s​ ​a​r​e​ ​f​o​l​d​e​r​s​ ​u​n​d​e​r​ ​t​h​i​s​ ​a​d​d​r​e​s​s​.
+	 */
+	storeUrlHelp: string
+	/**
+	 * U​p​d​a​t​e​ ​p​l​a​y​b​o​o​k​s​ ​a​u​t​o​m​a​t​i​c​a​l​l​y
+	 */
+	playbookAutoUpdate: string
+	/**
+	 * T​a​k​e​ ​a​ ​n​e​w​ ​r​e​v​i​s​i​o​n​ ​a​s​ ​s​o​o​n​ ​a​s​ ​i​t​ ​i​s​ ​p​u​b​l​i​s​h​e​d​,​ ​f​o​r​ ​t​h​e​ ​p​l​a​y​b​o​o​k​s​ ​y​o​u​ ​h​a​v​e​ ​n​o​t​ ​e​d​i​t​e​d​.​ ​Y​o​u​r​s​ ​a​r​e​ ​n​e​v​e​r​ ​o​v​e​r​w​r​i​t​t​e​n​.
+	 */
+	playbookAutoUpdateHelp: string
+	/**
+	 * P​r​o​c​e​d​u​r​e​s​ ​y​o​u​ ​i​n​s​t​a​l​l​,​ ​a​n​d​ ​w​h​a​t​ ​h​a​p​p​e​n​s​ ​w​h​e​n​ ​t​h​e​ ​s​t​o​r​e​ ​p​u​b​l​i​s​h​e​s​ ​a​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​o​f​ ​o​n​e​.
+	 */
+	playbookStoreDescription: string
+	/**
 	 * S​w​i​t​c​h​ ​a​ ​p​r​o​c​e​d​u​r​e​ ​o​n​ ​o​r​ ​o​f​f​ ​f​o​r​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
 	 */
 	playbooksCommandDescription: string
@@ -3842,6 +3870,34 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * Store
+	 */
+	store: () => LocalizedString
+	/**
+	 * Where personas, playbooks and anything else installable are read from. One address for all of them.
+	 */
+	storeDescription: () => LocalizedString
+	/**
+	 * Store address
+	 */
+	storeUrl: () => LocalizedString
+	/**
+	 * Leave empty for the public store. A closed network can point this at its own mirror: the catalogues are folders under this address.
+	 */
+	storeUrlHelp: () => LocalizedString
+	/**
+	 * Update playbooks automatically
+	 */
+	playbookAutoUpdate: () => LocalizedString
+	/**
+	 * Take a new revision as soon as it is published, for the playbooks you have not edited. Yours are never overwritten.
+	 */
+	playbookAutoUpdateHelp: () => LocalizedString
+	/**
+	 * Procedures you install, and what happens when the store publishes a new version of one.
+	 */
+	playbookStoreDescription: () => LocalizedString
 	/**
 	 * Switch a procedure on or off for this conversation
 	 */

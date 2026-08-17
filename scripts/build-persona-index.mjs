@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 // modified. Node reads TypeScript directly, so importing it costs nothing.
 import { bundleAuthored, contentDigest } from '../src/lib/personaDigest.ts';
 
-const ROOT = fileURLToPath(new URL('../personas/', import.meta.url));
+const ROOT = fileURLToPath(new URL('../store/personas/', import.meta.url));
 const BUNDLES = join(ROOT, 'bundles');
 const INDEX = join(ROOT, 'index.json');
 
@@ -116,11 +116,11 @@ const index = JSON.stringify({ format: 'llooma.personas', version: 1, entries },
 if (process.argv.includes('--check')) {
 	const current = readFileSync(INDEX, 'utf8');
 	if (current !== index) {
-		console.error('personas/index.json is out of date. Run `pnpm personas:index`.');
+		console.error('store/personas/index.json is out of date. Run `pnpm personas:index`.');
 		process.exit(1);
 	}
-	console.log(`personas/index.json is up to date (${entries.length} personas).`);
+	console.log(`store/personas/index.json is up to date (${entries.length} personas).`);
 } else {
 	writeFileSync(INDEX, index);
-	console.log(`Wrote personas/index.json (${entries.length} personas).`);
+	console.log(`Wrote store/personas/index.json (${entries.length} personas).`);
 }

@@ -80,7 +80,7 @@ export async function saveStoreUrl(url: string): Promise<void> {
 	await fetch('/api/admin/config', {
 		method: 'PUT',
 		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ personaStoreUrl: url })
+		body: JSON.stringify({ storeUrl: url })
 	});
 	serverPersonas.update((c) => (c ? { ...c, storeUrl: url } : c));
 }

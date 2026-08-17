@@ -1,20 +1,10 @@
 /**
- * The contract of the playbook store: its address and the shape of its listing.
+ * The shape of the playbook catalogue's listing.
  *
  * Its own module because both sides of the app read it, the same reason
- * `personaStore` exists. Nothing here touches a store or the browser, so it is
- * safe to import anywhere.
+ * `personaStore` exists. The address is not here: there is one store, addressed
+ * from `store`, and this is one of the catalogues under it.
  */
-
-/**
- * Where the playbooks live.
- *
- * Served from the documentation site, which is published from this repository
- * and already sits behind a domain of ours. Moving the store to a repository of
- * its own later changes this line and nothing else: every path in the listing is
- * relative to this address.
- */
-export const DEFAULT_PLAYBOOK_STORE = 'https://llooma.eu/playbooks/';
 
 export type CatalogOrigin = 'official' | 'community';
 

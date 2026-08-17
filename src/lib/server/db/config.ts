@@ -77,26 +77,21 @@ export function setPersonaAutoUpdateForced(value: boolean): void {
 }
 
 /**
- * Where the persona store is read from.
+ * Where the store is read from.
  *
  * The instance's, not each person's: the server is what fetches it, so the
- * address has to be one an administrator sets. `PERSONA_STORE_URL` seeds it for
- * a deployment that would rather not click, and the admin panel overrides it.
+ * address has to be one an administrator sets. `STORE_URL` seeds it for a
+ * deployment that would rather not click, and the admin panel overrides it.
+ *
+ * One address for every catalogue under it — personas, playbooks, and whatever
+ * follows. Somebody running a mirror moves one folder and changes one field.
  */
-export function personaStoreUrl(): string | undefined {
-	return getConfig('personaStoreUrl')?.trim() || undefined;
+export function storeUrl(): string | undefined {
+	return getConfig('storeUrl')?.trim() || undefined;
 }
 
-export function setPersonaStoreUrl(value: string): void {
-	setConfig('personaStoreUrl', value.trim());
-}
-
-export function playbookStoreUrl(): string | undefined {
-	return getConfig('playbookStoreUrl')?.trim() || undefined;
-}
-
-export function setPlaybookStoreUrl(value: string): void {
-	setConfig('playbookStoreUrl', value.trim());
+export function setStoreUrl(value: string): void {
+	setConfig('storeUrl', value.trim());
 }
 
 /**

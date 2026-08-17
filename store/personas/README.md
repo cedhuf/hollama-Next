@@ -5,7 +5,7 @@ the app fetches this folder over the network, which is why adding a persona is a
 file in a pull request rather than a release.
 
 Served from the documentation site, so the public address of this folder is
-<https://llooma.eu/personas/>. The docs workflow copies it into the site before
+<https://llooma.eu/store/personas/>. The docs workflow copies it into the site before
 building.
 
 ## Layout

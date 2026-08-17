@@ -1,15 +1,15 @@
 import { json } from '@sveltejs/kit';
 
 import { env as privateEnv } from '$env/dynamic/private';
-import { DEFAULT_PERSONA_STORE } from '$lib/personaStore';
 import { requireUser } from '$lib/server/api';
 import {
 	allowUserPersonas,
 	personaAutoUpdateForced,
 	personaStoreMode,
-	personaStoreUrl
+	storeUrl
 } from '$lib/server/db/config';
 import { sharedCatalogIds, sharedPersonas } from '$lib/server/db/sharedPersonas';
+import { DEFAULT_STORE } from '$lib/store';
 
 export async function GET(event) {
 	const user = await requireUser(event);
@@ -30,7 +30,7 @@ export async function GET(event) {
 		storeMode: isAdmin ? 'open' : personaStoreMode(),
 		canShare: isAdmin,
 		autoUpdateForced: personaAutoUpdateForced(),
-		storeUrl: personaStoreUrl() ?? privateEnv.PERSONA_STORE_URL ?? DEFAULT_PERSONA_STORE,
+		storeUrl: storeUrl() ?? privateEnv.STORE_URL ?? DEFAULT_STORE,
 		canEditStore: isAdmin
 	});
 }

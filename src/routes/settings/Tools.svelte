@@ -8,8 +8,8 @@
 	import { documentsDisabledByInstance } from '$lib/documents';
 	import { settingsStore } from '$lib/localStorage';
 	import { personasConfig, saveStoreUrl } from '$lib/personasConfig';
-	import { DEFAULT_PERSONA_STORE } from '$lib/personaStore';
 	import { searchConfig } from '$lib/search';
+	import { DEFAULT_STORE } from '$lib/store';
 	import { webFetchConfig } from '$lib/webFetch';
 
 	import SettingsBadge from './SettingsBadge.svelte';
@@ -39,13 +39,11 @@
 	 * the writer are read separately rather than both from the settings store.
 	 */
 	const storeEditable = $derived(!isServerMode || $personasConfig.canEditStore);
-	const storeValue = $derived(
-		isServerMode ? $personasConfig.storeUrl : $settingsStore.personaStoreUrl
-	);
+	const storeValue = $derived(isServerMode ? $personasConfig.storeUrl : $settingsStore.storeUrl);
 
 	function setStoreUrl(value: string) {
 		if (isServerMode) void saveStoreUrl(value);
-		else $settingsStore.personaStoreUrl = value;
+		else $settingsStore.storeUrl = value;
 	}
 
 	// System-instruction editor: one prompt shown at a time. The textarea reflects the
@@ -191,25 +189,29 @@
 		<SettingsHint>{$LL.webFetchHint()}</SettingsHint>
 	</SettingsSection>
 
-	<SettingsSection title={$LL.personas()} description={$LL.personaStoreDescription()} card>
+	<!-- The store, once: one address serves every catalogue under it, so mirroring
+	     it is one folder and one field rather than one of each per kind. -->
+	<SettingsSection title={$LL.store()} description={$LL.storeDescription()} card>
 		{#snippet badge()}
 			{#if isServerMode && !$personasConfig.canEditStore}
 				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 			{/if}
 		{/snippet}
 
-		<SettingsField label={$LL.personaStoreUrl()}>
+		<SettingsField label={$LL.storeUrl()}>
 			<input
 				class="settings-field disabled:opacity-60"
 				disabled={!storeEditable}
 				value={storeValue}
-				placeholder={DEFAULT_PERSONA_STORE}
+				placeholder={DEFAULT_STORE}
 				spellcheck="false"
 				onchange={(e) => setStoreUrl(e.currentTarget.value)}
 			/>
 		</SettingsField>
-		<SettingsHint>{$LL.personaStoreUrlHelp()}</SettingsHint>
+		<SettingsHint>{$LL.storeUrlHelp()}</SettingsHint>
+	</SettingsSection>
 
+	<SettingsSection title={$LL.personas()} description={$LL.personaStoreDescription()} card>
 		<!-- Forced by the instance: shown as on and not offered, rather than hidden,
 		     so the behaviour is explained rather than merely happening. -->
 		<FieldCheckbox

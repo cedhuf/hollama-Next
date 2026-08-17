@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 
-import { isSafeCatalogPath } from '$lib/personaStore';
+import { isSafeCatalogPath } from '$lib/store';
 
 /**
  * A store, read by the instance rather than by each browser.
@@ -16,11 +16,10 @@ import { isSafeCatalogPath } from '$lib/personaStore';
  * bundles are validated where they are used, which is the client, and doing it
  * twice would mean two shapes to keep in step.
  *
- * Written once for both stores. They differ in their address and in what they
- * are called in an error message; everything else — the path check that keeps
- * this from being an open proxy, the held copy, the fallback to a stale copy
- * when the store is unreachable — is the same code, and the second store was the
- * moment to stop copying it.
+ * Its own module rather than the body of the route, so the route is the address
+ * and nothing else. The path check that keeps this from being an open proxy, the
+ * held copy and the fallback to a stale one when the store is unreachable are
+ * all here.
  */
 
 /**

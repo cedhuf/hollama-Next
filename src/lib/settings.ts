@@ -115,13 +115,14 @@ export interface Settings {
 	promptOverrides: Partial<Record<PromptKey, string>>;
 	systemPrompts: SystemPrompts;
 	/**
-	 * Where to read the persona store, when it is not the public one.
+	 * Where to read the store, when it is not the public one.
 	 *
-	 * Empty means `DEFAULT_PERSONA_STORE`. A closed network points this at its own
-	 * mirror; nothing else needs to change, because every path in the listing is
-	 * relative to this address.
+	 * Empty means `DEFAULT_STORE`. One address for every catalogue under it, so a
+	 * closed network mirroring it moves one folder and changes one field. Nothing
+	 * else needs to change: every path in every listing is relative to its own
+	 * catalogue.
 	 */
-	personaStoreUrl: string;
+	storeUrl: string;
 	/** How the persona store draws its entries: cards to browse, rows to scan. */
 	personaStoreLayout: 'grid' | 'list';
 	/**
@@ -132,15 +133,6 @@ export interface Settings {
 	 * update, it is a loss; those keep being offered rather than applied.
 	 */
 	personaAutoUpdate: boolean;
-	/**
-	 * Where to read the playbook store, when it is not the public one.
-	 *
-	 * Empty means `DEFAULT_PLAYBOOK_STORE`. Its own setting rather than one
-	 * address for both: the two stores are separate folders today and separate
-	 * repositories tomorrow, and an instance mirroring one has no reason to be
-	 * forced to mirror the other.
-	 */
-	playbookStoreUrl: string;
 	/** Take a new revision of an installed playbook, for the ones you have not touched. */
 	playbookAutoUpdate: boolean;
 	/**
@@ -304,10 +296,9 @@ export const DEFAULT_SETTINGS: Settings = {
 	sendCurrentDate: true,
 	promptOverrides: {},
 	systemPrompts: { global: '', perModel: {} },
-	personaStoreUrl: '',
+	storeUrl: '',
 	personaStoreLayout: 'grid',
 	personaAutoUpdate: false,
-	playbookStoreUrl: '',
 	playbookAutoUpdate: false,
 	mentionsSequential: true,
 	knowledgeCollections: [],

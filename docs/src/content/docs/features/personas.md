@@ -108,7 +108,7 @@ There is no language filter, and that is a decision rather than an omission. A p
 one language and answers in whichever you ask it to, so what it happens to be written in tells you
 nothing about whether it is for you. Models stopped being monolingual; the filter followed.
 
-The public store is served from this site, at [llooma.eu/personas](/personas/), and its contents
+The public store is served from this site, at [llooma.eu/store](/store/personas/index.json), and its contents
 live in the
 [`personas/` folder of the repository](https://github.com/cedhuf/llooma/tree/main/personas).
 

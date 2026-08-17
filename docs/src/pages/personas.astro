@@ -13,7 +13,7 @@ import { PERSONA_GLYPHS } from '../../../src/lib/personaGlyphs';
 // Written into `public/` by `scripts/copy-personas.mjs`, which the dev and build
 // scripts both run first. The listing is generated from the bundles, so this page
 // cannot describe a persona the store does not actually serve.
-import index from '../../public/personas/index.json';
+import index from '../../public/store/personas/index.json';
 
 const glyphs = Object.fromEntries(PERSONA_GLYPHS.map((glyph) => [glyph.id, glyph.body]));
 
@@ -61,7 +61,7 @@ const description = 'The personas you can install into Llooma, and how to add on
 						<p class="persona-meta">
 							<span>{entry.origin}</span>
 							{entry.author && <span>{entry.author}</span>}
-							<a href={`/personas/${entry.path}`}>bundle</a>
+							<a href={`/store/personas/${entry.path}`}>bundle</a>
 						</p>
 					</div>
 				</article>
@@ -76,7 +76,7 @@ const description = 'The personas you can install into Llooma, and how to add on
 			><code>personas/bundles/</code></a
 		>, run <code>pnpm personas:index</code>, and open a pull request. The format, the avatar glyphs
 		and the rules are documented in the
-		<a href="https://github.com/cedhuf/llooma/blob/main/personas/README.md">folder's README</a>.
+		<a href="https://github.com/cedhuf/llooma/blob/main/store/personas/README.md">folder's README</a>.
 	</p>
 
 	<p>

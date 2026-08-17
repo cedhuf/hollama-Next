@@ -7,13 +7,13 @@ import { playbooksStore, settingsStore } from '$lib/localStorage';
 import { playbookDigest } from '$lib/playbookDigest';
 import { newPlaybook, pickPlaybookColor, savePlaybook, type Playbook } from '$lib/playbooks';
 import {
-	DEFAULT_PLAYBOOK_STORE,
 	parsePlaybookBundle,
 	parsePlaybookIndex,
 	type PlaybookBundle,
 	type PlaybookCatalog,
 	type PlaybookCatalogEntry
 } from '$lib/playbookStore';
+import { catalogBase } from '$lib/store';
 
 /**
  * The store of playbooks you can install, which is not part of the application.
@@ -46,10 +46,7 @@ const state = writable<PlaybookCatalogState>({ status: 'idle' });
 export const playbookCatalogState = { subscribe: state.subscribe };
 
 function base(): string {
-	if (isServer) return '/api/playbooks/catalog/';
-	const configured = get(settingsStore).playbookStoreUrl?.trim();
-	const url = configured || DEFAULT_PLAYBOOK_STORE;
-	return url.endsWith('/') ? url : `${url}/`;
+	return catalogBase('playbooks', isServer, get(settingsStore).storeUrl);
 }
 
 function readCache(): PlaybookCatalog | undefined {

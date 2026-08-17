@@ -8,12 +8,8 @@ import { applyBundleToPersona, parsePersonaBundle, type PersonaBundle } from '$l
 import { personaOrigin } from '$lib/personas';
 import { personasConfig } from '$lib/personasConfig';
 import { personaState } from '$lib/personaState';
-import {
-	DEFAULT_PERSONA_STORE,
-	parseCatalogIndex,
-	type Catalog,
-	type CatalogEntry
-} from '$lib/personaStore';
+import { parseCatalogIndex, type Catalog, type CatalogEntry } from '$lib/personaStore';
+import { catalogBase } from '$lib/store';
 
 /**
  * The store of personas you can install, which is not part of the application.
@@ -56,10 +52,7 @@ export const catalogState = { subscribe: state.subscribe };
  * than by each person.
  */
 function base(): string {
-	if (isServer) return '/api/personas/catalog/';
-	const configured = get(settingsStore).personaStoreUrl?.trim();
-	const url = configured || DEFAULT_PERSONA_STORE;
-	return url.endsWith('/') ? url : `${url}/`;
+	return catalogBase('personas', isServer, get(settingsStore).storeUrl);
 }
 
 function readCache(): Catalog | undefined {

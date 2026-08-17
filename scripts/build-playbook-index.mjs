@@ -31,7 +31,7 @@ const playbookDigest = (playbook) =>
 		tags: playbook.tags
 	});
 
-const ROOT = fileURLToPath(new URL('../playbooks/', import.meta.url));
+const ROOT = fileURLToPath(new URL('../store/playbooks/', import.meta.url));
 const BUNDLES = join(ROOT, 'bundles');
 const INDEX = join(ROOT, 'index.json');
 
@@ -100,11 +100,11 @@ const index =
 if (process.argv.includes('--check')) {
 	const current = readFileSync(INDEX, 'utf8');
 	if (current !== index) {
-		console.error('playbooks/index.json is out of date. Run `pnpm playbooks:index`.');
+		console.error('store/playbooks/index.json is out of date. Run `pnpm playbooks:index`.');
 		process.exit(1);
 	}
-	console.log(`playbooks/index.json is up to date (${entries.length} playbooks).`);
+	console.log(`store/playbooks/index.json is up to date (${entries.length} playbooks).`);
 } else {
 	writeFileSync(INDEX, index);
-	console.log(`Wrote playbooks/index.json (${entries.length} playbooks).`);
+	console.log(`Wrote store/playbooks/index.json (${entries.length} playbooks).`);
 }

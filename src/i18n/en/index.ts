@@ -313,6 +313,18 @@ const en = {
 	noMatches: 'No matches',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	store: 'Store',
+	storeDescription:
+		'Where personas, playbooks and anything else installable are read from. One address for all of them.',
+	storeUrl: 'Store address',
+	storeUrlHelp:
+		'Leave empty for the public store. A closed network can point this at its own mirror: the catalogues are folders under this address.',
+	playbookAutoUpdate: 'Update playbooks automatically',
+	playbookAutoUpdateHelp:
+		'Take a new revision as soon as it is published, for the playbooks you have not edited. Yours are never overwritten.',
+	playbookStoreDescription:
+		'Procedures you install, and what happens when the store publishes a new version of one.',
+
 	playbooksCommandDescription: 'Switch a procedure on or off for this conversation',
 	playbooksInUse: '{count:number} {{playbook|playbooks}} in use',
 	playbooksEmpty: 'No playbooks yet. Write one in the Library, or install one from the store.',

@@ -306,6 +306,18 @@ const fr = extendDictionary(en, {
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	store: 'Store',
+	storeDescription:
+		'Où sont lus les personas, les playbooks et tout ce qui s\u2019installe. Une seule adresse pour tout.',
+	storeUrl: 'Adresse du store',
+	storeUrlHelp:
+		'Laisser vide pour le store public. Un réseau fermé peut pointer vers son propre miroir : les catalogues sont des dossiers sous cette adresse.',
+	playbookAutoUpdate: 'Mettre à jour les playbooks automatiquement',
+	playbookAutoUpdateHelp:
+		'Prendre une nouvelle révision dès sa publication, pour les playbooks que vous n\u2019avez pas modifiés. Les vôtres ne sont jamais écrasés.',
+	playbookStoreDescription:
+		'Les procédures que vous installez, et ce qui se passe quand le store en publie une nouvelle version.',
+
 	playbooksCommandDescription: 'Activer ou désactiver une procédure pour cette conversation',
 	playbooksInUse: '{count} playbook{{s}} en service',
 	playbooksEmpty:
