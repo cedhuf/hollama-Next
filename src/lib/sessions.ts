@@ -137,6 +137,16 @@ export interface Session {
 	title?: string;
 	/** True once the user edits the system prompt by hand — stops auto-resolution. */
 	systemPromptEdited?: boolean;
+	/**
+	 * True once someone typed the title themselves.
+	 *
+	 * Which stops anything from writing over it. Nothing distinguished a name the
+	 * model wrote from a name a person chose, so renaming a conversation and then
+	 * letting it be named again would have silently thrown the choice away.
+	 */
+	titleEdited?: boolean;
+	/** Set once the conversation has been named again, so it happens once and not on a loop. */
+	titleRegenerated?: boolean;
 	/** Set when this conversation belongs to a persona (Library). */
 	personaId?: string;
 	/** Pinned to the top of the sidebar, regardless of recency. */

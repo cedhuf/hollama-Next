@@ -25,6 +25,23 @@ Titles and automatic compaction moved with the turn, for the same reason. A firs
 landed while the tab was closed used to come back untitled; now the conversation is named whether
 or not anyone was watching.
 
+### Naming it again
+
+The first title is written from a single message, before anything has been answered, so it names
+the question rather than the conversation. _Settings → Chat → Naming_ can give it a second name a
+few exchanges in, once there is something to name. Off by default.
+
+Two rules make it useful rather than distracting:
+
+- **Once.** A conversation whose name keeps changing stops being something you recognise in the
+  sidebar, which is the only thing a title is for.
+- **Never over a name you typed.** Renaming a conversation marks it as yours, and nothing writes
+  over it after that.
+
+In server mode it travels with the rest of the naming configuration: an admin sets it for
+themselves and shares it under _Settings → Admin → Title generation_, like the model that writes
+the titles.
+
 ## Stop still stops
 
 The stop button reaches the run wherever it is. What the model had already written is kept, as it

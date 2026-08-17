@@ -42,6 +42,21 @@ export interface Settings {
 	defaultModel: string | null;
 	generateTitlesWithAI: boolean;
 	titleModel: string | null;
+	/**
+	 * Name the conversation again once it has grown into one.
+	 *
+	 * The first title is written from a single question, before anything has been
+	 * answered, so it names the question rather than the conversation. A few
+	 * exchanges later there is something to name.
+	 *
+	 * Once, and only once. A conversation whose name changes every other message is
+	 * worse than one badly named: the sidebar stops being somewhere you recognise
+	 * things. And never over a title someone typed, which is what `titleEdited` on
+	 * the conversation is for.
+	 */
+	regenerateTitle: boolean;
+	/** How many replies before it is named again. */
+	regenerateTitleAfter: number;
 	/** Model that writes compaction summaries. Empty = the conversation's own model. */
 	compactModel: string | null;
 	/** Compact on its own once the conversation crosses `compactThreshold`. */
@@ -255,6 +270,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	notifiedUpdateVersion: '',
 	defaultModel: null,
 	generateTitlesWithAI: false,
+	regenerateTitle: false,
+	regenerateTitleAfter: 3,
 	titleModel: null,
 	compactModel: null,
 	autoCompact: false,

@@ -12,9 +12,18 @@ export interface ChatDefaultsView {
 		generateTitlesWithAI: boolean;
 		titleModel: string;
 		titleServerId: string;
+		/** Name the conversation again once it has grown into one. Once, not on a loop. */
+		regenerateTitle: boolean;
+		regenerateTitleAfter: number;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { generateTitlesWithAI: boolean; titleModel: string; titleServerId: string };
+		admin: {
+			generateTitlesWithAI: boolean;
+			titleModel: string;
+			titleServerId: string;
+			regenerateTitle: boolean;
+			regenerateTitleAfter: number;
+		};
 	};
 	compact: {
 		compactModel: string;
@@ -59,9 +68,17 @@ export const chatDefaultsConfig = derived(
 				generateTitlesWithAI: $s.generateTitlesWithAI,
 				titleModel: $s.titleModel ?? '',
 				titleServerId: '',
+				regenerateTitle: $s.regenerateTitle,
+				regenerateTitleAfter: $s.regenerateTitleAfter,
 				editable: true,
 				source: 'user',
-				admin: { generateTitlesWithAI: false, titleModel: '', titleServerId: '' }
+				admin: {
+					generateTitlesWithAI: false,
+					titleModel: '',
+					titleServerId: '',
+					regenerateTitle: false,
+					regenerateTitleAfter: 3
+				}
 			},
 			compact: {
 				compactModel: $s.compactModel ?? '',
@@ -97,6 +114,8 @@ export const chatDefaultsConfig = derived(
 						generateTitlesWithAI: $s.generateTitlesWithAI,
 						titleModel: $s.titleModel,
 						titleServerId: '',
+						regenerateTitle: $s.regenerateTitle,
+						regenerateTitleAfter: $s.regenerateTitleAfter,
 						source: 'user' as const
 					}
 				: { ...$srv.title, ...$srv.title.admin };

@@ -273,6 +273,11 @@ const fr = extendDictionary(en, {
 	defaultModel: 'Modèle par défaut',
 	titleModel: 'Modèle pour les titres',
 	generateTitlesWithAI: 'Générer les titres par IA',
+	regenerateTitle: "Renommer la conversation une fois qu'elle a pris forme",
+	regenerateTitleHelp:
+		"Le premier titre est écrit à partir d'un seul message, avant toute réponse : il nomme la question, pas la conversation. Ceci lui donne un second nom après quelques échanges. Une seule fois, et jamais par-dessus un titre que vous avez saisi.",
+	regenerateTitleAfter: 'Après combien de réponses',
+	regenerateTitleAfterValue: '{count:number} réponse{{s}}',
 	generateTitlesWithAIHelp:
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
 	serverSideGeneration: 'Générer sur le serveur',

@@ -120,6 +120,12 @@ export async function PUT(event) {
 		setConfig('titleEnabled', body.titleEnabled ? 'true' : 'false');
 	}
 	if (typeof body?.titleModel === 'string') setConfig('titleModel', body.titleModel);
+	if (typeof body?.titleRegenerate === 'boolean') {
+		setConfig('titleRegenerate', body.titleRegenerate ? 'true' : 'false');
+	}
+	if (Number.isFinite(body?.titleRegenerateAfter)) {
+		setConfig('titleRegenerateAfter', String(body.titleRegenerateAfter));
+	}
 	if (typeof body?.titleServerId === 'string') setConfig('titleServerId', body.titleServerId);
 
 	// Compaction: the admin shares the model that writes the summaries, plus the

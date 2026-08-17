@@ -28,7 +28,14 @@
 		!!session.systemPromptEdited && resolvedDefault !== session.systemPrompt.content
 	);
 
+	/**
+	 * A title typed here is yours, and is marked as such.
+	 *
+	 * Which is what stops the app naming the conversation again over the top of it.
+	 * Nothing else distinguished a name the model wrote from a name a person chose.
+	 */
 	function onTitleInput() {
+		session.titleEdited = true;
 		saveSession(session);
 	}
 

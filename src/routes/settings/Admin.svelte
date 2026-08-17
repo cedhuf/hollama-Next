@@ -261,7 +261,12 @@
 			titleSharing,
 			titleEnabled: $settingsStore.generateTitlesWithAI,
 			titleModel: $settingsStore.titleModel ?? '',
-			titleServerId: model?.serverId ?? ''
+			titleServerId: model?.serverId ?? '',
+			// Shared with the rest of it: an admin configures naming for themselves in
+			// Chat, and this section decides who else gets that configuration. A second
+			// set of controls here would be the same decision in two places.
+			titleRegenerate: $settingsStore.regenerateTitle,
+			titleRegenerateAfter: $settingsStore.regenerateTitleAfter
 		});
 	}
 
@@ -489,7 +494,9 @@
 			<span class="text-xs text-muted">
 				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
 					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
-					: $LL.off()}
+					: $LL.off()}{$settingsStore.generateTitlesWithAI && $settingsStore.regenerateTitle
+					? ` · ${$LL.regenerateTitleAfterValue({ count: $settingsStore.regenerateTitleAfter })}`
+					: ''}
 			</span>
 		{/if}
 	</SettingsSection>

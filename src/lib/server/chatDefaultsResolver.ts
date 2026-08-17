@@ -14,9 +14,17 @@ export interface ResolvedChatDefaults {
 		generateTitlesWithAI: boolean;
 		titleModel: string;
 		titleServerId: string;
+		regenerateTitle: boolean;
+		regenerateTitleAfter: number;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { generateTitlesWithAI: boolean; titleModel: string; titleServerId: string };
+		admin: {
+			generateTitlesWithAI: boolean;
+			titleModel: string;
+			titleServerId: string;
+			regenerateTitle: boolean;
+			regenerateTitleAfter: number;
+		};
 	};
 	compact: {
 		compactModel: string;
@@ -47,7 +55,10 @@ export function resolveChatDefaults(
 	const ownTitle = {
 		generateTitlesWithAI: userSettings?.generateTitlesWithAI ?? false,
 		titleModel: userSettings?.titleModel ?? '',
-		titleServerId: ''
+		titleServerId: '',
+		regenerateTitle: userSettings?.regenerateTitle ?? DEFAULT_SETTINGS.regenerateTitle,
+		regenerateTitleAfter:
+			userSettings?.regenerateTitleAfter ?? DEFAULT_SETTINGS.regenerateTitleAfter
 	};
 
 	const ownCompact = {
@@ -65,7 +76,11 @@ export function resolveChatDefaults(
 	const adminTitle = {
 		generateTitlesWithAI: getConfig('titleEnabled') === 'true',
 		titleModel: getConfig('titleModel') ?? '',
-		titleServerId: getConfig('titleServerId') ?? ''
+		titleServerId: getConfig('titleServerId') ?? '',
+		regenerateTitle: getConfig('titleRegenerate') === 'true',
+		regenerateTitleAfter: Number(
+			getConfig('titleRegenerateAfter') ?? DEFAULT_SETTINGS.regenerateTitleAfter
+		)
 	};
 	const adminCompact = {
 		compactModel: getConfig('compactModel') ?? '',

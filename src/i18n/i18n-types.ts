@@ -1104,6 +1104,23 @@ type RootTranslation = {
 	 */
 	generateTitlesWithAI: string
 	/**
+	 * N​a​m​e​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​a​g​a​i​n​ ​o​n​c​e​ ​i​t​ ​h​a​s​ ​g​r​o​w​n
+	 */
+	regenerateTitle: string
+	/**
+	 * T​h​e​ ​f​i​r​s​t​ ​t​i​t​l​e​ ​i​s​ ​w​r​i​t​t​e​n​ ​f​r​o​m​ ​o​n​e​ ​m​e​s​s​a​g​e​,​ ​b​e​f​o​r​e​ ​a​n​y​t​h​i​n​g​ ​h​a​s​ ​b​e​e​n​ ​a​n​s​w​e​r​e​d​,​ ​s​o​ ​i​t​ ​n​a​m​e​s​ ​t​h​e​ ​q​u​e​s​t​i​o​n​ ​r​a​t​h​e​r​ ​t​h​a​n​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​ ​T​h​i​s​ ​g​i​v​e​s​ ​i​t​ ​a​ ​s​e​c​o​n​d​ ​n​a​m​e​ ​a​ ​f​e​w​ ​e​x​c​h​a​n​g​e​s​ ​i​n​.​ ​O​n​c​e​ ​o​n​l​y​,​ ​a​n​d​ ​n​e​v​e​r​ ​o​v​e​r​ ​a​ ​t​i​t​l​e​ ​y​o​u​ ​t​y​p​e​d​ ​y​o​u​r​s​e​l​f​.
+	 */
+	regenerateTitleHelp: string
+	/**
+	 * A​f​t​e​r​ ​h​o​w​ ​m​a​n​y​ ​r​e​p​l​i​e​s
+	 */
+	regenerateTitleAfter: string
+	/**
+	 * {​c​o​u​n​t​}​ ​r​e​p​l​{​{​y​|​i​e​s​}​}
+	 * @param {number} count
+	 */
+	regenerateTitleAfterValue: RequiredParams<'count'>
+	/**
 	 * A​u​t​o​m​a​t​i​c​a​l​l​y​ ​n​a​m​e​ ​n​e​w​ ​s​e​s​s​i​o​n​s​ ​a​f​t​e​r​ ​t​h​e​ ​f​i​r​s​t​ ​r​e​p​l​y​,​ ​u​s​i​n​g​ ​t​h​e​ ​s​e​l​e​c​t​e​d​ ​m​o​d​e​l
 	 */
 	generateTitlesWithAIHelp: string
@@ -3573,6 +3590,22 @@ The completion in progress will stop
 	 * Generate titles with AI
 	 */
 	generateTitlesWithAI: () => LocalizedString
+	/**
+	 * Name the conversation again once it has grown
+	 */
+	regenerateTitle: () => LocalizedString
+	/**
+	 * The first title is written from one message, before anything has been answered, so it names the question rather than the conversation. This gives it a second name a few exchanges in. Once only, and never over a title you typed yourself.
+	 */
+	regenerateTitleHelp: () => LocalizedString
+	/**
+	 * After how many replies
+	 */
+	regenerateTitleAfter: () => LocalizedString
+	/**
+	 * {count} repl{{y|ies}}
+	 */
+	regenerateTitleAfterValue: (arg: { count: number }) => LocalizedString
 	/**
 	 * Automatically name new sessions after the first reply, using the selected model
 	 */

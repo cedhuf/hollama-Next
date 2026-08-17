@@ -156,6 +156,14 @@ export function applyRunEvent(
 		}
 
 		case 'title':
+			// Never over a name someone typed. The run cannot know: it was asked for a
+			// title before the turn went out, and the conversation may have been
+			// renamed while it was being written.
+			if (session.titleEdited) return;
+			// A conversation that already had a title is being named again, and that
+			// happens once. Marked here rather than where it was asked for, because
+			// here is where it actually landed.
+			if (session.title) session.titleRegenerated = true;
 			session.title = event.title;
 			session.updatedAt = new Date().toISOString();
 			surface.save();

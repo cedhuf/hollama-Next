@@ -15,6 +15,7 @@
 	import SettingsLink from './SettingsLink.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
+	import SettingsSlider from './SettingsSlider.svelte';
 
 	const dmEditable = $derived($chatDefaultsConfig.defaultModel.editable);
 	const dmValue = $derived($chatDefaultsConfig.defaultModel.value || undefined);
@@ -106,6 +107,25 @@
 						onSelect={(name) => ($settingsStore.titleModel = name || null)}
 					/>
 				</SettingsField>
+
+				<!-- The first title is written before anything has been answered, so it
+				     names the question rather than the conversation. Once, and never over
+				     a name you typed yourself. -->
+				<FieldCheckbox
+					label={$LL.regenerateTitle()}
+					bind:checked={$settingsStore.regenerateTitle}
+				/>
+				<SettingsHint>{$LL.regenerateTitleHelp()}</SettingsHint>
+
+				{#if $settingsStore.regenerateTitle}
+					<SettingsSlider
+						label={$LL.regenerateTitleAfter()}
+						bind:value={$settingsStore.regenerateTitleAfter}
+						min={2}
+						max={10}
+						format={(value) => $LL.regenerateTitleAfterValue({ count: value })}
+					/>
+				{/if}
 			{/if}
 		{:else}
 			<SettingsField label={$LL.generateTitlesWithAI()}>

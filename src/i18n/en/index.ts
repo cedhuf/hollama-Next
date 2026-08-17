@@ -281,6 +281,11 @@ const en = {
 	defaultModel: 'Default model',
 	titleModel: 'Title model',
 	generateTitlesWithAI: 'Generate titles with AI',
+	regenerateTitle: 'Name the conversation again once it has grown',
+	regenerateTitleHelp:
+		'The first title is written from one message, before anything has been answered, so it names the question rather than the conversation. This gives it a second name a few exchanges in. Once only, and never over a title you typed yourself.',
+	regenerateTitleAfter: 'After how many replies',
+	regenerateTitleAfterValue: '{count:number} repl{{y|ies}}',
 	generateTitlesWithAIHelp:
 		'Automatically name new sessions after the first reply, using the selected model',
 	serverSideGeneration: 'Generate on the server',

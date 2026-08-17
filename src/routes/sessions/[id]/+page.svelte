@@ -566,11 +566,28 @@
 		// state it will leave behind: a conversation with no assistant message yet is
 		// the one about to earn a name, and automatic compaction is due once this
 		// answer has landed rather than before it does.
+		/**
+		 * Whether this turn should also name the conversation.
+		 *
+		 * Two moments, and the second is the interesting one. The first title is
+		 * written before anything has been answered, so it names the question rather
+		 * than the conversation; a few exchanges later there is something to name.
+		 *
+		 * Once, though, and never over a name someone typed. A conversation whose
+		 * name keeps changing is worse than one badly named, and a title you chose
+		 * being quietly replaced is worse than either.
+		 */
+		const titleConfig = $chatDefaultsConfig.title;
+		const replies = session.messages.filter((m) => m.role === 'assistant').length;
+
 		const wants = {
 			title:
-				$chatDefaultsConfig.title.generateTitlesWithAI &&
-				!session.title &&
-				session.messages.filter((m) => m.role === 'assistant').length === 0,
+				titleConfig.generateTitlesWithAI &&
+				!session.titleEdited &&
+				((!session.title && replies === 0) ||
+					(titleConfig.regenerateTitle &&
+						!session.titleRegenerated &&
+						replies + 1 >= titleConfig.regenerateTitleAfter)),
 			compact: compactConfig.autoCompact && !isCompacting
 		};
 
