@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
 import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
-import { isOverLimit } from '$lib/server/db/usage';
+import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
 import { meter } from '$lib/server/usageMeter';
 
@@ -47,12 +47,38 @@ const proxy: RequestHandler = async (event) => {
 		event.params.path ?? ''
 	);
 
-	// Asked before the turn starts, never during one: a conversation already under
-	// way always finishes. Someone over their allowance is told so plainly, which
-	// is the only moment a limit is allowed to interrupt anything.
-	if (isCompletion && isOverLimit(user.id)) throw error(402, 'Credit limit reached');
+	/**
+	 * Whether this account's spending is being watched at all.
+	 *
+	 * Only on the instance's own connections. A personal server is somebody's own
+	 * key and their own bill, and neither counting it against an instance
+	 * allowance nor refusing it in the name of one would be defensible.
+	 */
+	const metered = server.owner_user_id === null;
+	const limit = metered && isCompletion ? creditLimitFor(user.id) : 0;
 
 	const model = modelIn(body);
+
+	if (limit > 0) {
+		// Asked before the turn starts, never during one: a conversation already
+		// under way always finishes. This is the only moment a limit is allowed to
+		// interrupt anything.
+		if (isOverLimit(user.id)) throw error(402, 'Credit limit reached');
+
+		/**
+		 * A model with no price is refused while a limit is in force.
+		 *
+		 * Not counted would mean not limited, and an unpriced model is almost
+		 * always an oversight rather than a decision: one forgotten model is an
+		 * unlimited allowance for everybody, quietly, for as long as nobody
+		 * notices. The message names the cause so the user asks their
+		 * administrator rather than concluding the app is broken.
+		 */
+		if (model && !getModelPricing(server.id)[model]) {
+			throw error(402, `No price is set for ${model} on this instance`);
+		}
+	}
+
 	if (isCompletion) body = askForUsage(body);
 
 	// The admin's rules are applied here rather than in the browser: this is the
@@ -69,7 +95,7 @@ const proxy: RequestHandler = async (event) => {
 	// Counted from what the provider reports, on the way past. The browser's half
 	// of the stream is untouched and waits for nothing.
 	const stream =
-		isCompletion && response.ok && response.body && model
+		metered && isCompletion && response.ok && response.body && model
 			? meter(response.body, user.id, (name) => getModelPricing(server.id)[name], model)
 			: response.body;
 

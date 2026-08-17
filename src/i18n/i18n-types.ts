@@ -2406,6 +2406,14 @@ type RootTranslation = {
 	 */
 	creditLimit: string
 	/**
+	 * S​h​a​r​e​d​ ​m​o​d​e​l​s​ ​w​i​t​h​ ​n​o​ ​p​r​i​c​e
+	 */
+	unpricedModels: string
+	/**
+	 * W​h​i​l​e​ ​a​n​ ​a​l​l​o​w​a​n​c​e​ ​i​s​ ​i​n​ ​f​o​r​c​e​ ​t​h​e​s​e​ ​a​r​e​ ​r​e​f​u​s​e​d​,​ ​b​e​c​a​u​s​e​ ​w​h​a​t​ ​i​s​ ​n​o​t​ ​c​o​u​n​t​e​d​ ​i​s​ ​n​o​t​ ​l​i​m​i​t​e​d​:​ ​o​n​e​ ​f​o​r​g​o​t​t​e​n​ ​m​o​d​e​l​ ​i​s​ ​a​n​ ​u​n​l​i​m​i​t​e​d​ ​a​l​l​o​w​a​n​c​e​ ​f​o​r​ ​e​v​e​r​y​b​o​d​y​.​ ​P​r​i​c​e​ ​t​h​e​m​ ​i​n​ ​S​e​r​v​e​r​s​ ​→​ ​M​o​d​e​l​s​ ​a​n​d​ ​p​r​i​c​i​n​g​,​ ​o​r​ ​s​t​o​p​ ​s​h​a​r​i​n​g​ ​t​h​e​m​.
+	 */
+	unpricedModelsHelp: string
+	/**
 	 * U​s​a​g​e
 	 */
 	usageTitle: string
@@ -5199,6 +5207,14 @@ The completion in progress will stop
 	 * Credit limit
 	 */
 	creditLimit: () => LocalizedString
+	/**
+	 * Shared models with no price
+	 */
+	unpricedModels: () => LocalizedString
+	/**
+	 * While an allowance is in force these are refused, because what is not counted is not limited: one forgotten model is an unlimited allowance for everybody. Price them in Servers → Models and pricing, or stop sharing them.
+	 */
+	unpricedModelsHelp: () => LocalizedString
 	/**
 	 * Usage
 	 */

@@ -2,6 +2,7 @@ import { error, json } from '@sveltejs/kit';
 
 import { requireAdmin } from '$lib/server/api';
 import { hashPassword } from '$lib/server/auth/password';
+import { unpricedSharedModels } from '$lib/server/db/servers';
 import { creditPeriod, instanceCreditLimit, periodStart, spendForAll } from '$lib/server/db/usage';
 import { createUser, getUserByEmail, listUsers } from '$lib/server/db/users';
 
@@ -20,11 +21,24 @@ export async function GET(event) {
 	const spend = spendForAll(from);
 	const fallback = instanceCreditLimit();
 
+	/**
+	 * Shared models with no price, but only when a limit is actually in force.
+	 *
+	 * With no limit anywhere, an unpriced model is simply uncounted and nothing is
+	 * wrong. The moment one account has an allowance, the same model becomes a way
+	 * around it — and the relay refuses it, so this list is also the list of what
+	 * has stopped working and why.
+	 */
+	const users = listUsers();
+	const limited = fallback > 0 || users.some((user) => (user.credit_limit ?? 0) > 0);
+	const unpriced = limited ? unpricedSharedModels() : [];
+
 	return json({
 		period,
 		from,
 		instanceLimit: fallback,
-		users: listUsers().map((user) => ({
+		unpriced,
+		users: users.map((user) => ({
 			...user,
 			// `null` is "whatever the instance says", which is a different answer from
 			// a limit that happens to equal it, and the field has to say which.

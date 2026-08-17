@@ -211,6 +211,41 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 	}
 }
 
+/**
+ * Shared models nobody has priced, per system connection.
+ *
+ * The hole a credit limit has if this is not checked: a model with no price is
+ * not counted, so a limit that is in force everywhere else is simply absent on
+ * that one — and it is absent for everybody, silently, because it was an
+ * oversight rather than a decision. An administrator has to be able to see the
+ * list, and the relay has to refuse it in the meantime.
+ */
+export function unpricedSharedModels(): { serverId: string; label: string; models: string[] }[] {
+	const rows = getDb()
+		.prepare(
+			`SELECT s.id AS server_id, COALESCE(s.label, s.base_url) AS label, m.model_name
+			 FROM shared_models m
+			 JOIN servers s ON s.id = m.server_id
+			 LEFT JOIN model_pricing p
+			   ON p.server_id = m.server_id AND p.model_name = m.model_name
+			 WHERE s.owner_user_id IS NULL AND s.is_enabled = 1 AND p.model_name IS NULL
+			 ORDER BY label, m.model_name`
+		)
+		.all() as { server_id: string; label: string; model_name: string }[];
+
+	const byServer = new Map<string, { serverId: string; label: string; models: string[] }>();
+	for (const row of rows) {
+		const entry = byServer.get(row.server_id) ?? {
+			serverId: row.server_id,
+			label: row.label,
+			models: []
+		};
+		entry.models.push(row.model_name);
+		byServer.set(row.server_id, entry);
+	}
+	return [...byServer.values()];
+}
+
 export function setSharedModels(serverId: string, models: string[]): void {
 	const db = getDb();
 	db.exec('BEGIN');

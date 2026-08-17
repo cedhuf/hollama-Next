@@ -93,6 +93,19 @@ counting it as free: a model nobody got round to pricing would otherwise let som
 without ever approaching a limit, and the total would quietly be a lie. Prices go in
 _Settings → Servers → Models and pricing_, per connection, in that provider's own currency.
 
+Which is why, **while an allowance is in force, an unpriced shared model is refused** rather than
+served uncounted. What is not counted is not limited, and one forgotten model is an unlimited
+allowance for everybody, silently, for as long as nobody notices. The Users tab lists them so the
+cause is where the limit was set, and the person refused is told which model has no price rather
+than left thinking the app is broken.
+
+With no allowance anywhere, nothing is refused and nothing is counted, which is the state of an
+instance that has not configured any of this.
+
+Only the instance's own connections are metered and limited. A personal server is somebody's own key
+and their own bill: counting it against an instance allowance, or refusing it in the name of one,
+would be neither.
+
 Every account can see its own figure in _Settings → Profile_: what it has spent, what it is allowed,
 that the allowance was set by an administrator, and when the counter starts again. Administrators
 see theirs too — being able to raise your own ceiling is not a reason to be unable to see it.

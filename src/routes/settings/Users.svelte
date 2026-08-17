@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Trash2, X } from '@lucide/svelte';
+	import { Plus, Trash2, TriangleAlert, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -47,6 +47,8 @@
 	let instanceLimit = $state(0);
 	/** Empty is how "no limit" is written, so nothing shows a bare 0 as a value. */
 	let instanceLimitField = $state('');
+	/** Shared models nobody has priced, which a limit in force turns into a hole. */
+	let unpriced = $state<{ serverId: string; label: string; models: string[] }[]>([]);
 	/** Until the first load settles, the empty state below would be a lie. */
 	let loading = $state(true);
 	let showCreate = $state(false);
@@ -73,6 +75,7 @@
 			period = data.period;
 			instanceLimit = data.instanceLimit;
 			instanceLimitField = instanceLimit > 0 ? String(instanceLimit) : '';
+			unpriced = data.unpriced ?? [];
 		} finally {
 			loading = false;
 		}
@@ -169,6 +172,25 @@
 			</label>
 		</div>
 		<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
+
+		{#if unpriced.length}
+			<!-- Not a nicety. While a limit is in force these models are refused, and
+			     the reason is here rather than in a log the person who set the limit
+			     will never read. -->
+			<div class="flex flex-col gap-1 rounded-md border border-warning/40 bg-warning/10 p-3">
+				<span class="flex items-center gap-1.5 text-sm font-medium text-active">
+					<TriangleAlert class="h-4 w-4 shrink-0" />
+					{$LL.unpricedModels()}
+				</span>
+				<p class="text-xs text-muted">{$LL.unpricedModelsHelp()}</p>
+				{#each unpriced as entry (entry.serverId)}
+					<p class="text-xs text-muted">
+						<span class="text-active">{entry.label}</span>
+						<span class="font-mono">{entry.models.join(', ')}</span>
+					</p>
+				{/each}
+			</div>
+		{/if}
 	</SettingsSection>
 
 	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>

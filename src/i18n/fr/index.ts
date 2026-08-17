@@ -684,6 +684,9 @@ const fr = extendDictionary(en, {
 		'Zéro signifie sans limite. Chaque compte peut avoir le sien dans l’onglet Utilisateurs. Une conversation en cours n’est jamais interrompue : le plafond est vérifié avant le tour suivant, et un modèle sans tarif n’est pas compté du tout.',
 	creditLimitDefault: 'Plafond par défaut',
 	creditLimit: 'Plafond',
+	unpricedModels: 'Modèles partagés sans tarif',
+	unpricedModelsHelp:
+		'Tant qu’un plafond s’applique, ils sont refusés : ce qui n’est pas compté n’est pas limité, et un seul modèle oublié vaut un plafond illimité pour tout le monde. Tarifez-les dans Serveurs → Modèles et tarifs, ou cessez de les partager.',
 	usageTitle: 'Consommation',
 	usageOfLimit: '{spent} sur {limit}',
 	usageUnlimited: 'Sans limite',
