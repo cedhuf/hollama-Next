@@ -116,6 +116,16 @@ export interface Session {
 	/** True once the user edits the system prompt by hand — stops auto-resolution. */
 	systemPromptEdited?: boolean;
 	/**
+	 * The playbooks switched on for this conversation, in the order they were.
+	 *
+	 * Ids rather than a copy, unlike everything a persona contributes, which is
+	 * snapshotted when the conversation starts. A persona is who you are talking
+	 * to and must not change under a conversation already under way; a playbook is
+	 * a procedure you maintain, and fixing a step in it should fix it everywhere it
+	 * is switched on. Deleting one simply removes it from the next request.
+	 */
+	playbookIds?: string[];
+	/**
 	 * True once someone typed the title themselves.
 	 *
 	 * Which stops anything from writing over it. Nothing distinguished a name the

@@ -90,7 +90,12 @@
 		},
 		// Always available: there is always a context, and a report saying it is
 		// nearly empty is a perfectly good answer to the question.
-		{ name: 'context', description: $LL.contextCommandDescription(), available: true }
+		{ name: 'context', description: $LL.contextCommandDescription(), available: true },
+		{
+			name: 'playbooks',
+			description: $LL.playbooksCommandDescription(),
+			available: true
+		}
 	]);
 	const knownCommands = $derived(commands.map((c) => ({ name: c.name, takesArgs: c.takesArgs })));
 

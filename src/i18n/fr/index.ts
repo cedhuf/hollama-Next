@@ -306,6 +306,11 @@ const fr = extendDictionary(en, {
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
+	playbooksCommandDescription: 'Activer ou désactiver une procédure pour cette conversation',
+	playbooksInUse: '{count} playbook{{s}} en service',
+	playbooksEmpty:
+		'Aucun playbook pour l\u2019instant. Écrivez-en un dans la bibliothèque, ou installez-en un depuis le store.',
+	playbooksManage: 'Gérer les playbooks dans la bibliothèque',
 	newPlaybook: 'Nouveau playbook',
 	playbookIdentity: 'Identité',
 	playbookNamePlaceholder: 'Nom (par exemple Menus de la semaine)',

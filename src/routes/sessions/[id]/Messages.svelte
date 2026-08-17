@@ -13,6 +13,7 @@
 	import CompactionDivider from './CompactionDivider.svelte';
 	import ContextDivider from './ContextDivider.svelte';
 	import MentionDivider from './MentionDivider.svelte';
+	import PlaybooksDivider from './PlaybooksDivider.svelte';
 
 	interface Props {
 		session: Session;
@@ -29,6 +30,8 @@
 		onCancelCompaction?: () => void;
 		/** Fold a recorded mention into this conversation. Lives in +page, which writes it. */
 		onAddMention?: (message: Message) => void;
+		/** Switch a playbook on or off for this conversation. */
+		onTogglePlaybook?: (id: string) => void;
 	}
 
 	let {
@@ -40,7 +43,8 @@
 		assistantLabel = undefined,
 		isCompacting = false,
 		onCancelCompaction = undefined,
-		onAddMention = undefined
+		onAddMention = undefined,
+		onTogglePlaybook = undefined
 	}: Props = $props();
 
 	/**
@@ -194,6 +198,11 @@
 			<ContextDivider note={message.note} />
 		{:else if message.note.kind === 'mention'}
 			<MentionDivider note={message.note} onAdd={() => onAddMention?.(message)} />
+		{:else if message.note.kind === 'playbooks'}
+			<PlaybooksDivider
+				active={session.playbookIds ?? []}
+				onToggle={(id) => onTogglePlaybook?.(id)}
+			/>
 		{/if}
 	{:else if message !== pendingChoice}
 		{#key message.role}

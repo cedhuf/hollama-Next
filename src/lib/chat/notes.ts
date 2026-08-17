@@ -26,7 +26,7 @@ import type { Message } from '$lib/sessions';
  * an empty one. That is a property of the design, not a filter to remember.
  */
 
-export type NoteKind = 'compaction' | 'cleared' | 'context' | 'mention';
+export type NoteKind = 'compaction' | 'cleared' | 'context' | 'mention' | 'playbooks';
 
 /**
  * Where the model starts reading, for a conversation ending at this note.
@@ -128,13 +128,36 @@ export interface MentionNote extends NoteBase {
 	addedAt?: string;
 }
 
-export type ConversationNote = CompactionNote | ClearedNote | ContextNote | MentionNote;
+/**
+ * The playbook list, opened in the conversation it applies to.
+ *
+ * The one note with no payload, and the one that is not a snapshot. The others
+ * record what was true at a moment; this is a control panel, and a control panel
+ * showing yesterday's switches would be a picture of a control panel. It carries
+ * only the fact that somebody asked for it here, and draws the current state of
+ * the library and of this conversation.
+ *
+ * Which is exactly why it is a note rather than a modal: switching a procedure on
+ * is part of how this conversation went, so it belongs in it, at the point it
+ * happened, above the answers it changed.
+ */
+export interface PlaybooksNote extends NoteBase {
+	kind: 'playbooks';
+}
+
+export type ConversationNote =
+	| CompactionNote
+	| ClearedNote
+	| ContextNote
+	| MentionNote
+	| PlaybooksNote;
 
 export const NOTE_KINDS: Record<NoteKind, { boundary: NoteBoundary }> = {
 	compaction: { boundary: 'from' },
 	cleared: { boundary: 'after' },
 	context: { boundary: 'none' },
-	mention: { boundary: 'none' }
+	mention: { boundary: 'none' },
+	playbooks: { boundary: 'none' }
 };
 
 /** Every kind there is, for the callers that have to enumerate them (the SQL does). */

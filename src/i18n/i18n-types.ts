@@ -1209,6 +1209,23 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * S​w​i​t​c​h​ ​a​ ​p​r​o​c​e​d​u​r​e​ ​o​n​ ​o​r​ ​o​f​f​ ​f​o​r​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	playbooksCommandDescription: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​p​l​a​y​b​o​o​k​|​p​l​a​y​b​o​o​k​s​}​}​ ​i​n​ ​u​s​e
+	 * @param {number} count
+	 */
+	playbooksInUse: RequiredParams<'count'>
+	/**
+	 * N​o​ ​p​l​a​y​b​o​o​k​s​ ​y​e​t​.​ ​W​r​i​t​e​ ​o​n​e​ ​i​n​ ​t​h​e​ ​L​i​b​r​a​r​y​,​ ​o​r​ ​i​n​s​t​a​l​l​ ​o​n​e​ ​f​r​o​m​ ​t​h​e​ ​s​t​o​r​e​.
+	 */
+	playbooksEmpty: string
+	/**
+	 * M​a​n​a​g​e​ ​p​l​a​y​b​o​o​k​s​ ​i​n​ ​t​h​e​ ​L​i​b​r​a​r​y
+	 */
+	playbooksManage: string
+	/**
 	 * N​e​w​ ​p​l​a​y​b​o​o​k
 	 */
 	newPlaybook: string
@@ -3825,6 +3842,22 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * Switch a procedure on or off for this conversation
+	 */
+	playbooksCommandDescription: () => LocalizedString
+	/**
+	 * {count} {{playbook|playbooks}} in use
+	 */
+	playbooksInUse: (arg: { count: number }) => LocalizedString
+	/**
+	 * No playbooks yet. Write one in the Library, or install one from the store.
+	 */
+	playbooksEmpty: () => LocalizedString
+	/**
+	 * Manage playbooks in the Library
+	 */
+	playbooksManage: () => LocalizedString
 	/**
 	 * New playbook
 	 */

@@ -40,6 +40,7 @@
 	import { resolvePrompt } from '$lib/defaultPrompts';
 	import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 	import { languageInstruction } from '$lib/personas';
+	import { playbookInstructions, playbooksOf } from '$lib/playbooks';
 	import { contextMessages, imagesPayload } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import { resolveSessionTitle, saveSession, type Editor, type Message } from '$lib/sessions';
@@ -531,7 +532,15 @@
 			model: session.model.name,
 			options: session.options,
 			think: editor.thinking !== false,
-			systemPrompt: session.systemPrompt.content || undefined,
+			// The playbooks in force are appended to the conversation's own prompt
+			// rather than replacing it: a procedure says how a job is done, not who is
+			// doing it, and it has to sit under whatever instructions were already
+			// there. Resolved at send time, so editing a playbook reaches every
+			// conversation running it without anyone reattaching anything.
+			systemPrompt:
+				[session.systemPrompt.content, playbookInstructions(playbooksOf(session.playbookIds))]
+					.filter((part) => part?.trim())
+					.join('\n\n') || undefined,
 			messages: messagesInContext(messages),
 			flags: {
 				webSearch: !!editor.webSearch,
@@ -878,6 +887,37 @@
 	}
 
 	/**
+	 * Open the playbook list here.
+	 *
+	 * One panel per conversation, moved to wherever it was last asked for rather
+	 * than stacked. Two of them would show the same live state in two places, and
+	 * only the lower one would be worth looking at. Nothing is lost by moving it:
+	 * unlike every other note this one records nothing, it is a set of switches.
+	 */
+	function openPlaybooks() {
+		session.messages = [
+			...session.messages.filter((message) => message.note?.kind !== 'playbooks'),
+			{
+				role: 'system',
+				content: '',
+				createdAt: new Date().toISOString(),
+				note: { kind: 'playbooks', generatedAt: new Date().toISOString() }
+			}
+		];
+		saveSession(session);
+		void scrollToBottom(true);
+	}
+
+	/** Switch a procedure on or off for this conversation. */
+	function togglePlaybook(id: string) {
+		const ids = session.playbookIds ?? [];
+		session.playbookIds = ids.includes(id)
+			? ids.filter((existing) => existing !== id)
+			: [...ids, id];
+		saveSession(session);
+	}
+
+	/**
 	 * Compact now, and say what happened.
 	 *
 	 * The waiting and the result are both drawn in the conversation, at the spot
@@ -927,6 +967,10 @@
 	function runCommand(name: CommandName, args: string) {
 		if (name === 'context') {
 			reportContext();
+			return;
+		}
+		if (name === 'playbooks') {
+			openPlaybooks();
 			return;
 		}
 		if (name === 'clear') {
@@ -1303,6 +1347,7 @@
 						{isCompacting}
 						onCancelCompaction={cancelCompaction}
 						onAddMention={addMentionToConversation}
+						onTogglePlaybook={togglePlaybook}
 					/>
 				</div>
 

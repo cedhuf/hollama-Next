@@ -8,7 +8,7 @@
  * being swallowed with an error. `//` at the start escapes to a literal `/`.
  */
 
-export type CommandName = 'compact' | 'clear' | 'context';
+export type CommandName = 'compact' | 'clear' | 'context' | 'playbooks';
 
 /**
  * What the parser needs to know about a command: its name, and whether anything
