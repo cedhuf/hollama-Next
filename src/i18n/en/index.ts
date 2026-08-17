@@ -31,7 +31,7 @@ const en = {
 	noModelsToRename: 'No models available. Sync this connection first.',
 	currency: 'Currency',
 	pricingHelp: 'What a million tokens costs, for the credit limits.',
-	perMillionShort: '/M tokens',
+	perMillionShort: '/M Tokens',
 	perMillionTokens: 'Price per million tokens',
 	currencyHelp: 'What this provider bills in. Nothing is converted.',
 	clearPrice: 'Clear',

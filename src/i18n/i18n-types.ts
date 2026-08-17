@@ -132,7 +132,7 @@ type RootTranslation = {
 	 */
 	pricingHelp: string
 	/**
-	 * /​M​ ​t​o​k​e​n​s
+	 * /​M​ ​T​o​k​e​n​s
 	 */
 	perMillionShort: string
 	/**
@@ -3006,7 +3006,7 @@ The completion in progress will stop
 	 */
 	pricingHelp: () => LocalizedString
 	/**
-	 * /M tokens
+	 * /M Tokens
 	 */
 	perMillionShort: () => LocalizedString
 	/**

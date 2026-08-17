@@ -314,25 +314,31 @@
 								transition:slide={{ duration: 160, easing: quadInOut }}
 							>
 								<!-- Everything about this price on one row: what it costs going
-								     out, coming back, in what, and the way back to nothing.
-								     Labels outside the fields, because a placeholder disappears the
-								     moment somebody types and "1.25" alone has lost its meaning. -->
-								<div class="flex flex-wrap items-center gap-2">
+								     out, coming back, in what, and the way back to nothing. Spread
+								     across the width rather than bunched at the left — each field
+								     hugs its own value, so left to themselves they pile up in a
+								     corner of a panel that is mostly empty. -->
+								<div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
 									{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownLeft, label: $LL.pricePerMillionOut() }] as field (field.side)}
 										{@const Icon = field.icon}
-										<label class="flex min-w-0 flex-1 items-center gap-1.5">
-											<!-- The arrow says which way the tokens go, the word says it in
-											     one, and the unit is in the box where the figure is typed.
-											     Spelling the unit out on the label pushed the row off the
-											     panel and said it twice. -->
-											<Icon class="h-3.5 w-3.5 shrink-0 text-muted" />
-											<span class="shrink-0 text-[11px] text-muted">{field.label}</span>
+										<!-- The arrow is the whole label: up is what you send, down is
+										     what comes back. The words are on the tooltip and on the
+										     accessible name, where they cost no width. -->
+										<label
+											class="flex shrink-0 items-center gap-1.5"
+											title="{field.label} · {$LL.perMillionTokens()}"
+										>
+											<Icon class="h-4 w-4 shrink-0 text-muted" />
 
+											<!-- The unit sits immediately after the figure, inside the box,
+											     so the field reads as one thing: 0,2 /M Tokens. The input is
+											     sized by its content, which is what keeps the two together
+											     instead of leaving the unit adrift at the far edge. -->
 											<span
-												class="flex min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 py-1 pl-1.5 pr-2 focus-within:border-accent"
+												class="flex items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 focus-within:border-accent"
 											>
 												<input
-													class="w-full min-w-10 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+													class="field-grow w-14 min-w-8 bg-transparent text-xs tabular-nums text-active outline-none placeholder:text-muted"
 													type="text"
 													inputmode="decimal"
 													value={server.modelPricing?.[name]?.[field.side] ?? ''}
