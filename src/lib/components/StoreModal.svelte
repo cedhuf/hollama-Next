@@ -9,12 +9,15 @@
 		RefreshCw,
 		RotateCcw,
 		Search,
+		Users,
 		X
 	} from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
+	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { matches, type Offer, type OfferAction, type OfferView } from '$lib/storeOffer';
 
 	/**
@@ -37,6 +40,8 @@
 		/** Which views to show. `shared` only where somebody hands things out. */
 		views: OfferView[];
 		view: OfferView;
+		/** How many entries each view holds, so a chip can say so without switching to it. */
+		counts?: Partial<Record<OfferView, number>>;
 		layout: 'grid' | 'list';
 		/** Whether the listing is being fetched, and what went wrong if it did. */
 		status: 'idle' | 'loading' | 'ready' | 'error';
@@ -53,6 +58,25 @@
 		onRefresh: () => void;
 		onLayout: (layout: 'grid' | 'list') => void;
 		/**
+		 * How many copies could take a newer published version, and how to take them.
+		 *
+		 * Counted by the caller rather than from what is on screen: the answer is
+		 * about the whole library, and it must not change because a filter is typed
+		 * or a view is switched.
+		 */
+		updatableCount?: number;
+		onUpdateAll?: () => Promise<void> | void;
+		/**
+		 * Whether sharing exists here at all — it does not in local mode, where there
+		 * is one person and nobody to share with — and whether this person may.
+		 *
+		 * Drawn for everyone and refused where it is not allowed, rather than
+		 * absent: a card that loses a control depending on who is looking is a
+		 * different card, and the two then have to be designed twice.
+		 */
+		sharing?: boolean;
+		shareAllowed?: boolean;
+		/**
 		 * One card. Handed the offer and the shell's own action row, so the button
 		 * is the same button in both stores and only its surroundings differ.
 		 */
@@ -65,6 +89,7 @@
 		offers,
 		views,
 		view = $bindable('store'),
+		counts,
 		layout,
 		status,
 		errorMessage,
@@ -75,23 +100,20 @@
 		unreachable,
 		onRefresh,
 		onLayout,
+		updatableCount = 0,
+		onUpdateAll,
+		sharing = false,
+		shareAllowed = false,
 		card
 	}: Props = $props();
 
 	let query = $state('');
 	/** The card being worked on, so only its own button spins. */
 	let working = $state<string | null>(null);
+	let toggling = $state<string | null>(null);
 	let updatingAll = $state(false);
 
 	const filtered = $derived(offers.filter((offer) => matches(offer, query)));
-
-	/**
-	 * What "update all" would take, which is never a copy somebody has rewritten.
-	 *
-	 * A single press that quietly overwrote everything someone had edited would be
-	 * the one nobody could undo, so those keep being offered card by card.
-	 */
-	const updatable = $derived(offers.filter((offer) => offer.action === 'update'));
 
 	const layouts = $derived([
 		{ value: 'grid' as const, icon: LayoutGrid, label: $LL.personaStoreGridView() },
@@ -120,16 +142,32 @@
 		try {
 			await offer.run();
 		} catch (error) {
-			console.error(error);
+			toast.error($LL.personaStoreInstallFailed(), {
+				description: error instanceof Error ? error.message : undefined
+			});
 		} finally {
 			working = null;
 		}
 	}
 
+	async function share(offer: Offer) {
+		toggling = offer.key;
+		try {
+			await offer.toggleShare();
+		} catch (error) {
+			toast.error($LL.requestFailed(), {
+				description: error instanceof Error ? error.message : undefined
+			});
+		} finally {
+			toggling = null;
+		}
+	}
+
 	async function updateAll() {
+		if (!onUpdateAll) return;
 		updatingAll = true;
 		try {
-			for (const offer of updatable) await offer.run?.();
+			await onUpdateAll();
 		} finally {
 			updatingAll = false;
 		}
@@ -187,6 +225,36 @@
 			{actionLabel(offer.action)}
 		</span>
 	{/if}
+
+	{#if sharing}
+		{@const label = !shareAllowed
+			? $LL.personaStoreShareForbidden()
+			: offer.shared
+				? $LL.personaStoreUnshare()
+				: $LL.personaStoreShare()}
+		<Tooltip>
+			{#snippet trigger({ props })}
+				<button
+					{...props}
+					type="button"
+					disabled={toggling !== null || !shareAllowed}
+					onclick={() => share(offer)}
+					aria-pressed={offer.shared}
+					aria-label={label}
+					class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.shared
+						? 'bg-accent/10 text-accent hover:bg-accent/20'
+						: 'text-muted hover:bg-shade-2 hover:text-active'}"
+				>
+					{#if toggling === offer.key}
+						<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+					{:else}
+						<Users class="h-3.5 w-3.5" />
+					{/if}
+				</button>
+			{/snippet}
+			{label}
+		</Tooltip>
+	{/if}
 {/snippet}
 
 <Modal bind:open closeButton={false}>
@@ -194,7 +262,7 @@
 		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
 			<span class="truncate text-sm font-semibold text-active">{title}</span>
 			<div class="flex shrink-0 items-center gap-1">
-				{#if updatable.length > 0}
+				{#if updatableCount > 0 && onUpdateAll}
 					<button
 						type="button"
 						disabled={updatingAll}
@@ -207,7 +275,7 @@
 							<ArrowDownToLine class="h-3.5 w-3.5" />
 						{/if}
 						{$LL.personaStoreUpdateAll()}
-						<span class="opacity-70">{updatable.length}</span>
+						<span class="opacity-70">{updatableCount}</span>
 					</button>
 				{/if}
 				<button
@@ -249,9 +317,9 @@
 					     a view decides what the page is about, a filter narrows what is
 					     already there. -->
 					{#each views as name (name)}
-						{@const count = name === 'store' ? 0 : offers.length}
+						{@const count = counts?.[name] ?? 0}
 						{@render chip(
-							`${viewLabel(name)}${view === name && count ? ` · ${count}` : ''}`,
+							`${viewLabel(name)}${count ? ` · ${count}` : ''}`,
 							view === name,
 							() => (view = name)
 						)}

@@ -143,6 +143,27 @@
 	);
 
 	const offers = $derived(view === 'mine' ? mine : packages);
+
+	/**
+	 * Every copy that could take a newer published version right now.
+	 *
+	 * Untouched ones only, and counted over the library rather than over what is
+	 * on screen: the answer must not change because a filter was typed.
+	 */
+	const updatable = $derived(library.filter((playbook) => stateOf(playbook) === 'outdated'));
+
+	async function updateAll() {
+		let done = 0;
+		for (const playbook of updatable) {
+			try {
+				await restore(playbook, false);
+				done += 1;
+			} catch {
+				// One that will not fetch is not a reason to stop the rest.
+			}
+		}
+		toast.success($LL.personaStoreUpdatedAll({ count: done }));
+	}
 </script>
 
 <StoreModal
@@ -151,6 +172,7 @@
 	title={$LL.playbookStore()}
 	{offers}
 	views={['store', 'mine']}
+	counts={{ mine: mine.length }}
 	layout={$settingsStore.personaStoreLayout}
 	tint={150}
 	status={catalog.status}
@@ -159,6 +181,8 @@
 	emptyMine={$LL.playbookStoreNothingMine()}
 	emptyShared={$LL.personaStoreNothingOffered()}
 	unreachable={$LL.playbookStoreUnreachable()}
+	updatableCount={updatable.length}
+	onUpdateAll={updateAll}
 	onRefresh={() => loadPlaybookCatalog(true)}
 	onLayout={(layout) => ($settingsStore.personaStoreLayout = layout)}
 	{card}

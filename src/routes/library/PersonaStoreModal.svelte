@@ -1,24 +1,10 @@
 <script lang="ts">
-	import {
-		ArrowDownToLine,
-		Check,
-		Download,
-		LayoutGrid,
-		List,
-		LoaderCircle,
-		RefreshCw,
-		RotateCcw,
-		Search,
-		Users,
-		X
-	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	import Tooltip from '$lib/components/Tooltip.svelte';
+	import StoreModal from '$lib/components/StoreModal.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { applyBundleToPersona, avatarFields, installPersonaBundle } from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
@@ -26,6 +12,7 @@
 	import { personasConfig, publishSharedPersonas, relayCatalogPersona } from '$lib/personasConfig';
 	import { personaState, type PersonaState } from '$lib/personaState';
 	import type { CatalogEntry } from '$lib/personaStore';
+	import { copyAction, packageAction, type Offer, type OfferView } from '$lib/storeOffer';
 
 	interface Props {
 		open: boolean;
@@ -53,42 +40,18 @@
 	 *   go back to what was published.
 	 *
 	 * Every view is then a selection of those two, never a third behaviour.
-	 */
-	type OfferKind = 'package' | 'copy';
-
-	/** What the one button in the footer does. Computed once, per card. */
-	type Action = 'install' | 'installed' | 'restore' | 'update';
-
-	interface Offer {
-		key: string;
-		kind: OfferKind;
-		name: string;
-		tagline: string;
-		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
-		tags: string[];
-		action: Action;
-		/** Absent for `installed`, which is a statement rather than a control. */
-		run?: () => Promise<void>;
-		/** Only a copy you have changed carries a label, and it is the only label. */
-		edited: boolean;
-		shared: boolean;
-		toggleShare: () => Promise<void>;
-	}
-
-	/**
-	 * What you are looking at.
 	 *
-	 * Two for everyone: what you can install, and what is yours. A third for an
-	 * administrator, because only somebody who hands personas out has a list of
-	 * what they hand out.
+	 * The rule itself now lives in `storeOffer`, where the playbook store reads the
+	 * same one. What stays here is what is genuinely about personas: which listing,
+	 * what installing means, and the face on the card.
 	 */
-	type View = 'store' | 'mine' | 'shared';
 
-	let view = $state<View>('store');
-	let query = $state('');
-	/** The card being worked on, so only its own button spins. */
-	let working = $state<string | null>(null);
-	let sharing = $state<string | null>(null);
+	/** What a persona card needs on top of the shared offer: a face. */
+	type PersonaOffer = Offer & {
+		avatar: Pick<Persona, 'avatarColor' | 'avatarGlyph' | 'avatarImage'>;
+	};
+
+	let view = $state<OfferView>('store');
 
 	// Opening is what asks for the listing, not mounting: the modal lives on the
 	// Library page whether or not anyone opens it, and a page load is not a reason
@@ -177,7 +140,7 @@
 	 * installing again is the way to get the published one back alongside yours,
 	 * which is the whole reason both are allowed to exist.
 	 */
-	function packageOffer(entry: CatalogEntry): Offer {
+	function packageOffer(entry: CatalogEntry): PersonaOffer {
 		const copies = copiesOf(entry);
 		const untouched = copies.some((persona) => !isEdited(stateOf(persona)));
 
@@ -185,10 +148,10 @@
 			key: `package:${entry.id}`,
 			kind: 'package',
 			name: entry.name,
-			tagline: entry.tagline,
+			line: entry.tagline,
 			avatar: avatarFields(entry.avatar, entry.name),
 			tags: entry.tags,
-			action: untouched ? 'installed' : 'install',
+			action: packageAction(untouched),
 			run: untouched ? undefined : () => installEntry(entry),
 			edited: false,
 			shared: relayed.has(entry.id),
@@ -203,7 +166,7 @@
 	 * nothing to install, so the button either states that it is yours or offers to
 	 * put the published version back.
 	 */
-	function copyOffer(persona: Persona): Offer {
+	function copyOffer(persona: Persona): PersonaOffer {
 		const state = stateOf(persona);
 		const edited = isEdited(state);
 		const outdated = state === 'outdated';
@@ -212,14 +175,14 @@
 			key: `copy:${persona.id}`,
 			kind: 'copy',
 			name: persona.name,
-			tagline: persona.tagline,
+			line: persona.tagline,
 			avatar: {
 				avatarColor: persona.avatarColor,
 				avatarGlyph: persona.avatarGlyph,
 				avatarImage: persona.avatarImage
 			},
 			tags: persona.tags ?? [],
-			action: edited ? 'restore' : outdated ? 'update' : 'installed',
+			action: copyAction(state),
 			run: edited || outdated ? () => restore(persona, edited) : undefined,
 			edited,
 			shared: !!persona.shared,
@@ -250,11 +213,11 @@
 		$personasConfig.shared
 			.filter((persona) => !library.some((own) => own.id === persona.id))
 			.map(
-				(persona): Offer => ({
+				(persona): PersonaOffer => ({
 					key: `shared:${persona.id}`,
 					kind: 'package',
 					name: persona.name,
-					tagline: persona.tagline,
+					line: persona.tagline,
 					avatar: {
 						avatarColor: persona.avatarColor,
 						avatarGlyph: persona.avatarGlyph,
@@ -298,17 +261,6 @@
 		view === 'mine' ? mine : view === 'shared' ? offered : [...shared, ...packages]
 	);
 
-	const filtered = $derived.by(() => {
-		const q = query.trim().toLowerCase();
-		if (!q) return offers;
-		return offers.filter(
-			(offer) =>
-				offer.name.toLowerCase().includes(q) ||
-				offer.tagline.toLowerCase().includes(q) ||
-				offer.tags.some((tag) => tag.toLowerCase().includes(q))
-		);
-	});
-
 	/**
 	 * Every copy that could take a newer published version right now.
 	 *
@@ -317,326 +269,68 @@
 	 */
 	const updatable = $derived(library.filter((persona) => stateOf(persona) === 'outdated'));
 
-	let updatingAll = $state(false);
 	async function updateAll() {
-		updatingAll = true;
 		let done = 0;
-		try {
-			for (const persona of updatable) {
-				try {
-					await restore(persona, false);
-					done += 1;
-				} catch {
-					// One that will not fetch is not a reason to stop the rest.
-				}
+		for (const persona of updatable) {
+			try {
+				await restore(persona, false);
+				done += 1;
+			} catch {
+				// One that will not fetch is not a reason to stop the rest.
 			}
-			toast.success($LL.personaStoreUpdatedAll({ count: done }));
-		} finally {
-			updatingAll = false;
 		}
+		toast.success($LL.personaStoreUpdatedAll({ count: done }));
 	}
-
-	async function run(offer: Offer) {
-		if (!offer.run) return;
-		working = offer.key;
-		try {
-			await offer.run();
-		} catch (error) {
-			toast.error($LL.personaStoreInstallFailed(), {
-				description: error instanceof Error ? error.message : undefined
-			});
-		} finally {
-			working = null;
-		}
-	}
-
-	async function share(offer: Offer) {
-		sharing = offer.key;
-		try {
-			await offer.toggleShare();
-		} catch (error) {
-			toast.error($LL.requestFailed(), {
-				description: error instanceof Error ? error.message : undefined
-			});
-		} finally {
-			sharing = null;
-		}
-	}
-
-	const layouts = $derived([
-		{ value: 'grid' as const, icon: LayoutGrid, label: $LL.personaStoreGridView() },
-		{ value: 'list' as const, icon: List, label: $LL.personaStoreListView() }
-	]);
-
-	const actionLabel = (action: Action) =>
-		action === 'install'
-			? $LL.install()
-			: action === 'installed'
-				? $LL.personaStoreInstalled()
-				: action === 'update'
-					? $LL.personaStoreUpdate()
-					: $LL.personaStoreReset();
 </script>
 
-{#snippet chip(label: string, active: boolean, onclick: () => void)}
-	<button
-		type="button"
-		{onclick}
-		class="shrink-0 rounded-full border px-3 py-1 text-xs transition-colors {active
-			? 'border-accent bg-accent/10 text-accent'
-			: 'border-shade-3 text-muted hover:border-shade-4 hover:text-active'}"
+<StoreModal
+	bind:open
+	bind:view
+	title={$LL.personaStore()}
+	{offers}
+	views={$personasConfig.canShare ? ['store', 'mine', 'shared'] : ['store', 'mine']}
+	counts={{ mine: mine.length, shared: offered.length }}
+	layout={$settingsStore.personaStoreLayout}
+	tint={0}
+	status={catalog.status}
+	errorMessage={catalog.status === 'error' ? catalog.message : undefined}
+	searchPlaceholder={$LL.personaStoreSearch()}
+	emptyMine={$LL.personaStoreNothingMine()}
+	emptyShared={$LL.personaStoreNothingOffered()}
+	unreachable={$LL.personaStoreUnreachable()}
+	updatableCount={updatable.length}
+	onUpdateAll={updateAll}
+	sharing={isServerMode}
+	shareAllowed={$personasConfig.canShare}
+	onRefresh={() => loadCatalog(true)}
+	onLayout={(value) => ($settingsStore.personaStoreLayout = value)}
+	{card}
+/>
+
+{#snippet card(offer: Offer, storeActions: import('svelte').Snippet<[Offer]>)}
+	<LibraryCard
+		name={offer.name}
+		tagline={offer.line}
+		avatar={(offer as PersonaOffer).avatar}
+		tags={offer.tags}
+		layout={$settingsStore.personaStoreLayout}
 	>
-		{label}
-	</button>
-{/snippet}
-
-<Modal bind:open closeButton={false}>
-	<div class="flex h-full w-full flex-col">
-		<!-- Header: the same shape as every other dialog's, so the close is where it
-		     always is and the title reads before the controls. -->
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">{$LL.personaStore()}</span>
-			<div class="flex shrink-0 items-center gap-1">
-				<!-- Only when there is something to do, and never for the ones you have
-				     edited: a single press that quietly overwrote everything someone had
-				     rewritten would be the one nobody could undo. -->
-				{#if updatable.length > 0}
-					<button
-						type="button"
-						disabled={updatingAll}
-						onclick={updateAll}
-						class="flex items-center gap-1.5 rounded-lg border border-accent px-2.5 py-1 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
-					>
-						{#if updatingAll}
-							<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-						{:else}
-							<ArrowDownToLine class="h-3.5 w-3.5" />
-						{/if}
-						{$LL.personaStoreUpdateAll()}
-						<span class="opacity-70">{updatable.length}</span>
-					</button>
-				{/if}
-				<button
-					type="button"
-					onclick={() => loadCatalog(true)}
-					aria-label={$LL.personaStoreRefresh()}
-					title={$LL.personaStoreRefresh()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+		<!-- One label, on one kind of card. A copy you have changed is the only thing
+		     here that is not simply what it says it is, so it is the only thing that
+		     says so. Everything else the card could announce is already in the button
+		     under it. -->
+		{#snippet badges()}
+			{#if offer.edited}
+				<span
+					class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
 				>
-					<RefreshCw class="h-4 w-4 {catalog.status === 'loading' ? 'animate-spin' : ''}" />
-				</button>
-				<button
-					type="button"
-					onclick={() => (open = false)}
-					aria-label={$LL.close()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
-				>
-					<X class="h-4 w-4" />
-				</button>
-			</div>
-		</div>
-
-		<!-- Search and filters, above the grid rather than beside it: a phone has no
-		     room for a sidebar of facets, and the same row works at every width.
-		     A filter with one possible value is not a choice, so it is not drawn. -->
-		<div class="shrink-0 border-b border-shade-2 px-4 py-3">
-			<div class="relative">
-				<Search class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted" />
-				<input
-					bind:value={query}
-					type="search"
-					placeholder={$LL.personaStoreSearch()}
-					class="settings-field w-full pl-9"
-				/>
-			</div>
-
-			<div class="mt-2 flex items-start gap-2">
-				<div class="flex min-w-0 flex-1 flex-wrap gap-1.5">
-					<!-- Views, not filters. They are not the same control wearing two hats:
-					     a view decides what the page is about, a filter narrows what is
-					     already there. The third is an administrator's, because only
-					     somebody who hands personas out has a list of what they hand out. -->
-					{@render chip($LL.personaStoreViewStore(), view === 'store', () => (view = 'store'))}
-					{@render chip(
-						`${$LL.personaStoreViewMine()}${mine.length ? ` · ${mine.length}` : ''}`,
-						view === 'mine',
-						() => (view = 'mine')
-					)}
-					{#if $personasConfig.canShare}
-						{@render chip(
-							`${$LL.personaStoreViewShared()}${offered.length ? ` · ${offered.length}` : ''}`,
-							view === 'shared',
-							() => (view = 'shared')
-						)}
-					{/if}
-				</div>
-
-				<!-- At the end of the filters, because it is one: how much of each entry
-				     you want to see at a time. Remembered, since it is a reading habit
-				     rather than a decision about this particular visit. -->
-				<div class="flex shrink-0 items-center rounded-lg border border-shade-3 p-0.5">
-					{#each layouts as option (option.value)}
-						<button
-							type="button"
-							onclick={() => ($settingsStore.personaStoreLayout = option.value)}
-							aria-label={option.label}
-							title={option.label}
-							aria-pressed={$settingsStore.personaStoreLayout === option.value}
-							class="rounded-md p-1.5 transition-colors {$settingsStore.personaStoreLayout ===
-							option.value
-								? 'bg-shade-2 text-active'
-								: 'text-muted hover:text-active'}"
-						>
-							<option.icon class="h-4 w-4" />
-						</button>
-					{/each}
-				</div>
-			</div>
-		</div>
-
-		<div class="min-h-0 flex-1 overflow-auto p-4">
-			{#if catalog.status === 'loading'}
-				<div class="flex h-full items-center justify-center text-muted">
-					<LoaderCircle class="h-5 w-5 animate-spin" />
-				</div>
-			{:else if catalog.status === 'error' && offers.length === 0}
-				<!-- Nothing ships inside the app, so an unreachable store is an empty
-				     library. Say which of the two it is, and offer the retry. -->
-				<div class="flex h-full flex-col items-center justify-center gap-3 text-center">
-					<p class="text-sm text-muted">{$LL.personaStoreUnreachable()}</p>
-					<p class="max-w-[40ch] text-xs text-muted">{catalog.message}</p>
-					<button
-						type="button"
-						onclick={() => loadCatalog(true)}
-						class="rounded-lg border border-shade-3 px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
-					>
-						{$LL.personaStoreRefresh()}
-					</button>
-				</div>
-			{:else if filtered.length === 0}
-				<p class="pt-8 text-center text-sm text-muted">
-					{#if query.trim()}
-						{$LL.noMatches()}
-					{:else if view === 'shared'}
-						{$LL.personaStoreNothingOffered()}
-					{:else if view === 'mine'}
-						{$LL.personaStoreNothingMine()}
-					{:else}
-						{$LL.noMatches()}
-					{/if}
-				</p>
-			{:else}
-				<!-- The personas' own turn of the accent, so a card here is tinted like
-				     the same card in the Library. The store shell does this from a prop;
-				     this modal predates it and will follow when it is ported. -->
-				<div
-					class="library-section {$settingsStore.personaStoreLayout === 'list'
-						? 'flex flex-col gap-2'
-						: 'grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3'}"
-					style="--section-turn: 0"
-				>
-					{#each filtered as offer (offer.key)}
-						<LibraryCard
-							name={offer.name}
-							tagline={offer.tagline}
-							avatar={offer.avatar}
-							tags={offer.tags}
-							layout={$settingsStore.personaStoreLayout}
-						>
-							<!-- One label, on one kind of card. A copy you have changed is the
-							     only thing here that is not simply what it says it is, so it is the
-							     only thing that says so. Everything else the card could announce
-							     is already in the button under it. -->
-							{#snippet badges()}
-								{#if offer.edited}
-									<span
-										class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
-									>
-										{$LL.personaStateEdited()}
-									</span>
-								{/if}
-							{/snippet}
-
-							{#snippet actions()}
-								<!-- One button, and what it says was decided when the card was
-								     built. Nothing here asks which view it is in. -->
-								{#if offer.run}
-									<button
-										type="button"
-										disabled={working !== null}
-										onclick={() => run(offer)}
-										title={offer.action === 'update'
-											? $LL.personaStoreUpdateTooltip()
-											: offer.action === 'restore'
-												? $LL.personaStoreResetTooltip()
-												: undefined}
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs transition-colors disabled:opacity-50 {offer.action ===
-										'update'
-											? 'border border-accent text-accent hover:bg-accent/10'
-											: 'text-muted hover:bg-shade-2 hover:text-active'}"
-									>
-										{#if working === offer.key}
-											<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-										{:else if offer.action === 'install'}
-											<Download class="h-3.5 w-3.5" />
-										{:else if offer.action === 'update'}
-											<ArrowDownToLine class="h-3.5 w-3.5" />
-										{:else}
-											<RotateCcw class="h-3.5 w-3.5" />
-										{/if}
-										{actionLabel(offer.action)}
-									</button>
-								{:else}
-									<!-- A statement rather than a control: you have it, and installing
-									     it again would hand you what you already hold. -->
-									<span
-										class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
-									>
-										<Check class="h-3.5 w-3.5" />
-										{actionLabel(offer.action)}
-									</span>
-								{/if}
-
-								<!-- Drawn for everyone and refused where it is not allowed, rather
-								     than absent: a card that loses a control depending on who is
-								     looking is a different card, and the two then have to be
-								     designed twice. Hidden only where sharing is not a thing at
-								     all, which is local mode: one person, nobody to share with. -->
-								{#if isServerMode}
-									{@const allowed = $personasConfig.canShare}
-									{@const label = !allowed
-										? $LL.personaStoreShareForbidden()
-										: offer.shared
-											? $LL.personaStoreUnshare()
-											: $LL.personaStoreShare()}
-									<Tooltip>
-										{#snippet trigger({ props })}
-											<button
-												{...props}
-												type="button"
-												disabled={sharing !== null || !allowed}
-												onclick={() => share(offer)}
-												aria-pressed={offer.shared}
-												aria-label={label}
-												class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors disabled:opacity-50 {offer.shared
-													? 'bg-accent/10 text-accent hover:bg-accent/20'
-													: 'text-muted hover:bg-shade-2 hover:text-active'}"
-											>
-												{#if sharing === offer.key}
-													<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
-												{:else}
-													<Users class="h-3.5 w-3.5" />
-												{/if}
-											</button>
-										{/snippet}
-										{label}
-									</Tooltip>
-								{/if}
-							{/snippet}
-						</LibraryCard>
-					{/each}
-				</div>
+					{$LL.personaStateEdited()}
+				</span>
 			{/if}
-		</div>
-	</div>
-</Modal>
+		{/snippet}
+
+		{#snippet actions()}
+			{@render storeActions(offer)}
+		{/snippet}
+	</LibraryCard>
+{/snippet}
