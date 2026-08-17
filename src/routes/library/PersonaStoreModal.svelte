@@ -526,10 +526,14 @@
 					{/if}
 				</p>
 			{:else}
+				<!-- The personas' own turn of the accent, so a card here is tinted like
+				     the same card in the Library. The store shell does this from a prop;
+				     this modal predates it and will follow when it is ported. -->
 				<div
-					class={$settingsStore.personaStoreLayout === 'list'
+					class="library-section {$settingsStore.personaStoreLayout === 'list'
 						? 'flex flex-col gap-2'
-						: 'grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3'}
+						: 'grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3'}"
+					style="--section-turn: 0"
 				>
 					{#each filtered as offer (offer.key)}
 						<LibraryCard

@@ -29,6 +29,19 @@
 		/** Shown when the title is still empty. */
 		placeholder: string;
 		children: Snippet;
+		/**
+		 * The body fills the dialog instead of scrolling in it.
+		 *
+		 * For an editor that is one field taking the whole height rather than a form
+		 * of sections. The dialog is 600px tall whatever is in it, so a body that
+		 * scrolls and a field with a floor of its own fight over those pixels: the
+		 * knowledge editor overflowed by about thirty of them with nothing typed.
+		 *
+		 * The flag exists because the two are genuinely different shapes, and it
+		 * earns its place by leaving exactly one scrollable area on screen either
+		 * way. What it must never become is a second way of saying "and also".
+		 */
+		fill?: boolean;
 		onExport?: () => void;
 		onDelete?: () => void;
 	}
@@ -38,6 +51,7 @@
 		title,
 		placeholder,
 		children,
+		fill = false,
 		onExport,
 		onDelete
 	}: Props = $props();
@@ -89,8 +103,10 @@
 			</div>
 		</div>
 
-		<div class="min-h-0 flex-1 overflow-auto p-4">
-			<div class="mx-auto flex w-full max-w-[70ch] flex-col gap-6">
+		<div class="min-h-0 flex-1 p-4 {fill ? 'overflow-hidden' : 'overflow-auto'}">
+			<div
+				class="mx-auto flex w-full max-w-[70ch] flex-col {fill ? 'h-full min-h-0 gap-3' : 'gap-6'}"
+			>
 				{@render children()}
 			</div>
 		</div>

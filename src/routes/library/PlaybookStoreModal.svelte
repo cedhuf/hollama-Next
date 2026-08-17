@@ -152,6 +152,7 @@
 	{offers}
 	views={['store', 'mine']}
 	layout={$settingsStore.personaStoreLayout}
+	tint={150}
 	status={catalog.status}
 	errorMessage={catalog.status === 'error' ? catalog.message : undefined}
 	searchPlaceholder={$LL.playbookStoreSearch()}

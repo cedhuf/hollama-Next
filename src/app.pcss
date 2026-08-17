@@ -146,7 +146,16 @@
 	border-color: var(--color-shade-3);
 
 	@supports (color: oklch(from red l c calc(h + 1))) {
-		border-color: color-mix(in oklch, var(--section) 22%, var(--color-shade-3));
+		/* The fallback is not decoration. A card drawn outside any section — in the
+		   store, in a picker — has no `--section` at all, and a `color-mix` with a
+		   missing colour is invalid, which lands on `currentColor` and paints a
+		   black outline. Same symptom as the bad angle, different cause: there, the
+		   value was wrong; here, there is no value. */
+		border-color: color-mix(
+			in oklch,
+			var(--section, var(--color-accent)) 22%,
+			var(--color-shade-3)
+		);
 	}
 }
 

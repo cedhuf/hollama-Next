@@ -41,6 +41,11 @@
 		/** Whether the listing is being fetched, and what went wrong if it did. */
 		status: 'idle' | 'loading' | 'ready' | 'error';
 		errorMessage?: string;
+		/**
+		 * The section's turn of the accent, so a card in the store is tinted like the
+		 * same card in the library. Degrees as a plain number: see `library-section`.
+		 */
+		tint?: number;
 		searchPlaceholder: string;
 		emptyMine: string;
 		emptyShared: string;
@@ -63,6 +68,7 @@
 		layout,
 		status,
 		errorMessage,
+		tint = 0,
 		searchPlaceholder,
 		emptyMine,
 		emptyShared,
@@ -308,9 +314,10 @@
 				</p>
 			{:else}
 				<div
-					class={layout === 'list'
+					class="library-section {layout === 'list'
 						? 'flex flex-col gap-2'
-						: 'grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3'}
+						: 'grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3'}"
+					style="--section-turn: {tint}"
 				>
 					{#each filtered as offer (offer.key)}
 						{@render card(offer, actions)}

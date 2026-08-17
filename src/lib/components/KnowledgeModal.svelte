@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Code, Type } from '@lucide/svelte';
+	import { Code, Pencil, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -123,22 +123,30 @@
 	bind:open={$knowledgeModalOpen}
 	title={name}
 	placeholder={$LL.newKnowledge()}
+	fill
 	onExport={isNew ? undefined : exportThis}
 	onDelete={isNew ? undefined : remove}
 >
-	<!-- The name reads as the title of the thing rather than as a form field, but
-	     a title with nothing in it reads as a heading nobody can type in. A border
-	     on hover and focus says otherwise without turning it back into a box that
-	     sits there all day. -->
-	<input
-		bind:this={nameInput}
-		bind:value={name}
-		oninput={persist}
-		name="name"
-		placeholder={$LL.knowledgeNamePlaceholder()}
-		spellcheck="false"
-		class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold text-active outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 focus:border-accent focus:bg-shade-0"
-	/>
+	<!-- The name reads as the title of the thing rather than as a form field. It
+	     still has to look typeable, though: a heading with a border only on hover
+	     says nothing on a phone, and says nothing to anyone who does not happen to
+	     pass over it. A pencil and a dotted underline are there at rest, and firm
+	     up into a real field on hover and focus. -->
+	<div class="group relative">
+		<input
+			bind:this={nameInput}
+			bind:value={name}
+			oninput={persist}
+			name="name"
+			placeholder={$LL.knowledgeNamePlaceholder()}
+			spellcheck="false"
+			class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 pr-8 text-lg font-semibold text-active decoration-shade-4 decoration-dotted underline-offset-[6px] outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 hover:no-underline focus:border-accent focus:bg-shade-0 focus:no-underline"
+			class:underline={!!name}
+		/>
+		<Pencil
+			class="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted opacity-60 transition-opacity group-focus-within:opacity-0"
+		/>
+	</div>
 
 	<div class="flex items-center justify-between gap-3">
 		<!-- Always there, including when no collection exists yet: the way to make
@@ -176,7 +184,7 @@
 			bind:value={content}
 			oninput={persist}
 			placeholder={$LL.knowledgeContentPlaceholder()}
-			class="field-grow min-h-[24rem] w-full rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
+			class="min-h-0 w-full flex-1 resize-none rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
 		></textarea>
 	{/if}
 
