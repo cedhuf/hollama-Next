@@ -74,10 +74,14 @@ A guardrail, not an accounting system. It exists so an instance run for a handfu
 the runaway loop and the forgotten tab; it is not built to invoice anybody, and it says so on every
 screen it appears on.
 
-Set the default allowance and how often it starts again in _Settings → Users_, above the list, and
-give an account its own in the row beside its name. An empty field on a row means **follow the
-instance**, which is not the same as typing the same number: an account that inherits follows the
-default when you change it.
+Set the default allowance and how often it starts again in _Settings → Users_, above the list. It
+resets every calendar month, every week (from Monday) or every day, whichever suits how closely you
+want to watch.
+
+Each account can have its own — both the figure and the period — folded away behind its row, in the
+same two controls. An empty field means **follow the instance**, which is not the same as typing the
+same number: an account that inherits follows the default when you change it, and one that was given
+a copy does not.
 
 Zero means no limit, and is what an instance nobody has configured has. Nothing changes for anyone
 until you decide otherwise.

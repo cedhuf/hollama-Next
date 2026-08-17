@@ -37,15 +37,6 @@ export interface Server {
 	 * unpriced model is not counted rather than counted as zero.
 	 */
 	modelPricing?: Record<string, ModelPrice>;
-	/**
-	 * What this provider bills in, as a currency code.
-	 *
-	 * Per connection, because that is where it is true: an account with one
-	 * provider is billed in dollars and another in euros, and a single figure
-	 * across both would be an addition nobody can defend. Free text, since the app
-	 * does no conversion and never should on its own.
-	 */
-	currency?: string;
 }
 
 /** Default badge colour and short id per provider, dark-mode safe. */

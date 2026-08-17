@@ -42,7 +42,6 @@ const fr = extendDictionary(en, {
 	pricingHelp: 'Ce que coûte un million de jetons, pour les plafonds de crédit.',
 	perMillionShort: '/M jetons',
 	perMillionTokens: 'Tarif par million de jetons',
-	currencyHelp: 'Ce que facture ce fournisseur. Rien n’est converti.',
 	clearPrice: 'Effacer',
 	pricingIntro: 'Ouvrez un modèle pour le tarifer. Les tarifs sont par million de jetons.',
 	priceUnset: 'non défini',
@@ -683,8 +682,6 @@ const fr = extendDictionary(en, {
 	credits: 'Plafonds de crédit',
 	creditsApproximate:
 		'Approximatif : chaque fournisseur déclare ses propres chiffres, et des tarifs en devises différentes sont additionnés.',
-	creditsDescription:
-		'Un garde-fou contre une boucle qui s’emballe ou un onglet oublié, pas un système de facturation.',
 	creditPeriod: 'Remise à zéro',
 	creditPeriodDay: 'Chaque jour',
 	creditPeriodMonth: 'Chaque mois calendaire',

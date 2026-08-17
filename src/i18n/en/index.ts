@@ -33,7 +33,6 @@ const en = {
 	pricingHelp: 'What a million tokens costs, for the credit limits.',
 	perMillionShort: '/M Tokens',
 	perMillionTokens: 'Price per million tokens',
-	currencyHelp: 'What this provider bills in. Nothing is converted.',
 	clearPrice: 'Clear',
 	pricingIntro: 'Open a model to price it. Prices are per million tokens.',
 	priceUnset: 'not set',
@@ -662,8 +661,6 @@ const en = {
 	credits: 'Credit limits',
 	creditsApproximate:
 		'Approximate: providers report their own figures, and prices in different currencies are added together.',
-	creditsDescription:
-		'A guardrail against a runaway loop or a forgotten tab, not an accounting system.',
 	creditPeriod: 'Resets',
 	creditPeriodDay: 'Every day',
 	creditPeriodMonth: 'Every calendar month',

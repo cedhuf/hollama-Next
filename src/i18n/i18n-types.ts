@@ -140,10 +140,6 @@ type RootTranslation = {
 	 */
 	perMillionTokens: string
 	/**
-	 * W​h​a​t​ ​t​h​i​s​ ​p​r​o​v​i​d​e​r​ ​b​i​l​l​s​ ​i​n​.​ ​N​o​t​h​i​n​g​ ​i​s​ ​c​o​n​v​e​r​t​e​d​.
-	 */
-	currencyHelp: string
-	/**
 	 * C​l​e​a​r
 	 */
 	clearPrice: string
@@ -2406,10 +2402,6 @@ type RootTranslation = {
 	 */
 	creditsApproximate: string
 	/**
-	 * A​ ​g​u​a​r​d​r​a​i​l​ ​a​g​a​i​n​s​t​ ​a​ ​r​u​n​a​w​a​y​ ​l​o​o​p​ ​o​r​ ​a​ ​f​o​r​g​o​t​t​e​n​ ​t​a​b​,​ ​n​o​t​ ​a​n​ ​a​c​c​o​u​n​t​i​n​g​ ​s​y​s​t​e​m​.
-	 */
-	creditsDescription: string
-	/**
 	 * R​e​s​e​t​s
 	 */
 	creditPeriod: string
@@ -3037,10 +3029,6 @@ The completion in progress will stop
 	 * Price per million tokens
 	 */
 	perMillionTokens: () => LocalizedString
-	/**
-	 * What this provider bills in. Nothing is converted.
-	 */
-	currencyHelp: () => LocalizedString
 	/**
 	 * Clear
 	 */
@@ -5259,10 +5247,6 @@ The completion in progress will stop
 	 * Approximate: providers report their own figures, and prices in different currencies are added together.
 	 */
 	creditsApproximate: () => LocalizedString
-	/**
-	 * A guardrail against a runaway loop or a forgotten tab, not an accounting system.
-	 */
-	creditsDescription: () => LocalizedString
 	/**
 	 * Resets
 	 */
