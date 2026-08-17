@@ -344,7 +344,7 @@
 											     right-aligned in a box that takes its share of the row, which
 											     keeps the two together while the pair fills the line. -->
 											<span
-												class="flex min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 focus-within:border-accent"
+												class="flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 focus-within:border-accent"
 											>
 												<input
 													class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
@@ -366,7 +366,7 @@
 									     can add up, and USD is what providers publish in. Same box as
 									     the fields beside it, so the row sits on one line. -->
 									<select
-										class="w-auto shrink-0 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs uppercase text-active outline-none focus:border-accent"
+										class="h-8 w-auto shrink-0 rounded-md border border-shade-3 bg-shade-0 px-2 text-xs uppercase text-active outline-none focus:border-accent"
 										value={server.modelPricing?.[name]?.currency ?? DEFAULT_CURRENCY}
 										aria-label="{name} · {$LL.currency()}"
 										onchange={(e) => setCurrency(name, e.currentTarget.value)}
@@ -384,7 +384,7 @@
 										onclick={() => clearPrice(name)}
 										title={$LL.clearPrice()}
 										aria-label="{name} · {$LL.clearPrice()}"
-										class="shrink-0 rounded-md border border-shade-3 p-1.5 text-muted transition-colors hover:border-shade-4 hover:text-active"
+										class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-shade-3 text-muted transition-colors hover:border-shade-4 hover:text-active"
 									>
 										<RotateCcw class="h-3.5 w-3.5" />
 									</button>
