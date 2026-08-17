@@ -23,7 +23,9 @@ src/i18n/i18n-util.ts
 # script controls. Formatting it here means the committed file and the one the
 # script writes disagree, and the CI check that compares them fails forever.
 /personas/index.json
+/playbooks/index.json
 /docs/public/personas
+/docs/public/playbooks
 
 # The docs site is its own project with its own toolchain; it is formatted and
 # built from `docs/`, not from here.

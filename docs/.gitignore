@@ -1,4 +1,5 @@
 dist/
 public/personas/
+public/playbooks/
 .astro/
 node_modules/

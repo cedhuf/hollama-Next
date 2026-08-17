@@ -1,0 +1,81 @@
+{
+	"format": "llooma.playbooks",
+	"version": 1,
+	"entries": [
+		{
+			"id": "decide-it",
+			"name": "Help me decide",
+			"summary": "Work through a decision you keep going round in circles on, and end with one recommendation.",
+			"color": "#7F77DD",
+			"glyph": "compass",
+			"tags": [
+				"thinking",
+				"everyday"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/decide-it.json",
+			"steps": 3,
+			"integrity": "sha256-UXA7txBnLOXsVYyuDHoBZYEzFmCRXT8Uc+J/R5APghM=",
+			"contentDigest": "8a065dc6fd66395e"
+		},
+		{
+			"id": "plain-language",
+			"name": "Say it plainly",
+			"summary": "Rewrite an official letter, a contract clause or a form so an ordinary person can act on it.",
+			"color": "#378ADD",
+			"glyph": "book",
+			"tags": [
+				"writing",
+				"admin",
+				"everyday"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/plain-language.json",
+			"steps": 3,
+			"integrity": "sha256-7w6OAlmx4fwnZcm/QtP7myVvAb3DwT/KqUcw7qLLqr4=",
+			"contentDigest": "2946b96891b0f6b6"
+		},
+		{
+			"id": "weekly-meals",
+			"name": "Meals for the week",
+			"summary": "Plan a week of dinners around what is already in the kitchen, and come out with one shopping list.",
+			"color": "#1D9E75",
+			"glyph": "face-chef",
+			"tags": [
+				"cooking",
+				"weekly",
+				"household"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/weekly-meals.json",
+			"steps": 3,
+			"integrity": "sha256-mHyzAyZnVV7w3DUb3Qhwyjv+fxTBppkaPJ3TCbfLHOc=",
+			"contentDigest": "e1f3806acbd2923c"
+		},
+		{
+			"id": "what-broke",
+			"name": "Something stopped working",
+			"summary": "Track down why a device, an app or a connection at home broke, without taking anything apart first.",
+			"color": "#BA7517",
+			"glyph": "face-headset",
+			"tags": [
+				"troubleshooting",
+				"home",
+				"everyday"
+			],
+			"author": "Llooma",
+			"revision": 1,
+			"origin": "official",
+			"path": "bundles/what-broke.json",
+			"steps": 3,
+			"integrity": "sha256-5k5tLnEwx0eo29zq5qOlzsWQSrZ/zU9gW61iWpmkKZo=",
+			"contentDigest": "4d56e1c9d0624ddc"
+		}
+	]
+}

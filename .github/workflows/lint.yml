@@ -32,3 +32,6 @@ jobs:
       # persona that exists in the repository and not in the store.
       - name: Check the persona store listing is in step with its bundles
         run: pnpm run personas:check
+
+      - name: Check the playbook store listing is in step with its bundles
+        run: pnpm run playbooks:check
