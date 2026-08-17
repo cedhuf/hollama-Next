@@ -7,13 +7,13 @@
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
-	import TourFace from '$lib/components/TourFace.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { catalogState, loadCatalog } from '$lib/personaCatalog';
 	import { instanceConfig } from '$lib/stores/instance';
 	import { welcomeOpen } from '$lib/stores/modal';
-	import { TOUR_CAST, TOUR_TURN, tourPersona } from '$lib/tourCast';
+	import { TOUR_CAST, TOUR_TURN, tourAvatar, tourPersona } from '$lib/tourCast';
 
 	/**
 	 * The welcome tour shown once on a user's first connection (server mode). Unlike
@@ -183,7 +183,7 @@
 						style="animation-duration:{9.5 + i * 1.9}s;animation-delay:{i * -2.7}s"
 						in:fly={{ y: 10, duration: 360, delay: 120 * i, easing: cubicOut }}
 					>
-						<TourFace {persona} size={42} />
+						<PersonaAvatar persona={tourAvatar(persona)} size={42} />
 						<div class="min-w-0">
 							<span class="mb-0.5 block px-1 text-[10px] font-medium text-muted">
 								{persona.name}
@@ -248,7 +248,7 @@
 							class="flex items-end gap-2.5"
 							in:fly={{ x: -14, y: 8, duration: 320, easing: cubicOut }}
 						>
-							<TourFace {persona} size={32} />
+							<PersonaAvatar persona={tourAvatar(persona)} size={32} />
 							<div class="min-w-0 flex-1">
 								<span class="mb-0.5 block pl-1 text-[11px] font-medium text-muted">
 									{persona.name}

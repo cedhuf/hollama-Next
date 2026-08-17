@@ -8,7 +8,7 @@
 			"tagline": "A friendly ear, anytime",
 			"avatar": {
 				"kind": "glyph",
-				"id": "heart",
+				"id": "face-hair",
 				"color": "#D4537E"
 			},
 			"tags": [
@@ -16,11 +16,11 @@
 				"companionship"
 			],
 			"author": "Llooma",
-			"revision": 1,
+			"revision": 2,
 			"origin": "official",
 			"path": "bundles/lou.json",
-			"integrity": "sha256-+JQYk9ZRLgCBOFfEwrgAV9jGFBZvSctAXQX8G0LutAk=",
-			"contentDigest": "5bdce88dda3bea1a"
+			"integrity": "sha256-2NZBxW/epnGHNkjNM7Yzz/RS3fUXIl1vdoGlRNu1RrQ=",
+			"contentDigest": "810250f97556467a"
 		},
 		{
 			"id": "maite",
@@ -28,7 +28,7 @@
 			"tagline": "Everyday cooking, no fuss",
 			"avatar": {
 				"kind": "glyph",
-				"id": "pot",
+				"id": "face-chef",
 				"color": "#BA7517"
 			},
 			"tags": [
@@ -37,11 +37,11 @@
 				"food"
 			],
 			"author": "Llooma",
-			"revision": 1,
+			"revision": 2,
 			"origin": "official",
 			"path": "bundles/maite.json",
-			"integrity": "sha256-kkM6n0pBX4dykWF1CoWDTLJssj6zZ3TFju0fzg6JMrs=",
-			"contentDigest": "e639cf3d68fc5da1"
+			"integrity": "sha256-MsoYoPySYLDggg44oAbb23QqVK/w6PND4ru4Z/suC/Y=",
+			"contentDigest": "64571c224ca7e443"
 		},
 		{
 			"id": "max",
@@ -49,7 +49,7 @@
 			"tagline": "Personal trainer & motivation",
 			"avatar": {
 				"kind": "glyph",
-				"id": "dumbbell",
+				"id": "face-headband",
 				"color": "#D85A30"
 			},
 			"tags": [
@@ -58,11 +58,11 @@
 				"coaching"
 			],
 			"author": "Llooma",
-			"revision": 1,
+			"revision": 2,
 			"origin": "official",
 			"path": "bundles/max.json",
-			"integrity": "sha256-/wIbZHZ82ghGdOtzhESaWFLrz/GI0gpsJcppvVzgHzU=",
-			"contentDigest": "7217d5d635d7b440"
+			"integrity": "sha256-n7bAF5wxVWd3lcQbGIP6EjugVFAe6VbSA6+JdZ25SQw=",
+			"contentDigest": "04ed9c307c97bda8"
 		},
 		{
 			"id": "nova",
@@ -70,7 +70,7 @@
 			"tagline": "Your everyday assistant",
 			"avatar": {
 				"kind": "glyph",
-				"id": "sparkle",
+				"id": "face-antenna",
 				"color": "#378ADD"
 			},
 			"tags": [
@@ -79,11 +79,11 @@
 				"productivity"
 			],
 			"author": "Llooma",
-			"revision": 1,
+			"revision": 2,
 			"origin": "official",
 			"path": "bundles/nova.json",
-			"integrity": "sha256-nDxyjDZwVKpW+pKCbb7djrZ7Bd+kDuwl1GGB3XuWD/I=",
-			"contentDigest": "9f99f422fcc2f963"
+			"integrity": "sha256-kWbPVuNUmtJ88Jh6M8xirpLH/djS0gHr6kRCtim81hE=",
+			"contentDigest": "edf4df9350a71fe4"
 		},
 		{
 			"id": "pixel",
@@ -91,7 +91,7 @@
 			"tagline": "Video games, always up to date",
 			"avatar": {
 				"kind": "glyph",
-				"id": "gamepad",
+				"id": "face-headset",
 				"color": "#7F77DD"
 			},
 			"tags": [
@@ -100,11 +100,11 @@
 				"web search"
 			],
 			"author": "Llooma",
-			"revision": 1,
+			"revision": 2,
 			"origin": "official",
 			"path": "bundles/pixel.json",
-			"integrity": "sha256-i3bZmDV3EEfSGHqVfb0WdHtWrtGeeuMIteTygar8h3o=",
-			"contentDigest": "dce6304df510c4be"
+			"integrity": "sha256-YCgAUrd5iatjsBzCB2ZTJsXgP9wQGlHde2q/Bcgp27o=",
+			"contentDigest": "de41072cd72d86de"
 		}
 	]
 }
