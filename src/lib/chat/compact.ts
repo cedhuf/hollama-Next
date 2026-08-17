@@ -114,10 +114,18 @@ export async function compactSession(
 			messages: [
 				{
 					role: 'system',
-					// Anything typed after `/compact` is appended to the instructions rather
-					// than replacing them: someone asking to keep the code decisions wants
-					// that *as well as* a usable summary, and a replaced prompt would drop
-					// every rule about length, tense and what a summary is for.
+					// Anything typed after `/compact` goes last and outranks what is above
+					// it, length and structure included.
+					//
+					// It was written the other way round first, with a wrapper ending "this
+					// does not licence a shorter or looser summary" — which is the model
+					// being told to ignore the user. `/compact one word only` produced the
+					// full six-section record, correctly, because that is what it had been
+					// asked for. A request that cannot lose is not a request.
+					//
+					// The guard against a summary that throws the conversation away is not
+					// a prompt refusing to obey: it is that compaction is reversible, and
+					// the divider offers the way back.
 					content: [resolvePrompt('compact', overrides), instruction].filter(Boolean).join('\n\n')
 				},
 				{ role: 'user', content: transcript }

@@ -95,8 +95,12 @@ changing it also affects summaries written earlier.
 ## Saying what to keep
 
 `/compact` takes an optional instruction: `/compact keep every decision about the database schema`.
-It is appended to the summariser's rules rather than replacing them, so the summary is still a
-summary; what changes is what it protects when it has to choose.
+It goes last and **outranks** the summariser's own rules, their length and their structure included.
+`/compact one word only` writes one word.
+
+That is deliberate, and it is worth knowing what it costs: whatever the summary leaves out is gone
+from the model's memory of the conversation. The protection is not a prompt refusing to obey you, it
+is that compaction is reversible — the divider gives the full history back.
 
 Picking `/compact` from the command menu now writes it into the composer with a space after it
 instead of running it, since the point of picking it from a list is that you were not going to type

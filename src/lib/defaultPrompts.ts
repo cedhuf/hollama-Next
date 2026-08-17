@@ -198,12 +198,12 @@ Rules:
 	compactInstruction: {
 		label: 'Compaction — what the user asked for',
 		placeholders: ['{instruction}'],
-		hint: 'Wraps anything typed after /compact, so the summariser treats it as a priority rather than as conversation.',
-		default: `The person compacting this conversation has asked for the following, and it takes precedence over the section order above wherever the two disagree:
+		hint: 'Wraps anything typed after /compact. It overrides the summary rules, including their length and structure.',
+		default: `The person compacting this conversation has asked for the following. It overrides everything above it: the sections, their order, the level of detail and the length. Wherever the rules above and this request disagree, this request wins.
 
 {instruction}
 
-Keep everything else the rules ask for. This adds an emphasis; it does not licence a shorter or looser summary.`
+Write what this asks for and nothing else. Do not add sections it did not ask for, and do not explain what you left out.`
 	},
 	compact: {
 		label: 'Compaction — write the summary',
