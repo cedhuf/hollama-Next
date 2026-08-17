@@ -23,6 +23,7 @@
 		"personas:check": "node scripts/build-persona-index.mjs --check",
 		"playbooks:index": "node scripts/build-playbook-index.mjs",
 		"playbooks:check": "node scripts/build-playbook-index.mjs --check",
+		"seed:dev": "node scripts/seed-dev.mjs",
 		"docs:dev": "pnpm --dir docs run dev",
 		"docs:build": "pnpm --dir docs run build"
 	},
