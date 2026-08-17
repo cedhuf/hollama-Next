@@ -81,7 +81,7 @@ test.describe('Servers', () => {
 		);
 		expect(localStorageServers).toBeNull();
 
-		let localStorageSettings = await page.evaluate(() =>
+		const localStorageSettings = await page.evaluate(() =>
 			window.localStorage.getItem('hollamanext-settings')
 		);
 		await page.evaluate(
@@ -102,9 +102,6 @@ test.describe('Servers', () => {
 
 		// Need to reload for the migrations in `<root>/+layout.svelte` to run
 		await page.reload();
-		localStorageSettings = await page.evaluate(() =>
-			window.localStorage.getItem('hollamanext-settings')
-		);
 		localStorageServers = await page.evaluate(() =>
 			window.localStorage.getItem('hollamanext-servers')
 		);

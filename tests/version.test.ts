@@ -168,9 +168,6 @@ test('performs automatic update check on navigation when enabled', async ({ page
 	await expect(page.getByText('A newer version is available')).toBeVisible();
 	await expect(settingsLink).not.toHaveClass(/before:bg-warning/);
 	await expect(autoUpdateCheckbox).toBeVisible();
-	localStorageValue = await page.evaluate(() =>
-		window.localStorage.getItem('hollamanext-settings')
-	);
 });
 
 test('skips automatic update check on navigation when disabled', async ({ page }) => {

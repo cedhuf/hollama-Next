@@ -19,6 +19,11 @@ export default ts.config(
 			'_local/**',
 			'build/**',
 			'.svelte-kit/**',
+			// pdf.js, copied out of node_modules by `prepare`. A minified third-party
+			// bundle judged by the rules of hand-written code reports about seventeen
+			// hundred style errors, which is enough to bury every real one and is the
+			// reason `pnpm lint` had been failing for months without anybody reading it.
+			'static/vendor/**',
 			'package/**',
 			'**/.DS_Store',
 			'**/.env',
