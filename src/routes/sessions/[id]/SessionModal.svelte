@@ -98,7 +98,7 @@
 					{/snippet}
 
 					<textarea
-						class="settings-field min-h-40 resize-y"
+						class="settings-field field-grow min-h-40"
 						rows="7"
 						bind:value={session.systemPrompt.content}
 						oninput={onSystemPromptInput}

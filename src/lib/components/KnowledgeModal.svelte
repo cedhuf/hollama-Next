@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Brain, Code, Trash2, Type } from '@lucide/svelte';
+	import { Brain, Code, Download, Trash2, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -69,6 +69,26 @@
 		});
 		toast.success($LL.knowledgeSaved());
 		$knowledgeModalOpen = false;
+	}
+
+	/**
+	 * A document, as a file the import reads back.
+	 *
+	 * The plain `{ name, content }` shape `parseKnowledgeImport` accepts, so what
+	 * leaves here goes into any library, including someone else's. No id and no
+	 * collection: both mean something only where they came from.
+	 */
+	function exportThis() {
+		const data = JSON.stringify({ name, content }, null, 2);
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${name.trim() || 'knowledge'}.json`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
 	}
 
 	function remove() {
@@ -189,6 +209,16 @@
 						<Trash2 class="base-icon" />
 					</Button>
 				{/if}
+			{/if}
+
+			{#if !isNew}
+				<!-- Beside the delete rather than in the header: this dialog keeps its
+				     controls in a footer because it has a Save to keep there, and
+				     scattering them across two bars to match another dialog's shape
+				     would be consistency with nothing. -->
+				<Button variant="icon" title={$LL.export()} aria-label={$LL.export()} onclick={exportThis}>
+					<Download class="base-icon" />
+				</Button>
 			{/if}
 
 			{#if content.trim()}

@@ -101,6 +101,58 @@
 	@apply border-shade-3 bg-shade-0 text-active focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm outline-none;
 }
 
+/*
+ * A text field that grows with what is in it, so a dialog has one scrollbar.
+ *
+ * A long prompt in a fixed-height box means scrolling the page to reach the
+ * field and then scrolling inside the field to read it, with the wheel changing
+ * meaning depending on where the pointer happens to be. The composer solved this
+ * for itself long ago; the editors kept the old shape.
+ *
+ * `min-height` is what a caller sets. No maximum: the dialog scrolls, which is
+ * the whole point, and a ceiling here would put the second scrollbar back.
+ */
+/*
+ * A section of the library, tinted from the theme rather than from a palette.
+ *
+ * Three sections of near-identical cards are hard to tell apart at a glance once
+ * the page is scrolled, and a fixed colour each would fight every theme the app
+ * ships. So each section takes the accent and turns it: same lightness, same
+ * chroma, a different hue. Change the theme and the three move together.
+ *
+ * `oklch(from …)` is what makes that honest — it is the accent, rotated, not a
+ * colour picked to look like it. Where relative colours are unsupported the
+ * variable falls back to the accent itself and the sections simply share it,
+ * which is exactly what they did before.
+ *
+ * The tint is deliberately faint. It is a cue for the eye scanning the page, not
+ * a category colour to be read, and a library in four colours is a toybox.
+ */
+@utility library-section {
+	--section: var(--color-accent);
+
+	@supports (color: oklch(from red l c h)) {
+		--section: oklch(from var(--color-accent) l c calc(h + var(--section-turn, 0)));
+	}
+}
+
+@utility section-tint {
+	border-color: color-mix(in srgb, var(--section) 22%, var(--color-shade-3));
+}
+
+@utility field-grow {
+	/* Where `field-sizing` is not implemented the field keeps its floor and can be
+	   dragged taller, which is what it did before. The handle is dropped only
+	   where growing on its own actually works, since a resize handle on a field
+	   that already fits its content is a control with nothing to do. */
+	resize: vertical;
+
+	@supports (field-sizing: content) {
+		field-sizing: content;
+		resize: none;
+	}
+}
+
 @custom-variant dark (&:where([data-color-theme='dark']));
 
 @utility base-input {

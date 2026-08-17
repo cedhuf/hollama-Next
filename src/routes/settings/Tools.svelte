@@ -290,7 +290,7 @@
 		<p class="text-xs text-muted">{DEFAULT_PROMPTS[selectedPrompt].hint}</p>
 
 		<textarea
-			class="settings-field min-h-36 resize-y font-mono text-xs leading-relaxed"
+			class="settings-field field-grow min-h-36 font-mono text-xs leading-relaxed"
 			value={selectedText}
 			oninput={(e) => setOverride(selectedPrompt, e.currentTarget.value)}
 		></textarea>

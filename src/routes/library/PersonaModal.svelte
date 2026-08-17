@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { Download, Trash2, X } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
+	import EditorModal from '$lib/components/EditorModal.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { LANGUAGE_LABELS } from '$lib/i18n';
 	import { knowledgeStore, settingsStore } from '$lib/localStorage';
@@ -101,163 +100,125 @@
 	}
 </script>
 
-<Modal bind:open closeButton={false}>
-	<div class="flex h-full w-full flex-col">
-		<!-- Header: live title + close, aligned like the Settings modal -->
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">
-				{persona.name.trim() || 'New persona'}
-			</span>
-			<button
-				type="button"
-				onclick={() => (open = false)}
-				aria-label="Close"
-				class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
-			>
-				<X class="h-4 w-4" />
-			</button>
+<EditorModal
+	bind:open
+	title={persona.name}
+	placeholder={$LL.newPersona()}
+	onExport={exportThis}
+	onDelete={remove}
+>
+	<SettingsSection title="Identity" card>
+		<div class="flex items-center gap-4">
+			<AvatarEditor
+				image={persona.avatarImage}
+				color={persona.avatarColor}
+				{initials}
+				colors={PERSONA_AVATAR_COLORS}
+				glyph={persona.avatarGlyph}
+				glyphs={PERSONA_GLYPHS}
+				label={persona.name}
+				onColorChange={(c) => {
+					persona.avatarColor = c;
+					persist();
+				}}
+				onGlyphChange={(id) => {
+					persona.avatarGlyph = id;
+					persist();
+				}}
+				onImageChange={(url) => {
+					persona.avatarImage = url;
+					persist();
+				}}
+				onImageRemove={() => {
+					persona.avatarImage = undefined;
+					persist();
+				}}
+			/>
+
+			<div class="flex min-w-0 flex-1 flex-col gap-2">
+				<input
+					class="settings-field"
+					bind:value={persona.name}
+					oninput={persist}
+					placeholder="Name (e.g. Léa)"
+				/>
+				<input
+					class="settings-field"
+					bind:value={persona.tagline}
+					oninput={persist}
+					placeholder="One-line description (e.g. Patient maths tutor)"
+				/>
+			</div>
 		</div>
+	</SettingsSection>
 
-		<!-- Body -->
-		<div class="min-h-0 flex-1 overflow-auto p-4">
-			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
-				<SettingsSection title="Identity" card>
-					<div class="flex items-center gap-4">
-						<AvatarEditor
-							image={persona.avatarImage}
-							color={persona.avatarColor}
-							{initials}
-							colors={PERSONA_AVATAR_COLORS}
-							glyph={persona.avatarGlyph}
-							glyphs={PERSONA_GLYPHS}
-							label={persona.name}
-							onColorChange={(c) => {
-								persona.avatarColor = c;
-								persist();
-							}}
-							onGlyphChange={(id) => {
-								persona.avatarGlyph = id;
-								persist();
-							}}
-							onImageChange={(url) => {
-								persona.avatarImage = url;
-								persist();
-							}}
-							onImageRemove={() => {
-								persona.avatarImage = undefined;
-								persist();
-							}}
-						/>
-
-						<div class="flex min-w-0 flex-1 flex-col gap-2">
-							<input
-								class="settings-field"
-								bind:value={persona.name}
-								oninput={persist}
-								placeholder="Name (e.g. Léa)"
-							/>
-							<input
-								class="settings-field"
-								bind:value={persona.tagline}
-								oninput={persist}
-								placeholder="One-line description (e.g. Patient maths tutor)"
-							/>
-						</div>
-					</div>
-				</SettingsSection>
-
-				<SettingsSection title="Behaviour" card>
-					<SettingsField label="Model">
-						<!-- Naming no model is a legitimate answer, and the common one for a
+	<SettingsSection title="Behaviour" card>
+		<SettingsField label="Model">
+			<!-- Naming no model is a legitimate answer, and the common one for a
 						     persona that travels: it runs on whatever the reader's default is.
 						     Said in the list rather than left as an empty field, which reads as
 						     unfinished. -->
-						<ModelSelect
-							bind:value={persona.modelName}
-							emptyLabel={$LL.personaDefaultModel()}
-							onSelect={persist}
-						/>
-					</SettingsField>
+			<ModelSelect
+				bind:value={persona.modelName}
+				emptyLabel={$LL.personaDefaultModel()}
+				onSelect={persist}
+			/>
+		</SettingsField>
 
-					<SettingsField label={$LL.personaLanguageLabel()} hint={$LL.personaLanguageHint()}>
-						<!-- Free text, not the list of locales the interface is translated into:
+		<SettingsField label={$LL.personaLanguageLabel()} hint={$LL.personaLanguageHint()}>
+			<!-- Free text, not the list of locales the interface is translated into:
 						     those are two different things. Empty follows the interface, and the
 						     placeholder shows what that currently resolves to. -->
-						<input
-							class="settings-field"
-							bind:value={persona.language}
-							oninput={persist}
-							placeholder={interfaceLanguage}
-							spellcheck="false"
-						/>
-					</SettingsField>
+			<input
+				class="settings-field"
+				bind:value={persona.language}
+				oninput={persist}
+				placeholder={interfaceLanguage}
+				spellcheck="false"
+			/>
+		</SettingsField>
 
-					<SettingsField label="System prompt" hint="The persona's personality lives here.">
-						<textarea
-							class="settings-field min-h-40 resize-y"
-							rows="7"
-							bind:value={persona.systemPrompt}
-							oninput={persist}
-							placeholder="Who they are, how they speak, what they do… (e.g. “You are Léa, a patient maths tutor…”)"
-						></textarea>
-					</SettingsField>
+		<SettingsField label="System prompt" hint="The persona's personality lives here.">
+			<textarea
+				class="settings-field field-grow min-h-40"
+				rows="7"
+				bind:value={persona.systemPrompt}
+				oninput={persist}
+				placeholder="Who they are, how they speak, what they do… (e.g. “You are Léa, a patient maths tutor…”)"
+			></textarea>
+		</SettingsField>
 
-					<SettingsField label="Greeting (optional)">
-						<textarea
-							class="settings-field resize-y"
-							rows="2"
-							bind:value={persona.greeting}
-							oninput={persist}
-							placeholder="Opening line shown when the conversation starts…"
-						></textarea>
-					</SettingsField>
+		<SettingsField label="Greeting (optional)">
+			<textarea
+				class="settings-field field-grow min-h-24"
+				rows="2"
+				bind:value={persona.greeting}
+				oninput={persist}
+				placeholder="Opening line shown when the conversation starts…"
+			></textarea>
+		</SettingsField>
 
-					<FieldCheckbox
-						label="Allow web search"
-						bind:checked={persona.webSearch}
-						onChange={persist}
-					/>
-					<!-- No share switch here any more. Offering a persona to an instance is
+		<FieldCheckbox label="Allow web search" bind:checked={persona.webSearch} onChange={persist} />
+		<!-- No share switch here any more. Offering a persona to an instance is
 					     done in the store, in one place, beside the button that offers the
 					     store's own and beside the list of what is currently offered. A
 					     checkbox buried in an editor meant an admin had to remember which of
 					     their personas they had ticked, with nowhere to go and look. -->
-				</SettingsSection>
+	</SettingsSection>
 
-				{#if $knowledgeStore.length > 0}
-					<SettingsSection title="Knowledge" description="Collections this persona can draw on.">
-						<div class="flex flex-col gap-1 rounded-lg border border-shade-3 bg-shade-0 p-1.5">
-							{#each $knowledgeStore as k (k.id)}
-								<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
-									<FieldCheckbox
-										label={k.name || 'Untitled'}
-										checked={attached.includes(k.id)}
-										onChange={() => toggleKnowledge(k.id)}
-									/>
-								</div>
-							{/each}
-						</div>
-					</SettingsSection>
-				{/if}
+	{#if $knowledgeStore.length > 0}
+		<SettingsSection title="Knowledge" description="Collections this persona can draw on.">
+			<div class="flex flex-col gap-1 rounded-lg border border-shade-3 bg-shade-0 p-1.5">
+				{#each $knowledgeStore as k (k.id)}
+					<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+						<FieldCheckbox
+							label={k.name || 'Untitled'}
+							checked={attached.includes(k.id)}
+							onChange={() => toggleKnowledge(k.id)}
+						/>
+					</div>
+				{/each}
 			</div>
-		</div>
-
-		<!-- Footer: actions pinned so Delete/Export are always reachable -->
-		<div class="flex shrink-0 items-center justify-between border-t border-shade-2 px-4 py-3">
-			<button
-				type="button"
-				class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
-				onclick={exportThis}
-			>
-				<Download class="h-3.5 w-3.5" /> Export
-			</button>
-			<button
-				type="button"
-				class="flex items-center gap-1.5 text-xs text-negative transition-colors hover:underline"
-				onclick={remove}
-			>
-				<Trash2 class="h-3.5 w-3.5" /> Delete
-			</button>
-		</div>
-	</div>
-</Modal>
+		</SettingsSection>
+	{/if}
+</EditorModal>

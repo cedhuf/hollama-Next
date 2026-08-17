@@ -294,7 +294,7 @@
 	<button
 		type="button"
 		onclick={() => openKnowledge({ id: knowledge.id })}
-		class="flex items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
+		class="section-tint flex items-center gap-2.5 rounded-xl border bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
 	>
 		<FileText class="h-5 w-5 shrink-0 text-muted" />
 		<div class="min-w-0">
@@ -348,6 +348,8 @@
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
 
 			<!-- Personas -->
+			<!-- Each section carries its own turn of the accent, so three grids of
+			     near-identical cards are separable at a glance without a legend. -->
 			<!-- The shortcut in the heading and the one at the end of the grid are both
 			     worth having: the heading is where you look when you arrive knowing what
 			     you want, the tile is where you end up having scrolled and found nothing
@@ -372,7 +374,10 @@
 			     within a section — the three hold different things and forcing a
 			     knowledge card to the height of a persona card would be padding, not
 			     alignment. -->
-			<div class="mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+			<div
+				class="library-section mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"
+				style="--section-turn: 0deg"
+			>
 				{#each $personasStore as persona (persona.id)}
 					{@const state = personaState(persona, publishedDigest(persona))}
 					<LibraryCard
@@ -508,7 +513,10 @@
 				</button>
 			</div>
 
-			<div class="mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+			<div
+				class="library-section mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"
+				style="--section-turn: 150deg"
+			>
 				{#each $playbooksStore as playbook (playbook.id)}
 					<LibraryCard
 						name={playbook.name || $LL.untitled()}
@@ -554,7 +562,10 @@
 			     you came to look at. No heading over it, because "everything not filed
 			     anywhere" is not a category anyone thinks in. -->
 			<div class="mb-6">
-				<div class="grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+				<div
+					class="library-section grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3"
+					style="--section-turn: -110deg"
+				>
 					{#each looseKnowledge as knowledge (knowledge.id)}
 						{@render knowledgeCard(knowledge)}
 					{/each}
@@ -684,7 +695,10 @@
 					</div>
 
 					{#if !collapsed}
-						<div class="grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+						<div
+							class="library-section grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3"
+							style="--section-turn: -110deg"
+						>
 							{#each items as knowledge (knowledge.id)}
 								{@render knowledgeCard(knowledge)}
 							{/each}
