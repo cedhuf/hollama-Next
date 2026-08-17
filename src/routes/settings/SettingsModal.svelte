@@ -9,6 +9,7 @@
 		Settings2,
 		Shield,
 		User,
+		UsersRound,
 		Wrench,
 		X
 	} from '@lucide/svelte';
@@ -27,6 +28,7 @@
 	import Profile from './Profile.svelte';
 	import Servers from './Servers.svelte';
 	import Tools from './Tools.svelte';
+	import Users from './Users.svelte';
 	import Version from './Version.svelte';
 
 	const serverMode = env.PUBLIC_MODE === 'server';
@@ -46,6 +48,9 @@
 			{ id: 'profile', label: $LL.profile(), icon: User },
 			{ id: 'servers', label: $LL.servers(), icon: Server },
 			{ id: 'admin', label: 'Admin', icon: Shield, visible: serverMode && isAdmin },
+			// Beside Admin and gated the same way, because it is the other half of
+			// running an instance: Admin is how it behaves, this is who is on it.
+			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: serverMode && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
 			{ id: 'interface', label: $LL.interface(), icon: Settings2 },
@@ -176,6 +181,8 @@
 					<Servers />
 				{:else if activeTab === 'admin'}
 					<Admin />
+				{:else if activeTab === 'users'}
+					<Users />
 				{:else if activeTab === 'chat'}
 					<Chat />
 				{:else if activeTab === 'tools'}

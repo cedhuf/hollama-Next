@@ -652,6 +652,7 @@ const en = {
 	lastSeenHours: '{hours:number}h ago',
 	lastSeenDays: '{days:number}d ago',
 	lastSeenNever: 'never seen',
+	deleteUserConfirm: 'Delete this user and everything they wrote?',
 	usersDescription: 'Accounts on this instance.',
 	createAUser: 'Create a user',
 	initialPassword: 'Initial password',

@@ -2368,6 +2368,10 @@ type RootTranslation = {
 	 */
 	lastSeenNever: string
 	/**
+	 * D​e​l​e​t​e​ ​t​h​i​s​ ​u​s​e​r​ ​a​n​d​ ​e​v​e​r​y​t​h​i​n​g​ ​t​h​e​y​ ​w​r​o​t​e​?
+	 */
+	deleteUserConfirm: string
+	/**
 	 * A​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
 	 */
 	usersDescription: string
@@ -5064,6 +5068,10 @@ The completion in progress will stop
 	 * never seen
 	 */
 	lastSeenNever: () => LocalizedString
+	/**
+	 * Delete this user and everything they wrote?
+	 */
+	deleteUserConfirm: () => LocalizedString
 	/**
 	 * Accounts on this instance.
 	 */

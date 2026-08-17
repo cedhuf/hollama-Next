@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PlayCircle, Plus, RotateCcw, Trash2, X } from '@lucide/svelte';
+	import { PlayCircle, RotateCcw } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -40,13 +40,6 @@
 		isEnabled: boolean;
 		sharedModels: string[];
 	}
-	interface UserRow {
-		id: string;
-		email: string;
-		role: string;
-		created_at: string;
-		last_seen_at: string | null;
-	}
 
 	/**
 	 * How long ago, in one glance.
@@ -56,13 +49,6 @@
 	 * behind it. Under an hour reads as "now", which is what it means in a list
 	 * whose question is who is still around.
 	 */
-	function lastSeen(at: string): string {
-		const hours = Math.floor((Date.now() - new Date(at).getTime()) / 3_600_000);
-		if (hours < 1) return $LL.lastSeenNow();
-		if (hours < 24) return $LL.lastSeenHours({ hours });
-		return $LL.lastSeenDays({ days: Math.floor(hours / 24) });
-	}
-
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
@@ -72,11 +58,8 @@
 	let themeShareEnabled = $state(false);
 	let resettingOnboarding = $state(false);
 	let servers = $state<SystemServer[]>([]);
-	let users = $state<UserRow[]>([]);
 	/** Until the first `load()` settles, the empty states below would be lies. */
 	let loading = $state(true);
-	let showCreateUser = $state(false);
-	let newUser = $state({ email: '', password: '', role: 'user' });
 
 	let searchSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let shareEnabled = $state(false);
@@ -153,10 +136,9 @@
 
 	async function load() {
 		try {
-			const [config, serverList, userList] = await Promise.all([
+			const [config, serverList] = await Promise.all([
 				fetch('/api/admin/config').then((r) => r.json()),
-				fetch('/api/admin/servers').then((r) => r.json()),
-				fetch('/api/admin/users').then((r) => r.json())
+				fetch('/api/admin/servers').then((r) => r.json())
 			]);
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
@@ -178,7 +160,6 @@
 			compactSharing = config.compactSharing ?? 'off';
 			compactShareEnabled = compactSharing !== 'off';
 			servers = serverList as SystemServer[];
-			users = userList;
 		} finally {
 			loading = false;
 		}
@@ -346,21 +327,6 @@
 
 	async function saveShared(server: SystemServer) {
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
-	}
-
-	async function addUser() {
-		if (!newUser.email || !newUser.password) return toast.error($LL.emailAndPasswordRequired());
-		await api('/api/admin/users', 'POST', newUser);
-		newUser = { email: '', password: '', role: 'user' };
-		showCreateUser = false;
-		await load();
-		toast.success($LL.userCreated());
-	}
-
-	async function removeUser(id: string) {
-		if (!confirm('Delete this user and all their data?')) return;
-		await api(`/api/admin/users/${id}`, 'DELETE');
-		await load();
 	}
 
 	/** Replay the first-connection welcome tour, so it can be reviewed on demand. */
@@ -603,73 +569,6 @@
 				{/if}
 			</div>
 		{/each}
-	</SettingsSection>
-
-	<!-- Users -->
-	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
-		{#if loading}
-			<Skeleton variant="row" count={3} />
-		{/if}
-		{#each users as user (user.id)}
-			<div
-				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
-			>
-				<span class="min-w-0 truncate">
-					{user.email}
-					<span class="text-xs text-muted">({user.role})</span>
-				</span>
-				<!-- Quiet and to the right of the row, before the one control that acts on
-				     it: an administrator scanning the list is looking for who is still
-				     around, not reading a report. Blank rather than a guess for an account
-				     nobody has opened since this existed. -->
-				<span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted">
-					{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
-				</span>
-				<Button variant="icon" onclick={() => removeUser(user.id)}>
-					<Trash2 class="base-icon" />
-				</Button>
-			</div>
-		{/each}
-
-		{#if showCreateUser}
-			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
-				<div class="flex items-center justify-between">
-					<span class="text-sm font-medium">{$LL.createAUser()}</span>
-					<button
-						type="button"
-						onclick={() => (showCreateUser = false)}
-						class="text-muted transition-colors hover:text-active"
-						aria-label={$LL.close()}
-					>
-						<X class="h-4 w-4" />
-					</button>
-				</div>
-				<input class="settings-field" type="email" bind:value={newUser.email} placeholder="Email" />
-				<input
-					class="settings-field"
-					type="password"
-					bind:value={newUser.password}
-					placeholder={$LL.initialPassword()}
-				/>
-				<Select
-					bind:value={newUser.role}
-					options={[
-						{ value: 'user', label: 'user' },
-						{ value: 'admin', label: 'admin' }
-					]}
-				/>
-				<Button onclick={addUser}><Plus class="base-icon" /> {$LL.createUser()}</Button>
-			</div>
-		{:else}
-			<button
-				type="button"
-				onclick={() => (showCreateUser = true)}
-				class="flex items-center gap-2 self-start rounded-md border border-dashed border-shade-4 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-active"
-			>
-				<Plus class="h-4 w-4" />
-				{$LL.addUser()}
-			</button>
-		{/if}
 	</SettingsSection>
 
 	<!-- Developer options -->

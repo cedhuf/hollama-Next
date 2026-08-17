@@ -53,7 +53,10 @@ Two switches under _User permissions_:
 
 ## Accounts
 
-There is **no self-registration**. You create accounts here, with an email, a password and a role,
+In _Settings → Users_, a tab of its own beside this one and gated the same way. Admin is how the
+instance behaves; that tab is who is on it, which is a list of people rather than a set of policies.
+
+There is **no self-registration**. You create accounts there, with an email, a password and a role,
 or users arrive through OIDC (auto-provisioned on first sign-in unless you set
 `OIDC_AUTO_PROVISION=false`).
 

@@ -673,6 +673,7 @@ const fr = extendDictionary(en, {
 	lastSeenHours: 'il y a {hours:number} h',
 	lastSeenDays: 'il y a {days:number} j',
 	lastSeenNever: 'jamais vu',
+	deleteUserConfirm: 'Supprimer cet utilisateur et tout ce qu’il a écrit ?',
 	usersDescription: 'Comptes de cette instance.',
 	createAUser: 'Créer un utilisateur',
 	initialPassword: 'Mot de passe initial',
