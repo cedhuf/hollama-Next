@@ -36,9 +36,15 @@
 		role: string;
 		created_at: string;
 		last_seen_at: string | null;
+		/** Null means the instance's allowance, which is what most accounts have. */
+		credit_limit: number | null;
+		effectiveLimit: number;
+		spend: { inputTokens: number; outputTokens: number; cost: number };
 	}
 
 	let users = $state<UserRow[]>([]);
+	let period = $state<'month' | 'week'>('month');
+	let instanceLimit = $state(0);
 	/** Until the first load settles, the empty state below would be a lie. */
 	let loading = $state(true);
 	let showCreate = $state(false);
@@ -60,11 +66,31 @@
 
 	async function load() {
 		try {
-			users = await fetch('/api/admin/users').then((r) => r.json());
+			const data = await fetch('/api/admin/users').then((r) => r.json());
+			users = data.users;
+			period = data.period;
+			instanceLimit = data.instanceLimit;
 		} finally {
 			loading = false;
 		}
 	}
+
+	/**
+	 * Set or clear one account's own allowance.
+	 *
+	 * An empty field means "follow the instance", not "no limit": those are
+	 * different answers, and only one of them keeps following when the instance's
+	 * figure changes.
+	 */
+	async function setLimit(user: UserRow, raw: string) {
+		const value = raw.trim() === '' ? null : Number(raw);
+		if (value !== null && !Number.isFinite(value)) return;
+		await api(`/api/admin/users/${user.id}`, 'PUT', { creditLimit: value });
+		await load();
+	}
+
+	const money = (value: number) =>
+		value.toLocaleString(undefined, { maximumFractionDigits: value < 1 ? 3 : 2 });
 
 	onMount(load);
 
@@ -93,29 +119,56 @@
 </script>
 
 <SettingsPanel>
-	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
+	<SettingsSection
+		title={$LL.users()}
+		description="{$LL.usersDescription()} {period === 'week'
+			? $LL.usagePerWeek()
+			: $LL.usagePerMonth()}."
+	>
 		{#if loading}
 			<Skeleton variant="row" count={3} />
 		{/if}
 
 		{#each users as user (user.id)}
-			<div
-				class="flex items-center justify-between gap-2 rounded-md border border-shade-3 p-2 text-sm"
-			>
-				<span class="min-w-0 truncate">
-					{user.email}
-					<span class="text-xs text-muted">({user.role})</span>
-				</span>
-				<!-- Quiet and to the right of the row, before the one control that acts on
+			<div class="flex flex-col gap-1.5 rounded-md border border-shade-3 p-2 text-sm">
+				<div class="flex items-center justify-between gap-2">
+					<span class="min-w-0 truncate">
+						{user.email}
+						<span class="text-xs text-muted">({user.role})</span>
+					</span>
+					<!-- Quiet and to the right of the row, before the one control that acts on
 				     it: an administrator scanning the list is looking for who is still
 				     around, not reading a report. Blank rather than a guess for an account
 				     nobody has opened since this existed. -->
-				<span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted">
-					{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
-				</span>
-				<Button variant="icon" onclick={() => removeUser(user.id)}>
-					<Trash2 class="base-icon" />
-				</Button>
+					<span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted">
+						{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
+					</span>
+					<Button variant="icon" onclick={() => removeUser(user.id)}>
+						<Trash2 class="base-icon" />
+					</Button>
+				</div>
+
+				<!-- What they have spent this period, and what they may. An empty field
+				     follows the instance; a figure overrides it; zero is no limit. -->
+				<div class="flex items-center gap-2 text-xs text-muted">
+					<span class="tabular-nums">
+						{$LL.usageSpent({ spent: money(user.spend.cost) })}
+					</span>
+					<span class="opacity-60">
+						{user.effectiveLimit > 0 ? money(user.effectiveLimit) : $LL.usageUnlimited()}
+					</span>
+					<input
+						class="settings-field ml-auto w-24 py-1 text-right text-xs tabular-nums"
+						type="number"
+						min="0"
+						step="0.01"
+						inputmode="decimal"
+						value={user.credit_limit ?? ''}
+						placeholder={instanceLimit > 0 ? money(instanceLimit) : $LL.usageUnlimited()}
+						aria-label="{user.email} · {$LL.creditLimit()}"
+						onchange={(e) => setLimit(user, e.currentTarget.value)}
+					/>
+				</div>
 			</div>
 		{/each}
 

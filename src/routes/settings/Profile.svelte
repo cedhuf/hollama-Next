@@ -8,6 +8,7 @@
 	import SettingsField from './SettingsField.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
+	import UsageCard from './UsageCard.svelte';
 
 	const PRESET_COLORS = [
 		'#6366f1',
@@ -72,6 +73,12 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- What this account has spent, between who you are and what you may change:
+	     it is a fact about you rather than a setting of yours. -->
+	{#if isServerMode}
+		<UsageCard />
+	{/if}
 
 	<!-- Identity -->
 	<SettingsSection title={$LL.profile()} card>

@@ -13,6 +13,14 @@ export interface UserRow {
 	created_at: string;
 	/** Last request this account made, to the minute it was written. Null: never seen. */
 	last_seen_at: string | null;
+	/**
+	 * This account's own allowance for the current period.
+	 *
+	 * Null means "whatever the instance says", which is a different answer from a
+	 * figure that happens to equal it: raising the instance's allowance should
+	 * raise theirs, and it cannot if inheriting was recorded as a number.
+	 */
+	credit_limit: number | null;
 }
 
 export function getUserByEmail(email: string): UserRow | undefined {
@@ -55,11 +63,16 @@ export function setUserRole(id: string, role: Role): void {
 	getDb().prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
 }
 
-export type UserSummary = Pick<UserRow, 'id' | 'email' | 'role' | 'created_at' | 'last_seen_at'>;
+export type UserSummary = Pick<
+	UserRow,
+	'id' | 'email' | 'role' | 'created_at' | 'last_seen_at' | 'credit_limit'
+>;
 
 export function listUsers(): UserSummary[] {
 	return getDb()
-		.prepare('SELECT id, email, role, created_at, last_seen_at FROM users ORDER BY created_at')
+		.prepare(
+			'SELECT id, email, role, created_at, last_seen_at, credit_limit FROM users ORDER BY created_at'
+		)
 		.all() as unknown as UserSummary[];
 }
 

@@ -240,6 +240,48 @@ const migrations: Migration[] = [
 			);
 			CREATE INDEX idx_playbooks_user ON playbooks(user_id);
 		`
+	},
+	{
+		version: 11,
+		up: `
+			-- What a million tokens costs, sparse like the labels beside it: a row only
+			-- where somebody has actually given a figure. Absent is not free, and the
+			-- difference matters: an unpriced model is not counted at all, rather than
+			-- counted as costing nothing, or a model nobody got round to pricing would
+			-- let somebody run for ever without ever reaching a limit.
+			CREATE TABLE model_pricing (
+				server_id  TEXT NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
+				model_name TEXT NOT NULL,
+				input      REAL,
+				output     REAL,
+				PRIMARY KEY (server_id, model_name)
+			);
+
+			-- What each provider bills in. On the connection because that is where it
+			-- is true, and because the app converts nothing.
+			ALTER TABLE servers ADD COLUMN currency TEXT;
+
+			-- What each account has spent, by day.
+			--
+			-- By day rather than by the period being enforced, so the period stays a
+			-- question asked at read time. An administrator switching from monthly to
+			-- weekly then gets a weekly figure for the weeks that have already
+			-- happened, instead of a counter that starts again at zero and a month of
+			-- history that means nothing.
+			CREATE TABLE user_usage (
+				user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				day           TEXT NOT NULL, -- YYYY-MM-DD, UTC
+				input_tokens  INTEGER NOT NULL DEFAULT 0,
+				output_tokens INTEGER NOT NULL DEFAULT 0,
+				cost          REAL NOT NULL DEFAULT 0,
+				PRIMARY KEY (user_id, day)
+			);
+
+			-- Null means "whatever the instance says". Zero means no limit, which is
+			-- also the instance default, so nothing changes for anyone until an
+			-- administrator decides otherwise.
+			ALTER TABLE users ADD COLUMN credit_limit REAL;
+		`
 	}
 ];
 

@@ -2365,6 +2365,74 @@ type RootTranslation = {
 	 */
 	noModelsCheckServersTab: string
 	/**
+	 * {​s​p​e​n​t​}​ ​s​p​e​n​t
+	 * @param {string} spent
+	 */
+	usageSpent: RequiredParams<'spent'>
+	/**
+	 * C​r​e​d​i​t​ ​l​i​m​i​t​s
+	 */
+	credits: string
+	/**
+	 * A​ ​g​u​a​r​d​r​a​i​l​ ​a​g​a​i​n​s​t​ ​a​ ​r​u​n​a​w​a​y​ ​l​o​o​p​ ​o​r​ ​a​ ​f​o​r​g​o​t​t​e​n​ ​t​a​b​,​ ​n​o​t​ ​a​n​ ​a​c​c​o​u​n​t​i​n​g​ ​s​y​s​t​e​m​.
+	 */
+	creditsDescription: string
+	/**
+	 * R​e​s​e​t​s
+	 */
+	creditPeriod: string
+	/**
+	 * E​v​e​r​y​ ​c​a​l​e​n​d​a​r​ ​m​o​n​t​h
+	 */
+	creditPeriodMonth: string
+	/**
+	 * E​v​e​r​y​ ​w​e​e​k
+	 */
+	creditPeriodWeek: string
+	/**
+	 * Z​e​r​o​ ​m​e​a​n​s​ ​n​o​ ​l​i​m​i​t​.​ ​E​a​c​h​ ​a​c​c​o​u​n​t​ ​c​a​n​ ​b​e​ ​g​i​v​e​n​ ​i​t​s​ ​o​w​n​ ​i​n​ ​t​h​e​ ​U​s​e​r​s​ ​t​a​b​.​ ​A​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​a​l​r​e​a​d​y​ ​u​n​d​e​r​ ​w​a​y​ ​i​s​ ​n​e​v​e​r​ ​i​n​t​e​r​r​u​p​t​e​d​:​ ​t​h​e​ ​l​i​m​i​t​ ​i​s​ ​c​h​e​c​k​e​d​ ​b​e​f​o​r​e​ ​t​h​e​ ​n​e​x​t​ ​t​u​r​n​ ​s​t​a​r​t​s​,​ ​a​n​d​ ​a​ ​m​o​d​e​l​ ​w​i​t​h​ ​n​o​ ​p​r​i​c​e​ ​s​e​t​ ​i​s​ ​n​o​t​ ​c​o​u​n​t​e​d​ ​a​t​ ​a​l​l​.
+	 */
+	creditsHelp: string
+	/**
+	 * C​r​e​d​i​t​ ​l​i​m​i​t
+	 */
+	creditLimit: string
+	/**
+	 * U​s​a​g​e
+	 */
+	usageTitle: string
+	/**
+	 * {​s​p​e​n​t​}​ ​o​f​ ​{​l​i​m​i​t​}
+	 * @param {string} limit
+	 * @param {string} spent
+	 */
+	usageOfLimit: RequiredParams<'limit' | 'spent'>
+	/**
+	 * N​o​ ​l​i​m​i​t
+	 */
+	usageUnlimited: string
+	/**
+	 * T​h​i​s​ ​c​a​l​e​n​d​a​r​ ​m​o​n​t​h
+	 */
+	usagePerMonth: string
+	/**
+	 * T​h​i​s​ ​w​e​e​k
+	 */
+	usagePerWeek: string
+	/**
+	 * a​l​l​o​w​a​n​c​e​ ​s​e​t​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r
+	 */
+	usageSetByAdmin: string
+	/**
+	 * R​e​s​e​t​s​ ​{​a​t​}
+	 * @param {string} at
+	 */
+	usageResetsAt: RequiredParams<'at'>
+	/**
+	 * C​o​u​n​t​e​d​ ​f​r​o​m​ ​w​h​a​t​ ​e​a​c​h​ ​p​r​o​v​i​d​e​r​ ​r​e​p​o​r​t​s​.​ ​M​o​d​e​l​s​ ​w​i​t​h​ ​n​o​ ​p​r​i​c​e​ ​s​e​t​ ​a​r​e​ ​n​o​t​ ​c​o​u​n​t​e​d​.
+	 */
+	usageEstimateNote: string
+	/**
 	 * U​s​e​r​s
 	 */
 	users: string
@@ -5083,6 +5151,70 @@ The completion in progress will stop
 	 * No models available — check this server in the Servers tab.
 	 */
 	noModelsCheckServersTab: () => LocalizedString
+	/**
+	 * {spent} spent
+	 */
+	usageSpent: (arg: { spent: string }) => LocalizedString
+	/**
+	 * Credit limits
+	 */
+	credits: () => LocalizedString
+	/**
+	 * A guardrail against a runaway loop or a forgotten tab, not an accounting system.
+	 */
+	creditsDescription: () => LocalizedString
+	/**
+	 * Resets
+	 */
+	creditPeriod: () => LocalizedString
+	/**
+	 * Every calendar month
+	 */
+	creditPeriodMonth: () => LocalizedString
+	/**
+	 * Every week
+	 */
+	creditPeriodWeek: () => LocalizedString
+	/**
+	 * Zero means no limit. Each account can be given its own in the Users tab. A conversation already under way is never interrupted: the limit is checked before the next turn starts, and a model with no price set is not counted at all.
+	 */
+	creditsHelp: () => LocalizedString
+	/**
+	 * Credit limit
+	 */
+	creditLimit: () => LocalizedString
+	/**
+	 * Usage
+	 */
+	usageTitle: () => LocalizedString
+	/**
+	 * {spent} of {limit}
+	 */
+	usageOfLimit: (arg: { limit: string, spent: string }) => LocalizedString
+	/**
+	 * No limit
+	 */
+	usageUnlimited: () => LocalizedString
+	/**
+	 * This calendar month
+	 */
+	usagePerMonth: () => LocalizedString
+	/**
+	 * This week
+	 */
+	usagePerWeek: () => LocalizedString
+	/**
+	 * allowance set by your administrator
+	 */
+	usageSetByAdmin: () => LocalizedString
+	/**
+	 * Resets {at}
+	 */
+	usageResetsAt: (arg: { at: string }) => LocalizedString
+	/**
+	 * Counted from what each provider reports. Models with no price set are not counted.
+	 */
+	usageEstimateNote: () => LocalizedString
 	/**
 	 * Users
 	 */

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import type { ModelPrice } from '$lib/connections';
 import { decrypt, encrypt } from '$lib/server/crypto';
 
 import { getDb } from './index';
@@ -163,6 +164,45 @@ export function setModelLabels(serverId: string, labels: Record<string, string>)
 		for (const [name, label] of Object.entries(labels)) {
 			const trimmed = label?.trim();
 			if (trimmed) insert.run(serverId, name, trimmed);
+		}
+		db.exec('COMMIT');
+	} catch (error) {
+		db.exec('ROLLBACK');
+		throw error;
+	}
+}
+
+/** What a million tokens costs on this connection, keyed by the real model id. */
+export function getModelPricing(serverId: string): Record<string, ModelPrice> {
+	const rows = getDb()
+		.prepare('SELECT model_name, input, output FROM model_pricing WHERE server_id = ?')
+		.all(serverId) as { model_name: string; input: number | null; output: number | null }[];
+
+	return Object.fromEntries(
+		rows.map((row) => [
+			row.model_name,
+			{ input: row.input ?? undefined, output: row.output ?? undefined }
+		])
+	);
+}
+
+/**
+ * Replaces the whole set, dropping anything with no figure at all.
+ *
+ * A model priced at zero keeps its row: free is a price, and it is not the same
+ * answer as "nobody has said". The meter counts the first and skips the second.
+ */
+export function setModelPricing(serverId: string, pricing: Record<string, ModelPrice>): void {
+	const db = getDb();
+	db.exec('BEGIN');
+	try {
+		db.prepare('DELETE FROM model_pricing WHERE server_id = ?').run(serverId);
+		const insert = db.prepare(
+			'INSERT INTO model_pricing (server_id, model_name, input, output) VALUES (?, ?, ?, ?)'
+		);
+		for (const [name, price] of Object.entries(pricing)) {
+			if (price?.input == null && price?.output == null) continue;
+			insert.run(serverId, name, price.input ?? null, price.output ?? null);
 		}
 		db.exec('COMMIT');
 	} catch (error) {

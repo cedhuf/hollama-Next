@@ -17,12 +17,20 @@ import {
 	storeUrl,
 	themeSharing
 } from '$lib/server/db/config';
+import {
+	creditPeriod,
+	instanceCreditLimit,
+	setCreditPeriod,
+	setInstanceCreditLimit
+} from '$lib/server/db/usage';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
 
 export async function GET(event) {
 	await requireAdmin(event);
 	return json({
 		allowUserKeys: allowUserKeys(),
+		creditLimit: instanceCreditLimit(),
+		creditPeriod: creditPeriod(),
 		allowUserPersonas: allowUserPersonas(),
 		personaStoreMode: personaStoreMode(),
 		personaAutoUpdateForced: personaAutoUpdateForced(),
@@ -51,6 +59,13 @@ export async function PUT(event) {
 	const body = await event.request.json();
 
 	if (typeof body?.allowUserKeys === 'boolean') setAllowUserKeys(body.allowUserKeys);
+
+	// The allowance everybody gets unless their own account says otherwise. Zero
+	// is no limit, and is what an instance nobody has configured has.
+	if (typeof body?.creditLimit === 'number') setInstanceCreditLimit(body.creditLimit);
+	if (body?.creditPeriod === 'month' || body?.creditPeriod === 'week') {
+		setCreditPeriod(body.creditPeriod);
+	}
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
 	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
 		setPersonaStoreMode(body.personaStoreMode);
