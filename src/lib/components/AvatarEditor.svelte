@@ -4,11 +4,18 @@
 
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
+	import { personaGlyph, type PersonaGlyph } from '$lib/personaGlyphs';
 
 	/**
 	 * Circular avatar that opens its own edit menu: colour swatches while there is
 	 * no picture, replace/remove once there is one. Shared by the user profile and
 	 * the persona editor, which had grown identical copies of it.
+	 *
+	 * It also draws a glyph, and had to: the faces the app ships were readable
+	 * everywhere a persona appeared *except* in the editor, which fell back to
+	 * initials. Opening the one persona whose face you recognised showed you two
+	 * letters instead, which reads as having lost it. Callers that have no glyphs
+	 * to offer pass none, and the section is not there.
 	 */
 	interface Props {
 		/** Image data URI (or URL). Empty means "show initials on `color`". */
@@ -16,11 +23,16 @@
 		color: string;
 		initials: string;
 		colors: readonly string[];
+		/** Id of the chosen glyph, drawn when there is no picture. */
+		glyph?: string;
+		/** The glyphs on offer. Empty (the default) leaves the section out entirely. */
+		glyphs?: readonly PersonaGlyph[];
 		size?: number;
 		/** Read-only rendering — no menu, no hover affordance (e.g. OIDC-managed). */
 		readonly?: boolean;
 		label?: string;
 		onColorChange?: (color: string) => void;
+		onGlyphChange?: (glyph: string | undefined) => void;
 		onImageChange?: (dataUrl: string) => void;
 		onImageRemove?: () => void;
 	}
@@ -30,13 +42,18 @@
 		color,
 		initials,
 		colors,
+		glyph,
+		glyphs = [],
 		size = 64,
 		readonly = false,
 		label = 'Avatar',
 		onColorChange,
+		onGlyphChange,
 		onImageChange,
 		onImageRemove
 	}: Props = $props();
+
+	const chosen = $derived(personaGlyph(glyph));
 
 	function uploadImage() {
 		const input = document.createElement('input');
@@ -53,12 +70,53 @@
 	}
 </script>
 
+<!-- Three faces, in the order they win, and the same order `PersonaAvatar` uses:
+     an uploaded picture, a glyph the app draws, the initials.
+
+     `{@html}` is safe here for the reason it is safe there: what it renders is
+     never a stored value, it is the body of the entry `personaGlyph` found under
+     that name in our own table. -->
 {#snippet face()}
 	{#if image}
 		<img src={image} alt={label} class="h-full w-full object-cover" />
+	{:else if chosen}
+		<svg
+			viewBox="0 0 64 64"
+			class="h-full w-full text-shade-0"
+			style="--persona-glyph-cut:{color}"
+			role="presentation"
+		>
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html chosen.body}
+		</svg>
 	{:else}
 		{initials}
 	{/if}
+{/snippet}
+
+<!-- One tile of the face grid, drawn on the avatar's own colour so the choice is
+     made against the disc it will actually sit on. -->
+{#snippet tile(body: string | undefined, id: string | undefined, name: string)}
+	<button
+		type="button"
+		aria-label={name}
+		title={name}
+		onclick={() => onGlyphChange?.(id)}
+		class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white ring-2 ring-offset-2 ring-offset-shade-0 transition-all {glyph ===
+		id
+			? 'ring-accent'
+			: 'ring-transparent hover:ring-shade-4'}"
+		style="background-color:{color};--persona-glyph-cut:{color}"
+	>
+		{#if body}
+			<svg viewBox="0 0 64 64" class="h-full w-full text-shade-0" role="presentation">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html body}
+			</svg>
+		{:else}
+			{initials}
+		{/if}
+	</button>
 {/snippet}
 
 {#if readonly}
@@ -112,6 +170,18 @@
 					></button>
 				{/each}
 			</div>
+			{#if glyphs.length}
+				<DropdownMenu.Separator class="my-1 border-t border-shade-2" />
+				<!-- Scrolls rather than growing the menu: the table of faces is meant to
+				     get longer, and a menu as tall as the window is a menu you cannot
+				     reach the bottom of. -->
+				<div class="grid max-h-36 grid-cols-4 gap-2 overflow-y-auto p-1">
+					{@render tile(undefined, undefined, 'Initials')}
+					{#each glyphs as option (option.id)}
+						{@render tile(option.body, option.id, option.label)}
+					{/each}
+				</div>
+			{/if}
 			<DropdownMenu.Separator class="my-1 border-t border-shade-2" />
 			<MenuItem icon={ImagePlus} onclick={uploadImage}>Upload a picture</MenuItem>
 		{/if}

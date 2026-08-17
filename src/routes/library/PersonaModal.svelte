@@ -10,6 +10,7 @@
 	import { LANGUAGE_LABELS } from '$lib/i18n';
 	import { knowledgeStore, settingsStore } from '$lib/localStorage';
 	import { personaToBundle } from '$lib/personaBundle';
+	import { PERSONA_GLYPHS } from '$lib/personaGlyphs';
 	import {
 		deletePersona,
 		PERSONA_AVATAR_COLORS,
@@ -127,9 +128,15 @@
 							color={persona.avatarColor}
 							{initials}
 							colors={PERSONA_AVATAR_COLORS}
+							glyph={persona.avatarGlyph}
+							glyphs={PERSONA_GLYPHS}
 							label={persona.name}
 							onColorChange={(c) => {
 								persona.avatarColor = c;
+								persist();
+							}}
+							onGlyphChange={(id) => {
+								persona.avatarGlyph = id;
 								persist();
 							}}
 							onImageChange={(url) => {
