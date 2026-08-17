@@ -27,6 +27,19 @@ export interface RunSurface {
 	onFinish?(outcome: { aborted: boolean; error?: string }): void;
 	/** Whether a summary is being written, drawn where the divider will land. */
 	setCompacting?(active: boolean): void;
+	/**
+	 * A persona called in with `@` has just answered, for the first time.
+	 *
+	 * Inside the idempotence guard rather than beside it, which is the whole
+	 * reason it is here and not in the page: a finished run is replayed to a tab
+	 * that comes back, and a notification sent on every delivery would write the
+	 * same record into the persona's conversation on every visit.
+	 *
+	 * A notification, not a side effect of its own: this file changes the
+	 * conversation it was given and nothing else, and what a persona's own
+	 * conversation does about it is the page's business.
+	 */
+	onPersonaReply?(reply: Message): void;
 }
 
 export interface ApplyOptions {
@@ -147,6 +160,7 @@ export function applyRunEvent(
 			};
 			session.messages = [...session.messages, message];
 			session.updatedAt = message.createdAt ?? new Date().toISOString();
+			if (message.personaId) surface.onPersonaReply?.(message);
 			editor.completion = '';
 			editor.reasoning = '';
 			editor.reasoningTrace = undefined;

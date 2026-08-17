@@ -698,6 +698,12 @@ const fr = extendDictionary(en, {
 	contextPartSources: 'Index des sources',
 	contextMessagesOfTotal: '{count} message{{s}} sur {total} envoyés avec la prochaine requête',
 	contextHeaviest: 'Le plus lourd :',
+	mentionCalledInto: 'Appelé dans « {title} »',
+	mentionOpenConversation: 'Ouvrir cette conversation',
+	mentionAdd: 'Ajouter à cette conversation',
+	mentionAddHelp:
+		'Reprendre cet échange ici, pour que le modèle l\u2019ait en tête à partir de maintenant',
+	mentionAlreadyAdded: 'Ajouté à cette conversation',
 	compactCommandDescription: 'Résumer la conversation pour libérer du contexte',
 	nothingToCompact: 'Cette conversation est trop courte pour valoir une compaction',
 	shortcutsCommands: 'Commandes',

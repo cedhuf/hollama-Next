@@ -2487,6 +2487,27 @@ type RootTranslation = {
 	 */
 	contextHeaviest: string
 	/**
+	 * C​a​l​l​e​d​ ​i​n​t​o​ ​“​{​t​i​t​l​e​}​”
+	 * @param {string} title
+	 */
+	mentionCalledInto: RequiredParams<'title'>
+	/**
+	 * O​p​e​n​ ​t​h​a​t​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	mentionOpenConversation: string
+	/**
+	 * A​d​d​ ​t​o​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	mentionAdd: string
+	/**
+	 * R​e​p​e​a​t​ ​t​h​i​s​ ​e​x​c​h​a​n​g​e​ ​h​e​r​e​,​ ​s​o​ ​t​h​e​ ​m​o​d​e​l​ ​h​a​s​ ​i​t​ ​i​n​ ​m​i​n​d​ ​f​r​o​m​ ​n​o​w​ ​o​n
+	 */
+	mentionAddHelp: string
+	/**
+	 * A​d​d​e​d​ ​t​o​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	mentionAlreadyAdded: string
+	/**
 	 * T​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​i​s​ ​t​o​o​ ​s​h​o​r​t​ ​t​o​ ​b​e​ ​w​o​r​t​h​ ​c​o​m​p​a​c​t​i​n​g
 	 */
 	nothingToCompact: string
@@ -4970,6 +4991,26 @@ The completion in progress will stop
 	 * Heaviest:
 	 */
 	contextHeaviest: () => LocalizedString
+	/**
+	 * Called into “{title}”
+	 */
+	mentionCalledInto: (arg: { title: string }) => LocalizedString
+	/**
+	 * Open that conversation
+	 */
+	mentionOpenConversation: () => LocalizedString
+	/**
+	 * Add to this conversation
+	 */
+	mentionAdd: () => LocalizedString
+	/**
+	 * Repeat this exchange here, so the model has it in mind from now on
+	 */
+	mentionAddHelp: () => LocalizedString
+	/**
+	 * Added to this conversation
+	 */
+	mentionAlreadyAdded: () => LocalizedString
 	/**
 	 * This conversation is too short to be worth compacting
 	 */

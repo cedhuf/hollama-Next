@@ -12,6 +12,7 @@
 	import ClearedDivider from './ClearedDivider.svelte';
 	import CompactionDivider from './CompactionDivider.svelte';
 	import ContextDivider from './ContextDivider.svelte';
+	import MentionDivider from './MentionDivider.svelte';
 
 	interface Props {
 		session: Session;
@@ -26,6 +27,8 @@
 		isCompacting?: boolean;
 		/** Abandon that summary. Absent when there is nothing to abandon. */
 		onCancelCompaction?: () => void;
+		/** Fold a recorded mention into this conversation. Lives in +page, which writes it. */
+		onAddMention?: (message: Message) => void;
 	}
 
 	let {
@@ -36,7 +39,8 @@
 		pendingChoice = null,
 		assistantLabel = undefined,
 		isCompacting = false,
-		onCancelCompaction = undefined
+		onCancelCompaction = undefined,
+		onAddMention = undefined
 	}: Props = $props();
 
 	/**
@@ -188,6 +192,8 @@
 			/>
 		{:else if message.note.kind === 'context'}
 			<ContextDivider note={message.note} />
+		{:else if message.note.kind === 'mention'}
+			<MentionDivider note={message.note} onAdd={() => onAddMention?.(message)} />
 		{/if}
 	{:else if message !== pendingChoice}
 		{#key message.role}

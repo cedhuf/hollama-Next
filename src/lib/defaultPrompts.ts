@@ -10,6 +10,7 @@ export type PromptKey =
 	| 'personaLanguage'
 	| 'personaSummoned'
 	| 'multiSpeaker'
+	| 'mentionRecall'
 	| 'searchRouter'
 	| 'toolPolicy'
 	| 'searchNone'
@@ -53,6 +54,13 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Added to a persona’s own prompt when it is summoned with @ from another conversation.',
 		default:
 			'You have been called into an ongoing conversation as {name}. You are one participant among several, not the assistant who has been answering so far: the messages above are the conversation as it stands, and some of them were written by other participants, each marked with their name. Read all of it as context, answer only the part addressed to you, and speak as yourself. Do not introduce yourself, do not summarise what was already said, and do not answer on anybody else’s behalf.'
+	},
+	mentionRecall: {
+		label: 'Exchange brought back from elsewhere',
+		placeholders: ['{title}'],
+		hint: 'Frames an exchange the user folds into a persona’s own conversation, from one it was called into with @.',
+		default:
+			'The exchange below did not take place here. You were called into another conversation, “{title}”, and this is what you were asked and what you answered there. It is being brought back so you have it in mind. Treat it as something you already said, not as a new question.'
 	},
 	multiSpeaker: {
 		label: 'Several participants',
@@ -231,6 +239,7 @@ export const PROMPT_KEYS: PromptKey[] = [
 	'personaLanguage',
 	'personaSummoned',
 	'multiSpeaker',
+	'mentionRecall',
 	'searchRouter',
 	'toolPolicy',
 	'searchNone',

@@ -26,7 +26,7 @@ import type { Message } from '$lib/sessions';
  * an empty one. That is a property of the design, not a filter to remember.
  */
 
-export type NoteKind = 'compaction' | 'cleared' | 'context';
+export type NoteKind = 'compaction' | 'cleared' | 'context' | 'mention';
 
 /**
  * Where the model starts reading, for a conversation ending at this note.
@@ -90,12 +90,49 @@ export interface ContextNote extends NoteBase {
 	model?: string;
 }
 
-export type ConversationNote = CompactionNote | ClearedNote | ContextNote;
+/**
+ * A persona was called into somebody else's conversation, and answered there.
+ *
+ * Written into the persona's own conversation, which is the one place a
+ * relationship with it is kept, and where its absence was strange: you could ask
+ * Maïté something in a conversation about a holiday and she would have no idea,
+ * next time you opened her, that it had happened.
+ *
+ * It carries the question and the answer, and nothing else. Not the conversation
+ * it happened in, not the turns around it. Two reasons, and the second is the
+ * important one: every mention would otherwise copy a whole conversation into
+ * another one, and this exchange can be *added* to the persona's context, where
+ * anything more would spend somebody's context window on a thread they were not
+ * part of.
+ *
+ * The model reads none of it until it is added. Until then it is a record, for
+ * the reader, like every other note.
+ */
+export interface MentionNote extends NoteBase {
+	kind: 'mention';
+	/** The conversation it was called into, so the record can link back to it. */
+	sessionId: string;
+	/** Its title when this was written. Titles change; a record does not. */
+	title?: string;
+	asked: string;
+	answered: string;
+	/**
+	 * When the exchange was folded into this conversation, if it was.
+	 *
+	 * A record and an offer at once: the button is gone afterwards, and what
+	 * replaces it is a sentence saying the model now knows about it. Adding the
+	 * same exchange twice is the failure this prevents.
+	 */
+	addedAt?: string;
+}
+
+export type ConversationNote = CompactionNote | ClearedNote | ContextNote | MentionNote;
 
 export const NOTE_KINDS: Record<NoteKind, { boundary: NoteBoundary }> = {
 	compaction: { boundary: 'from' },
 	cleared: { boundary: 'after' },
-	context: { boundary: 'none' }
+	context: { boundary: 'none' },
+	mention: { boundary: 'none' }
 };
 
 /** Every kind there is, for the callers that have to enumerate them (the SQL does). */

@@ -13,6 +13,7 @@
 	import { compactSession } from '$lib/chat/compact';
 	import { contextSnapshot, contextUsage } from '$lib/chat/context';
 	import { isServerMode } from '$lib/chat/endpoint';
+	import { recordMention } from '$lib/chat/mentionRecord';
 	import { mentionedPersonas } from '$lib/chat/mentions';
 	import { messagesInContext } from '$lib/chat/notes';
 	import { applyRunEvent, type RunSurface } from '$lib/chat/run/apply';
@@ -756,8 +757,47 @@
 		setCompacting: (active) => (isCompacting = active),
 		onFinish: ({ error }) => {
 			if (error) handleError(new Error(error));
+		},
+		// Best-effort on purpose: the answer is already in the conversation the user
+		// is looking at, and a persona's own conversation failing to load is not a
+		// reason to make this turn look like it failed.
+		onPersonaReply: (reply) => {
+			if (reply.personaId) void recordMention(reply.personaId, session, reply);
 		}
 	};
+
+	/**
+	 * Fold a recorded exchange into this conversation, so the model has it too.
+	 *
+	 * Two messages, in the roles they were said in, with a framing on the question
+	 * saying where it came from: without it the model reads a question it has no
+	 * memory of being asked and starts explaining itself. The framing is an
+	 * overridable prompt like every other, so it can be reworded without touching
+	 * the code.
+	 *
+	 * The note keeps the exchange whatever happens here, so this adds and never
+	 * moves: deleting the two messages afterwards leaves the record intact and the
+	 * offer available again.
+	 */
+	function addMentionToConversation(marker: Message) {
+		const note = marker.note;
+		if (note?.kind !== 'mention' || note.addedAt) return;
+
+		const framing = resolvePrompt('mentionRecall', $settingsStore.promptOverrides, {
+			title: note.title || $LL.newSession()
+		});
+		const at = new Date().toISOString();
+
+		session.messages = [
+			...session.messages.map((message) =>
+				message === marker ? { ...message, note: { ...note, addedAt: at } } : message
+			),
+			{ role: 'user' as const, content: `${framing}\n\n${note.asked}`, createdAt: at },
+			{ role: 'assistant' as const, content: note.answered, createdAt: at }
+		];
+		saveSession(session);
+		void scrollToBottom(true);
+	}
 
 	// --- compaction -----------------------------------------------------------
 
@@ -1262,6 +1302,7 @@
 						assistantLabel={persona?.name}
 						{isCompacting}
 						onCancelCompaction={cancelCompaction}
+						onAddMention={addMentionToConversation}
 					/>
 				</div>
 

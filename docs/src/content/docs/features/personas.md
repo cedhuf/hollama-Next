@@ -249,6 +249,29 @@ A persona shared **from a library** does not carry its attached knowledge: the d
 that library, and their ids mean nothing in anyone else's. Share a bundle file if they matter. A
 relayed one has no such problem, since what users install is the bundle itself.
 
+### Where else it has spoken
+
+A persona called into a conversation with `@` leaves a record in **its own** conversation: a note
+saying which conversation wanted it, with the question and its answer folded underneath. Without it,
+a persona you had just spent an afternoon consulting elsewhere greeted you as if nothing had
+happened, which is the wrong behaviour for the one object in the app that is meant to be an ongoing
+relationship.
+
+The record holds **the question and the answer, and nothing else**. Not the thread around them, not
+the other participants. A mention would otherwise copy somebody else's conversation into this one,
+and the record can be handed to the model, where anything bigger would spend a context window on a
+conversation the persona was not part of.
+
+The model has not read it. It is a record, like every other note, until **Add to this conversation**
+puts the two messages here for real, framed so the model understands they were said elsewhere. That
+framing is the `Exchange brought back from elsewhere` prompt in _Settings → Tools → System
+instructions_, so it can be reworded. Once added, the offer is replaced by a line saying so, since
+adding the same exchange twice is the one mistake worth preventing.
+
+A persona nobody has opened yet has no conversation of its own, and mentioning it does not create
+one: a conversation appearing in the sidebar because you typed `@` once is a conversation you did
+not start. The exchange still lives where it happened.
+
 ### Showing the tour again
 
 Under _Settings → Admin → Developer options_, **Show the welcome tour again** plays it once for

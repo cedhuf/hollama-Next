@@ -681,6 +681,11 @@ const en = {
 	contextMessagesOfTotal:
 		'{count:number} of {total:number} {{message|messages}} sent with the next request',
 	contextHeaviest: 'Heaviest:',
+	mentionCalledInto: 'Called into “{title:string}”',
+	mentionOpenConversation: 'Open that conversation',
+	mentionAdd: 'Add to this conversation',
+	mentionAddHelp: 'Repeat this exchange here, so the model has it in mind from now on',
+	mentionAlreadyAdded: 'Added to this conversation',
 	nothingToCompact: 'This conversation is too short to be worth compacting',
 	shortcutsCommands: 'Slash commands',
 	shortcutCompleteCommand: 'Complete',
