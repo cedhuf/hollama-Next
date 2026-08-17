@@ -58,10 +58,9 @@
 	import { openKnowledge } from '$lib/stores/modal';
 	import { formatTimestampToNow } from '$lib/utils';
 
+	import LibraryStore from './LibraryStore.svelte';
 	import PersonaModal from './PersonaModal.svelte';
-	import PersonaStoreModal from './PersonaStoreModal.svelte';
 	import PlaybookModal from './PlaybookModal.svelte';
-	import PlaybookStoreModal from './PlaybookStoreModal.svelte';
 
 	let editing = $state<Persona | null>(null);
 	let modalOpen = $state(false);
@@ -199,6 +198,19 @@
 	let personaFileInput = $state<HTMLInputElement | undefined>();
 	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
 	let storeOpen = $state(false);
+	/**
+	 * Which shelf the store opens on.
+	 *
+	 * The door is where you are: the button in the Personas section opens the
+	 * store on the personas, the one in the Playbooks section on the playbooks,
+	 * and the one at the top of the page on everything. Same window, three ways in.
+	 */
+	let storeFamily = $state<'' | 'personas' | 'playbooks'>('');
+
+	function openStore(family: '' | 'personas' | 'playbooks' = '') {
+		storeFamily = family;
+		storeOpen = true;
+	}
 
 	const canCreate = $derived($personasConfig.canCreate);
 
@@ -262,7 +274,6 @@
 	}
 
 	let playbookModalOpen = $state(false);
-	let playbookStoreOpen = $state(false);
 	let editingPlaybook = $state<Playbook>(newPlaybook());
 
 	function editPlaybook(playbook: Playbook) {
@@ -320,7 +331,19 @@
 					<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
 				</div>
 
-				<div class="shrink-0">
+				<div class="flex shrink-0 items-center gap-2">
+					<!-- One store, at the top of the page, because there is one store. The
+					     small icon on each create tile opens the same window on that shelf,
+					     which is where you are when you have just found nothing that suits. -->
+					<button
+						type="button"
+						onclick={() => openStore()}
+						class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:border-shade-4 hover:text-active"
+					>
+						<Store class="h-4 w-4" />
+						{$LL.store()}
+					</button>
+
 					<Menu class="w-48">
 						{#snippet trigger({ props })}
 							<button
@@ -359,14 +382,6 @@
 					<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
 					<span class="text-xs text-muted">{$personasStore.length}</span>
 				</div>
-				<button
-					type="button"
-					onclick={() => (storeOpen = true)}
-					class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
-				>
-					<Store class="h-3.5 w-3.5" />
-					{$LL.personaStore()}
-				</button>
 			</div>
 
 			<!-- Equal rows: a card's height comes from how many lines its tags wrap
@@ -484,7 +499,7 @@
 					</button>
 					<button
 						type="button"
-						onclick={() => (storeOpen = true)}
+						onclick={() => openStore('personas')}
 						title={$LL.personaStoreBrowse()}
 						aria-label={$LL.personaStoreBrowse()}
 						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
@@ -503,14 +518,6 @@
 					<h2 class="text-sm font-medium text-active">{$LL.playbooks()}</h2>
 					<span class="text-xs text-muted">{$playbooksStore.length}</span>
 				</div>
-				<button
-					type="button"
-					onclick={() => (playbookStoreOpen = true)}
-					class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
-				>
-					<Store class="h-3.5 w-3.5" />
-					{$LL.playbookStore()}
-				</button>
 			</div>
 
 			<div
@@ -542,7 +549,7 @@
 					</button>
 					<button
 						type="button"
-						onclick={() => (playbookStoreOpen = true)}
+						onclick={() => openStore('playbooks')}
 						title={$LL.playbookStore()}
 						aria-label={$LL.playbookStore()}
 						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
@@ -730,6 +737,5 @@
 	<PersonaModal bind:open={modalOpen} bind:persona={editing} />
 {/if}
 
-<PersonaStoreModal bind:open={storeOpen} />
 <PlaybookModal bind:open={playbookModalOpen} bind:playbook={editingPlaybook} />
-<PlaybookStoreModal bind:open={playbookStoreOpen} />
+<LibraryStore bind:open={storeOpen} bind:family={storeFamily} />

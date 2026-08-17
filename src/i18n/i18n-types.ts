@@ -1251,6 +1251,14 @@ type RootTranslation = {
 	 */
 	storeDescription: string
 	/**
+	 * S​e​a​r​c​h​ ​t​h​e​ ​s​t​o​r​e
+	 */
+	storeSearch: string
+	/**
+	 * E​v​e​r​y​t​h​i​n​g
+	 */
+	storeEverything: string
+	/**
 	 * S​t​o​r​e​ ​a​d​d​r​e​s​s
 	 */
 	storeUrl: string
@@ -3944,6 +3952,14 @@ The completion in progress will stop
 	 * Where personas, playbooks and anything else installable are read from. One address for all of them.
 	 */
 	storeDescription: () => LocalizedString
+	/**
+	 * Search the store
+	 */
+	storeSearch: () => LocalizedString
+	/**
+	 * Everything
+	 */
+	storeEverything: () => LocalizedString
 	/**
 	 * Store address
 	 */

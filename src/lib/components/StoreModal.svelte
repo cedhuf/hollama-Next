@@ -18,6 +18,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import type { StoreKind } from '$lib/store';
 	import { matches, type Offer, type OfferAction, type OfferView } from '$lib/storeOffer';
 
 	/**
@@ -42,6 +43,16 @@
 		view: OfferView;
 		/** How many entries each view holds, so a chip can say so without switching to it. */
 		counts?: Partial<Record<OfferView, number>>;
+		/**
+		 * The catalogues on offer, in the order the shelf groups them.
+		 *
+		 * A filter rather than a view: what you are looking at (on offer, mine,
+		 * shared) is a different question from what kind of thing it is. With none
+		 * selected the shelf is grouped under a heading each, so nobody has to skim
+		 * playbooks looking for a persona.
+		 */
+		families?: { value: StoreKind; label: string; tint: number; count: number }[];
+		family?: StoreKind | '';
 		layout: 'grid' | 'list';
 		/** Whether the listing is being fetched, and what went wrong if it did. */
 		status: 'idle' | 'loading' | 'ready' | 'error';
@@ -90,6 +101,8 @@
 		views,
 		view = $bindable('store'),
 		counts,
+		families = [],
+		family = $bindable('' as StoreKind | ''),
 		layout,
 		status,
 		errorMessage,
@@ -173,6 +186,19 @@
 		}
 	}
 </script>
+
+{#snippet shelf(rows: Offer[], turn: number)}
+	<div
+		class="library-section {layout === 'list'
+			? 'flex flex-col gap-2'
+			: 'grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3'}"
+		style="--section-turn: {turn}"
+	>
+		{#each rows as offer (offer.key)}
+			{@render card(offer, actions)}
+		{/each}
+	</div>
+{/snippet}
 
 {#snippet chip(label: string, active: boolean, onclick: () => void)}
 	<button
@@ -324,6 +350,18 @@
 							() => (view = name)
 						)}
 					{/each}
+
+					{#if families.length > 1}
+						<span class="mx-1 my-1 w-px self-stretch bg-shade-3"></span>
+						{@render chip($LL.storeEverything(), family === '', () => (family = ''))}
+						{#each families as group (group.value)}
+							{@render chip(
+								`${group.label}${group.count ? ` · ${group.count}` : ''}`,
+								family === group.value,
+								() => (family = group.value)
+							)}
+						{/each}
+					{/if}
 				</div>
 
 				<!-- At the end of the filters, because it is one: how much of each entry
@@ -380,15 +418,23 @@
 						{$LL.noMatches()}
 					{/if}
 				</p>
+			{:else if family || families.length === 0}
+				{@render shelf(filtered, families.find((f) => f.value === family)?.tint ?? tint)}
 			{:else}
-				<div
-					class="library-section {layout === 'list'
-						? 'flex flex-col gap-2'
-						: 'grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3'}"
-					style="--section-turn: {tint}"
-				>
-					{#each filtered as offer (offer.key)}
-						{@render card(offer, actions)}
+				<!-- Grouped, with a heading each. Interleaved, two catalogues of
+				     near-identical cards read as one long shelf nobody can scan. -->
+				<div class="flex flex-col gap-6">
+					{#each families as group (group.value)}
+						{@const rows = filtered.filter((offer) => offer.family === group.value)}
+						{#if rows.length}
+							<div class="flex flex-col gap-3">
+								<div class="flex items-baseline gap-2">
+									<h3 class="text-sm font-medium text-active">{group.label}</h3>
+									<span class="text-xs text-muted">{rows.length}</span>
+								</div>
+								{@render shelf(rows, group.tint)}
+							</div>
+						{/if}
 					{/each}
 				</div>
 			{/if}

@@ -324,6 +324,8 @@ const en = {
 	store: 'Store',
 	storeDescription:
 		'Where personas, playbooks and anything else installable are read from. One address for all of them.',
+	storeSearch: 'Search the store',
+	storeEverything: 'Everything',
 	storeUrl: 'Store address',
 	storeUrlHelp:
 		'Leave empty for the public store. A closed network can point this at its own mirror: the catalogues are folders under this address.',

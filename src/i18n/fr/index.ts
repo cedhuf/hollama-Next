@@ -318,6 +318,8 @@ const fr = extendDictionary(en, {
 	store: 'Store',
 	storeDescription:
 		'Où sont lus les personas, les playbooks et tout ce qui s\u2019installe. Une seule adresse pour tout.',
+	storeSearch: 'Rechercher dans la boutique',
+	storeEverything: 'Tout',
 	storeUrl: 'Adresse du store',
 	storeUrlHelp:
 		'Laisser vide pour le store public. Un réseau fermé peut pointer vers son propre miroir : les catalogues sont des dossiers sous cette adresse.',

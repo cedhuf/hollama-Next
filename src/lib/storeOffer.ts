@@ -17,6 +17,8 @@
  * second store starts from the rule rather than from the page.
  */
 
+import type { StoreKind } from './store';
+
 export type OfferKind = 'package' | 'copy';
 
 /** What the one button on a card does. Computed once, when the card is built. */
@@ -37,6 +39,15 @@ export type InstalledState = 'own' | 'clean' | 'edited' | 'outdated' | 'edited-o
 export interface Offer {
 	key: string;
 	kind: OfferKind;
+	/**
+	 * Which catalogue it comes from.
+	 *
+	 * Not the same question as `kind`, which says whether the card is something on
+	 * offer or something of yours. This says what the thing *is*, and it is what
+	 * lets one storefront hold several catalogues: the shelf groups by it, the
+	 * filter narrows by it, and the installer is chosen by it.
+	 */
+	family: StoreKind;
 	name: string;
 	/** The one line under the name: a tagline, a summary, whatever the kind calls it. */
 	line: string;
