@@ -1,9 +1,11 @@
 import { json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
+import { pricedCurrencies } from '$lib/server/db/servers';
 import {
 	creditLimitFor,
 	creditPeriodFor,
+	dailySpend,
 	periodStart,
 	spendSince,
 	type CreditPeriod
@@ -28,7 +30,13 @@ export async function GET(event) {
 		from,
 		resetsAt: nextPeriodStart(period, from),
 		limit: creditLimitFor(user.id),
-		spend: spendSince(user.id, from)
+		spend: spendSince(user.id, from),
+		// One currency can label a figure; several have to be admitted to, since
+		// nothing is converted anywhere.
+		currencies: pricedCurrencies(),
+		// Always the last thirty days, whatever the period: a month of history
+		// beside a weekly allowance is what says whether this week is unusual.
+		history: dailySpend(user.id, daysAgo(29))
 	});
 }
 
@@ -38,4 +46,11 @@ function nextPeriodStart(period: CreditPeriod, from: string): string {
 	if (period === 'month') start.setUTCMonth(start.getUTCMonth() + 1);
 	else start.setUTCDate(start.getUTCDate() + (period === 'week' ? 7 : 1));
 	return start.toISOString();
+}
+
+/** A day, `n` days back, as the ledger writes them. */
+function daysAgo(n: number): string {
+	const date = new Date();
+	date.setUTCDate(date.getUTCDate() - n);
+	return date.toISOString().slice(0, 10);
 }

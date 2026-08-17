@@ -162,6 +162,10 @@ export class OpenAIStrategy implements ChatStrategy {
 			model,
 			messages,
 			stream: true,
+			// Without this a streamed answer carries no `usage` block at all, so every
+			// turn — which is every turn — would go uncounted. Servers that do not know
+			// the field ignore it.
+			stream_options: { include_usage: true },
 			...(tools ? { tools } : {}),
 			...extraBody
 		});
@@ -193,6 +197,16 @@ export class OpenAIStrategy implements ChatStrategy {
 			const thinking = delta?.reasoning_content ?? delta?.reasoning;
 			if (thinking) onChunk({ thinking });
 			if (delta?.content) onChunk({ content: delta.content });
+
+			// The last chunk of a stream carries the totals and no delta. Forwarded as
+			// it is: whoever is counting decides what to do with it.
+			const usage = (chunk as { usage?: { prompt_tokens?: number; completion_tokens?: number } })
+				.usage;
+			if (usage?.prompt_tokens || usage?.completion_tokens) {
+				onChunk({
+					usage: { input: usage.prompt_tokens ?? 0, output: usage.completion_tokens ?? 0 }
+				});
+			}
 
 			for (const fragment of delta?.tool_calls ?? []) {
 				const slot = pending.get(fragment.index) ?? { id: '', name: '', arguments: '' };

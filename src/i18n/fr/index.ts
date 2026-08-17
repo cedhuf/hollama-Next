@@ -705,9 +705,14 @@ const fr = extendDictionary(en, {
 	unpricedModels: 'Modèles partagés sans tarif',
 	unpricedModelsHelp:
 		'Tant qu’un plafond s’applique, ils sont refusés : ce qui n’est pas compté n’est pas limité, et un seul modèle oublié vaut un plafond illimité pour tout le monde. Tarifez-les dans Serveurs → Modèles et tarifs, ou cessez de les partager.',
+	usageNothingYet: 'Rien de dépensé pour l’instant',
+	usageToday: 'Aujourd’hui',
 	usageTitle: 'Consommation',
 	usageOfLimit: '{spent} sur {limit}',
 	usageUnlimited: 'Sans limite',
+	usagePerDay: 'Aujourd’hui',
+	usageMixedCurrencies:
+		'Les tarifs sont écrits en {currencies}, et sont additionnés sans conversion.',
 	usagePerMonth: 'Ce mois calendaire',
 	usagePerWeek: 'Cette semaine',
 	usageSetByAdmin: 'plafond fixé par votre administrateur',

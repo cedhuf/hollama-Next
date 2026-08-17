@@ -2475,6 +2475,14 @@ type RootTranslation = {
 	 */
 	unpricedModelsHelp: string
 	/**
+	 * N​o​t​h​i​n​g​ ​s​p​e​n​t​ ​y​e​t
+	 */
+	usageNothingYet: string
+	/**
+	 * T​o​d​a​y
+	 */
+	usageToday: string
+	/**
 	 * U​s​a​g​e
 	 */
 	usageTitle: string
@@ -2488,6 +2496,15 @@ type RootTranslation = {
 	 * N​o​ ​l​i​m​i​t
 	 */
 	usageUnlimited: string
+	/**
+	 * T​o​d​a​y
+	 */
+	usagePerDay: string
+	/**
+	 * P​r​i​c​e​s​ ​h​e​r​e​ ​a​r​e​ ​w​r​i​t​t​e​n​ ​i​n​ ​{​c​u​r​r​e​n​c​i​e​s​}​,​ ​a​n​d​ ​a​r​e​ ​a​d​d​e​d​ ​t​o​g​e​t​h​e​r​ ​w​i​t​h​o​u​t​ ​c​o​n​v​e​r​s​i​o​n​.
+	 * @param {string} currencies
+	 */
+	usageMixedCurrencies: RequiredParams<'currencies'>
 	/**
 	 * T​h​i​s​ ​c​a​l​e​n​d​a​r​ ​m​o​n​t​h
 	 */
@@ -5337,6 +5354,14 @@ The completion in progress will stop
 	 */
 	unpricedModelsHelp: () => LocalizedString
 	/**
+	 * Nothing spent yet
+	 */
+	usageNothingYet: () => LocalizedString
+	/**
+	 * Today
+	 */
+	usageToday: () => LocalizedString
+	/**
 	 * Usage
 	 */
 	usageTitle: () => LocalizedString
@@ -5348,6 +5373,14 @@ The completion in progress will stop
 	 * No limit
 	 */
 	usageUnlimited: () => LocalizedString
+	/**
+	 * Today
+	 */
+	usagePerDay: () => LocalizedString
+	/**
+	 * Prices here are written in {currencies}, and are added together without conversion.
+	 */
+	usageMixedCurrencies: (arg: { currencies: string }) => LocalizedString
 	/**
 	 * This calendar month
 	 */

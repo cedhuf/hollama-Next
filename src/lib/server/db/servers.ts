@@ -256,6 +256,24 @@ export function unpricedSharedModels(): { serverId: string; label: string; model
 	return [...byServer.values()];
 }
 
+/**
+ * The currencies this instance's prices are written in.
+ *
+ * One is the answer a figure can be labelled with; several is the answer that
+ * has to be admitted to, since nothing is converted. Empty means nothing is
+ * priced, and then no figure is worth labelling at all.
+ */
+export function pricedCurrencies(): string[] {
+	const rows = getDb()
+		.prepare(
+			`SELECT DISTINCT COALESCE(p.currency, 'USD') AS currency
+			 FROM model_pricing p JOIN servers s ON s.id = p.server_id
+			 WHERE s.owner_user_id IS NULL AND (p.input IS NOT NULL OR p.output IS NOT NULL)`
+		)
+		.all() as { currency: string }[];
+	return rows.map((row) => row.currency).sort();
+}
+
 export function setSharedModels(serverId: string, models: string[]): void {
 	const db = getDb();
 	db.exec('BEGIN');

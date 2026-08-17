@@ -3,6 +3,7 @@ import { get } from 'svelte/store';
 
 import { sessionsStore, settingsStore } from '$lib/localStorage';
 import type { Model } from '$lib/settings';
+import type { TokenCount } from '$lib/usageCounts';
 
 import { type OllamaOptions } from './ollama';
 
@@ -73,7 +74,19 @@ export interface ChatRequest {
  * the same bug written three times. Each strategy accumulates internally and
  * emits the finished calls once, at the end of the stream.
  */
-export type ChatChunk = { content?: string; thinking?: string; toolCalls?: ToolCall[] };
+export type ChatChunk = {
+	content?: string;
+	thinking?: string;
+	toolCalls?: ToolCall[];
+	/**
+	 * What the provider says the turn consumed, on the chunk that carries it.
+	 *
+	 * Only ever the provider's own figure. Our character-count estimate colours a
+	 * ring; it has no business deciding what somebody spent. Absent on every
+	 * chunk but the last, and absent entirely from providers that do not report.
+	 */
+	usage?: TokenCount;
+};
 
 /**
  * The answer without the model's chain-of-thought.

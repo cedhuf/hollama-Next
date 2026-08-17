@@ -2,7 +2,18 @@
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import { isServerMode } from '$lib/chat/endpoint';
 	import Meter from '$lib/components/Meter.svelte';
+	import SpendChart from '$lib/components/SpendChart.svelte';
+	import { serversStore } from '$lib/localStorage';
+	import {
+		daysAgo,
+		localCurrencies,
+		localDaily,
+		localPeriodStart,
+		localSpend,
+		nextMonthStart
+	} from '$lib/localUsage';
 
 	/**
 	 * What you have spent this period, and what you are allowed.
@@ -18,16 +29,36 @@
 	 * needs two numbers — the figure alone is the whole answer.
 	 */
 	interface Usage {
-		period: 'month' | 'week';
+		period: 'month' | 'week' | 'day';
 		from: string;
 		resetsAt: string;
 		limit: number;
 		spend: { inputTokens: number; outputTokens: number; cost: number };
+		/** What the prices behind these figures are written in. */
+		currencies: string[];
+		history: { day: string; cost: number }[];
 	}
 
 	let usage = $state<Usage | null>(null);
 
 	onMount(async () => {
+		// Local mode has no server to ask and nobody to limit: the ledger is in this
+		// browser, and what it can still answer is what the month cost. Same shape,
+		// so the card below does not know the difference.
+		if (!isServerMode) {
+			const from = localPeriodStart();
+			usage = {
+				period: 'month',
+				from,
+				resetsAt: nextMonthStart(from),
+				limit: 0,
+				spend: localSpend(from),
+				currencies: localCurrencies($serversStore ?? []),
+				history: localDaily(daysAgo(29))
+			};
+			return;
+		}
+
 		try {
 			const response = await fetch('/api/usage');
 			if (response.ok) usage = await response.json();
@@ -36,8 +67,22 @@
 		}
 	});
 
-	const money = (value: number) =>
-		value.toLocaleString(undefined, { maximumFractionDigits: value < 1 ? 3 : 2 });
+	/**
+	 * A figure with its unit, when there is one unit to give it.
+	 *
+	 * With prices in a single currency the amount can carry it. With several, it
+	 * cannot: nothing is converted, so the total is a sum of different things and
+	 * labelling it with one of them would be the lie. It says so instead.
+	 */
+	const money = (value: number) => {
+		const amount = value.toLocaleString(undefined, {
+			maximumFractionDigits: value < 1 ? 3 : 2
+		});
+		const currencies = usage?.currencies ?? [];
+		return currencies.length === 1 ? `${amount} ${currencies[0]}` : amount;
+	};
+
+	const mixed = $derived((usage?.currencies.length ?? 0) > 1);
 
 	const resets = $derived(
 		usage
@@ -75,9 +120,17 @@
 			/>
 		{/if}
 
+		<!-- Thirty days behind the figure, whatever the period: a month of history
+		     beside a weekly allowance is what says whether this week is unusual. -->
+		<SpendChart days={usage.history} limit={usage.limit} format={money} />
+
 		<div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs text-muted">
 			<span>
-				{usage.period === 'week' ? $LL.usagePerWeek() : $LL.usagePerMonth()}
+				{usage.period === 'week'
+					? $LL.usagePerWeek()
+					: usage.period === 'day'
+						? $LL.usagePerDay()
+						: $LL.usagePerMonth()}
 				{#if usage.limit > 0}
 					· {$LL.usageSetByAdmin()}
 				{/if}
@@ -85,6 +138,11 @@
 			<span class="tabular-nums">{$LL.usageResetsAt({ at: resets })}</span>
 		</div>
 
-		<p class="text-[11px] text-muted">{$LL.usageEstimateNote()}</p>
+		<p class="text-[11px] text-muted">
+			{$LL.usageEstimateNote()}
+			{#if mixed}
+				{$LL.usageMixedCurrencies({ currencies: usage.currencies.join(', ') })}
+			{/if}
+		</p>
 	</div>
 {/if}

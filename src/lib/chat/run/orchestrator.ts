@@ -9,6 +9,7 @@ import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 import { parseRouterDecision } from '$lib/search';
 import type { Message, WebSearchInfo } from '$lib/sessions';
 import { extractUrls } from '$lib/urls';
+import type { TokenCount } from '$lib/usageCounts';
 
 import type { RunEvent, RunInput } from './types';
 
@@ -75,6 +76,16 @@ export async function runTurn(
 	signal: AbortSignal
 ): Promise<void> {
 	const overrides = input.promptOverrides;
+
+	/**
+	 * What the provider says this turn consumed, across every round of it.
+	 *
+	 * Reported once at the end rather than per round: a turn that called two tools
+	 * made three requests, and what somebody spent is the three added up. Zero
+	 * when the provider reports nothing, which is how it is told apart from a turn
+	 * that genuinely cost nothing.
+	 */
+	let used: TokenCount = { input: 0, output: 0 };
 
 	try {
 		// A stored marker holds the bare summary; the instructions that tell the model
@@ -503,6 +514,14 @@ export async function runTurn(
 				}
 				if (part.content) reasoningProcessor.processChunk(part.content);
 				if (part.toolCalls) toolCalls = part.toolCalls;
+				// What the provider says it used. Summed across rounds, because a turn
+				// that called a tool made more than one request and paid for each.
+				if (part.usage) {
+					used = {
+						input: used.input + part.usage.input,
+						output: used.output + part.usage.output
+					};
+				}
 			});
 
 			reasoningProcessor.finalize();
@@ -706,6 +725,10 @@ export async function runTurn(
 			}
 		}
 
+		// Last, so a client that is counting has the whole turn rather than a round
+		// of it. Emitted even at zero: the difference between "nothing reported" and
+		// "nothing spent" belongs to whoever reads it.
+		emit({ type: 'usage', used });
 		emit({ type: 'done' });
 	} catch (error) {
 		const typed = error instanceof Error ? error : new Error(String(error));

@@ -111,8 +111,15 @@ and their own bill: counting it against an instance allowance, or refusing it in
 would be neither.
 
 Every account can see its own figure in _Settings → Profile_: what it has spent, what it is allowed,
-that the allowance was set by an administrator, and when the counter starts again. Administrators
-see theirs too — being able to raise your own ceiling is not a reason to be unable to see it.
+that the allowance was set by an administrator, when the counter starts again, and the last thirty
+days as a chart — a total says how much, not whether it happened yesterday or has been happening all
+month. Administrators see theirs too; being able to raise your own ceiling is not a reason to be
+unable to see it.
+
+The same card appears in **local mode**, where there is no account to limit and nobody to limit it.
+What is left is the half that is still useful to somebody paying their own provider: price the
+models in _Settings → Servers_, and the card counts what each week costs. Nothing is ever refused
+there.
 
 ### It never cuts a conversation
 

@@ -186,6 +186,13 @@ export type RunEvent =
 	/** The conversation was compacted, and this marker replaces what came before it. */
 	| { type: 'compaction'; marker: Message; replacedCount: number }
 	/** The turn is over. Nothing follows. */
+	/**
+	 * What the provider says the turn consumed, once, at the end.
+	 *
+	 * Carried as an event like everything else so a reattaching client gets it on
+	 * replay and the local and server paths report it the same way.
+	 */
+	| { type: 'usage'; used: { input: number; output: number } }
 	| { type: 'done' }
 	/**
 	 * The turn failed, or was cancelled.

@@ -684,9 +684,14 @@ const en = {
 	unpricedModels: 'Shared models with no price',
 	unpricedModelsHelp:
 		'While an allowance is in force these are refused, because what is not counted is not limited: one forgotten model is an unlimited allowance for everybody. Price them in Servers → Models and pricing, or stop sharing them.',
+	usageNothingYet: 'Nothing spent yet',
+	usageToday: 'Today',
 	usageTitle: 'Usage',
 	usageOfLimit: '{spent:string} of {limit:string}',
 	usageUnlimited: 'No limit',
+	usagePerDay: 'Today',
+	usageMixedCurrencies:
+		'Prices here are written in {currencies:string}, and are added together without conversion.',
 	usagePerMonth: 'This calendar month',
 	usagePerWeek: 'This week',
 	usageSetByAdmin: 'allowance set by your administrator',

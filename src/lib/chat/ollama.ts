@@ -241,7 +241,22 @@ export class OllamaStrategy implements ChatStrategy {
 			const chatResponses = value.split('\n').filter((line) => line);
 
 			for (const chatResponse of chatResponses) {
-				const { message } = JSON.parse(chatResponse) as ChatResponse;
+				const parsed = JSON.parse(chatResponse) as ChatResponse & {
+					prompt_eval_count?: number;
+					eval_count?: number;
+				};
+				const { message } = parsed;
+
+				// Ollama puts its counts on the final object, unasked. Forwarded as it
+				// is: whoever is counting decides what to do with it.
+				if (parsed.prompt_eval_count || parsed.eval_count) {
+					onChunk({
+						usage: {
+							input: parsed.prompt_eval_count ?? 0,
+							output: parsed.eval_count ?? 0
+						}
+					});
+				}
 				// Reasoning models stream `thinking` separately from `content`.
 				if (message.thinking) onChunk({ thinking: message.thinking });
 				if (message.content) onChunk({ content: message.content });

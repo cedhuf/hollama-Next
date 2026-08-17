@@ -1,3 +1,8 @@
+import { get } from 'svelte/store';
+
+import { isServerMode } from '$lib/chat/endpoint';
+import { serversStore } from '$lib/localStorage';
+import { recordLocalUsage } from '$lib/localUsage';
 import type { Editor, Message, Session } from '$lib/sessions';
 
 import type { RunEvent } from './types';
@@ -203,6 +208,19 @@ export function applyRunEvent(
 			editor.speakerName = undefined;
 			editor.shouldFocusTextarea = true;
 			surface.onFinish?.({ aborted: false });
+			return;
+
+		case 'usage':
+			// Local mode only: the server counts in its relay, where it can also refuse.
+			// Here nobody is refused anything, and what is left is worth knowing —
+			// somebody paying their own provider wants to see what the week cost.
+			if (!isServerMode) {
+				recordLocalUsage(
+					get(serversStore)?.find((server) => server.id === session.model?.serverId),
+					session.model?.name ?? '',
+					event.used
+				);
+			}
 			return;
 
 		case 'error':

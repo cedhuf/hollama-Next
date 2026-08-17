@@ -118,6 +118,34 @@ export function spendForAll(from: string): Record<string, Spend> {
 	);
 }
 
+/**
+ * What was spent each day since a date, oldest first, days with nothing included.
+ *
+ * The gaps matter: a chart drawn only from the days that have rows says nothing
+ * about the days somebody did not use it, which is half of what "is this person
+ * running away with it" is asking.
+ */
+export function dailySpend(userId: string, from: string): { day: string; cost: number }[] {
+	const rows = getDb()
+		.prepare(
+			`SELECT day, SUM(cost) AS cost FROM user_usage
+			 WHERE user_id = ? AND day >= ? GROUP BY day ORDER BY day`
+		)
+		.all(userId, from) as { day: string; cost: number }[];
+
+	const byDay = new Map(rows.map((row) => [row.day, row.cost]));
+	const out: { day: string; cost: number }[] = [];
+
+	const cursor = new Date(`${from}T00:00:00.000Z`);
+	const end = new Date(`${today()}T00:00:00.000Z`);
+	while (cursor <= end) {
+		const day = cursor.toISOString().slice(0, 10);
+		out.push({ day, cost: byDay.get(day) ?? 0 });
+		cursor.setUTCDate(cursor.getUTCDate() + 1);
+	}
+	return out;
+}
+
 /** Add one turn's consumption to today's row. */
 export function addUsage(userId: string, usage: Spend): void {
 	if (!usage.inputTokens && !usage.outputTokens && !usage.cost) return;
