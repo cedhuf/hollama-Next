@@ -1217,6 +1217,20 @@ type RootTranslation = {
 	 */
 	playbooks: string
 	/**
+	 * {​c​o​u​n​t​}​ ​{​{​p​l​a​y​b​o​o​k​|​p​l​a​y​b​o​o​k​s​}​}​ ​i​m​p​o​r​t​e​d
+	 * @param {number} count
+	 */
+	importedPlaybooks: RequiredParams<'count'>
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​e​n​t​r​y​|​e​n​t​r​i​e​s​}​}​ ​s​k​i​p​p​e​d
+	 * @param {number} count
+	 */
+	importSkipped: RequiredParams<'count'>
+	/**
+	 * N​o​t​h​i​n​g​ ​i​n​ ​t​h​a​t​ ​f​i​l​e​ ​c​o​u​l​d​ ​b​e​ ​i​m​p​o​r​t​e​d
+	 */
+	nothingImportable: string
+	/**
 	 * {​c​o​u​n​t​}​ ​{​{​s​e​c​t​i​o​n​|​s​e​c​t​i​o​n​s​}​}
 	 * @param {number} count
 	 */
@@ -3920,6 +3934,18 @@ The completion in progress will stop
 	 * Playbooks
 	 */
 	playbooks: () => LocalizedString
+	/**
+	 * {count} {{playbook|playbooks}} imported
+	 */
+	importedPlaybooks: (arg: { count: number }) => LocalizedString
+	/**
+	 * {count} {{entry|entries}} skipped
+	 */
+	importSkipped: (arg: { count: number }) => LocalizedString
+	/**
+	 * Nothing in that file could be imported
+	 */
+	nothingImportable: () => LocalizedString
 	/**
 	 * {count} {{section|sections}}
 	 */

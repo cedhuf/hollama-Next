@@ -4,7 +4,6 @@
 		ChevronDown,
 		FileText,
 		Folder,
-		FolderOpen,
 		FolderPlus,
 		LoaderCircle,
 		MessageSquare,
@@ -13,8 +12,7 @@
 		RotateCcw,
 		Store,
 		Trash2,
-		Upload,
-		UserRound
+		Upload
 	} from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -24,8 +22,6 @@
 	import { resolve } from '$app/paths';
 	import Head from '$lib/components/Head.svelte';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
-	import Menu from '$lib/components/Menu.svelte';
-	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import {
 		createCollection,
@@ -40,8 +36,7 @@
 	import {
 		applyBundleToPersona,
 		installPersonaBundle,
-		parsePersonaBundle,
-		type PersonaBundle
+		parsePersonaBundle
 	} from '$lib/personaBundle';
 	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
 	import {
@@ -54,9 +49,11 @@
 	} from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
 	import { personaState } from '$lib/personaState';
+	import { installPlaybookBundle } from '$lib/playbookCatalog';
 	import { newPlaybook, playbookSteps, type Playbook } from '$lib/playbooks';
+	import { parsePlaybookBundle } from '$lib/playbookStore';
 	import { openKnowledge } from '$lib/stores/modal';
-	import { formatTimestampToNow } from '$lib/utils';
+	import { formatTimestampToNow, generateRandomId } from '$lib/utils';
 
 	import LibraryStore from './LibraryStore.svelte';
 	import PersonaModal from './PersonaModal.svelte';
@@ -195,8 +192,7 @@
 		}
 	}
 
-	let personaFileInput = $state<HTMLInputElement | undefined>();
-	let knowledgeFileInput = $state<HTMLInputElement | undefined>();
+	let importInput = $state<HTMLInputElement | undefined>();
 	let storeOpen = $state(false);
 	/**
 	 * Which shelf the store opens on.
@@ -228,49 +224,101 @@
 		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
 	}
 
-	function readJsonFile(input: HTMLInputElement, onData: (data: unknown) => void) {
-		const file = input.files?.[0];
-		if (!file) return;
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			try {
-				onData(JSON.parse(e.target?.result as string));
-			} catch (error) {
-				toast.error($LL.importError(), {
-					description: error instanceof Error ? error.message : $LL.invalidFile()
+	/**
+	 * One Import, which reads the files rather than asking what is in them.
+	 *
+	 * Three menu entries all opened the same picker and then failed if you chose
+	 * the wrong kind, which is a quiz about a format nobody memorises. Every one of
+	 * these announces itself — a bundle says `llooma.persona` or `llooma.playbook`,
+	 * an OpenWebUI export has its own shape, a knowledge file is a name and some
+	 * text — so the file is asked instead.
+	 *
+	 * Anything that is not JSON at all is a document: a Markdown note dropped here
+	 * becomes knowledge under its own file name, which is what somebody handing a
+	 * `.md` to a library means by it. Guessing would be shaky over formats that had
+	 * to be inferred; these say what they are, and what was shaky was the version
+	 * where the right answer depended on having picked the right menu item first.
+	 */
+	async function onImport(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const files = [...(input.files ?? [])];
+		input.value = '';
+		if (!files.length) return;
+
+		let personas = 0;
+		let playbooks = 0;
+		let documents = 0;
+		let failed = 0;
+
+		for (const file of files) {
+			const text = await file.text();
+			const json = parseJson(text);
+
+			if (json === undefined) {
+				// Not JSON, so it is what it looks like: a document.
+				saveKnowledge({
+					id: generateRandomId(),
+					name: file.name.replace(/\.[^.]+$/, ''),
+					content: text,
+					updatedAt: new Date().toISOString()
 				});
-			} finally {
-				input.value = '';
+				documents += 1;
+				continue;
 			}
-		};
-		reader.readAsText(file);
+
+			for (const item of Array.isArray(json) ? json : [json]) {
+				const personaBundle = parsePersonaBundle(item);
+				if (personaBundle) {
+					installPersonaBundle(personaBundle, { origin: 'file' });
+					personas += 1;
+					continue;
+				}
+
+				const playbookBundle = parsePlaybookBundle(item);
+				if (playbookBundle) {
+					installPlaybookBundle(playbookBundle, { origin: 'file' });
+					playbooks += 1;
+					continue;
+				}
+
+				// Native and OpenWebUI personas, recognised by their fields rather than
+				// by a format line.
+				const native = parsePersonasImport(item);
+				if (native.length) {
+					for (const persona of native) savePersona(persona);
+					personas += native.length;
+					continue;
+				}
+
+				const knowledge = parseKnowledgeImport(item);
+				if (!knowledge.length) {
+					failed += 1;
+					continue;
+				}
+				for (const document of knowledge) saveKnowledge(document);
+				documents += knowledge.length;
+			}
+		}
+
+		const summary = [
+			personas ? $LL.importedPersonas({ count: personas }) : '',
+			playbooks ? $LL.importedPlaybooks({ count: playbooks }) : '',
+			documents ? $LL.importedCollections({ count: documents }) : ''
+		].filter(Boolean);
+
+		if (!summary.length) return toast.error($LL.nothingImportable());
+		toast.success(summary.join(' · '), {
+			description: failed ? $LL.importSkipped({ count: failed }) : undefined
+		});
 	}
 
-	/**
-	 * A dropped file, which is one of three things.
-	 *
-	 * Bundles first, because that is what the app itself exports and what the store
-	 * serves, and because they are the only form that carries its documents: read
-	 * as anything else, a persona with knowledge attached arrives with the
-	 * attachment pointing nowhere. The older shapes, our raw records and OpenWebUI
-	 * models, still import behind it.
-	 */
-	function onImportPersonas(event: Event) {
-		readJsonFile(event.target as HTMLInputElement, (data) => {
-			const bundles = (Array.isArray(data) ? data : [data])
-				.map(parsePersonaBundle)
-				.filter((b): b is PersonaBundle => !!b);
-
-			if (bundles.length) {
-				for (const bundle of bundles) installPersonaBundle(bundle, { origin: 'file' });
-				return toast.success($LL.importedPersonas({ count: bundles.length }));
-			}
-
-			const personas = parsePersonasImport(data);
-			if (personas.length === 0) return toast.error($LL.noPersonasInFile());
-			for (const persona of personas) savePersona(persona);
-			toast.success($LL.importedPersonas({ count: personas.length }));
-		});
+	/** `undefined` rather than a throw, so "is this JSON" is a question with an answer. */
+	function parseJson(text: string): unknown {
+		try {
+			return JSON.parse(text);
+		} catch {
+			return undefined;
+		}
 	}
 
 	let playbookModalOpen = $state(false);
@@ -289,15 +337,6 @@
 	function createPlaybook() {
 		editingPlaybook = newPlaybook();
 		playbookModalOpen = true;
-	}
-
-	function onImportKnowledge(event: Event) {
-		readJsonFile(event.target as HTMLInputElement, (data) => {
-			const items = parseKnowledgeImport(data);
-			if (items.length === 0) return toast.error($LL.noKnowledgeInFile());
-			for (const item of items) saveKnowledge(item);
-			toast.success($LL.importedCollections({ count: items.length }));
-		});
 	}
 </script>
 
@@ -338,34 +377,20 @@
 					<button
 						type="button"
 						onclick={() => openStore()}
-						class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:border-shade-4 hover:text-active"
+						class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
 					>
 						<Store class="h-4 w-4" />
 						{$LL.store()}
 					</button>
 
-					<Menu class="w-48">
-						{#snippet trigger({ props })}
-							<button
-								{...props}
-								type="button"
-								class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
-							>
-								<Upload class="h-4 w-4" />
-								{$LL.import()}
-								<ChevronDown class="h-3.5 w-3.5 opacity-80" />
-							</button>
-						{/snippet}
-
-						{#if canCreate}
-							<MenuItem icon={UserRound} onclick={() => personaFileInput?.click()}>
-								{$LL.importPersona()}
-							</MenuItem>
-						{/if}
-						<MenuItem icon={FolderOpen} onclick={() => knowledgeFileInput?.click()}>
-							{$LL.importKnowledge()}
-						</MenuItem>
-					</Menu>
+					<button
+						type="button"
+						onclick={() => importInput?.click()}
+						class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+					>
+						<Upload class="h-4 w-4" />
+						{$LL.import()}
+					</button>
 				</div>
 			</div>
 			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
@@ -718,19 +743,16 @@
 </div>
 
 <!-- Hidden file inputs driven by the Import menu in the header -->
+<!-- Several at once, and text as readily as JSON: the button reads whatever it
+     is handed, so restricting the picker would be the one place still asking the
+     question the rest of it stopped asking. -->
 <input
-	bind:this={personaFileInput}
+	bind:this={importInput}
 	type="file"
-	accept="application/json,.json"
+	multiple
+	accept=".json,.md,.markdown,.txt,.csv,application/json,text/plain,text/markdown"
 	class="hidden"
-	onchange={onImportPersonas}
-/>
-<input
-	bind:this={knowledgeFileInput}
-	type="file"
-	accept="application/json,.json"
-	class="hidden"
-	onchange={onImportKnowledge}
+	onchange={onImport}
 />
 
 {#if editing}
