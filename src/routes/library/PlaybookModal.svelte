@@ -4,6 +4,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import EditorModal from '$lib/components/EditorModal.svelte';
 	import { deletePlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
+	import { publishSharedPlaybooks } from '$lib/playbooksConfig';
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
@@ -24,9 +25,28 @@
 
 	let { open = $bindable(false), playbook = $bindable() }: Props = $props();
 
+	/**
+	 * A shared playbook that has been edited has to be republished.
+	 *
+	 * What users are offered is a snapshot taken when it was shared. Without this
+	 * it was only ever retaken when the share switch itself moved, so rewriting a
+	 * step changed nothing for anybody: the instance went on handing out the old
+	 * text, and the card comparing the two still found them identical because the
+	 * snapshot was still the original.
+	 *
+	 * Debounced, since this runs on every keystroke.
+	 */
+	let publishTimer: ReturnType<typeof setTimeout> | undefined;
+	function schedulePublish() {
+		clearTimeout(publishTimer);
+		publishTimer = setTimeout(() => void publishSharedPlaybooks(), 600);
+	}
+
+	/** Persist only once it has a name, so empty drafts never clutter the Library. */
 	function persist() {
 		if (!playbook.name.trim()) return;
 		savePlaybook(playbook);
+		if (playbook.shared) schedulePublish();
 	}
 
 	/**
@@ -66,6 +86,7 @@
 	function remove() {
 		if (!confirm($LL.areYouSureYouWantToDeleteThisPlaybook())) return;
 		deletePlaybook(playbook.id);
+		if (playbook.shared) void publishSharedPlaybooks();
 		toast.info($LL.playbookDeleted());
 		open = false;
 	}

@@ -175,6 +175,7 @@ export function personaOffers(input: PersonaInput, actions: PersonaActions) {
 
 export interface PlaybookActions {
 	install: (entry: PlaybookCatalogEntry) => Promise<void>;
+	installShared: (playbook: Playbook) => Promise<void>;
 	restore: (playbook: Playbook, ask: boolean) => Promise<void>;
 	toggleOwn: (playbook: Playbook) => Promise<void>;
 	toggleRelay: (id: string, relay: boolean) => Promise<void>;
@@ -241,18 +242,28 @@ export function playbookOffers(input: PlaybookInput, actions: PlaybookActions) {
 		};
 	};
 
+	/**
+	 * The playbooks an administrator shares that are not in the catalogue.
+	 *
+	 * Theirs, so what a user gets is a copy of it. Left out of your own store when
+	 * it is already in your library, which for the administrator who shared it is
+	 * always: the store is what you can add, and you cannot add what you wrote.
+	 */
 	const fromAdmin = input.shared
 		.filter((playbook) => !library.some((own) => own.id === playbook.id))
-		.map(
-			(playbook): Offer => ({
+		.map((playbook): Offer => {
+			const held = library.some((own) => own.source?.id === playbook.id);
+			return {
 				...copyOffer(playbook),
 				key: `playbook:shared:${playbook.id}`,
 				kind: 'package',
-				action: library.some((own) => own.source?.id === playbook.id) ? 'installed' : 'install',
-				run: undefined,
-				edited: false
-			})
-		);
+				action: held ? 'installed' : 'install',
+				// A button that says Install and does nothing is worse than no button.
+				run: held ? undefined : () => actions.installShared(playbook),
+				edited: false,
+				shared: true
+			};
+		});
 
 	return {
 		store: [

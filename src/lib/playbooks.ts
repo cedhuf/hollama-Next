@@ -74,6 +74,27 @@ export const deletePlaybook = (id: string): void => {
 };
 
 /**
+ * Install a playbook an administrator shared, as an editable copy of your own.
+ *
+ * A copy, not a link: a fresh id, and what it is a copy *of* recorded, so the
+ * card can tell later whether you have changed it. The share is a snapshot, so
+ * nothing here reaches back into the admin's library either.
+ */
+export function installSharedPlaybook(playbook: Playbook): Playbook {
+	const now = new Date().toISOString();
+	const copy: Playbook = {
+		...playbook,
+		id: generateRandomId(),
+		shared: false,
+		source: { origin: 'admin', id: playbook.id },
+		createdAt: now,
+		updatedAt: now
+	};
+	savePlaybook(copy);
+	return copy;
+}
+
+/**
  * The playbooks a conversation is running with, in the order they were switched on.
  *
  * Held by id and resolved on the fly, unlike a persona, which is snapshotted

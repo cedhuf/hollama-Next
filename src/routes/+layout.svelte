@@ -40,6 +40,7 @@
 		StorageKey
 	} from '$lib/localStorage';
 	import { loadServerPersonas } from '$lib/personasConfig';
+	import { loadServerPlaybooks } from '$lib/playbooksConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentRole, currentUser } from '$lib/stores/auth';
 	import { setInstanceConfig } from '$lib/stores/instance';
@@ -317,6 +318,7 @@
 		await loadServerSystemPrompts();
 		await loadServerChatDefaults();
 		await loadServerPersonas();
+		await loadServerPlaybooks();
 
 		// No personas are written at boot any more. They used to be built here and
 		// pushed straight into the store, which made "shipped with the app" and

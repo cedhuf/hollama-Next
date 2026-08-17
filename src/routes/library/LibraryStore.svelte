@@ -18,7 +18,12 @@
 		loadPlaybookCatalog,
 		playbookCatalogState
 	} from '$lib/playbookCatalog';
-	import { savePlaybook, type Playbook } from '$lib/playbooks';
+	import { installSharedPlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
+	import {
+		playbooksConfig,
+		publishSharedPlaybooks,
+		relayCatalogPlaybook
+	} from '$lib/playbooksConfig';
 	import type { PlaybookCatalogEntry } from '$lib/playbookStore';
 	import type { StoreKind } from '$lib/store';
 	import { personaOffers, playbookOffers, type PersonaOffer } from '$lib/store/offers';
@@ -171,21 +176,36 @@
 			{
 				entries: playbookCatalog.status === 'ready' ? playbookCatalog.catalog.entries : [],
 				library: $playbooksStore ?? [],
-				shared: [],
-				relayed: new Set<string>(),
-				curated: false,
+				shared: $playbooksConfig.shared,
+				relayed: new Set($playbooksConfig.sharedFromStore),
+				curated: $playbooksConfig.storeMode === 'curated',
 				sections: (count) => $LL.playbookSections({ count })
 			},
 			{
 				install: installPlaybook,
+				installShared: async (playbook) => {
+					installSharedPlaybook(playbook);
+					toast.success($LL.playbookInstalled({ name: playbook.name }));
+				},
 				restore: restorePlaybook,
 				toggleOwn: async (playbook) => {
 					savePlaybook({ ...playbook, shared: !playbook.shared });
+					await publishSharedPlaybooks();
 				},
-				toggleRelay: async () => {}
+				toggleRelay: relayCatalogPlaybook
 			}
 		)
 	);
+
+	/**
+	 * Whether this person may hand anything out.
+	 *
+	 * Both catalogues answer it, and both answer it the same way, because it is a
+	 * property of the account rather than of the shelf: an administrator shares,
+	 * everybody else does not. Read from one of them, once, so a card in a store
+	 * that holds two catalogues is never gated on the config of the other.
+	 */
+	const canShare = $derived($personasConfig.canShare || $playbooksConfig.canShare);
 
 	// --- the shelf ------------------------------------------------------------
 
@@ -260,14 +280,14 @@
 	{status}
 	{errorMessage}
 	{updatableCount}
-	views={$personasConfig.canShare ? ['store', 'mine', 'shared'] : ['store', 'mine']}
+	views={canShare ? ['store', 'mine', 'shared'] : ['store', 'mine']}
 	layout={$settingsStore.personaStoreLayout}
 	searchPlaceholder={$LL.storeSearch()}
 	emptyMine={$LL.personaStoreNothingMine()}
 	emptyShared={$LL.personaStoreNothingOffered()}
 	unreachable={$LL.personaStoreUnreachable()}
 	sharing={isServerMode}
-	shareAllowed={$personasConfig.canShare}
+	shareAllowed={canShare}
 	onUpdateAll={updateAll}
 	onRefresh={() => {
 		void loadCatalog(true);
