@@ -192,7 +192,20 @@ export type RunEvent =
 	 * Carried as an event like everything else so a reattaching client gets it on
 	 * replay and the local and server paths report it the same way.
 	 */
-	| { type: 'usage'; used: { input: number; output: number } }
+	| {
+			type: 'usage';
+			used: { input: number; output: number };
+			/**
+			 * Which model and which connection spent it.
+			 *
+			 * On the event rather than inferred from the run, because a turn can have
+			 * several voices and each brings its own: reading the conversation's model
+			 * would price a persona's answer at the wrong rate, or at a rate that does
+			 * not exist on that connection at all.
+			 */
+			model?: string;
+			serverId?: string;
+	  }
 	| { type: 'done' }
 	/**
 	 * The turn failed, or was cancelled.

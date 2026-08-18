@@ -215,9 +215,13 @@ export function applyRunEvent(
 			// Here nobody is refused anything, and what is left is worth knowing —
 			// somebody paying their own provider wants to see what the week cost.
 			if (!isServerMode) {
+				// The event names its own model and connection, so a persona answering
+				// on its own model is priced at its own rate rather than the
+				// conversation's.
+				const serverId = event.serverId ?? session.model?.serverId;
 				recordLocalUsage(
-					get(serversStore)?.find((server) => server.id === session.model?.serverId),
-					session.model?.name ?? '',
+					get(serversStore)?.find((server) => server.id === serverId),
+					event.model ?? session.model?.name ?? '',
 					event.used
 				);
 			}

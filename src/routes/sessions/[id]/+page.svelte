@@ -82,7 +82,12 @@
 		webFetch: $webFetchConfig.available && $settingsStore.webFetchByDefault,
 		interactiveChoices: $settingsStore.interactiveChoices,
 		sendCurrentDate: $settingsStore.sendCurrentDate,
-		thinking: true
+		thinking: true,
+		// Declared here rather than left undefined: it is bound into the streaming
+		// article, and Svelte refuses `bind:` against a prop that has a fallback when
+		// the bound value is undefined. Reattaching to a run in progress hit that
+		// before the first turn had set it, and threw during render.
+		streamingReasoningExpanded: false
 	});
 	/**
 	 * Where the composer is drawn: sticky at the foot of the conversation while you

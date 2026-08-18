@@ -7,6 +7,7 @@ import { requireUser } from '$lib/server/api';
 import { PolicyError } from '$lib/server/llmPolicy';
 import { serverDeps, type RunPrincipal } from '$lib/server/runDeps';
 import { createRun, emitTo, findRunForSession, summarise } from '$lib/server/runs';
+import { recordRunUsage } from '$lib/server/usageMeter';
 
 /**
  * Start a turn, and answer immediately with the run it became.
@@ -44,7 +45,22 @@ export async function POST(event) {
 	void runSpeakers(
 		input,
 		(pass) => serverDeps(pass, principal),
-		(ev) => emitTo(run, ev),
+		(ev) => {
+			// Counted here, where the turn actually happens.
+			//
+			// The relay in `/api/llm` meters what the browser sends through it, and in
+			// server mode the browser sends nothing through it: `runDeps` builds a
+			// direct strategy and talks to the provider itself. So every server-side
+			// turn went uncounted while the meter watched a road nobody was on.
+			//
+			// The counts come from the run's own `usage` event, which both strategies
+			// fill from what the provider reported, so this path and the browser's
+			// agree by construction.
+			if (ev.type === 'usage' && principal.userId) {
+				recordRunUsage(principal.userId, ev.serverId, ev.model, ev.used);
+			}
+			emitTo(run, ev);
+		},
 		run.controller.signal
 	);
 

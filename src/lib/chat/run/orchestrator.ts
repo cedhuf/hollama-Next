@@ -728,7 +728,12 @@ export async function runTurn(
 		// Last, so a client that is counting has the whole turn rather than a round
 		// of it. Emitted even at zero: the difference between "nothing reported" and
 		// "nothing spent" belongs to whoever reads it.
-		emit({ type: 'usage', used });
+		emit({
+			type: 'usage',
+			used,
+			model: input.model,
+			serverId: input.server.kind === 'id' ? input.server.id : undefined
+		});
 		emit({ type: 'done' });
 	} catch (error) {
 		const typed = error instanceof Error ? error : new Error(String(error));

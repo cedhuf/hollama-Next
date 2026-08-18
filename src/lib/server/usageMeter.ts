@@ -1,6 +1,7 @@
 import type { ModelPrice } from '$lib/connections';
-import { costOf, countsInBody } from '$lib/usageCounts';
+import { costOf, countsInBody, type TokenCount } from '$lib/usageCounts';
 
+import { getModelPricing, getServer } from './db/servers';
 import { addUsage } from './db/usage';
 
 /**
@@ -76,4 +77,35 @@ export function meter(
 	});
 
 	return body.pipeThrough(watcher);
+}
+
+/**
+ * Record what a server-side turn consumed.
+ *
+ * The counts arrive as an event rather than as bytes on a stream, because on
+ * this path the server *is* the client: it holds the provider connection, and
+ * what it reports is already parsed. The pricing lookup is the same one the
+ * relay does, so a model costs the same whichever road the turn took.
+ *
+ * The server a turn ran on is the one named in its input; a personal connection
+ * is somebody's own key and own bill, so it is neither counted nor limited.
+ */
+export function recordRunUsage(
+	userId: string,
+	serverId: string | undefined,
+	model: string | undefined,
+	used: TokenCount
+): void {
+	if (!serverId || !model || (!used.input && !used.output)) return;
+
+	const row = getServer(serverId);
+	if (!row || row.owner_user_id !== null) return;
+
+	const cost = costOf(used, getModelPricing(serverId)[model]);
+	if (cost === undefined) {
+		console.warn(`[usage] ${model} has no price on this connection; nothing recorded`);
+		return;
+	}
+
+	addUsage(userId, { inputTokens: used.input, outputTokens: used.output, cost });
 }
