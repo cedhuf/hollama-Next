@@ -84,6 +84,23 @@
 
 	const mixed = $derived((usage?.currencies.length ?? 0) > 1);
 
+	/**
+	 * The tokens behind the figure.
+	 *
+	 * At a fifth of a euro per million, a week of real use rounds to a thousandth
+	 * and the amount alone says almost nothing. The token count is the same fact
+	 * at a scale somebody can feel, and it is the one the provider actually
+	 * reported — the money is our arithmetic on top of it.
+	 */
+	const tokens = $derived(usage ? usage.spend.inputTokens + usage.spend.outputTokens : 0);
+
+	const compact = (value: number) =>
+		value >= 1_000_000
+			? `${(value / 1_000_000).toFixed(1)}M`
+			: value >= 1_000
+				? `${Math.round(value / 1000)}k`
+				: String(value);
+
 	const resets = $derived(
 		usage
 			? new Date(usage.resetsAt).toLocaleString(undefined, {
@@ -98,7 +115,10 @@
 	<div class="flex flex-col gap-2 rounded-xl border border-shade-3 bg-shade-0 p-4">
 		<div class="flex items-baseline justify-between gap-2">
 			<span class="text-sm font-medium text-active">{$LL.usageTitle()}</span>
-			<span class="text-xs tabular-nums text-muted">
+			<span class="flex items-baseline gap-1.5 text-xs tabular-nums text-muted">
+				{#if tokens > 0}
+					<span class="opacity-70">{$LL.usageTokens({ tokens: compact(tokens) })}</span>
+				{/if}
 				{#if usage.limit > 0}
 					{$LL.usageOfLimit({ spent: money(usage.spend.cost), limit: money(usage.limit) })}
 				{:else}

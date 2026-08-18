@@ -686,6 +686,7 @@ const en = {
 		'While an allowance is in force these are refused, because what is not counted is not limited: one forgotten model is an unlimited allowance for everybody. Price them in Servers → Models and pricing, or stop sharing them.',
 	usageNothingYet: 'Nothing spent yet',
 	usageToday: 'Today',
+	usageTokens: '{tokens:string} tokens',
 	usageTitle: 'Usage',
 	usageOfLimit: '{spent:string} of {limit:string}',
 	usageUnlimited: 'No limit',

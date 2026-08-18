@@ -2483,6 +2483,11 @@ type RootTranslation = {
 	 */
 	usageToday: string
 	/**
+	 * {​t​o​k​e​n​s​}​ ​t​o​k​e​n​s
+	 * @param {string} tokens
+	 */
+	usageTokens: RequiredParams<'tokens'>
+	/**
 	 * U​s​a​g​e
 	 */
 	usageTitle: string
@@ -5361,6 +5366,10 @@ The completion in progress will stop
 	 * Today
 	 */
 	usageToday: () => LocalizedString
+	/**
+	 * {tokens} tokens
+	 */
+	usageTokens: (arg: { tokens: string }) => LocalizedString
 	/**
 	 * Usage
 	 */

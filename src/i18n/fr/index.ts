@@ -707,6 +707,7 @@ const fr = extendDictionary(en, {
 		'Tant qu’un plafond s’applique, ils sont refusés : ce qui n’est pas compté n’est pas limité, et un seul modèle oublié vaut un plafond illimité pour tout le monde. Tarifez-les dans Serveurs → Modèles et tarifs, ou cessez de les partager.',
 	usageNothingYet: 'Rien de dépensé pour l’instant',
 	usageToday: 'Aujourd’hui',
+	usageTokens: '{tokens} jetons',
 	usageTitle: 'Consommation',
 	usageOfLimit: '{spent} sur {limit}',
 	usageUnlimited: 'Sans limite',
