@@ -21,7 +21,7 @@
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
-	import { conversedPersonas, launchPersona } from '$lib/personas';
+	import { conversedPersonas, launchPersona, type Persona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import { resolveSessionTitle } from '$lib/sessions';
@@ -169,6 +169,12 @@
 		event.preventDefault();
 		submit(prompt);
 	}
+
+	/** Awaited, so the conversation exists before the page that reads it opens. */
+	async function launch(persona: Persona) {
+		const id = await launchPersona(persona, $settingsStore.models);
+		goto(resolve('/sessions/[id]', { id }));
+	}
 </script>
 
 <Head title={$LL.sessions()} />
@@ -287,10 +293,7 @@
 					{#each recentPersonas as persona (persona.id)}
 						<button
 							type="button"
-							onclick={() =>
-								goto(
-									resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) })
-								)}
+							onclick={() => launch(persona)}
 							class="transition-transform hover:scale-105"
 							title={`${persona.name} — ${persona.tagline}`}
 						>

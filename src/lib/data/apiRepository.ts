@@ -4,6 +4,7 @@ import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
+import type { PersonaMemory } from '$lib/personaMemory';
 import type { Persona } from '$lib/personas';
 import type { Playbook } from '$lib/playbooks';
 import { fetchProviders, providerToServer } from '$lib/providers';
@@ -13,7 +14,13 @@ import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
 import { NotAuthenticatedError, type Backup, type DataRepository } from './repository';
 
-type Collection = 'sessions' | 'knowledge' | 'personas' | 'playbooks' | 'settings';
+type Collection =
+	| 'sessions'
+	| 'knowledge'
+	| 'personas'
+	| 'playbooks'
+	| 'persona-memory'
+	| 'settings';
 
 const DEBOUNCE_MS = 800;
 
@@ -63,6 +70,10 @@ export class ApiRepository implements DataRepository {
 	async loadPersonas(): Promise<Persona[]> {
 		return this.#get<Persona[]>('personas', []);
 	}
+
+	async loadPersonaMemory(): Promise<PersonaMemory[]> {
+		return this.#get<PersonaMemory[]>('persona-memory', []);
+	}
 	/**
 	 * Playbooks, and nothing if this server has never heard of them.
 	 *
@@ -110,6 +121,7 @@ export class ApiRepository implements DataRepository {
 	}
 	async deletePersona(id: string): Promise<void> {
 		await this.#delete(`/api/data/personas/${id}`);
+		await this.#delete(`/api/data/persona-memory/${id}`);
 	}
 	async savePlaybook(playbook: Playbook): Promise<void> {
 		this.#schedule(`/api/data/playbooks/${playbook.id}`, playbook);
@@ -126,6 +138,18 @@ export class ApiRepository implements DataRepository {
 	}
 	async replacePersonas(value: Persona[]): Promise<void> {
 		await this.#put('/api/data/personas', value);
+	}
+
+	async savePersonaMemory(memory: PersonaMemory): Promise<void> {
+		this.#schedule(`/api/data/persona-memory/${memory.id}`, memory);
+	}
+
+	async deletePersonaMemory(personaId: string): Promise<void> {
+		await this.#delete(`/api/data/persona-memory/${personaId}`);
+	}
+
+	async replacePersonaMemory(value: PersonaMemory[]): Promise<void> {
+		await this.#put('/api/data/persona-memory', value);
 	}
 	async replacePlaybooks(value: Playbook[]): Promise<void> {
 		await this.#put('/api/data/playbooks', value);
@@ -249,5 +273,24 @@ export class ApiRepository implements DataRepository {
 		}
 		this.#timers.clear();
 		this.#pending.clear();
+	}
+
+	/**
+	 * Send everything queued, now, and wait for it to land.
+	 *
+	 * The debounce is there because the stores persist on every change, down to
+	 * each streamed token. That is the right trade for an edit and the wrong one
+	 * for a creation: creating a conversation and then navigating to it means
+	 * reading back, in the same breath, something that is still sitting in a
+	 * timer. The read answers 404, the page treats "not there yet" as "does not
+	 * exist", starts a blank conversation over it, and the real one is gone with
+	 * everything that made it a persona's.
+	 */
+	async flush(): Promise<void> {
+		const queued = [...this.#pending];
+		for (const timer of this.#timers.values()) clearTimeout(timer);
+		this.#timers.clear();
+		this.#pending.clear();
+		await Promise.all(queued.map(([url, value]) => this.#put(url, value)));
 	}
 }

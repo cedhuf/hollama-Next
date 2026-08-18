@@ -7,14 +7,15 @@ import { OllamaStrategy } from '$lib/chat/ollama';
 import { OpenAIStrategy } from '$lib/chat/openai';
 import type { RunDeps } from '$lib/chat/run/orchestrator';
 import type { RunInput } from '$lib/chat/run/types';
-import { stripTitleMarkdown, TITLE_SYSTEM_PROMPT } from '$lib/chat/titleText';
-import { useNativeTools } from '$lib/chat/tools';
+import { stripTitleMarkdown } from '$lib/chat/titleText';
+import { canCarryTools, useNativeTools } from '$lib/chat/tools';
 import { ConnectionType, type Server } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { getSettings } from '$lib/server/db/collections';
 import { getServer, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
 import { fetchPage } from '$lib/server/fetchPage';
 import { policeChatBody, PolicyError, type ChatBody } from '$lib/server/llmPolicy';
+import { serverMemory } from '$lib/server/personaMemoryAccess';
 import { webSearch, type SearchTarget } from '$lib/server/search';
 import { resolveSearch } from '$lib/server/searchResolver';
 import { resolveTools, WEB_FETCH_CEILINGS, WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
@@ -186,6 +187,8 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 
 		useNativeTools: () => useNativeTools(server, input.model, input.flags.nativeTools),
 
+		canCarryTools: () => canCarryTools(server, input.model, input.flags.nativeTools),
+
 		async search(query, startNumber = 1) {
 			if (!target) return null;
 			const results = await webSearch(query, target);
@@ -224,13 +227,18 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 			return { context: body, pages: pages.map((p) => ({ title: p.title, url: p.url })) };
 		},
 
+		// The speaker's own persona when somebody was called in with @, and the
+		// conversation's otherwise. The account comes from the principal, never
+		// from the body: naming whose memory to read is not a client's call.
+		memory: serverMemory(principal.userId, input.speaker?.personaId ?? input.personaId),
+
 		title: input.title
 			? async (first: string) => {
 					try {
 						const raw = await oneShot(
 							input.title!.model,
 							[
-								{ role: 'system', content: TITLE_SYSTEM_PROMPT },
+								{ role: 'system', content: resolvePrompt('conversationTitle', overrides) },
 								{ role: 'user', content: first }
 							],
 							input.title!.serverId

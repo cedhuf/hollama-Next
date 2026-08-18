@@ -1,6 +1,7 @@
 import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
+import type { PersonaMemory } from '$lib/personaMemory';
 import type { Persona } from '$lib/personas';
 import type { Playbook } from '$lib/playbooks';
 import type { Session, SessionSummary } from '$lib/sessions';
@@ -36,6 +37,7 @@ export interface AppData {
 	knowledge: Knowledge[];
 	personas: Persona[];
 	playbooks: Playbook[];
+	personaMemory: PersonaMemory[];
 }
 
 /**
@@ -76,6 +78,14 @@ export interface DataRepository {
 	loadKnowledge(): Promise<Knowledge[]>;
 	loadPersonas(): Promise<Persona[]>;
 	loadPlaybooks(): Promise<Playbook[]>;
+	/**
+	 * What each persona remembers about the person signed in.
+	 *
+	 * Loaded whole rather than per persona: the always-present part of a memory is
+	 * capped, so the whole set is small, and a turn must not wait on a round trip
+	 * to find out what its persona knows.
+	 */
+	loadPersonaMemory(): Promise<PersonaMemory[]>;
 
 	saveSettings(value: Settings): Promise<void>;
 	saveServers(value: Server[]): Promise<void>;
@@ -99,6 +109,8 @@ export interface DataRepository {
 	deletePersona(id: string): Promise<void>;
 	savePlaybook(playbook: Playbook): Promise<void>;
 	deletePlaybook(id: string): Promise<void>;
+	savePersonaMemory(memory: PersonaMemory): Promise<void>;
+	deletePersonaMemory(personaId: string): Promise<void>;
 
 	/**
 	 * Wholesale replacement, for restoring a backup — the one case where the
@@ -108,6 +120,7 @@ export interface DataRepository {
 	replaceKnowledge(knowledge: Knowledge[]): Promise<void>;
 	replacePersonas(personas: Persona[]): Promise<void>;
 	replacePlaybooks(playbooks: Playbook[]): Promise<void>;
+	replacePersonaMemory(memories: PersonaMemory[]): Promise<void>;
 
 	/**
 	 * Conversations matching a content search, best first.
@@ -118,6 +131,15 @@ export interface DataRepository {
 	 */
 	/** `everything` includes what a clear set aside and what a compaction replaced. */
 	searchSessions(query: string, everything?: boolean): Promise<ConversationResult[]>;
+
+	/**
+	 * Land every queued write before going on.
+	 *
+	 * Called when what happens next reads back what was just written: creating a
+	 * conversation and navigating to it, above all. Absent on repositories that do
+	 * not queue, which is why it is optional rather than a no-op nobody can see.
+	 */
+	flush?(): Promise<void>;
 
 	exportBackup(): Promise<Backup>;
 	importBackup(backup: Backup): Promise<void>;

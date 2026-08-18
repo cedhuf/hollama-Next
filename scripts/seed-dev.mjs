@@ -293,6 +293,42 @@ const sessions = [
 const nova = personas.find((p) => p.id === 'seed-persona-nova');
 if (nova) nova.sessionId = 'seed-session-nova';
 
+// --- a model everything can actually run on --------------------------------
+//
+// Seeded conversations used to arrive with no model at all, which looks fine in
+// a list and is a dead end the moment you try to answer in one: the composer has
+// nothing to send to. So one is picked from what this instance really offers,
+// rather than hard-coded to a name that only exists on the machine this script
+// was written on.
+//
+// Shared models first, since in server mode those are the ones a user may pick.
+const pickModel = () => {
+	const shared = db
+		.prepare(
+			`SELECT sm.model_name AS name, sm.server_id AS serverId
+			 FROM shared_models sm JOIN servers s ON s.id = sm.server_id
+			 WHERE s.is_enabled = 1
+			 ORDER BY sm.model_name LIMIT 1`
+		)
+		.get();
+	if (shared) return { name: shared.name, serverId: shared.serverId };
+
+	const server = db.prepare('SELECT id FROM servers WHERE is_enabled = 1 LIMIT 1').get();
+	return server ? { name: '', serverId: server.id } : undefined;
+};
+
+const model = pickModel();
+if (model?.name) {
+	for (const session of sessions) session.model = model;
+	// A persona with no model of its own falls back to yours, which is what these
+	// are meant to demonstrate. Only the ones naming a model get one that exists.
+	for (const persona of personas) if (persona.modelName) persona.modelName = model.name;
+} else {
+	console.warn(
+		'[seed] No enabled connection with a shared model: conversations are seeded without one, and you will have to pick a model before you can answer in them.'
+	);
+}
+
 // --- write ------------------------------------------------------------------
 const upsert = (table, item) =>
 	db

@@ -1,4 +1,5 @@
 import { getConfig } from '$lib/server/db/config';
+import { resolveShared, type Sharing } from '$lib/server/sharing';
 import {
 	DEFAULT_SETTINGS,
 	type ModelSystemPrompt,
@@ -6,7 +7,7 @@ import {
 	type SystemPrompts
 } from '$lib/settings';
 
-export type SystemPromptsSharing = 'off' | 'locked' | 'overridable';
+export type SystemPromptsSharing = Sharing;
 
 export interface ResolvedSystemPrompts {
 	prompts: SystemPrompts;
@@ -32,32 +33,23 @@ function adminSnapshot(): SystemPrompts {
 const hasContent = (p: SystemPrompts) => !!p.global.trim() || Object.keys(p.perModel).length > 0;
 
 /**
- * Resolve the effective system prompts for a user (server mode):
- *   - off          → the user's own prompts (editable)
- *   - locked       → the admin's snapshot, read-only
- *   - overridable  → the admin's snapshot as a default the user may override
- *                    (their own prompts win once set; "restore" clears them)
- * Admins always edit their own. Per-group prompts are deferred.
+ * The system prompt a user actually gets, under the instance's sharing mode.
+ * The three modes are `sharing.ts`; this only says what a system prompt is.
+ * Per-group prompts are deferred.
  */
 export function resolveSystemPrompts(
 	userSettings: Settings | null,
 	isAdmin: boolean
 ): ResolvedSystemPrompts {
-	const own = userSettings?.systemPrompts ?? DEFAULT_SETTINGS.systemPrompts;
-	const sharing = (getConfig('systemPromptsSharing') as SystemPromptsSharing) || 'off';
+	const shared = resolveShared<SystemPrompts>({
+		own: userSettings?.systemPrompts ?? DEFAULT_SETTINGS.systemPrompts,
+		admin: adminSnapshot,
+		empty: EMPTY,
+		sharing: (getConfig('systemPromptsSharing') as Sharing) || 'off',
+		isAdmin,
+		hasContent
+	});
 
-	if (isAdmin || sharing === 'off') {
-		return { prompts: own, editable: true, source: 'user', shared: false, adminPrompts: EMPTY };
-	}
-
-	const admin = adminSnapshot();
-
-	if (sharing === 'locked') {
-		return { prompts: admin, editable: false, source: 'admin', shared: true, adminPrompts: admin };
-	}
-
-	// overridable
-	return hasContent(own)
-		? { prompts: own, editable: true, source: 'user', shared: true, adminPrompts: admin }
-		: { prompts: admin, editable: true, source: 'admin', shared: true, adminPrompts: admin };
+	const { value, adminValue, ...rest } = shared;
+	return { prompts: value, adminPrompts: adminValue, ...rest };
 }

@@ -304,6 +304,64 @@ const migrations: Migration[] = [
 			-- recorded as a value.
 			ALTER TABLE users ADD COLUMN credit_period TEXT;
 		`
+	},
+	{
+		version: 14,
+		up: `
+			-- What a persona remembers about one person.
+			--
+			-- Keyed on the pair, not on the persona, and that is the whole design. A
+			-- persona an admin shares is a single object every account reads: a memory
+			-- stored on it would be one memory for the instance, which for something
+			-- this personal is the wrong answer in the loudest possible way.
+			--
+			-- The account cascades: deleting it takes its memories with it. The
+			-- persona deliberately does not, because a shared persona is not a row in
+			-- the personas table at all, and a foreign key would make remembering one
+			-- impossible. Memories of a persona nobody has any more are cleaned up
+			-- with the persona itself.
+			CREATE TABLE persona_memory (
+				id         TEXT NOT NULL,                 -- the persona's id
+				user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				data       TEXT NOT NULL,                 -- JSON PersonaMemory
+				updated_at TEXT NOT NULL,
+				PRIMARY KEY (id, user_id)
+			);
+			CREATE INDEX idx_persona_memory_user ON persona_memory(user_id);
+		`
+	},
+	{
+		version: 15,
+		/**
+		 * Repair `persona_memory` on the databases that got the first draft of 14.
+		 *
+		 * Its key column was renamed from `persona_id` to `id` while 14 was still
+		 * being written, and a migration that has already run never runs again: a
+		 * database created in between has the old column and every read of it fails.
+		 * Nothing is lost by rebuilding, because nothing could ever have been
+		 * written through a column the code does not name.
+		 *
+		 * A no-op on a database that got 14 in its finished form, which is why it
+		 * checks the shape rather than assuming it.
+		 */
+		run: (db) => {
+			const columns = db.prepare('PRAGMA table_info(persona_memory)').all() as {
+				name: string;
+			}[];
+			if (columns.some((column) => column.name === 'id')) return;
+
+			db.exec(`
+				DROP TABLE IF EXISTS persona_memory;
+				CREATE TABLE persona_memory (
+					id         TEXT NOT NULL,                 -- the persona's id
+					user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+					data       TEXT NOT NULL,                 -- JSON PersonaMemory
+					updated_at TEXT NOT NULL,
+					PRIMARY KEY (id, user_id)
+				);
+				CREATE INDEX idx_persona_memory_user ON persona_memory(user_id);
+			`);
+		}
 	}
 ];
 

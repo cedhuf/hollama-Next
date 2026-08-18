@@ -1,3 +1,8 @@
+import { get } from 'svelte/store';
+
+import { personaMemoryStore } from '$lib/localStorage';
+import { indexLine } from '$lib/personaMemory';
+import { personasConfig } from '$lib/personasConfig';
 import type { Message, Session } from '$lib/sessions';
 
 import { conversationBoundary, messagesInContext, type ContextNote } from './notes';
@@ -208,6 +213,16 @@ export function contextSnapshot(session: Session, threshold: number): ContextNot
 	const systemTokens = estimateTokens(session.systemPrompt?.content ?? '');
 	const sourceTokens = estimateSourceIndexTokens(active);
 
+	// Only the part paid on every message: the profile and one line per note. A
+	// note's body is paid when it is opened, and is nobody's standing cost.
+	const remembered = session.personaId
+		? get(personaMemoryStore).find((memory) => memory.id === session.personaId)
+		: undefined;
+	const memoryTokens =
+		remembered && get(personasConfig).memoryEnabled
+			? estimateTokens([remembered.profile, ...remembered.notes.map(indexLine)].join('\n'))
+			: 0;
+
 	let messageTokens = 0;
 	let heaviest: ContextNote['heaviest'];
 	for (const message of active) {
@@ -227,6 +242,7 @@ export function contextSnapshot(session: Session, threshold: number): ContextNot
 		systemTokens,
 		messageTokens,
 		sourceTokens,
+		memoryTokens,
 		messageCount: usage.messageCount,
 		totalCount: session.messages.filter((message) => !message.note).length,
 		heaviest: heaviest?.preview ? heaviest : undefined,

@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 
+import { effectivePrompts } from '$lib/appPrompts';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
@@ -91,7 +92,7 @@ export async function compactSession(
 	const active = messagesInContext(session.messages);
 	if (!active.length) throw new Error('Nothing to compact');
 
-	const overrides = get(settingsStore).promptOverrides;
+	const overrides = get(effectivePrompts);
 	const instruction = options.instruction?.trim()
 		? resolvePrompt('compactInstruction', overrides, { instruction: options.instruction.trim() })
 		: '';

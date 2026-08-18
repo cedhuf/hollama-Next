@@ -86,6 +86,14 @@ export interface RunInput {
 	/** The session's own system prompt, already resolved. Empty means none. */
 	systemPrompt?: string;
 	/**
+	 * The persona whose conversation this is, when there is one.
+	 *
+	 * Carried so a turn can find what that persona remembers about the account
+	 * asking. Never used to look the persona up otherwise: everything else about
+	 * it is already resolved into the fields above, on purpose.
+	 */
+	personaId?: string;
+	/**
 	 * The conversation as the model should receive it: already cut back to the
 	 * last compaction marker, still carrying its markers and images.
 	 */

@@ -6,10 +6,11 @@ import { contextUsage } from '$lib/chat/context';
 import { OllamaStrategy } from '$lib/chat/ollama';
 import { OpenAIStrategy } from '$lib/chat/openai';
 import { generateTitle } from '$lib/chat/title';
-import { useNativeTools } from '$lib/chat/tools';
+import { canCarryTools, useNativeTools } from '$lib/chat/tools';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType, type Server } from '$lib/connections';
 import { serversStore } from '$lib/localStorage';
+import { browserMemory } from '$lib/personaMemoryAccess';
 import { buildSearchContext } from '$lib/search';
 import type { Session } from '$lib/sessions';
 import { buildPageContext } from '$lib/webFetch';
@@ -53,6 +54,8 @@ export function browserDeps(
 
 		useNativeTools: () => useNativeTools(server, input.model, input.flags.nativeTools),
 
+		canCarryTools: () => canCarryTools(server, input.model, input.flags.nativeTools),
+
 		async search(query, startNumber) {
 			const found = await buildSearchContext(query, startNumber);
 			if (!found) return null;
@@ -72,6 +75,11 @@ export function browserDeps(
 				pages: read.pages.map((p) => ({ title: p.title, url: p.url }))
 			};
 		},
+
+		// The speaker's own persona when somebody was called in with @, and the
+		// conversation's otherwise: a persona summoned into a chat remembers as
+		// itself, not as whoever lives there.
+		memory: browserMemory(input.speaker?.personaId ?? input.personaId),
 
 		title: wants.title ? (first: string) => generateTitle(first) : undefined,
 

@@ -8,6 +8,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { effectivePrompts } from '$lib/appPrompts';
 	import { formatAskAnswer } from '$lib/askChoice';
 	import type { CommandName } from '$lib/chat/commands';
 	import { compactSession } from '$lib/chat/compact';
@@ -464,7 +465,7 @@
 			const server = $serversStore.find((srv) => srv.id === model?.serverId);
 			if (!model?.name || !server) continue;
 
-			const framing = resolvePrompt('personaSummoned', $settingsStore.promptOverrides, {
+			const framing = resolvePrompt('personaSummoned', $effectivePrompts, {
 				name: persona.name
 			});
 			const language = languageInstruction(persona);
@@ -548,6 +549,10 @@
 				[session.systemPrompt.content, playbookInstructions(playbooksOf(session.playbookIds))]
 					.filter((part) => part?.trim())
 					.join('\n\n') || undefined,
+			// Only so the turn can find what this persona remembers about this
+			// account. Everything else about the persona is already resolved into the
+			// fields above, which is deliberate and stays that way.
+			personaId: session.personaId,
 			messages: messagesInContext(messages),
 			flags: {
 				webSearch: !!editor.webSearch,
@@ -561,7 +566,7 @@
 				search: searchAvailable,
 				fetch: $webFetchConfig.available
 			},
-			promptOverrides: $settingsStore.promptOverrides,
+			promptOverrides: $effectivePrompts,
 			speakers: speakersFor(messages),
 			sequential: $settingsStore.mentionsSequential !== false,
 			// Only local mode sends these: they are the browser's own configuration,
@@ -799,7 +804,7 @@
 		const note = marker.note;
 		if (note?.kind !== 'mention' || note.addedAt) return;
 
-		const framing = resolvePrompt('mentionRecall', $settingsStore.promptOverrides, {
+		const framing = resolvePrompt('mentionRecall', $effectivePrompts, {
 			title: note.title || $LL.newSession()
 		});
 		const at = new Date().toISOString();

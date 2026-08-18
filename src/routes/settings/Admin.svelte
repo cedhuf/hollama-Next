@@ -54,6 +54,7 @@
 	let personaStoreMode = $state<'open' | 'curated'>('open');
 
 	let personaAutoUpdateForced = $state(false);
+	let personaMemoryEnabled = $state(true);
 	let themeSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let themeShareEnabled = $state(false);
 	let resettingOnboarding = $state(false);
@@ -73,6 +74,10 @@
 		!!$settingsStore.systemPrompts.global.trim() ||
 			Object.keys($settingsStore.systemPrompts.perModel).length > 0
 	);
+
+	let appPromptsSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let appPromptsShareEnabled = $state(false);
+	const hasOwnAppPrompts = $derived(Object.keys($settingsStore.promptOverrides ?? {}).length > 0);
 
 	let defaultModelSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let defaultModelValue = $state('');
@@ -144,6 +149,7 @@
 			allowUserPersonas = config.allowUserPersonas ?? true;
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
+			personaMemoryEnabled = config.personaMemoryEnabled ?? true;
 			themeSharing = config.themeSharing ?? 'off';
 			themeShareEnabled = themeSharing !== 'off';
 			searchSharing = config.searchSharing ?? 'off';
@@ -153,6 +159,8 @@
 			webFetchShareEnabled = webFetchSharing !== 'off';
 			systemPromptsSharing = config.systemPromptsSharing ?? 'off';
 			promptsShareEnabled = systemPromptsSharing !== 'off';
+			appPromptsSharing = config.appPromptsSharing ?? 'off';
+			appPromptsShareEnabled = appPromptsSharing !== 'off';
 			defaultModelSharing = config.defaultModelSharing ?? 'off';
 			defaultModelValue = config.defaultModel ?? '';
 			titleSharing = config.titleSharing ?? 'off';
@@ -232,6 +240,22 @@
 		});
 	}
 
+	async function saveAppPrompts() {
+		await api('/api/admin/config', 'PUT', {
+			appPromptsSharing,
+			appPrompts: $settingsStore.promptOverrides ?? {}
+		});
+	}
+
+	function syncAppPromptsShare() {
+		appPromptsSharing = appPromptsShareEnabled
+			? appPromptsSharing === 'off'
+				? 'locked'
+				: appPromptsSharing
+			: 'off';
+		saveAppPrompts();
+	}
+
 	async function saveDefaultModel() {
 		await api('/api/admin/config', 'PUT', { defaultModelSharing, defaultModel: defaultModelValue });
 	}
@@ -268,6 +292,7 @@
 		// editing prompts/search/title there stays in sync without a Save step.
 		if (shareEnabled) saveSearch();
 		if (promptsShareEnabled) saveSystemPrompts();
+		if (appPromptsShareEnabled) saveAppPrompts();
 		if (titleShareEnabled) saveTitle();
 		if (compactShareEnabled) saveCompact();
 	});
@@ -287,6 +312,10 @@
 
 	async function savePersonaAutoUpdate() {
 		await api('/api/admin/config', 'PUT', { personaAutoUpdateForced });
+	}
+
+	async function savePersonaMemory() {
+		await api('/api/admin/config', 'PUT', { personaMemoryEnabled });
 	}
 
 	/**
@@ -379,6 +408,18 @@
 			onChange={savePersonaAutoUpdate}
 		/>
 		<SettingsHint>{$LL.personaAutoUpdateForceHelp()}</SettingsHint>
+
+		<!-- The whole feature, not a default. Off means the tools are never offered
+		     and nothing is injected, so a persona here behaves as it did before
+		     memory existed. What people already wrote is left where it is: erasing
+		     the most personal data on the instance is not something a switch should
+		     be able to do as a side effect. -->
+		<FieldCheckbox
+			label={$LL.personaMemoryAllow()}
+			bind:checked={personaMemoryEnabled}
+			onChange={savePersonaMemory}
+		/>
+		<SettingsHint>{$LL.personaMemoryAllowHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->
@@ -441,6 +482,26 @@
 				options={sharingOptions}
 				onChange={saveSystemPrompts}
 			/>
+		{/if}
+	</SettingsSection>
+
+	<!-- App prompt sharing -->
+	<SettingsSection
+		title={$LL.appPromptsSharing()}
+		description={$LL.appPromptsSharingDescription()}
+		card
+	>
+		{#if !hasOwnAppPrompts}
+			<span class="text-xs text-muted">{$LL.noAppPromptsRewritten()}</span>
+		{/if}
+
+		<FieldCheckbox
+			label={$LL.shareAppPrompts()}
+			bind:checked={appPromptsShareEnabled}
+			onChange={syncAppPromptsShare}
+		/>
+		{#if appPromptsShareEnabled}
+			<Select bind:value={appPromptsSharing} options={sharingOptions} onChange={saveAppPrompts} />
 		{/if}
 	</SettingsSection>
 

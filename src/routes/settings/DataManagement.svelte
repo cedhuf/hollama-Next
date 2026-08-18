@@ -18,6 +18,7 @@
 	import type { Knowledge } from '$lib/knowledge';
 	import {
 		knowledgeStore,
+		personaMemoryStore,
 		personasStore,
 		playbooksStore,
 		serversStore,
@@ -25,6 +26,7 @@
 		settingsStore,
 		StorageKey
 	} from '$lib/localStorage';
+	import type { PersonaMemory } from '$lib/personaMemory';
 	import type { Persona } from '$lib/personas';
 	import type { Playbook } from '$lib/playbooks';
 	import type { Session } from '$lib/sessions';
@@ -46,7 +48,8 @@
 		[StorageKey.Sessions]: (value) => sessionsStore.replaceAll(value as Session[]),
 		[StorageKey.Knowledge]: (value) => knowledgeStore.replaceAll(value as Knowledge[]),
 		[StorageKey.Personas]: (value) => personasStore.replaceAll(value as Persona[]),
-		[StorageKey.Playbooks]: (value) => playbooksStore.replaceAll(value as Playbook[])
+		[StorageKey.Playbooks]: (value) => playbooksStore.replaceAll(value as Playbook[]),
+		[StorageKey.PersonaMemory]: (value) => personaMemoryStore.replaceAll(value as PersonaMemory[])
 	};
 
 	// Triggers a browser download of `data` as a JSON file.
@@ -106,6 +109,15 @@
 			fileName: `${APP_SLUG}-playbooks.json`,
 			label: $LL.playbooks(),
 			description: $LL.playbooksDescription()
+		},
+		// Its own row rather than part of the personas one, because it is the most
+		// personal thing the app holds and deleting it must not mean deleting the
+		// personas that wrote it.
+		{
+			storageKey: StorageKey.PersonaMemory,
+			fileName: `${APP_SLUG}-persona-memory.json`,
+			label: $LL.personaMemory(),
+			description: $LL.personaMemoryDescription()
 		}
 	]);
 
@@ -116,7 +128,8 @@
 		[StorageKey.Sessions]: [],
 		[StorageKey.Knowledge]: [],
 		[StorageKey.Personas]: [],
-		[StorageKey.Playbooks]: []
+		[StorageKey.Playbooks]: [],
+		[StorageKey.PersonaMemory]: []
 	};
 
 	/**
@@ -198,7 +211,8 @@
 			[StorageKey.Sessions]: $LL.areYouSureYouWantToDeleteAllSessions(),
 			[StorageKey.Knowledge]: $LL.areYouSureYouWantToDeleteAllKnowledge(),
 			[StorageKey.Personas]: $LL.areYouSureYouWantToDeleteAllPersonas(),
-			[StorageKey.Playbooks]: $LL.areYouSureYouWantToDeleteAllPlaybooks()
+			[StorageKey.Playbooks]: $LL.areYouSureYouWantToDeleteAllPlaybooks(),
+			[StorageKey.PersonaMemory]: $LL.areYouSureYouWantToDeleteAllPersonaMemory()
 		};
 
 		if (confirm(confirmMessages[storageKey])) {

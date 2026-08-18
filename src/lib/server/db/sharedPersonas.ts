@@ -38,8 +38,45 @@ export function sharedPersonas(): Persona[] {
 	}
 }
 
+/**
+ * The fields an admin actually shares, and no others.
+ *
+ * An allowlist rather than the object as it arrives, on the same principle the
+ * export bundle already follows: this is the one place where one account's
+ * persona is handed to every other, so anything that lands on `Persona` and is
+ * not named here is a thing that would have been broadcast by accident. It used
+ * to send the whole object, which meant the admin's conversation id travelled
+ * with it.
+ *
+ * Memory is not on this list and could not be: it is not on the persona at all,
+ * it is keyed on the pair of persona and account precisely so that sharing a
+ * persona cannot share what it remembers.
+ */
+function shareable(persona: Persona): Persona {
+	return {
+		id: persona.id,
+		name: persona.name,
+		tagline: persona.tagline,
+		avatarColor: persona.avatarColor,
+		avatarImage: persona.avatarImage,
+		avatarGlyph: persona.avatarGlyph,
+		systemPrompt: persona.systemPrompt,
+		greeting: persona.greeting,
+		modelName: persona.modelName,
+		language: persona.language,
+		params: persona.params,
+		webSearch: persona.webSearch,
+		suggestions: persona.suggestions,
+		tags: persona.tags,
+		source: persona.source,
+		shared: true,
+		createdAt: persona.createdAt,
+		updatedAt: persona.updatedAt
+	};
+}
+
 export function setSharedPersonas(list: Persona[]): void {
-	setConfig(PERSONAS, JSON.stringify(list));
+	setConfig(PERSONAS, JSON.stringify(list.map(shareable)));
 }
 
 /** The store personas this instance relays, by their catalogue id. */

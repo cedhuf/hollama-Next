@@ -61,6 +61,12 @@
 		browsing = false;
 		goto(resolve('/sessions/[id]', { id }));
 	}
+
+	/** Awaited, so the conversation exists before the page that reads it opens. */
+	async function launch(persona: Persona) {
+		const id = await launchPersona(persona, $settingsStore.models);
+		goto(resolve('/sessions/[id]', { id }));
+	}
 </script>
 
 <!-- The whole column in one lane: the primary actions, then the same launchers the
@@ -152,12 +158,7 @@
 									{...menuProps}
 									{...props}
 									type="button"
-									onclick={() =>
-										goto(
-											resolve('/sessions/[id]', {
-												id: launchPersona(persona, $settingsStore.models)
-											})
-										)}
+									onclick={() => launch(persona)}
 									aria-label={persona.name}
 									class="persona-launcher rounded-full outline-none transition duration-150 hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-shade-1 motion-reduce:transition-none"
 								>

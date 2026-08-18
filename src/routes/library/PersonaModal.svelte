@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Trash2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
@@ -7,9 +8,10 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { LANGUAGE_LABELS } from '$lib/i18n';
-	import { knowledgeStore, settingsStore } from '$lib/localStorage';
+	import { knowledgeStore, personaMemoryStore, settingsStore } from '$lib/localStorage';
 	import { personaToBundle } from '$lib/personaBundle';
 	import { PERSONA_GLYPHS } from '$lib/personaGlyphs';
+	import { contextCost, emptyMemory, MEMORY_LIMITS, type PersonaMemory } from '$lib/personaMemory';
 	import {
 		deletePersona,
 		PERSONA_AVATAR_COLORS,
@@ -17,9 +19,11 @@
 		savePersona,
 		type Persona
 	} from '$lib/personas';
-	import { publishSharedPersonas } from '$lib/personasConfig';
+	import { personasConfig, publishSharedPersonas } from '$lib/personasConfig';
 
 	import SettingsField from '../settings/SettingsField.svelte';
+	import SettingsHint from '../settings/SettingsHint.svelte';
+	import SettingsLink from '../settings/SettingsLink.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
 
 	interface Props {
@@ -35,6 +39,41 @@
 	const interfaceLanguage = $derived(
 		LANGUAGE_LABELS[$settingsStore.userLanguage as keyof typeof LANGUAGE_LABELS] ?? 'English'
 	);
+
+	/**
+	 * What this persona has remembered about you, shown so it can be corrected.
+	 *
+	 * The real guardrail against a memory going wrong is not a cap, it is that you
+	 * can read it. A note nobody can see is a note nobody can fix, and a persona
+	 * quietly working from something untrue about you is the failure this panel
+	 * exists to make impossible.
+	 *
+	 * Never leaves with the persona: it is not in the bundle, not in the digest,
+	 * and not in what an admin shares. It belongs to this pairing of persona and
+	 * account, and to nothing else.
+	 */
+	const memory = $derived<PersonaMemory>(
+		$personaMemoryStore.find((m) => m.id === persona.id) ?? emptyMemory(persona.id)
+	);
+	const memoryUsed = $derived(contextCost(memory));
+	const memoryOn = $derived($personasConfig.memoryEnabled);
+
+	function saveMemory(next: PersonaMemory) {
+		personaMemoryStore.upsert({ ...next, updatedAt: new Date().toISOString() });
+	}
+
+	function setProfileText(text: string) {
+		saveMemory({ ...memory, profile: text });
+	}
+
+	function forget(id: string) {
+		saveMemory({ ...memory, notes: memory.notes.filter((note) => note.id !== id) });
+	}
+
+	function forgetEverything() {
+		if (!confirm($LL.memoryForgetAllConfirm({ name: persona.name || 'this persona' }))) return;
+		saveMemory({ ...memory, profile: '', notes: [] });
+	}
 
 	/**
 	 * A shared persona that has been edited has to be republished.
@@ -205,6 +244,52 @@
 					     checkbox buried in an editor meant an admin had to remember which of
 					     their personas they had ticked, with nowhere to go and look. -->
 	</SettingsSection>
+
+	{#if memoryOn}
+		<SettingsSection
+			title={$LL.memorySectionTitle()}
+			description={$LL.memorySectionDescription({ name: persona.name || $LL.thisPersona() })}
+		>
+			<SettingsField
+				label={$LL.memoryProfileLabel()}
+				hint={$LL.memoryProfileHint({ used: memoryUsed, total: MEMORY_LIMITS.alwaysInContext })}
+			>
+				<textarea
+					class="settings-field min-h-24"
+					value={memory.profile}
+					placeholder={$LL.memoryProfilePlaceholder()}
+					oninput={(e) => setProfileText(e.currentTarget.value)}
+				></textarea>
+			</SettingsField>
+
+			{#if memory.notes.length}
+				<div class="flex flex-col gap-2">
+					{#each memory.notes as note (note.id)}
+						<div class="flex flex-col gap-1 rounded-md border border-shade-3 p-2.5">
+							<div class="flex items-start justify-between gap-2">
+								<span class="min-w-0 flex-1">
+									<span class="block truncate text-sm font-medium">{note.title}</span>
+									<span class="block truncate text-xs text-muted">{note.when}</span>
+								</span>
+								<button
+									type="button"
+									class="shrink-0 text-muted transition-colors hover:text-active"
+									onclick={() => forget(note.id)}
+									aria-label={$LL.memoryForgetNote({ title: note.title })}
+								>
+									<Trash2 class="base-icon" />
+								</button>
+							</div>
+							<p class="whitespace-pre-wrap text-xs leading-snug text-muted">{note.body}</p>
+						</div>
+					{/each}
+				</div>
+				<SettingsLink onclick={forgetEverything}>{$LL.memoryForgetAll()}</SettingsLink>
+			{:else}
+				<SettingsHint>{$LL.memoryNoNotes()}</SettingsHint>
+			{/if}
+		</SettingsSection>
+	{/if}
 
 	{#if $knowledgeStore.length > 0}
 		<SettingsSection title="Knowledge" description="Collections this persona can draw on.">

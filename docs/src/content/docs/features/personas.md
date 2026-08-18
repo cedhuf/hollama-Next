@@ -39,7 +39,7 @@ thing to want.
 It is written into the conversation's system prompt when the chat starts, as a sentence, rather than
 left to the model to work out. Inferring it is exactly what goes wrong: an English prompt makes an
 English answer feel right to the model even when everything around it is French. The sentence itself
-is editable under _Settings → Tools → System instructions_, like the others the app builds.
+is editable under _Settings → Prompts_, like the others the app builds.
 
 ## Calling one into a conversation
 
@@ -89,6 +89,48 @@ That also means the persona's system prompt is marked as edited on the conversat
 and per-model prompts do not resolve on top of it. The one exception is a locked instance prompt in
 server mode, which is prepended server-side and cannot be displaced. See
 [Security](/guides/security/).
+
+## What it remembers
+
+A persona can keep a few things about you between conversations. Nothing is written unless it
+decides to write it, and every write shows up in the conversation as a step you can see, the same
+way a web search does.
+
+There are two tiers, and the split is what keeps the cost fixed.
+
+**Always in mind** is one block it rereads at the start of every message: who you are to it, what you
+are working on, how you want it to answer. **Notes** are everything else. Only their titles and a
+line saying when each one matters are carried; the note itself is opened only when that line says it
+bears on what is being discussed.
+
+Everything always carried, the block plus the index, fits in 4000 characters. When it is full the
+persona has to merge two notes or forget one, and it is told so rather than being allowed to truncate
+quietly. It can open at most three notes in a single turn.
+
+### It is yours, and it is private
+
+Open the persona in the Library and the memory is there, in full: read it, correct anything that is
+wrong, delete a note, or empty it entirely. That is the real safeguard. A memory you cannot read is
+one you cannot fix, and a persona quietly working from something untrue about you is worse than one
+that remembers nothing.
+
+It belongs to the pair of you and that persona, and to nothing else. Exporting the persona does not
+carry it. Sharing the persona on an instance does not carry it, and cannot: the memory is not stored
+on the persona at all. Each account that uses a shared persona has its own, invisible to everyone
+else including the administrator.
+
+_Settings → Data_ has its own row for it, so you can export or delete every memory without touching
+the personas that wrote them.
+
+### What it needs
+
+Native tool calling. A persona on an endpoint that cannot call tools still receives what it
+remembers and still answers from it, but cannot write to it or open a note by itself. You can still
+edit it by hand.
+
+The wording that decides what it keeps is the `Memory — when to write` prompt in
+_Settings → Prompts_. If a persona remembers too much, too little, or the wrong kind of thing, that
+is the thing to change. On a shared instance an administrator can turn the whole feature off.
 
 ## The store
 

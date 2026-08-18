@@ -52,7 +52,7 @@
 		welcomeOpen
 	} from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
-	import { loadServerSystemPrompts } from '$lib/systemPrompts';
+	import { loadServerPrompts } from '$lib/systemPrompts';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 	import { wallpaperImage } from '$lib/wallpapers';
 	import { loadWebFetchConfig } from '$lib/webFetch';
@@ -315,7 +315,7 @@
 		await hydrateStores();
 		await loadServerSearch();
 		await loadWebFetchConfig();
-		await loadServerSystemPrompts();
+		await loadServerPrompts();
 		await loadServerChatDefaults();
 		await loadServerPersonas();
 		await loadServerPlaybooks();

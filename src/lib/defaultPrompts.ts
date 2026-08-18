@@ -7,6 +7,7 @@
 
 export type PromptKey =
 	| 'currentDate'
+	| 'conversationTitle'
 	| 'personaLanguage'
 	| 'personaSummoned'
 	| 'multiSpeaker'
@@ -18,6 +19,16 @@ export type PromptKey =
 	| 'searchRecall'
 	| 'pageContext'
 	| 'searchRead'
+	| 'memoryPolicy'
+	| 'memoryContext'
+	| 'toolMemoryProfile'
+	| 'toolMemoryWrite'
+	| 'toolMemoryForget'
+	| 'toolMemoryRead'
+	| 'toolSearch'
+	| 'toolSearchQuery'
+	| 'toolReadPage'
+	| 'toolReadUrl'
 	| 'interactiveChoices'
 	| 'compact'
 	| 'compactInstruction'
@@ -41,6 +52,12 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Anchors the model in the present so it trusts recent facts.',
 		default:
 			'The current date and time is {datetime}. Treat this as the authoritative present — it overrides any date you would infer from your training data. Do not reject something as impossible, fake, or a rumour merely because it postdates your training cutoff; weigh it on its own merits and on any sources you are given.'
+	},
+	conversationTitle: {
+		label: 'Conversation title',
+		hint: 'Names a conversation from its first message. The answer is stripped of markdown and cut at 80 characters, so ask for something short.',
+		default:
+			'Generate a short, descriptive title (3 to 6 words) for a conversation that starts with the following message. Reply with only the title, no quotes, no markdown, no trailing punctuation.'
 	},
 	personaLanguage: {
 		label: 'Persona language',
@@ -170,6 +187,73 @@ using the address of any source listed above, including ones from earlier in thi
 
 Ask when the detail decides the answer and the snippets do not settle it: a changelog, a release note, a specification. Ask too when you are about to contradict, doubt or take back something you said earlier from a source, which is exactly the moment to look rather than guess. Ask only for what you need, three pages at most. If what you already have is genuinely enough, just answer normally.`
 	},
+	memoryPolicy: {
+		label: 'Memory — when to write',
+		hint: 'Decides what a persona keeps between conversations, and what it lets go. The prompt to tune if it remembers too much or too little.',
+		default: `You can remember things about this person between conversations. Nothing here is written unless you write it, and nothing you write is ever seen by anyone else.
+
+Keep what will still be true and still be useful the next time you speak: who they are, what they are working on, how they want you to answer, decisions already settled so they are not re-litigated. Write it the moment it is worth keeping, not at the end of a conversation, because there may not be an end you get to see.
+
+Do not keep the conversation itself. A memory is not a summary: nobody is served by a record of what was discussed on a Tuesday. If a fact only matters inside this conversation, it does not go in.
+
+Be careful with what is sensitive. Something told to you in passing is not automatically something to write down, and a person who has to correct their own file is worse off than one you simply asked again. When in doubt, ask before keeping it.
+
+The profile is what is true most of the time and is always in front of you. Notes are for everything else: each has a line saying when it matters, and that line is what you will read later to decide whether to open it. Write it for your future self.
+
+Keeping something is not free. Everything you keep is read again at the start of every message, in every conversation, so the space is small on purpose. When it is full, the answer is to merge two notes or forget one, not to write shorter and shorter until nothing means anything. And when something you kept turns out to be wrong or out of date, correct it or forget it: a confident wrong memory costs more than no memory at all.`
+	},
+	memoryContext: {
+		label: 'Memory — what you remember',
+		placeholders: ['{profile}', '{notes}'],
+		hint: 'How the memory is handed to the model at the start of a turn: the profile in full, the notes as an index.',
+		default: `What you remember about the person you are speaking to. You wrote this yourself, in earlier conversations. It is yours and theirs alone, and they can read and change it at any time.
+
+{profile}
+
+Notes you have kept. Only their titles are here, with a line saying when each one matters; ask for one by its id when that line says it bears on what is being discussed, and do not guess at what a note says from its title.
+
+{notes}`
+	},
+	toolMemoryProfile: {
+		label: 'Native tool — memory_profile',
+		hint: 'Rewrites the always-present block. It is replaced whole, never appended to.',
+		default: `Rewrite what you always keep in mind about this person: who they are, what they are working on, how they want you to answer. This replaces the whole block rather than adding to it, so include everything you still want to keep, and leave out what has stopped being true.`
+	},
+	toolMemoryWrite: {
+		label: 'Native tool — memory_write',
+		hint: 'Creates or replaces one note.',
+		default: `Keep a note about this person. Without an id it creates one; with the id of a note you already have, it replaces that note whole. Use it to correct something that has changed, and to merge two notes that overlap into one.`
+	},
+	toolMemoryForget: {
+		label: 'Native tool — memory_forget',
+		hint: 'Deletes one note. The only way anything leaves memory by itself.',
+		default: `Forget a note, by its id. Do this when what it says has stopped being true, when it has been folded into another note, or when the person asks you to.`
+	},
+	toolMemoryRead: {
+		label: 'Native tool — memory_read',
+		hint: 'Opens the body of one note. The index says when; this says what.',
+		default: `Read one of your notes in full, by its id. The list you were given holds titles and a line saying when each note matters, not what it says. Open a note when that line bears on what is being discussed, rather than answering from the title.`
+	},
+	toolSearch: {
+		label: 'Native tool — web_search',
+		hint: 'What the provider is told the search tool does. Says the same thing as “Web search — query”, for models that call tools instead of writing them.',
+		default: `Search the web. Returns a numbered list of results, each with a title, an address and a short snippet. Use it for anything you are not certain of: current events, prices, schedules, opening hours, releases, and facts about a named thing such as a game, film, product, company, place or API. An unfamiliar or niche name is the strongest reason to search, not a reason to guess. Search again rather than taking back an earlier answer you have started to doubt. Cite the results you use inline with their [number].`
+	},
+	toolSearchQuery: {
+		label: 'Native tool — web_search query',
+		hint: 'How the query itself should be written: which language, which words to avoid.',
+		default: `A few keywords, no quotes. Use neutral, factual terms: do not add words like "rumor", "fake" or "hoax" because you doubt something exists. Write the query in the language the answer is documented in, which is the user's language for news, weather and local topics, and usually English for software, games, science and technology. Never translate a proper noun yourself: spell it exactly as its makers do.`
+	},
+	toolReadPage: {
+		label: 'Native tool — read_page',
+		hint: 'What the provider is told the page-reading tool does. The native counterpart of “Web search — read a result”.',
+		default: `Fetch the full text of a page whose address you have already been given, in a search result or earlier in this conversation. Snippets are a sentence or two; use this when the detail decides the answer, and whenever you are about to contradict, doubt or take back something you said earlier from a source. You cannot open an address that has not appeared in this conversation.`
+	},
+	toolReadUrl: {
+		label: 'Native tool — read_page address',
+		hint: 'How the model should supply the address it wants read.',
+		default: `The exact address, copied from where it was given to you.`
+	},
 	pageContext: {
 		label: 'Web fetch — pages',
 		placeholders: ['{pages}'],
@@ -244,25 +328,87 @@ Write in the language of the conversation. Be concise but never lossy: prefer a 
 	}
 };
 
-/** Order shown in the Settings dropdown. */
-export const PROMPT_KEYS: PromptKey[] = [
-	'currentDate',
-	'personaLanguage',
-	'personaSummoned',
-	'multiSpeaker',
-	'mentionRecall',
-	'searchRouter',
-	'toolPolicy',
-	'searchNone',
-	'searchContext',
-	'searchRecall',
-	'searchRead',
-	'pageContext',
-	'interactiveChoices',
-	'compact',
-	'compactInstruction',
-	'compactContext'
-];
+/**
+ * The prompts, grouped the way the Settings screen shows them.
+ *
+ * The grouping is the ordering: a flat list of twenty-odd prompts reads as a
+ * wall, and the question anyone actually arrives with is "where is the one that
+ * decides X". Sections answer that; a dropdown did not.
+ */
+export interface PromptGroup {
+	id: string;
+	/** Short title for the section. */
+	label: string;
+	/** One line saying which part of a turn this group governs. */
+	hint: string;
+	keys: readonly PromptKey[];
+}
+
+export const PROMPT_GROUPS = [
+	{
+		id: 'conversation',
+		label: 'Conversation',
+		hint: 'What every turn carries, whichever model answers it.',
+		keys: ['currentDate', 'multiSpeaker', 'interactiveChoices', 'conversationTitle']
+	},
+	{
+		id: 'personas',
+		label: 'Personas',
+		hint: 'What is added to a persona’s own prompt, on top of what you wrote for it.',
+		keys: ['personaLanguage', 'personaSummoned', 'mentionRecall']
+	},
+	{
+		id: 'web',
+		label: 'Web search and pages',
+		hint: 'Deciding to look something up, and what to do with what comes back.',
+		keys: [
+			'searchRouter',
+			'toolPolicy',
+			'searchNone',
+			'searchContext',
+			'searchRecall',
+			'searchRead',
+			'pageContext'
+		]
+	},
+	{
+		id: 'memory',
+		label: 'Memory',
+		hint: 'What a persona keeps about the person it is speaking to, between conversations.',
+		keys: [
+			'memoryPolicy',
+			'memoryContext',
+			'toolMemoryProfile',
+			'toolMemoryWrite',
+			'toolMemoryForget',
+			'toolMemoryRead'
+		]
+	},
+	{
+		id: 'nativeTools',
+		label: 'Native tools',
+		hint: 'The same instructions again, handed to providers that call tools instead of reading prose. Both paths have to agree or a bug becomes a bug on some providers only.',
+		keys: ['toolSearch', 'toolSearchQuery', 'toolReadPage', 'toolReadUrl']
+	},
+	{
+		id: 'compaction',
+		label: 'Compaction',
+		hint: 'Writing a summary that replaces the earlier part of a conversation, and using it afterwards.',
+		keys: ['compact', 'compactInstruction', 'compactContext']
+	}
+] as const satisfies readonly PromptGroup[];
+
+/**
+ * A prompt in no group is a prompt nobody can find, which is exactly how the
+ * old dropdown hid every one of them. Caught here rather than in review: adding
+ * a key to `PromptKey` without listing it above stops compiling.
+ */
+type UngroupedKey = Exclude<PromptKey, (typeof PROMPT_GROUPS)[number]['keys'][number]>;
+const _everyPromptIsGrouped: [UngroupedKey] extends [never] ? true : never = true;
+void _everyPromptIsGrouped;
+
+/** Every prompt, in the order the groups list them. */
+export const PROMPT_KEYS: PromptKey[] = PROMPT_GROUPS.flatMap((group) => [...group.keys]);
 
 /**
  * The effective text for a prompt: a non-empty user override, else the built-in

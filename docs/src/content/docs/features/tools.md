@@ -90,33 +90,8 @@ because they postdate its training. With it, it weighs them.
 Covered on its own page, including OCR and the instance-wide off switch. See
 [Documents](/features/documents/).
 
-## System instructions
+## The instructions behind them
 
 Every one of these features works by adding text to what the model receives, and all of that text is
-yours to rewrite. Pick a prompt from the dropdown, edit it, and the override is saved. Blank it, or
-type the default back, and the override disappears.
-
-| Prompt                      | What it drives                                          |
-| --------------------------- | ------------------------------------------------------- |
-| Current date                | How the date is framed                                  |
-| Web search, query           | Whether to search and what to search for, in auto mode  |
-| Native tools, when to use   | When the model should call a tool rather than answer    |
-| Web search, not used        | Stops the model claiming it searched when it did not    |
-| Web search, results         | How results are handed over, and how they are cited     |
-| Web search, earlier sources | The index of what past turns found, and how to treat it |
-| Web search, read a result   | The rule for opening a page in full                     |
-| Web fetch, pages            | How fetched pages are framed                            |
-| Interactive choices         | The question protocol                                   |
-| Compaction, write           | How the summary is written                              |
-| Compaction, use             | How the summary is framed for the model afterwards      |
-
-Some prompts take placeholders, listed under the editor. `{datetime}`, `{results}` and `{pages}` are
-substituted at send time. Leave one out and the model simply never sees that part.
-
-:::note[Changing a prompt is retroactive where it is applied at send time]
-The compaction framing prompt is applied when the conversation goes out, so editing it also changes
-how summaries written weeks ago are presented. The prompt that _writes_ a summary only affects the
-next one.
-:::
-
-In server mode an admin can share their prompts with everyone, read-only or as a starting point.
+yours to rewrite, in _Settings → Prompts_. It has its own page: see
+[Prompts](/features/prompts/).

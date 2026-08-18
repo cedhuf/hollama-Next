@@ -45,7 +45,7 @@ export interface WebSearchInfo {
  * that one is still streaming while the rest is already history.
  */
 export interface ReasoningStep {
-	type: 'search' | 'reasoning' | 'read';
+	type: 'search' | 'reasoning' | 'read' | 'memory';
 	/** The thinking, for a `reasoning` step. */
 	content?: string;
 	/** What was searched, for a `search` step. */
@@ -53,6 +53,15 @@ export interface ReasoningStep {
 	resultCount?: number;
 	/** The pages that were opened, for a `read` step. Empty when none could be. */
 	pages?: SearchSource[];
+	/**
+	 * What was done to the persona's memory, for a `memory` step.
+	 *
+	 * Traced like a search is traced, and for the same reason: something happened
+	 * on the user's behalf that they did not ask for and would otherwise never
+	 * see. A memory written in silence is the version of this feature nobody
+	 * should ship.
+	 */
+	memory?: { action: 'profile' | 'write' | 'forget' | 'read'; title?: string; refused?: boolean };
 }
 
 export interface Message {

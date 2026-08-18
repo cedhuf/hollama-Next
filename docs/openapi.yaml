@@ -430,10 +430,10 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
-  /api/system-prompts/config:
+  /api/prompts/config:
     get:
-      tags: [system-prompts]
-      summary: TODO
+      tags: [prompts]
+      summary: The system prompt and the app's own instructions, resolved for the caller
       x-status: todo
       responses:
         '200': { description: TODO }

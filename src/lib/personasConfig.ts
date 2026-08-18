@@ -34,6 +34,14 @@ export interface PersonasConfig {
 	/** The instance updates installed personas for everyone, whatever they chose. */
 	autoUpdateForced: boolean;
 	/**
+	 * Whether personas may remember anything here.
+	 *
+	 * Off takes the tools away and stops the injection, so a persona on such an
+	 * instance behaves exactly as it did before memory existed. Always on in local
+	 * mode, where there is nobody to decide it for you.
+	 */
+	memoryEnabled: boolean;
+	/**
 	 * Store personas this instance relays, by catalogue id.
 	 *
 	 * References rather than copies, which is what keeps the catalogue showing one
@@ -53,6 +61,7 @@ const DEFAULT: PersonasConfig = {
 	storeMode: 'open',
 	canShare: false,
 	autoUpdateForced: false,
+	memoryEnabled: true,
 	sharedFromStore: []
 };
 

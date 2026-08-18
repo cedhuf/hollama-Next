@@ -1,6 +1,7 @@
 import { derived, get, writable } from 'svelte/store';
 
 import { env } from '$env/dynamic/public';
+import { effectivePrompts } from '$lib/appPrompts';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { settingsStore } from '$lib/localStorage';
 
@@ -184,7 +185,7 @@ export async function buildSearchContext(
 		.map((r, i) => `[${startNumber + i}] ${r.title}\n${r.url}\n${r.snippet}`)
 		.join('\n\n');
 	return {
-		context: resolvePrompt('searchContext', get(settingsStore).promptOverrides, { results: body }),
+		context: resolvePrompt('searchContext', get(effectivePrompts), { results: body }),
 		query,
 		resultCount: results.length,
 		results

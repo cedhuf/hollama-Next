@@ -1,13 +1,15 @@
 import { get } from 'svelte/store';
 
+import { effectivePrompts } from '$lib/appPrompts';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
+import { resolvePrompt } from '$lib/defaultPrompts';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
 import { stripThinkTags, type ChatStrategy } from './index';
 import { OllamaStrategy } from './ollama';
 import { OpenAIStrategy } from './openai';
-import { stripTitleMarkdown, TITLE_SYSTEM_PROMPT } from './titleText';
+import { stripTitleMarkdown } from './titleText';
 
 /**
  * Generates a concise session title from the first user message using the
@@ -45,7 +47,7 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 			{
 				model: modelName,
 				messages: [
-					{ role: 'system', content: TITLE_SYSTEM_PROMPT },
+					{ role: 'system', content: resolvePrompt('conversationTitle', get(effectivePrompts)) },
 					{ role: 'user', content: firstUserMessage }
 				],
 				think: false // Titles are a quick one-shot — never spend reasoning on them.

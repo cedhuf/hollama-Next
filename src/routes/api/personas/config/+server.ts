@@ -5,6 +5,7 @@ import { requireUser } from '$lib/server/api';
 import {
 	allowUserPersonas,
 	personaAutoUpdateForced,
+	personaMemoryEnabled,
 	personaStoreMode,
 	storeUrl
 } from '$lib/server/db/config';
@@ -30,6 +31,7 @@ export async function GET(event) {
 		storeMode: isAdmin ? 'open' : personaStoreMode(),
 		canShare: isAdmin,
 		autoUpdateForced: personaAutoUpdateForced(),
+		memoryEnabled: personaMemoryEnabled(),
 		storeUrl: storeUrl() ?? privateEnv.STORE_URL ?? DEFAULT_STORE,
 		canEditStore: isAdmin
 	});

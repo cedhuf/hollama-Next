@@ -2,6 +2,11 @@ import { error, json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
 import { deleteItem, getItem, upsertItem } from '$lib/server/db/collections';
+import {
+	deletePersonaMemory,
+	getPersonaMemory,
+	savePersonaMemory
+} from '$lib/server/db/personaMemory';
 
 /**
  * One item of a collection.
@@ -13,6 +18,16 @@ import { deleteItem, getItem, upsertItem } from '$lib/server/db/collections';
 const TABLES = ['sessions', 'knowledge', 'personas', 'playbooks'] as const;
 type Table = (typeof TABLES)[number];
 
+/**
+ * Persona memory is handled apart rather than added to `TABLES`.
+ *
+ * The generic helpers key on a globally unique `id`; a memory is keyed on the
+ * pair (persona, account), because the same persona is remembered separately by
+ * everyone who uses it. Squeezing it into the shared path would have meant
+ * loosening that key, and the key is the feature.
+ */
+const MEMORY = 'persona-memory';
+
 function tableFor(collection: string | undefined): Table {
 	const table = TABLES.find((candidate) => candidate === collection);
 	if (!table) throw error(404, 'Unknown collection');
@@ -21,6 +36,11 @@ function tableFor(collection: string | undefined): Table {
 
 export async function GET(event) {
 	const user = await requireUser(event);
+	if (event.params.collection === MEMORY) {
+		const memory = getPersonaMemory(user.id, event.params.id);
+		if (!memory) throw error(404, 'Not found');
+		return json(memory);
+	}
 	const table = tableFor(event.params.collection);
 
 	const item = getItem(table, user.id, event.params.id);
@@ -30,7 +50,6 @@ export async function GET(event) {
 
 export async function PUT(event) {
 	const user = await requireUser(event);
-	const table = tableFor(event.params.collection);
 	const body = await event.request.json();
 
 	if (typeof body !== 'object' || body === null || Array.isArray(body)) {
@@ -40,12 +59,22 @@ export async function PUT(event) {
 	// would write to a row the request did not name.
 	if (body.id !== event.params.id) throw error(400, 'Body id does not match the URL');
 
+	if (event.params.collection === MEMORY) {
+		savePersonaMemory(user.id, body);
+		return new Response(null, { status: 204 });
+	}
+
+	const table = tableFor(event.params.collection);
 	upsertItem(table, user.id, body);
 	return new Response(null, { status: 204 });
 }
 
 export async function DELETE(event) {
 	const user = await requireUser(event);
+	if (event.params.collection === MEMORY) {
+		deletePersonaMemory(user.id, event.params.id);
+		return new Response(null, { status: 204 });
+	}
 	const table = tableFor(event.params.collection);
 
 	deleteItem(table, user.id, event.params.id);

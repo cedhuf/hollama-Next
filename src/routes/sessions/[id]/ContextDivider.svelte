@@ -28,10 +28,11 @@
 
 	const percent = $derived(note.limit > 0 ? Math.round((note.tokens / note.limit) * 100) : 0);
 
-	/** The three parts, as shares of the whole, for the bar. */
+	/** The parts, as shares of the whole, for the bar. Absent ones are not drawn. */
 	const parts = $derived(
 		[
 			{ key: 'system', tokens: note.systemTokens, class: 'bg-accent' },
+			{ key: 'memory', tokens: note.memoryTokens ?? 0, class: 'bg-accent/80' },
 			{ key: 'messages', tokens: note.messageTokens, class: 'bg-accent/60' },
 			{ key: 'sources', tokens: note.sourceTokens, class: 'bg-accent/30' }
 		].filter((part) => part.tokens > 0)
@@ -41,6 +42,7 @@
 		(key: string) =>
 			({
 				system: $LL.contextPartSystem(),
+				memory: $LL.contextPartMemory(),
 				messages: $LL.contextPartMessages(),
 				sources: $LL.contextPartSources()
 			})[key] ?? key

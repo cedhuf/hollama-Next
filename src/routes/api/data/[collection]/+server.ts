@@ -13,6 +13,7 @@ import {
 	replaceSessions,
 	replaceSettings
 } from '$lib/server/db/collections';
+import { getAllPersonaMemory, replacePersonaMemory } from '$lib/server/db/personaMemory';
 
 export async function GET(event) {
 	const user = await requireUser(event);
@@ -26,6 +27,8 @@ export async function GET(event) {
 			return json(getPersonas(user.id));
 		case 'playbooks':
 			return json(getPlaybooks(user.id));
+		case 'persona-memory':
+			return json(getAllPersonaMemory(user.id));
 		case 'settings':
 			return json(getSettings(user.id));
 		default:
@@ -60,6 +63,10 @@ export async function PUT(event) {
 		case 'playbooks':
 			if (!Array.isArray(body)) throw error(400, 'Expected an array');
 			replacePlaybooks(user.id, body);
+			break;
+		case 'persona-memory':
+			if (!Array.isArray(body)) throw error(400, 'Expected an array');
+			replacePersonaMemory(user.id, body);
 			break;
 		case 'settings':
 			if (typeof body !== 'object' || body === null) throw error(400, 'Expected an object');

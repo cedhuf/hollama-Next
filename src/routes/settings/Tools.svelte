@@ -1,10 +1,8 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { APP_NAME } from '$lib/brand';
 	import { isServerMode } from '$lib/chat/endpoint';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Select from '$lib/components/Select.svelte';
-	import { DEFAULT_PROMPTS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 	import { documentsDisabledByInstance } from '$lib/documents';
 	import { settingsStore } from '$lib/localStorage';
 	import { personasConfig, saveStoreUrl } from '$lib/personasConfig';
@@ -44,26 +42,6 @@
 	function setStoreUrl(value: string) {
 		if (isServerMode) void saveStoreUrl(value);
 		else $settingsStore.storeUrl = value;
-	}
-
-	// System-instruction editor: one prompt shown at a time. The textarea reflects the
-	// override if set, else the built-in default; editing stores an override (cleared
-	// again if it's blanked or matches the default).
-	let selectedPrompt = $state<PromptKey>('currentDate');
-	const selectedOverride = $derived($settingsStore.promptOverrides?.[selectedPrompt]);
-	const selectedText = $derived(selectedOverride ?? DEFAULT_PROMPTS[selectedPrompt].default);
-
-	function setOverride(key: PromptKey, value: string) {
-		const next = { ...$settingsStore.promptOverrides };
-		if (!value.trim() || value === DEFAULT_PROMPTS[key].default) delete next[key];
-		else next[key] = value;
-		$settingsStore.promptOverrides = next;
-	}
-
-	function resetOverride(key: PromptKey) {
-		const next = { ...$settingsStore.promptOverrides };
-		delete next[key];
-		$settingsStore.promptOverrides = next;
 	}
 </script>
 
@@ -274,38 +252,5 @@
 
 	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()} card>
 		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />
-	</SettingsSection>
-
-	<SettingsSection
-		title={$LL.systemInstructionsTitle()}
-		description={$LL.systemInstructionsDescription({ app: APP_NAME })}
-		card
-	>
-		<Select
-			value={selectedPrompt}
-			options={PROMPT_KEYS.map((key) => ({ value: key, label: DEFAULT_PROMPTS[key].label }))}
-			onChange={(option) => (selectedPrompt = option.value as PromptKey)}
-		/>
-
-		<p class="text-xs text-muted">{DEFAULT_PROMPTS[selectedPrompt].hint}</p>
-
-		<textarea
-			class="settings-field field-grow min-h-36 font-mono text-xs leading-relaxed"
-			value={selectedText}
-			oninput={(e) => setOverride(selectedPrompt, e.currentTarget.value)}
-		></textarea>
-
-		<div class="flex items-center justify-between gap-2">
-			<span class="text-xs text-muted">
-				{#if DEFAULT_PROMPTS[selectedPrompt].placeholders}
-					{$LL.placeholders()}: {DEFAULT_PROMPTS[selectedPrompt].placeholders?.join(', ')}
-				{/if}
-			</span>
-			{#if selectedOverride !== undefined}
-				<SettingsLink align="end" onclick={() => resetOverride(selectedPrompt)}>
-					{$LL.resetToDefault()}
-				</SettingsLink>
-			{/if}
-		</div>
 	</SettingsSection>
 </SettingsPanel>

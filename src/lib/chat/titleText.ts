@@ -1,14 +1,11 @@
 /**
- * The wording of a title, and the cleaning up after it.
+ * The cleaning up after a title.
  *
- * Its own module so the browser and the server produce the same titles: both
- * ask the same thing and tidy the answer the same way, and neither has to import
- * the other's world to do it.
+ * Its own module so the browser and the server tidy the answer the same way, and
+ * neither has to import the other's world to do it. The wording that asks for the
+ * title lives in `defaultPrompts` with every other instruction the app injects,
+ * because it is one the user is entitled to change.
  */
-
-export const TITLE_SYSTEM_PROMPT =
-	'Generate a short, descriptive title (3 to 6 words) for a conversation that starts with the ' +
-	'following message. Reply with only the title — no quotes, no markdown, no trailing punctuation.';
 
 /**
  * Session titles render as plain text, so any markdown the model returns despite

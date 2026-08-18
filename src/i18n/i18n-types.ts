@@ -2066,6 +2066,77 @@ type RootTranslation = {
 	 */
 	resetToDefault: string
 	/**
+	 * L​e​t​ ​p​e​r​s​o​n​a​s​ ​r​e​m​e​m​b​e​r​ ​t​h​i​n​g​s​ ​a​b​o​u​t​ ​t​h​e​i​r​ ​u​s​e​r
+	 */
+	personaMemoryAllow: string
+	/**
+	 * A​ ​p​e​r​s​o​n​a​ ​c​a​n​ ​k​e​e​p​ ​a​ ​f​e​w​ ​n​o​t​e​s​ ​b​e​t​w​e​e​n​ ​c​o​n​v​e​r​s​a​t​i​o​n​s​,​ ​w​r​i​t​t​e​n​ ​b​y​ ​i​t​s​e​l​f​ ​a​n​d​ ​r​e​a​d​a​b​l​e​ ​b​y​ ​w​h​o​e​v​e​r​ ​i​t​ ​i​s​ ​a​b​o​u​t​.​ ​E​a​c​h​ ​m​e​m​o​r​y​ ​b​e​l​o​n​g​s​ ​t​o​ ​o​n​e​ ​a​c​c​o​u​n​t​ ​a​n​d​ ​i​s​ ​n​e​v​e​r​ ​s​h​a​r​e​d​,​ ​n​o​t​ ​e​v​e​n​ ​w​h​e​n​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​i​s​.​ ​T​u​r​n​i​n​g​ ​t​h​i​s​ ​o​f​f​ ​t​a​k​e​s​ ​t​h​e​ ​a​b​i​l​i​t​y​ ​a​w​a​y​ ​w​i​t​h​o​u​t​ ​e​r​a​s​i​n​g​ ​w​h​a​t​ ​w​a​s​ ​a​l​r​e​a​d​y​ ​w​r​i​t​t​e​n​.
+	 */
+	personaMemoryAllowHelp: string
+	/**
+	 * P​r​o​m​p​t​s
+	 */
+	promptsTab: string
+	/**
+	 * W​h​a​t​ ​{​a​p​p​}​ ​t​e​l​l​s​ ​t​h​e​ ​m​o​d​e​l
+	 * @param {string} app
+	 */
+	promptsTitle: RequiredParams<'app'>
+	/**
+	 * E​v​e​r​y​ ​i​n​s​t​r​u​c​t​i​o​n​ ​{​a​p​p​}​ ​a​d​d​s​ ​b​e​h​i​n​d​ ​y​o​u​r​ ​m​e​s​s​a​g​e​:​ ​a​n​c​h​o​r​i​n​g​ ​t​h​e​ ​d​a​t​e​,​ ​d​e​c​i​d​i​n​g​ ​w​h​e​t​h​e​r​ ​t​o​ ​s​e​a​r​c​h​,​ ​u​s​i​n​g​ ​w​h​a​t​ ​c​o​m​e​s​ ​b​a​c​k​,​ ​w​r​i​t​i​n​g​ ​a​ ​s​u​m​m​a​r​y​.​ ​T​h​e​y​ ​s​h​i​p​ ​w​i​t​h​ ​s​e​n​s​i​b​l​e​ ​w​o​r​d​i​n​g​,​ ​a​n​d​ ​y​o​u​ ​c​a​n​ ​r​e​w​r​i​t​e​ ​a​n​y​ ​o​f​ ​t​h​e​m​.
+	 * @param {string} app
+	 */
+	promptsDescription: RequiredParams<'app'>
+	/**
+	 * A​ ​p​e​r​s​o​n​a​’​s​ ​p​r​o​m​p​t​ ​a​n​d​ ​a​ ​p​l​a​y​b​o​o​k​’​s​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​a​r​e​ ​n​o​t​ ​h​e​r​e​:​ ​t​h​e​y​ ​b​e​l​o​n​g​ ​t​o​ ​w​h​a​t​ ​y​o​u​ ​w​r​o​t​e​,​ ​a​n​d​ ​s​t​a​y​ ​w​i​t​h​ ​i​t​ ​i​n​ ​t​h​e​ ​l​i​b​r​a​r​y​.​ ​T​h​e​ ​s​y​s​t​e​m​ ​p​r​o​m​p​t​ ​s​e​n​t​ ​w​i​t​h​ ​e​v​e​r​y​ ​m​e​s​s​a​g​e​ ​i​s​ ​i​n​ ​C​h​a​t​.
+	 */
+	promptsElsewhere: string
+	/**
+	 * {​c​o​u​n​t​}​ ​r​e​w​r​i​t​t​e​n
+	 * @param {number} count
+	 */
+	promptsModified: RequiredParams<'count'>
+	/**
+	 * R​e​s​t​o​r​e​ ​a​l​l​ ​d​e​f​a​u​l​t​s
+	 */
+	promptsResetAll: string
+	/**
+	 * R​e​w​r​i​t​t​e​n
+	 */
+	promptEdited: string
+	/**
+	 * B​e​h​i​n​d​ ​e​v​e​r​y​ ​m​e​s​s​a​g​e
+	 */
+	appPromptsTitle: string
+	/**
+	 * T​h​e​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​t​h​e​ ​a​p​p​ ​a​d​d​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​b​e​h​a​l​f​:​ ​t​h​e​ ​d​a​t​e​,​ ​d​e​c​i​d​i​n​g​ ​w​h​e​t​h​e​r​ ​t​o​ ​s​e​a​r​c​h​,​ ​u​s​i​n​g​ ​w​h​a​t​ ​c​o​m​e​s​ ​b​a​c​k​,​ ​w​r​i​t​i​n​g​ ​a​ ​s​u​m​m​a​r​y​.​ ​S​e​n​s​i​b​l​e​ ​b​y​ ​d​e​f​a​u​l​t​,​ ​a​n​d​ ​y​o​u​r​s​ ​t​o​ ​r​e​w​r​i​t​e​.
+	 */
+	appPromptsDescription: string
+	/**
+	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​s​e​t​ ​t​h​e​s​e​ ​f​o​r​ ​t​h​e​ ​i​n​s​t​a​n​c​e​.​ ​T​h​e​y​ ​a​r​e​ ​s​h​o​w​n​ ​s​o​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​i​s​ ​b​e​i​n​g​ ​s​e​n​t​ ​f​o​r​ ​y​o​u​,​ ​a​n​d​ ​c​a​n​n​o​t​ ​b​e​ ​c​h​a​n​g​e​d​ ​h​e​r​e​.
+	 */
+	appPromptsLocked: string
+	/**
+	 * F​r​o​m​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r
+	 */
+	promptFromAdmin: string
+	/**
+	 * P​r​o​m​p​t​ ​s​h​a​r​i​n​g
+	 */
+	appPromptsSharing: string
+	/**
+	 * T​h​e​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​t​h​e​ ​a​p​p​ ​a​d​d​s​ ​b​e​h​i​n​d​ ​e​v​e​r​y​ ​m​e​s​s​a​g​e​,​ ​a​s​ ​y​o​u​ ​h​a​v​e​ ​r​e​w​r​i​t​t​e​n​ ​t​h​e​m​ ​i​n​ ​t​h​e​ ​P​r​o​m​p​t​s​ ​t​a​b​.​ ​L​o​c​k​e​d​ ​m​e​a​n​s​ ​n​o​b​o​d​y​ ​e​l​s​e​ ​m​a​y​ ​c​h​a​n​g​e​ ​t​h​e​m​;​ ​o​v​e​r​r​i​d​a​b​l​e​ ​h​a​n​d​s​ ​t​h​e​m​ ​o​v​e​r​ ​a​s​ ​a​ ​s​t​a​r​t​i​n​g​ ​p​o​i​n​t​,​ ​p​r​o​m​p​t​ ​b​y​ ​p​r​o​m​p​t​.
+	 */
+	appPromptsSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​m​y​ ​p​r​o​m​p​t​ ​r​e​w​r​i​t​e​s
+	 */
+	shareAppPrompts: string
+	/**
+	 * Y​o​u​ ​h​a​v​e​ ​n​o​t​ ​r​e​w​r​i​t​t​e​n​ ​a​n​y​ ​p​r​o​m​p​t​ ​y​e​t​,​ ​s​o​ ​t​h​e​r​e​ ​i​s​ ​n​o​t​h​i​n​g​ ​t​o​ ​s​h​a​r​e​.
+	 */
+	noAppPromptsRewritten: string
+	/**
 	 * B​a​c​k​u​p​ ​&​ ​r​e​s​t​o​r​e
 	 */
 	backupAndRestore: string
@@ -2098,9 +2169,86 @@ type RootTranslation = {
 	 */
 	areYouSureYouWantToDeleteAllPersonas: string
 	/**
+	 * W​h​a​t​ ​i​t​ ​r​e​m​e​m​b​e​r​s​ ​a​b​o​u​t​ ​y​o​u
+	 */
+	memorySectionTitle: string
+	/**
+	 * {​n​a​m​e​}​ ​w​r​i​t​e​s​ ​t​h​i​s​ ​i​t​s​e​l​f​,​ ​b​e​t​w​e​e​n​ ​c​o​n​v​e​r​s​a​t​i​o​n​s​.​ ​N​o​b​o​d​y​ ​e​l​s​e​ ​c​a​n​ ​r​e​a​d​ ​i​t​,​ ​n​o​t​ ​e​v​e​n​ ​w​h​e​n​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​i​s​ ​s​h​a​r​e​d​.​ ​C​o​r​r​e​c​t​ ​a​n​y​t​h​i​n​g​ ​t​h​a​t​ ​i​s​ ​w​r​o​n​g​,​ ​o​r​ ​d​e​l​e​t​e​ ​i​t​.
+	 * @param {string} name
+	 */
+	memorySectionDescription: RequiredParams<'name'>
+	/**
+	 * T​h​i​s​ ​p​e​r​s​o​n​a
+	 */
+	thisPersona: string
+	/**
+	 * A​l​w​a​y​s​ ​i​n​ ​m​i​n​d
+	 */
+	memoryProfileLabel: string
+	/**
+	 * R​e​a​d​ ​a​t​ ​t​h​e​ ​s​t​a​r​t​ ​o​f​ ​e​v​e​r​y​ ​m​e​s​s​a​g​e​.​ ​{​u​s​e​d​}​ ​o​f​ ​{​t​o​t​a​l​}​ ​c​h​a​r​a​c​t​e​r​s​ ​u​s​e​d​,​ ​n​o​t​e​s​ ​i​n​c​l​u​d​e​d​.
+	 * @param {number} total
+	 * @param {number} used
+	 */
+	memoryProfileHint: RequiredParams<'total' | 'used'>
+	/**
+	 * N​o​t​h​i​n​g​ ​y​e​t​.​ ​I​t​ ​f​i​l​l​s​ ​i​n​ ​a​s​ ​y​o​u​ ​t​a​l​k​.
+	 */
+	memoryProfilePlaceholder: string
+	/**
+	 * N​o​ ​n​o​t​e​s​ ​y​e​t​.​ ​I​t​ ​w​r​i​t​e​s​ ​o​n​e​ ​w​h​e​n​ ​s​o​m​e​t​h​i​n​g​ ​s​e​e​m​s​ ​w​o​r​t​h​ ​k​e​e​p​i​n​g​ ​f​o​r​ ​n​e​x​t​ ​t​i​m​e​.
+	 */
+	memoryNoNotes: string
+	/**
+	 * F​o​r​g​e​t​ ​“​{​t​i​t​l​e​}​”
+	 * @param {string} title
+	 */
+	memoryForgetNote: RequiredParams<'title'>
+	/**
+	 * F​o​r​g​e​t​ ​e​v​e​r​y​t​h​i​n​g
+	 */
+	memoryForgetAll: string
+	/**
+	 * D​e​l​e​t​e​ ​e​v​e​r​y​t​h​i​n​g​ ​{​n​a​m​e​}​ ​r​e​m​e​m​b​e​r​s​ ​a​b​o​u​t​ ​y​o​u​?​ ​T​h​e​ ​p​e​r​s​o​n​a​ ​i​t​s​e​l​f​ ​i​s​ ​u​n​t​o​u​c​h​e​d​.
+	 * @param {string} name
+	 */
+	memoryForgetAllConfirm: RequiredParams<'name'>
+	/**
+	 * K​e​p​t​ ​i​n​ ​m​e​m​o​r​y
+	 */
+	memoryStepKept: string
+	/**
+	 * U​p​d​a​t​e​d​ ​w​h​a​t​ ​i​t​ ​k​e​e​p​s​ ​i​n​ ​m​i​n​d​ ​a​b​o​u​t​ ​y​o​u
+	 */
+	memoryStepProfile: string
+	/**
+	 * F​o​r​g​o​t​ ​a​ ​n​o​t​e
+	 */
+	memoryStepForgot: string
+	/**
+	 * R​e​a​d​ ​o​n​e​ ​o​f​ ​i​t​s​ ​n​o​t​e​s
+	 */
+	memoryStepRead: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​k​e​e​p​ ​t​h​i​s
+	 */
+	memoryStepRefused: string
+	/**
+	 * P​e​r​s​o​n​a​ ​m​e​m​o​r​y
+	 */
+	personaMemory: string
+	/**
+	 * W​h​a​t​ ​e​a​c​h​ ​p​e​r​s​o​n​a​ ​h​a​s​ ​r​e​m​e​m​b​e​r​e​d​ ​a​b​o​u​t​ ​y​o​u​,​ ​i​n​ ​i​t​s​ ​o​w​n​ ​w​o​r​d​s​.​ ​P​e​r​s​o​n​a​l​,​ ​n​e​v​e​r​ ​s​h​a​r​e​d​,​ ​a​n​d​ ​y​o​u​r​s​ ​t​o​ ​r​e​a​d​ ​o​r​ ​d​e​l​e​t​e​.
+	 */
+	personaMemoryDescription: string
+	/**
 	 * Y​o​u​r​ ​s​a​v​e​d​ ​p​r​o​c​e​d​u​r​e​s​ ​a​n​d​ ​w​h​a​t​ ​t​h​e​y​ ​c​o​n​t​a​i​n
 	 */
 	playbooksDescription: string
+	/**
+	 * D​e​l​e​t​e​ ​e​v​e​r​y​t​h​i​n​g​ ​y​o​u​r​ ​p​e​r​s​o​n​a​s​ ​h​a​v​e​ ​r​e​m​e​m​b​e​r​e​d​ ​a​b​o​u​t​ ​y​o​u​?​ ​T​h​e​y​ ​k​e​e​p​ ​t​h​e​i​r​ ​p​r​o​m​p​t​s​ ​a​n​d​ ​s​e​t​t​i​n​g​s​;​ ​o​n​l​y​ ​w​h​a​t​ ​t​h​e​y​ ​w​r​o​t​e​ ​a​b​o​u​t​ ​y​o​u​ ​i​s​ ​e​r​a​s​e​d​.
+	 */
+	areYouSureYouWantToDeleteAllPersonaMemory: string
 	/**
 	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​a​l​l​ ​p​l​a​y​b​o​o​k​s​?
 	 */
@@ -2837,6 +2985,10 @@ type RootTranslation = {
 	 * S​y​s​t​e​m​ ​p​r​o​m​p​t
 	 */
 	contextPartSystem: string
+	/**
+	 * M​e​m​o​r​y
+	 */
+	contextPartMemory: string
 	/**
 	 * M​e​s​s​a​g​e​s
 	 */
@@ -4955,6 +5107,74 @@ The completion in progress will stop
 	 */
 	resetToDefault: () => LocalizedString
 	/**
+	 * Let personas remember things about their user
+	 */
+	personaMemoryAllow: () => LocalizedString
+	/**
+	 * A persona can keep a few notes between conversations, written by itself and readable by whoever it is about. Each memory belongs to one account and is never shared, not even when the persona is. Turning this off takes the ability away without erasing what was already written.
+	 */
+	personaMemoryAllowHelp: () => LocalizedString
+	/**
+	 * Prompts
+	 */
+	promptsTab: () => LocalizedString
+	/**
+	 * What {app} tells the model
+	 */
+	promptsTitle: (arg: { app: string }) => LocalizedString
+	/**
+	 * Every instruction {app} adds behind your message: anchoring the date, deciding whether to search, using what comes back, writing a summary. They ship with sensible wording, and you can rewrite any of them.
+	 */
+	promptsDescription: (arg: { app: string }) => LocalizedString
+	/**
+	 * A persona’s prompt and a playbook’s instructions are not here: they belong to what you wrote, and stay with it in the library. The system prompt sent with every message is in Chat.
+	 */
+	promptsElsewhere: () => LocalizedString
+	/**
+	 * {count} rewritten
+	 */
+	promptsModified: (arg: { count: number }) => LocalizedString
+	/**
+	 * Restore all defaults
+	 */
+	promptsResetAll: () => LocalizedString
+	/**
+	 * Rewritten
+	 */
+	promptEdited: () => LocalizedString
+	/**
+	 * Behind every message
+	 */
+	appPromptsTitle: () => LocalizedString
+	/**
+	 * The instructions the app adds on its own behalf: the date, deciding whether to search, using what comes back, writing a summary. Sensible by default, and yours to rewrite.
+	 */
+	appPromptsDescription: () => LocalizedString
+	/**
+	 * Your administrator has set these for the instance. They are shown so you know what is being sent for you, and cannot be changed here.
+	 */
+	appPromptsLocked: () => LocalizedString
+	/**
+	 * From your administrator
+	 */
+	promptFromAdmin: () => LocalizedString
+	/**
+	 * Prompt sharing
+	 */
+	appPromptsSharing: () => LocalizedString
+	/**
+	 * The instructions the app adds behind every message, as you have rewritten them in the Prompts tab. Locked means nobody else may change them; overridable hands them over as a starting point, prompt by prompt.
+	 */
+	appPromptsSharingDescription: () => LocalizedString
+	/**
+	 * Share my prompt rewrites
+	 */
+	shareAppPrompts: () => LocalizedString
+	/**
+	 * You have not rewritten any prompt yet, so there is nothing to share.
+	 */
+	noAppPromptsRewritten: () => LocalizedString
+	/**
 	 * Backup & restore
 	 */
 	backupAndRestore: () => LocalizedString
@@ -4987,9 +5207,81 @@ The completion in progress will stop
 	 */
 	areYouSureYouWantToDeleteAllPersonas: () => LocalizedString
 	/**
+	 * What it remembers about you
+	 */
+	memorySectionTitle: () => LocalizedString
+	/**
+	 * {name} writes this itself, between conversations. Nobody else can read it, not even when the persona is shared. Correct anything that is wrong, or delete it.
+	 */
+	memorySectionDescription: (arg: { name: string }) => LocalizedString
+	/**
+	 * This persona
+	 */
+	thisPersona: () => LocalizedString
+	/**
+	 * Always in mind
+	 */
+	memoryProfileLabel: () => LocalizedString
+	/**
+	 * Read at the start of every message. {used} of {total} characters used, notes included.
+	 */
+	memoryProfileHint: (arg: { total: number, used: number }) => LocalizedString
+	/**
+	 * Nothing yet. It fills in as you talk.
+	 */
+	memoryProfilePlaceholder: () => LocalizedString
+	/**
+	 * No notes yet. It writes one when something seems worth keeping for next time.
+	 */
+	memoryNoNotes: () => LocalizedString
+	/**
+	 * Forget “{title}”
+	 */
+	memoryForgetNote: (arg: { title: string }) => LocalizedString
+	/**
+	 * Forget everything
+	 */
+	memoryForgetAll: () => LocalizedString
+	/**
+	 * Delete everything {name} remembers about you? The persona itself is untouched.
+	 */
+	memoryForgetAllConfirm: (arg: { name: string }) => LocalizedString
+	/**
+	 * Kept in memory
+	 */
+	memoryStepKept: () => LocalizedString
+	/**
+	 * Updated what it keeps in mind about you
+	 */
+	memoryStepProfile: () => LocalizedString
+	/**
+	 * Forgot a note
+	 */
+	memoryStepForgot: () => LocalizedString
+	/**
+	 * Read one of its notes
+	 */
+	memoryStepRead: () => LocalizedString
+	/**
+	 * Could not keep this
+	 */
+	memoryStepRefused: () => LocalizedString
+	/**
+	 * Persona memory
+	 */
+	personaMemory: () => LocalizedString
+	/**
+	 * What each persona has remembered about you, in its own words. Personal, never shared, and yours to read or delete.
+	 */
+	personaMemoryDescription: () => LocalizedString
+	/**
 	 * Your saved procedures and what they contain
 	 */
 	playbooksDescription: () => LocalizedString
+	/**
+	 * Delete everything your personas have remembered about you? They keep their prompts and settings; only what they wrote about you is erased.
+	 */
+	areYouSureYouWantToDeleteAllPersonaMemory: () => LocalizedString
 	/**
 	 * Are you sure you want to delete all playbooks?
 	 */
@@ -5698,6 +5990,10 @@ The completion in progress will stop
 	 * System prompt
 	 */
 	contextPartSystem: () => LocalizedString
+	/**
+	 * Memory
+	 */
+	contextPartMemory: () => LocalizedString
 	/**
 	 * Messages
 	 */

@@ -89,7 +89,7 @@ why, facts and constraints verbatim, code and artifacts still in use, current st
 questions. A paragraph of prose loses exactly the parts the next turn needs.
 
 Both the prompt that writes the summary and the one that frames it for the model are overridable
-under _Settings → Tools → System instructions_. The framing prompt is applied at send time, so
+under _Settings → Prompts_. The framing prompt is applied at send time, so
 changing it also affects summaries written earlier.
 
 ## Saying what to keep
@@ -110,9 +110,9 @@ The instruction is kept in the note and shown above the summary when it is unfol
 written to an instruction is not the same object as one written to the default rules, and reading it
 without knowing that is how you conclude the summariser lost the plot.
 
-The wrapper around it is the `Compaction — what the user asked for` prompt in _Settings → Tools →
-System instructions_. Commands that take no arguments only match when given none, so `/clear the air
-before we start` is the sentence it looks like.
+The wrapper around it is the `Compaction — what the user asked for` prompt in _Settings → Prompts_.
+Commands that take no arguments only match when given none, so `/clear the air before we start` is
+the sentence it looks like.
 
 ## Sharing it
 

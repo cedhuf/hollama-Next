@@ -1,6 +1,7 @@
 import { derived, writable } from 'svelte/store';
 
 import { env } from '$env/dynamic/public';
+import { setServerAppPrompts } from '$lib/appPrompts';
 import { settingsStore } from '$lib/localStorage';
 
 import type { SystemPrompts } from './settings';
@@ -21,11 +22,25 @@ export interface SystemPromptsView {
 // In server mode the resolved config comes from the server (admin sharing).
 const serverConfig = writable<SystemPromptsView | null>(null);
 
-export async function loadServerSystemPrompts(): Promise<void> {
+export function setServerSystemPrompts(resolved: SystemPromptsView | null): void {
+	serverConfig.set(resolved);
+}
+
+/**
+ * Both kinds of prompt, in one request.
+ *
+ * The system prompt and the app's own instructions are two screens' worth of
+ * one question — what does this instance let you say to the model — and they are
+ * resolved by the same rules, so they arrive together rather than racing.
+ */
+export async function loadServerPrompts(): Promise<void> {
 	if (!isServer) return;
 	try {
-		const response = await fetch('/api/system-prompts/config');
-		if (response.ok) serverConfig.set(await response.json());
+		const response = await fetch('/api/prompts/config');
+		if (!response.ok) return;
+		const config = await response.json();
+		serverConfig.set(config.systemPrompts ?? null);
+		setServerAppPrompts(config.appPrompts ?? null);
 	} catch {
 		/* leave null */
 	}

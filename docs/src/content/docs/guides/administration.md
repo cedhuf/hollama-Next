@@ -26,11 +26,17 @@ What you share is a **snapshot of your own settings**, taken from the tab where 
 There is no separate copy to maintain: you set the search engine up in your Tools tab, then come
 here and decide whether it is everyone's.
 
+Overridable behaves differently for the prompt rewrites, and deliberately. Every other setting is
+one value, so a user replacing it replaces the whole thing. The rewrites are twenty independent
+prompts, so they merge: a user who rewrites the summary keeps your version of the other nineteen.
+
 ## What can be shared
 
 - **Web search.** Your backend URL, its type and its token. Users never see the token.
 - **Web fetch.** On or off, with your page and character caps.
-- **System prompts.** The global one and the per-model ones.
+- **System prompts.** The global one and the per-model ones, from the Prompts tab.
+- **Prompt rewrites.** The instructions the app adds on its own behalf: the date line, the search
+  router, the compaction rules, the native tool descriptions. Also the Prompts tab.
 - **Title generation.** The setting and the model. The title model works even when it is not in the
   shared model list, since a user never picks it.
 - **Compaction.** The model, the automatic toggle and the threshold.
@@ -50,6 +56,11 @@ Two switches under _User permissions_:
   only models. On means a user can paste their own key and use whatever they like alongside them.
 - **Allow users to create their own personas.** Off leaves them with the ones you share. Installing a
   shared [persona](/features/personas/) still works either way.
+- **Let personas remember things about their user.** On by default. Off takes the ability away
+  entirely: the tools are never offered and nothing is injected, so a persona behaves as it did
+  before memory existed. What people already wrote is left alone, because erasing the most personal
+  data on the instance should not be a side effect of a switch. Each memory belongs to one account
+  and is never visible to anyone else, you included.
 
 ## Accounts
 
@@ -148,6 +159,10 @@ counter that restarts at zero.
 This is the part worth trusting. Shared tools, model allow-lists and locked prompts are applied in
 the endpoints, `/api/fetch` and `/api/llm`, not only in the interface. A hand-crafted request from a
 signed-in user is policed exactly like the app's own.
+
+Locked prompt rewrites are checked when a turn starts, in `/api/runs`, against the account that
+asked rather than against what the request claims. A client that keeps its own rewrites in local
+storage and sends them anyway gets yours.
 
 A locked instance prompt is guaranteed **present** rather than exclusive: it is prepended in the
 proxy, so a persona's system prompt adds to it instead of replacing it. See

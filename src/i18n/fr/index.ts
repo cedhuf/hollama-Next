@@ -580,6 +580,32 @@ const fr = extendDictionary(en, {
 	placeholders: 'Variables',
 	resetToDefault: 'Rétablir la valeur par défaut',
 
+	personaMemoryAllow: 'Autoriser les personas à retenir des choses sur leur utilisateur',
+	personaMemoryAllowHelp:
+		"Un persona peut garder quelques notes entre les conversations, écrites par lui-même et lisibles par la personne concernée. Chaque mémoire appartient à un seul compte et n'est jamais partagée, même quand le persona l'est. Désactiver retire la capacité sans effacer ce qui a déjà été écrit.",
+
+	// --- Paramètres › Invites --------------------------------------------------
+	promptsTab: 'Invites',
+	promptsTitle: 'Ce que {app} dit au modèle',
+	promptsDescription:
+		"Chaque instruction que {app} ajoute derrière votre message : ancrer la date, décider s'il faut chercher, exploiter ce qui revient, rédiger un résumé. Elles arrivent avec une formulation raisonnable, et vous pouvez toutes les réécrire.",
+	promptsElsewhere:
+		"L'invite d'un persona et les instructions d'un playbook ne sont pas ici : elles appartiennent à ce que vous avez écrit et restent avec, dans la bibliothèque. L'invite système envoyée à chaque message est dans Chat.",
+	promptsModified: '{count} réécrite(s)',
+	promptsResetAll: 'Tout rétablir',
+	promptEdited: 'Réécrite',
+	appPromptsTitle: 'Derrière chaque message',
+	appPromptsDescription:
+		"Les instructions que l'application ajoute d'elle-même : la date, décider s'il faut chercher, exploiter ce qui revient, rédiger un résumé. Raisonnables par défaut, et à vous de les réécrire.",
+	appPromptsLocked:
+		"Votre administrateur les a fixées pour l'instance. Elles sont affichées pour que vous sachiez ce qui est envoyé en votre nom, et ne sont pas modifiables ici.",
+	promptFromAdmin: 'De votre administrateur',
+	appPromptsSharing: 'Partage des invites',
+	appPromptsSharingDescription:
+		"Les instructions que l'application ajoute derrière chaque message, telles que vous les avez réécrites dans l'onglet Invites. Verrouillé signifie que personne d'autre ne peut les changer ; modifiable les transmet comme point de départ, invite par invite.",
+	shareAppPrompts: 'Partager mes invites réécrites',
+	noAppPromptsRewritten: "Vous n'avez encore réécrit aucune invite, il n'y a donc rien à partager.",
+
 	// --- Paramètres › Données --------------------------------------------------
 	backupAndRestore: 'Sauvegarde et restauration',
 	backupAndRestoreDescription:
@@ -590,7 +616,31 @@ const fr = extendDictionary(en, {
 	byCategoryDescription: 'Exportez, importez ou supprimez chaque type de donnée séparément.',
 	personasDescription: 'Vos personnages enregistrés et leurs réglages',
 	areYouSureYouWantToDeleteAllPersonas: 'Êtes-vous sûr de vouloir supprimer tous les personas ?',
+	memorySectionTitle: 'Ce qu’il retient de vous',
+	memorySectionDescription:
+		'{name} écrit ceci lui-même, entre les conversations. Personne d’autre ne peut le lire, même quand le persona est partagé. Corrigez ce qui est faux, ou supprimez-le.',
+	thisPersona: 'Ce persona',
+	memoryProfileLabel: 'Toujours en tête',
+	memoryProfileHint:
+		'Relu au début de chaque message. {used} caractères sur {total} utilisés, notes comprises.',
+	memoryProfilePlaceholder: 'Rien pour l’instant. Cela se remplit au fil des échanges.',
+	memoryNoNotes:
+		'Aucune note. Il en écrit une quand quelque chose lui semble bon à garder pour la prochaine fois.',
+	memoryForgetNote: 'Oublier « {title} »',
+	memoryForgetAll: 'Tout oublier',
+	memoryForgetAllConfirm:
+		'Supprimer tout ce que {name} retient de vous ? Le persona lui-même n’est pas touché.',
+	memoryStepKept: 'Retenu',
+	memoryStepProfile: 'A mis à jour ce qu’il garde en tête sur vous',
+	memoryStepForgot: 'A oublié une note',
+	memoryStepRead: 'A relu une de ses notes',
+	memoryStepRefused: 'N’a pas pu retenir ceci',
+	personaMemory: 'Mémoire des personas',
+	personaMemoryDescription:
+		'Ce que chaque persona a retenu de vous, dans ses propres mots. Personnel, jamais partagé, à lire ou à supprimer comme vous voulez.',
 	playbooksDescription: 'Vos procédures enregistrées et ce qu\u2019elles contiennent',
+	areYouSureYouWantToDeleteAllPersonaMemory:
+		'Supprimer tout ce que vos personas ont retenu de vous ? Ils gardent leurs invites et leurs réglages ; seul ce qu’ils ont écrit sur vous est effacé.',
 	areYouSureYouWantToDeleteAllPlaybooks: 'Voulez-vous vraiment supprimer tous les playbooks ?',
 	confirmResetEverything: 'Êtes-vous sûr ? Cette action est irréversible.',
 	yesDeleteEverything: 'Oui, tout supprimer',
@@ -799,6 +849,7 @@ const fr = extendDictionary(en, {
 	contextCommandDescription: 'Afficher ce qui est actuellement envoyé au modèle',
 	contextReport: 'Contexte · ~{tokens} ({percent}%)',
 	contextPartSystem: 'Prompt système',
+	contextPartMemory: 'Mémoire',
 	contextPartMessages: 'Messages',
 	contextPartSources: 'Index des sources',
 	contextMessagesOfTotal: '{count} message{{s}} sur {total} envoyés avec la prochaine requête',

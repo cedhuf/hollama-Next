@@ -560,6 +560,32 @@ const en = {
 	placeholders: 'Placeholders',
 	resetToDefault: 'Reset to default',
 
+	personaMemoryAllow: 'Let personas remember things about their user',
+	personaMemoryAllowHelp:
+		'A persona can keep a few notes between conversations, written by itself and readable by whoever it is about. Each memory belongs to one account and is never shared, not even when the persona is. Turning this off takes the ability away without erasing what was already written.',
+
+	// --- Settings › Prompts ----------------------------------------------------
+	promptsTab: 'Prompts',
+	promptsTitle: 'What {app:string} tells the model',
+	promptsDescription:
+		'Every instruction {app:string} adds behind your message: anchoring the date, deciding whether to search, using what comes back, writing a summary. They ship with sensible wording, and you can rewrite any of them.',
+	promptsElsewhere:
+		'A persona’s prompt and a playbook’s instructions are not here: they belong to what you wrote, and stay with it in the library. The system prompt sent with every message is in Chat.',
+	promptsModified: '{count:number} rewritten',
+	promptsResetAll: 'Restore all defaults',
+	promptEdited: 'Rewritten',
+	appPromptsTitle: 'Behind every message',
+	appPromptsDescription:
+		'The instructions the app adds on its own behalf: the date, deciding whether to search, using what comes back, writing a summary. Sensible by default, and yours to rewrite.',
+	appPromptsLocked:
+		'Your administrator has set these for the instance. They are shown so you know what is being sent for you, and cannot be changed here.',
+	promptFromAdmin: 'From your administrator',
+	appPromptsSharing: 'Prompt sharing',
+	appPromptsSharingDescription:
+		'The instructions the app adds behind every message, as you have rewritten them in the Prompts tab. Locked means nobody else may change them; overridable hands them over as a starting point, prompt by prompt.',
+	shareAppPrompts: 'Share my prompt rewrites',
+	noAppPromptsRewritten: 'You have not rewritten any prompt yet, so there is nothing to share.',
+
 	// --- Settings › Data -------------------------------------------------------
 	backupAndRestore: 'Backup & restore',
 	backupAndRestoreDescription:
@@ -570,7 +596,30 @@ const en = {
 	byCategoryDescription: 'Export, import or delete each kind of data on its own.',
 	personasDescription: 'Your saved characters and their settings',
 	areYouSureYouWantToDeleteAllPersonas: 'Are you sure you want to delete all personas?',
+	memorySectionTitle: 'What it remembers about you',
+	memorySectionDescription:
+		'{name:string} writes this itself, between conversations. Nobody else can read it, not even when the persona is shared. Correct anything that is wrong, or delete it.',
+	thisPersona: 'This persona',
+	memoryProfileLabel: 'Always in mind',
+	memoryProfileHint:
+		'Read at the start of every message. {used:number} of {total:number} characters used, notes included.',
+	memoryProfilePlaceholder: 'Nothing yet. It fills in as you talk.',
+	memoryNoNotes: 'No notes yet. It writes one when something seems worth keeping for next time.',
+	memoryForgetNote: 'Forget “{title:string}”',
+	memoryForgetAll: 'Forget everything',
+	memoryForgetAllConfirm:
+		'Delete everything {name:string} remembers about you? The persona itself is untouched.',
+	memoryStepKept: 'Kept in memory',
+	memoryStepProfile: 'Updated what it keeps in mind about you',
+	memoryStepForgot: 'Forgot a note',
+	memoryStepRead: 'Read one of its notes',
+	memoryStepRefused: 'Could not keep this',
+	personaMemory: 'Persona memory',
+	personaMemoryDescription:
+		'What each persona has remembered about you, in its own words. Personal, never shared, and yours to read or delete.',
 	playbooksDescription: 'Your saved procedures and what they contain',
+	areYouSureYouWantToDeleteAllPersonaMemory:
+		'Delete everything your personas have remembered about you? They keep their prompts and settings; only what they wrote about you is erased.',
 	areYouSureYouWantToDeleteAllPlaybooks: 'Are you sure you want to delete all playbooks?',
 	confirmResetEverything: 'Are you sure? This cannot be undone.',
 	yesDeleteEverything: 'Yes, delete everything',
@@ -779,6 +828,7 @@ const en = {
 	contextCommandDescription: 'Show what the model is currently being sent',
 	contextReport: 'Context · ~{tokens:string} ({percent:number}%)',
 	contextPartSystem: 'System prompt',
+	contextPartMemory: 'Memory',
 	contextPartMessages: 'Messages',
 	contextPartSources: 'Sources index',
 	contextMessagesOfTotal:

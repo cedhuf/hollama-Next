@@ -46,8 +46,9 @@
 	 */
 	const COLUMNS = 5;
 
-	function launch(persona: Persona) {
-		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
+	async function launch(persona: Persona) {
+		const id = await launchPersona(persona, $settingsStore.models);
+		goto(resolve('/sessions/[id]', { id }));
 	}
 
 	/**

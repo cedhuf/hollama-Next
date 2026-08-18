@@ -1,5 +1,8 @@
 import { get } from 'svelte/store';
 
+import { effectivePrompts } from '$lib/appPrompts';
+import { chatDefaultsConfig } from '$lib/chatDefaults';
+import { repository } from '$lib/data';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { LANGUAGE_LABELS } from '$lib/i18n';
 import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
@@ -106,8 +109,6 @@ export interface Persona {
 	installedFrom?: string;
 	/** The single ongoing conversation bound to this persona. */
 	sessionId?: string;
-	/** Reserved for future auto-summarised long-term memory. */
-	memory?: string;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -190,17 +191,35 @@ export function languageInstruction(persona: Persona): string {
 		persona.language?.trim() ||
 		LANGUAGE_LABELS[settings.userLanguage as keyof typeof LANGUAGE_LABELS] ||
 		'English';
-	return resolvePrompt('personaLanguage', settings.promptOverrides, { language });
+	return resolvePrompt('personaLanguage', get(effectivePrompts), { language });
 }
 
-export function launchPersona(persona: Persona, models: Model[]): string {
+/**
+ * Open a persona's conversation, creating it the first time.
+ *
+ * Async because the conversation has to exist where the next line will look for
+ * it. Every caller navigates to the id this returns, and the page behind that id
+ * reads the conversation back from storage: with the write still queued, the
+ * read came back empty, the page started a blank conversation on the same id,
+ * and the persona's prompt, greeting and binding were overwritten by it. The
+ * persona still pointed at the conversation; the conversation no longer pointed
+ * back, so it behaved as an ordinary chat with no character and no memory.
+ */
+export async function launchPersona(persona: Persona, models: Model[]): Promise<string> {
 	const sessions = get(sessionsStore) || [];
 	if (persona.sessionId && sessions.some((s) => s.id === persona.sessionId)) {
 		return persona.sessionId;
 	}
 
 	const id = generateRandomId();
-	const model = models.find((m) => m.name === persona.modelName);
+	// A persona names a model, or leaves it empty to mean "whichever is mine".
+	// The fallback has to happen here: a conversation opened directly resolves
+	// nothing, so an empty one arrived with no model at all and could not be
+	// answered in until somebody picked one by hand.
+	const defaultModel = get(chatDefaultsConfig).defaultModel.value;
+	const model =
+		models.find((m) => m.name === persona.modelName) ??
+		(defaultModel ? models.find((m) => m.name === defaultModel) : undefined);
 	const session: Session = {
 		id,
 		messages: persona.greeting?.trim() ? [{ role: 'assistant', content: persona.greeting }] : [],
@@ -220,6 +239,8 @@ export function launchPersona(persona: Persona, models: Model[]): string {
 
 	saveSession(session);
 	savePersona({ ...persona, sessionId: id });
+	// Nothing is navigated to until it is really there.
+	await repository.flush?.();
 	return id;
 }
 

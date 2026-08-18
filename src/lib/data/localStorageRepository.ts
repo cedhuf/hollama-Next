@@ -5,6 +5,7 @@ import { adoptLegacyNotes } from '$lib/chat/legacyNotes';
 import type { Server } from '$lib/connections';
 import { searchSessionsLocally, type ConversationResult } from '$lib/conversationSearch';
 import type { Knowledge } from '$lib/knowledge';
+import type { PersonaMemory } from '$lib/personaMemory';
 import type { Persona } from '$lib/personas';
 import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
@@ -61,6 +62,7 @@ export class LocalStorageRepository implements DataRepository {
 			sessions: this.#readSummaries(),
 			knowledge: this.#read<Knowledge[]>(StorageKey.Knowledge, []),
 			personas: this.#read<Persona[]>(StorageKey.Personas, []),
+			personaMemory: this.#read<PersonaMemory[]>(StorageKey.PersonaMemory, []),
 			playbooks: this.#read<Playbook[]>(StorageKey.Playbooks, [])
 		};
 	}
@@ -95,6 +97,10 @@ export class LocalStorageRepository implements DataRepository {
 	async loadKnowledge(): Promise<Knowledge[]> {
 		return this.#read<Knowledge[]>(StorageKey.Knowledge, []);
 	}
+	async loadPersonaMemory(): Promise<PersonaMemory[]> {
+		return this.#read<PersonaMemory[]>(StorageKey.PersonaMemory, []);
+	}
+
 	async loadPersonas(): Promise<Persona[]> {
 		return this.#read<Persona[]>(StorageKey.Personas, []);
 	}
@@ -125,6 +131,9 @@ export class LocalStorageRepository implements DataRepository {
 	}
 	async deletePersona(id: string): Promise<void> {
 		this.#remove(StorageKey.Personas, id);
+		// A persona that is gone can have no memory: nothing could ever read it, and
+		// a new persona reusing the id would inherit somebody else's past.
+		this.#remove(StorageKey.PersonaMemory, id);
 	}
 	async savePlaybook(playbook: Playbook): Promise<void> {
 		this.#upsert(StorageKey.Playbooks, playbook);
@@ -139,6 +148,18 @@ export class LocalStorageRepository implements DataRepository {
 	async replaceKnowledge(value: Knowledge[]): Promise<void> {
 		this.#write(StorageKey.Knowledge, value);
 	}
+	async savePersonaMemory(memory: PersonaMemory): Promise<void> {
+		this.#upsert(StorageKey.PersonaMemory, memory);
+	}
+
+	async deletePersonaMemory(personaId: string): Promise<void> {
+		this.#remove(StorageKey.PersonaMemory, personaId);
+	}
+
+	async replacePersonaMemory(value: PersonaMemory[]): Promise<void> {
+		this.#write(StorageKey.PersonaMemory, value);
+	}
+
 	async replacePersonas(value: Persona[]): Promise<void> {
 		this.#write(StorageKey.Personas, value);
 	}

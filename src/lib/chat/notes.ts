@@ -80,10 +80,17 @@ export interface ContextNote extends NoteBase {
 	tokens: number;
 	limit: number;
 	limitSource: 'model' | 'threshold';
-	/** The three things the estimate is made of. They add up to `tokens`. */
+	/** The four things the estimate is made of. They add up to `tokens`. */
 	systemTokens: number;
 	messageTokens: number;
 	sourceTokens: number;
+	/**
+	 * What the persona's memory costs on every message: the profile and the index.
+	 *
+	 * Reported because a budget nobody can see is not a budget. Zero when there is
+	 * no persona, when the instance has memory off, or when nothing is remembered.
+	 */
+	memoryTokens: number;
 	/** Messages in context, and in the conversation as a whole. */
 	messageCount: number;
 	totalCount: number;

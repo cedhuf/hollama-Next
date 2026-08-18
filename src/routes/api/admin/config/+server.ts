@@ -1,17 +1,20 @@
 import { json } from '@sveltejs/kit';
 
 import { requireAdmin } from '$lib/server/api';
+import { appPromptsSharing, setAdminAppPrompts } from '$lib/server/appPromptsResolver';
 import {
 	allowUserKeys,
 	allowUserPersonas,
 	getConfig,
 	personaAutoUpdateForced,
+	personaMemoryEnabled,
 	personaStoreMode,
 	resetOnboarding,
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
 	setPersonaAutoUpdateForced,
+	setPersonaMemoryEnabled,
 	setPersonaStoreMode,
 	setStoreUrl,
 	storeUrl,
@@ -34,6 +37,7 @@ export async function GET(event) {
 		allowUserPersonas: allowUserPersonas(),
 		personaStoreMode: personaStoreMode(),
 		personaAutoUpdateForced: personaAutoUpdateForced(),
+		personaMemoryEnabled: personaMemoryEnabled(),
 		themeSharing: themeSharing(),
 		themeMode: getConfig('themeMode') ?? 'system',
 		themeStyle: getConfig('themeStyle') ?? 'classic',
@@ -43,6 +47,7 @@ export async function GET(event) {
 		searchBackend: getConfig('searchBackend') ?? 'degoog',
 		searchSharing: getConfig('searchSharing') ?? 'off',
 		systemPromptsSharing: getConfig('systemPromptsSharing') ?? 'off',
+		appPromptsSharing: appPromptsSharing(),
 		defaultModelSharing: getConfig('defaultModelSharing') ?? 'off',
 		defaultModel: getConfig('defaultModel') ?? '',
 		titleSharing: getConfig('titleSharing') ?? 'off',
@@ -84,6 +89,9 @@ export async function PUT(event) {
 	if (typeof body?.personaAutoUpdateForced === 'boolean') {
 		setPersonaAutoUpdateForced(body.personaAutoUpdateForced);
 	}
+	if (typeof body?.personaMemoryEnabled === 'boolean') {
+		setPersonaMemoryEnabled(body.personaMemoryEnabled);
+	}
 	if (typeof body?.storeUrl === 'string') setStoreUrl(body.storeUrl);
 	if (typeof body?.searchUrl === 'string') setConfig('searchUrl', body.searchUrl.trim());
 	if (body?.searchBackend === 'degoog' || body?.searchBackend === 'searxng') {
@@ -101,6 +109,16 @@ export async function PUT(event) {
 	if (body?.systemPrompts && typeof body.systemPrompts === 'object') {
 		setConfig('systemPromptsGlobal', String(body.systemPrompts.global ?? ''));
 		setConfig('systemPromptsPerModel', JSON.stringify(body.systemPrompts.perModel ?? {}));
+	}
+
+	// The app's own instructions, shared the same way and from the same place the
+	// admin edits them. Merged rather than replaced on the reading side, so a user
+	// rewriting one prompt keeps the admin's other nineteen.
+	if (['off', 'locked', 'overridable'].includes(body?.appPromptsSharing)) {
+		setConfig('appPromptsSharing', body.appPromptsSharing);
+	}
+	if (body?.appPrompts && typeof body.appPrompts === 'object') {
+		setAdminAppPrompts(body.appPrompts);
 	}
 
 	if (['off', 'locked', 'overridable'].includes(body?.defaultModelSharing)) {

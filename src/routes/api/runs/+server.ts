@@ -4,6 +4,7 @@ import { env as publicEnv } from '$env/dynamic/public';
 import { runSpeakers } from '$lib/chat/run/speakers';
 import type { RunInput } from '$lib/chat/run/types';
 import { requireUser } from '$lib/server/api';
+import { resolveClaimedAppPrompts } from '$lib/server/appPromptsResolver';
 import { PolicyError } from '$lib/server/llmPolicy';
 import { serverDeps, type RunPrincipal } from '$lib/server/runDeps';
 import { createRun, emitTo, findRunForSession, summarise } from '$lib/server/runs';
@@ -21,6 +22,17 @@ export async function POST(event) {
 	const principal = await principalFor(event);
 	const input = (await event.request.json().catch(() => null)) as RunInput | null;
 	if (!input?.sessionId || !input.model) throw error(400, 'Expected a run to start');
+
+	// The instance's answer about who may rewrite which instruction, applied to
+	// what the request claims. Here rather than deeper down because this is where
+	// the client's word arrives, and a rule enforced past that point is a rule
+	// somebody can reach around by calling the API directly.
+	if (publicEnv.PUBLIC_MODE === 'server') {
+		input.promptOverrides = resolveClaimedAppPrompts(
+			input.promptOverrides,
+			principal.isAdmin
+		).overrides;
+	}
 
 	// One at a time per conversation. Two turns writing into the same transcript
 	// is not a race the transcript can win, and a second tab hitting send is the

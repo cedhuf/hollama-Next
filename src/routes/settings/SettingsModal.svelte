@@ -5,6 +5,7 @@
 		Info,
 		LogOut,
 		MessageSquare,
+		MessageSquareQuote,
 		Server,
 		Settings2,
 		Shield,
@@ -26,6 +27,7 @@
 	import DataManagement from './DataManagement.svelte';
 	import Interface from './Interface.svelte';
 	import Profile from './Profile.svelte';
+	import Prompts from './Prompts.svelte';
 	import Servers from './Servers.svelte';
 	import Tools from './Tools.svelte';
 	import Users from './Users.svelte';
@@ -53,6 +55,9 @@
 			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: serverMode && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
+			// Its own tab rather than a section of Tools: twenty prompts folded into
+			// one dropdown at the bottom of a long scroll is a feature nobody finds.
+			{ id: 'prompts', label: $LL.promptsTab(), icon: MessageSquareQuote },
 			{ id: 'interface', label: $LL.interface(), icon: Settings2 },
 			{ id: 'data', label: 'Data', icon: Database },
 			{ id: 'version', label: 'About', icon: Info }
@@ -187,6 +192,8 @@
 					<Chat />
 				{:else if activeTab === 'tools'}
 					<Tools />
+				{:else if activeTab === 'prompts'}
+					<Prompts />
 				{:else if activeTab === 'interface'}
 					<Interface />
 				{:else if activeTab === 'profile'}

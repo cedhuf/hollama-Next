@@ -2,9 +2,26 @@ import { askChoicesToText, parseAskBlock } from '$lib/askChoice';
 import type { ChatRequest, ChatStrategy, ToolCall, ToolSpec } from '$lib/chat';
 import { createReasoningProcessor } from '$lib/chat/reasoningProcessor';
 import { formatSourceIndex, recallableUrls, recallSearches } from '$lib/chat/sourceIndex';
-import { READ_PAGE_TOOL, WEB_SEARCH_TOOL } from '$lib/chat/tools';
+import {
+	MEMORY_FORGET_TOOL_NAME,
+	MEMORY_PROFILE_TOOL_NAME,
+	MEMORY_READ_TOOL_NAME,
+	MEMORY_WRITE_TOOL_NAME,
+	memoryTools,
+	READ_PAGE_TOOL_NAME,
+	readPageTool,
+	WEB_SEARCH_TOOL_NAME,
+	webSearchTool
+} from '$lib/chat/tools';
 import { formatCurrentDateTime } from '$lib/currentDate';
 import { resolvePrompt } from '$lib/defaultPrompts';
+import {
+	indexLine,
+	MEMORY_LIMITS,
+	type MemoryNote,
+	type MemoryResult,
+	type PersonaMemory
+} from '$lib/personaMemory';
 import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 import { parseRouterDecision } from '$lib/search';
 import type { Message, WebSearchInfo } from '$lib/sessions';
@@ -40,12 +57,44 @@ export interface RunDeps {
 	complete(request: ChatRequest): Promise<string>;
 	/** Whether the provider carries tools natively for this model. */
 	useNativeTools(): Promise<boolean>;
+	/**
+	 * Whether the endpoint can carry tools at all, whatever the web setting says.
+	 *
+	 * For the tools that have no prose fallback, which today means memory.
+	 */
+	canCarryTools(): Promise<boolean>;
 	search(query: string, startNumber?: number): Promise<SearchOutcome | null>;
 	readPages(urls: string[], startNumber?: number): Promise<ReadOutcome | null>;
 	/** Best-effort naming of a fresh conversation. Absent when it is not wanted. */
 	title?(firstUserMessage: string): Promise<string | null>;
 	/** Best-effort compaction once the turn lands. Absent when it is not due. */
 	compact?(messages: Message[]): Promise<{ marker: Message; replacedCount: number } | null>;
+	/**
+	 * What this persona remembers about the person asking.
+	 *
+	 * Absent when there is no persona, when the instance has turned memory off, or
+	 * when the endpoint cannot call tools. Absent means the whole feature is
+	 * absent for this turn: nothing injected, nothing offered, nothing written.
+	 *
+	 * Reads and writes go through here rather than through the run's body, because
+	 * in server mode the memory belongs to the signed-in account and a client is
+	 * not entitled to say what it contains.
+	 */
+	memory?: MemoryAccess;
+}
+
+/** Reading and writing one persona's memory of one person, from inside a turn. */
+export interface MemoryAccess {
+	read(): PersonaMemory;
+	note(id: string): MemoryNote | null;
+	setProfile(text: string): MemoryResult<PersonaMemory>;
+	write(input: {
+		id?: string;
+		title: string;
+		when: string;
+		body: string;
+	}): MemoryResult<PersonaMemory>;
+	forget(id: string): MemoryResult<PersonaMemory>;
 }
 
 export interface SearchOutcome {
@@ -109,9 +158,33 @@ export async function runTurn(
 			return message;
 		});
 
+		/**
+		 * What this persona remembers, and the rules for keeping more.
+		 *
+		 * After the persona's own prompt and before the conversation: it is
+		 * something this character knows, not something the app is telling it, and
+		 * a memory read before knowing who you are reads as somebody else's notes.
+		 *
+		 * Only the profile and the index go in. A note's body is paid for when it is
+		 * opened, which is the whole reason the two tiers exist.
+		 */
+		const remembered = deps.memory?.read();
+		const memoryPreamble: Message[] = [];
+		if (remembered && (remembered.profile.trim() || remembered.notes.length)) {
+			memoryPreamble.push({
+				role: 'system',
+				content: resolvePrompt('memoryContext', overrides, {
+					profile: remembered.profile.trim() || '(nothing yet)',
+					notes: remembered.notes.length
+						? remembered.notes.map(indexLine).join('\n')
+						: '(no notes yet)'
+				})
+			});
+		}
+
 		let chatMessages: Message[] = input.systemPrompt
-			? [{ role: 'system', content: input.systemPrompt }, ...framed]
-			: framed;
+			? [{ role: 'system', content: input.systemPrompt }, ...memoryPreamble, ...framed]
+			: [...memoryPreamble, ...framed];
 
 		// Said once, and only when it is true: a conversation nobody was called into
 		// reads exactly as it did before any of this existed.
@@ -157,8 +230,19 @@ export async function runTurn(
 			(searchAvailable && input.flags.webSearch) || mayReread ? await deps.useNativeTools() : false;
 
 		const nativeTools: ToolSpec[] = [];
-		if (native && searchAvailable && input.flags.webSearch) nativeTools.push(WEB_SEARCH_TOOL);
-		if (native && mayReread) nativeTools.push(READ_PAGE_TOOL);
+		if (native && searchAvailable && input.flags.webSearch)
+			nativeTools.push(webSearchTool(overrides));
+		if (native && mayReread) nativeTools.push(readPageTool(overrides));
+		// Whether the web tools are on the list, which is a different question from
+		// whether the list is empty now that memory can fill it on its own.
+		const webTools = nativeTools.length > 0;
+
+		// Memory rides on native tool calling and asks the provider on its own, since
+		// a persona with something to remember is a reason to ask even when every web
+		// toggle is off.
+		const memory = deps.memory;
+		const memoryTooling = memory ? native || (await deps.canCarryTools()) : false;
+		if (memory && memoryTooling) nativeTools.push(...memoryTools(overrides));
 
 		// Pages the user linked to are read in full, and take precedence over a
 		// search: given an address, looking it up by keyword is the wrong move —
@@ -322,10 +406,20 @@ export async function runTurn(
 		// line in a tool description. The text path has a whole pre-pass whose only job
 		// is deciding whether to look something up, and dropping that left the decision
 		// resting on a description the model weighs far more lightly.
-		if (nativeTools.length) {
+		if (webTools) {
 			chatMessages = [
 				...chatMessages,
 				{ role: 'system', content: resolvePrompt('toolPolicy', overrides) }
+			];
+		}
+
+		// Said only when the persona can actually act on it. Told to a model with no
+		// memory tools, it is an instruction to do something impossible, which models
+		// answer by narrating that they have remembered something.
+		if (memory && memoryTooling) {
+			chatMessages = [
+				...chatMessages,
+				{ role: 'system', content: resolvePrompt('memoryPolicy', overrides) }
 			];
 		}
 
@@ -388,7 +482,7 @@ export async function runTurn(
 				return 'Those arguments were not valid JSON, so the call was not made. Try again with a well-formed argument object, or answer without this tool.';
 			}
 
-			if (call.name === WEB_SEARCH_TOOL.name) {
+			if (call.name === WEB_SEARCH_TOOL_NAME) {
 				const query = typeof args.query === 'string' ? args.query.trim() : '';
 				if (!query) return 'This call needs a non-empty "query" string.';
 
@@ -414,7 +508,7 @@ export async function runTurn(
 				return search.context;
 			}
 
-			if (call.name === READ_PAGE_TOOL.name) {
+			if (call.name === READ_PAGE_TOOL_NAME) {
 				const url = typeof args.url === 'string' ? args.url.trim() : '';
 				if (!url) return 'This call needs a non-empty "url" string.';
 				// The same allowlist the `<read>` protocol resolves against: the model can
@@ -451,7 +545,92 @@ export async function runTurn(
 				return resolvePrompt('pageContext', overrides, { pages: read.context });
 			}
 
+			if (
+				call.name === MEMORY_PROFILE_TOOL_NAME ||
+				call.name === MEMORY_WRITE_TOOL_NAME ||
+				call.name === MEMORY_FORGET_TOOL_NAME ||
+				call.name === MEMORY_READ_TOOL_NAME
+			) {
+				if (!memory) return 'Memory is not available in this conversation.';
+				return runMemoryCall(call.name, args);
+			}
+
 			return `There is no tool called "${call.name}".`;
+		};
+
+		/**
+		 * One memory call, and what the model reads back from it.
+		 *
+		 * Refusals come back as text saying what to do instead, never as a silent
+		 * truncation or an eviction: over budget, the model has to merge or forget
+		 * and say which. Every outcome is traced, including the refusals, because
+		 * "it tried to remember something and could not" is exactly what somebody
+		 * wondering why it forgot needs to see.
+		 */
+		let notesOpened = 0;
+
+		const runMemoryCall = (name: string, args: Record<string, unknown>): string => {
+			if (!memory) return 'Memory is not available in this conversation.';
+			const text = (value: unknown) => (typeof value === 'string' ? value : '');
+
+			const traced = (
+				action: 'profile' | 'write' | 'forget',
+				title: string,
+				result: MemoryResult<PersonaMemory>
+			): string => {
+				emit({
+					type: 'trace',
+					step: { type: 'memory', memory: { action, title, refused: !result.ok } }
+				});
+				if (result.ok) return 'Kept.';
+				return result.reason;
+			};
+
+			if (name === MEMORY_PROFILE_TOOL_NAME) {
+				return traced('profile', '', memory.setProfile(text(args.text)));
+			}
+
+			if (name === MEMORY_WRITE_TOOL_NAME) {
+				const title = text(args.title).trim();
+				return traced(
+					'write',
+					title,
+					memory.write({
+						id: text(args.id).trim() || undefined,
+						title,
+						when: text(args.when),
+						body: text(args.body)
+					})
+				);
+			}
+
+			if (name === MEMORY_FORGET_TOOL_NAME) {
+				const id = text(args.id).trim();
+				const before = memory.note(id);
+				return traced('forget', before?.title ?? id, memory.forget(id));
+			}
+
+			// A turn that opens everything it has has not chosen anything, and pays
+			// for the whole memory on one message, which is what the index exists to
+			// avoid. Refused rather than truncated, so the model knows it must decide.
+			if (notesOpened >= MEMORY_LIMITS.openPerTurn) {
+				return `You have already opened ${MEMORY_LIMITS.openPerTurn} notes in this turn, which is the most allowed. Answer with what you have.`;
+			}
+			notesOpened++;
+
+			const id = text(args.id).trim();
+			const note: MemoryNote | null = memory.note(id);
+			emit({
+				type: 'trace',
+				step: {
+					type: 'memory',
+					memory: { action: 'read', title: note?.title ?? id, refused: !note }
+				}
+			});
+			if (!note) {
+				return `There is no note ${id}. The ids you can open are the ones listed in what you remember.`;
+			}
+			return `${note.title}\n${note.body}\n\n(Last confirmed ${note.confirmedAt.slice(0, 10)}. If any of it has stopped being true, correct it with ${MEMORY_WRITE_TOOL_NAME} or drop it with ${MEMORY_FORGET_TOOL_NAME}.)`;
 		};
 
 		// Two rounds for the text protocol: the model may answer the first with a

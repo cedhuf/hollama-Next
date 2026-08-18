@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		BookMarked,
 		Brain,
 		Check,
 		ChevronDown,
@@ -24,7 +25,7 @@
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThinkingIndicator from '$lib/components/ThinkingIndicator.svelte';
 	import { personasStore, settingsStore } from '$lib/localStorage';
-	import { type Message } from '$lib/sessions';
+	import { type Message, type ReasoningStep } from '$lib/sessions';
 	import { openKnowledge } from '$lib/stores/modal';
 
 	import ActivityText from './ActivityText.svelte';
@@ -177,6 +178,22 @@
 		if (pages) done.push($LL.pagesRead({ count: pages }));
 		return done.length ? done.join(' · ') : $LL.reasoning();
 	});
+
+	/** What a memory step did, in the user's language rather than the tool's. */
+	function memoryLabel(memory: ReasoningStep['memory']): string {
+		if (!memory) return $LL.memoryStepKept();
+		if (memory.refused) return $LL.memoryStepRefused();
+		switch (memory.action) {
+			case 'profile':
+				return $LL.memoryStepProfile();
+			case 'forget':
+				return $LL.memoryStepForgot();
+			case 'read':
+				return $LL.memoryStepRead();
+			default:
+				return $LL.memoryStepKept();
+		}
+	}
 
 	function toggleReasoningVisibility() {
 		isReasoningVisible = !isReasoningVisible;
@@ -369,6 +386,8 @@
 										<Brain class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{:else if step.type === 'search'}
 										<Globe class="mt-1 h-3.5 w-3.5 shrink-0" />
+									{:else if step.type === 'memory'}
+										<BookMarked class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{:else}
 										<FileText class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{/if}
@@ -397,6 +416,19 @@
 													? $LL.searchResults({ count: step.resultCount })
 													: $LL.noWebResults()}
 											</span>
+										</div>
+									{:else if step.type === 'memory'}
+										<!-- Shown for the same reason a search is shown: something was done
+										     on the user's behalf that they did not ask for. A refusal is
+										     shown too, since "it tried and could not" is what somebody
+										     wondering why it forgot needs to see. -->
+										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+											<span>{memoryLabel(step.memory)}</span>
+											{#if step.memory?.title}
+												<span class="max-w-[15rem] truncate rounded-full bg-shade-2 px-2 py-0.5">
+													{step.memory.title}
+												</span>
+											{/if}
 										</div>
 									{:else}
 										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">

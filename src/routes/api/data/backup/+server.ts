@@ -15,6 +15,7 @@ import {
 	replaceSessions,
 	replaceSettings
 } from '$lib/server/db/collections';
+import { getAllPersonaMemory, replacePersonaMemory } from '$lib/server/db/personaMemory';
 import type { Settings } from '$lib/settings';
 
 // Backups are keyed by StorageKey so files stay portable between local and
@@ -28,6 +29,7 @@ export async function GET(event) {
 		[StorageKey.Knowledge]: getKnowledge(user.id),
 		[StorageKey.Personas]: getPersonas(user.id),
 		[StorageKey.Playbooks]: getPlaybooks(user.id),
+		[StorageKey.PersonaMemory]: getAllPersonaMemory(user.id),
 		[StorageKey.Preferences]: getSettings(user.id) ?? {}
 	});
 }
@@ -41,6 +43,7 @@ export async function POST(event) {
 	const knowledge = backup[StorageKey.Knowledge];
 	const personas = backup[StorageKey.Personas];
 	const playbooks = backup[StorageKey.Playbooks];
+	const personaMemory = backup[StorageKey.PersonaMemory];
 	const settings = backup[StorageKey.Preferences] as Settings | undefined;
 
 	// An exported file never ages out: one written before notes became a single
@@ -52,6 +55,7 @@ export async function POST(event) {
 	if (Array.isArray(knowledge)) replaceKnowledge(user.id, knowledge);
 	if (Array.isArray(personas)) replacePersonas(user.id, personas);
 	if (Array.isArray(playbooks)) replacePlaybooks(user.id, playbooks);
+	if (Array.isArray(personaMemory)) replacePersonaMemory(user.id, personaMemory);
 	if (settings && typeof settings === 'object') replaceSettings(user.id, settings);
 
 	return new Response(null, { status: 204 });

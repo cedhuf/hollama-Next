@@ -143,6 +143,7 @@ export function resetUserData(userId: string): void {
 		db.prepare('DELETE FROM knowledge WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM personas WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM playbooks WHERE user_id = ?').run(userId);
+		db.prepare('DELETE FROM persona_memory WHERE user_id = ?').run(userId);
 		db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
 		db.exec('COMMIT');
 	} catch (error) {

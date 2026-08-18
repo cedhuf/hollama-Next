@@ -220,8 +220,9 @@
 		modalOpen = true;
 	}
 
-	function chatWith(persona: Persona) {
-		goto(resolve('/sessions/[id]', { id: launchPersona(persona, $settingsStore.models) }));
+	async function chatWith(persona: Persona) {
+		const id = await launchPersona(persona, $settingsStore.models);
+		goto(resolve('/sessions/[id]', { id }));
 	}
 
 	/**

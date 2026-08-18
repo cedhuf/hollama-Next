@@ -4,6 +4,7 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { Knowledge } from '$lib/knowledge';
+import type { PersonaMemory } from '$lib/personaMemory';
 import type { Persona } from '$lib/personas';
 import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
@@ -141,7 +142,8 @@ const seed = repository.hydrate?.() ?? {
 	sessions: [] as SessionSummary[],
 	knowledge: [] as Knowledge[],
 	personas: [] as Persona[],
-	playbooks: [] as Playbook[]
+	playbooks: [] as Playbook[],
+	personaMemory: [] as PersonaMemory[]
 };
 
 export const settingsStore = persistedStore<Settings>(seed.settings, DEFAULT_SETTINGS, (v) =>
@@ -167,6 +169,19 @@ export const personasStore = collectionStore<Persona>(seed.personas, {
 	remove: (id) => repository.deletePersona(id),
 	replaceAll: (personas) => repository.replacePersonas(personas),
 	summarize: (persona) => persona
+});
+/**
+ * What each persona remembers about you.
+ *
+ * A collection like the others, keyed by the persona's id, and deliberately not
+ * a field on the persona: a persona an admin shares is one object everybody
+ * reads, and a memory living on it would be everybody's.
+ */
+export const personaMemoryStore = collectionStore<PersonaMemory>(seed.personaMemory, {
+	save: (memory) => repository.savePersonaMemory(memory),
+	remove: (id) => repository.deletePersonaMemory(id),
+	replaceAll: (memories) => repository.replacePersonaMemory(memories),
+	summarize: (memory) => memory
 });
 export const playbooksStore = collectionStore<Playbook>(seed.playbooks, {
 	save: (playbook) => repository.savePlaybook(playbook),
@@ -220,6 +235,7 @@ export async function refreshStores(): Promise<void> {
 		sessionsStore.setQuiet(local.sessions);
 		knowledgeStore.setQuiet(local.knowledge);
 		personasStore.setQuiet(local.personas);
+		personaMemoryStore.setQuiet(local.personaMemory);
 		playbooksStore.setQuiet(local.playbooks);
 		return;
 	}
@@ -236,13 +252,15 @@ export async function refreshStores(): Promise<void> {
 	let sessions: SessionSummary[],
 		knowledge: Knowledge[],
 		personas: Persona[],
-		playbooks: Playbook[];
+		playbooks: Playbook[],
+		personaMemory: PersonaMemory[];
 	try {
-		[sessions, knowledge, personas, playbooks] = await Promise.all([
+		[sessions, knowledge, personas, playbooks, personaMemory] = await Promise.all([
 			repository.loadSessions(),
 			repository.loadKnowledge(),
 			repository.loadPersonas(),
-			repository.loadPlaybooks()
+			repository.loadPlaybooks(),
+			repository.loadPersonaMemory()
 		]);
 	} catch (error) {
 		reportLoadFailure(error);
@@ -252,6 +270,7 @@ export async function refreshStores(): Promise<void> {
 	sessionsStore.setQuiet(sessions);
 	knowledgeStore.setQuiet(knowledge);
 	personasStore.setQuiet(personas);
+	personaMemoryStore.setQuiet(personaMemory);
 	playbooksStore.setQuiet(playbooks);
 }
 
@@ -277,19 +296,22 @@ function reportLoadFailure(error: unknown): void {
 
 /** The network load shared by the boot and the refresh. */
 async function loadIntoStores(): Promise<void> {
-	const [settings, servers, sessions, knowledge, personas, playbooks] = await Promise.all([
-		repository.loadSettings(),
-		repository.loadServers(),
-		repository.loadSessions(),
-		repository.loadKnowledge(),
-		repository.loadPersonas(),
-		repository.loadPlaybooks()
-	]);
+	const [settings, servers, sessions, knowledge, personas, playbooks, personaMemory] =
+		await Promise.all([
+			repository.loadSettings(),
+			repository.loadServers(),
+			repository.loadSessions(),
+			repository.loadKnowledge(),
+			repository.loadPersonas(),
+			repository.loadPlaybooks(),
+			repository.loadPersonaMemory()
+		]);
 
 	if (settings) settingsStore.setQuiet(settings);
 	serversStore.setQuiet(servers);
 	sessionsStore.setQuiet(sessions);
 	knowledgeStore.setQuiet(knowledge);
 	personasStore.setQuiet(personas);
+	personaMemoryStore.setQuiet(personaMemory);
 	playbooksStore.setQuiet(playbooks);
 }

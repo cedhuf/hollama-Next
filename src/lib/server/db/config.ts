@@ -103,6 +103,23 @@ export function setStoreUrl(value: string): void {
  */
 export type ThemeSharing = 'off' | 'locked' | 'overridable';
 
+/**
+ * Whether personas may remember anything on this instance.
+ *
+ * On unless an admin says otherwise, and the switch is total rather than a
+ * default: off means the tools are not offered, nothing is injected, and nothing
+ * new is written. What was already remembered is left alone, since deleting an
+ * account's most personal data as a side effect of a setting is not a thing a
+ * toggle should be able to do. People can still erase their own from Data.
+ */
+export function personaMemoryEnabled(): boolean {
+	return getConfig('personaMemoryEnabled') !== 'false';
+}
+
+export function setPersonaMemoryEnabled(value: boolean): void {
+	setConfig('personaMemoryEnabled', value ? 'true' : 'false');
+}
+
 export function themeSharing(): ThemeSharing {
 	const value = getConfig('themeSharing');
 	return value === 'locked' || value === 'overridable' ? value : 'off';
