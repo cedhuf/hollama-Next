@@ -239,7 +239,10 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 			 VALUES (?, ?, ?, ?, ?, ?, ?)`
 		);
 		for (const [name, price] of Object.entries(pricing)) {
-			if (!hasPriceFigure(price)) continue;
+			// A unit with no figure is still an answer worth keeping: it is how an
+			// administrator records that a model is billed per minute before they
+			// have looked up the rate. It is not a price, and nothing counts it.
+			if (!hasPriceFigure(price) && !(price?.unit && price.unit !== 'token')) continue;
 			insert.run(
 				serverId,
 				name,
@@ -305,6 +308,10 @@ export function setModelKinds(serverId: string, kinds: Record<string, ModelKind>
 /**
  * Shared models nobody has priced, per system connection.
  *
+ * A row that only records a unit does not count as priced here: the join asks for
+ * a figure, not for a row, because a unit is what somebody wrote down on the way
+ * to a price rather than the price itself.
+ *
  * The hole a credit limit has if this is not checked: a model with no price is
  * not counted, so a limit that is in force everywhere else is simply absent on
  * that one — and it is absent for everybody, silently, because it was an
@@ -319,6 +326,7 @@ export function unpricedSharedModels(): { serverId: string; label: string; model
 			 JOIN servers s ON s.id = m.server_id
 			 LEFT JOIN model_pricing p
 			   ON p.server_id = m.server_id AND p.model_name = m.model_name
+			  AND (p.input IS NOT NULL OR p.output IS NOT NULL OR p.rate IS NOT NULL)
 			 WHERE s.owner_user_id IS NULL AND s.is_enabled = 1 AND p.model_name IS NULL
 			 ORDER BY label, m.model_name`
 		)

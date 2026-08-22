@@ -23,6 +23,7 @@
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { releaseUrl } from '$lib/github';
+	import { loadImages } from '$lib/images';
 	import {
 		installDialog,
 		isInstalled,
@@ -319,6 +320,9 @@
 		await loadServerChatDefaults();
 		await loadServerPersonas();
 		await loadServerPlaybooks();
+		// The gallery's index, which is small by construction: the pictures
+		// themselves are fetched one at a time by the page that shows them.
+		await loadImages();
 
 		// No personas are written at boot any more. They used to be built here and
 		// pushed straight into the store, which made "shipped with the app" and

@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Library, MessageSquareText, Plus, Search } from '@lucide/svelte';
+	import { ImageIcon, Library, MessageSquareText, Plus, Search } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { canDrawImages } from '$lib/images';
 	import type { Persona } from '$lib/personas';
 	import { modKey } from '$lib/platform';
 	import { openSearch } from '$lib/stores/modal';
@@ -33,6 +34,21 @@
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onChats = $derived(pathname.includes('/sessions'));
+	const onImages = $derived(pathname.includes('/images'));
+
+	/**
+	 * Whether this row has three destinations or two.
+	 *
+	 * Images only appears where it can actually be used: the right mode, the
+	 * instance's permission, and a model that can draw. Most instances keep two
+	 * segments and never learn the third exists, which is the point — a permanently
+	 * disabled button is a worse answer than no button.
+	 *
+	 * Three of them do not fit at this width with labels at their usual size, and
+	 * the drawer is 22rem at its widest. So the type drops a step when the third
+	 * arrives, rather than the labels being cut off or the row wrapping.
+	 */
+	const crowded = $derived($canDrawImages);
 </script>
 
 <!-- Sits above the list rather than over it. Nothing scrolls underneath, so this
@@ -110,22 +126,40 @@
 			<div class="mt-2 flex w-full gap-1.5">
 				<a
 					href={resolve('/sessions')}
-					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onChats
+					title={$LL.chats()}
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 font-medium transition-colors {crowded
+						? 'text-xs'
+						: 'text-sm'} {onChats
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
 					<MessageSquareText class="h-4 w-4 shrink-0" />
-					{$LL.chats()}
+					<span class="truncate">{$LL.chats()}</span>
 				</a>
 				<a
 					href={resolve('/library')}
-					class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors {onLibrary
+					title={$LL.library()}
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 font-medium transition-colors {crowded
+						? 'text-xs'
+						: 'text-sm'} {onLibrary
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
 					<Library class="h-4 w-4 shrink-0" />
-					{$LL.library()}
+					<span class="truncate">{$LL.library()}</span>
 				</a>
+				{#if $canDrawImages}
+					<a
+						href={resolve('/images')}
+						title={$LL.images()}
+						class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-xs font-medium transition-colors {onImages
+							? 'bg-shade-0 text-active shadow-sm'
+							: 'text-muted hover:bg-shade-0 hover:text-active'}"
+					>
+						<ImageIcon class="h-4 w-4 shrink-0" />
+						<span class="truncate">{$LL.images()}</span>
+					</a>
+				{/if}
 			</div>
 		</div>
 

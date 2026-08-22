@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
+import { hasPriceFigure } from '$lib/connections';
 import { requireUser } from '$lib/server/api';
 import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
@@ -105,7 +106,7 @@ const proxy: RequestHandler = async (event) => {
 		 * notices. The message names the cause so the user asks their
 		 * administrator rather than concluding the app is broken.
 		 */
-		if (model && !getModelPricing(server.id)[model]) {
+		if (model && !hasPriceFigure(getModelPricing(server.id)[model])) {
 			throw error(402, refusal('unpriced-model', model));
 		}
 	}

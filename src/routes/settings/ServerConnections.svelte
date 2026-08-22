@@ -352,7 +352,13 @@
 									}}
 								/>
 							</SettingsField>
-						{:else}
+						{:else if !draftProvider.identified}
+							<!-- Only the providers whose endpoint is theirs to choose. OpenAI and
+							     Claude have one fixed address that the app already knows, so asking
+							     for it offers nothing but a chance to get it wrong; anyone pointing
+							     at something else wants the OpenAI-compatible entry, which is what
+							     it is there for. An existing connection can still be redirected,
+							     under Advanced, where a rare need belongs. -->
 							<SettingsField label={$LL.baseUrl()}>
 								<input
 									class="settings-field font-mono text-xs"

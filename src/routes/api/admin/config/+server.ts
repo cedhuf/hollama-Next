@@ -6,6 +6,7 @@ import {
 	allowUserKeys,
 	allowUserPersonas,
 	getConfig,
+	imagesEnabled,
 	personaAutoUpdateForced,
 	personaMemoryEnabled,
 	personaStoreMode,
@@ -13,6 +14,7 @@ import {
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
+	setImagesEnabled,
 	setPersonaAutoUpdateForced,
 	setPersonaMemoryEnabled,
 	setPersonaStoreMode,
@@ -38,6 +40,7 @@ export async function GET(event) {
 		personaStoreMode: personaStoreMode(),
 		personaAutoUpdateForced: personaAutoUpdateForced(),
 		personaMemoryEnabled: personaMemoryEnabled(),
+		imagesEnabled: imagesEnabled(),
 		themeSharing: themeSharing(),
 		themeMode: getConfig('themeMode') ?? 'system',
 		themeStyle: getConfig('themeStyle') ?? 'classic',
@@ -70,6 +73,7 @@ export async function PUT(event) {
 	if (typeof body?.creditLimit === 'number') setInstanceCreditLimit(body.creditLimit);
 	if (['month', 'week', 'day'].includes(body?.creditPeriod)) setCreditPeriod(body.creditPeriod);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
+	if (typeof body?.imagesEnabled === 'boolean') setImagesEnabled(body.imagesEnabled);
 	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
 		setPersonaStoreMode(body.personaStoreMode);
 	}

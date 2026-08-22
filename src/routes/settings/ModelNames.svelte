@@ -189,10 +189,21 @@
 		return { ok: true, value };
 	}
 
-	/** Store a price, or drop the row entirely once it holds no figure at all. */
+	/**
+	 * Store a price, or drop the row once it holds nothing worth keeping.
+	 *
+	 * A figure is worth keeping, and so is a unit on its own: saying "this one is
+	 * billed per minute" is an answer, given before the rate is typed and often
+	 * before it is known. Dropping it there was a bug you could watch happen — the
+	 * unit snapped back to tokens the instant it was chosen, because the row it
+	 * lived in had just been deleted for being empty.
+	 *
+	 * Unpriced is still unpriced. `hasPriceFigure` is what the meter and the credit
+	 * limit ask, and a row with a unit and no figure answers no to it.
+	 */
 	function writePrice(name: string, price: ModelPrice) {
 		const pricing = { ...(server.modelPricing ?? {}) };
-		if (hasPriceFigure(price)) pricing[name] = price;
+		if (hasPriceFigure(price) || (price.unit && price.unit !== 'token')) pricing[name] = price;
 		else delete pricing[name];
 		server.modelPricing = pricing;
 		onChange();
@@ -251,7 +262,7 @@
 	function setCurrency(name: string, code: string) {
 		const pricing = { ...(server.modelPricing ?? {}) };
 		const current = pricing[name];
-		if (!hasPriceFigure(current)) return;
+		if (!current) return;
 		pricing[name] = { ...current, currency: code };
 		server.modelPricing = pricing;
 		onChange();

@@ -55,6 +55,7 @@
 
 	let personaAutoUpdateForced = $state(false);
 	let personaMemoryEnabled = $state(true);
+	let imagesEnabled = $state(false);
 	let themeSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let themeShareEnabled = $state(false);
 	let resettingOnboarding = $state(false);
@@ -150,6 +151,7 @@
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
 			personaMemoryEnabled = config.personaMemoryEnabled ?? true;
+			imagesEnabled = config.imagesEnabled ?? false;
 			themeSharing = config.themeSharing ?? 'off';
 			themeShareEnabled = themeSharing !== 'off';
 			searchSharing = config.searchSharing ?? 'off';
@@ -318,6 +320,10 @@
 		await api('/api/admin/config', 'PUT', { personaMemoryEnabled });
 	}
 
+	async function saveImages() {
+		await api('/api/admin/config', 'PUT', { imagesEnabled });
+	}
+
 	/**
 	 * The admin shares the theme they are using, the way they share their search
 	 * engine and their prompts: the panel decides who gets it, the values come
@@ -420,6 +426,14 @@
 			onChange={savePersonaMemory}
 		/>
 		<SettingsHint>{$LL.personaMemoryAllowHelp()}</SettingsHint>
+
+		<!-- Off until somebody decides otherwise, unlike most of this panel. Every
+		     provider with an image model charges real money per request, so an
+		     instance that starts drawing because it was upgraded is an instance that
+		     surprises whoever pays for it. Turning it off later hides the page and
+		     refuses the route; nothing already drawn is touched. -->
+		<FieldCheckbox label={$LL.imagesAllow()} bind:checked={imagesEnabled} onChange={saveImages} />
+		<SettingsHint>{$LL.imagesAllowHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->

@@ -2126,6 +2126,96 @@ type RootTranslation = {
 	 */
 	resetToDefault: string
 	/**
+	 * I​m​a​g​e​s
+	 */
+	images: string
+	/**
+	 * E​v​e​r​y​t​h​i​n​g​ ​y​o​u​ ​h​a​v​e​ ​g​e​n​e​r​a​t​e​d​ ​h​e​r​e​,​ ​n​e​w​e​s​t​ ​f​i​r​s​t​.
+	 */
+	imagesSubtitle: string
+	/**
+	 * {​c​o​u​n​t​}​ ​i​m​a​g​e​{​{​s​}​}
+	 * @param {number} count
+	 */
+	imagesCount: RequiredParams<'count'>
+	/**
+	 * N​o​t​h​i​n​g​ ​y​e​t​.​ ​D​e​s​c​r​i​b​e​ ​a​ ​p​i​c​t​u​r​e​ ​a​b​o​v​e​ ​a​n​d​ ​i​t​ ​w​i​l​l​ ​a​p​p​e​a​r​ ​h​e​r​e​.
+	 */
+	imagesEmpty: string
+	/**
+	 * I​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n​ ​i​s​ ​s​w​i​t​c​h​e​d​ ​o​f​f​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.​ ​Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​c​a​n​ ​t​u​r​n​ ​i​t​ ​o​n​.
+	 */
+	imagesDisabled: string
+	/**
+	 * N​o​ ​i​m​a​g​e​ ​m​o​d​e​l​ ​i​s​ ​a​v​a​i​l​a​b​l​e​.​ ​A​n​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​t​o​ ​m​a​r​k​ ​o​n​e​ ​a​s​ ​a​n​ ​i​m​a​g​e​ ​m​o​d​e​l​ ​u​n​d​e​r​ ​M​o​d​e​l​s​ ​a​n​d​ ​p​r​i​c​i​n​g​,​ ​a​n​d​ ​s​h​a​r​e​ ​i​t​.
+	 */
+	imagesNoModel: string
+	/**
+	 * D​e​s​c​r​i​b​e​ ​t​h​e​ ​p​i​c​t​u​r​e​ ​y​o​u​ ​w​a​n​t​.
+	 */
+	imagePromptPlaceholder: string
+	/**
+	 * G​e​n​e​r​a​t​e
+	 */
+	imageGenerate: string
+	/**
+	 * D​r​a​w​i​n​g​.​ ​T​h​i​s​ ​t​a​k​e​s​ ​a​ ​w​h​i​l​e​,​ ​a​n​d​ ​t​h​e​ ​r​e​s​u​l​t​ ​i​s​ ​k​e​p​t​ ​e​v​e​n​ ​i​f​ ​y​o​u​ ​l​e​a​v​e​ ​t​h​i​s​ ​p​a​g​e​.
+	 */
+	imageGeneratingHint: string
+	/**
+	 * G​e​n​e​r​a​t​i​o​n​ ​f​a​i​l​e​d
+	 */
+	imageGenerationFailed: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​d​e​l​e​t​e​ ​t​h​a​t​ ​i​m​a​g​e
+	 */
+	imageDeleteFailed: string
+	/**
+	 * S​i​z​e
+	 */
+	imageSize: string
+	/**
+	 * D​e​f​a​u​l​t​ ​s​i​z​e
+	 */
+	imageSizeDefault: string
+	/**
+	 * H​o​w​ ​m​a​n​y
+	 */
+	imageCount: string
+	/**
+	 * {​c​o​u​n​t​}​ ​i​m​a​g​e​{​{​s​}​}
+	 * @param {number} count
+	 */
+	imageCountOption: RequiredParams<'count'>
+	/**
+	 * N​e​g​a​t​i​v​e​ ​p​r​o​m​p​t
+	 */
+	imageNegativePrompt: string
+	/**
+	 * W​h​a​t​ ​t​o​ ​k​e​e​p​ ​o​u​t​ ​o​f​ ​t​h​e​ ​p​i​c​t​u​r​e​.
+	 */
+	imageNegativePromptPlaceholder: string
+	/**
+	 * N​o​t​ ​e​v​e​r​y​ ​m​o​d​e​l​ ​s​u​p​p​o​r​t​s​ ​t​h​i​s​;​ ​t​h​e​ ​o​n​e​s​ ​t​h​a​t​ ​d​o​ ​n​o​t​ ​w​i​l​l​ ​i​g​n​o​r​e​ ​i​t​.
+	 */
+	imageNegativePromptHelp: string
+	/**
+	 * R​e​u​s​e​ ​t​h​i​s​ ​p​r​o​m​p​t
+	 */
+	imageReusePrompt: string
+	/**
+	 * D​o​w​n​l​o​a​d
+	 */
+	download: string
+	/**
+	 * A​l​l​o​w​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n
+	 */
+	imagesAllow: string
+	/**
+	 * O​f​f​ ​b​y​ ​d​e​f​a​u​l​t​.​ ​I​m​a​g​e​ ​m​o​d​e​l​s​ ​a​r​e​ ​b​i​l​l​e​d​ ​p​e​r​ ​r​e​q​u​e​s​t​,​ ​s​o​ ​n​o​b​o​d​y​ ​s​t​a​r​t​s​ ​s​p​e​n​d​i​n​g​ ​u​n​t​i​l​ ​y​o​u​ ​t​u​r​n​ ​t​h​i​s​ ​o​n​.​ ​T​u​r​n​i​n​g​ ​i​t​ ​o​f​f​ ​l​a​t​e​r​ ​h​i​d​e​s​ ​t​h​e​ ​p​a​g​e​ ​a​n​d​ ​r​e​f​u​s​e​s​ ​n​e​w​ ​g​e​n​e​r​a​t​i​o​n​s​;​ ​i​m​a​g​e​s​ ​a​l​r​e​a​d​y​ ​m​a​d​e​ ​a​r​e​ ​k​e​p​t​.
+	 */
+	imagesAllowHelp: string
+	/**
 	 * L​e​t​ ​p​e​r​s​o​n​a​s​ ​r​e​m​e​m​b​e​r​ ​t​h​i​n​g​s​ ​a​b​o​u​t​ ​t​h​e​i​r​ ​u​s​e​r
 	 */
 	personaMemoryAllow: string
@@ -5226,6 +5316,94 @@ The completion in progress will stop
 	 * Reset to default
 	 */
 	resetToDefault: () => LocalizedString
+	/**
+	 * Images
+	 */
+	images: () => LocalizedString
+	/**
+	 * Everything you have generated here, newest first.
+	 */
+	imagesSubtitle: () => LocalizedString
+	/**
+	 * {count} image{{s}}
+	 */
+	imagesCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * Nothing yet. Describe a picture above and it will appear here.
+	 */
+	imagesEmpty: () => LocalizedString
+	/**
+	 * Image generation is switched off on this instance. Your administrator can turn it on.
+	 */
+	imagesDisabled: () => LocalizedString
+	/**
+	 * No image model is available. An administrator has to mark one as an image model under Models and pricing, and share it.
+	 */
+	imagesNoModel: () => LocalizedString
+	/**
+	 * Describe the picture you want.
+	 */
+	imagePromptPlaceholder: () => LocalizedString
+	/**
+	 * Generate
+	 */
+	imageGenerate: () => LocalizedString
+	/**
+	 * Drawing. This takes a while, and the result is kept even if you leave this page.
+	 */
+	imageGeneratingHint: () => LocalizedString
+	/**
+	 * Generation failed
+	 */
+	imageGenerationFailed: () => LocalizedString
+	/**
+	 * Could not delete that image
+	 */
+	imageDeleteFailed: () => LocalizedString
+	/**
+	 * Size
+	 */
+	imageSize: () => LocalizedString
+	/**
+	 * Default size
+	 */
+	imageSizeDefault: () => LocalizedString
+	/**
+	 * How many
+	 */
+	imageCount: () => LocalizedString
+	/**
+	 * {count} image{{s}}
+	 */
+	imageCountOption: (arg: { count: number }) => LocalizedString
+	/**
+	 * Negative prompt
+	 */
+	imageNegativePrompt: () => LocalizedString
+	/**
+	 * What to keep out of the picture.
+	 */
+	imageNegativePromptPlaceholder: () => LocalizedString
+	/**
+	 * Not every model supports this; the ones that do not will ignore it.
+	 */
+	imageNegativePromptHelp: () => LocalizedString
+	/**
+	 * Reuse this prompt
+	 */
+	imageReusePrompt: () => LocalizedString
+	/**
+	 * Download
+	 */
+	download: () => LocalizedString
+	/**
+	 * Allow image generation
+	 */
+	imagesAllow: () => LocalizedString
+	/**
+	 * Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.
+	 */
+	imagesAllowHelp: () => LocalizedString
 	/**
 	 * Let personas remember things about their user
 	 */
