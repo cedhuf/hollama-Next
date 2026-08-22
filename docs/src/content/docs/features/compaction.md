@@ -100,7 +100,7 @@ It goes last and **outranks** the summariser's own rules, their length and their
 
 That is deliberate, and it is worth knowing what it costs: whatever the summary leaves out is gone
 from the model's memory of the conversation. The protection is not a prompt refusing to obey you, it
-is that compaction is reversible — the divider gives the full history back.
+is that compaction is reversible, since the divider gives the full history back.
 
 Picking `/compact` from the command menu now writes it into the composer with a space after it
 instead of running it, since the point of picking it from a list is that you were not going to type
@@ -110,7 +110,7 @@ The instruction is kept in the note and shown above the summary when it is unfol
 written to an instruction is not the same object as one written to the default rules, and reading it
 without knowing that is how you conclude the summariser lost the plot.
 
-The wrapper around it is the `Compaction — what the user asked for` prompt in _Settings → Prompts_.
+The wrapper around it is the `Compaction: what the user asked for` prompt in _Settings → Prompts_.
 Commands that take no arguments only match when given none, so `/clear the air before we start` is
 the sentence it looks like.
 

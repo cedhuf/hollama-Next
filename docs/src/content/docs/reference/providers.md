@@ -79,7 +79,7 @@ call a portrait.
 
 Those conveniences come from one file per provider under `src/lib/providers/`, and adding one is a
 file and a line. Nothing else in the application names a provider, so contributing yours is a small
-change a reviewer can judge on knowing the provider rather than the codebase — and because the list
+change a reviewer can judge on knowing the provider rather than the codebase. And because the list
 is never a gate, getting a detail wrong degrades an experience instead of locking anyone out.
 
 See [Adding a provider](/development/providers/).

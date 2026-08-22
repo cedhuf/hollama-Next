@@ -35,7 +35,7 @@ with a way through to the page at its end. Like every other section there it can
 under Settings, Interface.
 
 There is no separate switch for the feature. Marking a model as one that draws is the decision, and
-on a system connection it only reaches anyone else once it is also shared — so a user sees nothing
+on a system connection it only reaches anyone else once it is also shared. A user therefore sees nothing
 until an administrator has done both, and an administrator who wants none of this marks no image
 model.
 
@@ -59,8 +59,8 @@ returns them from `/v1/models` and no amount of asking will. Where Llooma knows 
 and it appears in the list like any other model.
 
 That is the whole point of naming it. From there it is priced per minute or per image, marked shared
-or not, refused while unpriced under a credit limit, and metered against the same allowance — by the
-same machinery as everything else, rather than by a second path written beside it. If you see a model
+or not, refused while unpriced under a credit limit, and metered against the same allowance, by the
+same machinery as everything else rather than by a second path written beside it. If you see a model
 in **Models and pricing** that your provider's own documentation calls an endpoint, this is why.
 
 ## Pricing
@@ -83,7 +83,7 @@ provider took.
 Most providers serve chat and images from the same address, and there is nothing to configure.
 
 Some do not. Infomaniak, for one, serves chat from API version 2 under `/openai/v1` and images
-only from version 1 under `/openai` — no path appended to the first can reach the second. The
+only from version 1 under `/openai`, and no path appended to the first can reach the second. The
 connection form therefore has an **Image endpoint** field under Advanced. Leave it empty unless
 your provider needs it; for Infomaniak it is filled in automatically from the product ID.
 
@@ -114,7 +114,7 @@ Prompts, Images**.
 
 ## Shape and quality
 
-The composer asks for a **shape** — square, portrait or landscape — and a **quality**, rather than a
+The composer asks for a **shape** (square, portrait or landscape) and a **quality**, rather than a
 pixel count. Those two are translated into whatever the provider calls them at the moment the
 request is sent.
 
@@ -125,8 +125,8 @@ guesses wrong is a 400 that arrives after the thirty seconds, not before them.
 
 A shape survives where a pixel count does not. Every image model offers square, portrait and
 landscape; the numbers behind them differ per model and change with each new one. On Infomaniak a
-portrait is `1024x1792`, on OpenAI's `gpt-image-1` it is `1024x1536`, and on `dall-e-3` — same
-provider — it is `1024x1792` again. Quality is worse: `dall-e-3` and Infomaniak take `standard` and
+portrait is `1024x1792`, on OpenAI's `gpt-image-1` it is `1024x1536`, and on `dall-e-3`, at the same
+provider, it is `1024x1792` again. Quality is worse: `dall-e-3` and Infomaniak take `standard` and
 `hd`, `gpt-image-1` takes `low`, `medium` and `high`.
 
 **Where the app has no translation, both controls are disabled and neither field is sent.** The
@@ -156,8 +156,8 @@ model that takes none puts down whatever was attached and tells you it did, rath
 picture you would believe was going out.
 
 **Some models need a word in the prompt.** Where a picture supplies a likeness, the prompt is how
-the endpoint is told where to put it, so a particular word has to appear next to who you mean —
-`portrait photo of a woman img`. The composer says which word as soon as you attach something, and
+the endpoint is told where to put it, so a particular word has to appear next to who you mean,
+as in `portrait photo of a woman img`. The composer says which word as soon as you attach something, and
 the request is refused here rather than sent, because that refusal otherwise arrives after the wait
 and after the meter has run.
 
@@ -168,7 +168,7 @@ offering a control that fails on most pictures.
 **Reference pictures are never stored.** They travel with the one request that uses them and are
 gone after it. Nothing about that is an oversight: keeping them would mean a second quota, a second
 thing to delete and a second place a private photograph lives. The consequence is worth stating
-plainly, because it is the trade — a picture made this way cannot be remade from the gallery alone.
+plainly, because it is the trade: a picture made this way cannot be remade from the gallery alone.
 The prompt, the model and the settings are kept, the pictures you brought are not.
 
 They are checked on arrival like everything else here: the type is read from the bytes, never from
@@ -179,8 +179,8 @@ The check the browser does while you drag is a courtesy to you, never the rule.
 
 Each picture is named once it exists: three to six words, written by the same text model the prompt
 writer uses, from the prompt that made it. It is on by default, and it is a different trade from the
-rewriter above it — a rewrite changes what gets drawn and costs a request nobody asked for, a title
-changes nothing and costs a dozen tokens beside an image billed by the minute.
+rewriter above it. A rewrite changes what gets drawn and costs a request nobody asked for, while a
+title changes nothing and costs a dozen tokens beside an image billed by the minute.
 
 The title is what the gallery, the dialog and the home strip all read, falling back to the prompt
 when there is none. It is also the **filename** in an export, which is the one piece of metadata
@@ -204,13 +204,13 @@ connection, exactly as for chat.
 
 ## Where the pictures live
 
-The metadata — the prompt, the model, the size, the duration, the cost — is a row in SQLite. The
+The metadata (the prompt, the model, the size, the duration, the cost) is a row in SQLite. The
 pictures themselves are files under `DATA_DIR/images/<account>/`, beside the database, so a single
 bind mount still holds everything mutable.
 
 They are served by an authenticated route scoped to their owner: an image id is not a permission.
 The file type is decided from the bytes when the image arrives, never from what the provider
-labelled it, and only PNG, JPEG and WebP are accepted — anything served from the app's own origin
+labelled it, and only PNG, JPEG and WebP are accepted. Anything served from the app's own origin
 has to be something that cannot carry a script.
 
 Images are **not** included in the JSON backup, which is deliberate: a backup that quietly grew to
@@ -237,6 +237,6 @@ in the gallery on the next load.
 
 ## Local mode
 
-There is no image generation in local mode. The bytes have nowhere to go — browser storage is
-measured in a handful of megabytes and a single image can be several — and the sidebar entry and
+There is no image generation in local mode. The bytes have nowhere to go: browser storage is
+measured in a handful of megabytes and a single image can be several. The sidebar entry and the
 settings section simply do not exist there.

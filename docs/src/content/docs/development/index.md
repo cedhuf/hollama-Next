@@ -37,7 +37,7 @@ whether tool calling works, what a provider calls a portrait, which models take 
 all of it is data, kept per provider, because all of it changes on somebody else's schedule rather
 than on ours.
 
-The list is a convenience and never a gate — an undescribed provider still works through the
+The list is a convenience and never a gate. An undescribed provider still works through the
 OpenAI-compatible entry and only loses conveniences. That is what makes it safe to open up, and why
 **a pull request adding or fixing a provider is a small, reviewable change**: the reviewer needs to
 know the provider, not this codebase.

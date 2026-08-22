@@ -46,7 +46,7 @@ different objects and a name never says which one you are about to switch on.
 ## The store
 
 Playbooks are not shipped inside Llooma. The app reads them from the store over the network, the
-same one the personas come from — [one address](/guides/administration/), with a folder per kind
+same one the personas come from: [one address](/guides/administration/), with a folder per kind
 under it. The public listing is at [llooma.eu/playbooks](/playbooks/).
 
 Installing makes a **copy**. It lands in your library and is yours from that moment: editing it is

@@ -128,7 +128,7 @@ Native tool calling. A persona on an endpoint that cannot call tools still recei
 remembers and still answers from it, but cannot write to it or open a note by itself. You can still
 edit it by hand.
 
-The wording that decides what it keeps is the `Memory — when to write` prompt in
+The wording that decides what it keeps is the `Memory: when to write` prompt in
 _Settings → Prompts_. If a persona remembers too much, too little, or the wrong kind of thing, that
 is the thing to change. On a shared instance an administrator can turn the whole feature off.
 

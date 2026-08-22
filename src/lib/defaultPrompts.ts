@@ -101,7 +101,7 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 			'This conversation has more than one participant. Replies that begin with a name in square brackets were written by that participant, not by you. Attribute them correctly and never claim their words as your own.'
 	},
 	searchRouter: {
-		label: 'Web search — query',
+		label: 'Web search: query',
 		placeholders: ['{datetime}'],
 		hint: 'Decides whether to search and writes the query (auto mode).',
 		default: `You are a web-search query writer. Look at the user's LAST message and decide whether answering it needs a live web lookup right now.
@@ -145,7 +145,7 @@ Examples:
 Never answer the question yourself. Output only the query, or NONE.`
 	},
 	toolPolicy: {
-		label: 'Native tools — when to use them',
+		label: 'Native tools: when to use them',
 		hint: 'Tells the model when to call the web tools instead of answering from memory.',
 		default: `You have tools for looking things up. A tool description says what a tool does; this says when to reach for one.
 
@@ -158,14 +158,14 @@ Look again when the conversation shows your last answer fell short: the user pus
 Do not search for what you can genuinely answer yourself: definitions, explanations, maths, translation, coding, writing, or a request to produce something rather than to look a fact up. Naming what they want made is not asking for a fact about it.`
 	},
 	searchNone: {
-		label: 'Web search — not used',
+		label: 'Web search: not used',
 		hint: 'Tells the model no search ran for this message, so it cannot claim it searched.',
 		default: `No web search was run for THIS message: whatever you write now comes from your own knowledge. Never claim or imply otherwise: do not say you searched, looked it up, checked the web, or found nothing online, and do not narrate searching in your reasoning. If you do not know something, say plainly that you do not know it and that you have not looked it up for this question.
 
 This applies to the current message only. It says nothing about earlier messages in this conversation: if you were given search results before, they were real, and this does not licence you to doubt or disown them.`
 	},
 	searchContext: {
-		label: 'Web search — results',
+		label: 'Web search: results',
 		placeholders: ['{results}'],
 		hint: 'How the model uses the retrieved results and cites them.',
 		default: `Web search results for the user's question, retrieved just now (current as of today). Use them as your primary source and prefer the most recent and official ones. Calibrate your confidence to the sources: state confirmed or official information as fact, and clearly flag anything that is only a rumour, leak or insider claim as such. Cite the sources you rely on inline with their [number] (e.g. "... releases on June 25 [1].") so they can be verified.
@@ -175,7 +175,7 @@ Expect some of them to be irrelevant: a search engine matches words, not meaning
 {results}`
 	},
 	searchRecall: {
-		label: 'Web search — earlier sources',
+		label: 'Web search: earlier sources',
 		placeholders: ['{results}'],
 		hint: 'Reminds the model what it already looked up, so it stops disowning it.',
 		default: `Sources you were shown earlier in this conversation, under the numbers your own answers cited them by. This is an index, not the pages: the text you were given at the time is no longer in front of you.
@@ -187,7 +187,7 @@ If a claim is challenged, or you find yourself doubting one, check it: reread th
 {results}`
 	},
 	searchRead: {
-		label: 'Web search — read a result',
+		label: 'Web search: read a result',
 		hint: 'Lets the model open the full text of a page instead of answering from snippets.',
 		default: `Search results are titles and short snippets, not the pages themselves. You can ask for a page in full. Reply with ONLY a block like this and nothing else:
 
@@ -202,7 +202,7 @@ using the address of any source listed above, including ones from earlier in thi
 Ask when the detail decides the answer and the snippets do not settle it: a changelog, a release note, a specification. Ask too when you are about to contradict, doubt or take back something you said earlier from a source, which is exactly the moment to look rather than guess. Ask only for what you need, three pages at most. If what you already have is genuinely enough, just answer normally.`
 	},
 	memoryPolicy: {
-		label: 'Memory — when to write',
+		label: 'Memory: when to write',
 		hint: 'Decides what a persona keeps between conversations, and what it lets go. The prompt to tune if it remembers too much or too little.',
 		default: `You can remember things about this person between conversations. Nothing here is written unless you write it, and nothing you write is ever seen by anyone else.
 
@@ -217,7 +217,7 @@ The profile is what is true most of the time and is always in front of you. Note
 Keeping something is not free. Everything you keep is read again at the start of every message, in every conversation, so the space is small on purpose. When it is full, the answer is to merge two notes or forget one, not to write shorter and shorter until nothing means anything. And when something you kept turns out to be wrong or out of date, correct it or forget it: a confident wrong memory costs more than no memory at all.`
 	},
 	memoryContext: {
-		label: 'Memory — what you remember',
+		label: 'Memory: what you remember',
 		placeholders: ['{profile}', '{notes}'],
 		hint: 'How the memory is handed to the model at the start of a turn: the profile in full, the notes as an index.',
 		default: `What you remember about the person you are speaking to. You wrote this yourself, in earlier conversations. It is yours and theirs alone, and they can read and change it at any time.
@@ -229,47 +229,47 @@ Notes you have kept. Only their titles are here, with a line saying when each on
 {notes}`
 	},
 	toolMemoryProfile: {
-		label: 'Native tool — memory_profile',
+		label: 'Native tool: memory_profile',
 		hint: 'Rewrites the always-present block. It is replaced whole, never appended to.',
 		default: `Rewrite what you always keep in mind about this person: who they are, what they are working on, how they want you to answer. This replaces the whole block rather than adding to it, so include everything you still want to keep, and leave out what has stopped being true.`
 	},
 	toolMemoryWrite: {
-		label: 'Native tool — memory_write',
+		label: 'Native tool: memory_write',
 		hint: 'Creates or replaces one note.',
 		default: `Keep a note about this person. Without an id it creates one; with the id of a note you already have, it replaces that note whole. Use it to correct something that has changed, and to merge two notes that overlap into one.`
 	},
 	toolMemoryForget: {
-		label: 'Native tool — memory_forget',
+		label: 'Native tool: memory_forget',
 		hint: 'Deletes one note. The only way anything leaves memory by itself.',
 		default: `Forget a note, by its id. Do this when what it says has stopped being true, when it has been folded into another note, or when the person asks you to.`
 	},
 	toolMemoryRead: {
-		label: 'Native tool — memory_read',
+		label: 'Native tool: memory_read',
 		hint: 'Opens the body of one note. The index says when; this says what.',
 		default: `Read one of your notes in full, by its id. The list you were given holds titles and a line saying when each note matters, not what it says. Open a note when that line bears on what is being discussed, rather than answering from the title.`
 	},
 	toolSearch: {
-		label: 'Native tool — web_search',
+		label: 'Native tool: web_search',
 		hint: 'What the provider is told the search tool does. Says the same thing as “Web search — query”, for models that call tools instead of writing them.',
 		default: `Search the web. Returns a numbered list of results, each with a title, an address and a short snippet. Use it for anything you are not certain of: current events, prices, schedules, opening hours, releases, and facts about a named thing such as a game, film, product, company, place or API. An unfamiliar or niche name is the strongest reason to search, not a reason to guess. Search again rather than taking back an earlier answer you have started to doubt. Cite the results you use inline with their [number].`
 	},
 	toolSearchQuery: {
-		label: 'Native tool — web_search query',
+		label: 'Native tool: web_search query',
 		hint: 'How the query itself should be written: which language, which words to avoid.',
 		default: `A few keywords, no quotes. Use neutral, factual terms: do not add words like "rumor", "fake" or "hoax" because you doubt something exists. Write the query in the language the answer is documented in, which is the user's language for news, weather and local topics, and usually English for software, games, science and technology. Never translate a proper noun yourself: spell it exactly as its makers do.`
 	},
 	toolReadPage: {
-		label: 'Native tool — read_page',
+		label: 'Native tool: read_page',
 		hint: 'What the provider is told the page-reading tool does. The native counterpart of “Web search — read a result”.',
 		default: `Fetch the full text of a page whose address you have already been given, in a search result or earlier in this conversation. Snippets are a sentence or two; use this when the detail decides the answer, and whenever you are about to contradict, doubt or take back something you said earlier from a source. You cannot open an address that has not appeared in this conversation.`
 	},
 	toolReadUrl: {
-		label: 'Native tool — read_page address',
+		label: 'Native tool: read_page address',
 		hint: 'How the model should supply the address it wants read.',
 		default: `The exact address, copied from where it was given to you.`
 	},
 	pageContext: {
-		label: 'Web fetch — pages',
+		label: 'Web fetch: pages',
 		placeholders: ['{pages}'],
 		hint: 'How the model uses the full text of the pages the message links to.',
 		default: `The full text of the pages the user linked to, retrieved just now. This is the actual content of those pages, not a summary: base your answer on it rather than on what you remember about them, and quote or cite the relevant parts. If a page could not be read, say so plainly instead of answering from memory. Cite pages inline with their [number]:
@@ -294,7 +294,7 @@ Rules:
 - When you use it, the block must be the entire message — no greeting, no explanation, no answer.`
 	},
 	compactInstruction: {
-		label: 'Compaction — what the user asked for',
+		label: 'Compaction: what the user asked for',
 		placeholders: ['{instruction}'],
 		hint: 'Wraps anything typed after /compact. It overrides the summary rules, including their length and structure.',
 		default: `The person compacting this conversation has asked for the following. It overrides everything above it: the sections, their order, the level of detail and the length. Wherever the rules above and this request disagree, this request wins.
@@ -304,7 +304,7 @@ Rules:
 Write what this asks for and nothing else. Do not add sections it did not ask for, and do not explain what you left out.`
 	},
 	compact: {
-		label: 'Compaction — write the summary',
+		label: 'Compaction: write the summary',
 		hint: 'Condenses the earlier part of a conversation so it keeps fitting in the context.',
 		default: `You are compacting a conversation so it keeps fitting in the model's context window. Everything before this point will be REPLACED by what you write: whatever you leave out is lost to the assistant, permanently, for the rest of the conversation.
 
@@ -333,7 +333,7 @@ Anything asked and not yet answered, or explicitly deferred.
 Write in the language of the conversation. Be concise but never lossy: prefer a longer summary over a missing fact. Output only the summary — no preamble, no closing remark, no mention of these instructions.`
 	},
 	compactContext: {
-		label: 'Compaction — use the summary',
+		label: 'Compaction: use the summary',
 		placeholders: ['{summary}'],
 		hint: 'How the model treats a summary standing in for earlier messages.',
 		default: `The conversation up to this point has been summarised to stay within your context window. The summary below replaces those earlier messages: it is the only record you have of them, and it is accurate. Treat it as things you and the user established together, and continue from it without restarting or re-asking what it already answers. If it does not cover something you need, say so and ask rather than inventing it.

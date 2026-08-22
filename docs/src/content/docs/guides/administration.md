@@ -65,7 +65,7 @@ Two switches under _User permissions_:
 ## Images
 
 Sharing only, like every other feature on this tab: a default image model and a prompt writer, with
-the same three states as everything else here — off, locked, or overridable.
+the same three states as everything else here: off, locked, or overridable.
 
 Whether this instance draws at all is not a switch here. It is whether a model is marked as one that
 draws, under _Models and pricing_, and whether it is shared on its connection. Both of those are
@@ -77,7 +77,7 @@ Which models anyone can actually reach is still the shared-models list on each s
 and an image model has to be marked as one under _Models and pricing_ before it can be chosen at
 all. Marking it there is also what keeps embedding and speech models out of the chat picker.
 
-Price image models by the unit their provider bills in — per image, per second or per minute rather
+Price image models by the unit their provider bills in: per image, per second or per minute rather
 than per million tokens. A model with no figure is unpriced, which means it is not counted towards
 anybody's spending and is refused outright while a credit limit is in force, so it does not become a
 hole in the limit.
@@ -109,7 +109,7 @@ Set the default allowance and how often it starts again in _Settings → Users_,
 resets every calendar month, every week (from Monday) or every day, whichever suits how closely you
 want to watch.
 
-Each account can have its own — both the figure and the period — folded away behind its row, in the
+Each account can have its own, both the figure and the period, folded away behind its row in the
 same two controls. An empty field means **follow the instance**, which is not the same as typing the
 same number: an account that inherits follows the default when you change it, and one that was given
 a copy does not.
@@ -120,7 +120,7 @@ until you decide otherwise.
 ### What is counted
 
 What each provider reports it used, and nothing else. Llooma's own token estimate divides characters
-by 3.7 — it exists to colour the load ring and to decide when to compact, and charging somebody with
+by 3.7. It exists to colour the load ring and to decide when to compact, and charging somebody with
 it would be inventing a figure and then acting on it.
 
 A model with **no price set** is not counted at all. That is deliberate, and it is not the same as
@@ -143,8 +143,8 @@ would be neither.
 
 Every account can see its own figure in _Settings → Profile_: what it has spent, what it is allowed,
 that the allowance was set by an administrator, when the counter starts again, and the last thirty
-days as a chart — a total says how much, not whether it happened yesterday or has been happening all
-month. Administrators see theirs too; being able to raise your own ceiling is not a reason to be
+days as a chart, because a total says how much but not whether it happened yesterday or has been
+happening all month. Administrators see theirs too; being able to raise your own ceiling is not a reason to be
 unable to see it.
 
 The same card appears in **local mode**, where there is no account to limit and nobody to limit it.
@@ -156,7 +156,7 @@ there.
 
 The limit is checked **before a turn starts**, in the relay every request passes through. A turn
 already under way always finishes, even if it goes over. Someone over their allowance is told so
-when they send the next message, and listing models still works — an app that cannot draw its own
+when they send the next message, and listing models still works. An app that cannot draw its own
 settings page is broken rather than restrained.
 
 ### What it is approximate about
