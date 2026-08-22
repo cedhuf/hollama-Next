@@ -326,11 +326,16 @@
 					</h2>
 
 					{#if recentImages.length > 0}
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-3">
 							<!-- `min-w-0` so the strip can be narrower than its content, which is
-							     what lets it scroll rather than push the button off the row. -->
-							<div class="overflow-scrollbar min-w-0 flex-1 overflow-y-hidden">
-								<div class="flex w-max gap-2 pb-1">
+							     what lets it scroll rather than push the button off the row.
+
+							     Quiet rather than the app's usual scroller: a styled bar never fades
+							     out, and under a row of 64px thumbnails it is a grey line drawn
+							     permanently across the section. A thumbnail cut off at the edge
+							     already says there is more to the right. -->
+							<div class="overflow-quiet min-w-0 flex-1 overflow-y-hidden">
+								<div class="flex w-max gap-2">
 									{#each recentImages as image (image.id)}
 										<!-- The app's own tooltip rather than the browser's: a strip of
 										     thumbnails is unreadable without one, and a `title` attribute
@@ -358,12 +363,18 @@
 							</div>
 
 							<!-- The way to the page, at the end of the strip: you arrive at it
-							     having looked along what is already there. -->
+							     having looked along what is already there.
+
+							     Round and small, not a bordered 64px square. Matching the thumbnails
+							     made it read as one more tile, an empty one, which is the wrong thing
+							     for the only control in the row. A disc the size of the app's other
+							     round controls reads as a control, and being shorter than the strip it
+							     centres against it instead of squaring up to it. -->
 							<a
 								href={resolve('/images')}
 								title={$LL.images()}
 								aria-label={$LL.images()}
-								class="border-shade-3 text-muted hover:border-shade-4 hover:bg-shade-0 hover:text-active flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border transition-colors"
+								class="border-shade-3 text-muted hover:border-accent hover:text-accent flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border transition-colors"
 							>
 								<ArrowRight class="h-4 w-4" />
 							</a>

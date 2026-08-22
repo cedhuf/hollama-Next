@@ -346,6 +346,26 @@
 	}
 }
 
+/**
+ * A row that scrolls sideways and says nothing about it.
+ *
+ * The companion to `overflow-scrollbar`, and the opposite trade. Styling a
+ * scrollbar at all is what opts an element out of the overlay behaviour macOS
+ * and iOS give it: any width, any colour, and the bar stops fading away and sits
+ * there for as long as the element does. That is worth it down a long pane,
+ * where the bar is how you learn there is more. It is not worth it across a row
+ * of thumbnails, where it is a grey line under the pictures at all times and the
+ * pictures already run visibly past the edge.
+ */
+@utility overflow-quiet {
+	overflow: auto;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 @utility badge {
 	@apply border-shade-3 text-muted inline-flex max-w-max items-center rounded-md border px-2 py-0.5 font-mono text-xs;
 }
