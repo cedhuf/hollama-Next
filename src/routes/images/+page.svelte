@@ -99,8 +99,14 @@
 	 */
 	const SIZES = ['', '1024x1024', '1024x1792', '1792x1024'];
 
-	/** Whether the rewriter is configured at all, here or by the administrator. */
-	const canRewrite = $derived(!!$chatDefaultsConfig.images.imagePromptModel);
+	/**
+	 * Whether to offer the rewriter: switched on, and with a model to run it —
+	 * its own, or failing that the one this account uses for everything else.
+	 */
+	const canRewrite = $derived(
+		$chatDefaultsConfig.images.imagePromptWriter &&
+			!!($chatDefaultsConfig.images.imagePromptModel || $chatDefaultsConfig.defaultModel.value)
+	);
 
 	// The instance's or the account's default, and failing both the first model
 	// that can draw — so the field is never empty on arrival.
@@ -215,14 +221,23 @@
 >
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
-		<div class="mx-auto w-full max-w-4xl px-6 py-8">
-			<div class="mb-1 flex items-center justify-between gap-3">
-				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.images()}</h1>
-				{#if $imagesStore.length}
-					<span class="shrink-0 text-xs tabular-nums text-muted">
-						{$LL.imagesCount({ count: $imagesStore.length })}
-					</span>
-				{/if}
+		<div class="mx-auto w-full max-w-5xl px-6 py-8">
+			<!-- Same header as the library's, down to the height of the row. Its right
+			     side carries buttons, which makes that row taller than a line of text;
+			     without a floor here the two titles sit at different heights and moving
+			     between the pages reads as a jump. The count sits beside the title the
+			     way every section count in the app does. -->
+			<div class="mb-1 flex min-h-9 items-center justify-between gap-3">
+				<div class="flex min-w-0 items-baseline gap-2">
+					<h1 class="truncate text-xl font-semibold tracking-tight text-active">
+						{$LL.images()}
+					</h1>
+					{#if $imagesStore.length}
+						<span class="shrink-0 text-xs tabular-nums text-muted">
+							{$imagesStore.length}
+						</span>
+					{/if}
+				</div>
 			</div>
 			<p class="mb-7 text-sm text-muted">{$LL.imagesSubtitle()}</p>
 

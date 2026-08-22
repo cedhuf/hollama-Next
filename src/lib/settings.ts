@@ -61,12 +61,15 @@ export interface Settings {
 	compactModel: string | null;
 	/** The image model the gallery starts on. Empty = the first one available. */
 	defaultImageModel: string | null;
+	/** Offer to rewrite a description into a fuller image prompt. */
+	imagePromptWriter: boolean;
 	/**
-	 * The text model that rewrites a description into an image prompt.
+	 * The text model that does the rewriting.
 	 *
-	 * Empty means the rewriter is not offered at all, which is the default: it is
-	 * a second model and a second bill, and an app that quietly spends on one
-	 * because a field was blank is an app nobody trusts with the first.
+	 * Empty means the default model, like every other model field in the app. An
+	 * empty field that silently meant "off" was the odd one out: everywhere else
+	 * blank means "whatever you normally use", and a switch is how something is
+	 * turned off.
 	 */
 	imagePromptModel: string | null;
 	/** Compact on its own once the conversation crosses `compactThreshold`. */
@@ -288,6 +291,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	titleModel: null,
 	compactModel: null,
 	defaultImageModel: null,
+	imagePromptWriter: true,
 	imagePromptModel: null,
 	autoCompact: false,
 	compactThreshold: 80000,

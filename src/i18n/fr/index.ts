@@ -627,6 +627,7 @@ const fr = extendDictionary(en, {
 		'Celui sur lequel la galerie démarre. Vous pouvez toujours en choisir un autre à chaque image.',
 	imagePromptWriter: 'Rédacteur de prompt',
 	imagePromptWriterOff: 'Désactivé',
+	imagePromptWriterModel: "Quel modèle l'écrit",
 	imagePromptWriterHelp:
 		'Un modèle de texte qui transforme une description simple en prompt plus complet. Laissez-le désactivé pour envoyer exactement ce que vous tapez.',
 	imagePromptEditableHint:

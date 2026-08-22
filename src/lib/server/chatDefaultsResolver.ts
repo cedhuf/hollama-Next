@@ -50,10 +50,11 @@ export interface ResolvedChatDefaults {
 	 */
 	images: {
 		defaultImageModel: string;
+		imagePromptWriter: boolean;
 		imagePromptModel: string;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { defaultImageModel: string; imagePromptModel: string };
+		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
 }
 
@@ -154,10 +155,12 @@ export function resolveChatDefaults(
 	// --- images ---
 	const ownImages = {
 		defaultImageModel: userSettings?.defaultImageModel ?? '',
+		imagePromptWriter: userSettings?.imagePromptWriter ?? DEFAULT_SETTINGS.imagePromptWriter,
 		imagePromptModel: userSettings?.imagePromptModel ?? ''
 	};
 	const adminImages = {
 		defaultImageModel: getConfig('defaultImageModel') ?? '',
+		imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
 		imagePromptModel: getConfig('imagePromptModel') ?? ''
 	};
 	const imagesSharing = (getConfig('imagesSharing') as Sharing) || 'off';

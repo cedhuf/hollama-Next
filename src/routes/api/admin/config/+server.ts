@@ -57,6 +57,7 @@ export async function GET(event) {
 		compactSharing: getConfig('compactSharing') ?? 'off',
 		imagesSharing: getConfig('imagesSharing') ?? 'off',
 		defaultImageModel: getConfig('defaultImageModel') ?? '',
+		imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
 		imagePromptModel: getConfig('imagePromptModel') ?? '',
 		webFetchSharing: getConfig('webFetchSharing') ?? 'off',
 		webFetchEnabled: getConfig('webFetchEnabled') !== 'false',
@@ -145,6 +146,9 @@ export async function PUT(event) {
 	}
 	if (typeof body?.defaultImageModel === 'string') {
 		setConfig('defaultImageModel', body.defaultImageModel);
+	}
+	if (typeof body?.imagePromptWriter === 'boolean') {
+		setConfig('imagePromptWriter', body.imagePromptWriter ? 'true' : 'false');
 	}
 	if (typeof body?.imagePromptModel === 'string') {
 		setConfig('imagePromptModel', body.imagePromptModel);

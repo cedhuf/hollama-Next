@@ -2228,6 +2228,10 @@ type RootTranslation = {
 	 */
 	imagePromptWriterOff: string
 	/**
+	 * W​h​i​c​h​ ​m​o​d​e​l​ ​w​r​i​t​e​s​ ​i​t
+	 */
+	imagePromptWriterModel: string
+	/**
 	 * A​ ​t​e​x​t​ ​m​o​d​e​l​ ​t​h​a​t​ ​t​u​r​n​s​ ​a​ ​p​l​a​i​n​ ​d​e​s​c​r​i​p​t​i​o​n​ ​i​n​t​o​ ​a​ ​f​u​l​l​e​r​ ​p​r​o​m​p​t​.​ ​L​e​a​v​e​ ​i​t​ ​o​f​f​ ​t​o​ ​s​e​n​d​ ​e​x​a​c​t​l​y​ ​w​h​a​t​ ​y​o​u​ ​t​y​p​e​.
 	 */
 	imagePromptWriterHelp: string
@@ -5631,6 +5635,10 @@ The completion in progress will stop
 	 * Off
 	 */
 	imagePromptWriterOff: () => LocalizedString
+	/**
+	 * Which model writes it
+	 */
+	imagePromptWriterModel: () => LocalizedString
 	/**
 	 * A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.
 	 */

@@ -42,10 +42,11 @@ export interface ChatDefaultsView {
 	/** Which model draws, and which one writes the prompt for it. */
 	images: {
 		defaultImageModel: string;
+		imagePromptWriter: boolean;
 		imagePromptModel: string;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { defaultImageModel: string; imagePromptModel: string };
+		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
 }
 
@@ -104,10 +105,11 @@ export const chatDefaultsConfig = derived(
 			},
 			images: {
 				defaultImageModel: $s.defaultImageModel ?? '',
+				imagePromptWriter: $s.imagePromptWriter,
 				imagePromptModel: $s.imagePromptModel ?? '',
 				editable: true,
 				source: 'user',
-				admin: { defaultImageModel: '', imagePromptModel: '' }
+				admin: { defaultImageModel: '', imagePromptWriter: true, imagePromptModel: '' }
 			}
 		};
 
@@ -160,6 +162,7 @@ export const chatDefaultsConfig = derived(
 				? {
 						...$srv.images,
 						defaultImageModel: $s.defaultImageModel,
+						imagePromptWriter: $s.imagePromptWriter,
 						imagePromptModel: $s.imagePromptModel ?? '',
 						source: 'user' as const
 					}

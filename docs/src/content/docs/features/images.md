@@ -16,7 +16,7 @@ of those are deliberate, and both are explained below.
 Three things have to be true before the Images entry appears in the sidebar:
 
 1. The instance runs in server mode.
-2. An administrator has ticked **Allow image generation** in Settings, Admin.
+2. An administrator has ticked **Allow image generation**, in the Images section of Settings, Admin.
 3. At least one model on a connection is marked as an image model.
 
 If any of them is missing, there is no Images entry at all rather than one that leads nowhere. A
@@ -77,10 +77,12 @@ Image models respond to a different kind of writing than a chat model does: fram
 lighting, palette, level of detail. Turning what you meant into that is a job a text model is good
 at.
 
-Under **Settings, Tools, Images** you can name a text model as the **prompt writer**. It is off by
-default, because it is a second model and a second bill.
+Under **Settings, Tools, Images** there is a **prompt writer** switch, on by default, and a field
+saying which model does the writing. Leave that field on _Default model_ and it uses whatever model
+this account normally uses, which is what a blank model field means everywhere else in the app.
+Turning the feature off is what the switch is for.
 
-With one set, an **Improve the prompt** button appears beside the field. What it produces is shown
+With it on, an **Improve the prompt** button appears beside the field. What it produces is shown
 in its own editable box, and that box is what gets sent. It never overwrites what you typed:
 clearing it sends your own words again. Both are kept on the image afterwards, so "why does this
 not look like what I asked for" stays a question with an answer.

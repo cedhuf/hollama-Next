@@ -271,33 +271,48 @@
 					<ModelSelect
 						value={imagesCfg.defaultImageModel || undefined}
 						kinds={['image']}
+						emptyLabel={$LL.defaultModel()}
 						onSelect={(name) => ($settingsStore.defaultImageModel = name || null)}
 					/>
 				</SettingsField>
 
-				<!-- Empty means the rewriter is not offered. A second model is a second
-				     bill, so it is asked for rather than assumed. -->
-				<SettingsField label={$LL.imagePromptWriter()} hint={$LL.imagePromptWriterHelp()}>
-					<ModelSelect
-						value={imagesCfg.imagePromptModel || undefined}
-						emptyLabel={$LL.imagePromptWriterOff()}
-						onSelect={(name) => ($settingsStore.imagePromptModel = name || null)}
-					/>
-				</SettingsField>
+				<!-- A switch turns it off, and the field below says which model does it.
+				     Blank there means the model you normally use, like every other model
+				     field in the app. -->
+				<FieldCheckbox
+					label={$LL.imagePromptWriter()}
+					bind:checked={$settingsStore.imagePromptWriter}
+				/>
+				<SettingsHint>{$LL.imagePromptWriterHelp()}</SettingsHint>
+
+				{#if $settingsStore.imagePromptWriter}
+					<SettingsField label={$LL.imagePromptWriterModel()}>
+						<ModelSelect
+							value={imagesCfg.imagePromptModel || undefined}
+							emptyLabel={$LL.defaultModel()}
+							onSelect={(name) => ($settingsStore.imagePromptModel = name || null)}
+						/>
+					</SettingsField>
+					<SettingsHint>{$LL.imagePromptEditableHint()}</SettingsHint>
+				{/if}
 			{:else}
 				<SettingsField label={$LL.defaultImageModel()}>
-					<input class="settings-field" disabled value={imagesCfg.defaultImageModel || '—'} />
+					<input
+						class="settings-field"
+						disabled
+						value={imagesCfg.defaultImageModel || $LL.defaultModel()}
+					/>
 				</SettingsField>
 				<SettingsField label={$LL.imagePromptWriter()}>
 					<input
 						class="settings-field"
 						disabled
-						value={imagesCfg.imagePromptModel || $LL.imagePromptWriterOff()}
+						value={imagesCfg.imagePromptWriter
+							? imagesCfg.imagePromptModel || $LL.defaultModel()
+							: $LL.imagePromptWriterOff()}
 					/>
 				</SettingsField>
 			{/if}
-
-			<SettingsHint>{$LL.imagePromptEditableHint()}</SettingsHint>
 		</SettingsSection>
 	{/if}
 

@@ -294,6 +294,7 @@
 		await api('/api/admin/config', 'PUT', {
 			imagesSharing,
 			defaultImageModel: $settingsStore.defaultImageModel ?? '',
+			imagePromptWriter: $settingsStore.imagePromptWriter,
 			imagePromptModel: $settingsStore.imagePromptModel ?? ''
 		});
 	}
@@ -448,14 +449,6 @@
 			onChange={savePersonaMemory}
 		/>
 		<SettingsHint>{$LL.personaMemoryAllowHelp()}</SettingsHint>
-
-		<!-- Off until somebody decides otherwise, unlike most of this panel. Every
-		     provider with an image model charges real money per request, so an
-		     instance that starts drawing because it was upgraded is an instance that
-		     surprises whoever pays for it. Turning it off later hides the page and
-		     refuses the route; nothing already drawn is touched. -->
-		<FieldCheckbox label={$LL.imagesAllow()} bind:checked={imagesEnabled} onChange={saveImages} />
-		<SettingsHint>{$LL.imagesAllowHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<!-- Web search sharing -->
@@ -589,8 +582,20 @@
 	<!-- Image defaults sharing. Only worth showing once the instance draws at all:
 	     a panel for choosing which model an instance uses for something it has
 	     switched off is a panel about nothing. -->
-	{#if imagesEnabled}
-		<SettingsSection title={$LL.imagesSharing()} description={$LL.imagesSharingDescription()} card>
+	<!-- One section for the whole feature: whether this instance draws, and what it
+	     draws with. They were two, a permission in the list above and a sharing panel
+	     down here, which read as the same subject asked about twice. Every other
+	     feature on this tab is one heading with everything about it underneath. -->
+	<SettingsSection title={$LL.images()} description={$LL.imagesSharingDescription()} card>
+		<!-- Off until somebody decides otherwise, unlike most of this tab. Every
+		     provider with an image model charges real money per request, so an
+		     instance that starts drawing because it was upgraded is an instance that
+		     surprises whoever pays for it. Turning it off later hides the page and
+		     refuses the route; nothing already drawn is touched. -->
+		<FieldCheckbox label={$LL.imagesAllow()} bind:checked={imagesEnabled} onChange={saveImages} />
+		<SettingsHint>{$LL.imagesAllowHelp()}</SettingsHint>
+
+		{#if imagesEnabled}
 			<FieldCheckbox
 				label={$LL.shareImages()}
 				bind:checked={imagesShareEnabled}
@@ -599,12 +604,14 @@
 			{#if imagesShareEnabled}
 				<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
 				<span class="text-xs text-muted">
-					{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || '—'}
-					· {$settingsStore.imagePromptModel || $LL.imagePromptWriterOff()}
+					{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || $LL.defaultModel()}
+					· {$settingsStore.imagePromptWriter
+						? $settingsStore.imagePromptModel || $LL.defaultModel()
+						: $LL.imagePromptWriterOff()}
 				</span>
 			{/if}
-		</SettingsSection>
-	{/if}
+		{/if}
+	</SettingsSection>
 
 	<!-- Web fetch sharing -->
 	<SettingsSection

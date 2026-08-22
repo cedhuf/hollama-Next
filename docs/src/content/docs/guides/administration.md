@@ -61,15 +61,19 @@ Two switches under _User permissions_:
   before memory existed. What people already wrote is left alone, because erasing the most personal
   data on the instance should not be a side effect of a switch. Each memory belongs to one account
   and is never visible to anyone else, you included.
-- **Allow image generation.** Off by default, unlike the rest of this list. Image models are billed
-  per request, and often per minute of processing, so an instance that started drawing because it
-  was upgraded would surprise whoever pays for it. Off hides the Images entry everywhere and refuses
-  the route; images already made are kept. See [Images](/features/images/).
 
-## Image defaults
+## Images
 
-Once image generation is on, a section appears for handing the instance a default image model and a
-prompt writer, with the same three states as everything else here: off, locked, or overridable.
+One section, holding both halves of the feature: whether this instance draws, and what it draws
+with.
+
+**Allow image generation** is off by default, unlike the rest of this tab. Image models are billed
+per request, and often per minute of processing, so an instance that started drawing because it was
+upgraded would surprise whoever pays for it. Off hides the Images entry everywhere and refuses the
+route; images already made are kept.
+
+With it on, you can hand the instance a default image model and a prompt writer, with the same three
+states as everything else here: off, locked, or overridable.
 
 Which models anyone can actually reach is still the shared-models list on each system connection,
 and an image model has to be marked as one under _Models and pricing_ before it can be chosen at

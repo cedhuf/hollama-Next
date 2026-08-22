@@ -22,8 +22,14 @@ import { serversStore, settingsStore } from '$lib/localStorage';
  * being overruled costs one keystroke.
  */
 export async function writeImagePrompt(description: string): Promise<string | null> {
-	const modelName = get(chatDefaultsConfig).images.imagePromptModel;
-	if (!modelName || !description.trim()) return null;
+	const defaults = get(chatDefaultsConfig);
+	if (!defaults.images.imagePromptWriter || !description.trim()) return null;
+
+	// Blank means the model you normally use, which is what blank means in every
+	// other model field in the app. Turning the writer off is what the switch is
+	// for; an empty field was never meant to be a second way of saying it.
+	const modelName = defaults.images.imagePromptModel || defaults.defaultModel.value;
+	if (!modelName) return null;
 
 	const model = get(settingsStore).models?.find((m) => m.name === modelName);
 	if (!model) return null;

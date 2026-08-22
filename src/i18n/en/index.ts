@@ -605,6 +605,7 @@ const en = {
 	defaultImageModelHelp: 'What the gallery starts on. You can still pick another one per image.',
 	imagePromptWriter: 'Prompt writer',
 	imagePromptWriterOff: 'Off',
+	imagePromptWriterModel: 'Which model writes it',
 	imagePromptWriterHelp:
 		'A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.',
 	imagePromptEditableHint:
