@@ -1,14 +1,8 @@
 import { error } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
-import { ConnectionType, infomaniakImageBaseUrl, infomaniakProductId } from '$lib/connections';
 import { requireUser } from '$lib/server/api';
-import {
-	getModelPricing,
-	getServer,
-	getServerApiKey,
-	type ServerRow
-} from '$lib/server/db/servers';
+import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
 import { meter, meterImages } from '$lib/server/usageMeter';
@@ -70,7 +64,7 @@ const proxy: RequestHandler = async (event) => {
 	 * learns either address — which is the whole point of this relay in server
 	 * mode.
 	 */
-	const base = isImage ? imageBaseFor(server) : server.base_url;
+	const base = (isImage && server.image_base_url) || server.base_url;
 	const path = event.params.path ? `/${event.params.path}` : '';
 	const url = `${base.replace(/\/+$/, '')}${path}`;
 
@@ -168,25 +162,6 @@ const proxy: RequestHandler = async (event) => {
 		}
 	});
 };
-
-/**
- * Where this connection's images live.
- *
- * What was configured, and failing that a guess for the one provider that is
- * known to split them. An Infomaniak connection that predates the field has an
- * empty one, and its owner has no reason to suspect that a form they filled in
- * correctly months ago is now missing something: deriving it from the product ID
- * already in the chat URL is the difference between working and a 404 nobody can
- * explain. Anything else falls back to the chat base, which is where every
- * provider that does not split serves them.
- */
-function imageBaseFor(server: ServerRow): string {
-	if (server.image_base_url) return server.image_base_url;
-	if (server.connection_type === ConnectionType.Infomaniak) {
-		return infomaniakImageBaseUrl(infomaniakProductId(server.base_url)) || server.base_url;
-	}
-	return server.base_url;
-}
 
 /**
  * How many images a request asks for.

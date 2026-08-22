@@ -12,6 +12,7 @@
 		getDefaultServer,
 		getProvider,
 		infomaniakBaseUrl,
+		infomaniakImageBaseUrl,
 		infomaniakProductId,
 		PROVIDERS,
 		type ModelKind,
@@ -74,7 +75,9 @@
 		label: '',
 		apiKey: '',
 		modelFilter: '' as string | null,
-		color: ''
+		color: '',
+		/** Filled in alongside the base URL for the providers that split the two. */
+		imageBaseUrl: ''
 	});
 	/** Drives the placeholders of the "add a server" form. */
 	const draftProvider = $derived(getProvider(draft.connectionType as ConnectionType));
@@ -165,6 +168,7 @@
 		draft = {
 			connectionType: type,
 			baseUrl: preset.baseUrl,
+			imageBaseUrl: '',
 			label: '',
 			apiKey: '',
 			modelFilter: preset.modelFilter ?? '',
@@ -205,6 +209,7 @@
 		const created = await api<{ id: string }>(base, 'POST', {
 			connectionType: draft.connectionType,
 			baseUrl: draft.baseUrl,
+			imageBaseUrl: draft.imageBaseUrl || null,
 			label: draft.label || null,
 			modelFilter: draft.modelFilter || null,
 			apiKey: draft.apiKey || null,
@@ -214,6 +219,7 @@
 		draft = {
 			connectionType: ConnectionType.Ollama,
 			baseUrl: '',
+			imageBaseUrl: '',
 			label: '',
 			apiKey: '',
 			modelFilter: '',
@@ -339,7 +345,9 @@
 									value={infomaniakProductId(draft.baseUrl)}
 									placeholder="123456"
 									oninput={(e) => {
-										draft.baseUrl = infomaniakBaseUrl(e.currentTarget.value);
+										const id = e.currentTarget.value;
+										draft.baseUrl = infomaniakBaseUrl(id);
+										draft.imageBaseUrl = infomaniakImageBaseUrl(id);
 										touch();
 									}}
 								/>

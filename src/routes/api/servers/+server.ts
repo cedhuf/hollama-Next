@@ -19,6 +19,7 @@ export async function POST(event) {
 		ownerUserId: user.id,
 		connectionType: body.connectionType,
 		baseUrl: body.baseUrl,
+		imageBaseUrl: body.imageBaseUrl ?? null,
 		apiKey: body.apiKey ?? null,
 		label: body.label ?? null,
 		modelFilter: body.modelFilter ?? null,
