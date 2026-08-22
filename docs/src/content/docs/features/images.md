@@ -22,7 +22,7 @@ A permanently disabled button is a worse answer than no button.
 
 ## Getting there
 
-The gallery is not a third entry beside Chats and Library. Those two are where you navigate; drawing
+The gallery is not a third entry beside Home and Library. Those two are where you navigate; drawing
 is something you make, so it sits with the other thing you make: **New chat** in the sidebar is a
 split control, and its right half opens the gallery in one click. It keeps that shape when the
 header folds, as two squares beside the search field.

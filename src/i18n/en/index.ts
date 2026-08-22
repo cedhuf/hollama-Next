@@ -339,7 +339,7 @@ const en = {
 
 	// Sidebar / navigation chrome
 	newChat: 'New chat',
-	chats: 'Chats',
+	home: 'Home',
 	library: 'Library',
 	searchChatsPersonas: 'Search chats & personas',
 	noMatches: 'No matches',

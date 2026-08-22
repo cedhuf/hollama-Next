@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ImageIcon, Library, MessageSquareText, Plus, Search } from '@lucide/svelte';
+	import { House, ImageIcon, Library, Plus, Search } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
@@ -33,7 +33,7 @@
 	const mod = $derived(modKey());
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
-	const onChats = $derived(pathname.includes('/sessions'));
+	const onHome = $derived(pathname.includes('/sessions'));
 </script>
 
 <!-- Sits above the list rather than over it. Nothing scrolls underneath, so this
@@ -156,13 +156,13 @@
 			<div class="mt-2 flex w-full gap-1.5">
 				<a
 					href={resolve('/sessions')}
-					title={$LL.chats()}
-					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors {onChats
+					title={$LL.home()}
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors {onHome
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
-					<MessageSquareText class="h-4 w-4 shrink-0" />
-					<span class="truncate">{$LL.chats()}</span>
+					<House class="h-4 w-4 shrink-0" />
+					<span class="truncate">{$LL.home()}</span>
 				</a>
 				<a
 					href={resolve('/library')}

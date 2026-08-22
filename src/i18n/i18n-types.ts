@@ -1313,9 +1313,9 @@ type RootTranslation = {
 	 */
 	newChat: string
 	/**
-	 * C​h​a​t​s
+	 * H​o​m​e
 	 */
-	chats: string
+	home: string
 	/**
 	 * L​i​b​r​a​r​y
 	 */
@@ -4751,9 +4751,9 @@ The completion in progress will stop
 	 */
 	newChat: () => LocalizedString
 	/**
-	 * Chats
+	 * Home
 	 */
-	chats: () => LocalizedString
+	home: () => LocalizedString
 	/**
 	 * Library
 	 */

@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		ImageIcon,
-		Library,
-		MessageSquareText,
-		MoreHorizontal,
-		Plus,
-		Search
-	} from '@lucide/svelte';
+	import { House, ImageIcon, Library, MoreHorizontal, Plus, Search } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
@@ -59,7 +52,7 @@
 
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
-	const onChats = $derived(pathname.includes('/sessions'));
+	const onHome = $derived(pathname.includes('/sessions'));
 
 	function initial(session: SessionSummary): string {
 		return (resolveSessionTitle(session).trim().charAt(0) || '#').toUpperCase();
@@ -149,15 +142,15 @@
 				<a
 					{...props}
 					href={resolve('/sessions')}
-					aria-label={$LL.chats()}
-					class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onChats
+					aria-label={$LL.home()}
+					class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onHome
 						? 'bg-shade-0 text-active'
 						: 'text-muted hover:text-active'}"
 				>
-					<MessageSquareText class="h-5 w-5" />
+					<House class="h-5 w-5" />
 				</a>
 			{/snippet}
-			{$LL.chats()}
+			{$LL.home()}
 		</Tooltip>
 
 		<Tooltip side="right">

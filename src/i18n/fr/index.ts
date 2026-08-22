@@ -332,7 +332,7 @@ const fr = extendDictionary(en, {
 
 	// Sidebar / navigation chrome
 	newChat: 'Nouveau chat',
-	chats: 'Discussions',
+	home: 'Accueil',
 	library: 'Bibliothèque',
 	searchChatsPersonas: 'Rechercher chats et personas',
 	noMatches: 'Aucun résultat',
