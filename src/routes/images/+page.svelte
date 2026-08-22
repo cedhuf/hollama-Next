@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Coins, ImageIcon, LoaderCircle, Sparkles, Trash2, X } from '@lucide/svelte';
+	import {
+		ArrowDownToLine,
+		Coins,
+		ImageIcon,
+		LoaderCircle,
+		RotateCcw,
+		Sparkles,
+		Trash2,
+		X
+	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -9,7 +18,7 @@
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import { modelLabel } from '$lib/connections';
+	import { modelLabel, serverBadge } from '$lib/connections';
 	import { downloadName, IMAGE_LIMITS, type GeneratedImage } from '$lib/generatedImages';
 	import {
 		canDrawImages,
@@ -62,6 +71,16 @@
 
 	const serverFor = (id: string) => $serversStore.find((server) => server.id === id);
 
+	/**
+	 * The connection's accent, which is the app's way of saying where something
+	 * came from. The same dot appears beside every model everywhere else, so a
+	 * gallery mixing two providers reads without a legend.
+	 */
+	function badgeColor(serverId: string): string {
+		const server = serverFor(serverId);
+		return server ? serverBadge(server).color : '#888780';
+	}
+
 	async function generate() {
 		const serverId = serverIdFor(model);
 		if (!serverId || !prompt.trim()) return;
@@ -96,6 +115,22 @@
 		} finally {
 			confirmingDelete = null;
 		}
+	}
+
+	/**
+	 * Set the field back to how this picture was made.
+	 *
+	 * The prompt and everything beside it, because reusing a prompt without the
+	 * model, size and negative prompt that produced the result is reusing a third
+	 * of it, and the difference shows in the next image rather than in the form.
+	 */
+	function reuse(image: GeneratedImage) {
+		prompt = image.prompt;
+		negativePrompt = image.negativePrompt ?? '';
+		if (image.size) size = image.size;
+		if ($imageModels.some((m) => m.name === image.model)) model = image.model;
+		if (image.negativePrompt) showAdvanced = true;
+		opened = null;
 	}
 
 	/** What one picture cost, when its model was priced. Unpriced says nothing. */
@@ -258,61 +293,77 @@
 	</div>
 </div>
 
-<!-- One picture, big, with everything that was true about it when it was made. -->
+<!-- One picture, as big as the dialog will allow. -->
 <Modal open={!!opened} closeButton={false}>
 	{#if opened}
 		{@const image = opened}
-		<div class="flex max-h-[85vh] w-full flex-col">
-			<div class="flex items-center justify-between gap-2 border-b border-shade-2 px-4 py-3">
-				<span class="truncate text-sm font-medium text-active">{image.model}</span>
+		<!-- The dialog is a fixed box, so this fills it and divides it rather than
+		     growing past it. Header, footer and the strip of facts hold their own
+		     height; everything left over is the picture's, and the picture scales to
+		     it. That is what stops a large image from turning a dialog into a page
+		     you scroll to see the middle of. -->
+		<div class="flex h-full w-full flex-col">
+			<div class="flex shrink-0 items-center gap-2 border-b border-shade-2 px-4 py-3">
+				<span
+					class="inline-block h-2 w-2 shrink-0 rounded-full"
+					style="background-color: {badgeColor(image.serverId)}"
+				></span>
+				<span class="truncate text-sm font-medium text-active">
+					{modelLabel(serverFor(image.serverId), image.model)}
+				</span>
 				<button
 					type="button"
 					onclick={() => (opened = null)}
 					aria-label={$LL.close()}
-					class="shrink-0 rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="ml-auto shrink-0 rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
 				>
 					<X class="h-4 w-4" />
 				</button>
 			</div>
 
-			<div class="min-h-0 flex-1 overflow-auto">
+			<!-- `min-h-0` is what makes the rest of this work: without it a flex child
+			     refuses to shrink below its content, so the image would push the footer
+			     off the bottom instead of fitting between them. -->
+			<div class="flex min-h-0 flex-1 items-center justify-center bg-shade-1 p-3">
 				<img
 					src={imageUrl(image.id)}
 					alt={image.prompt}
-					class="max-h-[55vh] w-full bg-shade-1 object-contain"
+					class="max-h-full max-w-full rounded-lg object-contain shadow-sm"
 				/>
+			</div>
 
-				<div class="flex flex-col gap-3 p-4">
-					<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
-					{#if image.negativePrompt}
-						<p class="text-xs text-muted">
-							{$LL.imageNegativePrompt()} · {image.negativePrompt}
-						</p>
+			<!-- Capped and scrollable on its own, so a long prompt takes room from
+			     itself rather than from the picture. -->
+			<div class="max-h-28 shrink-0 overflow-auto border-t border-shade-2 px-4 py-3">
+				<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
+				{#if image.negativePrompt}
+					<p class="mt-1 text-xs text-muted">
+						{$LL.imageNegativePrompt()} · {image.negativePrompt}
+					</p>
+				{/if}
+				<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
+					<span>{formatTimestampToNow(image.createdAt)}</span>
+					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
+					{#if costLabel(image)}
+						<span class="flex items-center gap-1 tabular-nums">
+							<Coins class="h-3 w-3" />
+							{costLabel(image)}
+						</span>
 					{/if}
-
-					<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-						<span>{modelLabel(serverFor(image.serverId), image.model)}</span>
-						{#if image.size}<span>{image.size}</span>{/if}
-						<span>{formatTimestampToNow(image.createdAt)}</span>
-						{#if image.seconds}<span>{image.seconds.toFixed(1)}s</span>{/if}
-						{#if costLabel(image)}
-							<span class="flex items-center gap-1 tabular-nums">
-								<Coins class="h-3 w-3" />
-								{costLabel(image)}
-							</span>
-						{/if}
-					</div>
 				</div>
 			</div>
 
-			<div class="flex flex-wrap items-center gap-2 border-t border-shade-2 px-4 py-3">
-				<Button variant="outline" onclick={() => (prompt = image.prompt)}>
+			<div class="flex shrink-0 flex-wrap items-center gap-2 border-t border-shade-2 px-4 py-3">
+				<Button variant="outline" onclick={() => reuse(image)}>
+					<RotateCcw class="h-4 w-4" />
 					{$LL.imageReusePrompt()}
 				</Button>
 				<!-- A plain link to the same authenticated route the grid reads. The
 				     download attribute only names the file; the session is what allows
 				     it, exactly as for the picture already on screen. -->
 				<Button variant="outline" href={imageUrl(image.id)} download={downloadName(image)}>
+					<ArrowDownToLine class="h-4 w-4" />
 					{$LL.download()}
 				</Button>
 
