@@ -83,7 +83,7 @@
 	 */
 	let promptOnlyHeight = $state(0);
 	/** One line of the prompt, at the leading the paragraph is given below. */
-	const PROMPT_LINE = 20;
+	const PROMPT_LINE = 16;
 	/**
 	 * How much shows when it is closed: two whole lines, or the whole prompt when
 	 * it is shorter than that. Exact either way, so nothing is ever half a letter.
@@ -584,21 +584,25 @@
 					style="max-height: {expandedPrompt ? promptHeight : collapsedHeight}px"
 				>
 					<div bind:clientHeight={promptHeight}>
-						<!-- An explicit leading, because the collapsed height is a multiple of
+						<!-- One prompt, and it is the one that was sent: the rewrite when there
+						     was one, the words as typed otherwise. Showing both put the same
+						     request on screen twice, which is a comparison nobody opened this
+						     dialog to make. The wand stays when it applies, because "these are
+						     not quite the words I typed" is the one thing the difference is
+						     worth saying.
+
+						     Set as a caption rather than as body text: what is being looked at
+						     is the picture, and the prompt is what is written under it.
+
+						     An explicit leading, because the collapsed height is a multiple of
 						     it. Left to the default it is a fraction nobody can divide by. -->
 						<p
 							bind:clientHeight={promptOnlyHeight}
-							class="whitespace-pre-wrap text-sm leading-5 text-active"
+							class="whitespace-pre-wrap text-xs leading-4 text-muted"
 						>
-							{image.prompt}
+							{#if image.sentPrompt}<Wand2 class="mr-1 inline h-3 w-3" />{/if}{image.sentPrompt ||
+								image.prompt}
 						</p>
-						{#if image.sentPrompt}
-							<!-- What was actually sent, when the writer had a go at it. Kept beside
-							     the original rather than instead of it. -->
-							<p class="mt-1 whitespace-pre-wrap text-xs text-muted">
-								<Wand2 class="mr-1 inline h-3 w-3" />{image.sentPrompt}
-							</p>
-						{/if}
 						{#if image.negativePrompt}
 							<p class="mt-1 text-xs text-muted">
 								{$LL.imageNegativePrompt()} · {image.negativePrompt}
