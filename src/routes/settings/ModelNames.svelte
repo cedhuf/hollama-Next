@@ -103,7 +103,8 @@
 	const KIND_LABELS = $derived<Record<ModelKind, string>>({
 		text: $LL.modelKindText(),
 		image: $LL.modelKindImage(),
-		embedding: $LL.modelKindEmbedding()
+		embedding: $LL.modelKindEmbedding(),
+		audio: $LL.modelKindAudio()
 	});
 
 	/** What each unit is called, and what it reads as beside a figure. */

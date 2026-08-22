@@ -72,14 +72,21 @@ export interface Server {
  * What a model does, which is the question every picker in the app is really
  * asking.
  *
- * Three answers, because three is what the app has to tell apart: something you
- * hold a conversation with, something that draws, and something that returns a
- * vector and cannot answer anything at all. An embedding model offered in the
- * chat picker is not a cosmetic problem — it is a 400 with no explanation.
+ * Four, because a provider's catalogue holds four sorts of thing and only the
+ * first two are offered anywhere: something you hold a conversation with,
+ * something that draws, something that returns a vector, and something that
+ * turns speech into text. The last two are here to be recognised and left out.
+ * An embedding model in the chat picker is not a cosmetic problem, it is a 400
+ * with no explanation, and the same is true of a transcription model.
+ *
+ * Infomaniak's own catalogue declares `llm`, `image`, `embedding`, `reranker`
+ * and `stt`. Rerankers fold in with embeddings here: both are retrieval-side,
+ * neither is ever offered, and inventing a section for a category the app will
+ * never call would be describing the provider rather than the app.
  */
-export type ModelKind = 'text' | 'image' | 'embedding';
+export type ModelKind = 'text' | 'image' | 'embedding' | 'audio';
 
-export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding'];
+export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding', 'audio'];
 
 /** Default badge colour and short id per provider, dark-mode safe. */
 export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = {
@@ -196,12 +203,16 @@ const EMBEDDING_HINTS = [
 	'gte-',
 	'e5-',
 	'minilm',
+	'mini_lm',
 	'nomic-embed',
 	'mxbai',
 	'arctic-embed',
 	'reranker',
 	'rerank'
 ];
+
+/** Speech, which is neither something to talk to nor something that draws. */
+const AUDIO_HINTS = ['whisper', 'wav2vec', 'parakeet', 'distil-whisper', 'transcribe', 'tts-'];
 
 const IMAGE_HINTS = [
 	'dall-e',
@@ -237,6 +248,7 @@ const IMAGE_HINTS = [
 export function guessModelKind(name: string): ModelKind {
 	const id = name.toLowerCase();
 	if (EMBEDDING_HINTS.some((hint) => id.includes(hint))) return 'embedding';
+	if (AUDIO_HINTS.some((hint) => id.includes(hint))) return 'audio';
 	if (IMAGE_HINTS.some((hint) => id.includes(hint))) return 'image';
 	return 'text';
 }

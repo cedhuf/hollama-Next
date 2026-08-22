@@ -196,6 +196,10 @@ type RootTranslation = {
 	 */
 	modelKindEmbedding: string
 	/**
+	 * S​p​e​e​c​h
+	 */
+	modelKindAudio: string
+	/**
 	 * C​l​e​a​r
 	 */
 	clearPrice: string
@@ -3332,6 +3336,10 @@ The completion in progress will stop
 	 * Embeddings
 	 */
 	modelKindEmbedding: () => LocalizedString
+	/**
+	 * Speech
+	 */
+	modelKindAudio: () => LocalizedString
 	/**
 	 * Clear
 	 */

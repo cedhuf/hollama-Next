@@ -48,6 +48,7 @@ const en = {
 	modelKindText: 'Chat',
 	modelKindImage: 'Images',
 	modelKindEmbedding: 'Embeddings',
+	modelKindAudio: 'Speech',
 	clearPrice: 'Clear',
 	pricingIntro:
 		'Open a model to price it. Say what each model does, so it is only offered where it works.',

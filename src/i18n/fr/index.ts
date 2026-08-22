@@ -57,6 +57,7 @@ const fr = extendDictionary(en, {
 	modelKindText: 'Conversation',
 	modelKindImage: 'Images',
 	modelKindEmbedding: 'Embeddings',
+	modelKindAudio: 'Audio',
 	clearPrice: 'Effacer',
 	pricingIntro:
 		"Ouvrez un modèle pour le tarifer. Indiquez ce que fait chacun, pour qu'il ne soit proposé que là où il fonctionne.",
