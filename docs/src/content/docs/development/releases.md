@@ -2,7 +2,7 @@
 title: Releases
 description: How a commit message becomes a version, a changelog and an image.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 Nobody edits a version number by hand here. `semantic-release` reads the commit log, decides what

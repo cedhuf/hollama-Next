@@ -29,16 +29,34 @@ design document for that split. It stays in the repository rather than on this s
 in French, and it is a plan rather than a description. Treat it as intent, and the code as the
 reference.
 
+## The other seam
+
+Everything the app knows about a **specific provider** lives in one file under
+`src/lib/providers/`, and nothing else in the application names one. Endpoints, key help links,
+whether tool calling works, what a provider calls a portrait, which models take reference pictures:
+all of it is data, kept per provider, because all of it changes on somebody else's schedule rather
+than on ours.
+
+The list is a convenience and never a gate — an undescribed provider still works through the
+OpenAI-compatible entry and only loses conveniences. That is what makes it safe to open up, and why
+**a pull request adding or fixing a provider is a small, reviewable change**: the reviewer needs to
+know the provider, not this codebase.
+
+If you find yourself editing a component to special-case a vendor, the descriptor is missing
+something, and closing that gap is the more useful patch. See
+[Adding a provider](/development/providers/).
+
 ## Layout
 
-| Path                  | What lives there                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| `src/lib/chat/`       | Provider strategies (Ollama, OpenAI-compatible), title generation, compaction, context accounting |
-| `src/lib/data/`       | The repository seam: the local and API implementations                                            |
-| `src/lib/server/`     | Everything that only ever runs on the server: database, migrations, auth, resolvers               |
-| `src/lib/components/` | Shared components, provider-agnostic and route-agnostic                                           |
-| `src/routes/api/`     | The HTTP API, see the [reference](/reference/api/)                                                |
-| `src/i18n/`           | typesafe-i18n dictionaries, see [Translations](/development/translations/)                        |
+| Path                  | What lives there                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| `src/lib/chat/`       | The conversation: strategies, the run orchestrator, titles, compaction, context accounting |
+| `src/lib/providers/`  | One file per provider, see [Adding a provider](/development/providers/)                    |
+| `src/lib/data/`       | The repository seam: the local and API implementations                                     |
+| `src/lib/server/`     | Everything that only ever runs on the server: database, migrations, auth, resolvers        |
+| `src/lib/components/` | Shared components, provider-agnostic and route-agnostic                                    |
+| `src/routes/api/`     | The HTTP API, see the [reference](/reference/api/)                                         |
+| `src/i18n/`           | typesafe-i18n dictionaries, see [Translations](/development/translations/)                 |
 
 ## Checks
 

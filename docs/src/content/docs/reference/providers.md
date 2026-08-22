@@ -70,3 +70,16 @@ CORS requires it. Ollama on another machine needs your origin in `OLLAMA_ORIGINS
 
 **Server mode**: the browser calls `/api/llm`, and the server injects the key. Keys never reach a
 browser, and the generic proxy is disabled outright. See [Security](/guides/security/).
+
+## Yours is not in the list
+
+Use **OpenAI-compatible**, which is the answer for everything the named entries are not. It works;
+it just cannot preset your endpoint, link to where your keys live, or know what your image models
+call a portrait.
+
+Those conveniences come from one file per provider under `src/lib/providers/`, and adding one is a
+file and a line. Nothing else in the application names a provider, so contributing yours is a small
+change a reviewer can judge on knowing the provider rather than the codebase — and because the list
+is never a gate, getting a detail wrong degrades an experience instead of locking anyone out.
+
+See [Adding a provider](/development/providers/).

@@ -1,6 +1,8 @@
 ---
 title: Adding a provider
 description: What the app knows about each provider, where it lives, and how to add or fix one.
+sidebar:
+  order: 2
 ---
 
 Everything Llooma knows about a specific provider lives in one file, under

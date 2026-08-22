@@ -2,7 +2,7 @@
 title: Translations
 description: How the dictionaries work, and what adding a language actually costs.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 The interface is translated with [typesafe-i18n](https://github.com/ivanhofer/typesafe-i18n). The
