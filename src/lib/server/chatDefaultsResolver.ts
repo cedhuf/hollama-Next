@@ -40,6 +40,21 @@ export interface ResolvedChatDefaults {
 			compactThreshold: number;
 		};
 	};
+	/**
+	 * The image defaults, shared the same three ways as everything else here.
+	 *
+	 * In this resolver rather than one of its own because the question is the same
+	 * question: which model does this account use for a job it did not choose a
+	 * model for, and who gets to decide. That it happens to draw rather than talk
+	 * does not make it a different mechanism.
+	 */
+	images: {
+		defaultImageModel: string;
+		imagePromptModel: string;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: { defaultImageModel: string; imagePromptModel: string };
+	};
 }
 
 /**
@@ -136,5 +151,27 @@ export function resolveChatDefaults(
 			: { ...adminCompact, editable: true, source: 'admin', admin: adminCompact };
 	}
 
-	return { defaultModel, title, compact };
+	// --- images ---
+	const ownImages = {
+		defaultImageModel: userSettings?.defaultImageModel ?? '',
+		imagePromptModel: userSettings?.imagePromptModel ?? ''
+	};
+	const adminImages = {
+		defaultImageModel: getConfig('defaultImageModel') ?? '',
+		imagePromptModel: getConfig('imagePromptModel') ?? ''
+	};
+	const imagesSharing = (getConfig('imagesSharing') as Sharing) || 'off';
+
+	let images: ResolvedChatDefaults['images'];
+	if (isAdmin || imagesSharing === 'off') {
+		images = { ...ownImages, editable: true, source: 'user', admin: adminImages };
+	} else if (imagesSharing === 'locked') {
+		images = { ...adminImages, editable: false, source: 'admin', admin: adminImages };
+	} else {
+		images = ownImages.defaultImageModel
+			? { ...ownImages, editable: true, source: 'user', admin: adminImages }
+			: { ...adminImages, editable: true, source: 'admin', admin: adminImages };
+	}
+
+	return { defaultModel, title, compact, images };
 }

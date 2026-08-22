@@ -601,24 +601,49 @@ const fr = extendDictionary(en, {
 	imagesSubtitle: 'Tout ce que vous avez généré ici, du plus récent au plus ancien.',
 	imagesCount: '{count} image{{s}}',
 	imagesEmpty: "Rien pour l'instant. Décrivez une image ci-dessus et elle apparaîtra ici.",
-	imagesDisabled: "La génération d'images est désactivée sur cette instance. Votre administrateur peut l'activer.",
-	imagesNoModel: "Aucun modèle d'image disponible. Un administrateur doit en marquer un comme modèle d'image dans Modèles et tarifs, puis le partager.",
+	imagesDisabled:
+		"La génération d'images est désactivée sur cette instance. Votre administrateur peut l'activer.",
+	imagesNoModel:
+		"Aucun modèle d'image disponible. Un administrateur doit en marquer un comme modèle d'image dans Modèles et tarifs, puis le partager.",
 	imagePromptPlaceholder: "Décrivez l'image que vous voulez.",
 	imageGenerate: 'Générer',
-	imageGeneratingHint: 'Génération en cours. C\'est long, et le résultat est conservé même si vous quittez cette page.',
+	imageGeneratingHint:
+		"Génération en cours. C'est long, et le résultat est conservé même si vous quittez cette page.",
 	imageGenerationFailed: 'La génération a échoué',
-	imageDeleteFailed: "Impossible de supprimer cette image",
+	imageDeleteFailed: 'Impossible de supprimer cette image',
 	imageSize: 'Taille',
 	imageSizeDefault: 'Taille par défaut',
 	imageCount: 'Combien',
 	imageCountOption: '{count} image{{s}}',
 	imageNegativePrompt: 'Prompt négatif',
 	imageNegativePromptPlaceholder: "Ce qu'il faut éviter dans l'image.",
-	imageNegativePromptHelp: "Tous les modèles ne le prennent pas en charge ; ceux qui ne le font pas l'ignorent.",
+	imageNegativePromptHelp:
+		"Tous les modèles ne le prennent pas en charge ; ceux qui ne le font pas l'ignorent.",
 	imageReusePrompt: 'Réutiliser ce prompt',
 	download: 'Télécharger',
+	imagesSettingsDescription: 'Quel modèle dessine, et lequel écrit le prompt pour lui.',
+	defaultImageModel: "Modèle d'image par défaut",
+	defaultImageModelHelp:
+		'Celui sur lequel la galerie démarre. Vous pouvez toujours en choisir un autre à chaque image.',
+	imagePromptWriter: 'Rédacteur de prompt',
+	imagePromptWriterOff: 'Désactivé',
+	imagePromptWriterHelp:
+		'Un modèle de texte qui transforme une description simple en prompt plus complet. Laissez-le désactivé pour envoyer exactement ce que vous tapez.',
+	imagePromptEditableHint:
+		"Ce qu'il écrit est toujours affiché dans un champ modifiable avant que quoi que ce soit soit dessiné. Ses instructions sont dans l'onglet Prompts.",
+	imagesSharing: "Partage des défauts d'images",
+	imagesSharingDescription:
+		"Transmettez votre modèle d'image et votre rédacteur de prompt à toute l'instance.",
+	shareImages: "Partager les défauts d'images",
+	imageRewrite: 'Améliorer le prompt',
+	imageRewriteFailed: 'Impossible de réécrire le prompt',
+	imageRewritten: 'Prompt réécrit',
+	imageRewrittenHint:
+		"C'est ce qui sera envoyé. Modifiez-le, ou videz-le pour envoyer vos propres mots.",
+	imageUseOriginal: 'Utiliser mes mots',
 	imagesAllow: "Autoriser la génération d'images",
-	imagesAllowHelp: "Désactivé par défaut. Les modèles d'image sont facturés à la requête, donc personne ne dépense tant que vous ne l'activez pas. Le désactiver ensuite masque la page et refuse les nouvelles générations ; les images déjà faites sont conservées.",
+	imagesAllowHelp:
+		"Désactivé par défaut. Les modèles d'image sont facturés à la requête, donc personne ne dépense tant que vous ne l'activez pas. Le désactiver ensuite masque la page et refuse les nouvelles générations ; les images déjà faites sont conservées.",
 	personaMemoryAllow: 'Autoriser les personas à retenir des choses sur leur utilisateur',
 	personaMemoryAllowHelp:
 		"Un persona peut garder quelques notes entre les conversations, écrites par lui-même et lisibles par la personne concernée. Chaque mémoire appartient à un seul compte et n'est jamais partagée, même quand le persona l'est. Désactiver retire la capacité sans effacer ce qui a déjà été écrit.",

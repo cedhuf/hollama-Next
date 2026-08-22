@@ -28,6 +28,8 @@ Everything else on the tab, grouped by the part of a turn it governs:
 | Conversation         | The date line, several participants, quick-choice questions, the title |
 | Personas             | The language rule, being summoned with `@`, an exchange brought back   |
 | Web search and pages | Whether to search, the query, how results and pages are used and cited |
+| Memory               | What a persona keeps about its user, and the tools that change it      |
+| Images               | Turning a plain description into a prompt an image model can draw      |
 | Native tools         | The same instructions for providers that call tools instead of reading |
 | Compaction           | Writing a summary, using one, and anything typed after `/compact`      |
 

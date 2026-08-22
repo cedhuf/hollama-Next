@@ -32,6 +32,7 @@ Conversations name themselves after the first reply, using whichever model you p
 | [Tools](/features/tools/)           | Web search, web fetch, interactive choices, system instructions    |
 | [Compaction](/features/compaction/) | Summarising a long conversation so it keeps fitting                |
 | [Search](/features/search/)         | Full-text search across every conversation                         |
+| [Images](/features/images/)         | Generating pictures, and the gallery that keeps them               |
 | [Interface](/features/interface/)   | Themes, the sidebar, the home screen, languages, the PWA           |
 | [Data](/features/data/)             | Export, import, backup, and moving from local to server            |
 

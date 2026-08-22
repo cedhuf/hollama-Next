@@ -85,6 +85,8 @@
 	let titleSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let titleShareEnabled = $state(false);
 	let compactSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let imagesSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let imagesShareEnabled = $state(false);
 	let compactShareEnabled = $state(false);
 
 	const sharedModelNames = $derived(
@@ -168,6 +170,8 @@
 			titleSharing = config.titleSharing ?? 'off';
 			titleShareEnabled = titleSharing !== 'off';
 			compactSharing = config.compactSharing ?? 'off';
+			imagesSharing = config.imagesSharing ?? 'off';
+			imagesShareEnabled = imagesSharing !== 'off';
 			compactShareEnabled = compactSharing !== 'off';
 			servers = serverList as SystemServer[];
 		} finally {
@@ -277,6 +281,23 @@
 		});
 	}
 
+	function syncImagesShare() {
+		imagesSharing = imagesShareEnabled
+			? imagesSharing === 'off'
+				? 'overridable'
+				: imagesSharing
+			: 'off';
+		saveImagesSharing();
+	}
+
+	async function saveImagesSharing() {
+		await api('/api/admin/config', 'PUT', {
+			imagesSharing,
+			defaultImageModel: $settingsStore.defaultImageModel ?? '',
+			imagePromptModel: $settingsStore.imagePromptModel ?? ''
+		});
+	}
+
 	async function saveCompact() {
 		const model = $settingsStore.models.find((m) => m.name === $settingsStore.compactModel);
 		await api('/api/admin/config', 'PUT', {
@@ -297,6 +318,7 @@
 		if (appPromptsShareEnabled) saveAppPrompts();
 		if (titleShareEnabled) saveTitle();
 		if (compactShareEnabled) saveCompact();
+		if (imagesShareEnabled) saveImagesSharing();
 	});
 
 	async function toggleAllowUserKeys() {
@@ -563,6 +585,26 @@
 			</span>
 		{/if}
 	</SettingsSection>
+
+	<!-- Image defaults sharing. Only worth showing once the instance draws at all:
+	     a panel for choosing which model an instance uses for something it has
+	     switched off is a panel about nothing. -->
+	{#if imagesEnabled}
+		<SettingsSection title={$LL.imagesSharing()} description={$LL.imagesSharingDescription()} card>
+			<FieldCheckbox
+				label={$LL.shareImages()}
+				bind:checked={imagesShareEnabled}
+				onChange={syncImagesShare}
+			/>
+			{#if imagesShareEnabled}
+				<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
+				<span class="text-xs text-muted">
+					{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || '—'}
+					· {$settingsStore.imagePromptModel || $LL.imagePromptWriterOff()}
+				</span>
+			{/if}
+		</SettingsSection>
+	{/if}
 
 	<!-- Web fetch sharing -->
 	<SettingsSection

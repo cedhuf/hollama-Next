@@ -1,9 +1,12 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { isServerMode } from '$lib/chat/endpoint';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { documentsDisabledByInstance } from '$lib/documents';
+	import { canDrawImages } from '$lib/images';
 	import { settingsStore } from '$lib/localStorage';
 	import { personasConfig, saveStoreUrl } from '$lib/personasConfig';
 	import { searchConfig } from '$lib/search';
@@ -17,6 +20,8 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsSlider from './SettingsSlider.svelte';
+
+	const imagesCfg = $derived($chatDefaultsConfig.images);
 
 	// Show the section unless we're a server user with nothing configured yet.
 	const showSearch = $derived($searchConfig.editable || $searchConfig.available);
@@ -247,6 +252,52 @@
 					</SettingsField>
 				{/if}
 			{/if}
+		</SettingsSection>
+	{/if}
+
+	<!-- Only where drawing is possible at all. The gallery already hides itself on
+	     the same three conditions; a settings section for a feature with no page
+	     behind it would be the one place it still looked available. -->
+	{#if $canDrawImages}
+		<SettingsSection title={$LL.images()} description={$LL.imagesSettingsDescription()} card>
+			{#snippet badge()}
+				{#if !imagesCfg.editable}
+					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
+				{/if}
+			{/snippet}
+
+			{#if imagesCfg.editable}
+				<SettingsField label={$LL.defaultImageModel()} hint={$LL.defaultImageModelHelp()}>
+					<ModelSelect
+						value={imagesCfg.defaultImageModel || undefined}
+						kinds={['image']}
+						onSelect={(name) => ($settingsStore.defaultImageModel = name || null)}
+					/>
+				</SettingsField>
+
+				<!-- Empty means the rewriter is not offered. A second model is a second
+				     bill, so it is asked for rather than assumed. -->
+				<SettingsField label={$LL.imagePromptWriter()} hint={$LL.imagePromptWriterHelp()}>
+					<ModelSelect
+						value={imagesCfg.imagePromptModel || undefined}
+						emptyLabel={$LL.imagePromptWriterOff()}
+						onSelect={(name) => ($settingsStore.imagePromptModel = name || null)}
+					/>
+				</SettingsField>
+			{:else}
+				<SettingsField label={$LL.defaultImageModel()}>
+					<input class="settings-field" disabled value={imagesCfg.defaultImageModel || '—'} />
+				</SettingsField>
+				<SettingsField label={$LL.imagePromptWriter()}>
+					<input
+						class="settings-field"
+						disabled
+						value={imagesCfg.imagePromptModel || $LL.imagePromptWriterOff()}
+					/>
+				</SettingsField>
+			{/if}
+
+			<SettingsHint>{$LL.imagePromptEditableHint()}</SettingsHint>
 		</SettingsSection>
 	{/if}
 

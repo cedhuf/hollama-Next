@@ -2208,6 +2208,66 @@ type RootTranslation = {
 	 */
 	download: string
 	/**
+	 * W​h​i​c​h​ ​m​o​d​e​l​ ​d​r​a​w​s​,​ ​a​n​d​ ​w​h​i​c​h​ ​o​n​e​ ​w​r​i​t​e​s​ ​t​h​e​ ​p​r​o​m​p​t​ ​f​o​r​ ​i​t​.
+	 */
+	imagesSettingsDescription: string
+	/**
+	 * D​e​f​a​u​l​t​ ​i​m​a​g​e​ ​m​o​d​e​l
+	 */
+	defaultImageModel: string
+	/**
+	 * W​h​a​t​ ​t​h​e​ ​g​a​l​l​e​r​y​ ​s​t​a​r​t​s​ ​o​n​.​ ​Y​o​u​ ​c​a​n​ ​s​t​i​l​l​ ​p​i​c​k​ ​a​n​o​t​h​e​r​ ​o​n​e​ ​p​e​r​ ​i​m​a​g​e​.
+	 */
+	defaultImageModelHelp: string
+	/**
+	 * P​r​o​m​p​t​ ​w​r​i​t​e​r
+	 */
+	imagePromptWriter: string
+	/**
+	 * O​f​f
+	 */
+	imagePromptWriterOff: string
+	/**
+	 * A​ ​t​e​x​t​ ​m​o​d​e​l​ ​t​h​a​t​ ​t​u​r​n​s​ ​a​ ​p​l​a​i​n​ ​d​e​s​c​r​i​p​t​i​o​n​ ​i​n​t​o​ ​a​ ​f​u​l​l​e​r​ ​p​r​o​m​p​t​.​ ​L​e​a​v​e​ ​i​t​ ​o​f​f​ ​t​o​ ​s​e​n​d​ ​e​x​a​c​t​l​y​ ​w​h​a​t​ ​y​o​u​ ​t​y​p​e​.
+	 */
+	imagePromptWriterHelp: string
+	/**
+	 * W​h​a​t​ ​i​t​ ​w​r​i​t​e​s​ ​i​s​ ​a​l​w​a​y​s​ ​s​h​o​w​n​ ​i​n​ ​a​n​ ​e​d​i​t​a​b​l​e​ ​f​i​e​l​d​ ​b​e​f​o​r​e​ ​a​n​y​t​h​i​n​g​ ​i​s​ ​d​r​a​w​n​.​ ​I​t​s​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​a​r​e​ ​i​n​ ​t​h​e​ ​P​r​o​m​p​t​s​ ​t​a​b​.
+	 */
+	imagePromptEditableHint: string
+	/**
+	 * I​m​a​g​e​ ​d​e​f​a​u​l​t​s​ ​s​h​a​r​i​n​g
+	 */
+	imagesSharing: string
+	/**
+	 * H​a​n​d​ ​y​o​u​r​ ​i​m​a​g​e​ ​m​o​d​e​l​ ​a​n​d​ ​p​r​o​m​p​t​ ​w​r​i​t​e​r​ ​t​o​ ​e​v​e​r​y​o​n​e​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	imagesSharingDescription: string
+	/**
+	 * S​h​a​r​e​ ​t​h​e​ ​i​m​a​g​e​ ​d​e​f​a​u​l​t​s
+	 */
+	shareImages: string
+	/**
+	 * I​m​p​r​o​v​e​ ​t​h​e​ ​p​r​o​m​p​t
+	 */
+	imageRewrite: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​r​e​w​r​i​t​e​ ​t​h​e​ ​p​r​o​m​p​t
+	 */
+	imageRewriteFailed: string
+	/**
+	 * R​e​w​r​i​t​t​e​n​ ​p​r​o​m​p​t
+	 */
+	imageRewritten: string
+	/**
+	 * T​h​i​s​ ​i​s​ ​w​h​a​t​ ​w​i​l​l​ ​b​e​ ​s​e​n​t​.​ ​E​d​i​t​ ​i​t​,​ ​o​r​ ​c​l​e​a​r​ ​i​t​ ​t​o​ ​s​e​n​d​ ​y​o​u​r​ ​o​w​n​ ​w​o​r​d​s​.
+	 */
+	imageRewrittenHint: string
+	/**
+	 * U​s​e​ ​m​y​ ​w​o​r​d​s
+	 */
+	imageUseOriginal: string
+	/**
 	 * A​l​l​o​w​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n
 	 */
 	imagesAllow: string
@@ -5396,6 +5456,66 @@ The completion in progress will stop
 	 * Download
 	 */
 	download: () => LocalizedString
+	/**
+	 * Which model draws, and which one writes the prompt for it.
+	 */
+	imagesSettingsDescription: () => LocalizedString
+	/**
+	 * Default image model
+	 */
+	defaultImageModel: () => LocalizedString
+	/**
+	 * What the gallery starts on. You can still pick another one per image.
+	 */
+	defaultImageModelHelp: () => LocalizedString
+	/**
+	 * Prompt writer
+	 */
+	imagePromptWriter: () => LocalizedString
+	/**
+	 * Off
+	 */
+	imagePromptWriterOff: () => LocalizedString
+	/**
+	 * A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.
+	 */
+	imagePromptWriterHelp: () => LocalizedString
+	/**
+	 * What it writes is always shown in an editable field before anything is drawn. Its instructions are in the Prompts tab.
+	 */
+	imagePromptEditableHint: () => LocalizedString
+	/**
+	 * Image defaults sharing
+	 */
+	imagesSharing: () => LocalizedString
+	/**
+	 * Hand your image model and prompt writer to everyone on this instance.
+	 */
+	imagesSharingDescription: () => LocalizedString
+	/**
+	 * Share the image defaults
+	 */
+	shareImages: () => LocalizedString
+	/**
+	 * Improve the prompt
+	 */
+	imageRewrite: () => LocalizedString
+	/**
+	 * Could not rewrite the prompt
+	 */
+	imageRewriteFailed: () => LocalizedString
+	/**
+	 * Rewritten prompt
+	 */
+	imageRewritten: () => LocalizedString
+	/**
+	 * This is what will be sent. Edit it, or clear it to send your own words.
+	 */
+	imageRewrittenHint: () => LocalizedString
+	/**
+	 * Use my words
+	 */
+	imageUseOriginal: () => LocalizedString
 	/**
 	 * Allow image generation
 	 */

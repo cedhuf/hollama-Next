@@ -55,6 +55,9 @@ export async function GET(event) {
 		defaultModel: getConfig('defaultModel') ?? '',
 		titleSharing: getConfig('titleSharing') ?? 'off',
 		compactSharing: getConfig('compactSharing') ?? 'off',
+		imagesSharing: getConfig('imagesSharing') ?? 'off',
+		defaultImageModel: getConfig('defaultImageModel') ?? '',
+		imagePromptModel: getConfig('imagePromptModel') ?? '',
 		webFetchSharing: getConfig('webFetchSharing') ?? 'off',
 		webFetchEnabled: getConfig('webFetchEnabled') !== 'false',
 		webFetchMaxPages: Number(getConfig('webFetchMaxPages') ?? WEB_FETCH_DEFAULTS.maxPages),
@@ -133,6 +136,18 @@ export async function PUT(event) {
 	}
 	if (['off', 'locked', 'overridable'].includes(body?.compactSharing)) {
 		setConfig('compactSharing', body.compactSharing);
+	}
+	// Images: which model draws and which one writes the prompt for it, shared the
+	// same three ways. Note this is separate from `imagesEnabled`, which is not a
+	// default anybody can override but whether the feature exists here at all.
+	if (['off', 'locked', 'overridable'].includes(body?.imagesSharing)) {
+		setConfig('imagesSharing', body.imagesSharing);
+	}
+	if (typeof body?.defaultImageModel === 'string') {
+		setConfig('defaultImageModel', body.defaultImageModel);
+	}
+	if (typeof body?.imagePromptModel === 'string') {
+		setConfig('imagePromptModel', body.imagePromptModel);
 	}
 
 	// Web fetch: the admin shares their own configuration, exactly as they share

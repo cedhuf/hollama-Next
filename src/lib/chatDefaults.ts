@@ -39,6 +39,14 @@ export interface ChatDefaultsView {
 			compactThreshold: number;
 		};
 	};
+	/** Which model draws, and which one writes the prompt for it. */
+	images: {
+		defaultImageModel: string;
+		imagePromptModel: string;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: { defaultImageModel: string; imagePromptModel: string };
+	};
 }
 
 const serverConfig = writable<ChatDefaultsView | null>(null);
@@ -93,6 +101,13 @@ export const chatDefaultsConfig = derived(
 					autoCompact: false,
 					compactThreshold: DEFAULT_SETTINGS.compactThreshold
 				}
+			},
+			images: {
+				defaultImageModel: $s.defaultImageModel ?? '',
+				imagePromptModel: $s.imagePromptModel ?? '',
+				editable: true,
+				source: 'user',
+				admin: { defaultImageModel: '', imagePromptModel: '' }
 			}
 		};
 
@@ -136,6 +151,20 @@ export const chatDefaultsConfig = derived(
 					}
 				: { ...$srv.compact, ...$srv.compact.admin };
 
-		return { defaultModel: dm, title: t, compact: c };
+		// Images: the same three states. "Own" means they picked a model to draw
+		// with; the prompt writer follows it, because a pair of models chosen half
+		// from one place and half from another is a pair nobody can reason about.
+		const i = !$srv.images.editable
+			? $srv.images
+			: $s.defaultImageModel
+				? {
+						...$srv.images,
+						defaultImageModel: $s.defaultImageModel,
+						imagePromptModel: $s.imagePromptModel ?? '',
+						source: 'user' as const
+					}
+				: { ...$srv.images, ...$srv.images.admin };
+
+		return { defaultModel: dm, title: t, compact: c, images: i };
 	}
 );

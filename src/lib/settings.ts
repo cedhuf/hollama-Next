@@ -59,6 +59,16 @@ export interface Settings {
 	regenerateTitleAfter: number;
 	/** Model that writes compaction summaries. Empty = the conversation's own model. */
 	compactModel: string | null;
+	/** The image model the gallery starts on. Empty = the first one available. */
+	defaultImageModel: string | null;
+	/**
+	 * The text model that rewrites a description into an image prompt.
+	 *
+	 * Empty means the rewriter is not offered at all, which is the default: it is
+	 * a second model and a second bill, and an app that quietly spends on one
+	 * because a field was blank is an app nobody trusts with the first.
+	 */
+	imagePromptModel: string | null;
 	/** Compact on its own once the conversation crosses `compactThreshold`. */
 	autoCompact: boolean;
 	/**
@@ -277,6 +287,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	regenerateTitleAfter: 3,
 	titleModel: null,
 	compactModel: null,
+	defaultImageModel: null,
+	imagePromptModel: null,
 	autoCompact: false,
 	compactThreshold: 80000,
 	webSearchByDefault: false,

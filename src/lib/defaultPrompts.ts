@@ -8,6 +8,7 @@
 export type PromptKey =
 	| 'currentDate'
 	| 'conversationTitle'
+	| 'imagePrompt'
 	| 'personaLanguage'
 	| 'personaSummoned'
 	| 'multiSpeaker'
@@ -58,6 +59,12 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Names a conversation from its first message. The answer is stripped of markdown and cut at 80 characters, so ask for something short.',
 		default:
 			'Generate a short, descriptive title (3 to 6 words) for a conversation that starts with the following message. Reply with only the title, no quotes, no markdown, no trailing punctuation.'
+	},
+	imagePrompt: {
+		label: 'Image prompt writer',
+		hint: 'Turns a plain description into a prompt an image model can use. The answer is put in an editable field and shown before anything is drawn, never sent straight through, so it can be as opinionated as you like.',
+		default:
+			'You rewrite a plain description into a prompt for an image generation model. Keep every subject, action and constraint the person asked for, and add only what a photographer or an illustrator would have decided anyway: framing, lens or medium, lighting, palette, level of detail, mood. Never invent a subject that was not asked for, never add text or watermarks, and never contradict the request. Answer with the prompt itself and nothing else: no preamble, no quotes, no markdown, no explanation. Write it in English, whatever language the request is in, because image models understand it best. Stay under 400 characters.'
 	},
 	personaLanguage: {
 		label: 'Persona language',
@@ -383,6 +390,12 @@ export const PROMPT_GROUPS = [
 			'toolMemoryForget',
 			'toolMemoryRead'
 		]
+	},
+	{
+		id: 'images',
+		label: 'Images',
+		hint: 'Turning what somebody typed into something an image model can draw.',
+		keys: ['imagePrompt']
 	},
 	{
 		id: 'nativeTools',

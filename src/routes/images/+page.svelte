@@ -7,12 +7,14 @@
 		RotateCcw,
 		Sparkles,
 		Trash2,
+		Wand2,
 		X
 	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
@@ -20,6 +22,7 @@
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { modelLabel, serverBadge } from '$lib/connections';
 	import { downloadName, IMAGE_LIMITS, type GeneratedImage } from '$lib/generatedImages';
+	import { writeImagePrompt } from '$lib/imagePrompt';
 	import {
 		canDrawImages,
 		deleteImage,
@@ -51,6 +54,16 @@
 	let count = $state(1);
 	let showAdvanced = $state(false);
 	let busy = $state(false);
+	/**
+	 * What the writer produced, waiting to be read.
+	 *
+	 * A field of its own rather than a replacement for what was typed. The person
+	 * keeps their words, sees what would be sent instead, and can edit or discard
+	 * it. A helper that silently overwrote the box would be one nobody could tell
+	 * apart from a bug the first time it made the picture worse.
+	 */
+	let rewritten = $state('');
+	let rewriting = $state(false);
 	let opened = $state<GeneratedImage | null>(null);
 	let confirmingDelete = $state<string | null>(null);
 
@@ -64,10 +77,33 @@
 	 */
 	const SIZES = ['', '1024x1024', '1024x1792', '1792x1024'];
 
-	// The first model that can draw, so the field is never empty on arrival.
+	/** Whether the rewriter is configured at all, here or by the administrator. */
+	const canRewrite = $derived(!!$chatDefaultsConfig.images.imagePromptModel);
+
+	// The instance's or the account's default, and failing both the first model
+	// that can draw — so the field is never empty on arrival.
 	onMount(() => {
-		if (!model) model = $imageModels[0]?.name ?? '';
+		if (model) return;
+		const preferred = $chatDefaultsConfig.images.defaultImageModel;
+		model =
+			($imageModels.some((m) => m.name === preferred) ? preferred : $imageModels[0]?.name) ?? '';
 	});
+
+	async function rewrite() {
+		if (!prompt.trim()) return;
+		rewriting = true;
+		try {
+			const text = await writeImagePrompt(prompt);
+			if (text) rewritten = text;
+			else toast.error($LL.imageRewriteFailed());
+		} catch (error) {
+			toast.error($LL.imageRewriteFailed(), {
+				description: error instanceof Error ? error.message : undefined
+			});
+		} finally {
+			rewriting = false;
+		}
+	}
 
 	const serverFor = (id: string) => $serversStore.find((server) => server.id === id);
 
@@ -90,7 +126,12 @@
 			await generateImages({
 				serverId,
 				model,
+				// Both, always. The words that were typed are what the gallery shows and
+				// what a search would match; the rewrite is what was actually sent, and
+				// keeping it is what makes "why does this not look like what I asked
+				// for" a question with an answer.
 				prompt: prompt.trim(),
+				sentPrompt: rewritten.trim() || undefined,
 				negativePrompt: negativePrompt.trim() || undefined,
 				size: size || undefined,
 				n: count
@@ -126,6 +167,7 @@
 	 */
 	function reuse(image: GeneratedImage) {
 		prompt = image.prompt;
+		rewritten = image.sentPrompt ?? '';
 		negativePrompt = image.negativePrompt ?? '';
 		if (image.size) size = image.size;
 		if ($imageModels.some((m) => m.name === image.model)) model = image.model;
@@ -188,10 +230,51 @@
 						class="w-full resize-y rounded-lg border border-shade-3 bg-shade-1 p-3 text-sm outline-none placeholder:text-muted focus:border-accent"
 					></textarea>
 
+					{#if canRewrite && rewritten}
+						<!-- Shown, not applied. What is in this box is what gets sent; empty
+						     it and the words above are sent instead. -->
+						<div class="flex flex-col gap-1.5 rounded-lg border border-accent/40 bg-accent/5 p-3">
+							<div class="flex items-center gap-2">
+								<Wand2 class="h-3.5 w-3.5 shrink-0 text-accent" />
+								<span class="text-xs font-medium text-active">{$LL.imageRewritten()}</span>
+								<button
+									type="button"
+									onclick={() => (rewritten = '')}
+									class="ml-auto text-xs text-link"
+								>
+									{$LL.imageUseOriginal()}
+								</button>
+							</div>
+							<textarea
+								bind:value={rewritten}
+								rows="3"
+								maxlength={IMAGE_LIMITS.prompt}
+								class="w-full resize-y rounded-md border border-shade-3 bg-shade-0 p-2 text-sm outline-none focus:border-accent"
+							></textarea>
+							<span class="text-xs leading-snug text-muted">{$LL.imageRewrittenHint()}</span>
+						</div>
+					{/if}
+
 					<div class="flex flex-wrap items-center gap-2">
 						<div class="min-w-48 flex-1">
 							<ModelSelect bind:value={model} kinds={['image']} />
 						</div>
+
+						{#if canRewrite}
+							<Button
+								variant="outline"
+								onclick={rewrite}
+								disabled={rewriting || busy || !prompt.trim()}
+								title={$LL.imageRewrite()}
+							>
+								{#if rewriting}
+									<LoaderCircle class="h-4 w-4 animate-spin" />
+								{:else}
+									<Wand2 class="h-4 w-4" />
+								{/if}
+								{$LL.imageRewrite()}
+							</Button>
+						{/if}
 
 						<select
 							bind:value={size}
@@ -336,6 +419,13 @@
 			     itself rather than from the picture. -->
 			<div class="max-h-28 shrink-0 overflow-auto border-t border-shade-2 px-4 py-3">
 				<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
+				{#if image.sentPrompt}
+					<!-- What was actually sent, when the writer had a go at it. Kept beside
+					     the original rather than instead of it. -->
+					<p class="mt-1 whitespace-pre-wrap text-xs text-muted">
+						<Wand2 class="mr-1 inline h-3 w-3" />{image.sentPrompt}
+					</p>
+				{/if}
 				{#if image.negativePrompt}
 					<p class="mt-1 text-xs text-muted">
 						{$LL.imageNegativePrompt()} · {image.negativePrompt}

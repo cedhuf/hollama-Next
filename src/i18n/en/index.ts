@@ -581,11 +581,14 @@ const en = {
 	imagesSubtitle: 'Everything you have generated here, newest first.',
 	imagesCount: '{count:number} image{{s}}',
 	imagesEmpty: 'Nothing yet. Describe a picture above and it will appear here.',
-	imagesDisabled: 'Image generation is switched off on this instance. Your administrator can turn it on.',
-	imagesNoModel: 'No image model is available. An administrator has to mark one as an image model under Models and pricing, and share it.',
+	imagesDisabled:
+		'Image generation is switched off on this instance. Your administrator can turn it on.',
+	imagesNoModel:
+		'No image model is available. An administrator has to mark one as an image model under Models and pricing, and share it.',
 	imagePromptPlaceholder: 'Describe the picture you want.',
 	imageGenerate: 'Generate',
-	imageGeneratingHint: 'Drawing. This takes a while, and the result is kept even if you leave this page.',
+	imageGeneratingHint:
+		'Drawing. This takes a while, and the result is kept even if you leave this page.',
 	imageGenerationFailed: 'Generation failed',
 	imageDeleteFailed: 'Could not delete that image',
 	imageSize: 'Size',
@@ -597,8 +600,26 @@ const en = {
 	imageNegativePromptHelp: 'Not every model supports this; the ones that do not will ignore it.',
 	imageReusePrompt: 'Reuse this prompt',
 	download: 'Download',
+	imagesSettingsDescription: 'Which model draws, and which one writes the prompt for it.',
+	defaultImageModel: 'Default image model',
+	defaultImageModelHelp: 'What the gallery starts on. You can still pick another one per image.',
+	imagePromptWriter: 'Prompt writer',
+	imagePromptWriterOff: 'Off',
+	imagePromptWriterHelp:
+		'A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.',
+	imagePromptEditableHint:
+		'What it writes is always shown in an editable field before anything is drawn. Its instructions are in the Prompts tab.',
+	imagesSharing: 'Image defaults sharing',
+	imagesSharingDescription: 'Hand your image model and prompt writer to everyone on this instance.',
+	shareImages: 'Share the image defaults',
+	imageRewrite: 'Improve the prompt',
+	imageRewriteFailed: 'Could not rewrite the prompt',
+	imageRewritten: 'Rewritten prompt',
+	imageRewrittenHint: 'This is what will be sent. Edit it, or clear it to send your own words.',
+	imageUseOriginal: 'Use my words',
 	imagesAllow: 'Allow image generation',
-	imagesAllowHelp: 'Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.',
+	imagesAllowHelp:
+		'Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.',
 	personaMemoryAllow: 'Let personas remember things about their user',
 	personaMemoryAllowHelp:
 		'A persona can keep a few notes between conversations, written by itself and readable by whoever it is about. Each memory belongs to one account and is never shared, not even when the persona is. Turning this off takes the ability away without erasing what was already written.',
