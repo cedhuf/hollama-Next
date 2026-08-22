@@ -59,7 +59,6 @@
 
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
-	const onImages = $derived(pathname.includes('/images'));
 	const onChats = $derived(pathname.includes('/sessions'));
 
 	function initial(session: SessionSummary): string {
@@ -103,6 +102,30 @@
 			{/snippet}
 			{$LL.newChat()}
 		</Tooltip>
+
+		<!-- Directly under New chat, and in its colour rather than the muted grey of
+		     the destinations below. Folded, this rail is the same two gestures the
+		     expanded header offers as one split button: starting a conversation and
+		     drawing a picture. The accent is what says they belong together, and it is
+		     tinted rather than filled so the pair still has one primary end.
+
+		     No active state, deliberately. It is not a third destination beside Chats
+		     and Library; it is the other thing you can make. -->
+		{#if $canDrawImages}
+			<Tooltip side="right">
+				{#snippet trigger({ props })}
+					<a
+						{...props}
+						href={resolve('/images')}
+						aria-label={$LL.imageGenerate()}
+						class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/15 text-accent transition-colors hover:bg-accent/25"
+					>
+						<ImageIcon class="h-5 w-5" />
+					</a>
+				{/snippet}
+				{$LL.imageGenerate()}
+			</Tooltip>
+		{/if}
 
 		<!-- The full-text search, which at this width is the whole of the search: there
 	     is no room for a field, and the field was only ever the way in to this. -->
@@ -152,27 +175,6 @@
 			{/snippet}
 			{$LL.library()}
 		</Tooltip>
-
-		<!-- On the same three conditions as the segment in the expanded header: the
-		     rail is the same navigation, folded. Leaving it out here made the gallery
-		     unreachable for anyone who keeps the sidebar shut. -->
-		{#if $canDrawImages}
-			<Tooltip side="right">
-				{#snippet trigger({ props })}
-					<a
-						{...props}
-						href={resolve('/images')}
-						aria-label={$LL.images()}
-						class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onImages
-							? 'bg-shade-0 text-active'
-							: 'text-muted hover:text-active'}"
-					>
-						<ImageIcon class="h-5 w-5" />
-					</a>
-				{/snippet}
-				{$LL.images()}
-			</Tooltip>
-		{/if}
 
 		{#if personas.length > 0}
 			<div class="my-1 h-px w-8 bg-shade-3"></div>

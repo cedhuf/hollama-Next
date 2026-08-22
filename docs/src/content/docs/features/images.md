@@ -27,6 +27,9 @@ is something you make, so it sits with the other thing you make: **New chat** in
 split control, and its right half opens the gallery in one click. It keeps that shape when the
 header folds, as two squares beside the search field.
 
+With the sidebar collapsed to its rail, the same pairing holds: the picture icon sits directly under
+New chat and wears its accent, rather than joining the muted destinations below it.
+
 The home screen also carries a strip of your latest pictures, after the personas, scrolling sideways
 with a way through to the page at its end. Like every other section there it can be switched off,
 under Settings, Interface.
