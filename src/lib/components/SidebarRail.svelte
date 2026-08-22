@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { Library, MessageSquareText, MoreHorizontal, Plus, Search } from '@lucide/svelte';
+	import {
+		ImageIcon,
+		Library,
+		MessageSquareText,
+		MoreHorizontal,
+		Plus,
+		Search
+	} from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { canDrawImages } from '$lib/images';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
 	import { launchPersona, unbindPersonaSession, type Persona } from '$lib/personas';
 	import { resolveSessionTitle, type SessionSummary } from '$lib/sessions';
@@ -51,6 +59,7 @@
 
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
+	const onImages = $derived(pathname.includes('/images'));
 	const onChats = $derived(pathname.includes('/sessions'));
 
 	function initial(session: SessionSummary): string {
@@ -143,6 +152,27 @@
 			{/snippet}
 			{$LL.library()}
 		</Tooltip>
+
+		<!-- On the same three conditions as the segment in the expanded header: the
+		     rail is the same navigation, folded. Leaving it out here made the gallery
+		     unreachable for anyone who keeps the sidebar shut. -->
+		{#if $canDrawImages}
+			<Tooltip side="right">
+				{#snippet trigger({ props })}
+					<a
+						{...props}
+						href={resolve('/images')}
+						aria-label={$LL.images()}
+						class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors {onImages
+							? 'bg-shade-0 text-active'
+							: 'text-muted hover:text-active'}"
+					>
+						<ImageIcon class="h-5 w-5" />
+					</a>
+				{/snippet}
+				{$LL.images()}
+			</Tooltip>
+		{/if}
 
 		{#if personas.length > 0}
 			<div class="my-1 h-px w-8 bg-shade-3"></div>

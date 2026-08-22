@@ -114,6 +114,12 @@ Images are **not** included in the JSON backup, which is deliberate: a backup th
 several hundred megabytes would be a backup nobody could move. Delete an image and both the row
 and the file go.
 
+Getting them out is its own button instead. **Export** at the top of the page offers the latest
+image on its own, or everything as a single zip streamed by the server rather than assembled in
+memory. The archive carries an `images.json` beside the pictures, holding each one's prompt, model,
+duration and cost: a folder of pictures is a folder of pictures, and what made each one only exists
+in the app until it is written down next to them.
+
 There are two caps, both generous, both there to stop a runaway rather than to ration anybody: one
 on a single image, and one on everything an account holds.
 

@@ -661,6 +661,8 @@ const en = {
 	tourKnowledgeItem1: 'House style',
 	tourKnowledgeItem2: 'Client brief',
 	tourKnowledgeItem3: 'Glossary',
+	imagesExportLast: 'Latest image',
+	imagesExportAll: 'All {count:number} images',
 	imagesAllow: 'Allow image generation',
 	imagesAllowHelp:
 		'Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.',

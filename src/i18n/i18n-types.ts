@@ -2427,6 +2427,15 @@ type RootTranslation = {
 	 */
 	tourKnowledgeItem3: string
 	/**
+	 * L​a​t​e​s​t​ ​i​m​a​g​e
+	 */
+	imagesExportLast: string
+	/**
+	 * A​l​l​ ​{​c​o​u​n​t​}​ ​i​m​a​g​e​s
+	 * @param {number} count
+	 */
+	imagesExportAll: RequiredParams<'count'>
+	/**
 	 * A​l​l​o​w​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n
 	 */
 	imagesAllow: string
@@ -5831,6 +5840,14 @@ The completion in progress will stop
 	 * Glossary
 	 */
 	tourKnowledgeItem3: () => LocalizedString
+	/**
+	 * Latest image
+	 */
+	imagesExportLast: () => LocalizedString
+	/**
+	 * All {count} images
+	 */
+	imagesExportAll: (arg: { count: number }) => LocalizedString
 	/**
 	 * Allow image generation
 	 */

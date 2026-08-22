@@ -3,6 +3,7 @@
 		ArrowDownToLine,
 		ChevronDown,
 		Coins,
+		FileArchive,
 		ImageIcon,
 		LoaderCircle,
 		RotateCcw,
@@ -19,6 +20,8 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Button from '$lib/components/Button.svelte';
 	import Head from '$lib/components/Head.svelte';
+	import Menu from '$lib/components/Menu.svelte';
+	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
@@ -175,6 +178,41 @@
 		}
 	}
 
+	/**
+	 * Hand a file to the browser.
+	 *
+	 * An anchor rather than a navigation, because the picture route serves its
+	 * bytes `inline` — going to it would show the image instead of saving it, and
+	 * `download` is what says which of the two is meant. Both routes are
+	 * same-origin and behind the same session as the page itself.
+	 */
+	function saveAs(url: string, name?: string) {
+		const link = document.createElement('a');
+		link.href = url;
+		if (name) link.download = name;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+	}
+
+	/** The newest one, which is almost always the one just made. */
+	function exportLatest() {
+		const latest = $imagesStore[0];
+		if (latest) saveAs(imageUrl(latest.id), downloadName(latest));
+	}
+
+	/**
+	 * Everything, as one archive built and streamed by the server.
+	 *
+	 * Not a loop of downloads: browsers block the second and third of those, and
+	 * an account may hold hundreds. The archive carries a manifest of the prompts
+	 * beside the pictures, which is the half that cannot be recovered from the
+	 * files themselves.
+	 */
+	function exportAll() {
+		saveAs('/api/images/export');
+	}
+
 	async function remove(id: string) {
 		try {
 			await deleteImage(id);
@@ -222,22 +260,42 @@
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
 		<div class="mx-auto w-full max-w-5xl px-6 py-8">
-			<!-- Same header as the library's, down to the height of the row. Its right
-			     side carries buttons, which makes that row taller than a line of text;
-			     without a floor here the two titles sit at different heights and moving
-			     between the pages reads as a jump. The count sits beside the title the
-			     way every section count in the app does. -->
+			<!-- Same header as the library's, down to the height of the row: its right
+			     side carries a button, which makes that row taller than a line of text,
+			     and without the same floor here the two titles sit at different heights
+			     and moving between the pages reads as a jump. -->
 			<div class="mb-1 flex min-h-9 items-center justify-between gap-3">
-				<div class="flex min-w-0 items-baseline gap-2">
-					<h1 class="truncate text-xl font-semibold tracking-tight text-active">
-						{$LL.images()}
-					</h1>
-					{#if $imagesStore.length}
-						<span class="shrink-0 text-xs tabular-nums text-muted">
-							{$imagesStore.length}
+				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.images()}</h1>
+
+				{#if $imagesStore.length}
+					<div class="flex shrink-0 items-center gap-2">
+						<!-- How many, next to the thing that acts on them rather than next to
+						     the title: it is the size of what you are about to export. -->
+						<span class="text-xs tabular-nums text-muted">
+							{$LL.imagesCount({ count: $imagesStore.length })}
 						</span>
-					{/if}
-				</div>
+
+						<Menu>
+							{#snippet trigger({ props })}
+								<button
+									{...props}
+									type="button"
+									class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+								>
+									<ArrowDownToLine class="h-4 w-4" />
+									{$LL.export()}
+								</button>
+							{/snippet}
+
+							<MenuItem icon={ImageIcon} onclick={exportLatest}>
+								{$LL.imagesExportLast()}
+							</MenuItem>
+							<MenuItem icon={FileArchive} onclick={exportAll}>
+								{$LL.imagesExportAll({ count: $imagesStore.length })}
+							</MenuItem>
+						</Menu>
+					</div>
+				{/if}
 			</div>
 			<p class="mb-7 text-sm text-muted">{$LL.imagesSubtitle()}</p>
 

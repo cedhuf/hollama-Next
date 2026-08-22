@@ -688,6 +688,8 @@ const fr = extendDictionary(en, {
 	tourKnowledgeItem1: 'Charte éditoriale',
 	tourKnowledgeItem2: 'Brief client',
 	tourKnowledgeItem3: 'Glossaire',
+	imagesExportLast: 'Dernière image',
+	imagesExportAll: 'Les {count} images',
 	imagesAllow: "Autoriser la génération d'images",
 	imagesAllowHelp:
 		"Désactivé par défaut. Les modèles d'image sont facturés à la requête, donc personne ne dépense tant que vous ne l'activez pas. Le désactiver ensuite masque la page et refuse les nouvelles générations ; les images déjà faites sont conservées.",
