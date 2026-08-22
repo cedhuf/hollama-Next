@@ -570,7 +570,7 @@
 				src={imageUrl(image.id)}
 				alt=""
 				aria-hidden="true"
-				class="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-25 blur-2xl"
+				class="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-2xl"
 			/>
 
 			<!-- Actions in the title bar, beside the close, and no footer at all. The
@@ -579,7 +579,7 @@
 			     close is already there and already pinned. Here it buys the picture that
 			     height back, which is the whole point of the dialog. -->
 			<div
-				class="relative flex h-12 shrink-0 items-center gap-3 border-b border-shade-2/50 bg-shade-0/45 px-4 backdrop-blur-md"
+				class="relative flex h-12 shrink-0 items-center gap-3 border-b border-shade-2/40 bg-shade-0/20 px-4 backdrop-blur-xl"
 			>
 				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<span
@@ -669,9 +669,16 @@
 			<!-- `min-h-0` is what makes the rest of this work: without it a flex child
 			     refuses to shrink below its content, so the image would push the strip
 			     below it off the bottom instead of fitting between them. -->
-			<!-- The two panes differ by how much of the backdrop each admits, which is
-			     what keeps the bar reading as a bar: a veil over it, almost nothing over
-			     the picture. Same layer underneath both, so it is one image and not two. -->
+			<!-- The two panes differ by how far each blurs the backdrop, not by how much
+			     paint each puts over it.
+			
+			     Paint was the first attempt and it was wrong, because it stacked: the
+			     backdrop is already a partly transparent picture over a light surface, so
+			     a second translucent white on the bar added to the first and the bar came
+			     out nearly opaque. Blur adds nothing. It softens what is already there
+			     until it stops competing with text, which is the whole job, and it is the
+			     same trade the app's own surfaces make everywhere else — transparency and
+			     blur move together, and neither is any use alone. -->
 			<!-- The picture stops where the prompt starts.
 			
 			     It used to run underneath it, which is what a floating bar does by
