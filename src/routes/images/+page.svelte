@@ -1,10 +1,12 @@
 <script lang="ts">
 	import {
 		ArrowDownToLine,
+		ChevronDown,
 		Coins,
 		ImageIcon,
 		LoaderCircle,
 		RotateCcw,
+		SlidersHorizontal,
 		Sparkles,
 		Trash2,
 		Wand2,
@@ -65,6 +67,12 @@
 	let rewritten = $state('');
 	let rewriting = $state(false);
 	let opened = $state<GeneratedImage | null>(null);
+	/** Whether the open picture's prompt is shown whole. Reset with each picture. */
+	let expandedPrompt = $state(false);
+	/** The prompt block's natural height, measured so the opening can be animated. */
+	let promptHeight = $state(0);
+	/** Two lines of the prompt, which is enough to recognise it by. */
+	const COLLAPSED_PROMPT = 44;
 	let confirmingDelete = $state<string | null>(null);
 
 	/**
@@ -219,21 +227,31 @@
 					{$LL.imagesNoModel()}
 				</p>
 			{:else if $canDrawImages}
-				<!-- What makes a new one. At the top because that is where the page
-				     starts, and because everything below it is the result. -->
-				<div class="mb-8 flex flex-col gap-3 rounded-xl border border-shade-3 bg-shade-0 p-4">
+				<!-- What makes a new one. At the top because that is where the page starts,
+				     and because everything below it is the result.
+
+				     Built as one surface rather than a stack of form rows: the words, the
+				     controls that qualify them and the button that acts on them are one
+				     gesture, so they share a frame and the field inside it has no border of
+				     its own. Same idea as the composer in a conversation, in the shape this
+				     page needs. -->
+				<div
+					class="library-section mb-8 overflow-hidden rounded-2xl border bg-shade-0 shadow-sm transition-colors focus-within:border-accent section-tint"
+					style="--section-turn: 40"
+				>
 					<textarea
 						bind:value={prompt}
 						rows="3"
 						maxlength={IMAGE_LIMITS.prompt}
 						placeholder={$LL.imagePromptPlaceholder()}
-						class="w-full resize-y rounded-lg border border-shade-3 bg-shade-1 p-3 text-sm outline-none placeholder:text-muted focus:border-accent"
+						class="w-full resize-none border-0 bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed outline-none placeholder:text-muted"
 					></textarea>
 
 					{#if canRewrite && rewritten}
-						<!-- Shown, not applied. What is in this box is what gets sent; empty
-						     it and the words above are sent instead. -->
-						<div class="flex flex-col gap-1.5 rounded-lg border border-accent/40 bg-accent/5 p-3">
+						<!-- Shown, not applied. What is in this box is what gets sent; empty it
+						     and the words above are sent instead. Tinted with the accent so it
+						     reads as something the app added rather than something you typed. -->
+						<div class="mx-4 mb-3 flex flex-col gap-1.5 rounded-xl bg-accent/[0.07] p-3">
 							<div class="flex items-center gap-2">
 								<Wand2 class="h-3.5 w-3.5 shrink-0 text-accent" />
 								<span class="text-xs font-medium text-active">{$LL.imageRewritten()}</span>
@@ -249,37 +267,39 @@
 								bind:value={rewritten}
 								rows="3"
 								maxlength={IMAGE_LIMITS.prompt}
-								class="w-full resize-y rounded-md border border-shade-3 bg-shade-0 p-2 text-sm outline-none focus:border-accent"
+								class="w-full resize-none rounded-lg border border-shade-3 bg-shade-0 p-2 text-sm leading-relaxed outline-none focus:border-accent"
 							></textarea>
 							<span class="text-xs leading-snug text-muted">{$LL.imageRewrittenHint()}</span>
 						</div>
 					{/if}
 
-					<div class="flex flex-wrap items-center gap-2">
-						<div class="min-w-48 flex-1">
+					{#if showAdvanced}
+						<div class="mx-4 mb-3 flex flex-col gap-1.5">
+							<input
+								bind:value={negativePrompt}
+								maxlength={IMAGE_LIMITS.negativePrompt}
+								placeholder={$LL.imageNegativePromptPlaceholder()}
+								aria-label={$LL.imageNegativePrompt()}
+								class="w-full rounded-lg border border-shade-3 bg-shade-1 px-3 py-2 text-sm outline-none placeholder:text-muted focus:border-accent"
+							/>
+							<span class="text-xs leading-snug text-muted">{$LL.imageNegativePromptHelp()}</span>
+						</div>
+					{/if}
+
+					<!-- The controls, on their own strip at the foot of the surface. A hairline
+					     rather than a second card: they qualify the words above, they are not a
+					     separate subject. -->
+					<div
+						class="flex flex-wrap items-center gap-2 border-t border-shade-2 bg-shade-1/60 px-3 py-2.5"
+					>
+						<div class="min-w-40 flex-1">
 							<ModelSelect bind:value={model} kinds={['image']} />
 						</div>
-
-						{#if canRewrite}
-							<Button
-								variant="outline"
-								onclick={rewrite}
-								disabled={rewriting || busy || !prompt.trim()}
-								title={$LL.imageRewrite()}
-							>
-								{#if rewriting}
-									<LoaderCircle class="h-4 w-4 animate-spin" />
-								{:else}
-									<Wand2 class="h-4 w-4" />
-								{/if}
-								{$LL.imageRewrite()}
-							</Button>
-						{/if}
 
 						<select
 							bind:value={size}
 							aria-label={$LL.imageSize()}
-							class="h-10 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-sm text-active outline-none focus:border-accent"
+							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent"
 						>
 							{#each SIZES as value (value)}
 								<option {value}>{value || $LL.imageSizeDefault()}</option>
@@ -289,75 +309,115 @@
 						<select
 							bind:value={count}
 							aria-label={$LL.imageCount()}
-							class="h-10 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-sm text-active outline-none focus:border-accent"
+							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent"
 						>
 							{#each Array.from({ length: IMAGE_LIMITS.maxPerRequest }, (_, i) => i + 1) as n (n)}
 								<option value={n}>{$LL.imageCountOption({ count: n })}</option>
 							{/each}
 						</select>
 
-						<Button onclick={generate} disabled={busy || !prompt.trim() || !model}>
-							{#if busy}
-								<LoaderCircle class="h-4 w-4 animate-spin" />
-							{:else}
-								<Sparkles class="h-4 w-4" />
+						<!-- The rarely-used half, as an icon that toggles rather than a link that
+						     reads like a page. It shows it is on by staying lit. -->
+						<button
+							type="button"
+							onclick={() => (showAdvanced = !showAdvanced)}
+							aria-expanded={showAdvanced}
+							aria-label={$LL.advancedSettings()}
+							title={$LL.imageNegativePrompt()}
+							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors {showAdvanced
+								? 'border-accent/50 bg-accent/10 text-accent'
+								: 'border-shade-3 text-muted hover:text-active'}"
+						>
+							<SlidersHorizontal class="h-3.5 w-3.5" />
+						</button>
+
+						<div class="ml-auto flex items-center gap-2">
+							{#if canRewrite}
+								<button
+									type="button"
+									onclick={rewrite}
+									disabled={rewriting || busy || !prompt.trim()}
+									title={$LL.imageRewrite()}
+									class="flex h-9 items-center gap-1.5 rounded-lg border border-shade-3 px-2.5 text-xs text-muted transition-colors hover:text-active disabled:pointer-events-none disabled:opacity-50"
+								>
+									{#if rewriting}
+										<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+									{:else}
+										<Wand2 class="h-3.5 w-3.5" />
+									{/if}
+									<span class="max-sm:hidden">{$LL.imageRewrite()}</span>
+								</button>
 							{/if}
-							{$LL.imageGenerate()}
-						</Button>
+
+							<button
+								type="button"
+								onclick={generate}
+								disabled={busy || !prompt.trim() || !model}
+								class="flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-medium text-shade-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:bg-shade-3 disabled:text-muted"
+							>
+								{#if busy}
+									<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
+								{:else}
+									<Sparkles class="h-3.5 w-3.5" />
+								{/if}
+								{$LL.imageGenerate()}
+							</button>
+						</div>
 					</div>
-
-					<button
-						type="button"
-						onclick={() => (showAdvanced = !showAdvanced)}
-						class="self-start text-xs text-link"
-					>
-						{$LL.advancedSettings()}
-					</button>
-
-					{#if showAdvanced}
-						<label class="flex flex-col gap-1.5">
-							<span class="text-xs font-medium text-active">{$LL.imageNegativePrompt()}</span>
-							<input
-								bind:value={negativePrompt}
-								maxlength={IMAGE_LIMITS.negativePrompt}
-								placeholder={$LL.imageNegativePromptPlaceholder()}
-								class="settings-field text-sm"
-							/>
-							<span class="text-xs leading-snug text-muted">
-								{$LL.imageNegativePromptHelp()}
-							</span>
-						</label>
-					{/if}
-
-					{#if busy}
-						<!-- Said plainly, because it is true and because thirty seconds of
-						     nothing reads as a broken button. The reassurance is the useful
-						     half: the answer is kept whatever this tab does next. -->
-						<p class="text-xs text-muted">{$LL.imageGeneratingHint()}</p>
-					{/if}
 				</div>
 			{/if}
 
 			<!-- The gallery. Newest first, because the one you just made is the one you
 			     want to look at. -->
-			{#if $imagesStore.length}
-				<div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+			{#if $imagesStore.length || busy}
+				<div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
+					{#if busy}
+						<!-- One placeholder per picture asked for, at the front, where the
+						     pictures will be. Thirty seconds of a spinner somewhere else reads
+						     as a page that has stopped; thirty seconds of the shapes filling in
+						     reads as a page that is working, and it says how many are coming. -->
+						{#each Array.from({ length: count }, (_, i) => i) as slot (slot)}
+							<div
+								class="flex aspect-square animate-pulse items-center justify-center rounded-xl border border-dashed border-accent/40 bg-accent/5"
+								style="animation-delay: {slot * 150}ms"
+							>
+								<ImageIcon class="h-6 w-6 text-accent/40" />
+							</div>
+						{/each}
+					{/if}
+
 					{#each $imagesStore as image (image.id)}
 						<button
 							type="button"
-							onclick={() => (opened = image)}
-							class="group relative aspect-square overflow-hidden rounded-xl border border-shade-3 bg-shade-1 transition-colors hover:border-shade-4"
+							onclick={() => {
+								opened = image;
+								expandedPrompt = false;
+							}}
+							class="group relative aspect-square overflow-hidden rounded-xl border border-shade-3 bg-shade-1 transition-all hover:border-shade-4 hover:shadow-md focus-visible:border-accent focus-visible:outline-none"
 						>
+							<!-- The picture grows a little under the pointer inside a frame that
+							     does not, which is what makes a grid of squares feel like objects
+							     rather than a contact sheet. -->
 							<img
 								src={imageUrl(image.id)}
 								alt={image.prompt}
 								loading="lazy"
-								class="h-full w-full object-cover"
+								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
 							/>
-							<!-- The prompt, on the picture, on hover. A grid of pictures with no
-							     words is a grid you have to open one by one to search. -->
+
+							<!-- Which connection drew it, in the colour that connection wears
+							     everywhere else in the app. A gallery mixing two providers reads
+							     without a legend. -->
 							<span
-								class="pointer-events-none absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/80 to-transparent p-2 text-left text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100"
+								class="absolute left-2 top-2 h-2 w-2 rounded-full ring-1 ring-black/20"
+								style="background-color: {badgeColor(image.serverId)}"
+							></span>
+
+							<!-- The prompt, on the picture, on hover and on keyboard focus. A grid
+							     of pictures with no words is a grid you open one by one to search.
+							     Focus counts as hover here, or the keyboard never sees it. -->
+							<span
+								class="pointer-events-none absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-2.5 pb-2.5 pt-6 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
 							>
 								{image.prompt}
 							</span>
@@ -365,12 +425,15 @@
 					{/each}
 				</div>
 			{:else if $imagesLoaded && $canDrawImages}
-				<p
-					class="rounded-xl border border-dashed border-shade-4 p-10 text-center text-sm text-muted"
+				<!-- Empty, and saying so as an invitation rather than as a fault. -->
+				<div
+					class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-shade-4 px-6 py-14 text-center"
 				>
-					<ImageIcon class="mx-auto mb-2 h-6 w-6 opacity-60" />
-					{$LL.imagesEmpty()}
-				</p>
+					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
+						<ImageIcon class="h-5 w-5 text-accent" />
+					</div>
+					<p class="max-w-sm text-sm text-muted">{$LL.imagesEmpty()}</p>
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -415,21 +478,54 @@
 				/>
 			</div>
 
-			<!-- Capped and scrollable on its own, so a long prompt takes room from
-			     itself rather than from the picture. -->
-			<div class="max-h-28 shrink-0 overflow-auto border-t border-shade-2 px-4 py-3">
-				<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
-				{#if image.sentPrompt}
-					<!-- What was actually sent, when the writer had a go at it. Kept beside
-					     the original rather than instead of it. -->
-					<p class="mt-1 whitespace-pre-wrap text-xs text-muted">
-						<Wand2 class="mr-1 inline h-3 w-3" />{image.sentPrompt}
-					</p>
-				{/if}
-				{#if image.negativePrompt}
-					<p class="mt-1 text-xs text-muted">
-						{$LL.imageNegativePrompt()} · {image.negativePrompt}
-					</p>
+			<!-- Nothing here scrolls. A long prompt is clamped to two lines, and opening
+			     it takes its room from the picture — which shrinks, because it is the
+			     flexible one. A scrollbar inside a strip this short is a control nobody
+			     sees and everybody fights. -->
+			<div class="shrink-0 border-t border-shade-2 px-4 py-3">
+				<!-- A clamp cannot be animated: `line-clamp` has no in-between, so opening
+				     one is a jump whatever easing is asked for. A height can be animated, but
+				     only towards a number, and the number is whatever this text happens to
+				     be — so it is measured. The inner box keeps its natural height because
+				     the clipping is done by its parent, which is what makes the measurement
+				     available even while it is hidden. -->
+				<div
+					class="overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none"
+					style="max-height: {expandedPrompt ? promptHeight : COLLAPSED_PROMPT}px"
+				>
+					<div bind:clientHeight={promptHeight}>
+						<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
+						{#if image.sentPrompt}
+							<!-- What was actually sent, when the writer had a go at it. Kept beside
+							     the original rather than instead of it. -->
+							<p class="mt-1 whitespace-pre-wrap text-xs text-muted">
+								<Wand2 class="mr-1 inline h-3 w-3" />{image.sentPrompt}
+							</p>
+						{/if}
+						{#if image.negativePrompt}
+							<p class="mt-1 text-xs text-muted">
+								{$LL.imageNegativePrompt()} · {image.negativePrompt}
+							</p>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Offered only when there is something to open. A prompt of six words with
+				     a "show more" under it is a control that does nothing. -->
+				{#if promptHeight > COLLAPSED_PROMPT}
+					<button
+						type="button"
+						onclick={() => (expandedPrompt = !expandedPrompt)}
+						aria-expanded={expandedPrompt}
+						class="mt-1.5 flex items-center gap-1 text-xs text-link"
+					>
+						<ChevronDown
+							class="h-3 w-3 transition-transform duration-300 motion-reduce:transition-none {expandedPrompt
+								? 'rotate-180'
+								: ''}"
+						/>
+						{expandedPrompt ? $LL.showLess() : $LL.showMore()}
+					</button>
 				{/if}
 				<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
 					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
