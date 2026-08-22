@@ -387,7 +387,7 @@
 					<button
 						type="button"
 						onclick={() => importInput?.click()}
-						class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+						class="flex items-center gap-1.5 rounded-lg border border-accent bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 					>
 						<Upload class="h-4 w-4" />
 						{$LL.import()}

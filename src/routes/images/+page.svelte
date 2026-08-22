@@ -260,11 +260,10 @@
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
 		<div class="mx-auto w-full max-w-5xl px-6 py-8">
-			<!-- Same header as the library's, down to the height of the row: its right
-			     side carries a button, which makes that row taller than a line of text,
-			     and without the same floor here the two titles sit at different heights
-			     and moving between the pages reads as a jump. -->
-			<div class="mb-1 flex min-h-9 items-center justify-between gap-3">
+			<!-- Same header as the library's, and the same height by construction rather
+			     than by a floor set here: the row is as tall as its button, and that
+			     button is the same button. -->
+			<div class="mb-1 flex items-center justify-between gap-3">
 				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.images()}</h1>
 
 				{#if $imagesStore.length}
@@ -280,7 +279,7 @@
 								<button
 									{...props}
 									type="button"
-									class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+									class="flex items-center gap-1.5 rounded-lg border border-accent bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 								>
 									<ArrowDownToLine class="h-4 w-4" />
 									{$LL.export()}
