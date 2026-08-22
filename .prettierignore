@@ -7,6 +7,11 @@ node_modules
 .env.*
 !.env.example
 
+# Agent worktrees: a full checkout plus its build output, ignored by git and
+# therefore invisible until Prettier walks into one and reports a thousand
+# generated files it can never fix.
+/.claude/worktrees
+
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml
 package-lock.json
