@@ -1,3 +1,5 @@
+import type { ImageQuality, ImageRatio } from '$lib/imageOptions';
+
 /**
  * A picture the app made, and everything about it that is not the picture.
  *
@@ -30,7 +32,17 @@ export interface GeneratedImage {
 	/** Which connection drew it, and with what. Both needed to draw it again. */
 	serverId: string;
 	model: string;
+	/** The concrete size that was sent, when one was. Absent means the model chose. */
 	size?: string;
+	/**
+	 * What was asked for, in the app's words rather than the provider's.
+	 *
+	 * Kept beside the size because it is what "make another like this" needs: the
+	 * pixel counts belong to whichever model drew it, and reusing them on another
+	 * model would be a refusal. A shape and a level of effort travel.
+	 */
+	ratio?: ImageRatio;
+	quality?: ImageQuality;
 	style?: string;
 	/** `image/png` and friends, decided here and never taken from the provider. */
 	contentType: string;

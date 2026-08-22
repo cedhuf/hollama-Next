@@ -1,5 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
+import { IMAGE_QUALITIES, IMAGE_RATIOS } from '$lib/imageOptions';
 import { requireUser } from '$lib/server/api';
 import { listImages } from '$lib/server/db/generatedImages';
 import { getServer } from '$lib/server/db/servers';
@@ -43,7 +44,10 @@ export async function POST(event) {
 			sentPrompt: typeof body.sentPrompt === 'string' ? body.sentPrompt : undefined,
 			negativePrompt: typeof body.negativePrompt === 'string' ? body.negativePrompt : undefined,
 			model: body.model,
-			size: typeof body.size === 'string' ? body.size : undefined,
+			// The app's own words, and only the ones it knows: anything else is dropped
+			// rather than passed through to a provider that would refuse it.
+			ratio: IMAGE_RATIOS.includes(body.ratio) ? body.ratio : undefined,
+			quality: IMAGE_QUALITIES.includes(body.quality) ? body.quality : undefined,
 			style: typeof body.style === 'string' ? body.style : undefined,
 			n: Number(body.n) || 1
 		});

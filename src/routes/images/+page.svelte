@@ -26,6 +26,13 @@
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { modelLabel, serverBadge } from '$lib/connections';
 	import { downloadName, IMAGE_LIMITS, type GeneratedImage } from '$lib/generatedImages';
+	import {
+		IMAGE_QUALITIES,
+		IMAGE_RATIOS,
+		imageOptionsFor,
+		type ImageQuality,
+		type ImageRatio
+	} from '$lib/imageOptions';
 	import { writeImagePrompt } from '$lib/imagePrompt';
 	import {
 		canDrawImages,
@@ -54,7 +61,8 @@
 	let prompt = $state('');
 	let negativePrompt = $state('');
 	let model = $state('');
-	let size = $state('');
+	let ratio = $state<ImageRatio>('square');
+	let quality = $state<ImageQuality>('standard');
 	let count = $state(1);
 	let showAdvanced = $state(false);
 	let busy = $state(false);
@@ -94,14 +102,28 @@
 	let confirmingDelete = $state<string | null>(null);
 
 	/**
-	 * The sizes every provider the app draws with accepts.
+	 * What this connection understands, for the model currently chosen.
 	 *
-	 * A short list rather than a free field: these are enumerated by the provider,
-	 * and a size it does not know is a 400 arriving thirty seconds later. Empty
-	 * means "whatever the model defaults to", which is the right answer for a
-	 * self-hosted model that has its own idea.
+	 * Empty on anything the app has no translation for, which disables both
+	 * controls rather than offering a choice that becomes a refusal thirty seconds
+	 * later. The request then carries neither field and the model uses its own
+	 * default, which is valid everywhere.
 	 */
-	const SIZES = ['', '1024x1024', '1024x1792', '1792x1024'];
+	const options = $derived.by(() => {
+		const server = serverFor(serverIdFor(model) ?? '');
+		return server ? imageOptionsFor(server.connectionType, model) : {};
+	});
+
+	const RATIO_LABELS = $derived<Record<ImageRatio, string>>({
+		square: $LL.imageRatioSquare(),
+		portrait: $LL.imageRatioPortrait(),
+		landscape: $LL.imageRatioLandscape()
+	});
+	const QUALITY_LABELS = $derived<Record<ImageQuality, string>>({
+		low: $LL.imageQualityLow(),
+		standard: $LL.imageQualityStandard(),
+		high: $LL.imageQualityHigh()
+	});
 
 	/**
 	 * Whether to offer the rewriter: switched on, and with a model to run it —
@@ -165,7 +187,10 @@
 				prompt: prompt.trim(),
 				sentPrompt: rewritten.trim() || undefined,
 				negativePrompt: negativePrompt.trim() || undefined,
-				size: size || undefined,
+				// The app's own words. The server holds the connection, so it is the side
+				// that knows what this provider calls them, and it translates there.
+				ratio,
+				quality,
 				n: count
 			});
 
@@ -240,7 +265,8 @@
 		prompt = image.prompt;
 		rewritten = image.sentPrompt ?? '';
 		negativePrompt = image.negativePrompt ?? '';
-		if (image.size) size = image.size;
+		if (image.ratio) ratio = image.ratio;
+		if (image.quality) quality = image.quality;
 		if ($imageModels.some((m) => m.name === image.model)) model = image.model;
 		if (image.negativePrompt) showAdvanced = true;
 		opened = null;
@@ -373,13 +399,30 @@
 							<ModelSelect bind:value={model} kinds={['image']} />
 						</div>
 
+						<!-- Disabled, not hidden, where the app has no translation: the control
+						     still says what it would have controlled, and the request simply
+						     leaves the field out so the model uses its own default. -->
 						<select
-							bind:value={size}
-							aria-label={$LL.imageSize()}
-							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent"
+							bind:value={ratio}
+							disabled={!options.sizes}
+							aria-label={$LL.imageRatio()}
+							title={options.sizes ? $LL.imageRatio() : $LL.imageOptionUnavailable()}
+							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent disabled:opacity-50"
 						>
-							{#each SIZES as value (value)}
-								<option {value}>{value || $LL.imageSizeDefault()}</option>
+							{#each IMAGE_RATIOS as value (value)}
+								<option {value}>{RATIO_LABELS[value]}</option>
+							{/each}
+						</select>
+
+						<select
+							bind:value={quality}
+							disabled={!options.qualities}
+							aria-label={$LL.imageQuality()}
+							title={options.qualities ? $LL.imageQuality() : $LL.imageOptionUnavailable()}
+							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent disabled:opacity-50"
+						>
+							{#each IMAGE_QUALITIES as value (value)}
+								<option {value}>{QUALITY_LABELS[value]}</option>
 							{/each}
 						</select>
 

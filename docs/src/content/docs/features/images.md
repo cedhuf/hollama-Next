@@ -101,6 +101,36 @@ not look like what I asked for" stays a question with an answer.
 The instruction it follows is editable like every other prompt in the app, under **Settings,
 Prompts, Images**.
 
+## Shape and quality
+
+The composer asks for a **shape** — square, portrait or landscape — and a **quality**, rather than a
+pixel count. Those two are translated into whatever the provider calls them at the moment the
+request is sent.
+
+This is not a convenience. Image endpoints have no capability discovery: `/v1/models` returns
+identifiers and nothing else, no provider publishes the sizes a model accepts, and the only way to
+"ask" would be to send something invalid and read the refusal. So the app cannot know, and a size it
+guesses wrong is a 400 that arrives after the thirty seconds, not before them.
+
+A shape survives where a pixel count does not. Every image model offers square, portrait and
+landscape; the numbers behind them differ per model and change with each new one. On Infomaniak a
+portrait is `1024x1792`, on OpenAI's `gpt-image-1` it is `1024x1536`, and on `dall-e-3` — same
+provider — it is `1024x1792` again. Quality is worse: `dall-e-3` and Infomaniak take `standard` and
+`hd`, `gpt-image-1` takes `low`, `medium` and `high`.
+
+**Where the app has no translation, both controls are disabled and neither field is sent.** The
+model then uses its own default, which is valid everywhere. That is the case for self-hosted
+OpenAI-compatible endpoints, which are whatever somebody installed, and for any model the app has
+not been told about.
+
+Where a provider offers two levels of quality and the app offers three, the bottom two collapse onto
+the same request. Collapsing is the honest failure: hiding a control on some providers and not
+others would make the same setting mean different things depending on where you are.
+
+Each picture records the shape and quality that were asked for, in the app's words, alongside the
+concrete size that was sent. Reusing a prompt therefore carries the intent to a different model
+rather than a pixel count that model would refuse.
+
 ## Titles
 
 Each picture is named once it exists: three to six words, written by the same text model the prompt

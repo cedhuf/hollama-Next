@@ -2167,14 +2167,6 @@ type RootTranslation = {
 	 */
 	imageDeleteFailed: string
 	/**
-	 * S​i​z​e
-	 */
-	imageSize: string
-	/**
-	 * D​e​f​a​u​l​t​ ​s​i​z​e
-	 */
-	imageSizeDefault: string
-	/**
 	 * H​o​w​ ​m​a​n​y
 	 */
 	imageCount: string
@@ -2438,6 +2430,42 @@ type RootTranslation = {
 	 * G​e​n​e​r​a​t​e​ ​o​n​e
 	 */
 	imagesStartGenerating: string
+	/**
+	 * S​h​a​p​e
+	 */
+	imageRatio: string
+	/**
+	 * S​q​u​a​r​e
+	 */
+	imageRatioSquare: string
+	/**
+	 * P​o​r​t​r​a​i​t
+	 */
+	imageRatioPortrait: string
+	/**
+	 * L​a​n​d​s​c​a​p​e
+	 */
+	imageRatioLandscape: string
+	/**
+	 * Q​u​a​l​i​t​y
+	 */
+	imageQuality: string
+	/**
+	 * D​r​a​f​t
+	 */
+	imageQualityLow: string
+	/**
+	 * S​t​a​n​d​a​r​d
+	 */
+	imageQualityStandard: string
+	/**
+	 * H​i​g​h
+	 */
+	imageQualityHigh: string
+	/**
+	 * T​h​i​s​ ​p​r​o​v​i​d​e​r​ ​d​o​e​s​ ​n​o​t​ ​s​a​y​ ​w​h​a​t​ ​i​t​ ​a​c​c​e​p​t​s​,​ ​s​o​ ​t​h​e​ ​m​o​d​e​l​ ​d​e​c​i​d​e​s​.
+	 */
+	imageOptionUnavailable: string
 	/**
 	 * L​a​t​e​s​t​ ​i​m​a​g​e
 	 */
@@ -5589,14 +5617,6 @@ The completion in progress will stop
 	 */
 	imageDeleteFailed: () => LocalizedString
 	/**
-	 * Size
-	 */
-	imageSize: () => LocalizedString
-	/**
-	 * Default size
-	 */
-	imageSizeDefault: () => LocalizedString
-	/**
 	 * How many
 	 */
 	imageCount: () => LocalizedString
@@ -5856,6 +5876,42 @@ The completion in progress will stop
 	 * Generate one
 	 */
 	imagesStartGenerating: () => LocalizedString
+	/**
+	 * Shape
+	 */
+	imageRatio: () => LocalizedString
+	/**
+	 * Square
+	 */
+	imageRatioSquare: () => LocalizedString
+	/**
+	 * Portrait
+	 */
+	imageRatioPortrait: () => LocalizedString
+	/**
+	 * Landscape
+	 */
+	imageRatioLandscape: () => LocalizedString
+	/**
+	 * Quality
+	 */
+	imageQuality: () => LocalizedString
+	/**
+	 * Draft
+	 */
+	imageQualityLow: () => LocalizedString
+	/**
+	 * Standard
+	 */
+	imageQualityStandard: () => LocalizedString
+	/**
+	 * High
+	 */
+	imageQualityHigh: () => LocalizedString
+	/**
+	 * This provider does not say what it accepts, so the model decides.
+	 */
+	imageOptionUnavailable: () => LocalizedString
 	/**
 	 * Latest image
 	 */

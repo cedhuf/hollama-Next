@@ -3,6 +3,7 @@ import { derived, get, writable } from 'svelte/store';
 import { isServerMode } from '$lib/chat/endpoint';
 import { modelKind } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
+import type { ImageQuality, ImageRatio } from '$lib/imageOptions';
 import { writeImageTitle } from '$lib/imagePrompt';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
@@ -44,7 +45,9 @@ export interface GenerateInput {
 	prompt: string;
 	sentPrompt?: string;
 	negativePrompt?: string;
-	size?: string;
+	/** The app's own words. The server translates them for the provider it calls. */
+	ratio?: ImageRatio;
+	quality?: ImageQuality;
 	n?: number;
 }
 

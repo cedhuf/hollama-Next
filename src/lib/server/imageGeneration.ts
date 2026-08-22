@@ -8,6 +8,14 @@ import {
 	sniffImageType,
 	type GeneratedImage
 } from '$lib/generatedImages';
+import {
+	imageOptionsFor,
+	qualityFor,
+	sizeFor,
+	type ImageOptions,
+	type ImageQuality,
+	type ImageRatio
+} from '$lib/imageOptions';
 import { bytesHeld, insertImage } from '$lib/server/db/generatedImages';
 import {
 	getModelKinds,
@@ -51,7 +59,9 @@ export interface ImageRequest {
 	sentPrompt?: string;
 	negativePrompt?: string;
 	model: string;
-	size?: string;
+	/** The app's words; this module turns them into whatever the provider calls them. */
+	ratio?: ImageRatio;
+	quality?: ImageQuality;
 	style?: string;
 	n?: number;
 }
@@ -74,8 +84,18 @@ function vet(server: ServerRow, isAdmin: boolean, model: string): void {
 	}
 }
 
-/** The body every provider the app draws with understands. */
-function requestBody(input: ImageRequest, count: number) {
+/**
+ * The body every provider the app draws with understands.
+ *
+ * Shape and quality are translated here and left out entirely when there is no
+ * translation, which is the safe answer: every endpoint has a default, and a
+ * field it does not recognise is a refusal arriving after the wait rather than
+ * before it.
+ */
+function requestBody(input: ImageRequest, count: number, options: ImageOptions) {
+	const size = input.ratio ? sizeFor(options, input.ratio) : undefined;
+	const quality = input.quality ? qualityFor(options, input.quality) : undefined;
+
 	return {
 		model: input.model,
 		prompt: input.sentPrompt?.trim() || input.prompt,
@@ -85,7 +105,8 @@ function requestBody(input: ImageRequest, count: number) {
 		// address — the shape of every SSRF there has ever been.
 		response_format: 'b64_json',
 		...(input.negativePrompt?.trim() ? { negative_prompt: input.negativePrompt.trim() } : {}),
-		...(input.size ? { size: input.size } : {}),
+		...(size ? { size } : {}),
+		...(quality ? { quality } : {}),
 		...(input.style ? { style: input.style } : {})
 	};
 }
@@ -144,6 +165,7 @@ export async function generateImages(
 		imageBaseUrl: server.image_base_url ?? undefined
 	}).replace(/\/+$/, '');
 
+	const options = imageOptionsFor(server.connection_type, input.model);
 	const key = getServerApiKey(server);
 	const startedAt = Date.now();
 
@@ -155,7 +177,7 @@ export async function generateImages(
 				'content-type': 'application/json',
 				...(key ? { authorization: `Bearer ${key}` } : {})
 			},
-			body: JSON.stringify(requestBody(input, count))
+			body: JSON.stringify(requestBody(input, count, options))
 		});
 	} catch {
 		throw new ImageError(502, 'The image provider could not be reached');
@@ -226,7 +248,11 @@ export async function generateImages(
 			negativePrompt: input.negativePrompt?.trim() || undefined,
 			serverId: server.id,
 			model: input.model,
-			size: input.size,
+			// What was actually sent, and what was asked for. The first is a fact about
+			// this picture, the second is what "another like this" can be built from.
+			size: input.ratio ? sizeFor(options, input.ratio) : undefined,
+			ratio: input.ratio,
+			quality: input.quality,
 			style: input.style,
 			contentType,
 			bytes: bytes.length,
