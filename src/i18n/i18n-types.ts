@@ -2268,6 +2268,161 @@ type RootTranslation = {
 	 */
 	imageUseOriginal: string
 	/**
+	 * C​o​n​t​i​n​u​e
+	 */
+	tourContinue: string
+	/**
+	 * Y​o​u​r​ ​o​w​n​ ​s​p​a​c​e​ ​t​o​ ​t​h​i​n​k​ ​o​u​t​ ​l​o​u​d​ ​w​i​t​h​ ​A​I​:​ ​p​r​i​v​a​t​e​,​ ​f​a​s​t​,​ ​a​n​d​ ​s​h​a​p​e​d​ ​t​h​e​ ​w​a​y​ ​y​o​u​ ​l​i​k​e​ ​i​t​.
+	 */
+	tourIntro: string
+	/**
+	 * M​a​k​e​ ​i​t​ ​y​o​u​r​s
+	 */
+	tourThemeTitle: string
+	/**
+	 * P​i​c​k​ ​a​ ​l​o​o​k​.​ ​I​t​ ​a​p​p​l​i​e​s​ ​i​n​s​t​a​n​t​l​y​ ​a​n​d​ ​i​s​ ​s​a​v​e​d​ ​a​s​ ​y​o​u​ ​g​o​.
+	 */
+	tourThemeBody: string
+	/**
+	 * M​e​e​t​ ​y​o​u​r​ ​p​e​r​s​o​n​a​s
+	 */
+	tourPersonasTitle: string
+	/**
+	 * A​ ​p​e​r​s​o​n​a​ ​i​s​ ​a​ ​c​h​a​r​a​c​t​e​r​ ​w​i​t​h​ ​i​t​s​ ​o​w​n​ ​v​o​i​c​e​ ​a​n​d​ ​i​t​s​ ​o​w​n​ ​e​x​p​e​r​t​i​s​e​,​ ​a​n​d​ ​i​t​ ​k​e​e​p​s​ ​i​t​s​ ​o​w​n​ ​o​n​g​o​i​n​g​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​w​i​t​h​ ​y​o​u​.
+	 */
+	tourPersonasBody: string
+	/**
+	 * {​c​o​u​n​t​}​ ​o​f​ ​t​h​e​m​ ​i​n​ ​t​h​e​ ​P​e​r​s​o​n​a​ ​s​t​o​r​e​,​ ​a​n​d​ ​y​o​u​ ​c​a​n​ ​w​r​i​t​e​ ​y​o​u​r​ ​o​w​n​.
+	 * @param {number} count
+	 */
+	tourStoreCount: RequiredParams<'count'>
+	/**
+	 * C​a​l​l​ ​t​h​e​m​ ​i​n​t​o​ ​a​n​y​ ​c​h​a​t
+	 */
+	tourMentionTitle: string
+	/**
+	 * T​y​p​e​ ​@​ ​a​n​d​ ​p​i​c​k​ ​a​ ​n​a​m​e​.​ ​M​e​n​t​i​o​n​ ​t​w​o​ ​a​n​d​ ​t​h​e​y​ ​a​n​s​w​e​r​ ​i​n​ ​t​u​r​n​,​ ​e​a​c​h​ ​u​n​d​e​r​ ​i​t​s​ ​o​w​n​,​ ​i​n​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​y​o​u​ ​w​e​r​e​ ​a​l​r​e​a​d​y​ ​h​a​v​i​n​g​.
+	 */
+	tourMentionBody: string
+	/**
+	 * T​h​i​n​k​i​n​g
+	 */
+	tourThinking: string
+	/**
+	 * A​n​d​ ​i​t​ ​d​r​a​w​s​,​ ​t​o​o
+	 */
+	tourImagesTitle: string
+	/**
+	 * D​e​s​c​r​i​b​e​ ​a​ ​p​i​c​t​u​r​e​ ​a​n​d​ ​i​t​ ​a​p​p​e​a​r​s​ ​i​n​ ​a​ ​g​a​l​l​e​r​y​ ​o​f​ ​y​o​u​r​ ​o​w​n​.​ ​A​ ​t​e​x​t​ ​m​o​d​e​l​ ​c​a​n​ ​r​e​w​r​i​t​e​ ​y​o​u​r​ ​d​e​s​c​r​i​p​t​i​o​n​ ​i​n​t​o​ ​a​ ​f​u​l​l​e​r​ ​p​r​o​m​p​t​ ​f​i​r​s​t​,​ ​a​n​d​ ​y​o​u​ ​a​l​w​a​y​s​ ​s​e​e​ ​w​h​a​t​ ​i​t​ ​w​r​o​t​e​ ​b​e​f​o​r​e​ ​a​n​y​t​h​i​n​g​ ​i​s​ ​d​r​a​w​n​.
+	 */
+	tourImagesBody: string
+	/**
+	 * S​t​a​r​t​ ​c​h​a​t​t​i​n​g
+	 */
+	tourStart: string
+	/**
+	 * A​s​k​ ​m​e​ ​a​n​y​t​h​i​n​g​.​ ​I​ ​k​e​e​p​ ​i​t​ ​s​h​o​r​t​.
+	 */
+	tourLineNova: string
+	/**
+	 * R​o​u​g​h​ ​d​a​y​?​ ​I​ ​a​m​ ​l​i​s​t​e​n​i​n​g​.
+	 */
+	tourLineLou: string
+	/**
+	 * R​e​a​d​y​ ​w​h​e​n​ ​y​o​u​ ​a​r​e​.​ ​L​e​t​'​s​ ​m​o​v​e​.
+	 */
+	tourLineMax: string
+	/**
+	 * Y​e​s​,​ ​i​t​ ​i​s​ ​o​u​t​ ​o​n​ ​F​r​i​d​a​y​.
+	 */
+	tourLinePixel: string
+	/**
+	 * W​h​a​t​ ​i​s​ ​i​n​ ​y​o​u​r​ ​f​r​i​d​g​e​?
+	 */
+	tourLineMaite: string
+	/**
+	 * w​h​a​t​ ​d​o​ ​I​ ​e​a​t​ ​a​f​t​e​r​ ​t​r​a​i​n​i​n​g​?
+	 */
+	tourAsk: string
+	/**
+	 * P​r​o​t​e​i​n​ ​a​n​d​ ​a​ ​p​r​o​p​e​r​ ​c​a​r​b​.​ ​E​g​g​s​,​ ​r​i​c​e​,​ ​w​h​a​t​e​v​e​r​ ​i​s​ ​o​p​e​n​.​ ​T​e​n​ ​m​i​n​u​t​e​s​,​ ​n​o​ ​m​o​r​e​.
+	 */
+	tourSaysMaite: string
+	/**
+	 * W​i​t​h​i​n​ ​t​h​e​ ​h​o​u​r​ ​i​f​ ​y​o​u​ ​c​a​n​,​ ​a​n​d​ ​d​r​i​n​k​ ​m​o​r​e​ ​t​h​a​n​ ​y​o​u​ ​t​h​i​n​k​ ​y​o​u​ ​n​e​e​d​.
+	 */
+	tourSaysMax: string
+	/**
+	 * W​e​l​c​o​m​e​ ​t​o​ ​{​a​p​p​}
+	 * @param {string} app
+	 */
+	onboardingWelcome: RequiredParams<'app'>
+	/**
+	 * L​e​t​'​s​ ​s​e​t​ ​t​h​i​n​g​s​ ​u​p​.​ ​I​t​ ​o​n​l​y​ ​t​a​k​e​s​ ​a​ ​m​i​n​u​t​e​.
+	 */
+	onboardingWelcomeBody: string
+	/**
+	 * Y​o​u​'​r​e​ ​a​l​l​ ​s​e​t
+	 */
+	onboardingDone: string
+	/**
+	 * Y​o​u​ ​c​a​n​ ​c​h​a​n​g​e​ ​a​n​y​ ​o​f​ ​t​h​i​s​ ​l​a​t​e​r​ ​i​n​ ​S​e​t​t​i​n​g​s​.
+	 */
+	onboardingDoneBody: string
+	/**
+	 * E​n​t​e​r​ ​{​a​p​p​}
+	 * @param {string} app
+	 */
+	onboardingEnter: RequiredParams<'app'>
+	/**
+	 * Y​o​u​r​ ​l​i​b​r​a​r​y
+	 */
+	tourLibraryTitle: string
+	/**
+	 * P​e​r​s​o​n​a​s​ ​a​r​e​ ​n​o​t​ ​a​l​o​n​e​ ​i​n​ ​t​h​e​r​e​.​ ​T​w​o​ ​m​o​r​e​ ​t​h​i​n​g​s​ ​y​o​u​ ​w​r​i​t​e​ ​o​n​c​e​ ​a​n​d​ ​r​e​u​s​e​ ​e​v​e​r​y​w​h​e​r​e​.
+	 */
+	tourLibraryBody: string
+	/**
+	 * P​l​a​y​b​o​o​k​s
+	 */
+	tourPlaybooksName: string
+	/**
+	 * A​ ​w​a​y​ ​o​f​ ​d​o​i​n​g​ ​s​o​m​e​t​h​i​n​g​,​ ​w​r​i​t​t​e​n​ ​d​o​w​n​ ​a​n​d​ ​s​w​i​t​c​h​e​d​ ​o​n​ ​i​n​ ​a​n​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​.
+	 */
+	tourPlaybooksBody: string
+	/**
+	 * R​e​a​d​ ​t​h​e​ ​b​r​i​e​f
+	 */
+	tourPlaybookStep1: string
+	/**
+	 * A​s​k​ ​w​h​a​t​ ​i​s​ ​m​i​s​s​i​n​g
+	 */
+	tourPlaybookStep2: string
+	/**
+	 * T​h​e​n​ ​d​r​a​f​t​ ​i​t
+	 */
+	tourPlaybookStep3: string
+	/**
+	 * K​n​o​w​l​e​d​g​e
+	 */
+	tourKnowledgeName: string
+	/**
+	 * T​e​x​t​ ​y​o​u​ ​k​e​e​p​ ​o​n​c​e​ ​a​n​d​ ​a​t​t​a​c​h​ ​w​h​e​r​e​ ​y​o​u​ ​n​e​e​d​ ​i​t​,​ ​g​r​o​u​p​e​d​ ​i​n​t​o​ ​c​o​l​l​e​c​t​i​o​n​s​.
+	 */
+	tourKnowledgeBody: string
+	/**
+	 * H​o​u​s​e​ ​s​t​y​l​e
+	 */
+	tourKnowledgeItem1: string
+	/**
+	 * C​l​i​e​n​t​ ​b​r​i​e​f
+	 */
+	tourKnowledgeItem2: string
+	/**
+	 * G​l​o​s​s​a​r​y
+	 */
+	tourKnowledgeItem3: string
+	/**
 	 * A​l​l​o​w​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n
 	 */
 	imagesAllow: string
@@ -5516,6 +5671,158 @@ The completion in progress will stop
 	 * Use my words
 	 */
 	imageUseOriginal: () => LocalizedString
+	/**
+	 * Continue
+	 */
+	tourContinue: () => LocalizedString
+	/**
+	 * Your own space to think out loud with AI: private, fast, and shaped the way you like it.
+	 */
+	tourIntro: () => LocalizedString
+	/**
+	 * Make it yours
+	 */
+	tourThemeTitle: () => LocalizedString
+	/**
+	 * Pick a look. It applies instantly and is saved as you go.
+	 */
+	tourThemeBody: () => LocalizedString
+	/**
+	 * Meet your personas
+	 */
+	tourPersonasTitle: () => LocalizedString
+	/**
+	 * A persona is a character with its own voice and its own expertise, and it keeps its own ongoing conversation with you.
+	 */
+	tourPersonasBody: () => LocalizedString
+	/**
+	 * {count} of them in the Persona store, and you can write your own.
+	 */
+	tourStoreCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * Call them into any chat
+	 */
+	tourMentionTitle: () => LocalizedString
+	/**
+	 * Type @ and pick a name. Mention two and they answer in turn, each under its own, in the conversation you were already having.
+	 */
+	tourMentionBody: () => LocalizedString
+	/**
+	 * Thinking
+	 */
+	tourThinking: () => LocalizedString
+	/**
+	 * And it draws, too
+	 */
+	tourImagesTitle: () => LocalizedString
+	/**
+	 * Describe a picture and it appears in a gallery of your own. A text model can rewrite your description into a fuller prompt first, and you always see what it wrote before anything is drawn.
+	 */
+	tourImagesBody: () => LocalizedString
+	/**
+	 * Start chatting
+	 */
+	tourStart: () => LocalizedString
+	/**
+	 * Ask me anything. I keep it short.
+	 */
+	tourLineNova: () => LocalizedString
+	/**
+	 * Rough day? I am listening.
+	 */
+	tourLineLou: () => LocalizedString
+	/**
+	 * Ready when you are. Let's move.
+	 */
+	tourLineMax: () => LocalizedString
+	/**
+	 * Yes, it is out on Friday.
+	 */
+	tourLinePixel: () => LocalizedString
+	/**
+	 * What is in your fridge?
+	 */
+	tourLineMaite: () => LocalizedString
+	/**
+	 * what do I eat after training?
+	 */
+	tourAsk: () => LocalizedString
+	/**
+	 * Protein and a proper carb. Eggs, rice, whatever is open. Ten minutes, no more.
+	 */
+	tourSaysMaite: () => LocalizedString
+	/**
+	 * Within the hour if you can, and drink more than you think you need.
+	 */
+	tourSaysMax: () => LocalizedString
+	/**
+	 * Welcome to {app}
+	 */
+	onboardingWelcome: (arg: { app: string }) => LocalizedString
+	/**
+	 * Let's set things up. It only takes a minute.
+	 */
+	onboardingWelcomeBody: () => LocalizedString
+	/**
+	 * You're all set
+	 */
+	onboardingDone: () => LocalizedString
+	/**
+	 * You can change any of this later in Settings.
+	 */
+	onboardingDoneBody: () => LocalizedString
+	/**
+	 * Enter {app}
+	 */
+	onboardingEnter: (arg: { app: string }) => LocalizedString
+	/**
+	 * Your library
+	 */
+	tourLibraryTitle: () => LocalizedString
+	/**
+	 * Personas are not alone in there. Two more things you write once and reuse everywhere.
+	 */
+	tourLibraryBody: () => LocalizedString
+	/**
+	 * Playbooks
+	 */
+	tourPlaybooksName: () => LocalizedString
+	/**
+	 * A way of doing something, written down and switched on in any conversation.
+	 */
+	tourPlaybooksBody: () => LocalizedString
+	/**
+	 * Read the brief
+	 */
+	tourPlaybookStep1: () => LocalizedString
+	/**
+	 * Ask what is missing
+	 */
+	tourPlaybookStep2: () => LocalizedString
+	/**
+	 * Then draft it
+	 */
+	tourPlaybookStep3: () => LocalizedString
+	/**
+	 * Knowledge
+	 */
+	tourKnowledgeName: () => LocalizedString
+	/**
+	 * Text you keep once and attach where you need it, grouped into collections.
+	 */
+	tourKnowledgeBody: () => LocalizedString
+	/**
+	 * House style
+	 */
+	tourKnowledgeItem1: () => LocalizedString
+	/**
+	 * Client brief
+	 */
+	tourKnowledgeItem2: () => LocalizedString
+	/**
+	 * Glossary
+	 */
+	tourKnowledgeItem3: () => LocalizedString
 	/**
 	 * Allow image generation
 	 */

@@ -1,14 +1,26 @@
 <script lang="ts">
-	import { ArrowLeft, ArrowRight, AtSign, Palette, Sparkles } from '@lucide/svelte';
+	import {
+		ArrowLeft,
+		ArrowRight,
+		AtSign,
+		FileText,
+		ImageIcon,
+		Library,
+		ListChecks,
+		Palette,
+		Sparkles
+	} from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 
+	import LL from '$i18n/i18n-svelte';
 	import { APP_NAME } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
+	import { canDrawImages } from '$lib/images';
 	import { settingsStore } from '$lib/localStorage';
 	import { catalogState, loadCatalog } from '$lib/personaCatalog';
 	import { instanceConfig } from '$lib/stores/instance';
@@ -23,7 +35,15 @@
 	 */
 	let step = $state(0);
 
-	const TOTAL_STEPS = 4;
+	/**
+	 * Six steps where this instance draws, five where it does not.
+	 *
+	 * Counted rather than fixed, because the step it adds is about a feature an
+	 * administrator may never have switched on, and introducing somebody to
+	 * something they cannot reach is worse than saying less. The dots at the foot
+	 * of the dialog read from the same number, so they stay honest too.
+	 */
+	const TOTAL_STEPS = $derived($canDrawImages ? 6 : 5);
 
 	/** Four drift, and a fifth turns up when the mention step calls for it. */
 	const drifting = TOUR_CAST.slice(0, 4);
@@ -40,10 +60,12 @@
 		{ at: 'right-1 bottom-0', flip: true }
 	];
 
-	const replies = TOUR_TURN.replies.map((reply) => ({
-		...tourPersona(reply.id),
-		says: reply.says
-	}));
+	const replies = $derived(
+		TOUR_TURN.replies.map((reply) => ({
+			...tourPersona(reply.id),
+			says: $LL[reply.says]()
+		}))
+	);
 
 	/**
 	 * The store, asked once, for one line.
@@ -76,7 +98,7 @@
 	 * The step is a small replay of a turn, not a cartoon of one.
 	 */
 	let stage = $state(0);
-	const finalStage = 1 + replies.length * 2;
+	const finalStage = $derived(1 + replies.length * 2);
 
 	$effect(() => {
 		if (step !== 3) return;
@@ -120,7 +142,7 @@
 		<span></span>
 	{/if}
 	<Button onclick={() => (step += 1)}>
-		Continue
+		{$LL.tourContinue()}
 		<ArrowRight class="base-icon" />
 	</Button>
 {/snippet}
@@ -139,7 +161,7 @@
 			<div class="flex flex-col gap-1.5">
 				<h2 class="text-xl font-semibold tracking-tight">{APP_NAME}</h2>
 				<p class="mx-auto max-w-xs text-sm leading-relaxed text-muted">
-					Your own space to think out loud with AI — private, fast, and shaped the way you like it.
+					{$LL.tourIntro()}
 				</p>
 			</div>
 		</div>
@@ -150,8 +172,8 @@
 				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
 					<Palette class="h-5 w-5 text-accent" />
 				</div>
-				<h2 class="text-lg font-semibold tracking-tight">Make it yours</h2>
-				<p class="text-sm text-muted">Pick a look — it applies instantly and is saved as you go.</p>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourThemeTitle()}</h2>
+				<p class="text-sm text-muted">{$LL.tourThemeBody()}</p>
 			</div>
 			<ThemePicker />
 		</div>
@@ -162,10 +184,9 @@
 				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
 					<Sparkles class="h-5 w-5 text-accent" />
 				</div>
-				<h2 class="text-lg font-semibold tracking-tight">Meet your personas</h2>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourPersonasTitle()}</h2>
 				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
-					A persona is a character with its own voice and its own expertise, and it keeps its own
-					ongoing conversation with you.
+					{$LL.tourPersonasBody()}
 				</p>
 			</div>
 
@@ -197,7 +218,7 @@
 									? 'rounded-br-sm'
 									: 'rounded-bl-sm'}"
 							>
-								{persona.line}
+								{$LL[persona.line]()}
 							</p>
 						</div>
 					</div>
@@ -206,9 +227,7 @@
 
 			{#if storeCount}
 				<p class="text-center text-xs text-muted" in:fade={{ duration: 240 }}>
-					{storeCount} of them in the
-					<strong class="font-medium text-active">Persona store</strong>, and you can write your
-					own.
+					{$LL.tourStoreCount({ count: storeCount })}
 				</p>
 			{/if}
 		</div>
@@ -219,10 +238,9 @@
 				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
 					<AtSign class="h-5 w-5 text-accent" />
 				</div>
-				<h2 class="text-lg font-semibold tracking-tight">Call them into any chat</h2>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourMentionTitle()}</h2>
 				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
-					Type <span class="font-medium text-accent">@</span> and pick a name. Mention two and they answer
-					in turn, each under its own, in the conversation you were already having.
+					{$LL.tourMentionBody()}
 				</p>
 			</div>
 
@@ -237,7 +255,7 @@
 							{#each replies as persona (persona.id)}
 								<span class="mr-1 font-medium text-accent">@{persona.name}</span>
 							{/each}
-							{TOUR_TURN.ask}
+							{$LL.tourAsk()}
 						</p>
 					</div>
 				{/if}
@@ -259,7 +277,7 @@
 									{#if stage >= i * 2 + 3}
 										{persona.says}
 									{:else}
-										<span class="flex items-center gap-1 py-1" aria-label="Thinking">
+										<span class="flex items-center gap-1 py-1" aria-label={$LL.tourThinking()}>
 											{#each [0, 1, 2] as dot (dot)}
 												<span
 													class="typing-dot h-1.5 w-1.5 rounded-full bg-muted"
@@ -274,9 +292,101 @@
 					{/if}
 				{/each}
 			</div>
-
-			<Button class="w-full" onclick={finish}>Start chatting</Button>
 		</div>
+	{:else if step === 4}
+		<!-- 5. The rest of the library -->
+		<div class="flex flex-col gap-4">
+			<div class="flex flex-col items-center gap-2 text-center">
+				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
+					<Library class="h-5 w-5 text-accent" />
+				</div>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourLibraryTitle()}</h2>
+				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+					{$LL.tourLibraryBody()}
+				</p>
+			</div>
+
+			<!-- Each one shown as the thing it is rather than described: a playbook is a
+			     short numbered procedure, so it is drawn as one, and knowledge is a few
+			     named pieces of text, so it is drawn as those. Two cards side by side
+			     from `sm` up, stacked below it, because at a phone's width two columns
+			     of this would be two columns of nothing. -->
+			<div class="grid gap-3 sm:grid-cols-2">
+				<div class="flex flex-col gap-2.5 rounded-2xl border border-shade-3 bg-shade-0/50 p-3.5">
+					<div class="flex items-center gap-2">
+						<ListChecks class="h-4 w-4 shrink-0 text-accent" />
+						<span class="text-sm font-medium text-active">{$LL.tourPlaybooksName()}</span>
+					</div>
+					<ol class="flex flex-col gap-1.5">
+						{#each [$LL.tourPlaybookStep1(), $LL.tourPlaybookStep2(), $LL.tourPlaybookStep3()] as line, i (line)}
+							<li
+								class="flex items-center gap-2 text-[11px] leading-snug text-muted"
+								in:fly={{ y: 8, duration: 300, delay: 120 * i, easing: cubicOut }}
+							>
+								<span
+									class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-medium tabular-nums text-accent"
+								>
+									{i + 1}
+								</span>
+								{line}
+							</li>
+						{/each}
+					</ol>
+					<p class="text-[11px] leading-snug text-muted">{$LL.tourPlaybooksBody()}</p>
+				</div>
+
+				<div class="flex flex-col gap-2.5 rounded-2xl border border-shade-3 bg-shade-0/50 p-3.5">
+					<div class="flex items-center gap-2">
+						<FileText class="h-4 w-4 shrink-0 text-accent" />
+						<span class="text-sm font-medium text-active">{$LL.tourKnowledgeName()}</span>
+					</div>
+					<div class="flex flex-wrap gap-1.5">
+						{#each [$LL.tourKnowledgeItem1(), $LL.tourKnowledgeItem2(), $LL.tourKnowledgeItem3()] as name, i (name)}
+							<span
+								class="flex items-center gap-1 rounded-lg border border-shade-3 bg-shade-0 px-2 py-1 text-[11px] text-active shadow-sm"
+								in:fly={{ y: 8, duration: 300, delay: 120 * i, easing: cubicOut }}
+							>
+								<FileText class="h-3 w-3 shrink-0 text-muted" />
+								{name}
+							</span>
+						{/each}
+					</div>
+					<p class="text-[11px] leading-snug text-muted">{$LL.tourKnowledgeBody()}</p>
+				</div>
+			</div>
+		</div>
+	{:else if step === 5}
+		<!-- 6. Drawing, where the instance allows it -->
+		<div class="flex flex-col gap-4">
+			<div class="flex flex-col items-center gap-2 text-center">
+				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
+					<ImageIcon class="h-5 w-5 text-accent" />
+				</div>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourImagesTitle()}</h2>
+				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+					{$LL.tourImagesBody()}
+				</p>
+			</div>
+
+			<!-- A gallery filling in, played rather than described: the same shapes the
+			     page shows while it is drawing, then the pictures landing one by one.
+			     Nothing is fetched — these are the app's own accent, not photographs. -->
+			<div class="grid grid-cols-3 gap-2">
+				{#each [0, 1, 2, 3, 4, 5] as tile (tile)}
+					<div
+						class="tour-tile aspect-square rounded-xl border border-shade-3 bg-gradient-to-br from-accent/25 to-accent/5"
+						style="animation-delay:{tile * 170}ms"
+					></div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- The way out lives on whichever step is last, and which one that is depends
+	     on the instance. Rendered here rather than inside a step so there is one of
+	     it however the tour is composed. -->
+	{#if step === TOTAL_STEPS - 1}
+		<Button class="mt-4 w-full" onclick={finish}>{$LL.tourStart()}</Button>
 	{/if}
 </OnboardingDialog>
 
@@ -309,6 +419,29 @@
 		}
 	}
 
+	/* A gallery filling in: each tile waits, fades up, and stays. The delay is set
+	   per tile inline, so six of them arrive as a sequence rather than together. */
+	.tour-tile {
+		animation: tour-tile 2.6s ease-out infinite;
+		opacity: 0;
+	}
+
+	@keyframes tour-tile {
+		0% {
+			opacity: 0;
+			scale: 0.9;
+		}
+		18%,
+		78% {
+			opacity: 1;
+			scale: 1;
+		}
+		100% {
+			opacity: 0;
+			scale: 0.96;
+		}
+	}
+
 	/* The pause before an answer, drawn the way the conversation itself draws it. */
 	.typing-dot {
 		animation: typing-dot 1.2s ease-in-out infinite;
@@ -330,8 +463,15 @@
 	/* A loop that never stops is the first thing someone turns off. */
 	@media (prefers-reduced-motion: reduce) {
 		.tour-drift,
-		.typing-dot {
+		.typing-dot,
+		.tour-tile {
 			animation: none;
+		}
+
+		/* The tiles start invisible so they can fade up. With the animation off there
+		   is nothing to fade them in, so they have to be given back. */
+		.tour-tile {
+			opacity: 1;
 		}
 	}
 </style>

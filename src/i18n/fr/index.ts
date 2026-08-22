@@ -641,6 +641,52 @@ const fr = extendDictionary(en, {
 	imageRewrittenHint:
 		"C'est ce qui sera envoyé. Modifiez-le, ou videz-le pour envoyer vos propres mots.",
 	imageUseOriginal: 'Utiliser mes mots',
+	tourContinue: 'Continuer',
+	tourIntro:
+		"Votre espace à vous pour réfléchir à voix haute avec l'IA : privé, rapide, et façonné comme vous l'entendez.",
+	tourThemeTitle: 'Faites-en le vôtre',
+	tourThemeBody:
+		"Choisissez une allure. Elle s'applique aussitôt et se retient au fur et à mesure.",
+	tourPersonasTitle: 'Rencontrez vos personas',
+	tourPersonasBody:
+		'Un persona est un personnage avec sa voix et son domaine, et il garde sa propre conversation avec vous.',
+	tourStoreCount: '{count} dans la boutique de personas, et vous pouvez écrire les vôtres.',
+	tourMentionTitle: "Appelez-les dans n'importe quelle discussion",
+	tourMentionBody:
+		'Tapez @ et choisissez un nom. Mentionnez-en deux et ils répondent chacun leur tour, chacun sous le sien, dans la conversation que vous aviez déjà.',
+	tourThinking: 'Réflexion',
+	tourImagesTitle: 'Et il dessine, aussi',
+	tourImagesBody:
+		"Décrivez une image et elle apparaît dans une galerie qui n'appartient qu'à vous. Un modèle de texte peut d'abord réécrire votre description en un prompt plus riche, et vous voyez toujours ce qu'il a écrit avant que quoi que ce soit soit dessiné.",
+	tourStart: 'Commencer à discuter',
+	tourLineNova: 'Demandez-moi ce que vous voulez. Je fais court.',
+	tourLineLou: 'Journée difficile ? Je vous écoute.',
+	tourLineMax: 'Quand vous voulez. On y va.',
+	tourLinePixel: 'Oui, ça sort vendredi.',
+	tourLineMaite: "Qu'est-ce qu'il y a dans votre frigo ?",
+	tourAsk: "qu'est-ce que je mange après l'entraînement ?",
+	tourSaysMaite:
+		'Des protéines et un vrai féculent. Œufs, riz, ce qui est ouvert. Dix minutes, pas plus.',
+	tourSaysMax: "Dans l'heure si vous pouvez, et buvez plus que vous ne le pensez.",
+	onboardingWelcome: 'Bienvenue dans {app}',
+	onboardingWelcomeBody: 'Configurons tout ça. Ça prend une minute.',
+	onboardingDone: 'Tout est prêt',
+	onboardingDoneBody: 'Vous pourrez changer tout cela plus tard dans les Réglages.',
+	onboardingEnter: 'Entrer dans {app}',
+	tourLibraryTitle: 'Votre bibliothèque',
+	tourLibraryBody:
+		"Les personas n'y sont pas seuls. Deux autres choses que vous écrivez une fois et réutilisez partout.",
+	tourPlaybooksName: 'Playbooks',
+	tourPlaybooksBody:
+		"Une façon de faire, notée une fois et activée dans n'importe quelle conversation.",
+	tourPlaybookStep1: 'Lire le brief',
+	tourPlaybookStep2: 'Demander ce qui manque',
+	tourPlaybookStep3: 'Puis rédiger',
+	tourKnowledgeName: 'Connaissances',
+	tourKnowledgeBody: 'Du texte gardé une fois et attaché là où il sert, rangé en collections.',
+	tourKnowledgeItem1: 'Charte éditoriale',
+	tourKnowledgeItem2: 'Brief client',
+	tourKnowledgeItem3: 'Glossaire',
 	imagesAllow: "Autoriser la génération d'images",
 	imagesAllowHelp:
 		"Désactivé par défaut. Les modèles d'image sont facturés à la requête, donc personne ne dépense tant que vous ne l'activez pas. Le désactiver ensuite masque la page et refuse les nouvelles générations ; les images déjà faites sont conservées.",

@@ -71,8 +71,22 @@
 	let expandedPrompt = $state(false);
 	/** The prompt block's natural height, measured so the opening can be animated. */
 	let promptHeight = $state(0);
-	/** Two lines of the prompt, which is enough to recognise it by. */
-	const COLLAPSED_PROMPT = 44;
+	/**
+	 * The prompt paragraph's own height, apart from everything under it.
+	 *
+	 * Two measurements rather than one because the collapsed height has to land on
+	 * a line boundary *and* never cut into the next paragraph. A single fixed
+	 * number does neither: it slices a line in half when the text is long, and
+	 * shows the tops of the letters below when the prompt is short.
+	 */
+	let promptOnlyHeight = $state(0);
+	/** One line of the prompt, at the leading the paragraph is given below. */
+	const PROMPT_LINE = 20;
+	/**
+	 * How much shows when it is closed: two whole lines, or the whole prompt when
+	 * it is shorter than that. Exact either way, so nothing is ever half a letter.
+	 */
+	const collapsedHeight = $derived(Math.min(promptOnlyHeight, PROMPT_LINE * 2));
 	let confirmingDelete = $state<string | null>(null);
 
 	/**
@@ -201,7 +215,7 @@
 >
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
-		<div class="mx-auto w-full max-w-5xl px-6 py-8">
+		<div class="mx-auto w-full max-w-4xl px-6 py-8">
 			<div class="mb-1 flex items-center justify-between gap-3">
 				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.images()}</h1>
 				{#if $imagesStore.length}
@@ -491,10 +505,17 @@
 				     available even while it is hidden. -->
 				<div
 					class="overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none"
-					style="max-height: {expandedPrompt ? promptHeight : COLLAPSED_PROMPT}px"
+					style="max-height: {expandedPrompt ? promptHeight : collapsedHeight}px"
 				>
 					<div bind:clientHeight={promptHeight}>
-						<p class="whitespace-pre-wrap text-sm text-active">{image.prompt}</p>
+						<!-- An explicit leading, because the collapsed height is a multiple of
+						     it. Left to the default it is a fraction nobody can divide by. -->
+						<p
+							bind:clientHeight={promptOnlyHeight}
+							class="whitespace-pre-wrap text-sm leading-5 text-active"
+						>
+							{image.prompt}
+						</p>
 						{#if image.sentPrompt}
 							<!-- What was actually sent, when the writer had a go at it. Kept beside
 							     the original rather than instead of it. -->
@@ -512,7 +533,7 @@
 
 				<!-- Offered only when there is something to open. A prompt of six words with
 				     a "show more" under it is a control that does nothing. -->
-				{#if promptHeight > COLLAPSED_PROMPT}
+				{#if promptHeight > collapsedHeight}
 					<button
 						type="button"
 						onclick={() => (expandedPrompt = !expandedPrompt)}

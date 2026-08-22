@@ -28,8 +28,15 @@ export interface TourPersona {
 	color: string;
 	/** One of `PERSONA_GLYPHS`, the same faces the store's personas wear. */
 	glyph: string;
-	/** What they say while drifting, in their own voice. */
-	line: string;
+	/**
+	 * The i18n key for what they say while drifting, in their own voice.
+	 *
+	 * A key rather than the sentence, because these are the first words anybody
+	 * reads and reading them in a language you did not choose is a poor welcome.
+	 * The characters, their faces and their colours are not language and stay
+	 * here; only what comes out of their mouths is looked up.
+	 */
+	line: 'tourLineNova' | 'tourLineLou' | 'tourLineMax' | 'tourLinePixel' | 'tourLineMaite';
 }
 
 export const TOUR_CAST: TourPersona[] = [
@@ -38,35 +45,35 @@ export const TOUR_CAST: TourPersona[] = [
 		name: 'Nova',
 		color: '#378ADD',
 		glyph: 'face-antenna',
-		line: 'Ask me anything. I keep it short.'
+		line: 'tourLineNova'
 	},
 	{
 		id: 'lou',
 		name: 'Lou',
 		color: '#D4537E',
 		glyph: 'face-hair',
-		line: 'Rough day? I am listening.'
+		line: 'tourLineLou'
 	},
 	{
 		id: 'max',
 		name: 'Max',
 		color: '#D85A30',
 		glyph: 'face-headband',
-		line: "Ready when you are. Let's move."
+		line: 'tourLineMax'
 	},
 	{
 		id: 'pixel',
 		name: 'Pixel',
 		color: '#7F77DD',
 		glyph: 'face-headset',
-		line: 'Yes, it is out on Friday.'
+		line: 'tourLinePixel'
 	},
 	{
 		id: 'maite',
 		name: 'Maïté',
 		color: '#BA7517',
 		glyph: 'face-chef',
-		line: 'What is in your fridge?'
+		line: 'tourLineMaite'
 	}
 ];
 
@@ -78,15 +85,12 @@ export const TOUR_CAST: TourPersona[] = [
  * for the feature and the only honest way to make it.
  */
 export const TOUR_TURN = {
-	ask: 'what do I eat after training?',
+	ask: 'tourAsk',
 	replies: [
-		{
-			id: 'maite',
-			says: 'Protein and a proper carb. Eggs, rice, whatever is open. Ten minutes, no more.'
-		},
-		{ id: 'max', says: 'Within the hour if you can, and drink more than you think you need.' }
+		{ id: 'maite', says: 'tourSaysMaite' as const },
+		{ id: 'max', says: 'tourSaysMax' as const }
 	]
-};
+} as const;
 
 /** What `PersonaAvatar` needs, for a character that is not a stored persona. */
 export const tourAvatar = (persona: TourPersona) => ({
