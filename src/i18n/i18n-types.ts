@@ -2419,6 +2419,18 @@ type RootTranslation = {
 	 */
 	tourKnowledgeItem3: string
 	/**
+	 * L​a​t​e​s​t​ ​i​m​a​g​e​s
+	 */
+	recentImages: string
+	/**
+	 * S​h​o​w​ ​t​h​e​ ​l​a​t​e​s​t​ ​i​m​a​g​e​s
+	 */
+	showRecentImages: string
+	/**
+	 * G​e​n​e​r​a​t​e​ ​o​n​e
+	 */
+	imagesStartGenerating: string
+	/**
 	 * L​a​t​e​s​t​ ​i​m​a​g​e
 	 */
 	imagesExportLast: string
@@ -5816,6 +5828,18 @@ The completion in progress will stop
 	 * Glossary
 	 */
 	tourKnowledgeItem3: () => LocalizedString
+	/**
+	 * Latest images
+	 */
+	recentImages: () => LocalizedString
+	/**
+	 * Show the latest images
+	 */
+	showRecentImages: () => LocalizedString
+	/**
+	 * Generate one
+	 */
+	imagesStartGenerating: () => LocalizedString
 	/**
 	 * Latest image
 	 */

@@ -34,21 +34,6 @@
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onChats = $derived(pathname.includes('/sessions'));
-	const onImages = $derived(pathname.includes('/images'));
-
-	/**
-	 * Whether this row has three destinations or two.
-	 *
-	 * Images only appears where it can actually be used: the right mode, the
-	 * instance's permission, and a model that can draw. Most instances keep two
-	 * segments and never learn the third exists, which is the point — a permanently
-	 * disabled button is a worse answer than no button.
-	 *
-	 * Three of them do not fit at this width with labels at their usual size, and
-	 * the drawer is 22rem at its widest. So the type drops a step when the third
-	 * arrives, rather than the labels being cut off or the row wrapping.
-	 */
-	const crowded = $derived($canDrawImages);
 </script>
 
 <!-- Sits above the list rather than over it. Nothing scrolls underneath, so this
@@ -58,22 +43,46 @@
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-96">
 		<div class="flex flex-col px-3 py-3">
-			<!-- Two New chat buttons rather than one that moves: a single button would have
+			<!-- Two New chat blocks rather than one that moves: a single button would have
 		     to cross a flex line break, and a line break is the one thing CSS cannot
 		     interpolate, so it happens on a frame, which is the jump. Here the tall one
 		     closes on its height while the compact one opens on its width, both
-		     continuous, and only ever one of them is reachable. -->
-			<button
-				onclick={onNewChat}
-				tabindex={compact ? -1 : 0}
-				aria-hidden={compact}
-				class="flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-300 ease-out hover:opacity-90 motion-reduce:transition-none {compact
+		     continuous, and only ever one of them is reachable.
+
+		     Each is a split control: starting a conversation and drawing a picture are
+		     both "make something new", and they share one shape for the same reason the
+		     Library's own header buttons share theirs. Two halves of one filled block,
+		     divided by a hairline of its own foreground, so it reads as one object with
+		     two ends rather than as two buttons that happen to touch. No dropdown: a
+		     menu would put a click in front of something used occasionally, which is
+		     exactly when a click is most expensive. -->
+			<div
+				class="flex w-full items-stretch overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
 					? 'pointer-events-none mb-0 h-0 opacity-0'
 					: 'mb-2 h-9 opacity-100'}"
+				aria-hidden={compact}
 			>
-				<Plus class="h-4 w-4 shrink-0" />
-				{$LL.newChat()}
-			</button>
+				<button
+					onclick={onNewChat}
+					tabindex={compact ? -1 : 0}
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 transition-opacity hover:opacity-90"
+				>
+					<Plus class="h-4 w-4 shrink-0" />
+					{$LL.newChat()}
+				</button>
+
+				{#if $canDrawImages}
+					<a
+						href={resolve('/images')}
+						tabindex={compact ? -1 : 0}
+						title={$LL.imageGenerate()}
+						aria-label={$LL.imageGenerate()}
+						class="flex w-9 shrink-0 items-center justify-center border-l border-shade-0/25 transition-opacity hover:opacity-90"
+					>
+						<ImageIcon class="h-4 w-4" />
+					</a>
+				{/if}
+			</div>
 
 			<div class="flex items-center">
 				<div class="relative min-w-0 flex-1">
@@ -95,18 +104,39 @@
 						<Kbd>{mod}</Kbd><Kbd>K</Kbd>
 					</span>
 				</div>
-				<button
-					onclick={onNewChat}
-					title={$LL.newChat()}
-					aria-label={$LL.newChat()}
-					tabindex={compact ? 0 : -1}
+				<!-- The same control, folded onto the search row. It opens on its width, so
+				     the pair is one box whose width is the sum of its halves: 36 alone, 72
+				     with the second. -->
+				<div
 					aria-hidden={!compact}
-					class="flex h-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-300 ease-out hover:opacity-90 motion-reduce:transition-none {compact
-						? 'ml-2 w-9 opacity-100'
+					class="flex h-9 shrink-0 items-stretch overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
+						? $canDrawImages
+							? 'ml-2 w-[4.5rem] opacity-100'
+							: 'ml-2 w-9 opacity-100'
 						: 'pointer-events-none ml-0 w-0 opacity-0'}"
 				>
-					<Plus class="h-4 w-4 shrink-0" />
-				</button>
+					<button
+						onclick={onNewChat}
+						title={$LL.newChat()}
+						aria-label={$LL.newChat()}
+						tabindex={compact ? 0 : -1}
+						class="flex w-9 shrink-0 items-center justify-center transition-opacity hover:opacity-90"
+					>
+						<Plus class="h-4 w-4 shrink-0" />
+					</button>
+
+					{#if $canDrawImages}
+						<a
+							href={resolve('/images')}
+							title={$LL.imageGenerate()}
+							aria-label={$LL.imageGenerate()}
+							tabindex={compact ? 0 : -1}
+							class="flex w-9 shrink-0 items-center justify-center border-l border-shade-0/25 transition-opacity hover:opacity-90"
+						>
+							<ImageIcon class="h-4 w-4" />
+						</a>
+					{/if}
+				</div>
 			</div>
 
 			<!-- The field above filters titles; this is the way out to the content of
@@ -127,9 +157,7 @@
 				<a
 					href={resolve('/sessions')}
 					title={$LL.chats()}
-					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 font-medium transition-colors {crowded
-						? 'text-xs'
-						: 'text-sm'} {onChats
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors {onChats
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
@@ -139,27 +167,13 @@
 				<a
 					href={resolve('/library')}
 					title={$LL.library()}
-					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 font-medium transition-colors {crowded
-						? 'text-xs'
-						: 'text-sm'} {onLibrary
+					class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors {onLibrary
 						? 'bg-shade-0 text-active shadow-sm'
 						: 'text-muted hover:bg-shade-0 hover:text-active'}"
 				>
 					<Library class="h-4 w-4 shrink-0" />
 					<span class="truncate">{$LL.library()}</span>
 				</a>
-				{#if $canDrawImages}
-					<a
-						href={resolve('/images')}
-						title={$LL.images()}
-						class="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg px-2 py-2 text-xs font-medium transition-colors {onImages
-							? 'bg-shade-0 text-active shadow-sm'
-							: 'text-muted hover:bg-shade-0 hover:text-active'}"
-					>
-						<ImageIcon class="h-4 w-4 shrink-0" />
-						<span class="truncate">{$LL.images()}</span>
-					</a>
-				{/if}
 			</div>
 		</div>
 

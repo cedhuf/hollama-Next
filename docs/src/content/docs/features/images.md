@@ -12,13 +12,24 @@ It is a **server mode** feature only.
 
 ## Turning it on
 
-Two things have to be true before the Images entry appears in the sidebar:
+Two things have to be true before the app offers to draw:
 
 1. The instance runs in server mode.
 2. At least one model you can reach is marked as an image model.
 
-If either is missing, there is no Images entry at all rather than one that leads nowhere. A
-permanently disabled button is a worse answer than no button.
+If either is missing, nothing about images appears at all rather than a control that leads nowhere.
+A permanently disabled button is a worse answer than no button.
+
+## Getting there
+
+The gallery is not a third entry beside Chats and Library. Those two are where you navigate; drawing
+is something you make, so it sits with the other thing you make: **New chat** in the sidebar is a
+split control, and its right half opens the gallery in one click. It keeps that shape when the
+header folds, as two squares beside the search field.
+
+The home screen also carries a strip of your latest pictures, after the personas, scrolling sideways
+with a way through to the page at its end. Like every other section there it can be switched off,
+under Settings, Interface.
 
 There is no separate switch for the feature. Marking a model as one that draws is the decision, and
 on a system connection it only reaches anyone else once it is also shared — so a user sees nothing

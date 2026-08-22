@@ -9,6 +9,7 @@
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { languageOptions } from '$lib/i18n';
+	import { canDrawImages } from '$lib/images';
 	import { settingsStore } from '$lib/localStorage';
 	import { themeLocked } from '$lib/stores/instance';
 	import { CUSTOM_MAX_BYTES, PACK_PREFIX, WALLPAPERS, wallpaperThumb } from '$lib/wallpapers';
@@ -244,6 +245,21 @@
 				label={$LL.howManyToShow()}
 				bind:value={$settingsStore.homeRecentPersonasCount}
 			/>
+		{/if}
+
+		<!-- Only where drawing is possible: a switch for a strip that can never have
+		     anything in it is a switch about nothing. -->
+		{#if $canDrawImages}
+			<FieldCheckbox
+				label={$LL.showRecentImages()}
+				bind:checked={$settingsStore.homeShowRecentImages}
+			/>
+			{#if $settingsStore.homeShowRecentImages}
+				<SettingsSlider
+					label={$LL.howManyToShow()}
+					bind:value={$settingsStore.homeRecentImagesCount}
+				/>
+			{/if}
 		{/if}
 
 		<FieldCheckbox

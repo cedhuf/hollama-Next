@@ -4,6 +4,7 @@
 		ArrowUp,
 		Code,
 		GraduationCap,
+		Image as ImageIcon,
 		Lightbulb,
 		MessageSquareText,
 		PenLine,
@@ -20,6 +21,7 @@
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
+	import { canDrawImages, imagesStore, imageUrl } from '$lib/images';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona, type Persona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
@@ -128,6 +130,11 @@
 
 	const shownSuggestions = $derived(
 		shownCategory ? suggestionsByCategory[shownCategory] || [] : []
+	);
+
+	/** The newest few, as many as the slider asks for. */
+	const recentImages = $derived(
+		$imagesStore.slice(0, Math.max(1, $settingsStore.homeRecentImagesCount))
 	);
 
 	const recentSessions = $derived(
@@ -300,6 +307,68 @@
 							<PersonaAvatar {persona} size={48} />
 						</button>
 					{/each}
+				</div>
+			{/if}
+
+			<!-- The latest pictures, after the personas and before the conversations.
+
+			     A strip rather than a grid: this is a glance at what you last made and a
+			     way back to the page that makes more, not a gallery. Thumbnails are small
+			     on purpose, and the row scrolls sideways instead of wrapping, so the
+			     section keeps one height whatever it holds.
+
+			     Shown even with nothing in it, unlike the sections around it, because an
+			     empty gallery is the one state where a way in is worth the most. -->
+			{#if $settingsStore.homeShowRecentImages && $canDrawImages}
+				<div class="mt-10 w-full">
+					<h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+						{$LL.recentImages()}
+					</h2>
+
+					{#if recentImages.length > 0}
+						<div class="flex items-center gap-2">
+							<!-- `min-w-0` so the strip can be narrower than its content, which is
+							     what lets it scroll rather than push the button off the row. -->
+							<div class="overflow-scrollbar min-w-0 flex-1 overflow-y-hidden">
+								<div class="flex w-max gap-2 pb-1">
+									{#each recentImages as image (image.id)}
+										<a
+											href={resolve('/images')}
+											title={image.sentPrompt || image.prompt}
+											class="group relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
+										>
+											<img
+												src={imageUrl(image.id)}
+												alt={image.prompt}
+												loading="lazy"
+												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+											/>
+										</a>
+									{/each}
+								</div>
+							</div>
+
+							<!-- The way to the page, at the end of the strip: you arrive at it
+							     having looked along what is already there. -->
+							<a
+								href={resolve('/images')}
+								title={$LL.images()}
+								aria-label={$LL.images()}
+								class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-shade-3 text-muted transition-colors hover:border-shade-4 hover:bg-shade-0 hover:text-active"
+							>
+								<ArrowRight class="h-4 w-4" />
+							</a>
+						</div>
+					{:else}
+						<a
+							href={resolve('/images')}
+							class="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-shade-4 px-6 py-6 text-center transition-colors hover:border-shade-6"
+						>
+							<ImageIcon class="h-5 w-5 text-muted" />
+							<span class="text-sm text-muted">{$LL.imagesEmpty()}</span>
+							<span class="text-sm font-medium text-link">{$LL.imagesStartGenerating()}</span>
+						</a>
+					{/if}
 				</div>
 			{/if}
 
