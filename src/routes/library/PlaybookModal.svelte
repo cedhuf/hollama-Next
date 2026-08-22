@@ -147,7 +147,6 @@
 			class="settings-field field-grow min-h-[24rem] font-mono text-xs leading-relaxed"
 			bind:value={playbook.instructions}
 			oninput={persist}
-			placeholder={$LL.playbookInstructionsPlaceholder()}
-		></textarea>
+			placeholder={$LL.playbookInstructionsPlaceholder()}></textarea>
 	</SettingsSection>
 </EditorModal>

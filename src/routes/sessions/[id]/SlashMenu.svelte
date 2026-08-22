@@ -25,7 +25,7 @@
 </script>
 
 <div
-	class="flex flex-col rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg"
+	class="border-shade-3 bg-shade-0 flex flex-col rounded-xl border p-1.5 shadow-lg"
 	role="listbox"
 	aria-label={$LL.slashCommands()}
 >
@@ -53,13 +53,13 @@
 					<span class="text-muted opacity-70">{command.argsHint}</span>
 				{/if}
 			</span>
-			<span class="min-w-0 flex-1 truncate text-xs text-muted">
+			<span class="text-muted min-w-0 flex-1 truncate text-xs">
 				{command.available ? command.description : (command.unavailableReason ?? '')}
 			</span>
 		</button>
 	{/each}
 
-	<p class="flex items-center gap-1.5 px-2.5 pb-0.5 pt-1.5 text-[11px] text-muted">
+	<p class="text-muted flex items-center gap-1.5 px-2.5 pt-1.5 pb-0.5 text-[11px]">
 		<Kbd>↑</Kbd><Kbd>↓</Kbd>
 		<span>{$LL.searchNavigate()}</span>
 		<Kbd>↵</Kbd>

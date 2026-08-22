@@ -150,8 +150,8 @@
 	<div class="flex h-full w-full flex-col">
 		<!-- The field is the title: a search dialog that opens with anything else at
 		     the top makes you look for where to type. -->
-		<div class="flex items-center gap-3 border-b border-shade-3 px-4 py-3">
-			<Search class="h-4 w-4 shrink-0 text-muted" />
+		<div class="border-shade-3 flex items-center gap-3 border-b px-4 py-3">
+			<Search class="text-muted h-4 w-4 shrink-0" />
 			<input
 				bind:this={input}
 				bind:value={query}
@@ -161,11 +161,11 @@
 				spellcheck="false"
 				aria-label={$LL.searchConversations()}
 				placeholder={$LL.searchConversationsPlaceholder()}
-				class="w-full bg-transparent text-base outline-none placeholder:text-muted"
+				class="placeholder:text-muted w-full bg-transparent text-base outline-none"
 			/>
 			{#if loading}
 				<div
-					class="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border border-shade-3 border-t-active"
+					class="border-shade-3 border-t-active h-3.5 w-3.5 shrink-0 animate-spin rounded-full border"
 				></div>
 			{/if}
 
@@ -187,24 +187,24 @@
 
 		<div bind:this={list} class="flex-1 overflow-y-auto px-2 py-2" role="listbox" tabindex="-1">
 			{#if !query.trim()}
-				<p class="px-3 py-8 text-center text-sm text-muted">{$LL.searchStart()}</p>
+				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.searchStart()}</p>
 			{:else if failed}
-				<p class="px-3 py-8 text-center text-sm text-muted">{$LL.genericError()}</p>
+				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.genericError()}</p>
 			{:else if !loading && !rows.length}
-				<p class="px-3 py-8 text-center text-sm text-muted">{$LL.searchEmpty()}</p>
+				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.searchEmpty()}</p>
 			{:else}
 				{#each results as result, resultIndex (result.sessionId)}
 					<!-- Heading, then its passages: title and date on one line so the
 					     "which conversation, and when" question is answered before the eye
 					     reaches the excerpts. -->
-					<div class="mb-1 mt-3 flex items-baseline gap-3 px-3 first:mt-0">
+					<div class="mt-3 mb-1 flex items-baseline gap-3 px-3 first:mt-0">
 						<span class="truncate text-sm font-semibold">
 							{result.title || $LL.untitled()}
 						</span>
-						<span class="ml-auto shrink-0 text-xs tabular-nums text-muted">
+						<span class="text-muted ml-auto shrink-0 text-xs tabular-nums">
 							{result.updatedAt ? formatTimestampToNow(result.updatedAt) : ''}
 						</span>
-						<span class="shrink-0 text-xs text-muted">
+						<span class="text-muted shrink-0 text-xs">
 							{$LL.searchMatches({ count: result.matches.length })}
 						</span>
 					</div>
@@ -225,15 +225,15 @@
 								? 'bg-shade-2'
 								: 'hover:bg-shade-2/60'}"
 						>
-							<span class="w-16 shrink-0 truncate pt-0.5 text-[11px] uppercase text-muted">
+							<span class="text-muted w-16 shrink-0 truncate pt-0.5 text-[11px] uppercase">
 								{match.role === 'user' ? $LL.you() : $LL.assistant()}
 							</span>
-							<span class="line-clamp-2 min-w-0 flex-1 text-muted">
+							<span class="text-muted line-clamp-2 min-w-0 flex-1">
 								<!-- The excerpt is message content, so it is only ever text nodes;
 								     the marks come from the split, never from parsed markup. -->
 								{#each splitExcerpt(match.excerpt) as segment, segmentIndex (segmentIndex)}
 									{#if segment.match}
-										<mark class="rounded-sm bg-yellow-400/30 text-active">{segment.text}</mark>
+										<mark class="text-active rounded-sm bg-yellow-400/30">{segment.text}</mark>
 									{:else}{segment.text}{/if}
 								{/each}
 							</span>
@@ -244,7 +244,7 @@
 		</div>
 
 		<div
-			class="flex items-center gap-4 border-t border-shade-3 px-4 py-2 text-[11px] text-muted"
+			class="border-shade-3 text-muted flex items-center gap-4 border-t px-4 py-2 text-[11px]"
 			aria-hidden="true"
 		>
 			<span class="flex items-center gap-1"><Kbd>↑</Kbd><Kbd>↓</Kbd>{$LL.searchNavigate()}</span>

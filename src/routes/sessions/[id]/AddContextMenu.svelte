@@ -106,7 +106,7 @@
 			title={$LL.addContext()}
 			aria-label={$LL.addContext()}
 			data-testid="add-context"
-			class="flex items-center justify-center rounded-md px-2.5 py-2 text-muted transition-colors hover:bg-shade-1 hover:text-active data-[state=open]:bg-shade-1 data-[state=open]:text-active"
+			class="text-muted hover:bg-shade-1 hover:text-active data-[state=open]:bg-shade-1 data-[state=open]:text-active flex items-center justify-center rounded-md px-2.5 py-2 transition-colors"
 		>
 			<Paperclip class="base-icon" />
 		</button>
@@ -116,9 +116,9 @@
 		<button
 			type="button"
 			onclick={pickImages}
-			class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+			class="text-active hover:bg-shade-1 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
 		>
-			<Image class="h-4 w-4 shrink-0 text-muted" />
+			<Image class="text-muted h-4 w-4 shrink-0" />
 			{$LL.attachImage()}
 		</button>
 
@@ -127,9 +127,9 @@
 				type="button"
 				onclick={pickDocuments}
 				data-testid="add-document"
-				class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+				class="text-active hover:bg-shade-1 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
 			>
-				<FileText class="h-4 w-4 shrink-0 text-muted" />
+				<FileText class="text-muted h-4 w-4 shrink-0" />
 				{$LL.attachDocument()}
 			</button>
 		{/if}
@@ -138,14 +138,14 @@
 			type="button"
 			onclick={showKnowledgeView}
 			data-testid="add-knowledge"
-			class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+			class="text-active hover:bg-shade-1 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
 		>
-			<Brain class="h-4 w-4 shrink-0 text-muted" />
+			<Brain class="text-muted h-4 w-4 shrink-0" />
 			<span class="flex-1">{$LL.knowledge()}</span>
 			{#if knowledge.length}
-				<span class="text-xs tabular-nums text-muted">{knowledge.length}</span>
+				<span class="text-muted text-xs tabular-nums">{knowledge.length}</span>
 			{/if}
-			<ChevronRight class="h-4 w-4 shrink-0 text-muted" />
+			<ChevronRight class="text-muted h-4 w-4 shrink-0" />
 		</button>
 	{:else}
 		<Command.Root loop class="flex flex-col">
@@ -154,30 +154,30 @@
 					type="button"
 					onclick={() => (view = 'root')}
 					aria-label={$LL.back()}
-					class="rounded-md p-1 text-muted transition-colors hover:bg-shade-1 hover:text-active"
+					class="text-muted hover:bg-shade-1 hover:text-active rounded-md p-1 transition-colors"
 				>
 					<ChevronLeft class="h-4 w-4" />
 				</button>
-				<span class="text-[11px] font-semibold uppercase tracking-wider text-muted">
+				<span class="text-muted text-[11px] font-semibold tracking-wider uppercase">
 					{$LL.knowledge()}
 				</span>
 			</div>
 
 			<div class="relative">
 				<Search
-					class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+					class="text-muted pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2"
 				/>
 				<Command.Input
 					bind:ref={searchInput}
 					bind:value={search}
 					placeholder={$LL.search()}
-					class="w-full rounded-md border border-shade-3 bg-shade-0 py-1.5 pl-8 pr-2.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+					class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent w-full rounded-md border py-1.5 pr-2.5 pl-8 text-sm outline-none"
 				/>
 			</div>
 
 			<Command.List class="mt-1 max-h-56 overflow-y-auto">
 				<Command.Viewport>
-					<Command.Empty class="px-2.5 py-3 text-center text-xs text-muted">
+					<Command.Empty class="text-muted px-2.5 py-3 text-center text-xs">
 						{knowledge.length ? $LL.searchEmpty() : $LL.emptyKnowledge()}
 					</Command.Empty>
 
@@ -191,11 +191,11 @@
 								value={collection.name}
 								keywords={items.map((item) => item.name)}
 								onSelect={() => pickCollection(items)}
-								class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-active transition-colors data-[selected]:bg-shade-1"
+								class="text-active data-[selected]:bg-shade-1 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors select-none"
 							>
-								<Folder class="h-4 w-4 shrink-0 text-muted" />
+								<Folder class="text-muted h-4 w-4 shrink-0" />
 								<span class="min-w-0 flex-1 truncate">{collection.name}</span>
-								<span class="shrink-0 text-xs tabular-nums text-muted">{items.length}</span>
+								<span class="text-muted shrink-0 text-xs tabular-nums">{items.length}</span>
 							</Command.Item>
 						{/if}
 					{/each}
@@ -206,25 +206,25 @@
 							value={item.name}
 							keywords={collection ? [collection.name] : undefined}
 							onSelect={() => pick(item)}
-							class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-active transition-colors data-[selected]:bg-shade-1"
+							class="text-active data-[selected]:bg-shade-1 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors select-none"
 						>
-							<Brain class="h-4 w-4 shrink-0 text-muted" />
+							<Brain class="text-muted h-4 w-4 shrink-0" />
 							<span class="min-w-0 flex-1 truncate">{item.name}</span>
 							{#if collection}
 								<!-- Which folder it came out of, so two similarly named pieces of
 								     knowledge are told apart without opening either. -->
-								<span class="shrink-0 truncate text-[11px] text-muted">{collection.name}</span>
+								<span class="text-muted shrink-0 truncate text-[11px]">{collection.name}</span>
 							{/if}
 						</Command.Item>
 					{/each}
 				</Command.Viewport>
 			</Command.List>
 
-			<div class="mt-1 border-t border-shade-3 pt-1">
+			<div class="border-shade-3 mt-1 border-t pt-1">
 				<button
 					type="button"
 					onclick={newKnowledge}
-					class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-1 hover:text-active"
+					class="text-muted hover:bg-shade-1 hover:text-active flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
 				>
 					<Plus class="h-4 w-4 shrink-0" />
 					{$LL.newKnowledge()}

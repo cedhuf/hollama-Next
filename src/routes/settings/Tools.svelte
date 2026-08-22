@@ -162,7 +162,7 @@
 			     a statement of fact rather than a disabled control. -->
 			<div class="flex items-center gap-2">
 				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
-				<span class="text-xs text-muted">
+				<span class="text-muted text-xs">
 					{$webFetchConfig.available
 						? $LL.webFetchLockedOn({ pages: $webFetchConfig.maxPages })
 						: $LL.webFetchLockedOff()}

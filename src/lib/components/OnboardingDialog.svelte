@@ -55,10 +55,10 @@
 	<Dialog.Portal>
 		<Dialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
 		<Dialog.Content
-			class="modal-content fixed inset-0 z-50 m-auto flex h-fit max-h-[88vh] w-[92vw] max-w-lg flex-col overflow-hidden rounded-2xl bg-shade-1 shadow-xl"
+			class="modal-content bg-shade-1 fixed inset-0 z-50 m-auto flex h-fit max-h-[88vh] w-[92vw] max-w-lg flex-col overflow-hidden rounded-2xl shadow-xl"
 		>
 			<!-- Step indicator -->
-			<div class="flex items-center gap-3 px-5 pb-3 pt-5">
+			<div class="flex items-center gap-3 px-5 pt-5 pb-3">
 				<div class="flex flex-1 gap-1.5">
 					{#each Array.from({ length: totalSteps }, (_, i) => i) as i (i)}
 						<span
@@ -69,7 +69,7 @@
 					{/each}
 				</div>
 				<Dialog.Close
-					class="rounded-md p-1 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1 transition-colors"
 					aria-label="Close"
 				>
 					<X class="h-4 w-4" />
@@ -87,7 +87,7 @@
 			</div>
 
 			{#if footer}
-				<div class="flex items-center justify-between gap-2 border-t border-shade-2 p-4">
+				<div class="border-shade-2 flex items-center justify-between gap-2 border-t p-4">
 					{@render footer()}
 				</div>
 			{/if}

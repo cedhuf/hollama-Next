@@ -126,29 +126,27 @@ export function personaOffers(input: PersonaInput, actions: PersonaActions) {
 	 */
 	const fromAdmin = input.shared
 		.filter((persona) => !library.some((own) => own.id === persona.id))
-		.map(
-			(persona): PersonaOffer => ({
-				key: `persona:shared:${persona.id}`,
-				kind: 'package',
-				family: 'personas',
-				name: persona.name,
-				line: persona.tagline,
-				avatar: {
-					avatarColor: persona.avatarColor,
-					avatarGlyph: persona.avatarGlyph,
-					avatarImage: persona.avatarImage
-				},
-				tags: persona.tags ?? [],
-				action: library.some((own) => personaOrigin(own) === persona.id) ? 'installed' : 'install',
-				run: () => actions.installShared(persona),
-				edited: false,
-				shared: true,
-				toggleShare: async () => {
-					const own = library.find((p) => p.id === persona.id);
-					if (own) await actions.toggleOwn(own);
-				}
-			})
-		);
+		.map((persona): PersonaOffer => ({
+			key: `persona:shared:${persona.id}`,
+			kind: 'package',
+			family: 'personas',
+			name: persona.name,
+			line: persona.tagline,
+			avatar: {
+				avatarColor: persona.avatarColor,
+				avatarGlyph: persona.avatarGlyph,
+				avatarImage: persona.avatarImage
+			},
+			tags: persona.tags ?? [],
+			action: library.some((own) => personaOrigin(own) === persona.id) ? 'installed' : 'install',
+			run: () => actions.installShared(persona),
+			edited: false,
+			shared: true,
+			toggleShare: async () => {
+				const own = library.find((p) => p.id === persona.id);
+				if (own) await actions.toggleOwn(own);
+			}
+		}));
 
 	return {
 		/** What the catalogue contributes, which on a curated instance is not all of it. */

@@ -452,7 +452,7 @@
 		card
 	>
 		{#if !$settingsStore.searchUrl}
-			<span class="text-xs text-muted">{$LL.noEngineConfigured()}</span>
+			<span class="text-muted text-xs">{$LL.noEngineConfigured()}</span>
 		{:else}
 			<FieldCheckbox
 				label={$LL.shareSearchEngine()}
@@ -462,7 +462,7 @@
 			{#if shareEnabled}
 				<Select bind:value={searchSharing} options={sharingOptions} onChange={saveSearch} />
 				{#if sharedUrl}
-					<span class="text-xs text-muted">{$LL.currentlySharing({ value: sharedUrl })}</span>
+					<span class="text-muted text-xs">{$LL.currentlySharing({ value: sharedUrl })}</span>
 				{/if}
 			{/if}
 		{/if}
@@ -478,7 +478,7 @@
 		{#if themeShareEnabled}
 			<Select bind:value={themeSharing} options={sharingOptions} onChange={saveTheme} />
 			<SettingsHint>{$LL.themeSharingHint()}</SettingsHint>
-			<span class="text-xs text-muted">
+			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.themeStyle} · {$settingsStore.themeMode}
 			</span>
 		{/if}
@@ -491,7 +491,7 @@
 		card
 	>
 		{#if !hasOwnPrompts}
-			<span class="text-xs text-muted">{$LL.noPromptsConfigured()}</span>
+			<span class="text-muted text-xs">{$LL.noPromptsConfigured()}</span>
 		{/if}
 
 		<FieldCheckbox
@@ -515,7 +515,7 @@
 		card
 	>
 		{#if !hasOwnAppPrompts}
-			<span class="text-xs text-muted">{$LL.noAppPromptsRewritten()}</span>
+			<span class="text-muted text-xs">{$LL.noAppPromptsRewritten()}</span>
 		{/if}
 
 		<FieldCheckbox
@@ -541,7 +541,7 @@
 		/>
 		{#if titleShareEnabled}
 			<Select bind:value={titleSharing} options={sharingOptions} onChange={saveTitle} />
-			<span class="text-xs text-muted">
+			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
 					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
 					: $LL.off()}{$settingsStore.generateTitlesWithAI && $settingsStore.regenerateTitle
@@ -564,7 +564,7 @@
 		/>
 		{#if compactShareEnabled}
 			<Select bind:value={compactSharing} options={sharingOptions} onChange={saveCompact} />
-			<span class="text-xs text-muted">
+			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.compactModel || $LL.compactModelOwn()}
 				· {$settingsStore.autoCompact
 					? `${$LL.on()} — ${$settingsStore.compactThreshold.toLocaleString()}`
@@ -588,7 +588,7 @@
 		/>
 		{#if imagesShareEnabled}
 			<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
-			<span class="text-xs text-muted">
+			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || $LL.defaultModel()}
 				· {$settingsStore.imagePromptWriter
 					? $settingsStore.imagePromptModel || $LL.defaultModel()
@@ -610,7 +610,7 @@
 		/>
 		{#if webFetchShareEnabled}
 			<Select bind:value={webFetchSharing} options={sharingOptions} onChange={saveWebFetch} />
-			<span class="text-xs text-muted">
+			<span class="text-muted text-xs">
 				{$settingsStore.webFetchEnabled
 					? $LL.currentlySharingWebFetch({
 							pages: $settingsStore.webFetchMaxPages,
@@ -626,11 +626,11 @@
 		{#if loading}
 			<Skeleton variant="row" count={2} />
 		{:else if servers.length === 0}
-			<span class="text-sm text-muted">{$LL.noSystemServers()}</span>
+			<span class="text-muted text-sm">{$LL.noSystemServers()}</span>
 		{/if}
 
 		{#if sharedModelNames.length}
-			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
+			<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-3">
 				<span class="text-sm font-medium">{$LL.defaultModelForUsers()}</span>
 				<Select
 					bind:value={defaultModelValue}
@@ -652,10 +652,10 @@
 		{/if}
 
 		{#each servers as server (server.id)}
-			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
+			<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-3">
 				<span class="text-sm font-medium">
 					{server.label || server.connectionType}
-					{#if !server.isEnabled}<span class="text-xs text-muted">({$LL.off()})</span>{/if}
+					{#if !server.isEnabled}<span class="text-muted text-xs">({$LL.off()})</span>{/if}
 				</span>
 
 				{#if optionsFor(server).length}
@@ -669,11 +669,11 @@
 							saveShared(server);
 						}}
 					/>
-					<span class="text-xs text-muted">
+					<span class="text-muted text-xs">
 						{$LL.sharedCount({ count: server.sharedModels.length })}
 					</span>
 				{:else}
-					<span class="text-xs text-muted">{$LL.noModelsCheckServersTab()}</span>
+					<span class="text-muted text-xs">{$LL.noModelsCheckServersTab()}</span>
 				{/if}
 			</div>
 		{/each}
@@ -682,11 +682,11 @@
 	<!-- Developer options -->
 	<SettingsSection title={$LL.developerOptions()} description={$LL.developerOptionsDescription()}>
 		<div
-			class="flex items-center justify-between gap-3 rounded-md border border-shade-3 p-3 text-sm"
+			class="border-shade-3 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
 		>
 			<div class="flex min-w-0 flex-col">
-				<span class="font-medium text-active">{$LL.newUserOnboarding()}</span>
-				<span class="text-xs text-muted">{$LL.newUserOnboardingDescription()}</span>
+				<span class="text-active font-medium">{$LL.newUserOnboarding()}</span>
+				<span class="text-muted text-xs">{$LL.newUserOnboardingDescription()}</span>
 			</div>
 			<Button variant="outline" onclick={replayWelcome}>
 				<PlayCircle class="base-icon" />
@@ -698,11 +698,11 @@
 		     beside the preview above: one shows you what they will see, the other
 		     makes them see it. -->
 		<div
-			class="mt-2 flex items-center justify-between gap-3 rounded-md border border-shade-3 p-3 text-sm"
+			class="border-shade-3 mt-2 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
 		>
 			<div class="flex min-w-0 flex-col">
-				<span class="font-medium text-active">{$LL.resetOnboarding()}</span>
-				<span class="text-xs text-muted">{$LL.resetOnboardingHelp()}</span>
+				<span class="text-active font-medium">{$LL.resetOnboarding()}</span>
+				<span class="text-muted text-xs">{$LL.resetOnboardingHelp()}</span>
 			</div>
 			<Button variant="outline" disabled={resettingOnboarding} onclick={askForOnboarding}>
 				<RotateCcw class="base-icon" />

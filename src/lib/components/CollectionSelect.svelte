@@ -71,26 +71,26 @@
 			{...props}
 			type="button"
 			data-testid="collection-select"
-			class="flex items-center gap-1.5 rounded-md border border-shade-3 bg-shade-0 px-2 py-1 text-xs transition-colors hover:border-shade-4 data-[state=open]:border-accent {className}"
+			class="border-shade-3 bg-shade-0 hover:border-shade-4 data-[state=open]:border-accent flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors {className}"
 		>
-			<Folder class="h-3.5 w-3.5 shrink-0 text-muted" />
+			<Folder class="text-muted h-3.5 w-3.5 shrink-0" />
 			<span class="min-w-0 truncate {current ? 'text-active' : 'text-muted'}">
 				{current ? current.name : $LL.noCollection()}
 			</span>
-			<ChevronDown class="h-3.5 w-3.5 shrink-0 text-muted" />
+			<ChevronDown class="text-muted h-3.5 w-3.5 shrink-0" />
 		</button>
 	{/snippet}
 
 	<Command.Root loop class="flex flex-col">
 		<div class="relative">
 			<Search
-				class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+				class="text-muted pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2"
 			/>
 			<Command.Input
 				bind:ref={searchInput}
 				bind:value={search}
 				placeholder={$LL.collectionSearchPlaceholder()}
-				class="w-full rounded-md border border-shade-3 bg-shade-0 py-1.5 pl-8 pr-2.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+				class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent w-full rounded-md border py-1.5 pr-2.5 pl-8 text-sm outline-none"
 			/>
 		</div>
 
@@ -102,37 +102,37 @@
 				<Command.Item
 					value={$LL.noCollection()}
 					onSelect={() => choose('')}
-					class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors data-[selected]:bg-shade-1 {value
+					class="data-[selected]:bg-shade-1 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors select-none {value
 						? 'text-muted'
 						: 'text-active'}"
 				>
-					<FolderX class="h-4 w-4 shrink-0 text-muted" />
+					<FolderX class="text-muted h-4 w-4 shrink-0" />
 					<span class="flex-1 truncate">{$LL.noCollection()}</span>
-					{#if !value}<Check class="h-3.5 w-3.5 shrink-0 text-accent" />{/if}
+					{#if !value}<Check class="text-accent h-3.5 w-3.5 shrink-0" />{/if}
 				</Command.Item>
 
 				{#each collections as collection (collection.id)}
 					<Command.Item
 						value={collection.name}
 						onSelect={() => choose(collection.id)}
-						class="flex cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-active transition-colors data-[selected]:bg-shade-1"
+						class="text-active data-[selected]:bg-shade-1 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors select-none"
 					>
-						<Folder class="h-4 w-4 shrink-0 text-muted" />
+						<Folder class="text-muted h-4 w-4 shrink-0" />
 						<span class="flex-1 truncate">{collection.name}</span>
-						{#if value === collection.id}<Check class="h-3.5 w-3.5 shrink-0 text-accent" />{/if}
+						{#if value === collection.id}<Check class="text-accent h-3.5 w-3.5 shrink-0" />{/if}
 					</Command.Item>
 				{/each}
 			</Command.Viewport>
 		</Command.List>
 
 		{#if canCreate}
-			<div class="mt-1 border-t border-shade-3 pt-1">
+			<div class="border-shade-3 mt-1 border-t pt-1">
 				<button
 					type="button"
 					onclick={create}
-					class="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-active transition-colors hover:bg-shade-1"
+					class="text-active hover:bg-shade-1 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
 				>
-					<Plus class="h-4 w-4 shrink-0 text-muted" />
+					<Plus class="text-muted h-4 w-4 shrink-0" />
 					<span class="truncate">{$LL.createCollectionNamed({ name: typed })}</span>
 				</button>
 			</div>

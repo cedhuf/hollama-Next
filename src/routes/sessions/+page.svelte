@@ -193,10 +193,10 @@
 		<div class="my-auto flex w-full max-w-2xl flex-col items-center self-center px-6 py-12">
 			{#if $settingsStore.homeShowHeader}
 				<div class="mb-8 text-center">
-					<h1 class="text-2xl font-semibold tracking-tight text-active">
+					<h1 class="text-active text-2xl font-semibold tracking-tight">
 						{greeting}
 					</h1>
-					<p class="mt-1.5 text-muted">{$LL.howCanIHelp()}</p>
+					<p class="text-muted mt-1.5">{$LL.howCanIHelp()}</p>
 				</div>
 			{/if}
 
@@ -205,23 +205,22 @@
 					<ModelSelect bind:value={selectedModel} variant="hero" />
 				</div>
 				<div
-					class="rounded-2xl border border-shade-3 bg-shade-0 shadow-sm transition-all hover:border-shade-4 focus-within:border-shade-5 focus-within:shadow-md"
+					class="border-shade-3 bg-shade-0 hover:border-shade-4 focus-within:border-shade-5 rounded-2xl border shadow-sm transition-all focus-within:shadow-md"
 				>
 					<textarea
 						placeholder={$LL.howCanIHelp()}
-						class="w-full resize-none bg-transparent px-5 pb-1 pt-4 text-sm text-base outline-none"
+						class="w-full resize-none bg-transparent px-5 pt-4 pb-1 text-base text-sm outline-none"
 						style="field-sizing: content; min-height: 56px; max-height: 200px;"
 						bind:value={prompt}
 						onkeydown={handleKeyDown}
 						enterkeyhint="send"
-						inputmode="text"
-					></textarea>
+						inputmode="text"></textarea>
 					<PromptAttachments bind:attachments {tools}>
 						{#snippet actions()}
 							<button
 								onclick={() => submit(prompt)}
 								disabled={!prompt.trim() && !attachments.length}
-								class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity disabled:opacity-30"
+								class="bg-accent text-shade-0 flex h-8 w-8 items-center justify-center rounded-lg transition-opacity disabled:opacity-30"
 							>
 								<ArrowUp class="h-4 w-4" />
 							</button>
@@ -260,31 +259,31 @@
 						<div class="min-h-0 overflow-hidden">
 							{#if shownCategory && shownSuggestions.length > 0}
 								{@const currentCategory = categories.find((c) => c.id === shownCategory)}
-								<div class="overflow-hidden rounded-xl border border-shade-3 bg-shade-0">
-									<div class="flex items-center gap-2 border-b border-shade-3 px-3 py-2">
+								<div class="border-shade-3 bg-shade-0 overflow-hidden rounded-xl border">
+									<div class="border-shade-3 flex items-center gap-2 border-b px-3 py-2">
 										{#if currentCategory}
-											<currentCategory.icon class="h-3.5 w-3.5 text-muted" />
+											<currentCategory.icon class="text-muted h-3.5 w-3.5" />
 										{/if}
-										<span class="flex-1 text-xs font-medium text-muted">{shownCategory}</span>
+										<span class="text-muted flex-1 text-xs font-medium">{shownCategory}</span>
 										<button
 											type="button"
 											onclick={() => (openCategory = null)}
-											class="text-muted transition-colors hover:text-active"
+											class="text-muted hover:text-active transition-colors"
 											aria-label="Close suggestions"
 										>
 											<X class="h-3.5 w-3.5" />
 										</button>
 									</div>
-									<div class="divide-y divide-shade-3">
+									<div class="divide-shade-3 divide-y">
 										{#each shownSuggestions as suggestion (suggestion)}
 											<button
 												type="button"
 												onclick={() => submit(suggestion)}
-												class="group flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-base transition-colors hover:bg-shade-1"
+												class="group hover:bg-shade-1 flex w-full items-center gap-2 px-4 py-2.5 text-left text-base text-sm transition-colors"
 											>
 												<span class="flex-1">{suggestion}</span>
 												<ArrowRight
-													class="h-3.5 w-3.5 flex-shrink-0 text-muted opacity-0 transition-opacity group-hover:opacity-100"
+													class="text-muted h-3.5 w-3.5 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
 												/>
 											</button>
 										{/each}
@@ -322,7 +321,7 @@
 			     empty gallery is the one state where a way in is worth the most. -->
 			{#if $settingsStore.homeShowRecentImages && $canDrawImages}
 				<div class="mt-10 w-full">
-					<h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+					<h2 class="text-muted mb-3 text-xs font-semibold tracking-wider uppercase">
 						{$LL.recentImages()}
 					</h2>
 
@@ -342,7 +341,7 @@
 												<a
 													{...props}
 													href={resolve('/images')}
-													class="group relative block h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
+													class="group border-shade-3 bg-shade-0 relative block h-16 w-16 shrink-0 overflow-hidden rounded-lg border"
 												>
 													<img
 														src={imageUrl(image.id)}
@@ -364,7 +363,7 @@
 								href={resolve('/images')}
 								title={$LL.images()}
 								aria-label={$LL.images()}
-								class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-shade-3 text-muted transition-colors hover:border-shade-4 hover:bg-shade-0 hover:text-active"
+								class="border-shade-3 text-muted hover:border-shade-4 hover:bg-shade-0 hover:text-active flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border transition-colors"
 							>
 								<ArrowRight class="h-4 w-4" />
 							</a>
@@ -372,11 +371,11 @@
 					{:else}
 						<a
 							href={resolve('/images')}
-							class="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-shade-4 px-6 py-6 text-center transition-colors hover:border-shade-6"
+							class="border-shade-4 hover:border-shade-6 flex flex-col items-center gap-1.5 rounded-xl border border-dashed px-6 py-6 text-center transition-colors"
 						>
-							<ImageIcon class="h-5 w-5 text-muted" />
-							<span class="text-sm text-muted">{$LL.imagesEmpty()}</span>
-							<span class="text-sm font-medium text-link">{$LL.imagesStartGenerating()}</span>
+							<ImageIcon class="text-muted h-5 w-5" />
+							<span class="text-muted text-sm">{$LL.imagesEmpty()}</span>
+							<span class="text-link text-sm font-medium">{$LL.imagesStartGenerating()}</span>
 						</a>
 					{/if}
 				</div>
@@ -384,20 +383,20 @@
 
 			{#if $settingsStore.homeShowRecentSessions && recentSessions.length > 0}
 				<div class="mt-10 w-full">
-					<h2 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+					<h2 class="text-muted mb-3 text-xs font-semibold tracking-wider uppercase">
 						{$LL.recentSessions()}
 					</h2>
-					<div class="divide-y divide-shade-3 rounded-xl border border-shade-3 bg-shade-0">
+					<div class="divide-shade-3 border-shade-3 bg-shade-0 divide-y rounded-xl border">
 						{#each recentSessions as session (session.id)}
 							<a
 								href={resolve('/sessions/[id]', { id: session.id })}
-								class="flex items-center gap-3 px-4 py-3 text-sm text-base transition-colors hover:bg-shade-1 first:rounded-t-xl last:rounded-b-xl"
+								class="hover:bg-shade-1 flex items-center gap-3 px-4 py-3 text-base text-sm transition-colors first:rounded-t-xl last:rounded-b-xl"
 							>
-								<MessageSquareText class="h-4 w-4 flex-shrink-0 text-muted" />
+								<MessageSquareText class="text-muted h-4 w-4 flex-shrink-0" />
 								<span class="flex-1 truncate"
 									>{resolveSessionTitle(session) || $LL.newSession()}</span
 								>
-								<span class="flex-shrink-0 text-xs text-muted">
+								<span class="text-muted flex-shrink-0 text-xs">
 									{session.updatedAt
 										? new Date(session.updatedAt).toLocaleDateString(undefined, {
 												month: 'short',

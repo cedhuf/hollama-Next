@@ -121,9 +121,7 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
  * anything up. Keeping them apart lets the caller fall back instead.
  */
 export type RouterDecision =
-	| { kind: 'query'; query: string }
-	| { kind: 'none' }
-	| { kind: 'unreadable' };
+	{ kind: 'query'; query: string } | { kind: 'none' } | { kind: 'unreadable' };
 
 /**
  * Read the router's reply.

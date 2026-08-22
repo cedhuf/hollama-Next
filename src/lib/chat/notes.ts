@@ -153,11 +153,7 @@ export interface PlaybooksNote extends NoteBase {
 }
 
 export type ConversationNote =
-	| CompactionNote
-	| ClearedNote
-	| ContextNote
-	| MentionNote
-	| PlaybooksNote;
+	CompactionNote | ClearedNote | ContextNote | MentionNote | PlaybooksNote;
 
 export const NOTE_KINDS: Record<NoteKind, { boundary: NoteBoundary }> = {
 	compaction: { boundary: 'from' },

@@ -169,7 +169,7 @@
 <!-- Theme mode: segmented control -->
 <div class="flex flex-col gap-1.5">
 	<span class="text-sm font-medium">{$LL.theme()}</span>
-	<div class="inline-flex gap-1 rounded-lg border border-shade-3 bg-shade-0 p-1">
+	<div class="border-shade-3 bg-shade-0 inline-flex gap-1 rounded-lg border p-1">
 		{#each themeModes as themeMode (themeMode.value)}
 			{@const Icon = themeMode.icon}
 			<button

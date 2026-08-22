@@ -89,7 +89,7 @@
 <div
 	bind:this={el}
 	onscroll={handleScroll}
-	class="min-h-0 flex-1 overflow-y-auto surface-column"
+	class="surface-column min-h-0 flex-1 overflow-y-auto"
 	style="overscroll-behavior-y: contain; overflow-x: hidden"
 >
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`.
@@ -99,7 +99,7 @@
 	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-96">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
-				<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+				<p class="text-muted px-2 py-1 text-[11px] font-semibold tracking-wider uppercase">
 					{groupLabel(group.key)}
 				</p>
 				<!-- A hair of space between rows: hovering the neighbour of the active
@@ -137,7 +137,7 @@
 			<button
 				type="button"
 				onclick={() => (archiveOpen = true)}
-				class="mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted transition-colors hover:bg-shade-0 hover:text-active"
+				class="text-muted hover:bg-shade-0 hover:text-active mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs transition-colors"
 			>
 				<Archive class="h-3.5 w-3.5 shrink-0" />
 				<span class="truncate">{$LL.archivedSessions()}</span>

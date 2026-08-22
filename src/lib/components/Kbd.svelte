@@ -11,7 +11,7 @@
 </script>
 
 <kbd
-	class="inline-flex min-w-5 items-center justify-center rounded border border-shade-3 px-1 py-px font-sans text-[10px] leading-none text-muted"
+	class="border-shade-3 text-muted inline-flex min-w-5 items-center justify-center rounded border px-1 py-px font-sans text-[10px] leading-none"
 >
 	{@render children()}
 </kbd>

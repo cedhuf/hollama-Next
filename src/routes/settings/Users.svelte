@@ -200,7 +200,7 @@
 			     purpose: what somebody needs to know here is that this counts well
 			     enough to catch a runaway, not well enough to bill anyone. -->
 			<p
-				class="flex items-start gap-1.5 rounded-md border border-shade-3 bg-shade-1 p-2 text-xs text-muted"
+				class="border-shade-3 bg-shade-1 text-muted flex items-start gap-1.5 rounded-md border p-2 text-xs"
 			>
 				<Info class="mt-0.5 h-3.5 w-3.5 shrink-0" />
 				{$LL.creditsApproximate()}
@@ -245,20 +245,20 @@
 				</div>
 			</div>
 
-			<p class="text-xs text-muted">{$LL.creditsHelp()}</p>
+			<p class="text-muted text-xs">{$LL.creditsHelp()}</p>
 
 			{#if unpriced.length}
 				<!-- Not a nicety. While a limit is in force these models are refused, and
 				     the reason is here rather than in a log the person who set the limit
 				     will never read. -->
-				<div class="flex flex-col gap-1 rounded-lg border border-warning/40 bg-warning/10 p-3">
-					<span class="flex items-center gap-1.5 text-sm font-medium text-active">
+				<div class="border-warning/40 bg-warning/10 flex flex-col gap-1 rounded-lg border p-3">
+					<span class="text-active flex items-center gap-1.5 text-sm font-medium">
 						<TriangleAlert class="h-4 w-4 shrink-0" />
 						{$LL.unpricedModels()}
 					</span>
-					<p class="text-xs leading-relaxed text-muted">{$LL.unpricedModelsHelp()}</p>
+					<p class="text-muted text-xs leading-relaxed">{$LL.unpricedModelsHelp()}</p>
 					{#each unpriced as entry (entry.serverId)}
-						<p class="text-xs text-muted">
+						<p class="text-muted text-xs">
 							<span class="text-active">{entry.label}</span>
 							<span class="font-mono">{entry.models.join(', ')}</span>
 						</p>
@@ -272,17 +272,17 @@
 		{/if}
 
 		{#each users as user (user.id)}
-			<div class="flex flex-col gap-1.5 rounded-md border border-shade-3 p-2 text-sm">
+			<div class="border-shade-3 flex flex-col gap-1.5 rounded-md border p-2 text-sm">
 				<div class="flex items-center justify-between gap-2">
 					<span class="min-w-0 truncate">
 						{user.email}
-						<span class="text-xs text-muted">({user.role})</span>
+						<span class="text-muted text-xs">({user.role})</span>
 					</span>
 					<!-- Quiet and to the right of the row, before the one control that acts on
 				     it: an administrator scanning the list is looking for who is still
 				     around, not reading a report. Blank rather than a guess for an account
 				     nobody has opened since this existed. -->
-					<span class="ml-auto shrink-0 text-[11px] tabular-nums text-muted">
+					<span class="text-muted ml-auto shrink-0 text-[11px] tabular-nums">
 						{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
 					</span>
 					<Button variant="icon" onclick={() => removeUser(user.id)}>
@@ -295,7 +295,7 @@
 				<!-- What this account has spent, and what it is allowed. The allowance
 				     itself is folded away: most accounts follow the instance, and a row of
 				     controls on every one of them is a list nobody can read down. -->
-				<div class="flex items-center gap-2 text-xs text-muted">
+				<div class="text-muted flex items-center gap-2 text-xs">
 					<span class="tabular-nums">
 						{$LL.usageSpent({ spent: money(user.spend.cost) })}
 					</span>
@@ -311,7 +311,7 @@
 						type="button"
 						onclick={() => (opened.has(user.id) ? opened.delete(user.id) : opened.add(user.id))}
 						aria-expanded={opened.has(user.id)}
-						class="ml-auto flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors hover:bg-shade-2 {user.credit_limit ==
+						class="hover:bg-shade-2 ml-auto flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors {user.credit_limit ==
 							null && user.credit_period == null
 							? 'text-muted'
 							: 'text-active'}"
@@ -332,7 +332,7 @@
 					     what an account has until somebody decides otherwise, and the note
 					     says which one is winning. -->
 					<div
-						class="flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
+						class="border-shade-3 bg-shade-1 flex flex-col gap-2 rounded-md border p-2"
 						transition:slide={{ duration: 160, easing: quadInOut }}
 					>
 						<!-- Labels beside their control rather than above it: this panel opens
@@ -340,7 +340,7 @@
 						     under it down a line for nothing. -->
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-2">
 							<label class="flex min-w-0 flex-1 items-center gap-2 text-xs">
-								<span class="shrink-0 text-muted">{$LL.creditLimit()}</span>
+								<span class="text-muted shrink-0">{$LL.creditLimit()}</span>
 								<input
 									class="settings-field min-w-0 flex-1 text-right tabular-nums"
 									type="text"
@@ -356,7 +356,7 @@
 							     which on a menu trigger is a second click, so the menu opens and
 							     shuts in the same gesture. -->
 							<div class="flex shrink-0 items-center gap-2 text-xs">
-								<span class="shrink-0 text-muted">{$LL.creditPeriod()}</span>
+								<span class="text-muted shrink-0">{$LL.creditPeriod()}</span>
 								<div class="w-52">
 									<Select
 										value={user.credit_period ?? ''}
@@ -372,13 +372,13 @@
 							</div>
 						</div>
 
-						<p class="text-[11px] text-muted">{$LL.creditOverrideHelp()}</p>
+						<p class="text-muted text-[11px]">{$LL.creditOverrideHelp()}</p>
 
 						{#if user.credit_limit != null || user.credit_period != null}
 							<button
 								type="button"
 								onclick={() => resetUser(user)}
-								class="flex items-center gap-1.5 self-start rounded-md border border-shade-3 px-2 py-1 text-[11px] text-muted transition-colors hover:border-shade-4 hover:text-active"
+								class="border-shade-3 text-muted hover:border-shade-4 hover:text-active flex items-center gap-1.5 self-start rounded-md border px-2 py-1 text-[11px] transition-colors"
 							>
 								<RotateCcw class="h-3 w-3" />
 								{$LL.creditLimitInherit()}
@@ -390,13 +390,13 @@
 		{/each}
 
 		{#if showCreate}
-			<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-3">
+			<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-3">
 				<div class="flex items-center justify-between">
 					<span class="text-sm font-medium">{$LL.createAUser()}</span>
 					<button
 						type="button"
 						onclick={() => (showCreate = false)}
-						class="text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active transition-colors"
 						aria-label={$LL.close()}
 					>
 						<X class="h-4 w-4" />
@@ -422,7 +422,7 @@
 			<button
 				type="button"
 				onclick={() => (showCreate = true)}
-				class="flex items-center gap-2 self-start rounded-md border border-dashed border-shade-4 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent hover:text-active"
+				class="border-shade-4 text-muted hover:border-accent hover:text-active flex items-center gap-2 self-start rounded-md border border-dashed px-3 py-1.5 text-sm transition-colors"
 			>
 				<Plus class="h-4 w-4" />
 				{$LL.addUser()}

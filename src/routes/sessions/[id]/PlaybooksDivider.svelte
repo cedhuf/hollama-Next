@@ -37,7 +37,7 @@
 />
 
 {#snippet panel()}
-	<div class="flex flex-col gap-2 rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5">
+	<div class="border-shade-3 bg-shade-1 flex flex-col gap-2 rounded-lg border px-3 py-2.5">
 		{#if $playbooksStore.length}
 			<div class="flex flex-col">
 				{#each $playbooksStore as playbook (playbook.id)}
@@ -46,30 +46,30 @@
 						type="button"
 						onclick={() => onToggle(playbook.id)}
 						aria-pressed={on}
-						class="flex items-start gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-shade-2"
+						class="hover:bg-shade-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors"
 					>
 						<span class="flex min-w-0 flex-1 flex-col">
 							<span class="truncate text-xs font-medium {on ? 'text-active' : 'text-muted'}">
 								{playbook.name.trim() || '—'}
 							</span>
 							{#if playbook.summary}
-								<span class="line-clamp-1 text-[11px] text-muted">{playbook.summary}</span>
+								<span class="text-muted line-clamp-1 text-[11px]">{playbook.summary}</span>
 							{/if}
 						</span>
 
 						{#if on}
-							<Check class="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" aria-hidden="true" />
+							<Check class="text-accent mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
 						{/if}
 					</button>
 				{/each}
 			</div>
 		{:else}
-			<p class="px-1.5 py-1 text-xs text-muted">{$LL.playbooksEmpty()}</p>
+			<p class="text-muted px-1.5 py-1 text-xs">{$LL.playbooksEmpty()}</p>
 		{/if}
 
 		<a
 			href={resolve('/library')}
-			class="flex items-center gap-1.5 border-t border-shade-3 px-1.5 pt-2 text-xs text-muted transition-colors hover:text-active"
+			class="border-shade-3 text-muted hover:text-active flex items-center gap-1.5 border-t px-1.5 pt-2 text-xs transition-colors"
 		>
 			<Plus class="h-3.5 w-3.5" />
 			{$LL.playbooksManage()}

@@ -72,7 +72,7 @@
 	{$LL.saveAsKnowledge()}
 </MenuItem>
 
-<div class="my-1 h-px bg-shade-3" role="none"></div>
+<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
 <!-- The same two formats the conversation's own copy menu offers, so what "copy
      this conversation" produces does not depend on where you asked. -->
@@ -84,7 +84,7 @@
 </MenuItem>
 
 {#if onClose}
-	<div class="my-1 h-px bg-shade-3" role="none"></div>
+	<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
 	<!-- Ends the conversation without ending anything else: the persona goes back to
 	     being unstarted and the transcript stays where it was, as an ordinary
@@ -96,7 +96,7 @@
 {/if}
 
 {#if onDelete}
-	<div class="my-1 h-px bg-shade-3" role="none"></div>
+	<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
 	<!-- Asks rather than does: the confirmation appears on the row, in the same
 	     place it appears when the quick buttons are on. -->

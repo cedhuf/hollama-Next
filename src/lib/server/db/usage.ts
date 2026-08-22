@@ -206,8 +206,7 @@ export function addUsage(userId: string, usage: Partial<Spend>): void {
 /** The period one account is measured over: its own when set, the instance's otherwise. */
 export function creditPeriodFor(userId: string): CreditPeriod {
 	const row = getDb().prepare('SELECT credit_period FROM users WHERE id = ?').get(userId) as
-		| { credit_period: string | null }
-		| undefined;
+		{ credit_period: string | null } | undefined;
 	const own = row?.credit_period as CreditPeriod | null;
 	return own && PERIODS.includes(own) ? own : creditPeriod();
 }
@@ -221,8 +220,7 @@ export function setCreditPeriodFor(userId: string, period: CreditPeriod | null):
 /** The allowance for one account: its own when set, the instance's otherwise. */
 export function creditLimitFor(userId: string): number {
 	const row = getDb().prepare('SELECT credit_limit FROM users WHERE id = ?').get(userId) as
-		| { credit_limit: number | null }
-		| undefined;
+		{ credit_limit: number | null } | undefined;
 	if (row?.credit_limit != null) return row.credit_limit > 0 ? row.credit_limit : 0;
 	return instanceCreditLimit();
 }

@@ -345,12 +345,12 @@
 	<button
 		type="button"
 		onclick={() => openKnowledge({ id: knowledge.id })}
-		class="section-tint flex items-center gap-2.5 rounded-xl border bg-shade-0 p-3.5 text-left transition-colors hover:border-shade-4"
+		class="section-tint bg-shade-0 hover:border-shade-4 flex items-center gap-2.5 rounded-xl border p-3.5 text-left transition-colors"
 	>
-		<FileText class="h-5 w-5 shrink-0 text-muted" />
+		<FileText class="text-muted h-5 w-5 shrink-0" />
 		<div class="min-w-0">
-			<p class="truncate text-sm font-medium text-active">{knowledge.name || $LL.untitled()}</p>
-			<p class="text-[11px] text-muted">{formatTimestampToNow(knowledge.updatedAt)}</p>
+			<p class="text-active truncate text-sm font-medium">{knowledge.name || $LL.untitled()}</p>
+			<p class="text-muted text-[11px]">{formatTimestampToNow(knowledge.updatedAt)}</p>
 		</div>
 	</button>
 {/snippet}
@@ -360,7 +360,7 @@
 <!-- Frameless like the sessions landing, and for the same reason it still carries a
      surface: see the comment there. -->
 <div
-	class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex h-full flex-col surface-pane lg:rounded-xl"
+	class="app-panel surface-pane flex h-full flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
 >
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
@@ -368,7 +368,7 @@
 			<!-- Header -->
 			<div class="mb-1 flex items-center justify-between gap-3">
 				<div class="flex min-w-0 items-center gap-1">
-					<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.library()}</h1>
+					<h1 class="text-active truncate text-xl font-semibold tracking-tight">{$LL.library()}</h1>
 				</div>
 
 				<div class="flex shrink-0 items-center gap-2">
@@ -378,7 +378,7 @@
 					<button
 						type="button"
 						onclick={() => openStore()}
-						class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="border-shade-3 text-muted hover:bg-shade-2 hover:text-active flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors"
 					>
 						<Store class="h-4 w-4" />
 						{$LL.store()}
@@ -387,14 +387,14 @@
 					<button
 						type="button"
 						onclick={() => importInput?.click()}
-						class="flex items-center gap-1.5 rounded-lg border border-accent bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+						class="border-accent bg-accent text-shade-0 flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-opacity hover:opacity-90"
 					>
 						<Upload class="h-4 w-4" />
 						{$LL.import()}
 					</button>
 				</div>
 			</div>
-			<p class="mb-7 text-sm text-muted">{$LL.librarySubtitle()}</p>
+			<p class="text-muted mb-7 text-sm">{$LL.librarySubtitle()}</p>
 
 			<!-- Personas -->
 			<!-- Each section carries its own turn of the accent, so three grids of
@@ -405,8 +405,8 @@
 			     that suits. -->
 			<div class="mb-3 flex items-baseline justify-between gap-2">
 				<div class="flex items-baseline gap-2">
-					<h2 class="text-sm font-medium text-active">{$LL.personas()}</h2>
-					<span class="text-xs text-muted">{$personasStore.length}</span>
+					<h2 class="text-active text-sm font-medium">{$LL.personas()}</h2>
+					<span class="text-muted text-xs">{$personasStore.length}</span>
 				</div>
 			</div>
 
@@ -441,7 +441,7 @@
 								     is worth catching an eye, and a grey annotation on a grey card
 								     catches none. -->
 								<span
-									class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
+									class="border-accent/30 bg-accent/10 text-accent rounded border px-1 text-[9px] leading-[15px] font-medium"
 								>
 									{state === 'edited'
 										? $LL.personaStateEdited()
@@ -486,7 +486,7 @@
 							<button
 								type="button"
 								onclick={() => chatWith(persona)}
-								class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+								class="text-muted hover:bg-shade-2 hover:text-active flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs transition-colors"
 							>
 								<MessageSquare class="h-3.5 w-3.5" />
 								{$LL.personaChat()}
@@ -496,7 +496,7 @@
 								onclick={() => editPersona(persona)}
 								title={$LL.edit()}
 								aria-label={$LL.editPersona()}
-								class="flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+								class="text-muted hover:bg-shade-2 hover:text-active flex shrink-0 items-center justify-center rounded-lg px-2.5 py-1.5 transition-colors"
 							>
 								<Pencil class="h-3.5 w-3.5" />
 							</button>
@@ -512,13 +512,13 @@
 			     the same width and its natural height. -->
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				<div
-					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+					class="border-shade-4 hover:border-accent flex items-stretch gap-1 rounded-xl border border-dashed transition-colors"
 				>
 					<button
 						type="button"
 						onclick={createPersona}
 						disabled={!canCreate}
-						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active disabled:cursor-not-allowed disabled:opacity-50"
+						class="text-muted hover:text-active flex flex-1 items-center justify-center gap-1.5 p-3.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<Plus class="h-4 w-4" />
 						<span class="text-xs">{$LL.personaStoreCreate()}</span>
@@ -528,7 +528,7 @@
 						onclick={() => openStore('personas')}
 						title={$LL.personaStoreBrowse()}
 						aria-label={$LL.personaStoreBrowse()}
-						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+						class="border-shade-3 text-muted hover:text-active my-2.5 border-l px-3 transition-colors"
 					>
 						<Store class="h-4 w-4" />
 					</button>
@@ -541,8 +541,8 @@
 			     things up in. -->
 			<div class="mb-3 flex items-baseline justify-between gap-2">
 				<div class="flex items-baseline gap-2">
-					<h2 class="text-sm font-medium text-active">{$LL.playbooks()}</h2>
-					<span class="text-xs text-muted">{$playbooksStore.length}</span>
+					<h2 class="text-active text-sm font-medium">{$LL.playbooks()}</h2>
+					<span class="text-muted text-xs">{$playbooksStore.length}</span>
 				</div>
 			</div>
 
@@ -563,12 +563,12 @@
 
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				<div
-					class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+					class="border-shade-4 hover:border-accent flex items-stretch gap-1 rounded-xl border border-dashed transition-colors"
 				>
 					<button
 						type="button"
 						onclick={createPlaybook}
-						class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active flex flex-1 items-center justify-center gap-1.5 p-3.5 transition-colors"
 					>
 						<Plus class="h-4 w-4" />
 						<span class="text-xs">{$LL.newPlaybook()}</span>
@@ -578,7 +578,7 @@
 						onclick={() => openStore('playbooks')}
 						title={$LL.playbookStore()}
 						aria-label={$LL.playbookStore()}
-						class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+						class="border-shade-3 text-muted hover:text-active my-2.5 border-l px-3 transition-colors"
 					>
 						<Store class="h-4 w-4" />
 					</button>
@@ -587,8 +587,8 @@
 
 			<!-- Knowledge -->
 			<div class="mb-3 flex items-baseline gap-2">
-				<h2 class="text-sm font-medium text-active">{$LL.knowledge()}</h2>
-				<span class="text-xs text-muted">{$knowledgeStore.length}</span>
+				<h2 class="text-active text-sm font-medium">{$LL.knowledge()}</h2>
+				<span class="text-muted text-xs">{$knowledgeStore.length}</span>
 			</div>
 
 			<!-- Loose knowledge first: it is where everything starts out, so it is what
@@ -608,26 +608,26 @@
 						     nothing covered the grid, and the name is typed where the folder
 						     will sit. -->
 						<div
-							class="flex items-center gap-2 rounded-xl border border-accent bg-shade-0 p-3.5 text-left"
+							class="border-accent bg-shade-0 flex items-center gap-2 rounded-xl border p-3.5 text-left"
 						>
-							<Folder class="h-5 w-5 shrink-0 text-muted" />
+							<Folder class="text-muted h-5 w-5 shrink-0" />
 							<input
 								bind:this={nameField}
 								bind:value={draftName}
 								onblur={commitName}
 								onkeydown={onNameKeydown}
 								placeholder={$LL.newCollection()}
-								class="w-full min-w-0 bg-transparent text-sm font-medium text-active outline-none placeholder:font-normal placeholder:text-muted"
+								class="text-active placeholder:text-muted w-full min-w-0 bg-transparent text-sm font-medium outline-none placeholder:font-normal"
 							/>
 						</div>
 					{:else}
 						<div
-							class="flex items-stretch gap-1 rounded-xl border border-dashed border-shade-4 transition-colors hover:border-accent"
+							class="border-shade-4 hover:border-accent flex items-stretch gap-1 rounded-xl border border-dashed transition-colors"
 						>
 							<button
 								type="button"
 								onclick={() => openKnowledge()}
-								class="flex flex-1 items-center justify-center gap-1.5 p-3.5 text-muted transition-colors hover:text-active"
+								class="text-muted hover:text-active flex flex-1 items-center justify-center gap-1.5 p-3.5 transition-colors"
 							>
 								<Plus class="h-4 w-4" />
 								<span class="text-xs">{$LL.newKnowledge()}</span>
@@ -637,7 +637,7 @@
 								onclick={startNamingNew}
 								title={$LL.newCollection()}
 								aria-label={$LL.newCollection()}
-								class="my-2.5 border-l border-shade-3 px-3 text-muted transition-colors hover:text-active"
+								class="border-shade-3 text-muted hover:text-active my-2.5 border-l px-3 transition-colors"
 							>
 								<FolderPlus class="h-4 w-4" />
 							</button>
@@ -659,58 +659,58 @@
 								bind:value={draftName}
 								onblur={commitName}
 								onkeydown={onNameKeydown}
-								class="min-w-0 rounded-md border border-accent bg-shade-0 px-2 py-0.5 text-sm font-medium text-active outline-none"
+								class="border-accent bg-shade-0 text-active min-w-0 rounded-md border px-2 py-0.5 text-sm font-medium outline-none"
 							/>
 						{:else}
 							<button
 								type="button"
 								onclick={() => toggleCollapsed(collection.id)}
 								aria-expanded={!collapsed}
-								class="flex min-w-0 items-center gap-1.5 text-sm font-medium text-active"
+								class="text-active flex min-w-0 items-center gap-1.5 text-sm font-medium"
 							>
 								<ChevronDown
-									class="h-3.5 w-3.5 shrink-0 text-muted transition-transform {collapsed
+									class="text-muted h-3.5 w-3.5 shrink-0 transition-transform {collapsed
 										? '-rotate-90'
 										: ''}"
 								/>
-								<Folder class="h-4 w-4 shrink-0 text-muted" />
+								<Folder class="text-muted h-4 w-4 shrink-0" />
 								<span class="truncate">{collection.name}</span>
-								<span class="shrink-0 text-xs font-normal text-muted">{items.length}</span>
+								<span class="text-muted shrink-0 text-xs font-normal">{items.length}</span>
 							</button>
 						{/if}
 
 						{#if confirmingDeleteId === collection.id}
 							<!-- Says what survives, because "delete the folder" reads as "delete
 							     what is in it" to most people, and here it does not. -->
-							<span class="ml-auto flex items-center gap-2 text-xs text-muted">
+							<span class="text-muted ml-auto flex items-center gap-2 text-xs">
 								<span class="hidden sm:inline">
 									{$LL.deleteCollectionConfirm({ name: collection.name })}
 								</span>
 								<button
 									type="button"
 									onclick={() => removeCollection(collection.id)}
-									class="font-medium text-negative transition-opacity hover:opacity-80"
+									class="text-negative font-medium transition-opacity hover:opacity-80"
 								>
 									{$LL.delete()}
 								</button>
 								<button
 									type="button"
 									onclick={() => (confirmingDeleteId = null)}
-									class="transition-colors hover:text-active"
+									class="hover:text-active transition-colors"
 								>
 									{$LL.cancel()}
 								</button>
 							</span>
 						{:else}
 							<div
-								class="ml-auto flex shrink-0 items-center gap-0.5 text-muted transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/section:opacity-100"
+								class="text-muted ml-auto flex shrink-0 items-center gap-0.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/section:opacity-100"
 							>
 								<button
 									type="button"
 									onclick={() => startRenaming(collection.id, collection.name)}
 									title={$LL.rename()}
 									aria-label={$LL.rename()}
-									class="rounded p-1 transition-colors hover:text-active"
+									class="hover:text-active rounded p-1 transition-colors"
 								>
 									<Pencil class="h-3.5 w-3.5" />
 								</button>
@@ -719,7 +719,7 @@
 									onclick={() => (confirmingDeleteId = collection.id)}
 									title={$LL.delete()}
 									aria-label={$LL.delete()}
-									class="rounded p-1 transition-colors hover:text-negative"
+									class="hover:text-negative rounded p-1 transition-colors"
 								>
 									<Trash2 class="h-3.5 w-3.5" />
 								</button>

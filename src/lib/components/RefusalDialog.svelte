@@ -33,20 +33,20 @@
 	<AlertDialog.Portal>
 		<AlertDialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
 		<AlertDialog.Content
-			class="modal-content fixed inset-0 z-50 m-auto flex h-fit w-[92vw] max-w-sm flex-col gap-3 rounded-2xl bg-shade-1 p-5 shadow-xl"
+			class="modal-content bg-shade-1 fixed inset-0 z-50 m-auto flex h-fit w-[92vw] max-w-sm flex-col gap-3 rounded-2xl p-5 shadow-xl"
 		>
 			<div class="flex items-center gap-2.5">
 				<span
-					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning"
+					class="bg-warning/15 text-warning flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
 				>
 					<TriangleAlert class="h-4.5 w-4.5" />
 				</span>
-				<AlertDialog.Title class="text-sm font-semibold text-active">
+				<AlertDialog.Title class="text-active text-sm font-semibold">
 					{$LL.refusedTitle()}
 				</AlertDialog.Title>
 			</div>
 
-			<AlertDialog.Description class="text-sm leading-relaxed text-muted">
+			<AlertDialog.Description class="text-muted text-sm leading-relaxed">
 				{$LL.refusedBody()}
 			</AlertDialog.Description>
 
@@ -54,7 +54,7 @@
 				<!-- The server's own words, quoted rather than paraphrased: one of the two
 				     refusals names the model that has no price, and that is the fact whoever
 				     reads this has to pass on. -->
-				<p class="rounded-md border border-shade-3 bg-shade-0 px-3 py-2 text-xs text-muted">
+				<p class="border-shade-3 bg-shade-0 text-muted rounded-md border px-3 py-2 text-xs">
 					{detail}
 				</p>
 			{/if}
@@ -62,15 +62,15 @@
 			{#if email}
 				<a
 					href="mailto:{email}"
-					class="flex items-center gap-2 rounded-md border border-shade-3 px-3 py-2 text-sm text-active transition-colors hover:border-accent"
+					class="border-shade-3 text-active hover:border-accent flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
 				>
-					<Mail class="h-4 w-4 shrink-0 text-muted" />
+					<Mail class="text-muted h-4 w-4 shrink-0" />
 					<span class="min-w-0 truncate">{email}</span>
 				</a>
 			{/if}
 
 			<AlertDialog.Action
-				class="mt-1 self-end rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+				class="bg-accent text-shade-0 mt-1 self-end rounded-lg px-3 py-2 text-sm font-medium transition-opacity hover:opacity-90"
 			>
 				{$LL.close()}
 			</AlertDialog.Action>

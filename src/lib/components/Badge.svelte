@@ -8,18 +8,18 @@
 <svelte:element
 	this={href ? 'a' : 'span'}
 	class="badge {variant === 'positive'
-		? 'border-transparent bg-positive-muted text-positive'
+		? 'bg-positive-muted text-positive border-transparent'
 		: variant === 'warning'
-			? 'border-transparent bg-warning-muted text-warning'
+			? 'bg-warning-muted text-warning border-transparent'
 			: variant === 'openai'
-				? '-mx-0.5 bg-shade-6'
+				? 'bg-shade-6 -mx-0.5'
 				: variant === 'ollama'
-					? '-mx-0.5 bg-shade-0'
+					? 'bg-shade-0 -mx-0.5'
 					: ''} {className}"
 	{href}
 >
 	{#if variant === 'openai'}
-		<span class="-mx-0.5 bg-shade-6">
+		<span class="bg-shade-6 -mx-0.5">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="10"
@@ -33,7 +33,7 @@
 			>
 		</span>
 	{:else if variant === 'ollama'}
-		<span class="-mx-0.5 bg-shade-0">
+		<span class="bg-shade-0 -mx-0.5">
 			<svg
 				width="12"
 				height="12"

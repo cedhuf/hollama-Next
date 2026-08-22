@@ -39,7 +39,7 @@
 <!-- Sits above the list rather than over it. Nothing scrolls underneath, so this
      pane has no height anyone needs to know and the list needs no clearance: they
      are neighbours in a column, and the column does the arithmetic. -->
-<div class="shrink-0 border-b border-shade-3/40 surface-column">
+<div class="border-shade-3/40 surface-column shrink-0 border-b">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-96">
 		<div class="flex flex-col px-3 py-3">
@@ -57,7 +57,7 @@
 		     menu would put a click in front of something used occasionally, which is
 		     exactly when a click is most expensive. -->
 			<div
-				class="flex w-full items-stretch overflow-hidden rounded-lg bg-accent text-sm font-medium text-shade-0 transition-[height,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
+				class="bg-accent text-shade-0 flex w-full items-stretch overflow-hidden rounded-lg text-sm font-medium transition-[height,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
 					? 'pointer-events-none mb-0 h-0 opacity-0'
 					: 'mb-2 h-9 opacity-100'}"
 				aria-hidden={compact}
@@ -77,7 +77,7 @@
 						tabindex={compact ? -1 : 0}
 						title={$LL.imageGenerate()}
 						aria-label={$LL.imageGenerate()}
-						class="flex w-9 shrink-0 items-center justify-center border-l border-shade-0/25 transition-opacity hover:opacity-90"
+						class="border-shade-0/25 flex w-9 shrink-0 items-center justify-center border-l transition-opacity hover:opacity-90"
 					>
 						<ImageIcon class="h-4 w-4" />
 					</a>
@@ -87,19 +87,19 @@
 			<div class="flex items-center">
 				<div class="relative min-w-0 flex-1">
 					<Search
-						class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+						class="text-muted pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2"
 					/>
 					<input
 						bind:value={query}
 						type="text"
 						placeholder={$LL.searchChatsPersonas()}
-						class="w-full rounded-lg border border-shade-3 bg-shade-0 py-2 pl-8 pr-12 text-sm outline-none placeholder:text-muted focus:border-accent"
+						class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent w-full rounded-lg border py-2 pr-12 pl-8 text-sm outline-none"
 					/>
 					<!-- The shortcut opens the full-text dialog, which is a different thing
 				     from this field. Shown as a hint, not a button: it is the keyboard's
 				     way in, and the line below is the pointer's. -->
 					<span
-						class="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5"
+						class="pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-0.5"
 					>
 						<Kbd>{mod}</Kbd><Kbd>K</Kbd>
 					</span>
@@ -109,7 +109,7 @@
 				     with the second. -->
 				<div
 					aria-hidden={!compact}
-					class="flex h-9 shrink-0 items-stretch overflow-hidden rounded-lg bg-accent text-shade-0 transition-[width,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
+					class="bg-accent text-shade-0 flex h-9 shrink-0 items-stretch overflow-hidden rounded-lg transition-[width,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
 						? $canDrawImages
 							? 'ml-2 w-[4.5rem] opacity-100'
 							: 'ml-2 w-9 opacity-100'
@@ -131,7 +131,7 @@
 							title={$LL.imageGenerate()}
 							aria-label={$LL.imageGenerate()}
 							tabindex={compact ? 0 : -1}
-							class="flex w-9 shrink-0 items-center justify-center border-l border-shade-0/25 transition-opacity hover:opacity-90"
+							class="border-shade-0/25 flex w-9 shrink-0 items-center justify-center border-l transition-opacity hover:opacity-90"
 						>
 							<ImageIcon class="h-4 w-4" />
 						</a>
@@ -146,7 +146,7 @@
 				<button
 					type="button"
 					onclick={() => openSearch(query)}
-					class="mt-2 flex w-full items-center gap-2 rounded-lg border border-shade-3 px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-shade-0 hover:text-active"
+					class="border-shade-3 text-muted hover:bg-shade-0 hover:text-active mt-2 flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-sm transition-colors"
 				>
 					<Search class="h-4 w-4 shrink-0" />
 					<span class="truncate">{$LL.searchAllConversations({ query })}</span>

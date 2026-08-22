@@ -16,13 +16,13 @@
 
 <label class="flex flex-col gap-1.5">
 	{#if label}
-		<span class="flex items-center gap-2 text-sm font-medium text-active">
+		<span class="text-active flex items-center gap-2 text-sm font-medium">
 			{label}
 			{@render badge?.()}
 		</span>
 	{/if}
 	{@render children()}
 	{#if hint}
-		<span class="text-xs leading-snug text-muted">{hint}</span>
+		<span class="text-muted text-xs leading-snug">{hint}</span>
 	{/if}
 </label>

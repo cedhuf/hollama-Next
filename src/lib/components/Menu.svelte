@@ -47,7 +47,7 @@
 			{side}
 			sideOffset={6}
 			collisionPadding={12}
-			class="z-50 max-h-[min(60dvh,24rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg focus-visible:outline-none {className}"
+			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,24rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none {className}"
 		>
 			{@render children()}
 		</DropdownMenu.Content>

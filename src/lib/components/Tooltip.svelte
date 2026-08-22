@@ -57,7 +57,7 @@
 				{align}
 				sideOffset={8}
 				collisionPadding={12}
-				class="z-50 max-w-[calc(100vw-1.5rem)] rounded-lg border border-shade-3 bg-shade-0 px-3 py-2 text-xs leading-relaxed shadow-lg {className}"
+				class="border-shade-3 bg-shade-0 z-50 max-w-[calc(100vw-1.5rem)] rounded-lg border px-3 py-2 text-xs leading-relaxed shadow-lg {className}"
 			>
 				{@render children()}
 			</Tooltip.Content>

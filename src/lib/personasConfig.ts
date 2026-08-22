@@ -78,9 +78,8 @@ export async function loadServerPersonas(): Promise<void> {
 }
 
 /** The effective personas governance for the current user/mode. */
-export const personasConfig = derived(
-	serverPersonas,
-	($server): PersonasConfig => (isServer ? ($server ?? DEFAULT) : DEFAULT)
+export const personasConfig = derived(serverPersonas, ($server): PersonasConfig =>
+	isServer ? ($server ?? DEFAULT) : DEFAULT
 );
 
 /** Admin: point the instance at another persona store. */

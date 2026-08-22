@@ -148,8 +148,7 @@
 					bind:value={$settingsStore.systemPrompts.global}
 					placeholder={adminDefaultExists && adminPrompts.global
 						? adminPrompts.global
-						: $LL.globalPromptPlaceholder()}
-				></textarea>
+						: $LL.globalPromptPlaceholder()}></textarea>
 			</SettingsField>
 
 			<!-- Heading and picker stacked: side by side, the model names in the picker
@@ -170,12 +169,12 @@
 			{#if perModelEntries.length}
 				<div class="flex flex-col gap-2">
 					{#each perModelEntries as [name] (name)}
-						<div class="flex flex-col gap-2 rounded-md border border-shade-3 p-2.5">
+						<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-2.5">
 							<div class="flex items-center justify-between gap-2">
 								<span class="min-w-0 truncate text-sm font-medium" title={name}>{name}</span>
 								<button
 									type="button"
-									class="text-muted transition-colors hover:text-active"
+									class="text-muted hover:text-active transition-colors"
 									onclick={() => removeModelPrompt(name)}
 									aria-label={$LL.removeModelPrompt({ model: name })}
 								>
@@ -186,8 +185,7 @@
 								class="settings-field"
 								rows="2"
 								bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
-								placeholder={$LL.promptForModel({ model: name })}
-							></textarea>
+								placeholder={$LL.promptForModel({ model: name })}></textarea>
 							<Select
 								bind:value={$settingsStore.systemPrompts.perModel[name].mode}
 								options={[
@@ -209,10 +207,10 @@
 			{#if sharedPerModel.length}
 				<div class="flex flex-col gap-2">
 					{#each sharedPerModel as [name, mp] (name)}
-						<div class="flex flex-col gap-1 rounded-md border border-shade-3 p-2.5">
+						<div class="border-shade-3 flex flex-col gap-1 rounded-md border p-2.5">
 							<span class="text-sm font-medium">
 								{name}
-								<span class="text-xs text-muted">
+								<span class="text-muted text-xs">
 									({mp.mode === 'replace' ? $LL.replacesGlobalShort() : $LL.extendsGlobalShort()})
 								</span>
 							</span>
@@ -237,7 +235,7 @@
 			<SettingsHint>{$LL.appPromptsLocked()}</SettingsHint>
 		{:else if rewritten.length}
 			<div class="flex items-center justify-between gap-2">
-				<span class="text-xs text-muted">{$LL.promptsModified({ count: rewritten.length })}</span>
+				<span class="text-muted text-xs">{$LL.promptsModified({ count: rewritten.length })}</span>
 				{#if Object.keys(mine).length}
 					<SettingsLink align="end" onclick={resetAll}>{$LL.promptsResetAll()}</SettingsLink>
 				{/if}
@@ -250,17 +248,16 @@
 			{#each group.keys as key (key)}
 				{@const def = DEFAULT_PROMPTS[key]}
 				<Collapsible title={def.label} description={def.hint} summary={summaryFor(key)}>
-					<p class="text-xs leading-snug text-muted">{def.hint}</p>
+					<p class="text-muted text-xs leading-snug">{def.hint}</p>
 
 					<textarea
 						class="settings-field field-grow min-h-36 font-mono text-xs leading-relaxed"
 						value={textOf(key)}
 						disabled={!editable}
-						oninput={(e) => setOverride(key, e.currentTarget.value)}
-					></textarea>
+						oninput={(e) => setOverride(key, e.currentTarget.value)}></textarea>
 
 					<div class="flex items-center justify-between gap-2">
-						<span class="text-xs text-muted">
+						<span class="text-muted text-xs">
 							{#if def.placeholders}
 								{$LL.placeholders()}: {def.placeholders.join(', ')}
 							{/if}

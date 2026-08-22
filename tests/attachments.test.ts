@@ -256,8 +256,7 @@ test.describe('Attachments', () => {
 
 		// Intercept outgoing request
 		let requestPayload:
-			| { messages: { role: string; content: string; images?: string[] }[] }
-			| undefined = undefined;
+			{ messages: { role: string; content: string; images?: string[] }[] } | undefined = undefined;
 		await page.route('**/chat', async (route, request) => {
 			const postData = request.postData();
 			if (postData) requestPayload = JSON.parse(postData);
@@ -341,8 +340,7 @@ test.describe('Attachments', () => {
 
 		// Intercept the EDIT request
 		let editRequestPayload1:
-			| { messages: { role: string; content: string; images?: string[] }[] }
-			| undefined = undefined;
+			{ messages: { role: string; content: string; images?: string[] }[] } | undefined = undefined;
 		await page.route('**/chat', async (route, request) => {
 			const postData = request.postData();
 			if (postData) editRequestPayload1 = JSON.parse(postData);
@@ -416,8 +414,7 @@ test.describe('Attachments', () => {
 
 		// Intercept the SECOND EDIT request
 		let editRequestPayload2:
-			| { messages: { role: string; content: string; images?: string[] }[] }
-			| undefined = undefined;
+			{ messages: { role: string; content: string; images?: string[] }[] } | undefined = undefined;
 		await page.route('**/chat', async (route, request) => {
 			const postData = request.postData();
 			if (postData) editRequestPayload2 = JSON.parse(postData);
@@ -666,8 +663,7 @@ test.describe('Attachments', () => {
 
 		// Intercept outgoing request to verify images are sent
 		let requestPayload:
-			| { messages: { role: string; content: string; images?: string[] }[] }
-			| undefined = undefined;
+			{ messages: { role: string; content: string; images?: string[] }[] } | undefined = undefined;
 		await page.route('**/chat', async (route, request) => {
 			const postData = request.postData();
 			if (postData) requestPayload = JSON.parse(postData);

@@ -39,23 +39,23 @@
 			<!-- Mirrors the real card's geometry, so the content replaces it in place
 			     instead of shoving the panel around. -->
 			<div
-				class="skeleton flex items-center gap-3 rounded-xl border border-shade-3 bg-shade-0 p-3"
+				class="skeleton border-shade-3 bg-shade-0 flex items-center gap-3 rounded-xl border p-3"
 				aria-hidden="true"
 			>
-				<span class="h-9 w-9 shrink-0 rounded-lg bg-shade-2"></span>
+				<span class="bg-shade-2 h-9 w-9 shrink-0 rounded-lg"></span>
 				<span class="flex min-w-0 flex-1 flex-col gap-1.5">
-					<span class="h-3 w-28 rounded bg-shade-2"></span>
-					<span class="h-2.5 w-20 rounded bg-shade-2"></span>
+					<span class="bg-shade-2 h-3 w-28 rounded"></span>
+					<span class="bg-shade-2 h-2.5 w-20 rounded"></span>
 				</span>
-				<span class="h-5 w-9 shrink-0 rounded-full bg-shade-2"></span>
+				<span class="bg-shade-2 h-5 w-9 shrink-0 rounded-full"></span>
 			</div>
 		{:else}
 			<div
-				class="skeleton flex items-center gap-3 rounded-md border border-shade-3 p-2.5"
+				class="skeleton border-shade-3 flex items-center gap-3 rounded-md border p-2.5"
 				aria-hidden="true"
 			>
-				<span class="h-3 w-40 rounded bg-shade-2"></span>
-				<span class="ml-auto h-3 w-10 rounded bg-shade-2"></span>
+				<span class="bg-shade-2 h-3 w-40 rounded"></span>
+				<span class="bg-shade-2 ml-auto h-3 w-10 rounded"></span>
 			</div>
 		{/if}
 	{/each}

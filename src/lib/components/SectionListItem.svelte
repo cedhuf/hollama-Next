@@ -47,7 +47,7 @@
 		{#snippet trigger({ props })}
 			<div
 				{...props}
-				class="section-list-item group relative flex items-center rounded-lg px-2.5 transition-colors hover:bg-shade-0
+				class="section-list-item group hover:bg-shade-0 relative flex items-center rounded-lg px-2.5 transition-colors
 				{isActive ? 'bg-shade-0' : ''}"
 				class:confirm-deletion={isDeleting}
 			>
@@ -60,7 +60,7 @@
 					href={generateNewUrl(sitemap, id)}
 				>
 					<p class="truncate text-sm font-medium {isActive ? 'text-active' : ''}">{title}</p>
-					<p class="truncate text-xs text-muted">{subtitle}</p>
+					<p class="text-muted truncate text-xs">{subtitle}</p>
 				</a>
 
 				<!-- In the flow rather than over the title.
@@ -82,7 +82,7 @@
 						aria-label={pinned ? $LL.unpin() : $LL.pin()}
 						class="shrink-0 px-1.5 py-1 transition-[color,opacity] {pinned
 							? 'text-accent'
-							: 'text-muted opacity-0 hover:text-active focus-visible:opacity-100 group-hover:opacity-100'}"
+							: 'text-muted hover:text-active opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}"
 					>
 						<Pin class="base-icon {pinned ? 'fill-accent' : ''}" />
 					</button>
@@ -96,7 +96,7 @@
 					<div
 						class="flex shrink-0 items-center {isDeleting
 							? ''
-							: 'opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100'}"
+							: 'opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100'}"
 					>
 						<ButtonDelete {sitemap} {id} compact bind:shouldConfirmDeletion={isDeleting} />
 					</div>

@@ -62,25 +62,25 @@
 		{step}
 		{disabled}
 		aria-label={label}
-		class="relative flex h-5 w-full touch-none select-none items-center"
+		class="relative flex h-5 w-full touch-none items-center select-none"
 	>
-		<span class="relative h-1.5 w-full grow overflow-hidden rounded-full bg-shade-3">
-			<Slider.Range class="absolute h-full bg-accent" />
+		<span class="bg-shade-3 relative h-1.5 w-full grow overflow-hidden rounded-full">
+			<Slider.Range class="bg-accent absolute h-full" />
 			<!-- Drawn last so it reads on the filled half as well as the empty one, and
 			     in the track's own background colour, which contrasts with both. -->
 			{#if midpoint}
-				<span class="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-shade-0"></span>
+				<span class="bg-shade-0 absolute top-0 left-1/2 h-full w-0.5 -translate-x-1/2"></span>
 			{/if}
 		</span>
 		<Slider.Thumb
 			index={0}
-			class="block h-4 w-4 cursor-grab rounded-full border-2 border-accent bg-shade-0 shadow-sm transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-shade-0 active:cursor-grabbing"
+			class="border-accent bg-shade-0 focus-visible:ring-accent focus-visible:ring-offset-shade-0 block h-4 w-4 cursor-grab rounded-full border-2 shadow-sm transition-shadow focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:cursor-grabbing"
 		/>
 	</Slider.Root>
 
 	{#if showValue}
 		<span
-			class="shrink-0 text-right text-sm font-medium tabular-nums text-active {format
+			class="text-active shrink-0 text-right text-sm font-medium tabular-nums {format
 				? 'w-16'
 				: 'w-5'}"
 		>

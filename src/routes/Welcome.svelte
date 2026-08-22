@@ -160,7 +160,7 @@
 			<Logo class="h-16 w-16" />
 			<div class="flex flex-col gap-1.5">
 				<h2 class="text-xl font-semibold tracking-tight">{APP_NAME}</h2>
-				<p class="mx-auto max-w-xs text-sm leading-relaxed text-muted">
+				<p class="text-muted mx-auto max-w-xs text-sm leading-relaxed">
 					{$LL.tourIntro()}
 				</p>
 			</div>
@@ -169,11 +169,11 @@
 		<!-- 2. Make it yours — applies live, saved as you click -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 pb-1 text-center">
-				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
-					<Palette class="h-5 w-5 text-accent" />
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<Palette class="text-accent h-5 w-5" />
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourThemeTitle()}</h2>
-				<p class="text-sm text-muted">{$LL.tourThemeBody()}</p>
+				<p class="text-muted text-sm">{$LL.tourThemeBody()}</p>
 			</div>
 			<ThemePicker />
 		</div>
@@ -181,11 +181,11 @@
 		<!-- 3. Who you can talk to -->
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col items-center gap-2 text-center">
-				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
-					<Sparkles class="h-5 w-5 text-accent" />
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<Sparkles class="text-accent h-5 w-5" />
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourPersonasTitle()}</h2>
-				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
 					{$LL.tourPersonasBody()}
 				</p>
 			</div>
@@ -206,13 +206,13 @@
 					>
 						<PersonaAvatar persona={tourAvatar(persona)} size={42} />
 						<div class="min-w-0">
-							<span class="mb-0.5 block px-1 text-[10px] font-medium text-muted">
+							<span class="text-muted mb-0.5 block px-1 text-[10px] font-medium">
 								{persona.name}
 							</span>
 							<!-- A tail on the corner nearest its face, which is the whole of what
 							     makes a rounded box read as speech rather than as a chip. -->
 							<p
-								class="rounded-2xl border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-[11px] leading-snug text-active shadow-sm {SLOTS[
+								class="border-shade-3 bg-shade-0 text-active rounded-2xl border px-2.5 py-1.5 text-[11px] leading-snug shadow-sm {SLOTS[
 									i
 								].flip
 									? 'rounded-br-sm'
@@ -226,7 +226,7 @@
 			</div>
 
 			{#if storeCount}
-				<p class="text-center text-xs text-muted" in:fade={{ duration: 240 }}>
+				<p class="text-muted text-center text-xs" in:fade={{ duration: 240 }}>
 					{$LL.tourStoreCount({ count: storeCount })}
 				</p>
 			{/if}
@@ -235,25 +235,25 @@
 		<!-- 4. Calling one into a conversation -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
-				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
-					<AtSign class="h-5 w-5 text-accent" />
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<AtSign class="text-accent h-5 w-5" />
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourMentionTitle()}</h2>
-				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
 					{$LL.tourMentionBody()}
 				</p>
 			</div>
 
 			<!-- The step plays the feature instead of describing it: a message with two
 			     names in it, then two answers arriving one after the other. -->
-			<div class="flex flex-col gap-3 rounded-2xl border border-shade-3 bg-shade-0/50 p-3">
+			<div class="border-shade-3 bg-shade-0/50 flex flex-col gap-3 rounded-2xl border p-3">
 				{#if stage >= 1}
 					<div class="flex justify-end" in:fly={{ y: 8, duration: 300, easing: cubicOut }}>
 						<p
-							class="max-w-[88%] rounded-2xl rounded-br-sm bg-accent/10 px-3 py-2 text-xs leading-relaxed text-active"
+							class="bg-accent/10 text-active max-w-[88%] rounded-2xl rounded-br-sm px-3 py-2 text-xs leading-relaxed"
 						>
 							{#each replies as persona (persona.id)}
-								<span class="mr-1 font-medium text-accent">@{persona.name}</span>
+								<span class="text-accent mr-1 font-medium">@{persona.name}</span>
 							{/each}
 							{$LL.tourAsk()}
 						</p>
@@ -268,11 +268,11 @@
 						>
 							<PersonaAvatar persona={tourAvatar(persona)} size={32} />
 							<div class="min-w-0 flex-1">
-								<span class="mb-0.5 block pl-1 text-[11px] font-medium text-muted">
+								<span class="text-muted mb-0.5 block pl-1 text-[11px] font-medium">
 									{persona.name}
 								</span>
 								<p
-									class="inline-block max-w-full rounded-2xl rounded-bl-sm border border-shade-3 bg-shade-0 px-3 py-2 text-xs leading-relaxed text-active"
+									class="border-shade-3 bg-shade-0 text-active inline-block max-w-full rounded-2xl rounded-bl-sm border px-3 py-2 text-xs leading-relaxed"
 								>
 									{#if stage >= i * 2 + 3}
 										{persona.says}
@@ -280,7 +280,7 @@
 										<span class="flex items-center gap-1 py-1" aria-label={$LL.tourThinking()}>
 											{#each [0, 1, 2] as dot (dot)}
 												<span
-													class="typing-dot h-1.5 w-1.5 rounded-full bg-muted"
+													class="typing-dot bg-muted h-1.5 w-1.5 rounded-full"
 													style="animation-delay:{dot * 0.16}s"
 												></span>
 											{/each}
@@ -297,11 +297,11 @@
 		<!-- 5. The rest of the library -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
-				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
-					<Library class="h-5 w-5 text-accent" />
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<Library class="text-accent h-5 w-5" />
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourLibraryTitle()}</h2>
-				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
 					{$LL.tourLibraryBody()}
 				</p>
 			</div>
@@ -312,19 +312,19 @@
 			     from `sm` up, stacked below it, because at a phone's width two columns
 			     of this would be two columns of nothing. -->
 			<div class="grid gap-3 sm:grid-cols-2">
-				<div class="flex flex-col gap-2.5 rounded-2xl border border-shade-3 bg-shade-0/50 p-3.5">
+				<div class="border-shade-3 bg-shade-0/50 flex flex-col gap-2.5 rounded-2xl border p-3.5">
 					<div class="flex items-center gap-2">
-						<ListChecks class="h-4 w-4 shrink-0 text-accent" />
-						<span class="text-sm font-medium text-active">{$LL.tourPlaybooksName()}</span>
+						<ListChecks class="text-accent h-4 w-4 shrink-0" />
+						<span class="text-active text-sm font-medium">{$LL.tourPlaybooksName()}</span>
 					</div>
 					<ol class="flex flex-col gap-1.5">
 						{#each [$LL.tourPlaybookStep1(), $LL.tourPlaybookStep2(), $LL.tourPlaybookStep3()] as line, i (line)}
 							<li
-								class="flex items-center gap-2 text-[11px] leading-snug text-muted"
+								class="text-muted flex items-center gap-2 text-[11px] leading-snug"
 								in:fly={{ y: 8, duration: 300, delay: 120 * i, easing: cubicOut }}
 							>
 								<span
-									class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[9px] font-medium tabular-nums text-accent"
+									class="bg-accent/10 text-accent flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-medium tabular-nums"
 								>
 									{i + 1}
 								</span>
@@ -332,26 +332,26 @@
 							</li>
 						{/each}
 					</ol>
-					<p class="text-[11px] leading-snug text-muted">{$LL.tourPlaybooksBody()}</p>
+					<p class="text-muted text-[11px] leading-snug">{$LL.tourPlaybooksBody()}</p>
 				</div>
 
-				<div class="flex flex-col gap-2.5 rounded-2xl border border-shade-3 bg-shade-0/50 p-3.5">
+				<div class="border-shade-3 bg-shade-0/50 flex flex-col gap-2.5 rounded-2xl border p-3.5">
 					<div class="flex items-center gap-2">
-						<FileText class="h-4 w-4 shrink-0 text-accent" />
-						<span class="text-sm font-medium text-active">{$LL.tourKnowledgeName()}</span>
+						<FileText class="text-accent h-4 w-4 shrink-0" />
+						<span class="text-active text-sm font-medium">{$LL.tourKnowledgeName()}</span>
 					</div>
 					<div class="flex flex-wrap gap-1.5">
 						{#each [$LL.tourKnowledgeItem1(), $LL.tourKnowledgeItem2(), $LL.tourKnowledgeItem3()] as name, i (name)}
 							<span
-								class="flex items-center gap-1 rounded-lg border border-shade-3 bg-shade-0 px-2 py-1 text-[11px] text-active shadow-sm"
+								class="border-shade-3 bg-shade-0 text-active flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] shadow-sm"
 								in:fly={{ y: 8, duration: 300, delay: 120 * i, easing: cubicOut }}
 							>
-								<FileText class="h-3 w-3 shrink-0 text-muted" />
+								<FileText class="text-muted h-3 w-3 shrink-0" />
 								{name}
 							</span>
 						{/each}
 					</div>
-					<p class="text-[11px] leading-snug text-muted">{$LL.tourKnowledgeBody()}</p>
+					<p class="text-muted text-[11px] leading-snug">{$LL.tourKnowledgeBody()}</p>
 				</div>
 			</div>
 		</div>
@@ -359,11 +359,11 @@
 		<!-- 6. Drawing, where the instance allows it -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
-				<div class="flex h-11 w-11 items-center justify-center rounded-full bg-accent/10">
-					<ImageIcon class="h-5 w-5 text-accent" />
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<ImageIcon class="text-accent h-5 w-5" />
 				</div>
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourImagesTitle()}</h2>
-				<p class="mx-auto max-w-sm text-sm leading-relaxed text-muted">
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
 					{$LL.tourImagesBody()}
 				</p>
 			</div>
@@ -374,7 +374,7 @@
 			<div class="grid grid-cols-3 gap-2">
 				{#each [0, 1, 2, 3, 4, 5] as tile (tile)}
 					<div
-						class="tour-tile aspect-square rounded-xl border border-shade-3 bg-gradient-to-br from-accent/25 to-accent/5"
+						class="tour-tile border-shade-3 from-accent/25 to-accent/5 aspect-square rounded-xl border bg-gradient-to-br"
 						style="animation-delay:{tile * 170}ms"
 					></div>
 				{/each}

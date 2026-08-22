@@ -22,7 +22,7 @@
 <DropdownMenu.Item
 	{disabled}
 	onSelect={onclick}
-	class="flex w-full cursor-pointer select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors focus-visible:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 {danger
+	class="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors select-none focus-visible:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 {danger
 		? 'text-red-600 data-[highlighted]:bg-red-500/10'
 		: 'text-active data-[highlighted]:bg-shade-1'}"
 >

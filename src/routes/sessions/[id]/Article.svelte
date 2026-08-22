@@ -272,7 +272,7 @@
 	</div>
 {:else if isKnowledgeAttachment}
 	<article
-		class="attachment mx-auto mb-2 flex w-full max-w-[80ch] gap-2 rounded-md border border-shade-3 flex items-center justify-between px-3 py-1 md:px-4 lg:px-6"
+		class="attachment border-shade-3 mx-auto mb-2 flex w-full max-w-[80ch] items-center justify-between gap-2 rounded-md border px-3 py-1 md:px-4 lg:px-6"
 		class:folded
 	>
 		<div class="attachment__content flex items-center gap-2">
@@ -304,20 +304,20 @@
 		class:folded
 		class="article article--{message.role} mx-auto mb-4 flex w-full max-w-[80ch] flex-col gap-y-2 last:mb-0 md:mb-6 {isUserRole
 			? 'items-end'
-			: ''} {message.role === 'system' ? 'rounded-md border border-shade-3 p-3 md:p-4' : ''}"
+			: ''} {message.role === 'system' ? 'border-shade-3 rounded-md border p-3 md:p-4' : ''}"
 	>
 		<!-- Header carries identity only: who spoke and when. Mirrored for the user so
 		     the badge always hugs the message's outer edge and the time sits inward,
 		     on both sides of the thread. -->
 		<nav
-			class="article__nav flex items-center gap-2 text-muted {isUserRole ? 'flex-row-reverse' : ''}"
+			class="article__nav text-muted flex items-center gap-2 {isUserRole ? 'flex-row-reverse' : ''}"
 		>
 			{#if speaker}
 				<PersonaAvatar persona={speaker} size={20} />
 			{/if}
 			<div
 				data-testid="session-role"
-				class="article__role text-center text-xs font-bold uppercase leading-7"
+				class="article__role text-center text-xs leading-7 font-bold uppercase"
 			>
 				<!-- A persona called in with `@` answers as itself, so the badge says its
 				     name and its face sits beside it. Read from the message rather than
@@ -339,7 +339,7 @@
 				     worth carrying on every line of a long conversation. Stays visible
 				     where there is no hover to reveal it with. -->
 				<span
-					class="article__sent-at shrink-0 text-[11px] tabular-nums text-muted"
+					class="article__sent-at text-muted shrink-0 text-[11px] tabular-nums"
 					title={message.createdAt}
 				>
 					{sentAt}
@@ -354,14 +354,14 @@
 		{#if steps.length || isSearching}
 			<div class="activity text-xs">
 				<button
-					class="activity__button flex max-w-full items-center gap-1.5 rounded py-1 text-muted transition-colors hover:text-active"
+					class="activity__button text-muted hover:text-active flex max-w-full items-center gap-1.5 rounded py-1 transition-colors"
 					onclick={toggleReasoningVisibility}
 					aria-expanded={isReasoningVisible}
 					disabled={!steps.length}
 				>
 					<span class="truncate {isSearching ? 'animate-pulse' : ''}">{activityLabel}</span>
 					{#if isSearching && searchQuery}
-						<span class="truncate rounded-full bg-shade-2 px-2 py-0.5">{searchQuery}</span>
+						<span class="bg-shade-2 truncate rounded-full px-2 py-0.5">{searchQuery}</span>
 					{/if}
 					{#if steps.length}
 						{#if isReasoningVisible}
@@ -381,7 +381,7 @@
 							<div class="flex gap-2">
 								<!-- Gutter: the icon says what the step is, the rule under it ties the
 								     steps together so they read as one sequence rather than as a stack. -->
-								<div class="flex w-4 shrink-0 flex-col items-center text-muted">
+								<div class="text-muted flex w-4 shrink-0 flex-col items-center">
 									{#if step.type === 'reasoning'}
 										<Brain class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{:else if step.type === 'search'}
@@ -392,7 +392,7 @@
 										<FileText class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{/if}
 									{#if i < steps.length - 1 || showDone}
-										<div class="my-1 w-px flex-1 bg-shade-3"></div>
+										<div class="bg-shade-3 my-1 w-px flex-1"></div>
 									{/if}
 								</div>
 
@@ -407,9 +407,9 @@
 											</article>
 										</ActivityText>
 									{:else if step.type === 'search'}
-										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
 											{#if step.query}
-												<span class="rounded-full bg-shade-2 px-2 py-0.5">{step.query}</span>
+												<span class="bg-shade-2 rounded-full px-2 py-0.5">{step.query}</span>
 											{/if}
 											<span>
 												{step.resultCount
@@ -422,16 +422,16 @@
 										     on the user's behalf that they did not ask for. A refusal is
 										     shown too, since "it tried and could not" is what somebody
 										     wondering why it forgot needs to see. -->
-										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
 											<span>{memoryLabel(step.memory)}</span>
 											{#if step.memory?.title}
-												<span class="max-w-[15rem] truncate rounded-full bg-shade-2 px-2 py-0.5">
+												<span class="bg-shade-2 max-w-[15rem] truncate rounded-full px-2 py-0.5">
 													{step.memory.title}
 												</span>
 											{/if}
 										</div>
 									{:else}
-										<div class="flex flex-wrap items-center gap-1.5 py-0.5 text-muted">
+										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
 											{#if step.pages?.length}
 												<span>{$LL.pagesRead({ count: step.pages.length })}</span>
 												{#each step.pages as page, p (page.url + p)}
@@ -440,7 +440,7 @@
 														target="_blank"
 														rel="noreferrer external"
 														title={page.title || page.url}
-														class="max-w-[15rem] truncate rounded-full border border-shade-3 bg-shade-1 px-2 py-0.5 transition-colors hover:border-accent hover:text-active"
+														class="border-shade-3 bg-shade-1 hover:border-accent hover:text-active max-w-[15rem] truncate rounded-full border px-2 py-0.5 transition-colors"
 													>
 														{domainOf(page.url)}
 													</a>
@@ -458,10 +458,10 @@
 						     was cut short — especially when it's a page read with no thinking after. -->
 						{#if showDone}
 							<div class="flex gap-2">
-								<div class="flex w-4 shrink-0 flex-col items-center text-muted">
+								<div class="text-muted flex w-4 shrink-0 flex-col items-center">
 									<Check class="mt-1 h-3.5 w-3.5 shrink-0" />
 								</div>
-								<div class="min-w-0 flex-1 py-0.5 text-muted">{$LL.activityDone()}</div>
+								<div class="text-muted min-w-0 flex-1 py-0.5">{$LL.activityDone()}</div>
 							</div>
 						{/if}
 					</div>
@@ -470,10 +470,10 @@
 		{/if}
 		{#if preparingChoices}
 			<div class="ask-skeleton flex flex-col gap-2">
-				<span class="animate-pulse text-sm text-muted">{$LL.preparingOptions()}…</span>
+				<span class="text-muted animate-pulse text-sm">{$LL.preparingOptions()}…</span>
 				<div class="flex flex-wrap gap-1.5">
 					{#each [0, 1, 2] as i (i)}
-						<span class="h-8 w-24 animate-pulse rounded-full bg-shade-2"></span>
+						<span class="bg-shade-2 h-8 w-24 animate-pulse rounded-full"></span>
 					{/each}
 				</div>
 			</div>
@@ -492,10 +492,10 @@
 					     excerpts give: message content turned into HTML would hand any
 					     conversation containing markup a way into the page. -->
 					{#if mentionSegments.length > 1}
-						<p class="whitespace-pre-wrap text-sm leading-relaxed">
+						<p class="text-sm leading-relaxed whitespace-pre-wrap">
 							{#each mentionSegments as segment, i (i)}
 								{#if segment.kind === 'mention'}
-									<span class="font-medium text-accent">{segment.text}</span>
+									<span class="text-accent font-medium">{segment.text}</span>
 								{:else}
 									{segment.text}
 								{/if}
@@ -515,7 +515,7 @@
 
 		{#if message.webSearch?.sources?.length}
 			<div class="article__sources mt-3 flex flex-col gap-1.5">
-				<span class="flex items-center gap-1.5 text-xs font-medium text-muted">
+				<span class="text-muted flex items-center gap-1.5 text-xs font-medium">
 					<Globe class="h-3 w-3 shrink-0" />
 					Sources · {message.webSearch.sources.length}
 				</span>
@@ -526,10 +526,10 @@
 							target="_blank"
 							rel="noreferrer external"
 							title={source.title || source.url}
-							class="flex max-w-[15rem] items-center gap-1.5 rounded-full border border-shade-3 bg-shade-1 py-1 pl-1.5 pr-2.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
+							class="border-shade-3 bg-shade-1 text-muted hover:border-accent hover:text-active flex max-w-[15rem] items-center gap-1.5 rounded-full border py-1 pr-2.5 pl-1.5 text-xs transition-colors"
 						>
 							<span
-								class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-shade-2 text-[9px] font-semibold"
+								class="bg-shade-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold"
 							>
 								{i + 1}
 							</span>

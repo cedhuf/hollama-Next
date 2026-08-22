@@ -15,12 +15,7 @@ import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 import { NotAuthenticatedError, type Backup, type DataRepository } from './repository';
 
 type Collection =
-	| 'sessions'
-	| 'knowledge'
-	| 'personas'
-	| 'playbooks'
-	| 'persona-memory'
-	| 'settings';
+	'sessions' | 'knowledge' | 'personas' | 'playbooks' | 'persona-memory' | 'settings';
 
 const DEBOUNCE_MS = 800;
 

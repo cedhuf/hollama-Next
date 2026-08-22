@@ -93,7 +93,7 @@
 		     stacked shapes, see-through on the left and filled on the right. A word
 		     at each end would need translating and would still say less. -->
 		<div class="flex items-center gap-3 {$settingsStore.surfaceTransparency ? '' : 'opacity-40'}">
-			<Copy class="h-4 w-4 shrink-0 text-muted" />
+			<Copy class="text-muted h-4 w-4 shrink-0" />
 			<div class="min-w-0 flex-1">
 				<SettingsSlider
 					label={$LL.surfaceTransparencyStrength()}
@@ -106,7 +106,7 @@
 					disabled={!$settingsStore.surfaceTransparency}
 				/>
 			</div>
-			<Copy class="h-4 w-4 shrink-0 fill-current text-muted" />
+			<Copy class="text-muted h-4 w-4 shrink-0 fill-current" />
 		</div>
 	</SettingsSection>
 
@@ -125,9 +125,9 @@
 				type="button"
 				onclick={() => choose('')}
 				aria-pressed={!background}
-				class="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border bg-shade-2 text-xs text-muted transition-colors {background
+				class="bg-shade-2 text-muted flex h-14 w-20 shrink-0 items-center justify-center rounded-md border text-xs transition-colors {background
 					? 'border-shade-3 hover:border-accent'
-					: 'border-accent ring-2 ring-accent'}"
+					: 'border-accent ring-accent ring-2'}"
 			>
 				{$LL.noBackground()}
 			</button>
@@ -140,7 +140,7 @@
 					type="button"
 					aria-label={$LL.yourImage()}
 					aria-pressed="true"
-					class="h-14 w-20 shrink-0 rounded-md border border-accent bg-cover bg-center ring-2 ring-accent"
+					class="border-accent ring-accent h-14 w-20 shrink-0 rounded-md border bg-cover bg-center ring-2"
 					style="background-image: {wallpaperThumb(background)}"
 				></button>
 			{/if}
@@ -154,7 +154,7 @@
 					aria-pressed={background === value}
 					class="h-14 w-20 shrink-0 rounded-md border bg-cover bg-center transition-colors {background ===
 					value
-						? 'border-accent ring-2 ring-accent'
+						? 'border-accent ring-accent ring-2'
 						: 'border-shade-3 hover:border-accent'}"
 					style="background-image: {wallpaper.thumb ?? wallpaper.image}"
 				></button>
@@ -171,7 +171,7 @@
 				{#snippet trigger({ props })}
 					<label
 						{...props}
-						class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm text-active transition-colors hover:border-accent"
+						class="border-shade-3 bg-shade-0 text-active hover:border-accent flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border px-2.5 py-1.5 text-sm transition-colors"
 					>
 						<ImagePlus class="h-4 w-4 shrink-0" />
 						{custom ? $LL.replaceImage() : $LL.useYourOwnImage()}
@@ -185,7 +185,7 @@
 				<button
 					type="button"
 					onclick={() => choose('')}
-					class="rounded-md px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-active"
+					class="text-muted hover:text-active rounded-md px-2.5 py-1.5 text-sm transition-colors"
 				>
 					{$LL.remove()}
 				</button>
@@ -193,7 +193,7 @@
 		</div>
 
 		{#if tooLarge}
-			<p class="text-xs text-negative">{$LL.imageTooLarge()}</p>
+			<p class="text-negative text-xs">{$LL.imageTooLarge()}</p>
 		{/if}
 
 		<!-- The same two ends as the transparency track, and the same shape twice
@@ -202,7 +202,7 @@
 		     shown rather than hidden, so the setting does not appear out of nowhere
 		     the moment one is chosen. -->
 		<div class="flex items-center gap-3 {background ? '' : 'opacity-40'}">
-			<ImageIcon class="h-4 w-4 shrink-0 text-muted" />
+			<ImageIcon class="text-muted h-4 w-4 shrink-0" />
 			<div class="min-w-0 flex-1">
 				<SettingsSlider
 					label={$LL.backgroundBlur()}
@@ -215,7 +215,7 @@
 					disabled={!background}
 				/>
 			</div>
-			<ImageIcon class="h-4 w-4 shrink-0 text-muted blur-[1.5px]" />
+			<ImageIcon class="text-muted h-4 w-4 shrink-0 blur-[1.5px]" />
 		</div>
 
 		<SettingsHint>{$LL.backgroundImageHelp()}</SettingsHint>

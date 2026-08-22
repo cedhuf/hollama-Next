@@ -31,8 +31,8 @@
 	onclick={() => mobileDrawerOpen.set(true)}
 	aria-label={$LL.expandSidebar()}
 	class={variant === 'floating'
-		? 'surface-floating pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-shade-3 text-muted shadow-lg transition-colors [--surface-tint:66%] hover:text-active lg:hidden'
-		: '-ml-1 shrink-0 rounded-lg p-2 text-muted transition-colors hover:text-active lg:hidden'}
+		? 'surface-floating border-shade-3 text-muted hover:text-active pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border shadow-lg transition-colors [--surface-tint:66%] lg:hidden'
+		: 'text-muted hover:text-active -ml-1 shrink-0 rounded-lg p-2 transition-colors lg:hidden'}
 >
 	<PanelLeft class="h-5 w-5" />
 </button>

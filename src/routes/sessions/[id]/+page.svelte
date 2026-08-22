@@ -353,9 +353,9 @@
 				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
 					<PersonaAvatar {persona} size={32} />
 					<div class="flex min-w-0 flex-col gap-0.5">
-						<p class="truncate text-sm font-bold leading-tight text-active">{persona.name}</p>
+						<p class="text-active truncate text-sm leading-tight font-bold">{persona.name}</p>
 						{#if persona.tagline}
-							<p class="truncate text-xs leading-tight text-muted">{persona.tagline}</p>
+							<p class="text-muted truncate text-xs leading-tight">{persona.tagline}</p>
 						{/if}
 					</div>
 				</div>
@@ -364,7 +364,7 @@
 			     kept as a parenthesised link so it stays copyable/navigable. -->
 				<!-- leading-tight, not leading-none: `truncate` hides overflow, so a line box
 			     the exact height of the font clips descenders. -->
-				<p data-testid="session-id" class="truncate font-bold leading-tight">
+				<p data-testid="session-id" class="truncate leading-tight font-bold">
 					{#if sessionTitle}
 						{sessionTitle}
 						<span class="text-muted">
@@ -377,7 +377,7 @@
 						<Button variant="link" href={`/sessions/${chat.session.id}`}>#{chat.session.id}</Button>
 					{/if}
 				</p>
-				<div class="flex items-center gap-1.5 text-xs text-muted">
+				<div class="text-muted flex items-center gap-1.5 text-xs">
 					{chat.editor.isNewSession
 						? $LL.newSession()
 						: formatTimestampToNow(chat.session.updatedAt ?? '')}
@@ -394,7 +394,7 @@
 			     The border lives on the group rather than on each half, so focusing (or
 			     opening) the picker rings the whole control instead of stopping mid-way. -->
 				<div
-					class="mr-1 flex items-center overflow-hidden rounded-md border border-shade-3 transition-colors focus-within:border-accent has-[[data-state=open]]:border-accent"
+					class="border-shade-3 focus-within:border-accent has-[[data-state=open]]:border-accent mr-1 flex items-center overflow-hidden rounded-md border transition-colors"
 				>
 					<span class="hidden lg:flex">
 						<ModelSelect bind:value={chat.modelName} variant="attached" />
@@ -403,7 +403,7 @@
 				     content, so it only lifts on hover. -->
 					<button
 						type="button"
-						class="flex h-8 items-center justify-center bg-transparent px-2 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active flex h-8 items-center justify-center bg-transparent px-2 transition-colors"
 						onclick={() => (sessionModalOpen = true)}
 						title={$LL.session()}
 						aria-label={$LL.session()}
@@ -428,7 +428,7 @@
 			{:else}
 				<button
 					type="button"
-					class="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active flex h-9 w-9 items-center justify-center rounded-full transition-colors"
 					onclick={() => (sessionModalOpen = true)}
 					aria-label={$LL.session()}
 				>
@@ -440,7 +440,7 @@
 						<button
 							{...props}
 							type="button"
-							class="flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							class="text-muted hover:bg-shade-2 hover:text-active flex h-9 w-9 items-center justify-center rounded-full transition-colors"
 							aria-label={$LL.moreOptions()}
 						>
 							<MoreHorizontal class="h-5 w-5" />
@@ -450,10 +450,10 @@
 					<!-- The title lives here now, and this is the one place it has room to be
 					     read: two lines, fixed, cut with an ellipsis past that, so the menu
 					     never changes height with the conversation it belongs to. -->
-					<p class="line-clamp-2 px-2 py-1.5 text-xs leading-snug text-muted">
+					<p class="text-muted line-clamp-2 px-2 py-1.5 text-xs leading-snug">
 						{chat.editor.isNewSession ? $LL.newSession() : resolveSessionTitle(chat.session)}
 					</p>
-					<div class="my-1 h-px bg-shade-3" role="none"></div>
+					<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
 					{#if !chat.editor.isNewSession}
 						<SessionMenu
@@ -497,7 +497,7 @@
 
 	<!-- Under the bar rather than beneath it, so neither owes the other any room. -->
 	{#if chat.editor.view === 'controls'}
-		<div class="flex min-h-0 flex-grow flex-col surface-pane">
+		<div class="surface-pane flex min-h-0 flex-grow flex-col">
 			<Controls bind:session={chat.session} />
 		</div>
 	{:else}
@@ -521,7 +521,7 @@
 		     reading. -->
 		<div class="relative flex min-h-0 flex-grow flex-col">
 			<div
-				class="session__history flex flex-grow flex-col overflow-auto px-4 surface-pane lg:px-6 xl:px-8"
+				class="session__history surface-pane flex flex-grow flex-col overflow-auto px-4 lg:px-6 xl:px-8"
 				style="scrollbar-gutter: stable"
 				bind:this={messagesWindow}
 			>
@@ -575,7 +575,7 @@
 								onclick={() => scrollToBottom(true, true)}
 								aria-label={$LL.scrollToBottom()}
 								title={$LL.scrollToBottom()}
-								class="scroll-to-bottom absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-0 text-muted shadow-md transition-colors hover:text-active"
+								class="scroll-to-bottom border-shade-3 bg-shade-0 text-muted hover:text-active absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors"
 							>
 								<ArrowDown class="base-icon" />
 							</button>
@@ -590,7 +590,7 @@
 	<!-- Drawn in one of two places, never both, which is why it is written once and
 	     rendered where it belongs. -->
 	{#if !floatingComposer}
-		<div class="shrink-0 surface-chrome">
+		<div class="surface-chrome shrink-0">
 			{@render composer()}
 		</div>
 	{/if}

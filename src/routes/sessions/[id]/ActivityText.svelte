@@ -59,7 +59,7 @@
 	</div>
 	{#if clamp && overflows}
 		<button
-			class="mt-1 rounded text-muted underline underline-offset-2 transition-colors hover:text-active"
+			class="text-muted hover:text-active mt-1 rounded underline underline-offset-2 transition-colors"
 			onclick={() => (expanded = !expanded)}
 		>
 			{expanded ? $LL.showLess() : $LL.showMore()}

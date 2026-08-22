@@ -45,7 +45,7 @@
 
 {#if empty}
 	<p
-		class="flex h-16 items-center justify-center rounded-md border border-dashed border-shade-3 text-xs text-muted"
+		class="border-shade-3 text-muted flex h-16 items-center justify-center rounded-md border border-dashed text-xs"
 	>
 		{$LL.usageNothingYet()}
 	</p>
@@ -55,7 +55,7 @@
 			{#if limit > 0 && peak > 0}
 				<!-- Where the allowance sits, against the days under it. -->
 				<div
-					class="pointer-events-none absolute inset-x-0 border-t border-dashed border-warning/60"
+					class="border-warning/60 pointer-events-none absolute inset-x-0 border-t border-dashed"
 					style="bottom:{(limit / peak) * 100}%"
 					aria-hidden="true"
 				></div>
@@ -79,7 +79,7 @@
 			{/each}
 		</div>
 
-		<div class="flex justify-between text-[10px] text-muted">
+		<div class="text-muted flex justify-between text-[10px]">
 			<span>{label(days[0].day)}</span>
 			<span>{$LL.usageToday()}</span>
 		</div>

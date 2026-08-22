@@ -82,7 +82,7 @@
 	{:else if chosen}
 		<svg
 			viewBox="0 0 64 64"
-			class="h-full w-full text-shade-0"
+			class="text-shade-0 h-full w-full"
 			style="--persona-glyph-cut:{color}"
 			role="presentation"
 		>
@@ -102,14 +102,14 @@
 		aria-label={name}
 		title={name}
 		onclick={() => onGlyphChange?.(id)}
-		class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white ring-2 ring-offset-2 ring-offset-shade-0 transition-all {glyph ===
+		class="ring-offset-shade-0 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-[10px] font-bold text-white ring-2 ring-offset-2 transition-all {glyph ===
 		id
 			? 'ring-accent'
-			: 'ring-transparent hover:ring-shade-4'}"
+			: 'hover:ring-shade-4 ring-transparent'}"
 		style="background-color:{color};--persona-glyph-cut:{color}"
 	>
 		{#if body}
-			<svg viewBox="0 0 64 64" class="h-full w-full text-shade-0" role="presentation">
+			<svg viewBox="0 0 64 64" class="text-shade-0 h-full w-full" role="presentation">
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html body}
 			</svg>
@@ -121,7 +121,7 @@
 
 {#if readonly}
 	<div
-		class="flex items-center justify-center overflow-hidden rounded-full font-bold text-white ring-2 ring-shade-3"
+		class="ring-shade-3 flex items-center justify-center overflow-hidden rounded-full font-bold text-white ring-2"
 		style="width:{size}px;height:{size}px;background-color:{color};font-size:{Math.round(
 			size * 0.31
 		)}px"
@@ -136,7 +136,7 @@
 				type="button"
 				title="Edit avatar"
 				aria-label="Edit avatar"
-				class="group relative flex items-center justify-center overflow-hidden rounded-full font-bold text-white ring-2 ring-shade-3"
+				class="group ring-shade-3 relative flex items-center justify-center overflow-hidden rounded-full font-bold text-white ring-2"
 				style="width:{size}px;height:{size}px;background-color:{color};font-size:{Math.round(
 					size * 0.31
 				)}px"
@@ -162,16 +162,16 @@
 						type="button"
 						aria-label="Choose avatar colour"
 						onclick={() => onColorChange?.(swatch)}
-						class="h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-shade-0 transition-all {color ===
+						class="ring-offset-shade-0 h-8 w-8 rounded-full ring-2 ring-offset-2 transition-all {color ===
 						swatch
 							? 'ring-accent'
-							: 'ring-transparent hover:ring-shade-4'}"
+							: 'hover:ring-shade-4 ring-transparent'}"
 						style="background-color: {swatch}"
 					></button>
 				{/each}
 			</div>
 			{#if glyphs.length}
-				<DropdownMenu.Separator class="my-1 border-t border-shade-2" />
+				<DropdownMenu.Separator class="border-shade-2 my-1 border-t" />
 				<!-- Scrolls rather than growing the menu: the table of faces is meant to
 				     get longer, and a menu as tall as the window is a menu you cannot
 				     reach the bottom of. -->
@@ -182,7 +182,7 @@
 					{/each}
 				</div>
 			{/if}
-			<DropdownMenu.Separator class="my-1 border-t border-shade-2" />
+			<DropdownMenu.Separator class="border-shade-2 my-1 border-t" />
 			<MenuItem icon={ImagePlus} onclick={uploadImage}>Upload a picture</MenuItem>
 		{/if}
 	</Menu>

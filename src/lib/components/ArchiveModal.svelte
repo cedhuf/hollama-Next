@@ -63,11 +63,11 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">
+		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<span class="text-active truncate text-sm font-semibold">
 				{$LL.archivedSessions()}
 				{#if archived.length}
-					<span class="font-normal text-muted">· {archived.length}</span>
+					<span class="text-muted font-normal">· {archived.length}</span>
 				{/if}
 			</span>
 			<div class="flex shrink-0 items-center gap-1">
@@ -78,14 +78,14 @@
 						<button
 							type="button"
 							onclick={removeAll}
-							class="rounded-lg px-2.5 py-1 text-xs text-negative transition-colors hover:bg-shade-2"
+							class="text-negative hover:bg-shade-2 rounded-lg px-2.5 py-1 text-xs transition-colors"
 						>
 							{$LL.confirmDeletion()}
 						</button>
 						<button
 							type="button"
 							onclick={() => (confirmingAll = false)}
-							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2"
+							class="text-muted hover:bg-shade-2 rounded-lg px-2.5 py-1 text-xs transition-colors"
 						>
 							{$LL.cancel()}
 						</button>
@@ -93,14 +93,14 @@
 						<button
 							type="button"
 							onclick={restoreAll}
-							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							class="text-muted hover:bg-shade-2 hover:text-active rounded-lg px-2.5 py-1 text-xs transition-colors"
 						>
 							{$LL.archiveRestoreAll()}
 						</button>
 						<button
 							type="button"
 							onclick={() => (confirmingAll = true)}
-							class="rounded-lg px-2.5 py-1 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-negative"
+							class="text-muted hover:bg-shade-2 hover:text-negative rounded-lg px-2.5 py-1 text-xs transition-colors"
 						>
 							{$LL.archiveDeleteAll()}
 						</button>
@@ -110,7 +110,7 @@
 					type="button"
 					onclick={() => (open = false)}
 					aria-label={$LL.close()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 				>
 					<X class="h-4 w-4" />
 				</button>
@@ -119,19 +119,19 @@
 
 		<div class="min-h-0 flex-1 overflow-auto p-3">
 			{#if archived.length === 0}
-				<p class="pt-8 text-center text-sm text-muted">{$LL.archivedSessionsEmpty()}</p>
+				<p class="text-muted pt-8 text-center text-sm">{$LL.archivedSessionsEmpty()}</p>
 			{:else}
 				<div class="flex flex-col gap-1">
 					{#each archived as session (session.id)}
 						<div
-							class="flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors hover:bg-shade-0"
+							class="hover:bg-shade-0 flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors"
 							class:confirm-deletion={confirming === session.id}
 						>
 							<div class="min-w-0 flex-1">
-								<p class="truncate text-sm font-medium text-active">
+								<p class="text-active truncate text-sm font-medium">
 									{resolveSessionTitle(session)}
 								</p>
-								<p class="truncate text-xs text-muted">
+								<p class="text-muted truncate text-xs">
 									{formatSessionMetadata(session, $serversStore)}
 								</p>
 							</div>
@@ -142,14 +142,14 @@
 								<button
 									type="button"
 									onclick={() => remove(session)}
-									class="shrink-0 rounded-lg px-2.5 py-1.5 text-xs text-negative transition-colors hover:bg-shade-2"
+									class="text-negative hover:bg-shade-2 shrink-0 rounded-lg px-2.5 py-1.5 text-xs transition-colors"
 								>
 									{$LL.confirmDeletion()}
 								</button>
 								<button
 									type="button"
 									onclick={() => (confirming = null)}
-									class="shrink-0 rounded-lg px-2.5 py-1.5 text-xs text-muted transition-colors hover:bg-shade-2"
+									class="text-muted hover:bg-shade-2 shrink-0 rounded-lg px-2.5 py-1.5 text-xs transition-colors"
 								>
 									{$LL.cancel()}
 								</button>
@@ -159,7 +159,7 @@
 									onclick={() => restore(session)}
 									title={$LL.unarchiveSession()}
 									aria-label={$LL.unarchiveSession()}
-									class="shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+									class="text-muted hover:bg-shade-2 hover:text-active shrink-0 rounded-lg p-1.5 transition-colors"
 								>
 									<ArchiveRestore class="h-4 w-4" />
 								</button>
@@ -168,7 +168,7 @@
 									onclick={() => (confirming = session.id)}
 									title={$LL.deleteSession()}
 									aria-label={$LL.deleteSession()}
-									class="shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-negative"
+									class="text-muted hover:bg-shade-2 hover:text-negative shrink-0 rounded-lg p-1.5 transition-colors"
 								>
 									<Trash2 class="h-4 w-4" />
 								</button>

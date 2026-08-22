@@ -509,8 +509,8 @@
 	<!-- Login renders standalone, without the app shell. -->
 	{@render children()}
 {:else if !booted}
-	<div class="flex h-dvh w-screen items-center justify-center bg-shade-2">
-		<LoaderCircle class="h-6 w-6 animate-spin text-muted" />
+	<div class="bg-shade-2 flex h-dvh w-screen items-center justify-center">
+		<LoaderCircle class="text-muted h-6 w-6 animate-spin" />
 	</div>
 {:else}
 	<SettingsModal />
@@ -539,7 +539,7 @@
 	     application along with the picture. It shows through the margin this padding
 	     leaves and the gap between the two columns. -->
 	<div
-		class="app-shell relative flex w-full overflow-hidden bg-shade-1 lg:bg-shade-2 lg:p-4 lg:pb-4 lg:pt-4"
+		class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden lg:p-4 lg:pt-4 lg:pb-4"
 		style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 	>
 		<CollapsibleSidebar />
@@ -566,7 +566,7 @@
 		     that same material, exactly as it does along the rest of the edge.
 		     A no-op on desktop, where the sidebar lives in flow. -->
 		<div
-			class="app-card relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden max-lg:bg-shade-1 {$mobileDrawerOpen
+			class="app-card max-lg:bg-shade-1 relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden {$mobileDrawerOpen
 				? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
 				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 		>

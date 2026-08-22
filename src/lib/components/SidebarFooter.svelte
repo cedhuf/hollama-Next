@@ -44,11 +44,11 @@
 					class="h-full w-full rounded-full object-cover"
 				/>
 			{:else}
-				<span class="text-sm font-bold text-shade-0">{initials()}</span>
+				<span class="text-shade-0 text-sm font-bold">{initials()}</span>
 			{/if}
 		</div>
 	{:else}
-		<div class="flex h-8 w-8 items-center justify-center rounded-full bg-shade-2 text-muted">
+		<div class="bg-shade-2 text-muted flex h-8 w-8 items-center justify-center rounded-full">
 			<Settings2 class="h-4 w-4" />
 		</div>
 	{/if}
@@ -56,7 +56,7 @@
 
 {#snippet connectionDot()}
 	<span
-		class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-shade-1 {connected
+		class="border-shade-1 absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 {connected
 			? 'bg-positive'
 			: 'bg-shade-5'}"
 		title={connected ? $LL.connected() : $LL.noServerConnected()}
@@ -76,7 +76,7 @@
 {/snippet}
 
 <!-- The bottom edge of the column, the same material as the top one. -->
-<div class="flex shrink-0 border-t surface-chrome">
+<div class="surface-chrome flex shrink-0 border-t">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div
 		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,env(safe-area-inset-bottom))] {rail
@@ -101,7 +101,7 @@
 			<button
 				onclick={() => ($settingsModalOpen = true)}
 				aria-label={$LL.settings()}
-				class="flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-shade-0"
+				class="hover:bg-shade-0 flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors"
 			>
 				{@render identity()}
 				<span class="flex min-w-0 flex-1 flex-col">
@@ -110,11 +110,11 @@
 							? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
 							: $LL.settings()}
 					</span>
-					<span class="text-xs text-muted">
+					<span class="text-muted text-xs">
 						{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
 					</span>
 				</span>
-				<span class="shrink-0 text-muted">
+				<span class="text-muted shrink-0">
 					<Settings2 class="h-5 w-5" />
 				</span>
 			</button>

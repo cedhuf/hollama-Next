@@ -140,11 +140,11 @@
 			name="name"
 			placeholder={$LL.knowledgeNamePlaceholder()}
 			spellcheck="false"
-			class="-mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 pr-8 text-lg font-semibold text-active decoration-shade-4 decoration-dotted underline-offset-[6px] outline-none transition-colors placeholder:font-normal placeholder:text-muted hover:border-shade-3 hover:no-underline focus:border-accent focus:bg-shade-0 focus:no-underline"
+			class="text-active decoration-shade-4 placeholder:text-muted hover:border-shade-3 focus:border-accent focus:bg-shade-0 -mx-2 w-[calc(100%+1rem)] rounded-md border border-transparent bg-transparent px-2 py-1 pr-8 text-lg font-semibold decoration-dotted underline-offset-[6px] transition-colors outline-none placeholder:font-normal hover:no-underline focus:no-underline"
 			class:underline={!!name}
 		/>
 		<Pencil
-			class="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted opacity-60 transition-opacity group-focus-within:opacity-0"
+			class="text-muted pointer-events-none absolute top-1/2 right-0 h-3.5 w-3.5 -translate-y-1/2 opacity-60 transition-opacity group-focus-within:opacity-0"
 		/>
 	</div>
 
@@ -158,7 +158,7 @@
 		     knowledge is prose; the code view is for the ones that are a schema or a
 		     config, where line numbers and a monospace grid are the difference
 		     between readable and not. -->
-		<div class="flex rounded-lg bg-shade-2 p-0.5 text-xs">
+		<div class="bg-shade-2 flex rounded-lg p-0.5 text-xs">
 			{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
 				{@const Icon = tab.icon}
 				<button
@@ -184,11 +184,11 @@
 			bind:value={content}
 			oninput={persist}
 			placeholder={$LL.knowledgeContentPlaceholder()}
-			class="min-h-0 w-full flex-1 resize-none rounded-lg border border-shade-3 bg-shade-0 p-3 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted focus:border-accent"
+			class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent min-h-0 w-full flex-1 resize-none rounded-lg border p-3 text-sm leading-relaxed transition-colors outline-none"
 		></textarea>
 	{/if}
 
-	<p class="flex items-center justify-between gap-3 text-xs text-muted">
+	<p class="text-muted flex items-center justify-between gap-3 text-xs">
 		<span>{isNew ? $LL.knowledgeModalHint() : formatTimestampToNow(updatedAt)}</span>
 		{#if content.trim()}
 			<span class="tabular-nums">{$LL.knowledgeTokens({ tokens: tokens.toLocaleString() })}</span>

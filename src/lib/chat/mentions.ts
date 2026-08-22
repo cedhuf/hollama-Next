@@ -106,8 +106,7 @@ export function mentionedPersonas(text: string, personas: Persona[]): Persona[] 
  * way into the page.
  */
 export type MentionSegment =
-	| { kind: 'text'; text: string }
-	| { kind: 'mention'; persona: Persona; text: string };
+	{ kind: 'text'; text: string } | { kind: 'mention'; persona: Persona; text: string };
 
 export function splitMentions(text: string, personas: Persona[]): MentionSegment[] {
 	const mentions = findMentions(text, personas);

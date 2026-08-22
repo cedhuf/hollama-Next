@@ -57,7 +57,7 @@
 			<button
 				type="button"
 				onclick={() => (step = 3)}
-				class="text-sm text-muted transition-colors hover:text-active"
+				class="text-muted hover:text-active text-sm transition-colors"
 			>
 				Skip for now
 			</button>
@@ -83,7 +83,7 @@
 				<h2 class="text-lg font-semibold tracking-tight">
 					{$LL.onboardingWelcome({ app: APP_NAME })}
 				</h2>
-				<p class="text-sm text-muted">{$LL.onboardingWelcomeBody()}</p>
+				<p class="text-muted text-sm">{$LL.onboardingWelcomeBody()}</p>
 			</div>
 			<div class="flex w-full flex-col gap-2 pt-2">
 				<Button onclick={() => (step = 1)}>
@@ -93,7 +93,7 @@
 				<button
 					type="button"
 					onclick={() => fileInput?.click()}
-					class="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors"
 				>
 					<Upload class="h-4 w-4" />
 					I have a backup to restore
@@ -113,12 +113,12 @@
 		<Servers />
 	{:else if step === 3}
 		<div class="flex flex-col items-center gap-4 py-6 text-center">
-			<div class="flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+			<div class="bg-accent flex h-14 w-14 items-center justify-center rounded-full">
 				<Check class="h-7 w-7 text-white" />
 			</div>
 			<div class="flex flex-col gap-1">
 				<h2 class="text-lg font-semibold tracking-tight">{$LL.onboardingDone()}</h2>
-				<p class="text-sm text-muted">{$LL.onboardingDoneBody()}</p>
+				<p class="text-muted text-sm">{$LL.onboardingDoneBody()}</p>
 			</div>
 			<Button onclick={finish}>{$LL.onboardingEnter({ app: APP_NAME })}</Button>
 		</div>

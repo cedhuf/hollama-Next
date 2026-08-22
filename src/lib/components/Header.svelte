@@ -69,7 +69,7 @@
 				<SidebarToggle variant="floating" />
 
 				<div
-					class="surface-floating pointer-events-auto flex h-12 items-center gap-1 rounded-full border border-shade-3 px-1.5 shadow-lg [--surface-tint:66%] {confirmDeletion
+					class="surface-floating border-shade-3 pointer-events-auto flex h-12 items-center gap-1 rounded-full border px-1.5 shadow-lg [--surface-tint:66%] {confirmDeletion
 						? 'confirm-deletion'
 						: ''}"
 				>
@@ -79,7 +79,7 @@
 		{/if}
 
 		<header
-			class="surface-floating pointer-events-auto h-16 w-full items-center justify-between rounded-full border border-shade-3 px-5 text-xs shadow-lg [--surface-tint:66%] {compact
+			class="surface-floating border-shade-3 pointer-events-auto h-16 w-full items-center justify-between rounded-full border px-5 text-xs shadow-lg [--surface-tint:66%] {compact
 				? 'hidden lg:flex'
 				: 'flex'} {confirmDeletion ? 'confirm-deletion' : ''}"
 		>

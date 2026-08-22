@@ -27,7 +27,7 @@
 </script>
 
 <div
-	class="flex max-h-64 flex-col overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg"
+	class="border-shade-3 bg-shade-0 flex max-h-64 flex-col overflow-y-auto rounded-xl border p-1.5 shadow-lg"
 	role="listbox"
 	aria-label={$LL.mentionPersona()}
 >
@@ -44,14 +44,14 @@
 				: ''}"
 		>
 			<PersonaAvatar {persona} size={24} />
-			<span class="shrink-0 text-sm text-active">{persona.name}</span>
+			<span class="text-active shrink-0 text-sm">{persona.name}</span>
 			{#if persona.tagline}
-				<span class="min-w-0 flex-1 truncate text-xs text-muted">{persona.tagline}</span>
+				<span class="text-muted min-w-0 flex-1 truncate text-xs">{persona.tagline}</span>
 			{/if}
 		</button>
 	{/each}
 
-	<p class="flex items-center gap-1.5 px-2.5 pb-0.5 pt-1.5 text-[11px] text-muted">
+	<p class="text-muted flex items-center gap-1.5 px-2.5 pt-1.5 pb-0.5 text-[11px]">
 		<Kbd>↑</Kbd><Kbd>↓</Kbd>
 		<span>{$LL.searchNavigate()}</span>
 		<Kbd>↵</Kbd>

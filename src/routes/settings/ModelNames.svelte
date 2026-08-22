@@ -284,11 +284,11 @@
 			class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
 			style="background-color: {badge.color}"
 		></span>
-		<span class="truncate text-sm font-medium text-active">
+		<span class="text-active truncate text-sm font-medium">
 			{server.label || badge.id || server.baseUrl}
 		</span>
 		{#if models.length}
-			<span class="ml-auto shrink-0 text-xs tabular-nums text-muted">
+			<span class="text-muted ml-auto shrink-0 text-xs tabular-nums">
 				{$LL.modelsSummary({ renamed: renamedCount, priced: pricedCount, total: models.length })}
 			</span>
 		{/if}
@@ -298,7 +298,7 @@
 		<!-- The unit, before anything is opened. It was stated on the labels inside
 		     each model's price panel, which is a panel nobody has opened yet: from
 		     the list, there was nothing anywhere saying what a figure would mean. -->
-		<p class="-mt-1 flex items-center gap-1.5 text-xs text-muted">
+		<p class="text-muted -mt-1 flex items-center gap-1.5 text-xs">
 			<Coins class="h-3.5 w-3.5 shrink-0" />
 			{$LL.pricingIntro()}
 		</p>
@@ -310,7 +310,7 @@
 		<div class="flex items-center gap-2">
 			<div class="relative flex-1">
 				<Search
-					class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+					class="text-muted pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2"
 				/>
 				<input
 					class="settings-field pl-8"
@@ -326,14 +326,14 @@
 					<button
 						type="button"
 						onclick={resetAll}
-						class="shrink-0 rounded-md bg-negative px-2.5 py-1.5 text-xs font-medium text-shade-0"
+						class="bg-negative text-shade-0 shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium"
 					>
 						{$LL.reset()}
 					</button>
 					<button
 						type="button"
 						onclick={() => (confirmingReset = false)}
-						class="shrink-0 text-xs text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active shrink-0 text-xs transition-colors"
 					>
 						{$LL.cancel()}
 					</button>
@@ -341,7 +341,7 @@
 					<button
 						type="button"
 						onclick={() => (confirmingReset = true)}
-						class="flex shrink-0 items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active flex shrink-0 items-center gap-1 text-xs transition-colors"
 					>
 						<RotateCcw class="h-3 w-3" />
 						{$LL.resetAllNames()}
@@ -351,7 +351,7 @@
 		</div>
 
 		{#if confirmingReset}
-			<p class="-mt-2 text-xs text-negative">{$LL.confirmResetNames()}</p>
+			<p class="text-negative -mt-2 text-xs">{$LL.confirmResetNames()}</p>
 		{/if}
 
 		{#if visible.length}
@@ -364,10 +364,10 @@
 			{#each sections as section (section.kind)}
 				<div class="flex flex-col gap-1.5">
 					<div class="flex items-baseline gap-2">
-						<h3 class="text-xs font-medium uppercase tracking-wide text-muted">
+						<h3 class="text-muted text-xs font-medium tracking-wide uppercase">
 							{section.label}
 						</h3>
-						<span class="text-xs tabular-nums text-muted">{section.models.length}</span>
+						<span class="text-muted text-xs tabular-nums">{section.models.length}</span>
 					</div>
 
 					<!-- One row per model, one column at every width: the editable name on
@@ -404,14 +404,14 @@
 										onclick={() => setLabel(name, '')}
 										aria-label={$LL.clear()}
 										title={$LL.clear()}
-										class="shrink-0 rounded-md p-1.5 text-muted transition-colors hover:text-active"
+										class="text-muted hover:text-active shrink-0 rounded-md p-1.5 transition-colors"
 									>
 										<X class="h-4 w-4" />
 									</button>
 								{/if}
 							</div>
 							<div class="flex items-center gap-2 px-1">
-								<span class="min-w-0 flex-1 truncate font-mono text-[11px] text-muted" title={name}>
+								<span class="text-muted min-w-0 flex-1 truncate font-mono text-[11px]" title={name}>
 									{name}
 								</span>
 
@@ -422,7 +422,7 @@
 								     us to go on, and left correctable because that guess is wrong often
 								     enough to matter. -->
 								<select
-									class="h-6 shrink-0 rounded-md border border-shade-3 bg-shade-0 px-1 text-[11px] text-muted outline-none transition-colors hover:text-active focus:border-accent"
+									class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-6 shrink-0 rounded-md border px-1 text-[11px] transition-colors outline-none"
 									value={modelKind(server, name)}
 									aria-label="{name} · {$LL.modelKindLabel()}"
 									title={$LL.modelKindLabel()}
@@ -440,7 +440,7 @@
 									type="button"
 									onclick={() => (priced.has(name) ? priced.delete(name) : priced.add(name))}
 									aria-expanded={priced.has(name)}
-									class="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] transition-colors hover:bg-shade-2 {hasPrice
+									class="hover:bg-shade-2 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] transition-colors {hasPrice
 										? 'text-active'
 										: 'text-muted'}"
 									title={$LL.pricingHelp()}
@@ -467,7 +467,7 @@
 
 							{#if priced.has(name)}
 								<div
-									class="mt-1 flex flex-col gap-2 rounded-md border border-shade-3 bg-shade-1 p-2"
+									class="border-shade-3 bg-shade-1 mt-1 flex flex-col gap-2 rounded-md border p-2"
 									transition:slide={{ duration: 160, easing: quadInOut }}
 								>
 									<!-- Everything about this price on one row: what it is billed by,
@@ -481,7 +481,7 @@
 										     of time, and showing two token fields for it would be asking
 										     two questions the invoice does not answer. -->
 										<select
-											class="h-8 w-auto shrink-0 rounded-md border border-shade-3 bg-shade-0 px-2 text-xs text-active outline-none focus:border-accent"
+											class="border-shade-3 bg-shade-0 text-active focus:border-accent h-8 w-auto shrink-0 rounded-md border px-2 text-xs outline-none"
 											value={unit}
 											aria-label="{name} · {$LL.priceUnitLabel()}"
 											onchange={(e) => setUnit(name, e.currentTarget.value as PriceUnit)}
@@ -502,17 +502,17 @@
 													class="flex min-w-0 flex-1 items-center gap-1.5"
 													title="{field.label} · {$LL.perMillionTokens()}"
 												>
-													<Icon class="h-4 w-4 shrink-0 text-muted" />
+													<Icon class="text-muted h-4 w-4 shrink-0" />
 
 													<!-- The unit sits immediately after the figure, inside the box,
 													     so the field reads as one thing: 0,2 /M Tokens. The figure is
 													     right-aligned in a box that takes its share of the row, which
 													     keeps the two together while the pair fills the line. -->
 													<span
-														class="flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 focus-within:border-accent"
+														class="border-shade-3 bg-shade-0 focus-within:border-accent flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border px-2"
 													>
 														<input
-															class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+															class="text-active placeholder:text-muted w-full min-w-0 bg-transparent text-right text-xs tabular-nums outline-none"
 															type="text"
 															inputmode="decimal"
 															value={price?.[field.side] ?? ''}
@@ -520,7 +520,7 @@
 															aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
 															oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
 														/>
-														<span class="shrink-0 whitespace-nowrap text-[10px] text-muted">
+														<span class="text-muted shrink-0 text-[10px] whitespace-nowrap">
 															{$LL.perMillionShort()}
 														</span>
 													</span>
@@ -533,12 +533,12 @@
 												class="flex min-w-0 flex-1 items-center gap-1.5"
 												title={UNIT_LABELS[unit]}
 											>
-												<Coins class="h-4 w-4 shrink-0 text-muted" />
+												<Coins class="text-muted h-4 w-4 shrink-0" />
 												<span
-													class="flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border border-shade-3 bg-shade-0 px-2 focus-within:border-accent"
+													class="border-shade-3 bg-shade-0 focus-within:border-accent flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border px-2"
 												>
 													<input
-														class="w-full min-w-0 bg-transparent text-right text-xs tabular-nums text-active outline-none placeholder:text-muted"
+														class="text-active placeholder:text-muted w-full min-w-0 bg-transparent text-right text-xs tabular-nums outline-none"
 														type="text"
 														inputmode="decimal"
 														value={price?.rate ?? ''}
@@ -546,7 +546,7 @@
 														aria-label="{name} · {UNIT_LABELS[unit]}"
 														oninput={(e) => setRate(name, e.currentTarget.value)}
 													/>
-													<span class="shrink-0 whitespace-nowrap text-[10px] text-muted">
+													<span class="text-muted shrink-0 text-[10px] whitespace-nowrap">
 														{UNIT_SUFFIX[unit]}
 													</span>
 												</span>
@@ -557,7 +557,7 @@
 										     can add up, and USD is what providers publish in. Same box as
 										     the fields beside it, so the row sits on one line. -->
 										<select
-											class="h-8 w-auto shrink-0 rounded-md border border-shade-3 bg-shade-0 px-2 text-xs uppercase text-active outline-none focus:border-accent"
+											class="border-shade-3 bg-shade-0 text-active focus:border-accent h-8 w-auto shrink-0 rounded-md border px-2 text-xs uppercase outline-none"
 											value={price?.currency ?? DEFAULT_CURRENCY}
 											aria-label="{name} · {$LL.currency()}"
 											onchange={(e) => setCurrency(name, e.currentTarget.value)}
@@ -575,7 +575,7 @@
 											onclick={() => clearPrice(name)}
 											title={$LL.clearPrice()}
 											aria-label="{name} · {$LL.clearPrice()}"
-											class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-shade-3 text-muted transition-colors hover:border-shade-4 hover:text-active"
+											class="border-shade-3 text-muted hover:border-shade-4 hover:text-active flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors"
 										>
 											<RotateCcw class="h-3.5 w-3.5" />
 										</button>
@@ -587,12 +587,12 @@
 				</div>
 			{/each}
 		{:else}
-			<p class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted">
+			<p class="border-shade-4 text-muted rounded-xl border border-dashed p-6 text-center text-sm">
 				{$LL.searchEmpty()}
 			</p>
 		{/if}
 	{:else}
-		<p class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted">
+		<p class="border-shade-4 text-muted rounded-xl border border-dashed p-6 text-center text-sm">
 			{$LL.noModelsToRename()}
 		</p>
 	{/if}

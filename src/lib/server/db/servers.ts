@@ -43,8 +43,7 @@ export function listUserServers(userId: string): ServerRow[] {
 
 export function getServer(id: string): ServerRow | undefined {
 	return getDb().prepare('SELECT * FROM servers WHERE id = ?').get(id) as unknown as
-		| ServerRow
-		| undefined;
+		ServerRow | undefined;
 }
 
 /** The decrypted API key for a server, for server-side use only (the proxy). */

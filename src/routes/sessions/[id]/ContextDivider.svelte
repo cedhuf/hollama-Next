@@ -59,7 +59,7 @@
 />
 
 {#snippet panel()}
-	<div class="flex flex-col gap-2.5 rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5">
+	<div class="border-shade-3 bg-shade-1 flex flex-col gap-2.5 rounded-lg border px-3 py-2.5">
 		<div class="flex flex-col gap-1.5">
 			<div class="flex items-baseline justify-between gap-2 text-xs">
 				<span class="text-active">
@@ -69,7 +69,7 @@
 						percent
 					})}
 				</span>
-				<span class="shrink-0 text-[11px] text-muted">
+				<span class="text-muted shrink-0 text-[11px]">
 					{note.limitSource === 'model'
 						? $LL.contextLimitFromModel()
 						: $LL.contextLimitFromThreshold()}
@@ -79,7 +79,7 @@
 			<!-- One bar for the whole request, cut into what it is made of. The three
 			     shares are of the limit, not of each other, so the empty end of the bar
 			     is the room left. -->
-			<div class="flex h-1.5 overflow-hidden rounded-full bg-shade-3">
+			<div class="bg-shade-3 flex h-1.5 overflow-hidden rounded-full">
 				{#each parts as part (part.key)}
 					<div
 						class={part.class}
@@ -93,13 +93,13 @@
 			{#each parts as part (part.key)}
 				<div class="flex items-baseline gap-2">
 					<span class="h-2 w-2 shrink-0 rounded-full {part.class}"></span>
-					<dt class="min-w-0 flex-1 truncate text-muted">{label(part.key)}</dt>
-					<dd class="shrink-0 tabular-nums text-active">{formatTokens(part.tokens)}</dd>
+					<dt class="text-muted min-w-0 flex-1 truncate">{label(part.key)}</dt>
+					<dd class="text-active shrink-0 tabular-nums">{formatTokens(part.tokens)}</dd>
 				</div>
 			{/each}
 		</dl>
 
-		<div class="flex flex-col gap-1 border-t border-shade-3 pt-2 text-xs text-muted">
+		<div class="border-shade-3 text-muted flex flex-col gap-1 border-t pt-2 text-xs">
 			<p>{$LL.contextMessagesOfTotal({ count: note.messageCount, total: note.totalCount })}</p>
 			{#if note.model}
 				<p class="truncate">{note.model}</p>
@@ -118,6 +118,6 @@
 			{/if}
 		</div>
 
-		<p class="text-[11px] text-muted">{$LL.contextEstimateNote()}</p>
+		<p class="text-muted text-[11px]">{$LL.contextEstimateNote()}</p>
 	</div>
 {/snippet}

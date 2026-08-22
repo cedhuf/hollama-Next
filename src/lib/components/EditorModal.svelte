@@ -59,8 +59,8 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">{title.trim() || placeholder}</span>
+		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<span class="text-active truncate text-sm font-semibold">{title.trim() || placeholder}</span>
 
 			<div class="flex shrink-0 items-center gap-1">
 				{#if onExport}
@@ -69,7 +69,7 @@
 						onclick={onExport}
 						title={$LL.export()}
 						aria-label={$LL.export()}
-						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 					>
 						<Download class="h-4 w-4" />
 					</button>
@@ -80,7 +80,7 @@
 						onclick={onDelete}
 						title={$LL.delete()}
 						aria-label={$LL.delete()}
-						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-negative"
+						class="text-muted hover:bg-shade-2 hover:text-negative rounded-md p-1.5 transition-colors"
 					>
 						<Trash2 class="h-4 w-4" />
 					</button>
@@ -89,14 +89,14 @@
 				<!-- A rule between what the dialog does and what closes it: destructive
 				     controls should not sit flush against the one everybody aims for. -->
 				{#if onExport || onDelete}
-					<span class="mx-1 h-5 w-px bg-shade-3"></span>
+					<span class="bg-shade-3 mx-1 h-5 w-px"></span>
 				{/if}
 
 				<button
 					type="button"
 					onclick={() => (open = false)}
 					aria-label={$LL.close()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 				>
 					<X class="h-4 w-4" />
 				</button>

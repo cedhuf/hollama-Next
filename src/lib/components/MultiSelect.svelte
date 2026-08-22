@@ -60,29 +60,29 @@
 	}}
 >
 	<Select.Trigger
-		class="select-trigger flex w-full items-center justify-between gap-2 rounded-md border border-shade-3 bg-shade-0 px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-accent disabled:cursor-not-allowed disabled:opacity-50 {className}"
+		class="select-trigger border-shade-3 bg-shade-0 focus:border-accent flex w-full items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50 {className}"
 	>
 		<span class="min-w-0 truncate text-left {value.length ? 'text-active' : 'text-muted'}">
 			{summary}
 		</span>
-		<ChevronsUpDown class="h-4 w-4 shrink-0 text-muted" />
+		<ChevronsUpDown class="text-muted h-4 w-4 shrink-0" />
 	</Select.Trigger>
 
 	<Select.Portal>
 		<Select.Content
 			sideOffset={6}
 			collisionPadding={12}
-			class="z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] min-w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-xl border border-shade-3 bg-shade-0 p-1.5 shadow-lg focus-visible:outline-none"
+			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] min-w-[var(--bits-select-anchor-width)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none"
 		>
 			{#if searchable}
 				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal
 				     them from this input and jump around the list instead. -->
-				<div class="mb-1 flex items-center gap-2 border-b border-shade-2 px-2 pb-2">
-					<Search class="h-4 w-4 shrink-0 text-muted" />
+				<div class="border-shade-2 mb-1 flex items-center gap-2 border-b px-2 pb-2">
+					<Search class="text-muted h-4 w-4 shrink-0" />
 					<input
 						bind:value={query}
 						{placeholder}
-						class="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+						class="placeholder:text-muted w-full bg-transparent text-sm outline-none"
 						onkeydown={(e) => {
 							if (e.key !== 'Escape' && e.key !== 'Enter' && !e.key.startsWith('Arrow'))
 								e.stopPropagation();
@@ -95,7 +95,7 @@
 				<Select.Item
 					value={option.value}
 					label={option.label}
-					class="select-item flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-2 text-sm text-active transition-colors focus-visible:outline-none data-[highlighted]:bg-shade-1"
+					class="select-item text-active data-[highlighted]:bg-shade-1 flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors select-none focus-visible:outline-none"
 				>
 					{#snippet children({ selected })}
 						<span
@@ -109,7 +109,7 @@
 					{/snippet}
 				</Select.Item>
 			{:else}
-				<p class="px-2.5 py-3 text-center text-sm text-muted">
+				<p class="text-muted px-2.5 py-3 text-center text-sm">
 					{query ? 'No matches' : placeholder}
 				</p>
 			{/each}

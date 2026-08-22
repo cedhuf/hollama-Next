@@ -11,7 +11,7 @@
 
 <fieldset
 	class="fieldset container mx-auto flex max-w-[80ch] flex-col gap-y-3 {legend
-		? 'fieldset--with-legend rounded-md border border-shade-4 p-4'
+		? 'fieldset--with-legend border-shade-4 rounded-md border p-4'
 		: ''}"
 >
 	{#if legend}

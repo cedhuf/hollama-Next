@@ -176,7 +176,7 @@
 			aria-label={$LL.expandSidebar()}
 			title={$LL.expandSidebar()}
 			style="top: calc(var(--app-header-h) / 2)"
-			class="absolute right-0 hidden -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-shade-3 bg-shade-1 p-1 text-muted shadow-sm transition-colors hover:border-accent hover:text-active lg:flex"
+			class="border-shade-3 bg-shade-1 text-muted hover:border-accent hover:text-active absolute right-0 hidden translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border p-1 shadow-sm transition-colors lg:flex"
 		>
 			<ChevronsRight class="h-3.5 w-3.5" />
 		</button>

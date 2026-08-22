@@ -72,10 +72,10 @@
 		<PersonaAvatar persona={{ name, ...avatar }} {size} />
 	{/if}
 	<div class="flex min-w-0 flex-1 flex-col">
-		<span class="truncate text-sm font-medium leading-tight text-active">{name}</span>
+		<span class="text-active truncate text-sm leading-tight font-medium">{name}</span>
 		{#if tagline}
 			<span
-				class="text-xs leading-snug text-muted {list
+				class="text-muted text-xs leading-snug {list
 					? 'truncate'
 					: 'line-clamp-2 min-h-[2.25em] pt-0.5'}"
 			>
@@ -89,7 +89,7 @@
 	{#if tags.length}
 		<div class="flex flex-wrap gap-1">
 			{#each tags.slice(0, limit) as tag (tag)}
-				<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[10px] leading-4 text-muted">
+				<span class="bg-shade-2 text-muted rounded px-1.5 py-0.5 text-[10px] leading-4">
 					{tag}
 				</span>
 			{/each}
@@ -101,7 +101,7 @@
      the same height; without this the border would stop at the content and the
      equal rows would be invisible. -->
 <article
-	class="section-tint relative flex h-full overflow-hidden rounded-xl border bg-shade-0 transition-colors hover:border-shade-4
+	class="section-tint bg-shade-0 hover:border-shade-4 relative flex h-full overflow-hidden rounded-xl border transition-colors
 		{list ? 'items-stretch' : 'flex-col'}"
 >
 	<!-- The body is a button when it does something and a plain box when it does
@@ -111,7 +111,7 @@
 			type="button"
 			{onclick}
 			aria-label={actionLabel ?? name}
-			class="flex min-w-0 flex-1 text-left transition-colors hover:bg-shade-1 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent
+			class="hover:bg-shade-1 focus-visible:outline-accent flex min-w-0 flex-1 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2
 				{list ? 'items-center gap-3 px-3 py-2.5' : 'flex-col gap-2.5 p-3.5'}"
 		>
 			{#if list}
@@ -120,7 +120,7 @@
 				<div class="flex w-full items-start gap-3">{@render identity(40)}</div>
 				{@render tagRow(3)}
 				{#if meta}
-					<span class="mt-auto pt-0.5 text-[11px] leading-snug text-muted">{meta}</span>
+					<span class="text-muted mt-auto pt-0.5 text-[11px] leading-snug">{meta}</span>
 				{/if}
 			{/if}
 		</button>
@@ -136,7 +136,7 @@
 				<div class="flex w-full items-start gap-3">{@render identity(40)}</div>
 				{@render tagRow(3)}
 				{#if meta}
-					<span class="mt-auto pt-0.5 text-[11px] leading-snug text-muted">{meta}</span>
+					<span class="text-muted mt-auto pt-0.5 text-[11px] leading-snug">{meta}</span>
 				{/if}
 			{/if}
 		</div>
@@ -149,7 +149,7 @@
 		     card of five. Floated, it annotates the card instead of being part of
 		     what the card says. `pointer-events-none` so it never intercepts the
 		     click the body is there to receive. -->
-		<div class="pointer-events-none absolute right-2 top-2 flex flex-wrap justify-end gap-1">
+		<div class="pointer-events-none absolute top-2 right-2 flex flex-wrap justify-end gap-1">
 			{@render badges()}
 		</div>
 	{/if}
@@ -159,7 +159,7 @@
 			<div class="hidden items-center gap-2 lg:flex">
 				{@render tagRow(2)}
 				{#if meta}
-					<span class="text-[11px] text-muted">{meta}</span>
+					<span class="text-muted text-[11px]">{meta}</span>
 				{/if}
 			</div>
 			{#if badges}
@@ -173,7 +173,7 @@
 		<!-- A footer with its own edge, rather than buttons floating at the bottom of
 		     the body: it is what makes the card read as a card, and it keeps the
 		     controls in the same place on every one of them. -->
-		<div class="mt-auto flex items-stretch gap-1 border-t border-shade-2 p-1.5">
+		<div class="border-shade-2 mt-auto flex items-stretch gap-1 border-t p-1.5">
 			{@render actions()}
 		</div>
 	{/if}

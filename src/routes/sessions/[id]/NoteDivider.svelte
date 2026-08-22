@@ -73,7 +73,7 @@
 				in:pillIn
 				onclick={() => (expanded = !expanded)}
 				aria-expanded={expanded}
-				class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted transition-colors hover:border-shade-4 hover:text-active"
+				class="border-shade-3 text-muted hover:border-shade-4 hover:text-active flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition-colors"
 			>
 				<Icon class="h-3.5 w-3.5 shrink-0" />
 				<span>{label}</span>
@@ -86,7 +86,7 @@
 			</button>
 		{:else}
 			<div
-				class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted"
+				class="border-shade-3 text-muted flex items-center gap-2 rounded-full border px-3 py-1 text-xs"
 			>
 				<Icon class="h-3.5 w-3.5 shrink-0" />
 				<span>{label}</span>

@@ -54,15 +54,15 @@
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
 		<!-- Header: live title + close, aligned with the persona and settings modals -->
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">
+		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<span class="text-active truncate text-sm font-semibold">
 				{session.title?.trim() || resolveSessionTitle(session) || 'Conversation settings'}
 			</span>
 			<button
 				type="button"
 				onclick={() => (open = false)}
 				aria-label="Close"
-				class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+				class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 			>
 				<X class="h-4 w-4" />
 			</button>
@@ -102,13 +102,12 @@
 						rows="7"
 						bind:value={session.systemPrompt.content}
 						oninput={onSystemPromptInput}
-						placeholder="Instructions for this conversation only…"
-					></textarea>
+						placeholder="Instructions for this conversation only…"></textarea>
 
 					{#if isOverridden}
 						<button
 							type="button"
-							class="self-start text-xs text-link hover:underline"
+							class="text-link self-start text-xs hover:underline"
 							onclick={resetSystemPromptToDefault}
 						>
 							Reset to settings default

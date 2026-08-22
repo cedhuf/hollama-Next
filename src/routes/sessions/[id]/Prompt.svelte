@@ -408,7 +408,7 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto w-full px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 lg:px-6 lg:pb-4 xl:px-8 {editor.isExpanded
+	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] lg:px-6 lg:pb-4 xl:px-8 {editor.isExpanded
 		? 'prompt-editor--fullscreen'
 		: ''}"
 >
@@ -449,7 +449,7 @@
 			<ImageDrop
 				label={$LL.dropImagesHere()}
 				onImages={(images) => (attachments = [...attachments, ...images])}
-				class="surface-floating flex flex-col rounded-2xl border border-shade-3 shadow-lg transition-colors focus-within:border-shade-5"
+				class="surface-floating border-shade-3 focus-within:border-shade-5 flex flex-col rounded-2xl border shadow-lg transition-colors"
 			>
 				<!-- The textarea auto-grows with its content (field-sizing); expanding only
 				     raises its floor and ceiling, so no flex-height chain to depend on. -->
@@ -484,8 +484,8 @@
 					<textarea
 						name="prompt"
 						class="prompt-editor__textarea prompt-editor__input base-input relative resize-none px-4 pt-3.5 {editor.isExpanded
-							? 'min-h-[52dvh] max-h-[70dvh]'
-							: 'min-h-14 max-h-[40dvh]'}"
+							? 'max-h-[70dvh] min-h-[52dvh]'
+							: 'max-h-[40dvh] min-h-14'}"
 						placeholder={$LL.promptPlaceholder()}
 						bind:this={editor.promptTextarea}
 						bind:value={editor.prompt}
@@ -497,8 +497,7 @@
 						onscroll={syncMirror}
 						onpaste={handlePaste}
 						enterkeyhint={editor.isExpanded ? 'enter' : 'send'}
-						inputmode="text"
-					></textarea>
+						inputmode="text"></textarea>
 				</div>
 
 				<PromptAttachments bind:attachments {tools}>
@@ -551,12 +550,12 @@
 								<Button title={$LL.stopCompletion()} variant="outline" onclick={stopCompletion}>
 									<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
 										<span
-											class="prompt-editor__stop-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
+											class="prompt-editor__stop-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
 										>
 											<CircleStop class="base-icon" />
 										</span>
 										<span
-											class="prompt-editor__loading-icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
+											class="prompt-editor__loading-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
 										>
 											<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
 										</span>

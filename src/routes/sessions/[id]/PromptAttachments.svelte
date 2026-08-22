@@ -147,14 +147,12 @@
 			const pages = await renderPdfPagesAsImages(file);
 			attachments = [
 				...attachments,
-				...pages.map(
-					(page): ImageAttachment => ({
-						type: 'image',
-						id: generateRandomId(),
-						name: page.name,
-						dataUrl: page.dataUrl
-					})
-				)
+				...pages.map((page): ImageAttachment => ({
+					type: 'image',
+					id: generateRandomId(),
+					name: page.name,
+					dataUrl: page.dataUrl
+				}))
 			];
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
@@ -184,7 +182,7 @@
 			     large PDF takes a few seconds, and nothing happening looks like nothing
 			     working. -->
 			<span
-				class="flex max-w-full items-center gap-1.5 rounded-full border border-dashed border-shade-3 py-1 pl-1.5 pr-2.5 text-xs text-muted"
+				class="border-shade-3 text-muted flex max-w-full items-center gap-1.5 rounded-full border border-dashed py-1 pr-2.5 pl-1.5 text-xs"
 			>
 				<span class="flex h-5 w-5 shrink-0 items-center justify-center">
 					<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
@@ -195,7 +193,7 @@
 	</div>
 {/if}
 
-<div class="flex items-center justify-between px-2 pb-2 pt-0.5">
+<div class="flex items-center justify-between px-2 pt-0.5 pb-2">
 	<div class="flex items-center gap-x-0.5">
 		<!-- One way in for every kind of context, and the picking happens inside it
 		     rather than in a select that appeared in the composer. -->
@@ -227,11 +225,11 @@
 					</button>
 				{/snippet}
 
-				<p class="px-2 pb-1 pt-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+				<p class="text-muted px-2 pt-0.5 pb-1 text-[11px] font-semibold tracking-wider uppercase">
 					Tools
 				</p>
 				{#each tools as tool (tool.label)}
-					<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+					<div class="hover:bg-shade-1 rounded-md px-2 py-1.5">
 						<FieldCheckbox label={tool.label} checked={tool.checked} onChange={tool.onChange} />
 					</div>
 				{/each}

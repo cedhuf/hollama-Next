@@ -91,9 +91,9 @@
 		{@const multi = question.type === 'multi_select'}
 		<div class="flex flex-col gap-1.5">
 			<div class="flex items-baseline gap-2">
-				<p class="text-sm font-medium text-active">{question.question}</p>
+				<p class="text-active text-sm font-medium">{question.question}</p>
 				{#if multi && !answered}
-					<span class="shrink-0 text-xs text-muted">{$LL.multipleAllowed()}</span>
+					<span class="text-muted shrink-0 text-xs">{$LL.multipleAllowed()}</span>
 				{/if}
 			</div>
 			<div class="flex flex-wrap gap-1.5">
@@ -105,8 +105,8 @@
 						onclick={() => toggleOption(qi, option)}
 						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors
 							{selected
-							? 'border-accent bg-accent/10 font-medium text-active'
-							: 'border-shade-3 text-base hover:bg-shade-1'}
+							? 'border-accent bg-accent/10 text-active font-medium'
+							: 'border-shade-3 hover:bg-shade-1 text-base'}
 							{answered && !selected ? 'opacity-40' : ''}
 							{answered || disabled ? 'cursor-default' : ''}"
 					>
@@ -129,9 +129,9 @@
 				{#if answered}
 					{#each customAnswers(qi) as value (value)}
 						<span
-							class="flex items-center gap-2 rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-sm font-medium text-active"
+							class="border-accent bg-accent/10 text-active flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium"
 						>
-							<Check class="h-3 w-3 shrink-0 text-accent" strokeWidth={3} />
+							<Check class="text-accent h-3 w-3 shrink-0" strokeWidth={3} />
 							{value}
 						</span>
 					{/each}
@@ -163,7 +163,7 @@
 							submit();
 						}
 					}}
-					class="w-full rounded-lg border border-shade-3 bg-shade-0 px-3 py-1.5 text-sm outline-none placeholder:text-muted focus:border-accent"
+					class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent w-full rounded-lg border px-3 py-1.5 text-sm outline-none"
 				/>
 			{/if}
 		</div>
@@ -174,7 +174,7 @@
 			type="button"
 			disabled={!allPicked || disabled}
 			onclick={submit}
-			class="w-fit rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-shade-0 transition-opacity disabled:opacity-40"
+			class="bg-accent text-shade-0 w-fit rounded-lg px-4 py-1.5 text-sm font-medium transition-opacity disabled:opacity-40"
 		>
 			{$LL.send()}
 		</button>

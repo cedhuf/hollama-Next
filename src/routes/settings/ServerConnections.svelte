@@ -297,7 +297,7 @@
 				     unless the wait actually drags, so a warm cache shows nothing at all. -->
 				<Skeleton />
 			{:else if !canManage}
-				<div class="rounded-xl border border-shade-3">
+				<div class="border-shade-3 rounded-xl border">
 					<EmptyMessage>{$LL.providersManagedByAdmin()}</EmptyMessage>
 				</div>
 			{:else}
@@ -319,13 +319,13 @@
 			<!-- Add a server: pick a provider, Verify, then Save. Dashed border so it
 			     reads as a slot to fill rather than another connection. -->
 			<SettingsSection title={$LL.addAServer()}>
-				<div class="flex flex-col gap-3 rounded-xl border border-dashed border-shade-4 p-4">
+				<div class="border-shade-4 flex flex-col gap-3 rounded-xl border border-dashed p-4">
 					<div class="flex flex-wrap gap-1.5">
 						{#each PROVIDERS as provider (provider.type)}
 							<button
 								type="button"
 								onclick={() => selectPreset(provider.type)}
-								class="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-shade-6 {draft.connectionType ===
+								class="hover:border-shade-6 rounded-md border px-2.5 py-1 text-xs transition-colors {draft.connectionType ===
 								provider.type
 									? 'border-accent text-active'
 									: 'border-shade-4 text-muted'}"
@@ -403,7 +403,7 @@
 							</Button>
 						{:else}
 							<Button onclick={saveDraft}><Check class="base-icon" /> {$LL.save()}</Button>
-							<span class="text-xs text-muted">{$LL.modelsFound({ count: modelCount })}</span>
+							<span class="text-muted text-xs">{$LL.modelsFound({ count: modelCount })}</span>
 						{/if}
 					</div>
 				</div>

@@ -69,7 +69,7 @@
 		     it with itself gives that colour back exactly and the panel stays
 		     invisible until there is a picture under it. -->
 		<div
-			class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex min-w-0 flex-1 flex-col surface-pane lg:rounded-xl"
+			class="app-panel surface-pane flex min-w-0 flex-1 flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
 		>
 			{@render children()}
 		</div>

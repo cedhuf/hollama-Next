@@ -31,7 +31,7 @@
 	{max}
 	aria-label={label}
 	aria-valuetext={valueLabel}
-	class="h-1.5 w-full overflow-hidden rounded-full bg-shade-3"
+	class="bg-shade-3 h-1.5 w-full overflow-hidden rounded-full"
 >
 	<div class="h-full transition-[width] duration-500 {tone}" style="width:{ratio * 100}%"></div>
 </Meter.Root>

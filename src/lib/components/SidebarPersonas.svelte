@@ -87,14 +87,14 @@
 			<button
 				type="button"
 				onclick={() => (sectionOpen = !sectionOpen)}
-				class="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-shade-0"
+				class="text-accent hover:bg-shade-0 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[11px] font-semibold tracking-wider uppercase transition-colors"
 			>
 				<span>{$LL.personas()} · {personas.length}</span>
 				<ChevronDown class="h-3.5 w-3.5 transition-transform {open ? '' : '-rotate-90'}" />
 			</button>
 			{#if open}
 				<!-- iOS Messages-style grid: five to a row, a partial row centred. -->
-				<div class="flex flex-wrap justify-center gap-1 pb-1 pt-1">
+				<div class="flex flex-wrap justify-center gap-1 pt-1 pb-1">
 					{#each personas as persona (persona.id)}
 						{@const session = sessionOf(persona)}
 						<ContextMenu>
@@ -108,17 +108,17 @@
 									title={persona.tagline || persona.name}
 								>
 									<span
-										class="relative inline-flex rounded-full ring-offset-2 ring-offset-shade-1 transition duration-150 group-hover:scale-105 motion-reduce:transition-none {isActive(
+										class="ring-offset-shade-1 relative inline-flex rounded-full ring-offset-2 transition duration-150 group-hover:scale-105 motion-reduce:transition-none {isActive(
 											persona
 										)
-											? 'ring-2 ring-accent'
-											: 'group-hover:ring-2 group-hover:ring-shade-4 group-focus-visible:ring-2 group-focus-visible:ring-accent'}"
+											? 'ring-accent ring-2'
+											: 'group-hover:ring-shade-4 group-focus-visible:ring-accent group-hover:ring-2 group-focus-visible:ring-2'}"
 									>
 										<PersonaAvatar {persona} size={44} />
 									</span>
 									<span
 										class="w-full truncate text-center text-xs transition-colors {isActive(persona)
-											? 'font-medium text-active'
+											? 'text-active font-medium'
 											: 'text-muted group-hover:text-active'}"
 									>
 										{persona.name}
@@ -161,11 +161,11 @@
 							onclick={() => launch(persona)}
 							title={persona.name}
 							aria-label={persona.name}
-							class="persona-launcher shrink-0 rounded-full outline-none ring-offset-2 ring-offset-shade-1 transition duration-150 hover:scale-105 motion-reduce:transition-none {isActive(
+							class="persona-launcher ring-offset-shade-1 shrink-0 rounded-full ring-offset-2 transition duration-150 outline-none hover:scale-105 motion-reduce:transition-none {isActive(
 								persona
 							)
-								? 'ring-2 ring-accent'
-								: 'hover:ring-2 hover:ring-shade-4 focus-visible:ring-2 focus-visible:ring-accent'}"
+								? 'ring-accent ring-2'
+								: 'hover:ring-shade-4 focus-visible:ring-accent hover:ring-2 focus-visible:ring-2'}"
 						>
 							<PersonaAvatar {persona} size={28} />
 						</button>

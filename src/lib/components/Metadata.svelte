@@ -10,7 +10,7 @@
 </script>
 
 <p
-	class="metadata max-w-full truncate whitespace-nowrap text-xs text-muted"
+	class="metadata text-muted max-w-full truncate text-xs whitespace-nowrap"
 	data-testid={dataTestid}
 >
 	{@render children?.()}

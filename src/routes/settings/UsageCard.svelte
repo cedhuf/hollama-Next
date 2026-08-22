@@ -112,10 +112,10 @@
 </script>
 
 {#if usage}
-	<div class="flex flex-col gap-2 rounded-xl border border-shade-3 bg-shade-0 p-4">
+	<div class="border-shade-3 bg-shade-0 flex flex-col gap-2 rounded-xl border p-4">
 		<div class="flex items-baseline justify-between gap-2">
-			<span class="text-sm font-medium text-active">{$LL.usageTitle()}</span>
-			<span class="flex items-baseline gap-1.5 text-xs tabular-nums text-muted">
+			<span class="text-active text-sm font-medium">{$LL.usageTitle()}</span>
+			<span class="text-muted flex items-baseline gap-1.5 text-xs tabular-nums">
 				{#if tokens > 0}
 					<span class="opacity-70">{$LL.usageTokens({ tokens: compact(tokens) })}</span>
 				{/if}
@@ -144,7 +144,7 @@
 		     beside a weekly allowance is what says whether this week is unusual. -->
 		<SpendChart days={usage.history} limit={usage.limit} format={money} />
 
-		<div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs text-muted">
+		<div class="text-muted flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
 			<span>
 				{usage.period === 'week'
 					? $LL.usagePerWeek()
@@ -158,7 +158,7 @@
 			<span class="tabular-nums">{$LL.usageResetsAt({ at: resets })}</span>
 		</div>
 
-		<p class="text-[11px] text-muted">
+		<p class="text-muted text-[11px]">
 			{$LL.usageEstimateNote()}
 			{#if mixed}
 				{$LL.usageMixedCurrencies({ currencies: usage.currencies.join(', ') })}

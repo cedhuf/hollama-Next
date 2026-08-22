@@ -313,7 +313,7 @@
 		{#snippet badges()}
 			{#if offer.edited}
 				<span
-					class="rounded border border-accent/30 bg-accent/10 px-1 text-[9px] font-medium leading-[15px] text-accent"
+					class="border-accent/30 bg-accent/10 text-accent rounded border px-1 text-[9px] leading-[15px] font-medium"
 				>
 					{$LL.personaStateEdited()}
 				</span>

@@ -118,7 +118,7 @@
 				{...props}
 				type="button"
 				aria-label={$LL.availableModels()}
-				class="flex h-8 w-[clamp(9rem,16vw,18rem)] items-center gap-1.5 rounded-l-md border-r border-shade-3 bg-transparent px-2.5 text-xs text-muted transition-colors hover:bg-shade-2 hover:text-active focus:outline-none"
+				class="border-shade-3 text-muted hover:bg-shade-2 hover:text-active flex h-8 w-[clamp(9rem,16vw,18rem)] items-center gap-1.5 rounded-l-md border-r bg-transparent px-2.5 text-xs transition-colors focus:outline-none"
 			>
 				<span class="truncate">{label}</span>
 				<ChevronDown class="ml-auto h-3.5 w-3.5 shrink-0 opacity-70" />
@@ -128,13 +128,13 @@
 				{...props}
 				type="button"
 				aria-label={$LL.availableModels()}
-				class="flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2 text-left text-sm transition-colors hover:border-shade-4 focus:border-accent focus:outline-none {variant ===
+				class="border-shade-3 bg-shade-0 hover:border-shade-4 focus:border-accent flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors focus:outline-none {variant ===
 				'hero'
 					? 'w-full max-w-xl'
 					: 'w-full'}"
 			>
 				<span class="truncate {hasValue ? 'text-active' : 'text-muted'}">{label}</span>
-				<ChevronDown class="ml-auto h-4 w-4 shrink-0 text-muted" />
+				<ChevronDown class="text-muted ml-auto h-4 w-4 shrink-0" />
 			</button>
 		{/if}
 	{/snippet}

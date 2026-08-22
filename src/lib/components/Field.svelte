@@ -18,7 +18,7 @@
 		: 'flex flex-col'} {isTextEditor ? 'overflow-scrollbar flex-grow' : ''}"
 >
 	<div
-		class="field-container flex w-full flex-col gap-y-1 rounded-md border bg-shade-0 text-sm focus-within:border-shade-6 focus-within:outline focus-within:outline-shade-2 {isTextEditor
+		class="field-container bg-shade-0 focus-within:border-shade-6 focus-within:outline-shade-2 flex w-full flex-col gap-y-1 rounded-md border text-sm focus-within:outline {isTextEditor
 			? 'flex-grow gap-y-0 p-0'
 			: ''} {disabled ? 'bg-shade-1' : ''}"
 	>
@@ -26,8 +26,8 @@
 			<Label.Root
 				for={name}
 				id={`${name}-label`}
-				class="field-label-root flex items-center gap-x-2 px-3 pb-0.5 pt-3 text-xs font-medium leading-none {isTextEditor
-					? 'border-b border-shade-2 p-3'
+				class="field-label-root flex items-center gap-x-2 px-3 pt-3 pb-0.5 text-xs leading-none font-medium {isTextEditor
+					? 'border-shade-2 border-b p-3'
 					: ''} {isLabelVisible ? '' : 'hidden'}"
 			>
 				<slot name="label" />

@@ -27,8 +27,7 @@ export interface UserRow {
 
 export function getUserByEmail(email: string): UserRow | undefined {
 	return getDb().prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase()) as
-		| UserRow
-		| undefined;
+		UserRow | undefined;
 }
 
 export function getUserById(id: string): UserRow | undefined {

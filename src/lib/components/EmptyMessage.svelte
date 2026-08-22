@@ -9,7 +9,7 @@
 </script>
 
 <p
-	class="align-center flex h-full w-full items-center justify-center text-balance p-4 text-center text-muted"
+	class="align-center text-muted flex h-full w-full items-center justify-center p-4 text-center text-balance"
 >
 	{@render children?.()}
 </p>

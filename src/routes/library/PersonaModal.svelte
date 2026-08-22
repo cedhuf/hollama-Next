@@ -233,8 +233,7 @@
 				rows="2"
 				bind:value={persona.greeting}
 				oninput={persist}
-				placeholder="Opening line shown when the conversation starts…"
-			></textarea>
+				placeholder="Opening line shown when the conversation starts…"></textarea>
 		</SettingsField>
 
 		<FieldCheckbox label="Allow web search" bind:checked={persona.webSearch} onChange={persist} />
@@ -258,29 +257,28 @@
 					class="settings-field min-h-24"
 					value={memory.profile}
 					placeholder={$LL.memoryProfilePlaceholder()}
-					oninput={(e) => setProfileText(e.currentTarget.value)}
-				></textarea>
+					oninput={(e) => setProfileText(e.currentTarget.value)}></textarea>
 			</SettingsField>
 
 			{#if memory.notes.length}
 				<div class="flex flex-col gap-2">
 					{#each memory.notes as note (note.id)}
-						<div class="flex flex-col gap-1 rounded-md border border-shade-3 p-2.5">
+						<div class="border-shade-3 flex flex-col gap-1 rounded-md border p-2.5">
 							<div class="flex items-start justify-between gap-2">
 								<span class="min-w-0 flex-1">
 									<span class="block truncate text-sm font-medium">{note.title}</span>
-									<span class="block truncate text-xs text-muted">{note.when}</span>
+									<span class="text-muted block truncate text-xs">{note.when}</span>
 								</span>
 								<button
 									type="button"
-									class="shrink-0 text-muted transition-colors hover:text-active"
+									class="text-muted hover:text-active shrink-0 transition-colors"
 									onclick={() => forget(note.id)}
 									aria-label={$LL.memoryForgetNote({ title: note.title })}
 								>
 									<Trash2 class="base-icon" />
 								</button>
 							</div>
-							<p class="whitespace-pre-wrap text-xs leading-snug text-muted">{note.body}</p>
+							<p class="text-muted text-xs leading-snug whitespace-pre-wrap">{note.body}</p>
 						</div>
 					{/each}
 				</div>
@@ -293,9 +291,9 @@
 
 	{#if $knowledgeStore.length > 0}
 		<SettingsSection title="Knowledge" description="Collections this persona can draw on.">
-			<div class="flex flex-col gap-1 rounded-lg border border-shade-3 bg-shade-0 p-1.5">
+			<div class="border-shade-3 bg-shade-0 flex flex-col gap-1 rounded-lg border p-1.5">
 				{#each $knowledgeStore as k (k.id)}
-					<div class="rounded-md px-2 py-1.5 hover:bg-shade-1">
+					<div class="hover:bg-shade-1 rounded-md px-2 py-1.5">
 						<FieldCheckbox
 							label={k.name || 'Untitled'}
 							checked={attached.includes(k.id)}

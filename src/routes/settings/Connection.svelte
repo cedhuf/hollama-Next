@@ -134,7 +134,7 @@
 
 <div
 	data-testid="server"
-	class="overflow-hidden rounded-xl border bg-shade-0 transition-colors {open
+	class="bg-shade-0 overflow-hidden rounded-xl border transition-colors {open
 		? 'border-shade-4'
 		: 'border-shade-3'}"
 >
@@ -159,14 +159,14 @@
 
 			<span class="flex min-w-0 flex-col">
 				<span class="flex items-center gap-1.5">
-					<span class="truncate text-sm font-medium text-active">{name}</span>
+					<span class="text-active truncate text-sm font-medium">{name}</span>
 					<!-- Only when the label is something other than the provider's own name,
 					     so a connection called "Ollama" doesn't say Ollama twice. -->
 					{#if name !== provider.name}
 						<span class="badge shrink-0">{provider.name}</span>
 					{/if}
 				</span>
-				<span class="flex items-center gap-1.5 text-xs text-muted">
+				<span class="text-muted flex items-center gap-1.5 text-xs">
 					<span
 						class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {syncedAt
 							? 'bg-positive'
@@ -193,7 +193,7 @@
 				class="peer sr-only"
 			/>
 			<span
-				class="relative h-5 w-9 rounded-full bg-shade-3 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:bg-accent peer-checked:after:translate-x-4 peer-focus-visible:ring-2 peer-focus-visible:ring-accent"
+				class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
 			></span>
 		</label>
 
@@ -216,7 +216,7 @@
 			onclick={() => (open = !open)}
 			aria-label={$LL.connectionSettings()}
 			aria-expanded={open}
-			class="shrink-0 rounded-md p-1 text-muted transition-colors hover:text-active"
+			class="text-muted hover:text-active shrink-0 rounded-md p-1 transition-colors"
 		>
 			<ChevronDown class="base-icon transition-transform {open ? 'rotate-180' : ''}" />
 		</button>
@@ -224,7 +224,7 @@
 
 	{#if open}
 		<div
-			class="flex flex-col gap-4 border-t border-shade-3 p-4"
+			class="border-shade-3 flex flex-col gap-4 border-t p-4"
 			transition:slide={{ duration: 150 }}
 		>
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -271,14 +271,14 @@
 							<!-- A stored key is never returned by the API. Showing the empty
 							     password field would read as "no key configured". -->
 							<div
-								class="flex items-center gap-2 rounded-md border border-shade-3 bg-shade-1 px-2.5 py-1.5"
+								class="border-shade-3 bg-shade-1 flex items-center gap-2 rounded-md border px-2.5 py-1.5"
 							>
-								<KeyRound class="h-3.5 w-3.5 shrink-0 text-positive" />
-								<span class="flex-1 text-sm text-muted">{$LL.apiKeySaved()}</span>
+								<KeyRound class="text-positive h-3.5 w-3.5 shrink-0" />
+								<span class="text-muted flex-1 text-sm">{$LL.apiKeySaved()}</span>
 								<button
 									type="button"
 									onclick={() => (replacingKey = true)}
-									class="text-xs text-link"
+									class="text-link text-xs"
 								>
 									{$LL.apiKeyReplace()}
 								</button>
@@ -302,7 +302,7 @@
 										}}
 										aria-label={$LL.apiKeyKeep()}
 										title={$LL.apiKeyKeep()}
-										class="shrink-0 rounded-md p-1.5 text-muted transition-colors hover:text-active"
+										class="text-muted hover:text-active shrink-0 rounded-md p-1.5 transition-colors"
 									>
 										<X class="h-4 w-4" />
 									</button>
@@ -347,7 +347,7 @@
 			     creation from whatever the other connections aren't using; changing it
 			     is just picking another swatch. -->
 			<div class="flex flex-wrap items-center gap-2">
-				<span class="mr-1 text-sm font-medium text-active">{$LL.color()}</span>
+				<span class="text-active mr-1 text-sm font-medium">{$LL.color()}</span>
 				{#each SERVER_COLORS as swatch (swatch)}
 					<button
 						type="button"
@@ -357,10 +357,10 @@
 							server.color = swatch;
 							persist();
 						}}
-						class="h-5 w-5 rounded-full ring-2 ring-offset-2 ring-offset-shade-0 transition-all {badge.color.toLowerCase() ===
+						class="ring-offset-shade-0 h-5 w-5 rounded-full ring-2 ring-offset-2 transition-all {badge.color.toLowerCase() ===
 						swatch.toLowerCase()
 							? 'ring-accent'
-							: 'ring-transparent hover:ring-shade-4'}"
+							: 'hover:ring-shade-4 ring-transparent'}"
 						style="background-color: {swatch}"
 					></button>
 				{/each}
@@ -407,12 +407,12 @@
 
 			<!-- Footer: the occasional actions, kept out of the way of the fields.
 			     Delete confirms in place rather than through a dialog. -->
-			<div class="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-shade-3 pt-3">
+			<div class="border-shade-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
 				{#if onRenameModels}
 					<button
 						type="button"
 						onclick={onRenameModels}
-						class="flex items-center gap-1.5 text-xs text-link"
+						class="text-link flex items-center gap-1.5 text-xs"
 					>
 						<Tags class="h-3.5 w-3.5" />
 						{$LL.modelNames()}
@@ -423,7 +423,7 @@
 					<button
 						type="button"
 						onclick={() => (showAdvanced = !showAdvanced)}
-						class="text-xs text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active text-xs transition-colors"
 					>
 						{$LL.advancedSettings()}
 					</button>
@@ -431,19 +431,19 @@
 
 				<div class="ml-auto flex items-center gap-2">
 					{#if confirmingDelete}
-						<span class="text-xs text-muted">{$LL.confirmDeletion()}</span>
+						<span class="text-muted text-xs">{$LL.confirmDeletion()}</span>
 						<button
 							type="button"
 							onclick={onDelete}
 							aria-label={$LL.deleteServer()}
-							class="rounded-md bg-negative px-2 py-1 text-xs font-medium text-shade-0"
+							class="bg-negative text-shade-0 rounded-md px-2 py-1 text-xs font-medium"
 						>
 							{$LL.delete()}
 						</button>
 						<button
 							type="button"
 							onclick={() => (confirmingDelete = false)}
-							class="text-xs text-muted transition-colors hover:text-active"
+							class="text-muted hover:text-active text-xs transition-colors"
 						>
 							{$LL.cancel()}
 						</button>
@@ -452,7 +452,7 @@
 							type="button"
 							onclick={() => (confirmingDelete = true)}
 							aria-label={$LL.deleteServer()}
-							class="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-negative"
+							class="text-muted hover:text-negative flex items-center gap-1.5 text-xs transition-colors"
 						>
 							<Trash2 class="h-3.5 w-3.5" />
 							{$LL.delete()}

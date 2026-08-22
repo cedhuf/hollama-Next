@@ -355,7 +355,7 @@
 <!-- Frameless like the library and the sessions landing, and carrying a surface
      for the same reason. -->
 <div
-	class="app-panel [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)] flex h-full flex-col surface-pane lg:rounded-xl"
+	class="app-panel surface-pane flex h-full flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
 >
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
@@ -364,13 +364,13 @@
 			     than by a floor set here: the row is as tall as its button, and that
 			     button is the same button. -->
 			<div class="mb-1 flex items-center justify-between gap-3">
-				<h1 class="truncate text-xl font-semibold tracking-tight text-active">{$LL.images()}</h1>
+				<h1 class="text-active truncate text-xl font-semibold tracking-tight">{$LL.images()}</h1>
 
 				{#if $imagesStore.length}
 					<div class="flex shrink-0 items-center gap-2">
 						<!-- How many, next to the thing that acts on them rather than next to
 						     the title: it is the size of what you are about to export. -->
-						<span class="text-xs tabular-nums text-muted">
+						<span class="text-muted text-xs tabular-nums">
 							{$LL.imagesCount({ count: $imagesStore.length })}
 						</span>
 
@@ -379,7 +379,7 @@
 								<button
 									{...props}
 									type="button"
-									class="flex items-center gap-1.5 rounded-lg border border-accent bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
+									class="border-accent bg-accent text-shade-0 flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-opacity hover:opacity-90"
 								>
 									<ArrowDownToLine class="h-4 w-4" />
 									{$LL.export()}
@@ -396,7 +396,7 @@
 					</div>
 				{/if}
 			</div>
-			<p class="mb-7 text-sm text-muted">{$LL.imagesSubtitle()}</p>
+			<p class="text-muted mb-7 text-sm">{$LL.imagesSubtitle()}</p>
 
 			{#if $canDrawImages}
 				<!-- What makes a new one. At the top because that is where the page starts,
@@ -412,7 +412,7 @@
 					label={$LL.imageReferencesDrop()}
 					refusal={$LL.imageReferencesUnsupported()}
 					onImages={addReferences}
-					class="library-section mb-8 overflow-hidden rounded-2xl border bg-shade-0 shadow-sm transition-colors focus-within:border-accent section-tint"
+					class="library-section bg-shade-0 focus-within:border-accent section-tint mb-8 overflow-hidden rounded-2xl border shadow-sm transition-colors"
 					style="--section-turn: 40"
 				>
 					<textarea
@@ -420,21 +420,21 @@
 						rows="3"
 						maxlength={IMAGE_LIMITS.prompt}
 						placeholder={$LL.imagePromptPlaceholder()}
-						class="w-full resize-none border-0 bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed outline-none placeholder:text-muted"
+						class="placeholder:text-muted w-full resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-base leading-relaxed outline-none"
 					></textarea>
 
 					{#if canRewrite && rewritten}
 						<!-- Shown, not applied. What is in this box is what gets sent; empty it
 						     and the words above are sent instead. Tinted with the accent so it
 						     reads as something the app added rather than something you typed. -->
-						<div class="mx-4 mb-3 flex flex-col gap-1.5 rounded-xl bg-accent/[0.07] p-3">
+						<div class="bg-accent/[0.07] mx-4 mb-3 flex flex-col gap-1.5 rounded-xl p-3">
 							<div class="flex items-center gap-2">
-								<Wand2 class="h-3.5 w-3.5 shrink-0 text-accent" />
-								<span class="text-xs font-medium text-active">{$LL.imageRewritten()}</span>
+								<Wand2 class="text-accent h-3.5 w-3.5 shrink-0" />
+								<span class="text-active text-xs font-medium">{$LL.imageRewritten()}</span>
 								<button
 									type="button"
 									onclick={() => (rewritten = '')}
-									class="ml-auto text-xs text-link"
+									class="text-link ml-auto text-xs"
 								>
 									{$LL.imageUseOriginal()}
 								</button>
@@ -443,9 +443,9 @@
 								bind:value={rewritten}
 								rows="3"
 								maxlength={IMAGE_LIMITS.prompt}
-								class="w-full resize-none rounded-lg border border-shade-3 bg-shade-0 p-2 text-sm leading-relaxed outline-none focus:border-accent"
+								class="border-shade-3 bg-shade-0 focus:border-accent w-full resize-none rounded-lg border p-2 text-sm leading-relaxed outline-none"
 							></textarea>
-							<span class="text-xs leading-snug text-muted">{$LL.imageRewrittenHint()}</span>
+							<span class="text-muted text-xs leading-snug">{$LL.imageRewrittenHint()}</span>
 						</div>
 					{/if}
 
@@ -456,9 +456,9 @@
 								maxlength={IMAGE_LIMITS.negativePrompt}
 								placeholder={$LL.imageNegativePromptPlaceholder()}
 								aria-label={$LL.imageNegativePrompt()}
-								class="w-full rounded-lg border border-shade-3 bg-shade-1 px-3 py-2 text-sm outline-none placeholder:text-muted focus:border-accent"
+								class="border-shade-3 bg-shade-1 placeholder:text-muted focus:border-accent w-full rounded-lg border px-3 py-2 text-sm outline-none"
 							/>
-							<span class="text-xs leading-snug text-muted">{$LL.imageNegativePromptHelp()}</span>
+							<span class="text-muted text-xs leading-snug">{$LL.imageNegativePromptHelp()}</span>
 						</div>
 					{/if}
 
@@ -466,7 +466,7 @@
 						<!-- Beside the pictures rather than under the button: it is a rule about
 						     what the words must say, and it appears when there is something for
 						     them to say it about. -->
-						<p class="mx-4 mb-3 text-xs leading-snug text-muted">
+						<p class="text-muted mx-4 mb-3 text-xs leading-snug">
 							{$LL.imageReferencesTrigger({ word: missingTrigger })}
 						</p>
 					{/if}
@@ -477,7 +477,7 @@
 						<div class="mx-4 mb-3 flex flex-wrap gap-2">
 							{#each references as reference (reference.id)}
 								<span
-									class="group relative h-14 w-14 overflow-hidden rounded-lg border border-shade-3"
+									class="group border-shade-3 relative h-14 w-14 overflow-hidden rounded-lg border"
 								>
 									<img
 										src={reference.dataUrl}
@@ -488,7 +488,7 @@
 										type="button"
 										onclick={() => (references = references.filter((r) => r.id !== reference.id))}
 										aria-label={$LL.remove()}
-										class="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+										class="absolute top-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 									>
 										<X class="h-3 w-3" />
 									</button>
@@ -501,7 +501,7 @@
 					     rather than a second card: they qualify the words above, they are not a
 					     separate subject. -->
 					<div
-						class="flex flex-wrap items-center gap-2 border-t border-shade-2 bg-shade-1/60 px-3 py-2.5"
+						class="border-shade-2 bg-shade-1/60 flex flex-wrap items-center gap-2 border-t px-3 py-2.5"
 					>
 						<div class="min-w-40 flex-1">
 							<ModelSelect bind:value={model} kinds={['image']} />
@@ -534,7 +534,7 @@
 							disabled={!options.sizes}
 							aria-label={$LL.imageRatio()}
 							title={options.sizes ? $LL.imageRatio() : $LL.imageOptionUnavailable()}
-							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent disabled:opacity-50"
+							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none disabled:opacity-50"
 						>
 							{#each IMAGE_RATIOS as value (value)}
 								<option {value}>{RATIO_LABELS[value]}</option>
@@ -546,7 +546,7 @@
 							disabled={!options.qualities}
 							aria-label={$LL.imageQuality()}
 							title={options.qualities ? $LL.imageQuality() : $LL.imageOptionUnavailable()}
-							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent disabled:opacity-50"
+							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none disabled:opacity-50"
 						>
 							{#each IMAGE_QUALITIES as value (value)}
 								<option {value}>{QUALITY_LABELS[value]}</option>
@@ -556,7 +556,7 @@
 						<select
 							bind:value={count}
 							aria-label={$LL.imageCount()}
-							class="h-9 shrink-0 rounded-lg border border-shade-3 bg-shade-0 px-2 text-xs text-muted outline-none transition-colors hover:text-active focus:border-accent"
+							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none"
 						>
 							{#each Array.from({ length: IMAGE_LIMITS.maxPerRequest }, (_, i) => i + 1) as n (n)}
 								<option value={n}>{$LL.imageCountOption({ count: n })}</option>
@@ -585,7 +585,7 @@
 									onclick={rewrite}
 									disabled={rewriting || busy || !prompt.trim()}
 									title={$LL.imageRewrite()}
-									class="flex h-9 items-center gap-1.5 rounded-lg border border-shade-3 px-2.5 text-xs text-muted transition-colors hover:text-active disabled:pointer-events-none disabled:opacity-50"
+									class="border-shade-3 text-muted hover:text-active flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors disabled:pointer-events-none disabled:opacity-50"
 								>
 									{#if rewriting}
 										<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
@@ -600,7 +600,7 @@
 								type="button"
 								onclick={generate}
 								disabled={busy || !prompt.trim() || !model}
-								class="flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-medium text-shade-0 transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:bg-shade-3 disabled:text-muted"
+								class="bg-accent text-shade-0 disabled:bg-shade-3 disabled:text-muted flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-opacity hover:opacity-90 disabled:pointer-events-none"
 							>
 								{#if busy}
 									<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
@@ -625,10 +625,10 @@
 						     reads as a page that is working, and it says how many are coming. -->
 						{#each Array.from({ length: count }, (_, i) => i) as slot (slot)}
 							<div
-								class="flex aspect-square animate-pulse items-center justify-center rounded-xl border border-dashed border-accent/40 bg-accent/5"
+								class="border-accent/40 bg-accent/5 flex aspect-square animate-pulse items-center justify-center rounded-xl border border-dashed"
 								style="animation-delay: {slot * 150}ms"
 							>
-								<ImageIcon class="h-6 w-6 text-accent/40" />
+								<ImageIcon class="text-accent/40 h-6 w-6" />
 							</div>
 						{/each}
 					{/if}
@@ -640,7 +640,7 @@
 								opened = image;
 								expandedPrompt = false;
 							}}
-							class="group relative aspect-square overflow-hidden rounded-xl border border-shade-3 bg-shade-1 transition-all hover:border-shade-4 hover:shadow-md focus-visible:border-accent focus-visible:outline-none"
+							class="group border-shade-3 bg-shade-1 hover:border-shade-4 focus-visible:border-accent relative aspect-square overflow-hidden rounded-xl border transition-all hover:shadow-md focus-visible:outline-none"
 						>
 							<!-- The picture grows a little under the pointer inside a frame that
 							     does not, which is what makes a grid of squares feel like objects
@@ -656,7 +656,7 @@
 							     everywhere else in the app. A gallery mixing two providers reads
 							     without a legend. -->
 							<span
-								class="absolute left-2 top-2 h-2 w-2 rounded-full ring-1 ring-black/20"
+								class="absolute top-2 left-2 h-2 w-2 rounded-full ring-1 ring-black/20"
 								style="background-color: {badgeColor(image.serverId)}"
 							></span>
 
@@ -673,7 +673,7 @@
 							     about being an excerpt, and the dialog is one click away for the
 							     rest. -->
 							<span
-								class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2 pt-5 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+								class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pt-5 pb-2 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
 							>
 								{image.title || image.sentPrompt || image.prompt}
 							</span>
@@ -683,12 +683,12 @@
 			{:else if $imagesLoaded && $canDrawImages}
 				<!-- Empty, and saying so as an invitation rather than as a fault. -->
 				<div
-					class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-shade-4 px-6 py-14 text-center"
+					class="border-shade-4 flex flex-col items-center gap-2 rounded-2xl border border-dashed px-6 py-14 text-center"
 				>
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10">
-						<ImageIcon class="h-5 w-5 text-accent" />
+					<div class="bg-accent/10 flex h-12 w-12 items-center justify-center rounded-full">
+						<ImageIcon class="text-accent h-5 w-5" />
 					</div>
-					<p class="max-w-sm text-sm text-muted">{$LL.imagesEmpty()}</p>
+					<p class="text-muted max-w-sm text-sm">{$LL.imagesEmpty()}</p>
 				</div>
 			{/if}
 		</div>
@@ -749,14 +749,14 @@
 			     close is already there and already pinned. Here it buys the picture that
 			     height back, which is the whole point of the dialog. -->
 			<div
-				class="relative flex h-12 shrink-0 items-center gap-3 border-b border-shade-2/40 bg-shade-0/20 px-4 backdrop-blur-xl"
+				class="border-shade-2/40 bg-shade-0/20 relative flex h-12 shrink-0 items-center gap-3 border-b px-4 backdrop-blur-xl"
 			>
 				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<span
 						class="inline-block h-2 w-2 shrink-0 rounded-full"
 						style="background-color: {badgeColor(image.serverId)}"
 					></span>
-					<span class="truncate text-sm font-semibold text-active">
+					<span class="text-active truncate text-sm font-semibold">
 						{image.title || modelLabel(serverFor(image.serverId), image.model)}
 					</span>
 				</div>
@@ -771,7 +771,7 @@
 				
 				     The model id is the one part with no ceiling of its own, since some run
 				     to forty characters, so it is given one. -->
-				<div class="hidden shrink-0 items-center gap-2 text-[10px] leading-4 text-muted sm:flex">
+				<div class="text-muted hidden shrink-0 items-center gap-2 text-[10px] leading-4 sm:flex">
 					<span class="max-w-[9rem] truncate">
 						{modelLabel(serverFor(image.serverId), image.model)}
 					</span>
@@ -792,7 +792,7 @@
 						onclick={() => reuse(image)}
 						title={$LL.imageReusePrompt()}
 						aria-label={$LL.imageReusePrompt()}
-						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 					>
 						<RotateCcw class="h-4 w-4" />
 					</button>
@@ -804,7 +804,7 @@
 						onclick={() => saveAs(imageUrl(image.id), downloadName(image))}
 						title={$LL.download()}
 						aria-label={$LL.download()}
-						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 					>
 						<ArrowDownToLine class="h-4 w-4" />
 					</button>
@@ -823,13 +823,13 @@
 
 					<!-- A rule between what the dialog does and what closes it: destructive
 					     controls should not sit flush against the one everybody aims for. -->
-					<span class="mx-1 h-5 w-px bg-shade-3"></span>
+					<span class="bg-shade-3 mx-1 h-5 w-px"></span>
 
 					<button
 						type="button"
 						onclick={() => (opened = null)}
 						aria-label={$LL.close()}
-						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 					>
 						<X class="h-4 w-4" />
 					</button>
@@ -904,7 +904,7 @@
 							     it. Left to the default it is a fraction nobody can divide by. -->
 							<p
 								bind:clientHeight={promptOnlyHeight}
-								class="whitespace-pre-wrap text-[11px] leading-4 text-white"
+								class="text-[11px] leading-4 whitespace-pre-wrap text-white"
 							>
 								{#if image.sentPrompt}<Wand2 class="mr-1 inline h-3 w-3" />{/if}{image.sentPrompt ||
 									image.prompt}

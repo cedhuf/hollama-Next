@@ -70,15 +70,15 @@
 />
 
 {#snippet panel()}
-	<div class="rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5">
+	<div class="border-shade-3 bg-shade-1 rounded-lg border px-3 py-2.5">
 		<div class="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-			<span class="min-w-0 text-xs leading-relaxed text-muted">{$LL.clearedExplain()}</span>
+			<span class="text-muted min-w-0 text-xs leading-relaxed">{$LL.clearedExplain()}</span>
 
 			{#if onUndo}
 				<button
 					type="button"
 					onclick={onUndo}
-					class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active sm:ml-auto"
+					class="text-muted hover:text-active flex shrink-0 items-center gap-1.5 text-xs transition-colors sm:ml-auto"
 					title={$LL.undoClearHelp()}
 				>
 					<Undo2 class="h-3.5 w-3.5" />
@@ -90,12 +90,12 @@
 		<!-- Its own scrollport, and a short one: this is an index you glance down,
 		     not a place to read a conversation. The conversation is what the page
 		     itself is for, and restoring puts it back there. -->
-		<div class="max-h-[45vh] overflow-y-auto rounded-md border border-shade-2 bg-shade-0">
+		<div class="border-shade-2 bg-shade-0 max-h-[45vh] overflow-y-auto rounded-md border">
 			{#if !showAll && cleared.length > PAGE}
 				<button
 					type="button"
 					onclick={() => (showAll = true)}
-					class="w-full border-b border-shade-2 px-3 py-2 text-center text-[11px] text-muted transition-colors hover:bg-shade-1 hover:text-active"
+					class="border-shade-2 text-muted hover:bg-shade-1 hover:text-active w-full border-b px-3 py-2 text-center text-[11px] transition-colors"
 				>
 					{$LL.clearedShowAll({ count: cleared.length })}
 				</button>
@@ -106,15 +106,15 @@
 				<button
 					type="button"
 					onclick={() => toggleRow(at)}
-					class="flex w-full gap-2 border-b border-shade-2 px-3 py-1.5 text-left transition-colors last:border-b-0 hover:bg-shade-1"
+					class="border-shade-2 hover:bg-shade-1 flex w-full gap-2 border-b px-3 py-1.5 text-left transition-colors last:border-b-0"
 				>
 					<span
-						class="w-14 shrink-0 pt-px text-[10px] font-medium uppercase tracking-wide text-muted"
+						class="text-muted w-14 shrink-0 pt-px text-[10px] font-medium tracking-wide uppercase"
 					>
 						{label(entry.role)}
 					</span>
 					<span
-						class="min-w-0 flex-1 whitespace-pre-wrap text-xs leading-snug text-active {opened.has(
+						class="text-active min-w-0 flex-1 text-xs leading-snug whitespace-pre-wrap {opened.has(
 							at
 						)
 							? ''

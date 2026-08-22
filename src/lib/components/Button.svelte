@@ -38,13 +38,13 @@
 			inline-flex items-center justify-center gap-2 rounded-md transition-colors duration-150
 			button--{variant}
 			{variant === 'default' || variant === 'outline'
-			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
+			? 'disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted border px-3 py-2 text-sm leading-tight font-medium disabled:pointer-events-none'
 			: ''}
 			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
-			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
-			{variant === 'icon-sm' ? 'px-1.5 py-1 text-muted hover:text-active' : ''}
+			{variant === 'icon' ? 'text-muted hover:text-active px-2.5 py-2' : ''}
+			{variant === 'icon-sm' ? 'text-muted hover:text-active px-1.5 py-1' : ''}
 			{className}
 		"
 		{onclick}
@@ -60,13 +60,13 @@
 			inline-flex items-center justify-center gap-2 rounded-md transition-colors duration-150
 			button--{variant}
 			{variant === 'default' || variant === 'outline'
-			? 'border px-3 py-2 text-sm font-medium leading-tight disabled:pointer-events-none disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted'
+			? 'disabled:border-shade-2 disabled:bg-shade-2 disabled:text-muted border px-3 py-2 text-sm leading-tight font-medium disabled:pointer-events-none'
 			: ''}
 			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
 			{variant === 'link' ? 'text-link inline rounded-none' : ''}
-			{variant === 'icon' ? 'px-2.5 py-2 text-muted hover:text-active' : ''}
-			{variant === 'icon-sm' ? 'px-1.5 py-1 text-muted hover:text-active' : ''}
+			{variant === 'icon' ? 'text-muted hover:text-active px-2.5 py-2' : ''}
+			{variant === 'icon-sm' ? 'text-muted hover:text-active px-1.5 py-1' : ''}
 			{isActive ? 'text-active' : ''}
 			{className}
 		"
@@ -74,7 +74,7 @@
 		{onclick}
 	>
 		<span
-			class="absolute inset-0 flex items-center justify-center bg-shade-2 {isLoading
+			class="bg-shade-2 absolute inset-0 flex items-center justify-center {isLoading
 				? 'flex'
 				: 'hidden'}"
 		>

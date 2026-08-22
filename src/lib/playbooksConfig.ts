@@ -49,9 +49,8 @@ export async function loadServerPlaybooks(): Promise<void> {
 	}
 }
 
-export const playbooksConfig = derived(
-	serverPlaybooks,
-	($server): PlaybooksConfig => (isServer ? ($server ?? DEFAULT) : DEFAULT)
+export const playbooksConfig = derived(serverPlaybooks, ($server): PlaybooksConfig =>
+	isServer ? ($server ?? DEFAULT) : DEFAULT
 );
 
 /**

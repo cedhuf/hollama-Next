@@ -44,9 +44,9 @@
 					<button
 						type="button"
 						onclick={() => addServer(provider.type)}
-						class="group flex items-center gap-2 rounded-lg border border-shade-3 bg-shade-0 px-3 py-2.5 text-left transition-colors hover:bg-shade-1"
+						class="group border-shade-3 bg-shade-0 hover:bg-shade-1 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors"
 					>
-						<Plus class="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-accent" />
+						<Plus class="text-muted group-hover:text-accent h-4 w-4 shrink-0 transition-colors" />
 						<span class="truncate text-sm font-medium">{provider.name}</span>
 					</button>
 				{/each}
@@ -55,7 +55,7 @@
 
 		<div class="flex flex-col gap-y-4">
 			{#if !$serversStore.length}
-				<div class="flex rounded-lg border border-shade-3 text-balance text-center">
+				<div class="border-shade-3 flex rounded-lg border text-center text-balance">
 					<EmptyMessage>{$LL.noServerConnections()}</EmptyMessage>
 				</div>
 			{/if}

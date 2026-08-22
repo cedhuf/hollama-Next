@@ -277,12 +277,7 @@ export async function toggleSessionArchive(id: string): Promise<void> {
 }
 
 export type SessionGroupKey =
-	| 'pinned'
-	| 'today'
-	| 'yesterday'
-	| 'previous7Days'
-	| 'previous30Days'
-	| 'older';
+	'pinned' | 'today' | 'yesterday' | 'previous7Days' | 'previous30Days' | 'older';
 
 export interface SessionGroup {
 	/** i18n key — the component resolves it via $LL (e.g. groupToday). */

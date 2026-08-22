@@ -103,7 +103,7 @@
 </script>
 
 <div
-	class="code-editor min-h-0 w-full flex-1 overflow-hidden rounded-lg border border-shade-3 bg-shade-0 text-sm focus-within:border-accent"
+	class="code-editor border-shade-3 bg-shade-0 focus-within:border-accent min-h-0 w-full flex-1 overflow-hidden rounded-lg border text-sm"
 	bind:this={container}
 	data-testid="code-editor"
 ></div>

@@ -12,4 +12,4 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
-<span class="rounded bg-shade-2 px-1.5 py-0.5 text-[11px] text-muted">{@render children()}</span>
+<span class="bg-shade-2 text-muted rounded px-1.5 py-0.5 text-[11px]">{@render children()}</span>

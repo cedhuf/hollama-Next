@@ -225,9 +225,9 @@
 				: offer.action === 'restore'
 					? $LL.personaStoreResetTooltip()
 					: undefined}
-			class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1.5 text-xs transition-colors disabled:opacity-50 {offer.action ===
+			class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs whitespace-nowrap transition-colors disabled:opacity-50 {offer.action ===
 			'update'
-				? 'border border-accent text-accent hover:bg-accent/10'
+				? 'border-accent text-accent hover:bg-accent/10 border'
 				: 'text-muted hover:bg-shade-2 hover:text-active'}"
 		>
 			{#if working === offer.key}
@@ -245,7 +245,7 @@
 		<!-- A statement rather than a control: you have it, and installing it again
 		     would hand you what you already hold. -->
 		<span
-			class="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-xs text-muted"
+			class="text-muted flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 text-xs whitespace-nowrap"
 		>
 			<Check class="h-3.5 w-3.5" />
 			{actionLabel(offer.action)}
@@ -285,15 +285,15 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<div class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4">
-			<span class="truncate text-sm font-semibold text-active">{title}</span>
+		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
+			<span class="text-active truncate text-sm font-semibold">{title}</span>
 			<div class="flex shrink-0 items-center gap-1">
 				{#if updatableCount > 0 && onUpdateAll}
 					<button
 						type="button"
 						disabled={updatingAll}
 						onclick={updateAll}
-						class="flex items-center gap-1.5 rounded-lg border border-accent px-2.5 py-1 text-xs text-accent transition-colors hover:bg-accent/10 disabled:opacity-50"
+						class="border-accent text-accent hover:bg-accent/10 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors disabled:opacity-50"
 					>
 						{#if updatingAll}
 							<LoaderCircle class="h-3.5 w-3.5 animate-spin" />
@@ -309,7 +309,7 @@
 					onclick={onRefresh}
 					aria-label={$LL.personaStoreRefresh()}
 					title={$LL.personaStoreRefresh()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 				>
 					<RefreshCw class="h-4 w-4 {status === 'loading' ? 'animate-spin' : ''}" />
 				</button>
@@ -317,7 +317,7 @@
 					type="button"
 					onclick={() => (open = false)}
 					aria-label={$LL.close()}
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
 				>
 					<X class="h-4 w-4" />
 				</button>
@@ -326,9 +326,9 @@
 
 		<!-- Search and filters above the grid rather than beside it: a phone has no
 		     room for a sidebar of facets, and the same row works at every width. -->
-		<div class="shrink-0 border-b border-shade-2 px-4 py-3">
+		<div class="border-shade-2 shrink-0 border-b px-4 py-3">
 			<div class="relative">
-				<Search class="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted" />
+				<Search class="text-muted pointer-events-none absolute top-2.5 left-3 h-4 w-4" />
 				<input
 					bind:value={query}
 					type="search"
@@ -352,7 +352,7 @@
 					{/each}
 
 					{#if families.length > 1}
-						<span class="mx-1 my-1 w-px self-stretch bg-shade-3"></span>
+						<span class="bg-shade-3 mx-1 my-1 w-px self-stretch"></span>
 						{@render chip($LL.storeEverything(), family === '', () => (family = ''))}
 						{#each families as group (group.value)}
 							{@render chip(
@@ -366,7 +366,7 @@
 
 				<!-- At the end of the filters, because it is one: how much of each entry
 				     you want to see at a time. -->
-				<div class="flex shrink-0 items-center rounded-lg border border-shade-3 p-0.5">
+				<div class="border-shade-3 flex shrink-0 items-center rounded-lg border p-0.5">
 					{#each layouts as option (option.value)}
 						<button
 							type="button"
@@ -387,27 +387,27 @@
 
 		<div class="min-h-0 flex-1 overflow-auto p-4">
 			{#if status === 'loading' && offers.length === 0}
-				<div class="flex h-full items-center justify-center text-muted">
+				<div class="text-muted flex h-full items-center justify-center">
 					<LoaderCircle class="h-5 w-5 animate-spin" />
 				</div>
 			{:else if status === 'error' && offers.length === 0}
 				<!-- Nothing ships inside the app, so an unreachable store is an empty
 				     library. Say which of the two it is, and offer the retry. -->
 				<div class="flex h-full flex-col items-center justify-center gap-3 text-center">
-					<p class="text-sm text-muted">{unreachable}</p>
+					<p class="text-muted text-sm">{unreachable}</p>
 					{#if errorMessage}
-						<p class="max-w-[40ch] text-xs text-muted">{errorMessage}</p>
+						<p class="text-muted max-w-[40ch] text-xs">{errorMessage}</p>
 					{/if}
 					<button
 						type="button"
 						onclick={onRefresh}
-						class="rounded-lg border border-shade-3 px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-active"
+						class="border-shade-3 text-muted hover:border-accent hover:text-active rounded-lg border px-3 py-1.5 text-xs transition-colors"
 					>
 						{$LL.personaStoreRefresh()}
 					</button>
 				</div>
 			{:else if filtered.length === 0}
-				<p class="pt-8 text-center text-sm text-muted">
+				<p class="text-muted pt-8 text-center text-sm">
 					{#if query.trim()}
 						{$LL.noMatches()}
 					{:else if view === 'shared'}
@@ -429,8 +429,8 @@
 						{#if rows.length}
 							<div class="flex flex-col gap-3">
 								<div class="flex items-baseline gap-2">
-									<h3 class="text-sm font-medium text-active">{group.label}</h3>
-									<span class="text-xs text-muted">{rows.length}</span>
+									<h3 class="text-active text-sm font-medium">{group.label}</h3>
+									<span class="text-muted text-xs">{rows.length}</span>
 								</div>
 								{@render shelf(rows, group.tint)}
 							</div>

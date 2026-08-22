@@ -53,7 +53,7 @@
 
 <SettingsPanel>
 	<!-- Identity card -->
-	<div class="flex items-center gap-4 rounded-xl border border-shade-3 bg-shade-0 p-4">
+	<div class="border-shade-3 bg-shade-0 flex items-center gap-4 rounded-xl border p-4">
 		<AvatarEditor
 			image={$settingsStore.profileAvatar}
 			color={$settingsStore.profileColor}
@@ -66,10 +66,10 @@
 		/>
 
 		<div class="flex min-w-0 flex-col">
-			<span class="truncate text-base font-semibold text-active">{displayName}</span>
-			<span class="text-xs text-muted">{roleLabels[$currentRole]}</span>
+			<span class="text-active truncate text-base font-semibold">{displayName}</span>
+			<span class="text-muted text-xs">{roleLabels[$currentRole]}</span>
 			{#if email}
-				<span class="mt-0.5 truncate text-xs text-muted">{email}</span>
+				<span class="text-muted mt-0.5 truncate text-xs">{email}</span>
 			{/if}
 		</div>
 	</div>

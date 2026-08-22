@@ -74,7 +74,7 @@
 	<div class="flex flex-col gap-4">
 		{#each groups as group (group.title)}
 			<div class="flex flex-col gap-1.5">
-				<h4 class="text-xs font-medium uppercase tracking-wide text-muted">{group.title}</h4>
+				<h4 class="text-muted text-xs font-medium tracking-wide uppercase">{group.title}</h4>
 
 				{#each group.shortcuts as shortcut (shortcut.label)}
 					<!-- Label left, keys right: the eye scans the actions, and only stops on
@@ -90,7 +90,7 @@
 				{/each}
 
 				{#if group.note}
-					<p class="text-xs leading-snug text-muted">{group.note}</p>
+					<p class="text-muted text-xs leading-snug">{group.note}</p>
 				{/if}
 			</div>
 		{/each}

@@ -19,7 +19,7 @@
 <!-- The top edge of the column, and the densest of its materials along with the
      footer: edges read as edges by being more solid than what they enclose. -->
 <div
-	class="flex h-[var(--app-header-h)] shrink-0 border-b surface-chrome max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))]"
+	class="surface-chrome flex h-[var(--app-header-h)] shrink-0 border-b max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))]"
 >
 	<!-- The block paints out to the frame's edge; its contents stop at the width the
 	     column is going to. Two jobs that used to be one and had to be separated: laid
@@ -42,11 +42,11 @@
 		{:else}
 			<a href={resolve('/sessions')} class="flex items-center gap-2">
 				<Logo class="h-8 w-8 shrink-0" />
-				<span class="whitespace-nowrap text-lg font-semibold tracking-tight">{APP_NAME}</span>
+				<span class="text-lg font-semibold tracking-tight whitespace-nowrap">{APP_NAME}</span>
 			</a>
 			<button
 				onclick={onCollapse}
-				class="ml-auto rounded-lg p-2 text-muted transition-colors hover:text-active"
+				class="text-muted hover:text-active ml-auto rounded-lg p-2 transition-colors"
 				aria-label={$LL.collapseSidebar()}
 				title={$LL.collapseSidebar()}
 			>

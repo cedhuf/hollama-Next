@@ -279,11 +279,11 @@
 					onchange={(e) => importData(e, dataSource.storageKey)}
 				/>
 				<div
-					class="inline-flex w-full flex-grow flex-col justify-between gap-x-2 text-balance rounded-xl border border-shade-3 bg-shade-0 p-3 text-sm leading-tight sm:flex-row sm:items-center"
+					class="border-shade-3 bg-shade-0 inline-flex w-full flex-grow flex-col justify-between gap-x-2 rounded-xl border p-3 text-sm leading-tight text-balance sm:flex-row sm:items-center"
 				>
 					<div class="flex flex-col">
-						<span class="text-sm font-medium text-active">{dataSource.label}</span>
-						<span class="text-xs text-muted">{dataSource.description}</span>
+						<span class="text-active text-sm font-medium">{dataSource.label}</span>
+						<span class="text-muted text-xs">{dataSource.description}</span>
 					</div>
 
 					<nav class="mt-4 flex justify-between sm:mt-0">
@@ -317,17 +317,17 @@
 	<!-- Danger zone: a card like the others, but outlined in the negative colour so
 	     it never gets skimmed past as just another section. -->
 	<section
-		class="flex flex-col gap-2.5 rounded-xl border border-negative/40 bg-shade-0 p-4"
+		class="border-negative/40 bg-shade-0 flex flex-col gap-2.5 rounded-xl border p-4"
 		data-testid="data-management-reset"
 	>
 		<div class="flex flex-col gap-0.5">
-			<h3 class="text-sm font-medium text-negative">{$LL.dangerZone()}</h3>
-			<p class="text-xs leading-snug text-muted">{$LL.resetEverythingDescription()}</p>
+			<h3 class="text-negative text-sm font-medium">{$LL.dangerZone()}</h3>
+			<p class="text-muted text-xs leading-snug">{$LL.resetEverythingDescription()}</p>
 		</div>
 
 		{#if confirmReset}
-			<div class="flex flex-col gap-2 rounded-md border border-negative/30 bg-shade-1 p-3">
-				<span class="text-sm font-medium text-negative">{$LL.confirmResetEverything()}</span>
+			<div class="border-negative/30 bg-shade-1 flex flex-col gap-2 rounded-md border p-3">
+				<span class="text-negative text-sm font-medium">{$LL.confirmResetEverything()}</span>
 				<div class="flex gap-2">
 					<!-- Tailwind 4 puts the important modifier at the end; the old `!bg-…`
 					     form silently compiled to nothing, so this button was never red. -->

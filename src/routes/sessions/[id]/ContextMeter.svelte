@@ -51,7 +51,7 @@
 			onclick={() => (tipOpen = !tipOpen)}
 			aria-label={$LL.contextLoad()}
 			data-testid="context-meter"
-			class="flex items-center gap-1.5 rounded-md px-2 py-2 transition-colors hover:bg-shade-1 hover:text-active {colour}"
+			class="hover:bg-shade-1 hover:text-active flex items-center gap-1.5 rounded-md px-2 py-2 transition-colors {colour}"
 		>
 			<svg viewBox="0 0 16 16" class="h-4 w-4 shrink-0" aria-hidden="true">
 				<!-- Track, then the filled arc drawn from 12 o'clock clockwise. -->
@@ -83,8 +83,8 @@
 		</button>
 	{/snippet}
 
-	<p class="font-medium text-active">{$LL.contextLoad()}</p>
-	<p class="mt-1 text-muted">
+	<p class="text-active font-medium">{$LL.contextLoad()}</p>
+	<p class="text-muted mt-1">
 		{$LL.contextTokensOfLimit({
 			tokens: usage.tokens.toLocaleString(),
 			limit: usage.limit.toLocaleString(),
@@ -97,11 +97,11 @@
 		     hover is noise. -->
 		<p class="text-muted">{$LL.contextLimitFromModel()}</p>
 	{/if}
-	<p class="mt-1 text-muted">{$LL.contextMessagesInContext({ count: usage.messageCount })}</p>
+	<p class="text-muted mt-1">{$LL.contextMessagesInContext({ count: usage.messageCount })}</p>
 	{#if usage.compactedCount}
 		<p class="text-muted">{$LL.contextMessagesCompacted({ count: usage.compactedCount })}</p>
 	{/if}
-	<p class="mt-2 border-t border-shade-3 pt-1.5 text-[11px] text-muted">
+	<p class="border-shade-3 text-muted mt-2 border-t pt-1.5 text-[11px]">
 		{$LL.contextEstimateNote()}
 	</p>
 </Tooltip>

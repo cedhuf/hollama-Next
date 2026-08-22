@@ -19,7 +19,7 @@
      stored value, it is the entry `personaGlyph` found under that name in our own
      table. A persona arriving from a catalogue can pick one of ours or none. -->
 <div
-	class="flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold text-shade-0"
+	class="text-shade-0 flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold"
 	style="width:{size}px;height:{size}px;background-color:{persona.avatarColor};font-size:{Math.round(
 		size * 0.38
 	)}px"

@@ -36,8 +36,8 @@
 		'rounded-md border border-shade-3 bg-shade-0 px-3 py-2 text-sm outline-none focus:border-accent';
 </script>
 
-<div class="flex h-dvh w-screen items-center justify-center bg-shade-2 p-4">
-	<div class="flex w-full max-w-sm flex-col gap-5 rounded-2xl bg-shade-1 p-6 shadow-xl">
+<div class="bg-shade-2 flex h-dvh w-screen items-center justify-center p-4">
+	<div class="bg-shade-1 flex w-full max-w-sm flex-col gap-5 rounded-2xl p-6 shadow-xl">
 		<div class="flex flex-col items-center gap-2 text-center">
 			<Logo class="h-12 w-12" />
 			<h1 class="text-lg font-semibold tracking-tight">Sign in to {APP_NAME}</h1>
@@ -45,7 +45,7 @@
 
 		{#if errorMessage}
 			<div
-				class="rounded-md border border-negative/40 bg-negative/10 px-3 py-2 text-sm text-negative"
+				class="border-negative/40 bg-negative/10 text-negative rounded-md border px-3 py-2 text-sm"
 			>
 				{errorMessage}
 				{#if errorCode}
@@ -73,7 +73,7 @@
 				</label>
 				<button
 					type="submit"
-					class="mt-1 inline-flex items-center justify-center gap-2 rounded-md border border-accent bg-accent px-3 py-2 text-sm font-medium text-shade-0"
+					class="border-accent bg-accent text-shade-0 mt-1 inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium"
 				>
 					Sign in
 				</button>
@@ -81,8 +81,8 @@
 		{/if}
 
 		{#if data.credentials && data.oidc}
-			<div class="flex items-center gap-3 text-xs text-muted">
-				<span class="h-px flex-1 bg-shade-3"></span>or<span class="h-px flex-1 bg-shade-3"></span>
+			<div class="text-muted flex items-center gap-3 text-xs">
+				<span class="bg-shade-3 h-px flex-1"></span>or<span class="bg-shade-3 h-px flex-1"></span>
 			</div>
 		{/if}
 
@@ -91,7 +91,7 @@
 				<input type="hidden" name="callbackUrl" value={data.redirectTo} />
 				<button
 					type="submit"
-					class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-shade-4 px-3 py-2 text-sm font-medium hover:border-shade-6 hover:text-active"
+					class="border-shade-4 hover:border-shade-6 hover:text-active inline-flex w-full items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium"
 				>
 					Continue with {data.oidc.name}
 				</button>
@@ -99,7 +99,7 @@
 		{/if}
 
 		{#if !data.credentials && !data.oidc}
-			<p class="text-center text-sm text-muted">No sign-in method is configured.</p>
+			<p class="text-muted text-center text-sm">No sign-in method is configured.</p>
 		{/if}
 	</div>
 </div>

@@ -75,7 +75,7 @@
 {#snippet waiting()}
 	<div
 		out:send={{ key: CROSSFADE_KEY }}
-		class="flex items-center gap-2 rounded-full border border-shade-3 px-3 py-1 text-xs text-muted"
+		class="border-shade-3 text-muted flex items-center gap-2 rounded-full border px-3 py-1 text-xs"
 		role="status"
 	>
 		<span class="folding inline-flex shrink-0">
@@ -88,7 +88,7 @@
 				onclick={onCancel}
 				aria-label={$LL.cancel()}
 				title={$LL.cancel()}
-				class="-mr-1 rounded-full p-0.5 transition-colors hover:text-active"
+				class="hover:text-active -mr-1 rounded-full p-0.5 transition-colors"
 			>
 				<X class="h-3.5 w-3.5" />
 			</button>
@@ -100,13 +100,13 @@
 	<!-- `markdown--aside` steps the summary down to the size reasoning is shown
 	     at: it is background to the conversation, not a turn in it, and it was
 	     reading as loudly as the answers around it. -->
-	<div class="markdown--aside rounded-lg border border-shade-3 bg-shade-1 px-3 py-2.5">
+	<div class="markdown--aside border-shade-3 bg-shade-1 rounded-lg border px-3 py-2.5">
 		<!-- Three things that each want the full width on a phone: what happened,
 		     what it saved, and the way back. Side by side they truncated the first
 		     one down to nothing, so below `sm` they stack and the figures sit on
 		     their own line under the sentence they belong to. -->
 		<div class="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-			<span class="min-w-0 truncate text-xs text-muted">
+			<span class="text-muted min-w-0 truncate text-xs">
 				{note?.automatic ? $LL.compactedAutomatically() : $LL.compactedManually()}
 				{#if note?.model}· {note.model}{/if}
 			</span>
@@ -118,7 +118,7 @@
 					     Estimated like every token figure in the app, hence the tilde, with
 					     the before and after on hover rather than spelled out here. -->
 					<span
-						class="flex shrink-0 items-center gap-1 rounded-full border border-shade-3 bg-shade-0 px-2 py-0.5 text-[11px] font-medium text-positive shadow-sm"
+						class="border-shade-3 bg-shade-0 text-positive flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium shadow-sm"
 						title="{$LL.tokensFreedDetail({
 							before: formatTokens(savings.before),
 							after: formatTokens(savings.after)
@@ -128,7 +128,7 @@
 						<span class="tabular-nums">
 							{$LL.tokensFreed({ tokens: formatTokens(savings.saved) })}
 						</span>
-						<span class="tabular-nums text-muted">{Math.round(savings.ratio * 100)}%</span>
+						<span class="text-muted tabular-nums">{Math.round(savings.ratio * 100)}%</span>
 					</span>
 				{/if}
 
@@ -136,7 +136,7 @@
 					<button
 						type="button"
 						onclick={onUndo}
-						class="flex shrink-0 items-center gap-1.5 text-xs text-muted transition-colors hover:text-active"
+						class="text-muted hover:text-active flex shrink-0 items-center gap-1.5 text-xs transition-colors"
 						title={$LL.undoCompactionHelp()}
 					>
 						<Undo2 class="h-3.5 w-3.5" />
@@ -151,7 +151,7 @@
 			     in. A summary written to an instruction is not the same object as one
 			     written to the default rules, and reading it without knowing that is
 			     how you conclude the summariser lost the plot. -->
-			<p class="mb-2 border-l-2 border-shade-3 pl-2.5 text-xs italic leading-relaxed text-muted">
+			<p class="border-shade-3 text-muted mb-2 border-l-2 pl-2.5 text-xs leading-relaxed italic">
 				{note.instruction}
 			</p>
 		{/if}

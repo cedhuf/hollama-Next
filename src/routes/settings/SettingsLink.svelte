@@ -22,7 +22,7 @@
 <button
 	type="button"
 	{onclick}
-	class="flex w-fit shrink-0 items-center gap-1.5 text-xs text-link {align === 'end'
+	class="text-link flex w-fit shrink-0 items-center gap-1.5 text-xs {align === 'end'
 		? 'ml-auto'
 		: ''}"
 >

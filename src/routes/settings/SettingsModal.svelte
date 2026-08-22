@@ -83,13 +83,13 @@
 <Modal bind:open={$settingsModalOpen} closeButton={false}>
 	<div class="flex w-full flex-col sm:flex-row">
 		<div
-			class="flex shrink-0 flex-col border-b border-shade-2 bg-shade-0 sm:w-48 sm:border-b-0 sm:border-r"
+			class="border-shade-2 bg-shade-0 flex shrink-0 flex-col border-b sm:w-48 sm:border-r sm:border-b-0"
 		>
 			<!-- Sidebar header: title at left, same height as the panel header on the right. -->
 			<div
-				class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-3"
+				class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-3"
 			>
-				<div class="flex items-center gap-2 text-sm font-semibold text-muted">
+				<div class="text-muted flex items-center gap-2 text-sm font-semibold">
 					<Settings2 class="h-4 w-4" />
 					{$LL.settings()}
 				</div>
@@ -98,7 +98,7 @@
 					type="button"
 					onclick={() => ($settingsModalOpen = false)}
 					aria-label="Close"
-					class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active sm:hidden"
+					class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors sm:hidden"
 				>
 					<X class="h-4 w-4" />
 				</button>
@@ -122,8 +122,8 @@
 						tabindex={active ? 0 : -1}
 						onclick={() => (activeTab = tab.id)}
 						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
-							? 'bg-accent/10 font-medium text-accent'
-							: 'text-base hover:bg-shade-2'}"
+							? 'bg-accent/10 text-accent font-medium'
+							: 'hover:bg-shade-2 text-base'}"
 					>
 						<Icon class="h-4 w-4 shrink-0" />
 						{tab.label}
@@ -135,7 +135,7 @@
 						<input type="hidden" name="callbackUrl" value="/login" />
 						<button
 							type="submit"
-							class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+							class="text-muted hover:bg-shade-2 hover:text-active flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors"
 						>
 							<LogOut class="h-4 w-4 shrink-0" />
 							Sign out
@@ -153,7 +153,7 @@
 			     mobile. A sub-view publishing a way back gives it something to hold, so
 			     it appears at every width rather than stranding a phone in the sub-view. -->
 			<div
-				class="h-12 shrink-0 items-center justify-between border-b border-shade-2 px-3 {$settingsBack
+				class="border-shade-2 h-12 shrink-0 items-center justify-between border-b px-3 {$settingsBack
 					? 'flex'
 					: 'hidden sm:flex'}"
 			>
@@ -161,7 +161,7 @@
 					<button
 						type="button"
 						onclick={$settingsBack.onBack}
-						class="flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+						class="text-muted hover:bg-shade-2 hover:text-active flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm transition-colors"
 					>
 						<ArrowLeft class="h-4 w-4" />
 						{$settingsBack.label}
@@ -176,7 +176,7 @@
 					type="button"
 					onclick={() => ($settingsModalOpen = false)}
 					aria-label="Close"
-					class="hidden rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active sm:block"
+					class="text-muted hover:bg-shade-2 hover:text-active hidden rounded-md p-1.5 transition-colors sm:block"
 				>
 					<X class="h-4 w-4" />
 				</button>

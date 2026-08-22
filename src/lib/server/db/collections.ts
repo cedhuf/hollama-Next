@@ -119,8 +119,7 @@ export const replacePlaybooks = (userId: string, playbooks: Playbook[]): void =>
 
 export function getSettings(userId: string): Settings | null {
 	const row = getDb().prepare('SELECT data FROM settings WHERE user_id = ?').get(userId) as
-		| { data: string }
-		| undefined;
+		{ data: string } | undefined;
 	return row ? (JSON.parse(row.data) as Settings) : null;
 }
 

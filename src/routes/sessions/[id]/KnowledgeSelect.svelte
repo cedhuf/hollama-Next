@@ -43,7 +43,7 @@
 				aria-label={$LL.newKnowledge()}
 				variant="outline"
 				onclick={() => openKnowledge()}
-				class="h-full text-muted"
+				class="text-muted h-full"
 			>
 				<Brain class="base-icon" />
 			</Button>

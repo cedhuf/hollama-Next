@@ -110,7 +110,7 @@
 			     it reads as a gloss on the name rather than part of it. -->
 			<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
 				<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
-				<span class="text-sm text-muted" lang="en">{APP_PRONUNCIATION}</span>
+				<span class="text-muted text-sm" lang="en">{APP_PRONUNCIATION}</span>
 				<!-- The badge carries the link to its own release notes, so the section
 				     below does not have to repeat the number just to have something to
 				     hang that link on. A badge does not read as clickable on its own,
@@ -136,7 +136,7 @@
 				href={DOCS_URL}
 				target="_blank"
 				rel="noopener noreferrer external"
-				class="flex items-center gap-1 text-xs text-muted transition-colors hover:text-active"
+				class="text-muted hover:text-active flex items-center gap-1 text-xs transition-colors"
 			>
 				<BookOpen class="h-3.5 w-3.5 shrink-0" />
 				{$LL.documentation()}
@@ -157,7 +157,7 @@
 							href={status.href}
 							target="_blank"
 							rel="noopener noreferrer external"
-							class="truncate transition-colors hover:text-accent"
+							class="hover:text-accent truncate transition-colors"
 						>
 							{status.label}
 						</a>
@@ -166,7 +166,7 @@
 					{/if}
 				</span>
 				{#if lastCheckedText}
-					<span class="truncate pl-4 text-xs text-muted">{lastCheckedText}</span>
+					<span class="text-muted truncate pl-4 text-xs">{lastCheckedText}</span>
 				{/if}
 			</div>
 
@@ -205,19 +205,19 @@
 					href={link.href}
 					target="_blank"
 					rel="noopener noreferrer external"
-					class="flex min-w-0 items-center gap-2.5 rounded-xl border border-shade-3 bg-shade-0 p-3 transition-colors hover:bg-shade-2"
+					class="border-shade-3 bg-shade-0 hover:bg-shade-2 flex min-w-0 items-center gap-2.5 rounded-xl border p-3 transition-colors"
 				>
 					<span
-						class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-shade-2"
+						class="bg-shade-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
 						aria-hidden="true"
 					>
 						<Icon class="h-5 w-5" />
 					</span>
 					<span class="flex min-w-0 flex-1 flex-col">
 						<span class="truncate text-sm font-medium">{link.title}</span>
-						<span class="truncate text-xs text-muted">{link.subtitle}</span>
+						<span class="text-muted truncate text-xs">{link.subtitle}</span>
 					</span>
-					<ExternalLink class="h-4 w-4 shrink-0 text-muted" />
+					<ExternalLink class="text-muted h-4 w-4 shrink-0" />
 				</a>
 			{/each}
 		</div>
@@ -236,14 +236,14 @@
 		</a>
 	</SettingsSection>
 
-	<p class="flex items-center justify-center gap-1 pb-2 text-xs text-muted">
+	<p class="text-muted flex items-center justify-center gap-1 pb-2 text-xs">
 		{$LL.madeWithLoveBy()}
-		<Heart class="inline h-3.5 w-3.5 text-negative" />
+		<Heart class="text-negative inline h-3.5 w-3.5" />
 		<a
 			href={AUTHOR_URL}
 			target="_blank"
 			rel="noopener noreferrer external"
-			class="transition-colors hover:text-active"
+			class="hover:text-active transition-colors"
 		>
 			{$LL.byAuthor()}
 		</a>

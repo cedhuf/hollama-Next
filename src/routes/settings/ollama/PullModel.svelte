@@ -92,7 +92,7 @@
 	</div>
 </SettingsField>
 
-<p class="-mt-2 text-xs leading-snug text-muted">
+<p class="text-muted -mt-2 text-xs leading-snug">
 	{$LL.browseModels()}
 	<Button href="https://ollama.com/library" variant="link" target="_blank">
 		{$LL.ollamaLibrary()}

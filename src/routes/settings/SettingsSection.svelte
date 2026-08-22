@@ -22,15 +22,15 @@
 </script>
 
 <section
-	class="flex flex-col gap-2.5 {card ? 'rounded-xl border border-shade-3 bg-shade-0 p-4' : ''}"
+	class="flex flex-col gap-2.5 {card ? 'border-shade-3 bg-shade-0 rounded-xl border p-4' : ''}"
 >
 	<div class="flex flex-col gap-0.5">
 		<div class="flex items-center gap-2">
-			<h3 class="text-sm font-medium text-active">{title}</h3>
+			<h3 class="text-active text-sm font-medium">{title}</h3>
 			{@render badge?.()}
 		</div>
 		{#if description}
-			<p class="text-xs leading-snug text-muted">{description}</p>
+			<p class="text-muted text-xs leading-snug">{description}</p>
 		{/if}
 	</div>
 	{@render children()}

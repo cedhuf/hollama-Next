@@ -32,7 +32,7 @@
 </script>
 
 <span
-	class="attachment group flex max-w-full items-center gap-1.5 rounded-full border border-shade-3 bg-shade-0 py-1 pl-1.5 pr-1 text-xs shadow-sm transition-colors hover:border-shade-4"
+	class="attachment group border-shade-3 bg-shade-0 hover:border-shade-4 flex max-w-full items-center gap-1.5 rounded-full border py-1 pr-1 pl-1.5 text-xs shadow-sm transition-colors"
 	data-testid="attachment-pill"
 >
 	{#if attachment.type === 'image'}
@@ -44,7 +44,7 @@
 		/>
 	{:else}
 		<span
-			class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-shade-2 text-muted"
+			class="bg-shade-2 text-muted flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
 			aria-hidden="true"
 		>
 			{#if attachment.type === 'document'}
@@ -60,7 +60,7 @@
 	{#if attachment.type === 'document' && attachment.pages}
 		<!-- The one number worth carrying: how much of the context this will take is
 		     the question people actually have about an attached document. -->
-		<span class="shrink-0 tabular-nums text-muted">
+		<span class="text-muted shrink-0 tabular-nums">
 			{$LL.pageCount({ count: attachment.pages })}
 		</span>
 	{/if}
@@ -72,7 +72,7 @@
 			aria-label={$LL.keepInLibrary()}
 			title={$LL.keepInLibrary()}
 			data-testid="attachment-save"
-			class="shrink-0 rounded-full p-0.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+			class="text-muted hover:bg-shade-2 hover:text-active shrink-0 rounded-full p-0.5 transition-colors"
 		>
 			<Library class="h-3.5 w-3.5" />
 		</button>
@@ -85,7 +85,7 @@
 			aria-label={$LL.remove()}
 			title={$LL.remove()}
 			data-testid="attachment-delete"
-			class="shrink-0 rounded-full p-0.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+			class="text-muted hover:bg-shade-2 hover:text-active shrink-0 rounded-full p-0.5 transition-colors"
 		>
 			<X class="h-3.5 w-3.5" />
 		</button>

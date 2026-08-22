@@ -78,17 +78,17 @@
 <!-- `surface-floating`, like the composer it sits above: both are cards hovering
      over the conversation, and both answer to the transparency setting. -->
 <div
-	class="ask-card surface-floating flex max-h-[min(55vh,30rem)] w-full flex-col overflow-hidden rounded-2xl border border-shade-3 shadow-lg"
+	class="ask-card surface-floating border-shade-3 flex max-h-[min(55vh,30rem)] w-full flex-col overflow-hidden rounded-2xl border shadow-lg"
 >
 	<!-- Header: the current question, a counter when there are several, and dismiss. -->
-	<div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
+	<div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
 		<div class="flex min-w-0 flex-col gap-0.5">
 			{#if questions.length > 1}
-				<span class="text-xs font-medium text-muted">{current + 1} / {questions.length}</span>
+				<span class="text-muted text-xs font-medium">{current + 1} / {questions.length}</span>
 			{/if}
-			<p class="text-base font-medium leading-snug text-active">{question.question}</p>
+			<p class="text-active text-base leading-snug font-medium">{question.question}</p>
 			{#if multi}
-				<span class="text-xs text-muted">{$LL.multipleAllowed()}</span>
+				<span class="text-muted text-xs">{$LL.multipleAllowed()}</span>
 			{/if}
 		</div>
 		{#if onDismiss}
@@ -96,7 +96,7 @@
 				type="button"
 				onclick={onDismiss}
 				aria-label={$LL.cancel()}
-				class="-mr-1.5 -mt-1.5 shrink-0 rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+				class="text-muted hover:bg-shade-2 hover:text-active -mt-1.5 -mr-1.5 shrink-0 rounded-md p-1.5 transition-colors"
 			>
 				<X class="h-4 w-4" />
 			</button>
@@ -111,7 +111,7 @@
 				type="button"
 				{disabled}
 				onclick={() => pickOption(option)}
-				class="flex w-full items-center gap-3 border-t border-shade-2 px-4 py-3 text-left text-sm transition-colors hover:bg-shade-1 disabled:cursor-default disabled:opacity-50 {selected
+				class="border-shade-2 hover:bg-shade-1 flex w-full items-center gap-3 border-t px-4 py-3 text-left text-sm transition-colors disabled:cursor-default disabled:opacity-50 {selected
 					? 'bg-accent/5'
 					: ''}"
 			>
@@ -126,16 +126,16 @@
 						{oi + 1}
 					{/if}
 				</span>
-				<span class="min-w-0 flex-1 {selected ? 'font-medium text-active' : 'text-base'}">
+				<span class="min-w-0 flex-1 {selected ? 'text-active font-medium' : 'text-base'}">
 					{option}
 				</span>
 			</button>
 		{/each}
 
 		<!-- Free-text escape hatch, styled as the last row. -->
-		<div class="flex items-center gap-3 border-t border-shade-2 px-4 py-3">
+		<div class="border-shade-2 flex items-center gap-3 border-t px-4 py-3">
 			<span
-				class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-shade-2 text-muted"
+				class="bg-shade-2 text-muted flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
 			>
 				<Pencil class="h-3.5 w-3.5" />
 			</span>
@@ -151,19 +151,19 @@
 						submitCustom();
 					}
 				}}
-				class="min-w-0 flex-1 bg-transparent text-sm text-active outline-none placeholder:text-muted"
+				class="text-active placeholder:text-muted min-w-0 flex-1 bg-transparent text-sm outline-none"
 			/>
 		</div>
 	</div>
 
 	<!-- Multi-select needs an explicit confirm; single-select submits on tap. -->
 	{#if multi}
-		<div class="border-t border-shade-2 p-3">
+		<div class="border-shade-2 border-t p-3">
 			<button
 				type="button"
 				disabled={disabled || !canAdvance}
 				onclick={() => advance(effective())}
-				class="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-shade-0 transition-opacity disabled:opacity-40"
+				class="bg-accent text-shade-0 w-full rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-40"
 			>
 				{$LL.send()}
 			</button>

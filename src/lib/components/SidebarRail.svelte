@@ -79,7 +79,7 @@
      the operating system rather than by the app. These are the app's own tooltips,
      opening on focus as readily as on hover, and pointing right because that is
      where the room is. -->
-<div class="min-h-0 flex-1 overflow-y-auto surface-column" style="overflow-x: hidden">
+<div class="surface-column min-h-0 flex-1 overflow-y-auto" style="overflow-x: hidden">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class="flex w-full flex-col items-center gap-1.5 py-3 lg:w-16">
 		<Tooltip side="right">
@@ -88,7 +88,7 @@
 					{...props}
 					onclick={onNewChat}
 					aria-label={$LL.newChat()}
-					class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-shade-0 transition-opacity hover:opacity-90"
+					class="bg-accent text-shade-0 flex h-9 w-9 items-center justify-center rounded-lg transition-opacity hover:opacity-90"
 				>
 					<Plus class="h-5 w-5" />
 				</button>
@@ -111,7 +111,7 @@
 						{...props}
 						href={resolve('/images')}
 						aria-label={$LL.imageGenerate()}
-						class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/15 text-accent transition-colors hover:bg-accent/25"
+						class="bg-accent/15 text-accent hover:bg-accent/25 flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
 					>
 						<ImageIcon class="h-5 w-5" />
 					</a>
@@ -129,7 +129,7 @@
 					type="button"
 					onclick={() => openSearch()}
 					aria-label={$LL.search()}
-					class="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:text-active"
+					class="text-muted hover:text-active flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
 				>
 					<Search class="h-5 w-5" />
 				</button>
@@ -170,7 +170,7 @@
 		</Tooltip>
 
 		{#if personas.length > 0}
-			<div class="my-1 h-px w-8 bg-shade-3"></div>
+			<div class="bg-shade-3 my-1 h-px w-8"></div>
 			{#each personas as persona (persona.id)}
 				{@const session = sessionOf(persona)}
 				<!-- The same menu the open column gives it, since it is the same thing:
@@ -185,7 +185,7 @@
 									type="button"
 									onclick={() => launch(persona)}
 									aria-label={persona.name}
-									class="persona-launcher rounded-full outline-none transition duration-150 hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-shade-1 motion-reduce:transition-none"
+									class="persona-launcher focus-visible:ring-accent focus-visible:ring-offset-shade-1 rounded-full transition duration-150 outline-none hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 motion-reduce:transition-none"
 								>
 									<PersonaAvatar {persona} size={32} />
 								</button>
@@ -193,9 +193,9 @@
 							<!-- Its name first: at this width the avatar is all there is, so the
 						     tooltip is where the persona says who it is before saying what it
 						     is for. -->
-							<span class="block font-medium text-active">{persona.name}</span>
+							<span class="text-active block font-medium">{persona.name}</span>
 							{#if persona.tagline}
-								<span class="mt-0.5 block text-muted">{persona.tagline}</span>
+								<span class="text-muted mt-0.5 block">{persona.tagline}</span>
 							{/if}
 						</Tooltip>
 					{/snippet}
@@ -214,7 +214,7 @@
 		{/if}
 
 		{#if recent.length > 0}
-			<div class="my-1 h-px w-8 bg-shade-3"></div>
+			<div class="bg-shade-3 my-1 h-px w-8"></div>
 			{#each recent as session (session.id)}
 				<!-- The right-click menu belongs to a conversation, not to the width it is
 			     drawn at. The wrapper is what the gesture targets, so the tooltip inside
@@ -259,7 +259,7 @@
 						{...props}
 						type="button"
 						aria-label={$LL.allConversations()}
-						class="flex h-8 w-8 items-center justify-center rounded-md border border-dashed text-muted transition-colors {browsing
+						class="text-muted flex h-8 w-8 items-center justify-center rounded-md border border-dashed transition-colors {browsing
 							? 'border-accent text-active'
 							: 'border-shade-3 hover:text-active'}"
 					>
@@ -267,7 +267,7 @@
 					</button>
 				{/snippet}
 
-				<p class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+				<p class="text-muted px-2 py-1 text-[11px] font-semibold tracking-wider uppercase">
 					{$LL.allConversations()}
 				</p>
 				<div class="max-h-[60vh] overflow-auto">
@@ -275,7 +275,7 @@
 						<button
 							type="button"
 							onclick={() => open(session.id)}
-							class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-shade-1 {pathname.includes(
+							class="hover:bg-shade-1 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors {pathname.includes(
 								session.id
 							)
 								? 'bg-shade-1 text-active'
