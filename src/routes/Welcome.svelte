@@ -45,6 +45,105 @@
 	 */
 	const TOTAL_STEPS = $derived($canDrawImages ? 6 : 5);
 
+	/**
+	 * Pictures the app drew, on the step that says it can.
+	 *
+	 * Eleven for six tiles, which is the whole reason there are more than six: a
+	 * tile hands over to the next picture in the pool at the one moment its own
+	 * animation has it at zero opacity, so the grid keeps refilling for as long as
+	 * anyone reads the step, and nobody sees a swap.
+	 *
+	 * Shipped with the app rather than fetched, small and square-cropped at build
+	 * time: the tiles are square and a picture cropped at the source is a picture
+	 * that is never upscaled to fill one.
+	 */
+	const TOUR_IMAGES = [
+		'/tour/panda-insects.webp',
+		'/tour/flower-warm.webp',
+		'/tour/anime-clouds.webp',
+		'/tour/cosmic-eye.webp',
+		'/tour/record-shop.webp',
+		'/tour/hanfu-sunset.webp',
+		'/tour/panda-rain.webp',
+		'/tour/studio-portrait.webp',
+		'/tour/street-sunset.webp',
+		'/tour/flower-rain.webp',
+		'/tour/tropical-fruit.webp'
+	];
+
+	/** Six tiles, and the stagger the stylesheet brings them in on. */
+	const TILES = 6;
+	const TILE_STAGGER_MS = 170;
+	/** How long the grid is left alone before one tile takes another picture. */
+	const SWAP_MIN_MS = 1600;
+	const SWAP_MAX_MS = 3600;
+	/** The cross-fade, the same half-second the tiles arrive on. */
+	const SWAP_FADE_MS = 500;
+
+	let tileImages = $state(Array.from({ length: TILES }, (_, i) => i));
+	/** The next picture to deal out, advanced past anything already on screen. */
+	let nextImage = TILES;
+
+	/**
+	 * The picture after this one, skipping whatever is already up.
+	 *
+	 * Eleven pictures for six tiles, so there are always five to choose from and
+	 * this cannot spin. Without the skip a tile could be dealt the picture its
+	 * neighbour is holding, which is the one arrangement that reads as a bug.
+	 */
+	function deal(): number {
+		let candidate = nextImage % TOUR_IMAGES.length;
+		while (tileImages.includes(candidate)) {
+			nextImage += 1;
+			candidate = nextImage % TOUR_IMAGES.length;
+		}
+		nextImage += 1;
+		return candidate;
+	}
+
+	/**
+	 * One picture changes. Then, a while later, one other.
+	 *
+	 * A single timer rather than one per tile, which is what makes "one at a time" a
+	 * property of the code instead of a hope about how six timers happen to fall.
+	 * The wait is irregular so the grid never settles into a rhythm, and the tile is
+	 * picked at random, never the one that just changed.
+	 *
+	 * The tiles keep the arrival they always had, fading up in sequence. They simply
+	 * do it once now: looping it meant all six fading out and back in for ever, which
+	 * is a grid blinking rather than pictures arriving.
+	 *
+	 * Nothing runs when the step is not on screen, and nothing runs for somebody who
+	 * asked for less motion.
+	 */
+	$effect(() => {
+		if (step !== 5) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		let timer: ReturnType<typeof setTimeout>;
+		let last = -1;
+
+		const queue = () => {
+			timer = setTimeout(swap, SWAP_MIN_MS + Math.random() * (SWAP_MAX_MS - SWAP_MIN_MS));
+		};
+
+		function swap() {
+			// Any tile but the one that just changed, so the eye is never sent back to
+			// the same corner twice running.
+			const offset = 1 + Math.floor(Math.random() * (TILES - 1));
+			const tile = last < 0 ? Math.floor(Math.random() * TILES) : (last + offset) % TILES;
+			last = tile;
+			tileImages[tile] = deal();
+			queue();
+		}
+
+		// Not before the last tile has landed: changing a picture during the entrance
+		// would be a seventh thing happening while six are still arriving.
+		timer = setTimeout(queue, TILES * TILE_STAGGER_MS + SWAP_FADE_MS);
+
+		return () => clearTimeout(timer);
+	});
+
 	/** Four drift, and a fifth turns up when the mention step calls for it. */
 	const drifting = TOUR_CAST.slice(0, 4);
 
@@ -372,11 +471,29 @@
 			     page shows while it is drawing, then the pictures landing one by one.
 			     Nothing is fetched — these are the app's own accent, not photographs. -->
 			<div class="grid grid-cols-3 gap-2">
-				{#each [0, 1, 2, 3, 4, 5] as tile (tile)}
+				{#each tileImages as image, tile (tile)}
 					<div
-						class="tour-tile border-shade-3 from-accent/25 to-accent/5 aspect-square rounded-xl border bg-gradient-to-br"
-						style="animation-delay:{tile * 170}ms"
-					></div>
+						class="tour-tile border-shade-3 from-accent/25 to-accent/5 relative aspect-square overflow-hidden rounded-xl border bg-gradient-to-br"
+						style="animation-delay:{tile * TILE_STAGGER_MS}ms"
+					>
+						<!-- Keyed on the picture, so a change replaces this element rather than
+						     editing it, and the two overlap while they trade places. Stacked
+						     absolutely for that reason: a cross-fade needs both on screen at once,
+						     and a tile that empties out first is the flicker this exists to avoid.
+
+						     Decorative, and the empty alt is deliberate: they are examples of what
+						     the feature makes, and the paragraph above has already said so. Six
+						     descriptions of six pictures would be six things for a screen reader to
+						     read out before the sentence that matters. -->
+						{#key image}
+							<img
+								src={TOUR_IMAGES[image]}
+								alt=""
+								transition:fade={{ duration: SWAP_FADE_MS }}
+								class="absolute inset-0 h-full w-full object-cover"
+							/>
+						{/key}
+					</div>
 				{/each}
 			</div>
 		</div>
@@ -420,25 +537,27 @@
 	}
 
 	/* A gallery filling in: each tile waits, fades up, and stays. The delay is set
-	   per tile inline, so six of them arrive as a sequence rather than together. */
+	   per tile inline, so six of them arrive as a sequence rather than together.
+
+	   Once, not on a loop. Looping it meant all six fading out and back in for ever,
+	   which reads as a grid blinking rather than as pictures arriving, and it fought
+	   the one thing this step is trying to show. After the entrance only a single
+	   picture changes at a time, cross-faded inside its own tile.
+
+	   `backwards` so the delay is spent invisible, rather than spent showing the
+	   tile it is about to fade in. */
 	.tour-tile {
-		animation: tour-tile 2.6s ease-out infinite;
-		opacity: 0;
+		animation: tour-tile 500ms ease-out backwards;
 	}
 
 	@keyframes tour-tile {
-		0% {
+		from {
 			opacity: 0;
 			scale: 0.9;
 		}
-		18%,
-		78% {
+		to {
 			opacity: 1;
 			scale: 1;
-		}
-		100% {
-			opacity: 0;
-			scale: 0.96;
 		}
 	}
 
@@ -468,10 +587,8 @@
 			animation: none;
 		}
 
-		/* The tiles start invisible so they can fade up. With the animation off there
-		   is nothing to fade them in, so they have to be given back. */
-		.tour-tile {
-			opacity: 1;
-		}
+		/* Nothing to give back: with the animation off, `backwards` never applies and
+		   the tiles simply are where they end up. The pictures stop changing too, in
+		   the effect that schedules them. */
 	}
 </style>
