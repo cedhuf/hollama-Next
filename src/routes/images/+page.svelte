@@ -651,12 +651,76 @@
 					class="relative max-h-full max-w-full rounded-lg object-contain shadow-lg"
 				/>
 
+				<!-- The prompt, floating along the foot of the picture rather than in a band
+				     under it. One line closed, the whole of it open, and the way to open it
+				     at the far right of that same line.
+
+				     No ellipsis, and that is a choice rather than an oversight. The clip
+				     lands on a line boundary, so it never cuts through a letter, and the
+				     control sitting at the end of the line already says there is more —
+				     which is the only job an ellipsis would have had. It also keeps the
+				     opening animation honest in both directions: `line-clamp` has no
+				     in-between, so re-applying one on the way closed would snap the text to
+				     a line while the box was still travelling.
+
+				     `items-start` so the control stays level with the first line once the
+				     rest has unfolded beneath it. -->
+				<div
+					class="absolute inset-x-3 bottom-3 flex items-start gap-2 rounded-lg bg-black/55 px-2.5 py-1.5 backdrop-blur-sm"
+				>
+					<div
+						class="min-w-0 flex-1 overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none"
+						style="max-height: {expandedPrompt ? promptHeight : collapsedHeight}px"
+					>
+						<div bind:clientHeight={promptHeight}>
+							<!-- One prompt, and it is the one that was sent: the rewrite when
+							     there was one, the words as typed otherwise. The wand stays when
+							     it applies, because "these are not quite the words I typed" is the
+							     one thing the difference is worth saying.
+
+							     An explicit leading, because the collapsed height is a multiple of
+							     it. Left to the default it is a fraction nobody can divide by. -->
+							<p
+								bind:clientHeight={promptOnlyHeight}
+								class="whitespace-pre-wrap text-[11px] leading-4 text-white"
+							>
+								{#if image.sentPrompt}<Wand2 class="mr-1 inline h-3 w-3" />{/if}{image.sentPrompt ||
+									image.prompt}
+							</p>
+							{#if image.negativePrompt}
+								<p class="mt-1 text-[11px] leading-4 text-white/70">
+									{$LL.imageNegativePrompt()} · {image.negativePrompt}
+								</p>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Offered only when there is something to open. A prompt of six words
+					     with a control beside it that does nothing is worse than no control. -->
+					{#if promptHeight > collapsedHeight}
+						<button
+							type="button"
+							onclick={() => (expandedPrompt = !expandedPrompt)}
+							aria-expanded={expandedPrompt}
+							aria-label={expandedPrompt ? $LL.showLess() : $LL.showMore()}
+							title={expandedPrompt ? $LL.showLess() : $LL.showMore()}
+							class="shrink-0 rounded p-0.5 text-white/70 transition-colors hover:text-white"
+						>
+							<ChevronDown
+								class="h-3.5 w-3.5 transition-transform duration-300 motion-reduce:transition-none {expandedPrompt
+									? 'rotate-180'
+									: ''}"
+							/>
+						</button>
+					{/if}
+				</div>
+
 				<!-- What it took to make, laid over the picture rather than under it. These
 				     are four short figures; giving them a band of their own cost more
 				     height than they are worth, and over a corner they are readable
 				     without taking anything from the image. -->
 				<div
-					class="pointer-events-none absolute right-4 top-4 flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 rounded-lg bg-black/55 px-2.5 py-1.5 text-[11px] text-white backdrop-blur-sm"
+					class="pointer-events-none absolute right-3 top-3 flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 rounded-lg bg-black/55 px-2.5 py-1.5 text-[11px] text-white backdrop-blur-sm"
 				>
 					<span class="truncate">{modelLabel(serverFor(image.serverId), image.model)}</span>
 					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
@@ -669,57 +733,6 @@
 						</span>
 					{/if}
 				</div>
-			</div>
-
-			<!-- One line, and a way to open it. Nothing here scrolls: opening the prompt
-			     takes its room from the picture, which shrinks because it is the flexible
-			     one. A scrollbar inside a strip this short is a control nobody sees and
-			     everybody fights. -->
-			<div class="shrink-0 border-t border-shade-2 px-4 py-2.5">
-				<div
-					class="overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none"
-					style="max-height: {expandedPrompt ? promptHeight : collapsedHeight}px"
-				>
-					<div bind:clientHeight={promptHeight}>
-						<!-- One prompt, and it is the one that was sent: the rewrite when there
-						     was one, the words as typed otherwise. The wand stays when it
-						     applies, because "these are not quite the words I typed" is the one
-						     thing the difference is worth saying.
-
-						     An explicit leading, because the collapsed height is a multiple of
-						     it. Left to the default it is a fraction nobody can divide by. -->
-						<p
-							bind:clientHeight={promptOnlyHeight}
-							class="whitespace-pre-wrap text-xs leading-4 text-muted"
-						>
-							{#if image.sentPrompt}<Wand2 class="mr-1 inline h-3 w-3" />{/if}{image.sentPrompt ||
-								image.prompt}
-						</p>
-						{#if image.negativePrompt}
-							<p class="mt-1 text-xs text-muted">
-								{$LL.imageNegativePrompt()} · {image.negativePrompt}
-							</p>
-						{/if}
-					</div>
-				</div>
-
-				<!-- Offered only when there is something to open. A prompt of six words with
-				     a "show more" under it is a control that does nothing. -->
-				{#if promptHeight > collapsedHeight}
-					<button
-						type="button"
-						onclick={() => (expandedPrompt = !expandedPrompt)}
-						aria-expanded={expandedPrompt}
-						class="mt-1 flex items-center gap-1 text-xs text-link"
-					>
-						<ChevronDown
-							class="h-3 w-3 transition-transform duration-300 motion-reduce:transition-none {expandedPrompt
-								? 'rotate-180'
-								: ''}"
-						/>
-						{expandedPrompt ? $LL.showLess() : $LL.showMore()}
-					</button>
-				{/if}
 			</div>
 		</div>
 	{/if}
