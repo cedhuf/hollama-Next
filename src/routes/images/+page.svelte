@@ -280,7 +280,7 @@
 								<button
 									{...props}
 									type="button"
-									class="flex items-center gap-1.5 rounded-lg border border-shade-3 px-3 py-2 text-sm text-muted transition-colors hover:bg-shade-2 hover:text-active"
+									class="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-shade-0 transition-opacity hover:opacity-90"
 								>
 									<ArrowDownToLine class="h-4 w-4" />
 									{$LL.export()}
