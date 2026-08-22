@@ -453,8 +453,27 @@
 	</div>
 </div>
 
-<!-- One picture, as big as the dialog will allow. -->
-<Modal open={!!opened} closeButton={false}>
+<!-- One picture, as big as the dialog will allow.
+
+     Bound in both directions, and it has to be: the dialog closes on Escape and
+     on a click outside as well as on its own button, and those two routes are the
+     dialog's own business. Handed a plain expression it shut itself while
+     `opened` stayed full, and since the expression never changed value nothing
+     could open it again — every later click set a different picture behind a
+     dialog that had already decided it was closed.
+
+     A pair of functions rather than a plain `bind:`, because what the dialog
+     holds is a boolean and what this page holds is a picture. Closing clears the
+     picture, which is the same thing said in the page's own terms. -->
+<Modal
+	bind:open={
+		() => !!opened,
+		(isOpen) => {
+			if (!isOpen) opened = null;
+		}
+	}
+	closeButton={false}
+>
 	{#if opened}
 		{@const image = opened}
 		<!-- The dialog is a fixed box, so this fills it and divides it rather than
