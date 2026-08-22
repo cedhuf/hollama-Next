@@ -551,14 +551,33 @@
 		     height; everything left over is the picture's, and the picture scales to
 		     it. That is what stops a large image from turning a dialog into a page
 		     you scroll to see the middle of. -->
-		<div class="flex h-full w-full flex-col">
+		<div class="relative flex h-full w-full flex-col">
+			<!-- The picture again, behind the whole dialog rather than behind its middle.
+
+			     The same source, so the browser serves it from the cache it already has:
+			     this costs a paint, not a request. Scaled up past its own edges because a
+			     blur softens the border it is given, and a softened border against the
+			     panel reads as a mistake; enlarging it puts that edge outside the box,
+			     which the dialog's own clipping then takes care of.
+
+			     Dimmed hard, and that is the whole restraint here: what is underneath must
+			     never compete with what is on top, and the figures in the corner are white
+			     text that has to stay legible over whatever the picture happens to be.
+			     Decoration, so it is hidden from anything that reads. -->
+			<img
+				src={imageUrl(image.id)}
+				alt=""
+				aria-hidden="true"
+				class="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-25 blur-2xl"
+			/>
+
 			<!-- Actions in the title bar, beside the close, and no footer at all. The
 			     library's editors settled this: a pinned band costs a full stripe of
 			     height on every dialog to hold two buttons, and the bar that carries the
 			     close is already there and already pinned. Here it buys the picture that
 			     height back, which is the whole point of the dialog. -->
 			<div
-				class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4"
+				class="relative flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2/70 bg-shade-0/75 px-4 backdrop-blur-sm"
 			>
 				<div class="flex min-w-0 items-center gap-2">
 					<span
@@ -623,28 +642,10 @@
 			<!-- `min-h-0` is what makes the rest of this work: without it a flex child
 			     refuses to shrink below its content, so the image would push the strip
 			     below it off the bottom instead of fitting between them. -->
-			<div
-				class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-shade-1 p-3"
-			>
-				<!-- The picture again, filling the space behind itself.
-				
-				     The same source, so the browser serves it from the cache it already
-				     has: this costs a paint, not a request. Scaled up past its own edges
-				     because a blur softens the border it is given, and a softened border
-				     against the panel reads as a mistake; enlarging it puts that edge
-				     outside the box, which is what `overflow-hidden` on the parent is for.
-				
-				     Dimmed hard, and that is the whole restraint here: what is underneath
-				     must never compete with what is on top, and the figures in the corner
-				     are white text that has to stay legible over whatever the picture
-				     happens to be. Decoration, so it is hidden from anything that reads. -->
-				<img
-					src={imageUrl(image.id)}
-					alt=""
-					aria-hidden="true"
-					class="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-25 blur-2xl"
-				/>
-
+			<!-- The two panes differ by how much of the backdrop each admits, which is
+			     what keeps the bar reading as a bar: a veil over it, almost nothing over
+			     the picture. Same layer underneath both, so it is one image and not two. -->
+			<div class="relative flex min-h-0 flex-1 items-center justify-center p-3">
 				<img
 					src={imageUrl(image.id)}
 					alt={image.prompt}
@@ -718,17 +719,25 @@
 				<!-- What it took to make, laid over the picture rather than under it. These
 				     are four short figures; giving them a band of their own cost more
 				     height than they are worth, and over a corner they are readable
-				     without taking anything from the image. -->
+				     without taking anything from the image.
+
+				     Kept deliberately small. It is a caption on a photograph, not a panel:
+				     the picture is what the dialog is for, and anything up here that grows
+				     is growing at its expense. The model id is the one part with no ceiling
+				     of its own, since some of them run to forty characters, so it is given
+				     one and truncated. -->
 				<div
-					class="pointer-events-none absolute right-3 top-3 flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 rounded-lg bg-black/55 px-2.5 py-1.5 text-[11px] text-white backdrop-blur-sm"
+					class="pointer-events-none absolute right-3 top-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center justify-end gap-x-2 gap-y-0.5 rounded-md bg-black/55 px-2 py-1 text-[10px] leading-4 text-white backdrop-blur-sm"
 				>
-					<span class="truncate">{modelLabel(serverFor(image.serverId), image.model)}</span>
+					<span class="max-w-[9rem] truncate">
+						{modelLabel(serverFor(image.serverId), image.model)}
+					</span>
 					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
 					<span>{formatTimestampToNow(image.createdAt)}</span>
 					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
 					{#if costLabel(image)}
 						<span class="flex items-center gap-1 tabular-nums">
-							<Coins class="h-3 w-3" />
+							<Coins class="h-2.5 w-2.5" />
 							{costLabel(image)}
 						</span>
 					{/if}
