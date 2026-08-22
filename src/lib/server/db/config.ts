@@ -26,6 +26,23 @@ export function setAllowUserKeys(value: boolean): void {
 	setConfig('allowUserKeys', value ? 'true' : 'false');
 }
 
+/**
+ * Whether this instance draws at all (default: false).
+ *
+ * Off until somebody turns it on, unlike most flags here, and deliberately: an
+ * image model costs real money per request on every provider that has one, and
+ * an instance that starts generating pictures because it was upgraded is an
+ * instance that surprises whoever pays for it. Turning it on is a decision, and
+ * it is one line of the Admin tab.
+ */
+export function imagesEnabled(): boolean {
+	return getConfig('imagesEnabled') === 'true';
+}
+
+export function setImagesEnabled(value: boolean): void {
+	setConfig('imagesEnabled', value ? 'true' : 'false');
+}
+
 /** Whether users may create their own personas (default: true). */
 export function allowUserPersonas(): boolean {
 	return getConfig('allowUserPersonas') !== 'false';

@@ -409,6 +409,31 @@ const migrations: Migration[] = [
 			-- and no path appended to the first reaches the second.
 			ALTER TABLE servers ADD COLUMN image_base_url TEXT;
 		`
+	},
+	{
+		version: 18,
+		up: `
+			-- What the app has drawn, minus the drawings.
+			--
+			-- The bytes are files under DATA_DIR, not a column: a gallery has to list a
+			-- hundred rows without carrying a hundred megabytes, and SQLite is a poor
+			-- place to keep megabytes that are only ever read whole. What is here is
+			-- the prompt, the model and the cost, which is small, searchable, and worth
+			-- keeping after the picture itself is deleted.
+			--
+			-- The bytes column is real rather than a field inside the JSON because it
+			-- is the one thing that gets summed: an account's quota is a SELECT SUM,
+			-- and a quota that has to parse every row to be enforced is a quota that
+			-- stops being enforced the day somebody has a thousand of them.
+			CREATE TABLE generated_images (
+				id         TEXT PRIMARY KEY,
+				user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				data       TEXT NOT NULL,          -- JSON GeneratedImage
+				bytes      INTEGER NOT NULL DEFAULT 0,
+				created_at TEXT NOT NULL
+			);
+			CREATE INDEX idx_generated_images_user ON generated_images(user_id, created_at DESC);
+		`
 	}
 ];
 
