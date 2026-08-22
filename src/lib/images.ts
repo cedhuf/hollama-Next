@@ -3,6 +3,7 @@ import { derived, get, writable } from 'svelte/store';
 import { isServerMode } from '$lib/chat/endpoint';
 import { modelKind } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
+import { writeImageTitle } from '$lib/imagePrompt';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
 /**
@@ -69,6 +70,39 @@ export async function generateImages(input: GenerateInput): Promise<GeneratedIma
 	const { images } = (await response.json()) as { images: GeneratedImage[] };
 	imagesStore.update((current) => [...images, ...current]);
 	return images;
+}
+
+/**
+ * Name the pictures a request just produced, once they exist.
+ *
+ * After the fact and never awaited by the caller: the pictures are already
+ * stored and already on screen, and a label arriving a second later is a label
+ * arriving a second later. A failure is silent by design — everything that reads
+ * a title falls back to the prompt, which is what it did before titles existed.
+ *
+ * One call for the batch, because four pictures from one request share one
+ * prompt and would otherwise be given four goes at naming the same thing.
+ */
+export async function titleImages(images: GeneratedImage[], prompt: string): Promise<void> {
+	if (!images.length) return;
+
+	const title = await writeImageTitle(prompt);
+	if (!title) return;
+
+	await Promise.all(
+		images.map((image) =>
+			fetch(`/api/images/${image.id}`, {
+				method: 'PATCH',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ title })
+			}).catch(() => undefined)
+		)
+	);
+
+	const named = new Set(images.map((image) => image.id));
+	imagesStore.update((current) =>
+		current.map((image) => (named.has(image.id) ? { ...image, title } : image))
+	);
 }
 
 export async function deleteImage(id: string): Promise<void> {

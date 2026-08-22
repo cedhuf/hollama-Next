@@ -101,6 +101,21 @@ not look like what I asked for" stays a question with an answer.
 The instruction it follows is editable like every other prompt in the app, under **Settings,
 Prompts, Images**.
 
+## Titles
+
+Each picture is named once it exists: three to six words, written by the same text model the prompt
+writer uses, from the prompt that made it. It is on by default, and it is a different trade from the
+rewriter above it — a rewrite changes what gets drawn and costs a request nobody asked for, a title
+changes nothing and costs a dozen tokens beside an image billed by the minute.
+
+The title is what the gallery, the dialog and the home strip all read, falling back to the prompt
+when there is none. It is also the **filename** in an export, which is the one piece of metadata
+every file manager and every desktop search already indexes.
+
+Its instruction is editable like every other prompt, under **Settings, Prompts, Images**, and the
+whole thing is switched off under **Settings, Tools, Images**. Pictures drawn before it existed, or
+with it off, simply show their prompt.
+
 ## Sharing
 
 An administrator can hand the whole instance a default image model and a prompt writer, using the

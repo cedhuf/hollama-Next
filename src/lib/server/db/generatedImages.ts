@@ -32,6 +32,22 @@ export function insertImage(userId: string, image: GeneratedImage): void {
 		.run(image.id, userId, JSON.stringify(image), image.bytes, image.createdAt);
 }
 
+/**
+ * Name one picture, after it was drawn.
+ *
+ * A patch rather than part of the insert, because the title is written by a
+ * second model once the picture exists: making the generation wait on it would
+ * add a round trip to a request that already takes half a minute, to set a label.
+ */
+export function setImageTitle(userId: string, id: string, title: string): void {
+	const image = getImage(userId, id);
+	if (!image) return;
+	const next = { ...image, title, updatedAt: new Date().toISOString() };
+	getDb()
+		.prepare('UPDATE generated_images SET data = ? WHERE id = ? AND user_id = ?')
+		.run(JSON.stringify(next), id, userId);
+}
+
 /** Delete one row, scoped to its owner. Says whether there was one to delete. */
 export function deleteImage(userId: string, id: string): boolean {
 	const result = getDb()

@@ -9,6 +9,7 @@ export type PromptKey =
 	| 'currentDate'
 	| 'conversationTitle'
 	| 'imagePrompt'
+	| 'imageTitle'
 	| 'personaLanguage'
 	| 'personaSummoned'
 	| 'multiSpeaker'
@@ -65,6 +66,12 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		hint: 'Turns a plain description into a prompt an image model can use. The answer is put in an editable field and shown before anything is drawn, never sent straight through, so it can be as opinionated as you like.',
 		default:
 			'You rewrite a plain description into a prompt for an image generation model. Keep every subject, action and constraint the person asked for, and add only what a photographer or an illustrator would have decided anyway: framing, lens or medium, lighting, palette, level of detail, mood. Never invent a subject that was not asked for, never add text or watermarks, and never contradict the request. Answer with the prompt itself and nothing else: no preamble, no quotes, no markdown, no explanation. Write it in English, whatever language the request is in, because image models understand it best. Stay under 400 characters.'
+	},
+	imageTitle: {
+		label: 'Image title',
+		hint: 'Names a picture from the prompt that made it. The answer is cut at 60 characters and used as the label everywhere the picture appears, so ask for something short.',
+		default:
+			'Give a short title, three to six words, for an image made from the following prompt. Name what is in the picture, not the style words. Reply with only the title: no quotes, no markdown, no trailing punctuation, and no words like "image" or "picture".'
 	},
 	personaLanguage: {
 		label: 'Persona language',
@@ -395,7 +402,7 @@ export const PROMPT_GROUPS = [
 		id: 'images',
 		label: 'Images',
 		hint: 'Turning what somebody typed into something an image model can draw.',
-		keys: ['imagePrompt']
+		keys: ['imagePrompt', 'imageTitle']
 	},
 	{
 		id: 'nativeTools',

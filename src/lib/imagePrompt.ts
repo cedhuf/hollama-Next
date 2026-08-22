@@ -24,6 +24,37 @@ import { serversStore, settingsStore } from '$lib/localStorage';
 export async function writeImagePrompt(description: string): Promise<string | null> {
 	const defaults = get(chatDefaultsConfig);
 	if (!defaults.images.imagePromptWriter || !description.trim()) return null;
+	return ask('imagePrompt', description, 400);
+}
+
+/**
+ * A few words naming a picture, from the prompt that made it.
+ *
+ * Its own switch and not the writer's, because the two are not the same trade. A
+ * rewrite changes what gets drawn and costs a request somebody did not ask for;
+ * a title changes nothing, costs a dozen tokens beside an image billed by the
+ * minute, and is what every list of pictures ends up being read by.
+ *
+ * Best-effort throughout: a picture with no title is a picture shown by its
+ * prompt, which is what happened before titles existed.
+ */
+export async function writeImageTitle(prompt: string): Promise<string | null> {
+	if (!get(settingsStore).imageAutoTitle) return null;
+	try {
+		return await ask('imageTitle', prompt, 60);
+	} catch {
+		return null;
+	}
+}
+
+/** One question, one answer, no history. The shape both of the above share. */
+async function ask(
+	instruction: 'imagePrompt' | 'imageTitle',
+	input: string,
+	limit: number
+): Promise<string | null> {
+	const defaults = get(chatDefaultsConfig);
+	if (!input.trim()) return null;
 
 	// Blank means the model you normally use, which is what blank means in every
 	// other model field in the app. Turning the writer off is what the switch is
@@ -48,8 +79,8 @@ export async function writeImagePrompt(description: string): Promise<string | nu
 		{
 			model: modelName,
 			messages: [
-				{ role: 'system', content: resolvePrompt('imagePrompt', get(effectivePrompts)) },
-				{ role: 'user', content: description.trim() }
+				{ role: 'system', content: resolvePrompt(instruction, get(effectivePrompts)) },
+				{ role: 'user', content: input.trim() }
 			],
 			// A one-shot rewrite, like a title. Nothing here is worth reasoning about,
 			// and a model that thinks out loud would put its thinking in the prompt.
@@ -68,5 +99,5 @@ export async function writeImagePrompt(description: string): Promise<string | nu
 		.replace(/^["'`]+|["'`]+$/g, '')
 		.trim();
 
-	return text || null;
+	return text ? text.slice(0, limit) : null;
 }

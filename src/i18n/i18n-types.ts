@@ -2224,6 +2224,14 @@ type RootTranslation = {
 	 */
 	imagePromptWriterOff: string
 	/**
+	 * N​a​m​e​ ​e​a​c​h​ ​p​i​c​t​u​r​e
+	 */
+	imageAutoTitle: string
+	/**
+	 * A​ ​f​e​w​ ​w​o​r​d​s​,​ ​w​r​i​t​t​e​n​ ​o​n​c​e​ ​t​h​e​ ​p​i​c​t​u​r​e​ ​e​x​i​s​t​s​,​ ​u​s​e​d​ ​a​s​ ​i​t​s​ ​l​a​b​e​l​ ​a​n​d​ ​i​t​s​ ​f​i​l​e​n​a​m​e​.
+	 */
+	imageAutoTitleHelp: string
+	/**
 	 * W​h​i​c​h​ ​m​o​d​e​l​ ​w​r​i​t​e​s​ ​i​t
 	 */
 	imagePromptWriterModel: string
@@ -5636,6 +5644,14 @@ The completion in progress will stop
 	 * Off
 	 */
 	imagePromptWriterOff: () => LocalizedString
+	/**
+	 * Name each picture
+	 */
+	imageAutoTitle: () => LocalizedString
+	/**
+	 * A few words, written once the picture exists, used as its label and its filename.
+	 */
+	imageAutoTitleHelp: () => LocalizedString
 	/**
 	 * Which model writes it
 	 */

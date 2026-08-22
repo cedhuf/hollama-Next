@@ -64,6 +64,14 @@ export interface Settings {
 	/** Offer to rewrite a description into a fuller image prompt. */
 	imagePromptWriter: boolean;
 	/**
+	 * Name each picture once it is drawn, with the same model that writes prompts.
+	 *
+	 * On by default, unlike the writer's own switch, because the two cost nothing
+	 * alike: a title is a handful of tokens against a request billed by the minute,
+	 * and it is what every list of pictures is read by afterwards.
+	 */
+	imageAutoTitle: boolean;
+	/**
 	 * The text model that does the rewriting.
 	 *
 	 * Empty means the default model, like every other model field in the app. An
@@ -295,6 +303,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	compactModel: null,
 	defaultImageModel: null,
 	imagePromptWriter: true,
+	imageAutoTitle: true,
 	imagePromptModel: null,
 	autoCompact: false,
 	compactThreshold: 80000,

@@ -9,6 +9,14 @@
  */
 export interface GeneratedImage {
 	id: string;
+	/**
+	 * A few words naming the picture, written by a text model after the fact.
+	 *
+	 * Absent on anything drawn before titling existed, and on anything drawn with
+	 * it switched off, so every reader falls back to the prompt. It is a label, not
+	 * a record: the prompt is what made the picture and is never replaced by it.
+	 */
+	title?: string;
 	/** What the person asked for, in their words. Never overwritten. */
 	prompt: string;
 	/**
@@ -99,13 +107,17 @@ export function extensionFor(contentType: string): string {
 /**
  * A filename somebody would recognise in their downloads folder.
  *
- * Built from the prompt, because a folder of `image-1.png` is a folder nobody
- * can search. Stripped to what every filesystem accepts, and truncated: a
+ * Built from the title when there is one and from the prompt otherwise, because a
+ * folder of `image-1.png` is a folder nobody can search — and because a filename
+ * is the one piece of metadata every file manager and every desktop search
+ * already indexes, without anyone writing a byte of EXIF. Stripped to what every filesystem accepts, and truncated: a
  * two-thousand-character prompt is not a filename.
  */
-export function downloadName(image: Pick<GeneratedImage, 'prompt' | 'contentType'>): string {
+export function downloadName(
+	image: Pick<GeneratedImage, 'title' | 'prompt' | 'contentType'>
+): string {
 	const stem =
-		image.prompt
+		(image.title || image.prompt)
 			.toLowerCase()
 			.replace(/[^a-z0-9]+/g, '-')
 			.replace(/^-+|-+$/g, '')

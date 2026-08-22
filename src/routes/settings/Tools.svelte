@@ -285,7 +285,13 @@
 				/>
 				<SettingsHint>{$LL.imagePromptWriterHelp()}</SettingsHint>
 
-				{#if $settingsStore.imagePromptWriter}
+				<!-- On by default, unlike the writer above it, and the two are not the same
+				     trade: a rewrite changes what gets drawn, a title changes nothing and
+				     costs a dozen tokens beside a request billed by the minute. -->
+				<FieldCheckbox label={$LL.imageAutoTitle()} bind:checked={$settingsStore.imageAutoTitle} />
+				<SettingsHint>{$LL.imageAutoTitleHelp()}</SettingsHint>
+
+				{#if $settingsStore.imagePromptWriter || $settingsStore.imageAutoTitle}
 					<SettingsField label={$LL.imagePromptWriterModel()}>
 						<ModelSelect
 							value={imagesCfg.imagePromptModel || undefined}

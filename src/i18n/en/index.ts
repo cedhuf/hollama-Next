@@ -596,6 +596,9 @@ const en = {
 	defaultImageModelHelp: 'What the gallery starts on.',
 	imagePromptWriter: 'Prompt writer',
 	imagePromptWriterOff: 'Off',
+	imageAutoTitle: 'Name each picture',
+	imageAutoTitleHelp:
+		'A few words, written once the picture exists, used as its label and its filename.',
 	imagePromptWriterModel: 'Which model writes it',
 	imagePromptWriterHelp: 'Turns a plain description into a fuller prompt.',
 	imagesSharing: 'Image defaults sharing',

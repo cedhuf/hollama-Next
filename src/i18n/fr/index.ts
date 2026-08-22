@@ -617,6 +617,9 @@ const fr = extendDictionary(en, {
 	defaultImageModelHelp: 'Ce sur quoi la galerie démarre.',
 	imagePromptWriter: 'Rédacteur de prompt',
 	imagePromptWriterOff: 'Désactivé',
+	imageAutoTitle: 'Nommer chaque image',
+	imageAutoTitleHelp:
+		"Quelques mots, écrits une fois l'image faite, qui lui servent d'étiquette et de nom de fichier.",
 	imagePromptWriterModel: "Quel modèle l'écrit",
 	imagePromptWriterHelp: 'Transforme une description simple en un prompt plus riche.',
 	imagesSharing: "Partage des défauts d'images",

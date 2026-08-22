@@ -31,6 +31,7 @@ export async function GET(event) {
 	 */
 	const manifest = images.map((image) => ({
 		file: fileNameFor(image.id, image),
+		title: image.title,
 		prompt: image.prompt,
 		sentPrompt: image.sentPrompt,
 		negativePrompt: image.negativePrompt,
@@ -79,12 +80,16 @@ export async function GET(event) {
 /**
  * A name inside the archive: readable, and unique.
  *
- * The prompt makes it recognisable, which is the whole reason not to number them
- * one to four hundred. The id makes it unique, because two pictures of the same
+ * The title makes it recognisable, and the prompt does when there is no title,
+ * which is the whole reason not to number them one to four hundred. It is also
+ * the one piece of metadata every desktop search already indexes. The id makes it unique, because two pictures of the same
  * prompt are the commonest thing in a gallery and a zip with two identical names
  * in it is a zip that unpacks to one file.
  */
-function fileNameFor(id: string, image: { prompt: string; contentType: string }): string {
+function fileNameFor(
+	id: string,
+	image: { title?: string; prompt: string; contentType: string }
+): string {
 	const stem = downloadName(image).replace(/\.[^.]+$/, '');
 	return `${stem}-${id.slice(0, 8)}.${extensionFor(image.contentType)}`;
 }

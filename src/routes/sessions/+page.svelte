@@ -20,6 +20,7 @@
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
 	import { canDrawImages, imagesStore, imageUrl } from '$lib/images';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
@@ -332,18 +333,27 @@
 							<div class="overflow-scrollbar min-w-0 flex-1 overflow-y-hidden">
 								<div class="flex w-max gap-2 pb-1">
 									{#each recentImages as image (image.id)}
-										<a
-											href={resolve('/images')}
-											title={image.sentPrompt || image.prompt}
-											class="group relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
-										>
-											<img
-												src={imageUrl(image.id)}
-												alt={image.prompt}
-												loading="lazy"
-												class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-											/>
-										</a>
+										<!-- The app's own tooltip rather than the browser's: a strip of
+										     thumbnails is unreadable without one, and a `title` attribute
+										     waits a second, cannot be reached by keyboard, and is drawn by
+										     the operating system instead of by the app. -->
+										<Tooltip side="bottom">
+											{#snippet trigger({ props })}
+												<a
+													{...props}
+													href={resolve('/images')}
+													class="group relative block h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-shade-3 bg-shade-0"
+												>
+													<img
+														src={imageUrl(image.id)}
+														alt={image.prompt}
+														loading="lazy"
+														class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+													/>
+												</a>
+											{/snippet}
+											{image.title || image.sentPrompt || image.prompt}
+										</Tooltip>
 									{/each}
 								</div>
 							</div>

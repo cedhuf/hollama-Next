@@ -35,7 +35,8 @@
 		imagesLoaded,
 		imagesStore,
 		imageUrl,
-		serverIdFor
+		serverIdFor,
+		titleImages
 	} from '$lib/images';
 	import { serversStore } from '$lib/localStorage';
 	import { formatTimestampToNow } from '$lib/utils';
@@ -152,7 +153,7 @@
 
 		busy = true;
 		try {
-			await generateImages({
+			const made = await generateImages({
 				serverId,
 				model,
 				// Both, always. The words that were typed are what the gallery shows and
@@ -165,6 +166,10 @@
 				size: size || undefined,
 				n: count
 			});
+
+			// Not awaited: the pictures are already on screen, and a label arriving a
+			// moment later is a label arriving a moment later.
+			void titleImages(made, rewritten.trim() || prompt.trim());
 			// The prompt stays. Drawing is iterative, and the commonest next action is
 			// the same words with one of them changed.
 		} catch (error) {
@@ -498,7 +503,7 @@
 							<span
 								class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2 pt-5 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
 							>
-								{image.sentPrompt || image.prompt}
+								{image.title || image.sentPrompt || image.prompt}
 							</span>
 						</button>
 					{/each}
@@ -561,7 +566,7 @@
 						style="background-color: {badgeColor(image.serverId)}"
 					></span>
 					<span class="truncate text-sm font-semibold text-active">
-						{modelLabel(serverFor(image.serverId), image.model)}
+						{image.title || modelLabel(serverFor(image.serverId), image.model)}
 					</span>
 				</div>
 
@@ -632,6 +637,7 @@
 				<div
 					class="pointer-events-none absolute right-4 top-4 flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 rounded-lg bg-black/55 px-2.5 py-1.5 text-[11px] text-white backdrop-blur-sm"
 				>
+					<span class="truncate">{modelLabel(serverFor(image.serverId), image.model)}</span>
 					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
 					<span>{formatTimestampToNow(image.createdAt)}</span>
 					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
