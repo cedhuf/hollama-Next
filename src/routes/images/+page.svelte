@@ -486,11 +486,20 @@
 
 							<!-- The prompt, on the picture, on hover and on keyboard focus. A grid
 							     of pictures with no words is a grid you open one by one to search.
-							     Focus counts as hover here, or the keyboard never sees it. -->
+							     Focus counts as hover here, or the keyboard never sees it.
+
+							     The same one the dialog shows: what was actually sent, so the two
+							     never disagree about what made this picture.
+
+							     One line, truncated. Two lines clamped left a long prompt broken
+							     off mid-thought across the bottom of a thumbnail, which is neither
+							     readable nor a summary. One line ending in an ellipsis is honest
+							     about being an excerpt, and the dialog is one click away for the
+							     rest. -->
 							<span
-								class="pointer-events-none absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-2.5 pb-2.5 pt-6 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+								class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pb-2 pt-5 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
 							>
-								{image.prompt}
+								{image.sentPrompt || image.prompt}
 							</span>
 						</button>
 					{/each}
