@@ -73,6 +73,8 @@
 	let expandedPrompt = $state(false);
 	/** The prompt block's natural height, measured so the opening can be animated. */
 	let promptHeight = $state(0);
+	/** How tall the floating prompt is, so the picture can stop above it. */
+	let promptBarHeight = $state(0);
 	/**
 	 * The prompt paragraph's own height, apart from everything under it.
 	 *
@@ -670,7 +672,23 @@
 			<!-- The two panes differ by how much of the backdrop each admits, which is
 			     what keeps the bar reading as a bar: a veil over it, almost nothing over
 			     the picture. Same layer underneath both, so it is one image and not two. -->
-			<div class="relative flex min-h-0 flex-1 items-center justify-center p-3">
+			<!-- The picture stops where the prompt starts.
+			
+			     It used to run underneath it, which is what a floating bar does by
+			     definition, and on a landscape image the bar sat squarely across the
+			     bottom of the subject. The bar keeps its floating look — it is still over
+			     the blurred backdrop, not in a band of its own — but the box the picture
+			     is fitted into gives up exactly the room the bar occupies.
+			
+			     Measured rather than assumed, because that height is one line or ten
+			     depending on what has been opened. There is no cycle to worry about here:
+			     the bar is positioned against the box's edges, so its height does not
+			     depend on the padding this sets. The padding rides the same transition as
+			     the unfolding, so the picture rises with it instead of jumping at the end. -->
+			<div
+				class="relative flex min-h-0 flex-1 items-center justify-center p-3 transition-[padding] duration-300 ease-out motion-reduce:transition-none"
+				style="padding-bottom: {promptBarHeight + 24}px"
+			>
 				<img
 					src={imageUrl(image.id)}
 					alt={image.prompt}
@@ -692,6 +710,7 @@
 				     `items-start` so the control stays level with the first line once the
 				     rest has unfolded beneath it. -->
 				<div
+					bind:clientHeight={promptBarHeight}
 					class="absolute inset-x-3 bottom-3 flex items-start gap-2 rounded-lg bg-black/55 px-2.5 py-1.5 backdrop-blur-sm"
 				>
 					<div
