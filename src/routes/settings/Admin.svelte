@@ -55,7 +55,6 @@
 
 	let personaAutoUpdateForced = $state(false);
 	let personaMemoryEnabled = $state(true);
-	let imagesEnabled = $state(false);
 	let themeSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let themeShareEnabled = $state(false);
 	let resettingOnboarding = $state(false);
@@ -153,7 +152,6 @@
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
 			personaMemoryEnabled = config.personaMemoryEnabled ?? true;
-			imagesEnabled = config.imagesEnabled ?? false;
 			themeSharing = config.themeSharing ?? 'off';
 			themeShareEnabled = themeSharing !== 'off';
 			searchSharing = config.searchSharing ?? 'off';
@@ -341,10 +339,6 @@
 
 	async function savePersonaMemory() {
 		await api('/api/admin/config', 'PUT', { personaMemoryEnabled });
-	}
-
-	async function saveImages() {
-		await api('/api/admin/config', 'PUT', { imagesEnabled });
 	}
 
 	/**
@@ -582,34 +576,24 @@
 	<!-- Image defaults sharing. Only worth showing once the instance draws at all:
 	     a panel for choosing which model an instance uses for something it has
 	     switched off is a panel about nothing. -->
-	<!-- One section for the whole feature: whether this instance draws, and what it
-	     draws with. They were two, a permission in the list above and a sharing panel
-	     down here, which read as the same subject asked about twice. Every other
-	     feature on this tab is one heading with everything about it underneath. -->
+	<!-- Sharing only, like every other feature on this tab. Whether this instance
+	     draws at all is not a switch here any more: it is whether an image model is
+	     marked as one and shared, which is the same decision taken where the models
+	     already live rather than restated as a permission. -->
 	<SettingsSection title={$LL.images()} description={$LL.imagesSharingDescription()} card>
-		<!-- Off until somebody decides otherwise, unlike most of this tab. Every
-		     provider with an image model charges real money per request, so an
-		     instance that starts drawing because it was upgraded is an instance that
-		     surprises whoever pays for it. Turning it off later hides the page and
-		     refuses the route; nothing already drawn is touched. -->
-		<FieldCheckbox label={$LL.imagesAllow()} bind:checked={imagesEnabled} onChange={saveImages} />
-		<SettingsHint>{$LL.imagesAllowHelp()}</SettingsHint>
-
-		{#if imagesEnabled}
-			<FieldCheckbox
-				label={$LL.shareImages()}
-				bind:checked={imagesShareEnabled}
-				onChange={syncImagesShare}
-			/>
-			{#if imagesShareEnabled}
-				<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
-				<span class="text-xs text-muted">
-					{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || $LL.defaultModel()}
-					· {$settingsStore.imagePromptWriter
-						? $settingsStore.imagePromptModel || $LL.defaultModel()
-						: $LL.imagePromptWriterOff()}
-				</span>
-			{/if}
+		<FieldCheckbox
+			label={$LL.shareImages()}
+			bind:checked={imagesShareEnabled}
+			onChange={syncImagesShare}
+		/>
+		{#if imagesShareEnabled}
+			<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
+			<span class="text-xs text-muted">
+				{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || $LL.defaultModel()}
+				· {$settingsStore.imagePromptWriter
+					? $settingsStore.imagePromptModel || $LL.defaultModel()
+					: $LL.imagePromptWriterOff()}
+			</span>
 		{/if}
 	</SettingsSection>
 

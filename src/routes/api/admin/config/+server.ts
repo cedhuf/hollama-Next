@@ -6,7 +6,6 @@ import {
 	allowUserKeys,
 	allowUserPersonas,
 	getConfig,
-	imagesEnabled,
 	personaAutoUpdateForced,
 	personaMemoryEnabled,
 	personaStoreMode,
@@ -14,7 +13,6 @@ import {
 	setAllowUserKeys,
 	setAllowUserPersonas,
 	setConfig,
-	setImagesEnabled,
 	setPersonaAutoUpdateForced,
 	setPersonaMemoryEnabled,
 	setPersonaStoreMode,
@@ -40,7 +38,6 @@ export async function GET(event) {
 		personaStoreMode: personaStoreMode(),
 		personaAutoUpdateForced: personaAutoUpdateForced(),
 		personaMemoryEnabled: personaMemoryEnabled(),
-		imagesEnabled: imagesEnabled(),
 		themeSharing: themeSharing(),
 		themeMode: getConfig('themeMode') ?? 'system',
 		themeStyle: getConfig('themeStyle') ?? 'classic',
@@ -77,7 +74,6 @@ export async function PUT(event) {
 	if (typeof body?.creditLimit === 'number') setInstanceCreditLimit(body.creditLimit);
 	if (['month', 'week', 'day'].includes(body?.creditPeriod)) setCreditPeriod(body.creditPeriod);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
-	if (typeof body?.imagesEnabled === 'boolean') setImagesEnabled(body.imagesEnabled);
 	if (body?.personaStoreMode === 'open' || body?.personaStoreMode === 'curated') {
 		setPersonaStoreMode(body.personaStoreMode);
 	}
@@ -139,8 +135,7 @@ export async function PUT(event) {
 		setConfig('compactSharing', body.compactSharing);
 	}
 	// Images: which model draws and which one writes the prompt for it, shared the
-	// same three ways. Note this is separate from `imagesEnabled`, which is not a
-	// default anybody can override but whether the feature exists here at all.
+	// same three ways.
 	if (['off', 'locked', 'overridable'].includes(body?.imagesSharing)) {
 		setConfig('imagesSharing', body.imagesSharing);
 	}

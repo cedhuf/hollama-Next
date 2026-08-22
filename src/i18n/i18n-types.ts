@@ -2436,14 +2436,6 @@ type RootTranslation = {
 	 */
 	imagesExportAll: RequiredParams<'count'>
 	/**
-	 * A​l​l​o​w​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n
-	 */
-	imagesAllow: string
-	/**
-	 * O​f​f​ ​b​y​ ​d​e​f​a​u​l​t​.​ ​I​m​a​g​e​ ​m​o​d​e​l​s​ ​a​r​e​ ​b​i​l​l​e​d​ ​p​e​r​ ​r​e​q​u​e​s​t​,​ ​s​o​ ​n​o​b​o​d​y​ ​s​t​a​r​t​s​ ​s​p​e​n​d​i​n​g​ ​u​n​t​i​l​ ​y​o​u​ ​t​u​r​n​ ​t​h​i​s​ ​o​n​.​ ​T​u​r​n​i​n​g​ ​i​t​ ​o​f​f​ ​l​a​t​e​r​ ​h​i​d​e​s​ ​t​h​e​ ​p​a​g​e​ ​a​n​d​ ​r​e​f​u​s​e​s​ ​n​e​w​ ​g​e​n​e​r​a​t​i​o​n​s​;​ ​i​m​a​g​e​s​ ​a​l​r​e​a​d​y​ ​m​a​d​e​ ​a​r​e​ ​k​e​p​t​.
-	 */
-	imagesAllowHelp: string
-	/**
 	 * L​e​t​ ​p​e​r​s​o​n​a​s​ ​r​e​m​e​m​b​e​r​ ​t​h​i​n​g​s​ ​a​b​o​u​t​ ​t​h​e​i​r​ ​u​s​e​r
 	 */
 	personaMemoryAllow: string
@@ -5848,14 +5840,6 @@ The completion in progress will stop
 	 * All {count} images
 	 */
 	imagesExportAll: (arg: { count: number }) => LocalizedString
-	/**
-	 * Allow image generation
-	 */
-	imagesAllow: () => LocalizedString
-	/**
-	 * Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.
-	 */
-	imagesAllowHelp: () => LocalizedString
 	/**
 	 * Let personas remember things about their user
 	 */

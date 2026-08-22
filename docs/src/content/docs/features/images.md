@@ -8,25 +8,22 @@ sidebar:
 Llooma can draw. A dedicated page holds everything you have generated, newest first, with the
 field that makes new ones at the top.
 
-It is a **server mode** feature only, and it is **off until an administrator turns it on**. Both
-of those are deliberate, and both are explained below.
+It is a **server mode** feature only.
 
 ## Turning it on
 
-Three things have to be true before the Images entry appears in the sidebar:
+Two things have to be true before the Images entry appears in the sidebar:
 
 1. The instance runs in server mode.
-2. An administrator has ticked **Allow image generation**, in the Images section of Settings, Admin.
-3. At least one model on a connection is marked as an image model.
+2. At least one model you can reach is marked as an image model.
 
-If any of them is missing, there is no Images entry at all rather than one that leads nowhere. A
+If either is missing, there is no Images entry at all rather than one that leads nowhere. A
 permanently disabled button is a worse answer than no button.
 
-### Why it is off by default
-
-Every provider that offers an image model charges for it per request, and often per minute of
-processing rather than per token. An instance that started drawing because it was upgraded would
-be an instance that surprised whoever pays for it. Turning it on is a decision.
+There is no separate switch for the feature. Marking a model as one that draws is the decision, and
+on a system connection it only reaches anyone else once it is also shared — so a user sees nothing
+until an administrator has done both, and an administrator who wants none of this marks no image
+model.
 
 ### Marking a model as an image model
 
@@ -95,6 +92,9 @@ Prompts, Images**.
 An administrator can hand the whole instance a default image model and a prompt writer, using the
 same three states as everything else shared here: off, locked, or overridable. See
 [Administration](/guides/administration/).
+
+Note what this shares: the *defaults*, not the permission. What makes a model reachable at all is
+still the shared-models list on its connection.
 
 Which models are reachable at all is still governed by the shared-models list on each system
 connection, exactly as for chat.

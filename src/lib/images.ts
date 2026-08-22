@@ -15,8 +15,6 @@ import { serversStore, settingsStore } from '$lib/localStorage';
  */
 
 export const imagesStore = writable<GeneratedImage[]>([]);
-/** Whether the instance draws at all. Unknown until the first load, so off. */
-export const imagesEnabled = writable(false);
 export const imagesLoaded = writable(false);
 
 /** Where a picture's bytes are. Authenticated and scoped to its owner. */
@@ -30,8 +28,7 @@ export async function loadImages(): Promise<void> {
 	try {
 		const response = await fetch('/api/images');
 		if (!response.ok) return;
-		const data = (await response.json()) as { enabled: boolean; images: GeneratedImage[] };
-		imagesEnabled.set(data.enabled);
+		const data = (await response.json()) as { images: GeneratedImage[] };
 		imagesStore.set(data.images ?? []);
 	} catch {
 		// A gallery that will not load is not a reason to break the page it is on.
@@ -89,14 +86,16 @@ export const imageModels = derived([settingsStore, serversStore], ([$settings, $
 );
 
 /**
- * Whether the app should offer drawing at all: the right mode, the instance's
- * permission, and at least one model that can do it. A page reachable without
- * the third is a page whose only content is an explanation.
+ * Whether the app should offer drawing at all: the right mode, and a model that
+ * can do it.
+ *
+ * The second half is the whole permission now. There is no separate instance
+ * switch: a model only counts as one that draws once somebody has marked it so
+ * under Models and pricing, and on a system connection it only reaches anyone
+ * once it is shared. An administrator who does not want this offers no image
+ * model, which is the same decision expressed where the models already are.
  */
-export const canDrawImages = derived(
-	[imagesEnabled, imageModels],
-	([$enabled, $models]) => isServerMode && $enabled && $models.length > 0
-);
+export const canDrawImages = derived(imageModels, ($models) => isServerMode && $models.length > 0);
 
 /** The connection a model belongs to, which the server needs named explicitly. */
 export function serverIdFor(model: string): string | undefined {

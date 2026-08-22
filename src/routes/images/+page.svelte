@@ -33,7 +33,6 @@
 		deleteImage,
 		generateImages,
 		imageModels,
-		imagesEnabled,
 		imagesLoaded,
 		imagesStore,
 		imageUrl,
@@ -298,21 +297,7 @@
 			</div>
 			<p class="mb-7 text-sm text-muted">{$LL.imagesSubtitle()}</p>
 
-			{#if !$imagesEnabled && $imagesLoaded}
-				<!-- The instance has not turned this on. Said once, plainly, rather than
-				     drawn as a disabled form nobody can use. -->
-				<p
-					class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted"
-				>
-					{$LL.imagesDisabled()}
-				</p>
-			{:else if !$imageModels.length && $imagesLoaded}
-				<p
-					class="rounded-xl border border-dashed border-shade-4 p-6 text-center text-sm text-muted"
-				>
-					{$LL.imagesNoModel()}
-				</p>
-			{:else if $canDrawImages}
+			{#if $canDrawImages}
 				<!-- What makes a new one. At the top because that is where the page starts,
 				     and because everything below it is the result.
 

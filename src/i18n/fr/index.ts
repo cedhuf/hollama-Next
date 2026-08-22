@@ -690,9 +690,6 @@ const fr = extendDictionary(en, {
 	tourKnowledgeItem3: 'Glossaire',
 	imagesExportLast: 'Dernière image',
 	imagesExportAll: 'Les {count} images',
-	imagesAllow: "Autoriser la génération d'images",
-	imagesAllowHelp:
-		"Désactivé par défaut. Les modèles d'image sont facturés à la requête, donc personne ne dépense tant que vous ne l'activez pas. Le désactiver ensuite masque la page et refuse les nouvelles générations ; les images déjà faites sont conservées.",
 	personaMemoryAllow: 'Autoriser les personas à retenir des choses sur leur utilisateur',
 	personaMemoryAllowHelp:
 		"Un persona peut garder quelques notes entre les conversations, écrites par lui-même et lisibles par la personne concernée. Chaque mémoire appartient à un seul compte et n'est jamais partagée, même quand le persona l'est. Désactiver retire la capacité sans effacer ce qui a déjà été écrit.",

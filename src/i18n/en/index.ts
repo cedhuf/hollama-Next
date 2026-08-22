@@ -663,9 +663,6 @@ const en = {
 	tourKnowledgeItem3: 'Glossary',
 	imagesExportLast: 'Latest image',
 	imagesExportAll: 'All {count:number} images',
-	imagesAllow: 'Allow image generation',
-	imagesAllowHelp:
-		'Off by default. Image models are billed per request, so nobody starts spending until you turn this on. Turning it off later hides the page and refuses new generations; images already made are kept.',
 	personaMemoryAllow: 'Let personas remember things about their user',
 	personaMemoryAllowHelp:
 		'A persona can keep a few notes between conversations, written by itself and readable by whoever it is about. Each memory belongs to one account and is never shared, not even when the persona is. Turning this off takes the ability away without erasing what was already written.',

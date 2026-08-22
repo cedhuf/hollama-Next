@@ -1,7 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
-import { imagesEnabled } from '$lib/server/db/config';
 import { listImages } from '$lib/server/db/generatedImages';
 import { getServer } from '$lib/server/db/servers';
 import { generateImages, ImageError } from '$lib/server/imageGeneration';
@@ -9,7 +8,7 @@ import { generateImages, ImageError } from '$lib/server/imageGeneration';
 /** Everything this account has drawn, newest first. Metadata only. */
 export async function GET(event) {
 	const user = await requireUser(event);
-	return json({ enabled: imagesEnabled(), images: listImages(user.id) });
+	return json({ images: listImages(user.id) });
 }
 
 /**
@@ -23,7 +22,6 @@ export async function GET(event) {
  */
 export async function POST(event) {
 	const user = await requireUser(event);
-	if (!imagesEnabled()) throw error(403, 'Image generation is disabled on this instance');
 
 	const body = await event.request.json().catch(() => null);
 	if (!body?.serverId || !body?.model || typeof body?.prompt !== 'string') {
