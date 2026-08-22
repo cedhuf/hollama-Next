@@ -11,16 +11,14 @@
 		ConnectionType,
 		getDefaultServer,
 		getProvider,
-		infomaniakBaseUrl,
-		infomaniakImageBaseUrl,
-		infomaniakProductId,
 		PROVIDERS,
 		type ModelKind,
 		type ModelPrice,
 		type Server
 	} from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
-	import { fetchProviders, providerModels, providerToServer } from '$lib/providers';
+	import { fetchProviders, providerModels, providerToServer } from '$lib/providerCatalogue';
+	import { describeProvider } from '$lib/providers';
 	import { currentUser } from '$lib/stores/auth';
 
 	import Connection from './Connection.svelte';
@@ -81,6 +79,9 @@
 	});
 	/** Drives the placeholders of the "add a server" form. */
 	const draftProvider = $derived(getProvider(draft.connectionType as ConnectionType));
+	const draftDescriptor = $derived(describeProvider(draft.connectionType));
+	/** Set on the providers whose endpoint is built from one short value. */
+	const draftUrlField = $derived(draftDescriptor.urlField);
 
 	let verifying = $state(false);
 	let verified = $state(false);
@@ -335,19 +336,19 @@
 					</div>
 
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<!-- Same rule as an existing connection: Infomaniak's endpoint is a
-						     function of its product ID, so that is what is asked for. Leaving
-						     it empty leaves the URL empty, and Verify stays disabled. -->
-						{#if draft.connectionType === ConnectionType.Infomaniak}
-							<SettingsField label={$LL.productId()}>
+						<!-- Same rule as an existing connection: a provider whose endpoint is a
+						     function of one value asks for that value. Leaving it empty leaves
+						     the URL empty, and Verify stays disabled. Which providers work this
+						     way is in their own file, not here. -->
+						{#if draftUrlField}
+							<SettingsField label={$LL[draftUrlField.label as 'productId']()}>
 								<input
 									class="settings-field font-mono text-xs"
-									value={infomaniakProductId(draft.baseUrl)}
-									placeholder="123456"
+									value={draftUrlField.fromBaseUrl(draft.baseUrl)}
+									placeholder={draftUrlField.placeholder}
 									oninput={(e) => {
-										const id = e.currentTarget.value;
-										draft.baseUrl = infomaniakBaseUrl(id);
-										draft.imageBaseUrl = infomaniakImageBaseUrl(id);
+										draft.baseUrl = draftUrlField.toBaseUrl(e.currentTarget.value);
+										draft.imageBaseUrl = draftDescriptor.imageBaseFrom?.(draft.baseUrl) ?? '';
 										touch();
 									}}
 								/>

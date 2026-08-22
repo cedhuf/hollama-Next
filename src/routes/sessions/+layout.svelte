@@ -8,9 +8,9 @@
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import RobotsNoIndex from '$lib/components/RobotsNoIndex.svelte';
-	import { ConnectionType } from '$lib/connections';
+	import { isOpenAiCompatible } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
-	import { fetchProviders, providerModels } from '$lib/providers';
+	import { fetchProviders, providerModels } from '$lib/providerCatalogue';
 	import { type Model } from '$lib/settings';
 
 	let { children }: { children: Snippet } = $props();
@@ -33,17 +33,13 @@
 		for (const server of $serversStore) {
 			if (!server.isEnabled) continue;
 
-			switch (server.connectionType) {
-				case ConnectionType.Ollama:
-					models.push(...(await new OllamaStrategy(server).getModels().catch(() => [])));
-					break;
-				case ConnectionType.OpenAI:
-				case ConnectionType.OpenAICompatible:
-				case ConnectionType.Anthropic:
-				case ConnectionType.Infomaniak:
-					models.push(...(await new OpenAIStrategy(server).getModels().catch(() => [])));
-					break;
-			}
+			// Asked of the provider rather than enumerated here. The list used to name
+			// every connection type in a switch, which meant a provider added to
+			// `$lib/providers` matched no case and quietly listed nothing at all.
+			const strategy = isOpenAiCompatible(server.connectionType)
+				? new OpenAIStrategy(server)
+				: new OllamaStrategy(server);
+			models.push(...(await strategy.getModels().catch(() => [])));
 		}
 
 		return models.sort((a, b) => {

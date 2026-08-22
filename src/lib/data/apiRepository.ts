@@ -7,7 +7,7 @@ import type { Knowledge } from '$lib/knowledge';
 import type { PersonaMemory } from '$lib/personaMemory';
 import type { Persona } from '$lib/personas';
 import type { Playbook } from '$lib/playbooks';
-import { fetchProviders, providerToServer } from '$lib/providers';
+import { fetchProviders, providerToServer } from '$lib/providerCatalogue';
 import type { Session } from '$lib/sessions';
 import { normalizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';

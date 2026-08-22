@@ -10,9 +10,6 @@
 	import {
 		ConnectionType,
 		getProvider,
-		infomaniakBaseUrl,
-		infomaniakImageBaseUrl,
-		infomaniakProductId,
 		isOpenAiCompatible,
 		SERVER_COLORS,
 		serverBadge,
@@ -21,6 +18,7 @@
 		type Server
 	} from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
+	import { describeProvider } from '$lib/providers';
 
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';
 	import PullModel from './ollama/PullModel.svelte';
@@ -86,7 +84,8 @@
 	const provider = $derived(getProvider(server.connectionType));
 	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
 	const isOllamaFamily = $derived(server.connectionType === ConnectionType.Ollama);
-	const isInfomaniak = $derived(server.connectionType === ConnectionType.Infomaniak);
+	const descriptor = $derived(describeProvider(server.connectionType));
+	const urlField = $derived(descriptor.urlField);
 	const canDraw = $derived(supportsImageGeneration(server.connectionType));
 
 	const name = $derived(server.label || provider.name);
@@ -242,25 +241,24 @@
 					</SettingsField>
 				{/if}
 
-				<!-- Infomaniak's endpoints differ only by the product ID in their path, so
-				     that is what the form asks for and the URLs are derived from it. An
-				     empty ID leaves them empty, which is what stops the connection being
-				     synced before it can work.
-				
-				     Two URLs from the one field, because Infomaniak's images are not under
-				     its chat endpoint: chat is API version 2 under /openai/v1, images are
-				     version 1 under /openai. Asking twice for the same product ID would be
-				     asking the user to know that. -->
-				{#if isInfomaniak}
-					<SettingsField label={$LL.productId()}>
+				<!-- Some providers' endpoints differ only by one value in their path, so
+				     that is what the form asks for and the URL is derived from it. An empty
+				     value leaves it empty, which is what stops the connection being synced
+				     before it can work.
+
+				     Both URLs from the one field, because a provider whose images are not
+				     under its chat endpoint would otherwise have to ask twice for the same
+				     value, which is asking the reader to know why. Which providers work
+				     this way, and how, is in their own file. -->
+				{#if urlField}
+					<SettingsField label={$LL[urlField.label as 'productId']()}>
 						<input
 							class="settings-field font-mono text-xs"
-							value={infomaniakProductId(server.baseUrl)}
-							placeholder="123456"
+							value={urlField.fromBaseUrl(server.baseUrl)}
+							placeholder={urlField.placeholder}
 							oninput={(e) => {
-								const id = e.currentTarget.value;
-								server.baseUrl = infomaniakBaseUrl(id);
-								server.imageBaseUrl = infomaniakImageBaseUrl(id);
+								server.baseUrl = urlField.toBaseUrl(e.currentTarget.value);
+								server.imageBaseUrl = descriptor.imageBaseFrom?.(server.baseUrl) ?? '';
 								persist();
 							}}
 						/>

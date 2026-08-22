@@ -1,4 +1,4 @@
-import type { ImageQuality, ImageRatio } from '$lib/imageOptions';
+import type { ImageQuality, ImageRatio } from '$lib/connections';
 
 /**
  * A picture the app made, and everything about it that is not the picture.

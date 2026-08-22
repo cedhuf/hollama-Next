@@ -15,7 +15,7 @@ import {
 	type ImageOptions,
 	type ImageQuality,
 	type ImageRatio
-} from '$lib/imageOptions';
+} from '$lib/connections';
 import { bytesHeld, insertImage } from '$lib/server/db/generatedImages';
 import {
 	getModelKinds,

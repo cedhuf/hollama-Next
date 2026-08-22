@@ -3,7 +3,7 @@ import { derived, get, writable } from 'svelte/store';
 import { isServerMode } from '$lib/chat/endpoint';
 import { modelKind } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
-import type { ImageQuality, ImageRatio } from '$lib/imageOptions';
+import type { ImageQuality, ImageRatio } from '$lib/connections';
 import { writeImageTitle } from '$lib/imagePrompt';
 import { serversStore, settingsStore } from '$lib/localStorage';
 

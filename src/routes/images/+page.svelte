@@ -32,7 +32,7 @@
 		imageOptionsFor,
 		type ImageQuality,
 		type ImageRatio
-	} from '$lib/imageOptions';
+	} from '$lib/connections';
 	import { writeImagePrompt } from '$lib/imagePrompt';
 	import {
 		canDrawImages,

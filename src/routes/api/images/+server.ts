@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
-import { IMAGE_QUALITIES, IMAGE_RATIOS } from '$lib/imageOptions';
+import { IMAGE_QUALITIES, IMAGE_RATIOS } from '$lib/connections';
 import { requireUser } from '$lib/server/api';
 import { listImages } from '$lib/server/db/generatedImages';
 import { getServer } from '$lib/server/db/servers';

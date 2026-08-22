@@ -1,3 +1,5 @@
+import { describeProvider, PROVIDER_DESCRIPTORS, type ProviderDescriptor } from '$lib/providers';
+
 import { generateRandomId } from './utils';
 
 export enum ConnectionType {
@@ -89,13 +91,9 @@ export type ModelKind = 'text' | 'image' | 'embedding' | 'audio';
 export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding', 'audio'];
 
 /** Default badge colour and short id per provider, dark-mode safe. */
-export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = {
-	[ConnectionType.Ollama]: { id: 'ollama', color: '#1D9E75' },
-	[ConnectionType.OpenAI]: { id: 'openai', color: '#378ADD' },
-	[ConnectionType.Anthropic]: { id: 'claude', color: '#D85A30' },
-	[ConnectionType.Infomaniak]: { id: 'infomaniak', color: '#BA7517' },
-	[ConnectionType.OpenAICompatible]: { id: 'compatible', color: '#888780' }
-};
+export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = Object.fromEntries(
+	PROVIDER_DESCRIPTORS.map((provider) => [provider.id, provider.badge])
+);
 
 /** Palette a connection's colour is drawn from. */
 export const SERVER_COLORS = [
@@ -297,13 +295,23 @@ export function serverInitials(name: string): string {
 }
 
 /**
- * Metadata describing each provider. Drives the provider picker cards and the
- * per-connection form. `identified` providers have a known endpoint, so the user
- * supplies an API key and little else, and the Base URL is hidden under Advanced.
- * Non-identified ones (Ollama, OpenAI-compatible) expose it as their main field.
+ * Where to send a drawing on this connection.
  *
- * Infomaniak counts as identified even though its URL is not one fixed string:
- * it varies only by the product ID, which the form asks for directly.
+ * The chat base whenever nothing says otherwise, so every provider that serves
+ * both from one root needs no configuration and none of this is visible to it.
+ * About a connection rather than about a provider, which is why it lives here
+ * and not in a descriptor.
+ */
+export function imageBaseUrl(server: Pick<Server, 'baseUrl' | 'imageBaseUrl'>): string {
+	return server.imageBaseUrl?.trim() || server.baseUrl;
+}
+
+/**
+ * What the connection form needs to know about a provider.
+ *
+ * A view of the descriptor rather than a second copy of it: the facts live in
+ * `$lib/providers`, one file each, and this is the shape the form already reads.
+ * Kept so nothing that renders a connection had to change when they moved.
  */
 export interface ProviderInfo {
 	type: ConnectionType;
@@ -319,174 +327,58 @@ export interface ProviderInfo {
 	apiKeyHelpUrl?: string;
 }
 
-/**
- * Infomaniak's endpoint, bar the product ID that identifies the user's AI Tools
- * subscription. Everything else about the URL is fixed.
- */
-export const INFOMANIAK_URL_TEMPLATE = 'https://api.infomaniak.com/2/ai/{productId}/openai/v1';
+const toProviderInfo = (descriptor: ProviderDescriptor): ProviderInfo => ({
+	type: descriptor.id as ConnectionType,
+	name: descriptor.name,
+	family: descriptor.family,
+	identified: descriptor.identified,
+	baseUrl: descriptor.baseUrl,
+	modelFilter: descriptor.modelFilter,
+	requiresApiKey: descriptor.requiresApiKey,
+	apiKeyHelpUrl: descriptor.apiKeyHelpUrl
+});
 
-/**
- * Infomaniak's image endpoints, which are not under its chat endpoint.
- *
- * A different API version and no `/v1`, both of which are theirs to decide and
- * neither of which can be reached from the chat base. Chat stays on version 2
- * deliberately: version 1's chat route is marked deprecated in their own
- * specification, and version 2 is the one that documents function calling and
- * multimodal input, which this app uses. Images have no version 2 route at all.
- */
-export const INFOMANIAK_IMAGE_URL_TEMPLATE = 'https://api.infomaniak.com/1/ai/{productId}/openai';
-
-/** The endpoint for a product ID, or nothing when there is no ID to build it from. */
-export function infomaniakBaseUrl(productId: string): string {
-	const id = productId.trim();
-	return id ? INFOMANIAK_URL_TEMPLATE.replace('{productId}', id) : '';
-}
-
-/** The image endpoint for a product ID, built from the same one field. */
-export function infomaniakImageBaseUrl(productId: string): string {
-	const id = productId.trim();
-	return id ? INFOMANIAK_IMAGE_URL_TEMPLATE.replace('{productId}', id) : '';
-}
-
-/**
- * Where to send a drawing on this connection.
- *
- * The chat base whenever nothing says otherwise, so every provider that serves
- * both from one root needs no configuration and none of this is visible to it.
- */
-export function imageBaseUrl(server: Pick<Server, 'baseUrl' | 'imageBaseUrl'>): string {
-	return server.imageBaseUrl?.trim() || server.baseUrl;
-}
-
-/**
- * The product ID out of a stored endpoint.
- *
- * Lets the form show a field for something that was never stored as a field, so
- * connections configured before this keep working and fill the input in on their
- * own. An unsubstituted placeholder reads as no ID at all, which is what it is.
- */
-export function infomaniakProductId(baseUrl: string): string {
-	const found = baseUrl?.match(/\/ai\/([^/]+)\/openai/)?.[1] ?? '';
-	return found === '{productId}' ? '' : found;
-}
-
-export const PROVIDERS: ProviderInfo[] = [
-	{
-		type: ConnectionType.Ollama,
-		name: 'Ollama',
-		family: 'ollama',
-		identified: false,
-		baseUrl: 'http://localhost:11434',
-		requiresApiKey: false
-	},
-	{
-		type: ConnectionType.OpenAI,
-		name: 'OpenAI',
-		family: 'openai',
-		identified: true,
-		baseUrl: 'https://api.openai.com/v1',
-		modelFilter: 'gpt',
-		requiresApiKey: true,
-		apiKeyHelpUrl: 'https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key'
-	},
-	{
-		type: ConnectionType.Anthropic,
-		name: 'Claude',
-		family: 'openai',
-		identified: true,
-		baseUrl: 'https://api.anthropic.com/v1',
-		modelFilter: 'claude',
-		requiresApiKey: true,
-		apiKeyHelpUrl: 'https://console.anthropic.com/settings/keys'
-	},
-	{
-		// The endpoint is fixed except for the product ID in its path, so the form
-		// asks for that one value and builds the URL. Asking for the whole URL with a
-		// {productId} placeholder in it, which is what this used to do, sends the
-		// placeholder itself to the API the moment anyone misses it.
-		type: ConnectionType.Infomaniak,
-		name: 'Infomaniak',
-		family: 'openai',
-		identified: true,
-		baseUrl: INFOMANIAK_URL_TEMPLATE,
-		requiresApiKey: true,
-		apiKeyHelpUrl: 'https://manager.infomaniak.com/v3/infomaniak-api'
-	},
-	{
-		type: ConnectionType.OpenAICompatible,
-		name: 'OpenAI-compatible',
-		family: 'openai',
-		identified: false,
-		baseUrl: 'http://localhost:8080/v1',
-		requiresApiKey: false
-	}
-];
+export const PROVIDERS: ProviderInfo[] = PROVIDER_DESCRIPTORS.map(toProviderInfo);
 
 export function getProvider(connectionType: ConnectionType): ProviderInfo {
-	return PROVIDERS.find((p) => p.type === connectionType) ?? PROVIDERS[0];
+	return toProviderInfo(describeProvider(connectionType));
 }
 
 /** Whether a connection talks to an OpenAI-compatible endpoint. */
 export function isOpenAiCompatible(connectionType: ConnectionType): boolean {
-	return getProvider(connectionType).family === 'openai';
+	return describeProvider(connectionType).family === 'openai';
 }
 
 /**
  * Whether this connection accepts an explicit "enable thinking" request flag
- * (`chat_template_kwargs.enable_thinking`). Self-hosted OpenAI-compatible servers
- * (vLLM / llama.cpp / SGLang) and Infomaniak (a generic OpenAI-compatible endpoint,
- * typically vLLM-backed) take it. Hosted OpenAI / Claude reject unknown body fields,
- * and Ollama has its own native `think` path — so they're excluded here.
+ * (`chat_template_kwargs.enable_thinking`).
  */
 export function supportsThinkingRequest(connectionType: ConnectionType): boolean {
-	return (
-		connectionType === ConnectionType.OpenAICompatible ||
-		connectionType === ConnectionType.Infomaniak
-	);
+	return describeProvider(connectionType).thinkingRequest === true;
 }
 
 /**
  * Whether an endpoint is known to accept a `tools` array.
  *
- * The hosted providers all do, and have for long enough that a version check
- * would be noise. Ollama does too, but only for some models, so it answers for
- * itself per model and is deliberately not listed here. What is left is
- * `OpenAICompatible`: llama.cpp, vLLM, SGLang, LM Studio, a proxy someone wrote
- * last week. Some support tool calling, some accept the field and ignore it, some
- * return 400. There is no way to ask, so the honest answer is no, and the user
- * who knows better says so with the `force` setting.
+ * Ollama does too, but only for some models, so it answers for itself per model
+ * and its descriptor deliberately stays silent here.
  */
 export function supportsNativeTools(connectionType: ConnectionType): boolean {
-	return (
-		connectionType === ConnectionType.OpenAI ||
-		connectionType === ConnectionType.Anthropic ||
-		connectionType === ConnectionType.Infomaniak
-	);
+	return describeProvider(connectionType).nativeTools === true;
 }
 
-/**
- * Whether this kind of connection can draw at all.
- *
- * Ollama has no image endpoint, and Anthropic does not generate pictures — it
- * reads them. What is left either serves OpenAI's `images/generations` or is
- * something self-hosted pretending to, which is the same request either way.
- * Used to decide whether the connection form has any business asking where its
- * image endpoint lives.
- */
+/** Whether this kind of connection can draw at all. */
 export function supportsImageGeneration(connectionType: ConnectionType): boolean {
-	return (
-		connectionType === ConnectionType.OpenAI ||
-		connectionType === ConnectionType.Infomaniak ||
-		connectionType === ConnectionType.OpenAICompatible
-	);
+	return describeProvider(connectionType).imageGeneration === true;
 }
 
 /**
- * Whether the composer should offer the per-conversation Reasoning toggle: Ollama
- * (native thinking) plus any endpoint that takes the explicit thinking flag.
+ * Whether the composer should offer the per-conversation Reasoning toggle: a
+ * provider with thinking of its own, plus any endpoint that takes the flag.
  */
 export function supportsReasoningToggle(connectionType: ConnectionType): boolean {
-	return connectionType === ConnectionType.Ollama || supportsThinkingRequest(connectionType);
+	const descriptor = describeProvider(connectionType);
+	return descriptor.nativeThinking === true || descriptor.thinkingRequest === true;
 }
 
 export function getDefaultServer(
@@ -498,10 +390,11 @@ export function getDefaultServer(
 
 	return {
 		id: generateRandomId(),
-		// Infomaniak starts empty rather than with its template: an endpoint that
-		// still has `{productId}` in it is not a working endpoint, and leaving it
-		// blank is what makes the form refuse to sync until the ID is given.
-		baseUrl: connectionType === ConnectionType.Infomaniak ? '' : provider.baseUrl,
+		// A provider whose address is built from one field starts blank rather than
+		// carrying its template: an endpoint with a placeholder still in it is not a
+		// working endpoint, and leaving it empty is what makes the form refuse to
+		// sync until the value is given.
+		baseUrl: describeProvider(connectionType).urlField ? '' : provider.baseUrl,
 		connectionType,
 		modelFilter: provider.modelFilter,
 		color: pickServerColor(usedColors),
@@ -509,3 +402,23 @@ export function getDefaultServer(
 		isEnabled: false
 	};
 }
+
+/**
+ * Everything a provider decides about itself, re-exported so the rest of the app
+ * keeps one import for "what is a connection" and never has to know which file a
+ * particular provider's facts happen to live in.
+ */
+export {
+	IMAGE_QUALITIES,
+	IMAGE_RATIOS,
+	type ImageOptions,
+	imageOptionsFor,
+	type ImageQuality,
+	type ImageRatio,
+	INFOMANIAK_URL_TEMPLATE,
+	infomaniakBaseUrl,
+	infomaniakImageBaseUrl,
+	infomaniakProductId,
+	qualityFor,
+	sizeFor
+} from '$lib/providers';
