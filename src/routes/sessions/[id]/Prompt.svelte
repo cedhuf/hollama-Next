@@ -16,18 +16,15 @@
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
+	import ImageDrop from '$lib/components/ImageDrop.svelte';
 	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
+	import { readPastedImages, warnRejected } from '$lib/imageFiles';
 	import { personasStore, serversStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
-	import {
-		contextMessages,
-		imagesPayload,
-		type Attachment,
-		type ImageAttachment
-	} from '$lib/promptAttachments';
+	import { contextMessages, imagesPayload, type Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
-	import { generateRandomId, isTouchPrimary } from '$lib/utils';
+	import { isTouchPrimary } from '$lib/utils';
 	import { webFetchConfig } from '$lib/webFetch';
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
@@ -371,70 +368,17 @@
 		submit();
 	}
 
-	function handlePaste(event: ClipboardEvent) {
-		const clipboardData = event.clipboardData;
-		if (!clipboardData) return;
+	async function handlePaste(event: ClipboardEvent) {
+		const data = event.clipboardData;
+		if (!data) return;
+		if (!Array.from(data.items).some((item) => item.type.startsWith('image/'))) return;
 
-		const items = Array.from(clipboardData.items);
-		const imageItems = items.filter((item) => item.type.startsWith('image/'));
-
-		if (imageItems.length === 0) return;
-
-		// Prevent default paste behavior when images are detected
+		// Only once there is a picture in it: a plain text paste is still a paste.
 		event.preventDefault();
 
-		const allowedTypes = ['image/png', 'image/jpeg'];
-		const newAttachments: ImageAttachment[] = [];
-		let unsupportedFiles = false;
-
-		const imagePromises = imageItems.map((item, index) => {
-			return new Promise<void>((resolve) => {
-				if (!allowedTypes.includes(item.type)) {
-					unsupportedFiles = true;
-					resolve();
-					return;
-				}
-
-				const file = item.getAsFile();
-				if (!file) {
-					resolve();
-					return;
-				}
-
-				const reader = new FileReader();
-				reader.onload = (event) => {
-					const dataUrl = event.target?.result as string;
-					if (dataUrl) {
-						// Generate a filename based on timestamp and index
-						const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-						const extension = item.type === 'image/png' ? 'png' : 'jpg';
-						const filename = `pasted-image-${timestamp}-${index + 1}.${extension}`;
-
-						newAttachments.push({
-							type: 'image',
-							id: generateRandomId(),
-							name: filename,
-							dataUrl
-						});
-					}
-					resolve();
-				};
-				reader.onerror = () => {
-					console.error('Error reading pasted image');
-					resolve();
-				};
-				reader.readAsDataURL(file);
-			});
-		});
-
-		Promise.all(imagePromises).then(() => {
-			if (unsupportedFiles) {
-				toast.warning('Some images were ignored. Only PNG and JPEG images are supported.');
-			}
-			if (newAttachments.length > 0) {
-				attachments = [...attachments, ...newAttachments];
-			}
-		});
+		const { images, rejected } = await readPastedImages(data);
+		warnRejected(rejected);
+		if (images.length) attachments = [...attachments, ...images];
 	}
 
 	function submit() {
@@ -502,7 +446,9 @@
 			{/if}
 			<!-- One composer, always: expanding only grows the card, so the toggle, Run,
 			     Cancel, attachments and tools stay reachable in every state. -->
-			<div
+			<ImageDrop
+				label={$LL.dropImagesHere()}
+				onImages={(images) => (attachments = [...attachments, ...images])}
 				class="surface-floating flex flex-col rounded-2xl border border-shade-3 shadow-lg transition-colors focus-within:border-shade-5"
 			>
 				<!-- The textarea auto-grows with its content (field-sizing); expanding only
@@ -631,7 +577,7 @@
 						</div>
 					{/snippet}
 				</PromptAttachments>
-			</div>
+			</ImageDrop>
 		{/if}
 	</div>
 </div>

@@ -52,6 +52,17 @@ so a better guess later still applies to everything you never touched.
 This is also what keeps embedding and transcription models out of the chat picker, where choosing
 one produces a 400 with no explanation attached.
 
+### Models that no catalogue lists
+
+Some capabilities are not a model at the provider at all: they are a dedicated route, so nothing
+returns them from `/v1/models` and no amount of asking will. Where Llooma knows of one, it names it
+and it appears in the list like any other model.
+
+That is the whole point of naming it. From there it is priced per minute or per image, marked shared
+or not, refused while unpriced under a credit limit, and metered against the same allowance — by the
+same machinery as everything else, rather than by a second path written beside it. If you see a model
+in **Models and pricing** that your provider's own documentation calls an endpoint, this is why.
+
 ## Pricing
 
 Image models are rarely billed by the token. Under Models and pricing, each model says what it is
@@ -131,6 +142,39 @@ Each picture records the shape and quality that were asked for, in the app's wor
 concrete size that was sent. Reusing a prompt therefore carries the intent to a different model
 rather than a pixel count that model would refuse.
 
+## Working from a picture
+
+Some models draw from pictures you give them rather than from words alone. Drop one on the composer
+from the desktop, or use the paperclip beside the controls. PNG and JPEG, and anything else in the
+same drop is counted back to you rather than dropped in silence.
+
+**The control follows the model, not the provider.** Which pictures an endpoint accepts varies
+inside a single provider: OpenAI's `gpt-image-1` takes up to sixteen, `dall-e-3` takes none at all,
+and Infomaniak's portrait route takes six. So the drop zone is open on a model that works this way
+and shut on one that does not, and it says which when you drag something onto it. Switching to a
+model that takes none puts down whatever was attached and tells you it did, rather than holding a
+picture you would believe was going out.
+
+**Some models need a word in the prompt.** Where a picture supplies a likeness, the prompt is how
+the endpoint is told where to put it, so a particular word has to appear next to who you mean —
+`portrait photo of a woman img`. The composer says which word as soon as you attach something, and
+the request is refused here rather than sent, because that refusal otherwise arrives after the wait
+and after the meter has run.
+
+`dall-e-2` is deliberately left out although its edit endpoint exists: it takes one square PNG under
+4 MB and nothing else, and none of those three conditions can be expressed, so offering it would be
+offering a control that fails on most pictures.
+
+**Reference pictures are never stored.** They travel with the one request that uses them and are
+gone after it. Nothing about that is an oversight: keeping them would mean a second quota, a second
+thing to delete and a second place a private photograph lives. The consequence is worth stating
+plainly, because it is the trade — a picture made this way cannot be remade from the gallery alone.
+The prompt, the model and the settings are kept, the pictures you brought are not.
+
+They are checked on arrival like everything else here: the type is read from the bytes, never from
+what the browser labelled them, and the size limit is the same one a generated picture answers to.
+The check the browser does while you drag is a courtesy to you, never the rule.
+
 ## Titles
 
 Each picture is named once it exists: three to six words, written by the same text model the prompt
@@ -152,7 +196,7 @@ An administrator can hand the whole instance a default image model and a prompt 
 same three states as everything else shared here: off, locked, or overridable. See
 [Administration](/guides/administration/).
 
-Note what this shares: the *defaults*, not the permission. What makes a model reachable at all is
+Note what this shares: the _defaults_, not the permission. What makes a model reachable at all is
 still the shared-models list on its connection.
 
 Which models are reachable at all is still governed by the shared-models list on each system

@@ -56,6 +56,61 @@ export interface ModelRule {
 	/** Matched against the lowercased model id. */
 	matches: string[];
 	images?: ImageOptions;
+	/**
+	 * Reference pictures this family accepts, when it accepts any.
+	 *
+	 * Per model rather than per provider, because within one provider it varies:
+	 * `gpt-image-1` takes sixteen, `dall-e-3` takes none at all. Leaving it off is
+	 * saying no, which is the answer that costs a disabled control rather than a
+	 * refusal arriving after the wait.
+	 */
+	references?: ReferenceImages;
+}
+
+/**
+ * How a provider takes pictures you hand it, rather than only a description.
+ *
+ * Both providers described here want multipart, with the pictures repeated in
+ * one field. They disagree about its name, and about whether a model is named
+ * beside them: OpenAI edits a picture *with* a model, while Infomaniak's portrait
+ * route has none at all, because there the endpoint is the model.
+ *
+ * There is deliberately no encoding to choose. Their specification announces
+ * JSON with base64 strings, and it is wrong — the endpoint answers
+ * `images.0 must be a file`. So one shape until something genuinely differs,
+ * rather than a switch designed from two samples and a misreading.
+ *
+ * What is deliberately *not* here: `response_format`, the accepted types and the
+ * size limits. Those are not vocabulary, they are the defences — asking for a
+ * URL instead of base64 would have the app fetch a host the provider named, from
+ * inside its own network. A descriptor may describe. It may never weaken a rule.
+ */
+export interface ReferenceImages {
+	/** At most this many pictures, from the provider's own documentation. */
+	max: number;
+	/** The form field carrying them, repeated once per picture. */
+	field: string;
+	/**
+	 * Whether a model is named beside the pictures.
+	 *
+	 * A route of its own is not a model anywhere, so naming one is a field it does
+	 * not know. Off by default, because that is the case a descriptor has to think
+	 * about; a general endpoint says so.
+	 */
+	sendsModel?: boolean;
+	/**
+	 * A word the prompt must contain for the pictures to be used.
+	 *
+	 * Some endpoints inject the likeness at a place the prompt names rather than
+	 * at the start of it, so the word is how they are told where. Missing, the
+	 * request is refused outright — after the wait, and after the meter has run.
+	 *
+	 * The token only. What to say about it is the application's, translated with
+	 * everything else, because a descriptor holds vocabulary and never wording.
+	 */
+	trigger?: string;
+	/** The endpoint, built from whichever of the connection's two roots it needs. */
+	url: (roots: { baseUrl: string; imageBaseUrl: string }) => string;
 }
 
 export interface ProviderDescriptor {
@@ -109,6 +164,17 @@ export interface ProviderDescriptor {
 
 	/** What this provider calls a shape and a quality, before any model rule. */
 	images?: ImageOptions;
+	/** Reference pictures, for a provider where every image model agrees. */
+	references?: ReferenceImages;
+	/**
+	 * Models this provider serves that its catalogue does not list.
+	 *
+	 * A dedicated endpoint has no entry in `/models`, because it is not a model
+	 * there — it is a route. Naming it here gives it one, and from that point on
+	 * it is priced, shared, refused and metered by exactly the machinery every
+	 * other model goes through, rather than by a second path written beside it.
+	 */
+	extraModels?: string[];
 	/** Refinements for the model families that disagree with the line above. */
 	modelRules?: ModelRule[];
 

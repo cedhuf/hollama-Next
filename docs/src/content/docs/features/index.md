@@ -17,7 +17,9 @@ conversation as JSON or Markdown.
 
 One menu in the composer, _Add context_, attaches everything: knowledge, images and documents. Each
 attachment becomes the same removable pill, on the home screen and halfway down a conversation
-alike.
+alike. Pictures have two shortcuts past the menu: paste one, or drag it onto the composer from the
+desktop. PNG and JPEG only, and anything else in the same drop is counted back to you rather than
+silently dropped.
 
 System prompts apply globally, per model, or to one conversation, and the most specific one wins.
 Conversations name themselves after the first reply, using whichever model you point at the job.

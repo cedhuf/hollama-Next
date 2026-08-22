@@ -83,6 +83,27 @@ export const IMAGE_LIMITS = {
  * this is served from the app's own origin: an SVG accepted here and handed to a
  * browser later is script running as the app. None of these three can carry any.
  */
+/**
+ * The types the app accepts as an *input* picture.
+ *
+ * Narrower than what it serves back, and narrower on purpose: the providers that
+ * take reference pictures take these two and refuse the rest — Infomaniak
+ * answers `must be a file of type: jpg, jpeg, png`. Accepting a third here would
+ * be accepting something that fails after the upload rather than before it.
+ */
+export const IMAGE_INPUT_TYPES = ['image/png', 'image/jpeg'];
+
+/**
+ * Whether the prompt names the trigger word, as a word rather than as letters.
+ *
+ * A boundary each side, so `image` does not pass for `img` and a trailing comma
+ * does not stop one that should.
+ */
+export function hasTrigger(prompt: string, trigger: string): boolean {
+	const escaped = trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`\\b${escaped}\\b`, 'i').test(prompt);
+}
+
 export const IMAGE_TYPES: Record<string, string> = {
 	'image/png': 'png',
 	'image/jpeg': 'jpg',

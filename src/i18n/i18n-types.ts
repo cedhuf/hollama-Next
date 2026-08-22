@@ -476,6 +476,15 @@ type RootTranslation = {
 	 */
 	pageCount: RequiredParams<'count'>
 	/**
+	 * D​r​o​p​ ​y​o​u​r​ ​i​m​a​g​e​s​ ​h​e​r​e
+	 */
+	dropImagesHere: string
+	/**
+	 * {​c​o​u​n​t​}​ ​{​{​f​i​l​e​|​f​i​l​e​s​}​}​ ​i​g​n​o​r​e​d​.​ ​O​n​l​y​ ​P​N​G​ ​a​n​d​ ​J​P​E​G​ ​i​m​a​g​e​s​ ​a​r​e​ ​s​u​p​p​o​r​t​e​d​.
+	 * @param {number} count
+	 */
+	imagesIgnored: RequiredParams<'count'>
+	/**
 	 * {​n​a​m​e​}​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​r​e​a​d
 	 * @param {string} name
 	 */
@@ -2244,6 +2253,37 @@ type RootTranslation = {
 	 */
 	shareImages: string
 	/**
+	 * R​e​f​e​r​e​n​c​e​ ​i​m​a​g​e​s
+	 */
+	imageReferences: string
+	/**
+	 * D​r​o​p​ ​y​o​u​r​ ​r​e​f​e​r​e​n​c​e​ ​i​m​a​g​e​s​ ​h​e​r​e
+	 */
+	imageReferencesDrop: string
+	/**
+	 * T​h​i​s​ ​m​o​d​e​l​ ​d​o​e​s​ ​n​o​t​ ​w​o​r​k​ ​f​r​o​m​ ​r​e​f​e​r​e​n​c​e​ ​i​m​a​g​e​s
+	 */
+	imageReferencesUnsupported: string
+	/**
+	 * {​c​o​u​n​t​}​ ​m​o​r​e​ ​r​e​f​e​r​e​n​c​e​ ​{​{​i​m​a​g​e​|​i​m​a​g​e​s​}​}
+	 * @param {number} count
+	 */
+	imageReferencesRoom: RequiredParams<'count'>
+	/**
+	 * A​t​ ​m​o​s​t​ ​{​c​o​u​n​t​}​ ​r​e​f​e​r​e​n​c​e​ ​{​{​i​m​a​g​e​|​i​m​a​g​e​s​}​}
+	 * @param {number} count
+	 */
+	imageReferencesFull: RequiredParams<'count'>
+	/**
+	 * R​e​f​e​r​e​n​c​e​ ​i​m​a​g​e​s​ ​r​e​m​o​v​e​d​:​ ​t​h​i​s​ ​m​o​d​e​l​ ​d​o​e​s​ ​n​o​t​ ​t​a​k​e​ ​a​n​y
+	 */
+	imageReferencesDropped: string
+	/**
+	 * T​h​i​s​ ​m​o​d​e​l​ ​o​n​l​y​ ​u​s​e​s​ ​y​o​u​r​ ​p​i​c​t​u​r​e​s​ ​i​f​ ​t​h​e​ ​p​r​o​m​p​t​ ​c​o​n​t​a​i​n​s​ ​t​h​e​ ​w​o​r​d​ ​"​{​w​o​r​d​}​"
+	 * @param {string} word
+	 */
+	imageReferencesTrigger: RequiredParams<'word'>
+	/**
 	 * I​m​p​r​o​v​e​ ​t​h​e​ ​p​r​o​m​p​t
 	 */
 	imageRewrite: string
@@ -3954,6 +3994,14 @@ The completion in progress will stop
 	 * {count} {{page|pages}}
 	 */
 	pageCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * Drop your images here
+	 */
+	dropImagesHere: () => LocalizedString
+	/**
+	 * {count} {{file|files}} ignored. Only PNG and JPEG images are supported.
+	 */
+	imagesIgnored: (arg: { count: number }) => LocalizedString
 	/**
 	 * {name} could not be read
 	 */
@@ -5692,6 +5740,34 @@ The completion in progress will stop
 	 * Share the image defaults
 	 */
 	shareImages: () => LocalizedString
+	/**
+	 * Reference images
+	 */
+	imageReferences: () => LocalizedString
+	/**
+	 * Drop your reference images here
+	 */
+	imageReferencesDrop: () => LocalizedString
+	/**
+	 * This model does not work from reference images
+	 */
+	imageReferencesUnsupported: () => LocalizedString
+	/**
+	 * {count} more reference {{image|images}}
+	 */
+	imageReferencesRoom: (arg: { count: number }) => LocalizedString
+	/**
+	 * At most {count} reference {{image|images}}
+	 */
+	imageReferencesFull: (arg: { count: number }) => LocalizedString
+	/**
+	 * Reference images removed: this model does not take any
+	 */
+	imageReferencesDropped: () => LocalizedString
+	/**
+	 * This model only uses your pictures if the prompt contains the word "{word}"
+	 */
+	imageReferencesTrigger: (arg: { word: string }) => LocalizedString
 	/**
 	 * Improve the prompt
 	 */

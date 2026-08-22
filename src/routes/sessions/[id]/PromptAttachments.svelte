@@ -13,6 +13,7 @@
 		MAX_PAGES_AS_IMAGES,
 		renderPdfPagesAsImages
 	} from '$lib/documents';
+	import { pickImageFiles, warnRejected } from '$lib/imageFiles';
 	import type { Knowledge } from '$lib/knowledge';
 	import { knowledgeStore, settingsStore } from '$lib/localStorage';
 	import type { Attachment, ImageAttachment } from '$lib/promptAttachments';
@@ -163,52 +164,10 @@
 		}
 	}
 
-	function pickImages() {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.accept = '.png,.jpg,.jpeg,image/png,image/jpeg';
-		input.multiple = true;
-		input.onchange = (e) => {
-			const files = (e.target as HTMLInputElement).files;
-			if (!files || files.length === 0) return;
-
-			const allowedTypes = ['image/png', 'image/jpeg'];
-			const newAttachments: ImageAttachment[] = [];
-			let unsupportedFiles = false;
-
-			const filePromises = Array.from(files).map((file) => {
-				return new Promise<void>((resolve) => {
-					if (!allowedTypes.includes(file.type)) {
-						unsupportedFiles = true;
-						resolve();
-						return;
-					}
-					const reader = new FileReader();
-					reader.onload = (event) => {
-						const dataUrl = event.target?.result as string;
-						if (dataUrl) {
-							newAttachments.push({
-								type: 'image',
-								id: generateRandomId(),
-								name: file.name,
-								dataUrl
-							});
-						}
-						resolve();
-					};
-					reader.onerror = () => resolve();
-					reader.readAsDataURL(file);
-				});
-			});
-
-			Promise.all(filePromises).then(() => {
-				if (unsupportedFiles) {
-					toast.warning('Some files were ignored. Only PNG and JPEG images are supported.');
-				}
-				if (newAttachments.length) attachments = [...attachments, ...newAttachments];
-			});
-		};
-		input.click();
+	async function pickImages() {
+		const { images, rejected } = await pickImageFiles();
+		warnRejected(rejected);
+		if (images.length) attachments = [...attachments, ...images];
 	}
 </script>
 

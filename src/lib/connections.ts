@@ -229,6 +229,7 @@ const IMAGE_HINTS = [
 	'hidream',
 	'qwen-image',
 	'photomaker',
+	'photo_maker',
 	'janus'
 ];
 
@@ -409,6 +410,7 @@ export function getDefaultServer(
  * particular provider's facts happen to live in.
  */
 export {
+	declaredModels,
 	IMAGE_QUALITIES,
 	IMAGE_RATIOS,
 	type ImageOptions,
@@ -420,5 +422,7 @@ export {
 	infomaniakImageBaseUrl,
 	infomaniakProductId,
 	qualityFor,
+	type ReferenceImages,
+	referencesFor,
 	sizeFor
 } from '$lib/providers';

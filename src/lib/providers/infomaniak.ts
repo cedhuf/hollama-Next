@@ -25,6 +25,11 @@ import type { ProviderDescriptor } from './types';
 /** Everything but the product id, which the connection form asks for. */
 export const INFOMANIAK_URL_TEMPLATE = 'https://api.infomaniak.com/2/ai/{productId}/openai/v1';
 const IMAGE_URL_TEMPLATE = 'https://api.infomaniak.com/1/ai/{productId}/openai';
+const PHOTO_MAKER_URL_TEMPLATE =
+	'https://api.infomaniak.com/1/ai/{productId}/images/generations/photo_maker';
+
+/** The name this app gives that route, so it can be priced and shared like a model. */
+export const INFOMANIAK_PHOTO_MAKER = 'photo_maker';
 
 /** The product id out of a stored endpoint, or nothing when there is none in it. */
 export function infomaniakProductId(baseUrl: string): string {
@@ -43,6 +48,19 @@ export function infomaniakBaseUrl(productId: string): string {
 export function infomaniakImageBaseUrl(productId: string): string {
 	const id = productId.trim();
 	return id ? IMAGE_URL_TEMPLATE.replace('{productId}', id) : '';
+}
+
+/**
+ * Portrait customisation, which is a third root again.
+ *
+ * Not under `/openai` like the drawing endpoint, and not under `/v1` like chat:
+ * it is Infomaniak's own route, so it hangs directly off the product. Derived
+ * from the same product id as the other two, so a connection still asks for one
+ * value and gets all three.
+ */
+export function infomaniakPhotoMakerUrl(productId: string): string {
+	const id = productId.trim();
+	return id ? PHOTO_MAKER_URL_TEMPLATE.replace('{productId}', id) : '';
 }
 
 export const infomaniak: ProviderDescriptor = {
@@ -70,5 +88,30 @@ export const infomaniak: ProviderDescriptor = {
 		sizes: { square: '1024x1024', portrait: '1024x1792', landscape: '1792x1024' },
 		qualities: { low: 'standard', standard: 'standard', high: 'hd' }
 	},
-	imageBaseFrom: (baseUrl) => infomaniakImageBaseUrl(infomaniakProductId(baseUrl))
+	imageBaseFrom: (baseUrl) => infomaniakImageBaseUrl(infomaniakProductId(baseUrl)),
+	// A route rather than a model, so nothing lists it. Named here, it becomes one:
+	// it shows up in Models and pricing, it is priced per minute, it is shared or
+	// not, and the credit limit refuses it unpriced exactly like everything else.
+	extraModels: [INFOMANIAK_PHOTO_MAKER],
+	modelRules: [
+		{
+			matches: [INFOMANIAK_PHOTO_MAKER],
+			// The same three sizes and two quality words as the drawing endpoint, per
+			// their specification, so nothing is repeated here that is not different.
+			images: {
+				sizes: { square: '1024x1024', portrait: '1024x1792', landscape: '1792x1024' },
+				qualities: { low: 'standard', standard: 'standard', high: 'hd' }
+			},
+			references: {
+				// One is enough, more is better, six is their ceiling.
+				max: 6,
+				field: 'images[]',
+				// The likeness goes where the prompt says: "portrait photo of a woman img".
+				// Without the word the endpoint refuses rather than ignoring it.
+				trigger: 'img',
+				// No model: this route is one, so naming another is a field it refuses.
+				url: ({ baseUrl }) => infomaniakPhotoMakerUrl(infomaniakProductId(baseUrl))
+			}
+		}
+	]
 };

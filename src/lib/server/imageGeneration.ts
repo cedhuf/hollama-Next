@@ -1,21 +1,27 @@
 import { randomUUID } from 'node:crypto';
 
 import { refusal } from '$lib/chat/refusal';
-import { hasPriceFigure, imageBaseUrl, modelKind } from '$lib/connections';
 import {
+	hasPriceFigure,
+	imageBaseUrl,
+	imageOptionsFor,
+	modelKind,
+	qualityFor,
+	referencesFor,
+	sizeFor,
+	type ImageOptions,
+	type ImageQuality,
+	type ImageRatio,
+	type ReferenceImages
+} from '$lib/connections';
+import {
+	hasTrigger,
+	IMAGE_INPUT_TYPES,
 	IMAGE_LIMITS,
 	IMAGE_TYPES,
 	sniffImageType,
 	type GeneratedImage
 } from '$lib/generatedImages';
-import {
-	imageOptionsFor,
-	qualityFor,
-	sizeFor,
-	type ImageOptions,
-	type ImageQuality,
-	type ImageRatio
-} from '$lib/connections';
 import { bytesHeld, insertImage } from '$lib/server/db/generatedImages';
 import {
 	getModelKinds,
@@ -64,6 +70,14 @@ export interface ImageRequest {
 	quality?: ImageQuality;
 	style?: string;
 	n?: number;
+	/**
+	 * Pictures to work from, as data URLs, when the model takes any.
+	 *
+	 * Never stored. They are read once into the request that uses them and then
+	 * dropped: a reference is a thing you brought, not a thing the app keeps, and
+	 * keeping it would mean a second quota and a second thing to delete.
+	 */
+	references?: string[];
 }
 
 /**
@@ -109,6 +123,67 @@ function requestBody(input: ImageRequest, count: number, options: ImageOptions) 
 		...(quality ? { quality } : {}),
 		...(input.style ? { style: input.style } : {})
 	};
+}
+
+/**
+ * A reference picture, read out of the data URL the browser sent.
+ *
+ * Inspected exactly like a picture coming back from a provider, and for the same
+ * reason: the type is read from the bytes, never from what the sender labelled
+ * them. The list is the input one rather than the one the app serves back, which
+ * is narrower — a WebP passes every check here and is then refused by the
+ * endpoint, so refusing it before the upload is the honest place.
+ */
+function decodeReference(dataUrl: string): { bytes: Buffer; contentType: string } {
+	const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+	const bytes = Buffer.from(base64, 'base64');
+	if (!bytes.length) throw new ImageError(400, 'A reference image is empty');
+	if (bytes.length > IMAGE_LIMITS.maxBytes) {
+		throw new ImageError(413, 'A reference image is too large');
+	}
+
+	const contentType = sniffImageType(bytes);
+	if (!contentType || !IMAGE_INPUT_TYPES.includes(contentType)) {
+		throw new ImageError(415, 'Reference images must be PNG or JPEG');
+	}
+	return { bytes, contentType };
+}
+
+/**
+ * The request that carries reference pictures.
+ *
+ * Multipart, because that is what both endpoints want — their specifications
+ * disagree, and the endpoints do not. The same fields as a plain drawing, so
+ * there is one answer to "what does the app send" rather than two, plus the
+ * pictures under whatever this provider calls that field.
+ */
+function referenceRequest(
+	accepts: ReferenceImages,
+	input: ImageRequest,
+	count: number,
+	options: ImageOptions,
+	pictures: { bytes: Buffer; contentType: string }[]
+): FormData {
+	const form = new FormData();
+	const body = requestBody(input, count, options);
+
+	for (const [key, value] of Object.entries(body)) {
+		// The model only where one is expected: a route of its own is the model, and
+		// naming a second is a field it refuses.
+		if (key === 'model' && !accepts.sendsModel) continue;
+		if (value !== undefined) form.append(key, String(value));
+	}
+
+	for (const [index, picture] of pictures.entries()) {
+		form.append(
+			accepts.field,
+			new Blob([new Uint8Array(picture.bytes)], { type: picture.contentType }),
+			`reference-${index + 1}.${IMAGE_TYPES[picture.contentType]}`
+		);
+	}
+
+	// Left to fetch, which appends the multipart boundary it generated.
+	return form;
 }
 
 /**
@@ -167,17 +242,54 @@ export async function generateImages(
 
 	const options = imageOptionsFor(server.connection_type, input.model);
 	const key = getServerApiKey(server);
+
+	/**
+	 * Where this request goes, and in what shape.
+	 *
+	 * With no reference picture it is the drawing endpoint, unchanged. With one it
+	 * is whatever the descriptor says this model takes them on — and a model that
+	 * says nothing takes none, so the pictures are refused here rather than sent
+	 * to an endpoint that would ignore them and bill for the ignoring.
+	 */
+	const references = input.references ?? [];
+	const accepts = references.length
+		? referencesFor(server.connection_type, input.model)
+		: undefined;
+	if (references.length && !accepts) {
+		throw new ImageError(400, `"${input.model}" does not take reference images`);
+	}
+	if (accepts && references.length > accepts.max) {
+		throw new ImageError(400, `At most ${accepts.max} reference images`);
+	}
+	// Asked here rather than only in the composer, and before the request goes out:
+	// the endpoint refuses this after the wait and after the meter has run, and a
+	// missing word is not worth a minute of somebody's allowance.
+	if (accepts?.trigger && !hasTrigger(input.sentPrompt?.trim() || prompt, accepts.trigger)) {
+		throw new ImageError(400, `The prompt must contain the word "${accepts.trigger}"`);
+	}
+
+	const pictures = references.map(decodeReference);
+	const target = accepts
+		? accepts.url({ baseUrl: server.base_url, imageBaseUrl: base })
+		: `${base}/images/generations`;
+	const request: { headers: Record<string, string>; body: BodyInit } = accepts
+		? { headers: {}, body: referenceRequest(accepts, input, count, options, pictures) }
+		: {
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(requestBody(input, count, options))
+			};
+
 	const startedAt = Date.now();
 
 	let response: Response;
 	try {
-		response = await fetch(`${base}/images/generations`, {
+		response = await fetch(target, {
 			method: 'POST',
 			headers: {
-				'content-type': 'application/json',
+				...request.headers,
 				...(key ? { authorization: `Bearer ${key}` } : {})
 			},
-			body: JSON.stringify(requestBody(input, count, options))
+			body: request.body
 		});
 	} catch {
 		throw new ImageError(502, 'The image provider could not be reached');

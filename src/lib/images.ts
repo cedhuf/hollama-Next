@@ -1,9 +1,8 @@
 import { derived, get, writable } from 'svelte/store';
 
 import { isServerMode } from '$lib/chat/endpoint';
-import { modelKind } from '$lib/connections';
+import { modelKind, type ImageQuality, type ImageRatio } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
-import type { ImageQuality, ImageRatio } from '$lib/connections';
 import { writeImageTitle } from '$lib/imagePrompt';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
@@ -49,6 +48,14 @@ export interface GenerateInput {
 	ratio?: ImageRatio;
 	quality?: ImageQuality;
 	n?: number;
+	/**
+	 * Pictures to work from, as data URLs, for a model that takes them.
+	 *
+	 * They go up with the request and are never stored: what comes back is kept,
+	 * what went in is not. Which also means a picture cannot be redrawn from the
+	 * gallery alone, and that is the trade the documentation states plainly.
+	 */
+	references?: string[];
 }
 
 /**

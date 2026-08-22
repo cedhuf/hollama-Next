@@ -6,6 +6,7 @@
 		FileArchive,
 		ImageIcon,
 		LoaderCircle,
+		Paperclip,
 		RotateCcw,
 		SlidersHorizontal,
 		Sparkles,
@@ -19,20 +20,29 @@
 	import LL from '$i18n/i18n-svelte';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Head from '$lib/components/Head.svelte';
+	import ImageDrop from '$lib/components/ImageDrop.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import { modelLabel, serverBadge } from '$lib/connections';
-	import { downloadName, IMAGE_LIMITS, type GeneratedImage } from '$lib/generatedImages';
 	import {
 		IMAGE_QUALITIES,
 		IMAGE_RATIOS,
 		imageOptionsFor,
+		modelLabel,
+		referencesFor,
+		serverBadge,
 		type ImageQuality,
 		type ImageRatio
 	} from '$lib/connections';
+	import {
+		downloadName,
+		hasTrigger,
+		IMAGE_LIMITS,
+		type GeneratedImage
+	} from '$lib/generatedImages';
+	import { pickImageFiles, warnRejected } from '$lib/imageFiles';
 	import { writeImagePrompt } from '$lib/imagePrompt';
 	import {
 		canDrawImages,
@@ -46,6 +56,7 @@
 		titleImages
 	} from '$lib/images';
 	import { serversStore } from '$lib/localStorage';
+	import type { ImageAttachment } from '$lib/promptAttachments';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	/**
@@ -113,6 +124,63 @@
 		const server = serverFor(serverIdFor(model) ?? '');
 		return server ? imageOptionsFor(server.connectionType, model) : {};
 	});
+
+	/**
+	 * Pictures to work from, when the model chosen takes any.
+	 *
+	 * Held here and nowhere else: they travel with one request and are never
+	 * stored, so switching to a model that takes none has to put them down rather
+	 * than keep them waiting for a model that would.
+	 */
+	let references = $state<ImageAttachment[]>([]);
+
+	const accepts = $derived.by(() => {
+		const server = serverFor(serverIdFor(model) ?? '');
+		return server ? referencesFor(server.connectionType, model) : undefined;
+	});
+
+	const roomLeft = $derived(accepts ? accepts.max - references.length : 0);
+
+	/**
+	 * Whether the words still owe the model its trigger.
+	 *
+	 * Shown only once there is something to work from, because before that the
+	 * sentence is about a rule for pictures nobody has attached. The server refuses
+	 * the same case, which is the one that protects the allowance; this is only so
+	 * the refusal never has to happen.
+	 */
+	const missingTrigger = $derived.by(() => {
+		const word = accepts?.trigger;
+		if (!word || !references.length) return undefined;
+		const sent = rewritten.trim() || prompt.trim();
+		return hasTrigger(sent, word) ? undefined : word;
+	});
+
+	// Dropped rather than carried over, and said out loud: a reference held for a
+	// model that cannot use it is a picture you think you attached.
+	$effect(() => {
+		if (!accepts && references.length) {
+			references = [];
+			toast.info($LL.imageReferencesDropped());
+		}
+	});
+
+	function addReferences(images: ImageAttachment[]) {
+		if (!accepts) return;
+		const room = accepts.max - references.length;
+		if (room <= 0) {
+			toast.warning($LL.imageReferencesFull({ count: accepts.max }));
+			return;
+		}
+		references = [...references, ...images.slice(0, room)];
+		if (images.length > room) toast.warning($LL.imageReferencesFull({ count: accepts.max }));
+	}
+
+	async function pickReferences() {
+		const { images, rejected } = await pickImageFiles();
+		warnRejected(rejected);
+		addReferences(images);
+	}
 
 	const RATIO_LABELS = $derived<Record<ImageRatio, string>>({
 		square: $LL.imageRatioSquare(),
@@ -191,7 +259,8 @@
 				// that knows what this provider calls them, and it translates there.
 				ratio,
 				quality,
-				n: count
+				n: count,
+				references: references.length ? references.map((image) => image.dataUrl) : undefined
 			});
 
 			// Not awaited: the pictures are already on screen, and a label arriving a
@@ -338,7 +407,11 @@
 				     gesture, so they share a frame and the field inside it has no border of
 				     its own. Same idea as the composer in a conversation, in the shape this
 				     page needs. -->
-				<div
+				<ImageDrop
+					enabled={!!accepts}
+					label={$LL.imageReferencesDrop()}
+					refusal={$LL.imageReferencesUnsupported()}
+					onImages={addReferences}
 					class="library-section mb-8 overflow-hidden rounded-2xl border bg-shade-0 shadow-sm transition-colors focus-within:border-accent section-tint"
 					style="--section-turn: 40"
 				>
@@ -389,6 +462,41 @@
 						</div>
 					{/if}
 
+					{#if missingTrigger}
+						<!-- Beside the pictures rather than under the button: it is a rule about
+						     what the words must say, and it appears when there is something for
+						     them to say it about. -->
+						<p class="mx-4 mb-3 text-xs leading-snug text-muted">
+							{$LL.imageReferencesTrigger({ word: missingTrigger })}
+						</p>
+					{/if}
+
+					{#if references.length}
+						<!-- What the drawing will work from, as thumbnails rather than names: a
+						     reference is a picture, and a filename is not one. -->
+						<div class="mx-4 mb-3 flex flex-wrap gap-2">
+							{#each references as reference (reference.id)}
+								<span
+									class="group relative h-14 w-14 overflow-hidden rounded-lg border border-shade-3"
+								>
+									<img
+										src={reference.dataUrl}
+										alt={reference.name}
+										class="h-full w-full object-cover"
+									/>
+									<button
+										type="button"
+										onclick={() => (references = references.filter((r) => r.id !== reference.id))}
+										aria-label={$LL.remove()}
+										class="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+									>
+										<X class="h-3 w-3" />
+									</button>
+								</span>
+							{/each}
+						</div>
+					{/if}
+
 					<!-- The controls, on their own strip at the foot of the surface. A hairline
 					     rather than a second card: they qualify the words above, they are not a
 					     separate subject. -->
@@ -398,6 +506,25 @@
 						<div class="min-w-40 flex-1">
 							<ModelSelect bind:value={model} kinds={['image']} />
 						</div>
+
+						<!-- The other way in, for a pointer that would rather not drag. Disabled
+						     rather than hidden on a model that takes none, for the same reason
+						     the two selects below are: the control still says what it would have
+						     done. -->
+						<button
+							type="button"
+							onclick={pickReferences}
+							disabled={!accepts || roomLeft <= 0}
+							aria-label={$LL.imageReferences()}
+							title={accepts
+								? $LL.imageReferencesRoom({ count: roomLeft })
+								: $LL.imageReferencesUnsupported()}
+							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors disabled:opacity-50 {references.length
+								? 'border-accent/50 bg-accent/10 text-accent'
+								: 'border-shade-3 text-muted hover:text-active'}"
+						>
+							<Paperclip class="h-3.5 w-3.5" />
+						</button>
 
 						<!-- Disabled, not hidden, where the app has no translation: the control
 						     still says what it would have controlled, and the request simply
@@ -484,7 +611,7 @@
 							</button>
 						</div>
 					</div>
-				</div>
+				</ImageDrop>
 			{/if}
 
 			<!-- The gallery. Newest first, because the one you just made is the one you

@@ -133,6 +133,9 @@ const fr = extendDictionary(en, {
 	deleteCollectionConfirm:
 		'Supprimer la collection {name:string} ? Les connaissances sont conservées.',
 	pageCount: '{count:number} page{{s}}',
+	dropImagesHere: 'Déposez vos images ici',
+	imagesIgnored:
+		'{count:number} fichier{{s}} ignoré{{s}}. Seules les images PNG et JPEG sont acceptées.',
 	documentFailed: '{name:string} n’a pas pu être lu',
 	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',
 	documentLooksScanned: 'Ce PDF semble être un scan',
@@ -624,6 +627,14 @@ const fr = extendDictionary(en, {
 	imagesSharingDescription:
 		"Transmettez votre modèle d'image et votre rédacteur de prompt à toute l'instance.",
 	shareImages: "Partager les défauts d'images",
+	imageReferences: 'Images de référence',
+	imageReferencesDrop: 'Déposez vos images de référence ici',
+	imageReferencesUnsupported: 'Ce modèle ne travaille pas à partir d’images de référence',
+	imageReferencesRoom: 'Encore {count:number} image{{s}} de référence',
+	imageReferencesFull: '{count:number} image{{s}} de référence au maximum',
+	imageReferencesDropped: 'Images de référence retirées : ce modèle n’en accepte pas',
+	imageReferencesTrigger:
+		'Ce modèle n’utilise vos images que si le prompt contient le mot « {word:string} »',
 	imageRewrite: 'Améliorer le prompt',
 	imageRewriteFailed: 'Impossible de réécrire le prompt',
 	imageRewritten: 'Prompt réécrit',

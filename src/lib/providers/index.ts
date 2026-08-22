@@ -8,7 +8,8 @@ import type {
 	ImageQuality,
 	ImageRatio,
 	ModelRule,
-	ProviderDescriptor
+	ProviderDescriptor,
+	ReferenceImages
 } from './types';
 
 /**
@@ -54,6 +55,27 @@ export function imageOptionsFor(connectionType: string, model: string): ImageOpt
 	return rule?.images ?? descriptor.images ?? {};
 }
 
+/**
+ * Reference pictures this model takes, if it takes any.
+ *
+ * The model's own rule first, the provider's answer second, and nothing when
+ * neither says — which is what leaves the drop zone shut rather than offering a
+ * control the endpoint would refuse.
+ */
+export function referencesFor(connectionType: string, model: string): ReferenceImages | undefined {
+	const descriptor = describeProvider(connectionType);
+	const id = model.toLowerCase();
+	const rule = descriptor.modelRules?.find((r: ModelRule) =>
+		r.matches.some((needle) => id.includes(needle))
+	);
+	return rule?.references ?? descriptor.references;
+}
+
+/** Models a provider serves that its own catalogue does not list. */
+export function declaredModels(connectionType: string): string[] {
+	return describeProvider(connectionType).extraModels ?? [];
+}
+
 /** The size to send, or nothing when the app cannot say. */
 export function sizeFor(options: ImageOptions, ratio: ImageRatio): string | undefined {
 	return options.sizes?.[ratio];
@@ -76,5 +98,6 @@ export {
 	type ImageOptions,
 	type ImageQuality,
 	type ImageRatio,
-	type ProviderDescriptor
+	type ProviderDescriptor,
+	type ReferenceImages
 } from './types';

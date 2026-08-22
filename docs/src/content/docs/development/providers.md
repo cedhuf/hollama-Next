@@ -36,6 +36,16 @@ shape. `compatible.ts` is worth reading second, for what it deliberately does no
   id, an account name. The form then asks for that value and builds the URL from it.
 - **`imageBaseFrom`**, for a provider that serves images from somewhere its chat base cannot reach.
 - **`images` and `modelRules`**, below.
+- **`references`**, for a model that draws from pictures you give it: how many at most, the form
+  field carrying them, whether a model is named beside them, and a function building the endpoint
+  from the connection's roots. Per model rather than per provider, because it varies inside one.
+  Multipart is assumed, because both endpoints described here want it whatever their specifications
+  say — trust the endpoint over the document. Add `trigger` where the prompt must contain a
+  particular word for the pictures to be used: the token only, never a sentence about it, because a
+  descriptor holds vocabulary and the application holds wording.
+- **`extraModels`**, for a route the provider's own catalogue cannot list because it is not a model
+  there. Naming it here gives it one, and from that point it is priced, shared, refused and metered
+  by the same machinery as everything else.
 
 ## Sizes and quality, and why they are rules
 
@@ -54,6 +64,20 @@ list that goes stale by the end of the month.
 Say nothing rather than guess. With no `images` and no matching rule, the request carries neither
 field and the model uses its own default — valid everywhere, where a wrong size is a refusal that
 arrives after the wait.
+
+## What a descriptor may not do
+
+A descriptor may **describe**. It may never **weaken a rule**.
+
+The line is not between data and code — the folder already holds functions, and `infomaniak.ts`
+holds three. It is between vocabulary and defence. What a provider calls a portrait is vocabulary,
+and a descriptor owns it. That answers come back as base64 rather than as a URL is a defence: a URL
+would have the application fetch a host the provider named, from inside its own network. So
+`response_format`, the accepted image types and the size limits are set by the application, on every
+request, and no descriptor can reach them.
+
+Read it as a review rule. If a change to this folder could make the app trust something more than it
+did before, it belongs in the app instead.
 
 ## Adding one
 

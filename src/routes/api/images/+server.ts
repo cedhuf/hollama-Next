@@ -49,7 +49,13 @@ export async function POST(event) {
 			ratio: IMAGE_RATIOS.includes(body.ratio) ? body.ratio : undefined,
 			quality: IMAGE_QUALITIES.includes(body.quality) ? body.quality : undefined,
 			style: typeof body.style === 'string' ? body.style : undefined,
-			n: Number(body.n) || 1
+			n: Number(body.n) || 1,
+			// Data URLs, kept as strings here: whether they are pictures at all is
+			// read from their bytes further in, which is the only place that answer
+			// can be trusted.
+			references: Array.isArray(body.references)
+				? body.references.filter((item: unknown): item is string => typeof item === 'string')
+				: undefined
 		});
 		return json({ images }, { status: 201 });
 	} catch (e) {

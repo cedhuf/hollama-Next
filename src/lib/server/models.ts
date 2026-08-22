@@ -1,3 +1,4 @@
+import { declaredModels } from '$lib/connections';
 import { getServerApiKey, type ServerRow } from '$lib/server/db/servers';
 
 export interface ProviderTarget {
@@ -69,5 +70,9 @@ export async function listProviderModels(server: ServerRow): Promise<string[]> {
 	if (server.image_base_url && server.image_base_url !== server.base_url) {
 		for (const name of await read(server.image_base_url)) names.add(name);
 	}
+	// And whatever the provider serves without listing. A dedicated endpoint is a
+	// route, so no catalogue mentions it; named in the descriptor it joins the list
+	// here and is priced, shared and metered like everything else in it.
+	for (const name of declaredModels(server.connection_type)) names.add(name);
 	return [...names].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 }
