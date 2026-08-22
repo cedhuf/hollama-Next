@@ -128,16 +128,14 @@ const en = {
 		'There is no text to extract, only pictures of it. A vision model can read the pages directly, up to {max:number} of them. Turn on OCR in Settings to read them as text instead.',
 	documentsTitle: 'Documents',
 	documentsDescription:
-		'Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation. Files are read in your browser and never uploaded.',
+		'Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation.',
 	documentsToggle: 'Read attached documents',
 	documentsHelp:
-		'Supports PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text. Turned off, the reader is never downloaded and documents cannot be attached.',
+		'PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text.',
 	documentOcrToggle: 'Read text inside images (OCR)',
-	documentOcrHelp:
-		'For scans and pictures of text. It is slow, a few seconds per page, and the result is approximate: expect tables and columns to come out flattened. On first use it downloads an OCR engine and its language data, from a public CDN unless this instance hosts them itself.',
+	documentOcrHelp: 'For scans and pictures of text. Slow, and approximate.',
 	documentOcrLanguage: 'OCR language',
-	documentOcrLanguageHelp:
-		'Tesseract language codes, for example eng, fra, deu. Combine them with a plus sign: eng+fra. Each language is a separate download.',
+	documentOcrLanguageHelp: 'Tesseract codes, for example eng or eng+fra.',
 	deleteKnowledge: 'Delete knowledge',
 	deleteServer: 'Delete server',
 	deleteMessage: 'Delete this message',
@@ -276,8 +274,7 @@ const en = {
 	webFetchByDefault: 'On by default in new conversations',
 	webFetchMaxPages: 'Pages read per message',
 	webFetchMaxChars: 'Characters kept per page',
-	webFetchHint:
-		'Only explicit http(s) links are read. Requests are made by the server, which refuses private and local addresses.',
+	webFetchHint: 'Only explicit http(s) links are read.',
 	webFetchLockedOn: 'Enabled by your administrator — up to {pages} pages per message.',
 	webFetchLockedOff: 'Disabled by your administrator.',
 	version: 'Version',
@@ -363,8 +360,7 @@ const en = {
 	storeSearch: 'Search the store',
 	storeEverything: 'Everything',
 	storeUrl: 'Store address',
-	storeUrlHelp:
-		'Leave empty for the public store. A closed network can point this at its own mirror: the catalogues are folders under this address.',
+	storeUrlHelp: 'Leave empty for the public store.',
 	playbookAutoUpdate: 'Update playbooks automatically',
 	playbookAutoUpdateHelp:
 		'Take a new revision as soon as it is published, for the playbooks you have not edited. Yours are never overwritten.',
@@ -445,7 +441,7 @@ const en = {
 	personaStoreShareForbidden: 'Only an administrator can share a persona with this instance',
 	personaAutoUpdate: 'Update installed personas automatically',
 	personaAutoUpdateHelp:
-		'Takes a new version as soon as it is published, for the personas you have not edited. The ones you have changed keep being offered instead, on their card.',
+		'Takes a new version as soon as it is published, for the personas you have not edited.',
 	personaAutoUpdateForcedHelp:
 		'Turned on for this instance by your administrator. Personas you have edited are never replaced.',
 	personaAutoUpdateForce: "Update everyone's personas automatically",
@@ -550,26 +546,21 @@ const en = {
 	webSearchTokenSet: '•••••••• (set)',
 	webSearchByDefault: 'Enable web search by default',
 	webSearchAuto: 'Let the model decide when to search the web automatically',
-	webSearchAutoHelp:
-		'The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.',
+	webSearchAutoHelp: 'A small model may decide this badly.',
 	webSearchUnavailable:
 		"Web search isn't available yet. An admin can configure it for this instance.",
 	nativeToolsTitle: 'Native tool calling',
-	nativeToolsDescription:
-		'How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.',
+	nativeToolsDescription: 'How the model is given the web tools.',
 	nativeToolsLabel: 'Mode',
 	nativeToolsOff: 'Text instructions (works everywhere)',
 	nativeToolsAuto: 'Native where supported',
 	nativeToolsForce: 'Always native',
-	nativeToolsHelp:
-		'Native calling lets the model search on its own, so no extra request is needed to decide for it. Ollama reports per model whether it can; the hosted providers all can. Choose "always" only for a self-hosted endpoint you know supports it, since a model offered tools it cannot call will improvise instead of failing.',
+	nativeToolsHelp: "Choose 'always' only for a self-hosted endpoint you know supports it.",
 	interactiveChoicesTitle: 'Interactive choices',
 	interactiveChoicesDescription:
-		'When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message.',
+		'For when a request is ambiguous and turns on a preference of yours.',
 	interactiveChoicesToggle: 'Let the model offer quick-choice buttons',
 	currentDateTitle: 'Current date',
-	currentDateDescription:
-		'A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts as impossible. This prepends the current date/time (your local timezone) to each request so it stays anchored in the present.',
 	currentDateToggle: "Tell the model today's date and time",
 	systemInstructionsTitle: 'System instructions',
 	systemInstructionsDescription:
@@ -602,14 +593,11 @@ const en = {
 	download: 'Download',
 	imagesSettingsDescription: 'Which model draws, and which one writes the prompt for it.',
 	defaultImageModel: 'Default image model',
-	defaultImageModelHelp: 'What the gallery starts on. You can still pick another one per image.',
+	defaultImageModelHelp: 'What the gallery starts on.',
 	imagePromptWriter: 'Prompt writer',
 	imagePromptWriterOff: 'Off',
 	imagePromptWriterModel: 'Which model writes it',
-	imagePromptWriterHelp:
-		'A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.',
-	imagePromptEditableHint:
-		'What it writes is always shown in an editable field before anything is drawn. Its instructions are in the Prompts tab.',
+	imagePromptWriterHelp: 'Turns a plain description into a fuller prompt.',
 	imagesSharing: 'Image defaults sharing',
 	imagesSharingDescription: 'Hand your image model and prompt writer to everyone on this instance.',
 	shareImages: 'Share the image defaults',
@@ -914,7 +902,7 @@ const en = {
 	mentionInsert: 'insert',
 	mentionsSequential: 'Personas called together read each other',
 	mentionsSequentialHelp:
-		'On, they answer in the order you named them, each having read the ones before. Off, each is handed the same question and none of the others\u2019 answers.',
+		'On, they answer in order, each having read the ones before. Off, each answers alone.',
 	slashRun: 'Run',
 	clearCommandDescription:
 		'Start again: fold this conversation away and give the model a blank slate',

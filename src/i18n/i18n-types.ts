@@ -507,7 +507,7 @@ type RootTranslation = {
 	 */
 	documentsTitle: string
 	/**
-	 * A​t​t​a​c​h​ ​a​ ​P​D​F​,​ ​a​ ​W​o​r​d​ ​f​i​l​e​ ​o​r​ ​a​ ​s​p​r​e​a​d​s​h​e​e​t​ ​a​n​d​ ​i​t​s​ ​t​e​x​t​ ​g​o​e​s​ ​i​n​t​o​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​ ​F​i​l​e​s​ ​a​r​e​ ​r​e​a​d​ ​i​n​ ​y​o​u​r​ ​b​r​o​w​s​e​r​ ​a​n​d​ ​n​e​v​e​r​ ​u​p​l​o​a​d​e​d​.
+	 * A​t​t​a​c​h​ ​a​ ​P​D​F​,​ ​a​ ​W​o​r​d​ ​f​i​l​e​ ​o​r​ ​a​ ​s​p​r​e​a​d​s​h​e​e​t​ ​a​n​d​ ​i​t​s​ ​t​e​x​t​ ​g​o​e​s​ ​i​n​t​o​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​.
 	 */
 	documentsDescription: string
 	/**
@@ -515,7 +515,7 @@ type RootTranslation = {
 	 */
 	documentsToggle: string
 	/**
-	 * S​u​p​p​o​r​t​s​ ​P​D​F​,​ ​D​O​C​X​,​ ​P​P​T​X​,​ ​X​L​S​X​,​ ​O​D​T​,​ ​O​D​P​,​ ​O​D​S​,​ ​R​T​F​,​ ​E​P​U​B​,​ ​C​S​V​,​ ​H​T​M​L​,​ ​M​a​r​k​d​o​w​n​ ​a​n​d​ ​p​l​a​i​n​ ​t​e​x​t​.​ ​T​u​r​n​e​d​ ​o​f​f​,​ ​t​h​e​ ​r​e​a​d​e​r​ ​i​s​ ​n​e​v​e​r​ ​d​o​w​n​l​o​a​d​e​d​ ​a​n​d​ ​d​o​c​u​m​e​n​t​s​ ​c​a​n​n​o​t​ ​b​e​ ​a​t​t​a​c​h​e​d​.
+	 * P​D​F​,​ ​D​O​C​X​,​ ​P​P​T​X​,​ ​X​L​S​X​,​ ​O​D​T​,​ ​O​D​P​,​ ​O​D​S​,​ ​R​T​F​,​ ​E​P​U​B​,​ ​C​S​V​,​ ​H​T​M​L​,​ ​M​a​r​k​d​o​w​n​ ​a​n​d​ ​p​l​a​i​n​ ​t​e​x​t​.
 	 */
 	documentsHelp: string
 	/**
@@ -523,7 +523,7 @@ type RootTranslation = {
 	 */
 	documentOcrToggle: string
 	/**
-	 * F​o​r​ ​s​c​a​n​s​ ​a​n​d​ ​p​i​c​t​u​r​e​s​ ​o​f​ ​t​e​x​t​.​ ​I​t​ ​i​s​ ​s​l​o​w​,​ ​a​ ​f​e​w​ ​s​e​c​o​n​d​s​ ​p​e​r​ ​p​a​g​e​,​ ​a​n​d​ ​t​h​e​ ​r​e​s​u​l​t​ ​i​s​ ​a​p​p​r​o​x​i​m​a​t​e​:​ ​e​x​p​e​c​t​ ​t​a​b​l​e​s​ ​a​n​d​ ​c​o​l​u​m​n​s​ ​t​o​ ​c​o​m​e​ ​o​u​t​ ​f​l​a​t​t​e​n​e​d​.​ ​O​n​ ​f​i​r​s​t​ ​u​s​e​ ​i​t​ ​d​o​w​n​l​o​a​d​s​ ​a​n​ ​O​C​R​ ​e​n​g​i​n​e​ ​a​n​d​ ​i​t​s​ ​l​a​n​g​u​a​g​e​ ​d​a​t​a​,​ ​f​r​o​m​ ​a​ ​p​u​b​l​i​c​ ​C​D​N​ ​u​n​l​e​s​s​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​h​o​s​t​s​ ​t​h​e​m​ ​i​t​s​e​l​f​.
+	 * F​o​r​ ​s​c​a​n​s​ ​a​n​d​ ​p​i​c​t​u​r​e​s​ ​o​f​ ​t​e​x​t​.​ ​S​l​o​w​,​ ​a​n​d​ ​a​p​p​r​o​x​i​m​a​t​e​.
 	 */
 	documentOcrHelp: string
 	/**
@@ -531,7 +531,7 @@ type RootTranslation = {
 	 */
 	documentOcrLanguage: string
 	/**
-	 * T​e​s​s​e​r​a​c​t​ ​l​a​n​g​u​a​g​e​ ​c​o​d​e​s​,​ ​f​o​r​ ​e​x​a​m​p​l​e​ ​e​n​g​,​ ​f​r​a​,​ ​d​e​u​.​ ​C​o​m​b​i​n​e​ ​t​h​e​m​ ​w​i​t​h​ ​a​ ​p​l​u​s​ ​s​i​g​n​:​ ​e​n​g​+​f​r​a​.​ ​E​a​c​h​ ​l​a​n​g​u​a​g​e​ ​i​s​ ​a​ ​s​e​p​a​r​a​t​e​ ​d​o​w​n​l​o​a​d​.
+	 * T​e​s​s​e​r​a​c​t​ ​c​o​d​e​s​,​ ​f​o​r​ ​e​x​a​m​p​l​e​ ​e​n​g​ ​o​r​ ​e​n​g​+​f​r​a​.
 	 */
 	documentOcrLanguageHelp: string
 	/**
@@ -1082,7 +1082,7 @@ type RootTranslation = {
 	 */
 	webFetchMaxChars: string
 	/**
-	 * O​n​l​y​ ​e​x​p​l​i​c​i​t​ ​h​t​t​p​(​s​)​ ​l​i​n​k​s​ ​a​r​e​ ​r​e​a​d​.​ ​R​e​q​u​e​s​t​s​ ​a​r​e​ ​m​a​d​e​ ​b​y​ ​t​h​e​ ​s​e​r​v​e​r​,​ ​w​h​i​c​h​ ​r​e​f​u​s​e​s​ ​p​r​i​v​a​t​e​ ​a​n​d​ ​l​o​c​a​l​ ​a​d​d​r​e​s​s​e​s​.
+	 * O​n​l​y​ ​e​x​p​l​i​c​i​t​ ​h​t​t​p​(​s​)​ ​l​i​n​k​s​ ​a​r​e​ ​r​e​a​d​.
 	 */
 	webFetchHint: string
 	/**
@@ -1397,7 +1397,7 @@ type RootTranslation = {
 	 */
 	storeUrl: string
 	/**
-	 * L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​.​ ​A​ ​c​l​o​s​e​d​ ​n​e​t​w​o​r​k​ ​c​a​n​ ​p​o​i​n​t​ ​t​h​i​s​ ​a​t​ ​i​t​s​ ​o​w​n​ ​m​i​r​r​o​r​:​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​s​ ​a​r​e​ ​f​o​l​d​e​r​s​ ​u​n​d​e​r​ ​t​h​i​s​ ​a​d​d​r​e​s​s​.
+	 * L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​t​h​e​ ​p​u​b​l​i​c​ ​s​t​o​r​e​.
 	 */
 	storeUrlHelp: string
 	/**
@@ -1688,7 +1688,7 @@ type RootTranslation = {
 	 */
 	personaAutoUpdate: string
 	/**
-	 * T​a​k​e​s​ ​a​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​a​s​ ​s​o​o​n​ ​a​s​ ​i​t​ ​i​s​ ​p​u​b​l​i​s​h​e​d​,​ ​f​o​r​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​h​a​v​e​ ​n​o​t​ ​e​d​i​t​e​d​.​ ​T​h​e​ ​o​n​e​s​ ​y​o​u​ ​h​a​v​e​ ​c​h​a​n​g​e​d​ ​k​e​e​p​ ​b​e​i​n​g​ ​o​f​f​e​r​e​d​ ​i​n​s​t​e​a​d​,​ ​o​n​ ​t​h​e​i​r​ ​c​a​r​d​.
+	 * T​a​k​e​s​ ​a​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​a​s​ ​s​o​o​n​ ​a​s​ ​i​t​ ​i​s​ ​p​u​b​l​i​s​h​e​d​,​ ​f​o​r​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​y​o​u​ ​h​a​v​e​ ​n​o​t​ ​e​d​i​t​e​d​.
 	 */
 	personaAutoUpdateHelp: string
 	/**
@@ -2049,7 +2049,7 @@ type RootTranslation = {
 	 */
 	webSearchAuto: string
 	/**
-	 * T​h​e​ ​m​o​d​e​l​ ​f​i​r​s​t​ ​d​e​c​i​d​e​s​ ​w​h​e​t​h​e​r​ ​a​ ​q​u​e​s​t​i​o​n​ ​n​e​e​d​s​ ​t​h​e​ ​w​e​b​.​ ​M​o​s​t​ ​m​o​d​e​r​n​ ​m​o​d​e​l​s​ ​(​e​v​e​n​ ​O​l​l​a​m​a​)​ ​h​a​n​d​l​e​ ​t​h​i​s​ ​w​e​l​l​,​ ​b​u​t​ ​a​ ​f​e​w​ ​s​m​a​l​l​ ​o​n​e​s​ ​m​a​y​ ​n​o​t​.
+	 * A​ ​s​m​a​l​l​ ​m​o​d​e​l​ ​m​a​y​ ​d​e​c​i​d​e​ ​t​h​i​s​ ​b​a​d​l​y​.
 	 */
 	webSearchAutoHelp: string
 	/**
@@ -2061,7 +2061,7 @@ type RootTranslation = {
 	 */
 	nativeToolsTitle: string
 	/**
-	 * H​o​w​ ​t​h​e​ ​m​o​d​e​l​ ​i​s​ ​g​i​v​e​n​ ​t​h​e​ ​w​e​b​ ​t​o​o​l​s​:​ ​a​s​ ​t​e​x​t​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​i​t​ ​a​n​s​w​e​r​s​ ​i​n​ ​i​t​s​ ​r​e​p​l​i​e​s​,​ ​o​r​ ​a​s​ ​t​o​o​l​ ​c​a​l​l​s​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​t​r​a​n​s​p​o​r​t​s​ ​f​o​r​ ​i​t​.
+	 * H​o​w​ ​t​h​e​ ​m​o​d​e​l​ ​i​s​ ​g​i​v​e​n​ ​t​h​e​ ​w​e​b​ ​t​o​o​l​s​.
 	 */
 	nativeToolsDescription: string
 	/**
@@ -2081,7 +2081,7 @@ type RootTranslation = {
 	 */
 	nativeToolsForce: string
 	/**
-	 * N​a​t​i​v​e​ ​c​a​l​l​i​n​g​ ​l​e​t​s​ ​t​h​e​ ​m​o​d​e​l​ ​s​e​a​r​c​h​ ​o​n​ ​i​t​s​ ​o​w​n​,​ ​s​o​ ​n​o​ ​e​x​t​r​a​ ​r​e​q​u​e​s​t​ ​i​s​ ​n​e​e​d​e​d​ ​t​o​ ​d​e​c​i​d​e​ ​f​o​r​ ​i​t​.​ ​O​l​l​a​m​a​ ​r​e​p​o​r​t​s​ ​p​e​r​ ​m​o​d​e​l​ ​w​h​e​t​h​e​r​ ​i​t​ ​c​a​n​;​ ​t​h​e​ ​h​o​s​t​e​d​ ​p​r​o​v​i​d​e​r​s​ ​a​l​l​ ​c​a​n​.​ ​C​h​o​o​s​e​ ​"​a​l​w​a​y​s​"​ ​o​n​l​y​ ​f​o​r​ ​a​ ​s​e​l​f​-​h​o​s​t​e​d​ ​e​n​d​p​o​i​n​t​ ​y​o​u​ ​k​n​o​w​ ​s​u​p​p​o​r​t​s​ ​i​t​,​ ​s​i​n​c​e​ ​a​ ​m​o​d​e​l​ ​o​f​f​e​r​e​d​ ​t​o​o​l​s​ ​i​t​ ​c​a​n​n​o​t​ ​c​a​l​l​ ​w​i​l​l​ ​i​m​p​r​o​v​i​s​e​ ​i​n​s​t​e​a​d​ ​o​f​ ​f​a​i​l​i​n​g​.
+	 * C​h​o​o​s​e​ ​'​a​l​w​a​y​s​'​ ​o​n​l​y​ ​f​o​r​ ​a​ ​s​e​l​f​-​h​o​s​t​e​d​ ​e​n​d​p​o​i​n​t​ ​y​o​u​ ​k​n​o​w​ ​s​u​p​p​o​r​t​s​ ​i​t​.
 	 */
 	nativeToolsHelp: string
 	/**
@@ -2089,7 +2089,7 @@ type RootTranslation = {
 	 */
 	interactiveChoicesTitle: string
 	/**
-	 * W​h​e​n​ ​a​ ​r​e​q​u​e​s​t​ ​i​s​ ​a​m​b​i​g​u​o​u​s​ ​a​n​d​ ​d​e​p​e​n​d​s​ ​o​n​ ​a​ ​p​r​e​f​e​r​e​n​c​e​,​ ​t​h​e​ ​m​o​d​e​l​ ​c​a​n​ ​p​r​e​s​e​n​t​ ​a​ ​f​e​w​ ​t​a​p​p​a​b​l​e​ ​o​p​t​i​o​n​s​ ​i​n​s​t​e​a​d​ ​o​f​ ​g​u​e​s​s​i​n​g​.​ ​Y​o​u​r​ ​s​e​l​e​c​t​i​o​n​ ​i​s​ ​s​e​n​t​ ​a​s​ ​a​ ​n​o​r​m​a​l​ ​m​e​s​s​a​g​e​.
+	 * F​o​r​ ​w​h​e​n​ ​a​ ​r​e​q​u​e​s​t​ ​i​s​ ​a​m​b​i​g​u​o​u​s​ ​a​n​d​ ​t​u​r​n​s​ ​o​n​ ​a​ ​p​r​e​f​e​r​e​n​c​e​ ​o​f​ ​y​o​u​r​s​.
 	 */
 	interactiveChoicesDescription: string
 	/**
@@ -2100,10 +2100,6 @@ type RootTranslation = {
 	 * C​u​r​r​e​n​t​ ​d​a​t​e
 	 */
 	currentDateTitle: string
-	/**
-	 * A​ ​m​o​d​e​l​ ​h​a​s​ ​n​o​ ​c​l​o​c​k​ ​a​n​d​ ​o​t​h​e​r​w​i​s​e​ ​a​s​s​u​m​e​s​ ​i​t​s​ ​t​r​a​i​n​i​n​g​-​c​u​t​o​f​f​ ​d​a​t​e​ ​—​ ​r​e​j​e​c​t​i​n​g​ ​n​e​w​e​r​ ​f​a​c​t​s​ ​a​s​ ​i​m​p​o​s​s​i​b​l​e​.​ ​T​h​i​s​ ​p​r​e​p​e​n​d​s​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​d​a​t​e​/​t​i​m​e​ ​(​y​o​u​r​ ​l​o​c​a​l​ ​t​i​m​e​z​o​n​e​)​ ​t​o​ ​e​a​c​h​ ​r​e​q​u​e​s​t​ ​s​o​ ​i​t​ ​s​t​a​y​s​ ​a​n​c​h​o​r​e​d​ ​i​n​ ​t​h​e​ ​p​r​e​s​e​n​t​.
-	 */
-	currentDateDescription: string
 	/**
 	 * T​e​l​l​ ​t​h​e​ ​m​o​d​e​l​ ​t​o​d​a​y​'​s​ ​d​a​t​e​ ​a​n​d​ ​t​i​m​e
 	 */
@@ -2216,7 +2212,7 @@ type RootTranslation = {
 	 */
 	defaultImageModel: string
 	/**
-	 * W​h​a​t​ ​t​h​e​ ​g​a​l​l​e​r​y​ ​s​t​a​r​t​s​ ​o​n​.​ ​Y​o​u​ ​c​a​n​ ​s​t​i​l​l​ ​p​i​c​k​ ​a​n​o​t​h​e​r​ ​o​n​e​ ​p​e​r​ ​i​m​a​g​e​.
+	 * W​h​a​t​ ​t​h​e​ ​g​a​l​l​e​r​y​ ​s​t​a​r​t​s​ ​o​n​.
 	 */
 	defaultImageModelHelp: string
 	/**
@@ -2232,13 +2228,9 @@ type RootTranslation = {
 	 */
 	imagePromptWriterModel: string
 	/**
-	 * A​ ​t​e​x​t​ ​m​o​d​e​l​ ​t​h​a​t​ ​t​u​r​n​s​ ​a​ ​p​l​a​i​n​ ​d​e​s​c​r​i​p​t​i​o​n​ ​i​n​t​o​ ​a​ ​f​u​l​l​e​r​ ​p​r​o​m​p​t​.​ ​L​e​a​v​e​ ​i​t​ ​o​f​f​ ​t​o​ ​s​e​n​d​ ​e​x​a​c​t​l​y​ ​w​h​a​t​ ​y​o​u​ ​t​y​p​e​.
+	 * T​u​r​n​s​ ​a​ ​p​l​a​i​n​ ​d​e​s​c​r​i​p​t​i​o​n​ ​i​n​t​o​ ​a​ ​f​u​l​l​e​r​ ​p​r​o​m​p​t​.
 	 */
 	imagePromptWriterHelp: string
-	/**
-	 * W​h​a​t​ ​i​t​ ​w​r​i​t​e​s​ ​i​s​ ​a​l​w​a​y​s​ ​s​h​o​w​n​ ​i​n​ ​a​n​ ​e​d​i​t​a​b​l​e​ ​f​i​e​l​d​ ​b​e​f​o​r​e​ ​a​n​y​t​h​i​n​g​ ​i​s​ ​d​r​a​w​n​.​ ​I​t​s​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​a​r​e​ ​i​n​ ​t​h​e​ ​P​r​o​m​p​t​s​ ​t​a​b​.
-	 */
-	imagePromptEditableHint: string
 	/**
 	 * I​m​a​g​e​ ​d​e​f​a​u​l​t​s​ ​s​h​a​r​i​n​g
 	 */
@@ -3292,7 +3284,7 @@ type RootTranslation = {
 	 */
 	mentionsSequential: string
 	/**
-	 * O​n​,​ ​t​h​e​y​ ​a​n​s​w​e​r​ ​i​n​ ​t​h​e​ ​o​r​d​e​r​ ​y​o​u​ ​n​a​m​e​d​ ​t​h​e​m​,​ ​e​a​c​h​ ​h​a​v​i​n​g​ ​r​e​a​d​ ​t​h​e​ ​o​n​e​s​ ​b​e​f​o​r​e​.​ ​O​f​f​,​ ​e​a​c​h​ ​i​s​ ​h​a​n​d​e​d​ ​t​h​e​ ​s​a​m​e​ ​q​u​e​s​t​i​o​n​ ​a​n​d​ ​n​o​n​e​ ​o​f​ ​t​h​e​ ​o​t​h​e​r​s​’​ ​a​n​s​w​e​r​s​.
+	 * O​n​,​ ​t​h​e​y​ ​a​n​s​w​e​r​ ​i​n​ ​o​r​d​e​r​,​ ​e​a​c​h​ ​h​a​v​i​n​g​ ​r​e​a​d​ ​t​h​e​ ​o​n​e​s​ ​b​e​f​o​r​e​.​ ​O​f​f​,​ ​e​a​c​h​ ​a​n​s​w​e​r​s​ ​a​l​o​n​e​.
 	 */
 	mentionsSequentialHelp: string
 	/**
@@ -3943,7 +3935,7 @@ The completion in progress will stop
 	 */
 	documentsTitle: () => LocalizedString
 	/**
-	 * Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation. Files are read in your browser and never uploaded.
+	 * Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation.
 	 */
 	documentsDescription: () => LocalizedString
 	/**
@@ -3951,7 +3943,7 @@ The completion in progress will stop
 	 */
 	documentsToggle: () => LocalizedString
 	/**
-	 * Supports PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text. Turned off, the reader is never downloaded and documents cannot be attached.
+	 * PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown and plain text.
 	 */
 	documentsHelp: () => LocalizedString
 	/**
@@ -3959,7 +3951,7 @@ The completion in progress will stop
 	 */
 	documentOcrToggle: () => LocalizedString
 	/**
-	 * For scans and pictures of text. It is slow, a few seconds per page, and the result is approximate: expect tables and columns to come out flattened. On first use it downloads an OCR engine and its language data, from a public CDN unless this instance hosts them itself.
+	 * For scans and pictures of text. Slow, and approximate.
 	 */
 	documentOcrHelp: () => LocalizedString
 	/**
@@ -3967,7 +3959,7 @@ The completion in progress will stop
 	 */
 	documentOcrLanguage: () => LocalizedString
 	/**
-	 * Tesseract language codes, for example eng, fra, deu. Combine them with a plus sign: eng+fra. Each language is a separate download.
+	 * Tesseract codes, for example eng or eng+fra.
 	 */
 	documentOcrLanguageHelp: () => LocalizedString
 	/**
@@ -4511,7 +4503,7 @@ The completion in progress will stop
 	 */
 	webFetchMaxChars: () => LocalizedString
 	/**
-	 * Only explicit http(s) links are read. Requests are made by the server, which refuses private and local addresses.
+	 * Only explicit http(s) links are read.
 	 */
 	webFetchHint: () => LocalizedString
 	/**
@@ -4819,7 +4811,7 @@ The completion in progress will stop
 	 */
 	storeUrl: () => LocalizedString
 	/**
-	 * Leave empty for the public store. A closed network can point this at its own mirror: the catalogues are folders under this address.
+	 * Leave empty for the public store.
 	 */
 	storeUrlHelp: () => LocalizedString
 	/**
@@ -5109,7 +5101,7 @@ The completion in progress will stop
 	 */
 	personaAutoUpdate: () => LocalizedString
 	/**
-	 * Takes a new version as soon as it is published, for the personas you have not edited. The ones you have changed keep being offered instead, on their card.
+	 * Takes a new version as soon as it is published, for the personas you have not edited.
 	 */
 	personaAutoUpdateHelp: () => LocalizedString
 	/**
@@ -5461,7 +5453,7 @@ The completion in progress will stop
 	 */
 	webSearchAuto: () => LocalizedString
 	/**
-	 * The model first decides whether a question needs the web. Most modern models (even Ollama) handle this well, but a few small ones may not.
+	 * A small model may decide this badly.
 	 */
 	webSearchAutoHelp: () => LocalizedString
 	/**
@@ -5473,7 +5465,7 @@ The completion in progress will stop
 	 */
 	nativeToolsTitle: () => LocalizedString
 	/**
-	 * How the model is given the web tools: as text instructions it answers in its replies, or as tool calls the provider transports for it.
+	 * How the model is given the web tools.
 	 */
 	nativeToolsDescription: () => LocalizedString
 	/**
@@ -5493,7 +5485,7 @@ The completion in progress will stop
 	 */
 	nativeToolsForce: () => LocalizedString
 	/**
-	 * Native calling lets the model search on its own, so no extra request is needed to decide for it. Ollama reports per model whether it can; the hosted providers all can. Choose "always" only for a self-hosted endpoint you know supports it, since a model offered tools it cannot call will improvise instead of failing.
+	 * Choose 'always' only for a self-hosted endpoint you know supports it.
 	 */
 	nativeToolsHelp: () => LocalizedString
 	/**
@@ -5501,7 +5493,7 @@ The completion in progress will stop
 	 */
 	interactiveChoicesTitle: () => LocalizedString
 	/**
-	 * When a request is ambiguous and depends on a preference, the model can present a few tappable options instead of guessing. Your selection is sent as a normal message.
+	 * For when a request is ambiguous and turns on a preference of yours.
 	 */
 	interactiveChoicesDescription: () => LocalizedString
 	/**
@@ -5512,10 +5504,6 @@ The completion in progress will stop
 	 * Current date
 	 */
 	currentDateTitle: () => LocalizedString
-	/**
-	 * A model has no clock and otherwise assumes its training-cutoff date — rejecting newer facts as impossible. This prepends the current date/time (your local timezone) to each request so it stays anchored in the present.
-	 */
-	currentDateDescription: () => LocalizedString
 	/**
 	 * Tell the model today's date and time
 	 */
@@ -5625,7 +5613,7 @@ The completion in progress will stop
 	 */
 	defaultImageModel: () => LocalizedString
 	/**
-	 * What the gallery starts on. You can still pick another one per image.
+	 * What the gallery starts on.
 	 */
 	defaultImageModelHelp: () => LocalizedString
 	/**
@@ -5641,13 +5629,9 @@ The completion in progress will stop
 	 */
 	imagePromptWriterModel: () => LocalizedString
 	/**
-	 * A text model that turns a plain description into a fuller prompt. Leave it off to send exactly what you type.
+	 * Turns a plain description into a fuller prompt.
 	 */
 	imagePromptWriterHelp: () => LocalizedString
-	/**
-	 * What it writes is always shown in an editable field before anything is drawn. Its instructions are in the Prompts tab.
-	 */
-	imagePromptEditableHint: () => LocalizedString
 	/**
 	 * Image defaults sharing
 	 */
@@ -6665,7 +6649,7 @@ The completion in progress will stop
 	 */
 	mentionsSequential: () => LocalizedString
 	/**
-	 * On, they answer in the order you named them, each having read the ones before. Off, each is handed the same question and none of the others’ answers.
+	 * On, they answer in order, each having read the ones before. Off, each answers alone.
 	 */
 	mentionsSequentialHelp: () => LocalizedString
 	/**

@@ -142,16 +142,14 @@ const fr = extendDictionary(en, {
 		'Il n’y a pas de texte à extraire, seulement des images de texte. Un modèle de vision peut lire les pages directement, jusqu’à {max:number}. Activez l’OCR dans les réglages pour les lire en texte à la place.',
 	documentsTitle: 'Documents',
 	documentsDescription:
-		'Joignez un PDF, un fichier Word ou un tableur et son texte rejoint la conversation. Les fichiers sont lus dans votre navigateur et ne sont jamais téléversés.',
+		'Joignez un PDF, un fichier Word ou un tableur et son texte entre dans la conversation.',
 	documentsToggle: 'Lire les documents joints',
 	documentsHelp:
-		'Prend en charge PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown et texte brut. Désactivé, le lecteur n’est jamais téléchargé et les documents ne peuvent pas être joints.',
+		'PDF, DOCX, PPTX, XLSX, ODT, ODP, ODS, RTF, EPUB, CSV, HTML, Markdown et texte brut.',
 	documentOcrToggle: 'Lire le texte dans les images (OCR)',
-	documentOcrHelp:
-		'Pour les scans et les images de texte. C’est lent, quelques secondes par page, et le résultat est approximatif : les tableaux et les colonnes ressortent aplatis. Au premier usage, un moteur OCR et ses données de langue sont téléchargés, depuis un CDN public sauf si cette instance les héberge elle-même.',
+	documentOcrHelp: 'Pour les scans et les photos de texte. Lent, et approximatif.',
 	documentOcrLanguage: 'Langue de l’OCR',
-	documentOcrLanguageHelp:
-		'Codes de langue Tesseract, par exemple eng, fra, deu. Combinez-les avec un plus : eng+fra. Chaque langue est un téléchargement distinct.',
+	documentOcrLanguageHelp: 'Codes Tesseract, par exemple eng ou eng+fra.',
 	downloadModel: 'Télécharger le modèle',
 	edit: 'Éditer',
 	emptyKnowledge: 'Aucune connaissance',
@@ -280,8 +278,7 @@ const fr = extendDictionary(en, {
 	webFetchByDefault: 'Activé par défaut dans les nouvelles conversations',
 	webFetchMaxPages: 'Pages lues par message',
 	webFetchMaxChars: 'Caractères conservés par page',
-	webFetchHint:
-		'Seuls les liens http(s) explicites sont lus. Les requêtes partent du serveur, qui refuse les adresses privées et locales.',
+	webFetchHint: 'Seuls les liens http(s) explicites sont lus.',
 	webFetchLockedOn: "Activé par votre administrateur — jusqu'à {pages} pages par message.",
 	webFetchLockedOff: 'Désactivé par votre administrateur.',
 	version: 'Version',
@@ -357,8 +354,7 @@ const fr = extendDictionary(en, {
 	storeSearch: 'Rechercher dans la boutique',
 	storeEverything: 'Tout',
 	storeUrl: 'Adresse du store',
-	storeUrlHelp:
-		'Laisser vide pour le store public. Un réseau fermé peut pointer vers son propre miroir : les catalogues sont des dossiers sous cette adresse.',
+	storeUrlHelp: 'Laissez vide pour la boutique publique.',
 	playbookAutoUpdate: 'Mettre à jour les playbooks automatiquement',
 	playbookAutoUpdateHelp:
 		'Prendre une nouvelle révision dès sa publication, pour les playbooks que vous n\u2019avez pas modifiés. Les vôtres ne sont jamais écrasés.',
@@ -442,7 +438,7 @@ const fr = extendDictionary(en, {
 	personaStoreShareForbidden: 'Seul un administrateur peut partager un persona avec cette instance',
 	personaAutoUpdate: 'Mettre à jour les personas installés automatiquement',
 	personaAutoUpdateHelp:
-		"Prend la nouvelle version dès sa publication, pour les personas que vous n'avez pas modifiés. Ceux que vous avez changés restent proposés sur leur carte.",
+		"Prend une nouvelle version dès sa publication, pour les personas que vous n'avez pas modifiés.",
 	personaAutoUpdateForcedHelp:
 		'Activé pour cette instance par votre administrateur. Les personas que vous avez modifiés ne sont jamais remplacés.',
 	personaAutoUpdateForce: 'Mettre à jour les personas de tout le monde automatiquement',
@@ -570,26 +566,21 @@ const fr = extendDictionary(en, {
 	webSearchTokenSet: '•••••••• (défini)',
 	webSearchByDefault: 'Activer la recherche web par défaut',
 	webSearchAuto: 'Laisser le modèle décider quand chercher sur le web',
-	webSearchAutoHelp:
-		"Le modèle détermine d'abord si une question nécessite le web. La plupart des modèles récents (même sous Ollama) s'en sortent bien, quelques petits modèles moins.",
+	webSearchAutoHelp: 'Un petit modèle peut mal en décider.',
 	webSearchUnavailable:
 		"La recherche web n'est pas encore disponible. Un administrateur peut la configurer pour cette instance.",
 	nativeToolsTitle: 'Appel natif des outils',
-	nativeToolsDescription:
-		"Comment les outils web sont donnés au modèle : sous forme de consignes textuelles auxquelles il répond dans ses messages, ou sous forme d'appels que le fournisseur transporte pour lui.",
+	nativeToolsDescription: 'Comment les outils web sont remis au modèle.',
 	nativeToolsLabel: 'Mode',
 	nativeToolsOff: 'Consignes textuelles (fonctionne partout)',
 	nativeToolsAuto: "Natif là où c'est supporté",
 	nativeToolsForce: 'Toujours natif',
 	nativeToolsHelp:
-		"L'appel natif permet au modèle de chercher de lui-même, sans requête supplémentaire pour décider à sa place. Ollama indique modèle par modèle s'il en est capable, et les fournisseurs hébergés le sont tous. Ne choisissez « toujours » que pour un serveur auto-hébergé dont vous savez qu'il le gère : un modèle à qui l'on propose des outils qu'il ne sait pas appeler improvise au lieu d'échouer.",
+		"Ne choisissez « toujours » que pour un endpoint auto-hébergé dont vous savez qu'il le gère.",
 	interactiveChoicesTitle: 'Choix interactifs',
-	interactiveChoicesDescription:
-		"Quand une demande est ambiguë et dépend d'une préférence, le modèle peut proposer quelques options à toucher plutôt que de deviner. Votre choix est envoyé comme un message normal.",
+	interactiveChoicesDescription: "Quand une demande est ambiguë et dépend d'une préférence à vous.",
 	interactiveChoicesToggle: 'Laisser le modèle proposer des boutons de choix rapide',
 	currentDateTitle: 'Date du jour',
-	currentDateDescription:
-		"Un modèle n'a pas d'horloge et suppose sinon être à sa date de fin d'entraînement — rejetant les faits plus récents comme impossibles. Ceci ajoute la date et l'heure actuelles (votre fuseau) à chaque requête pour l'ancrer dans le présent.",
 	currentDateToggle: "Indiquer au modèle la date et l'heure du jour",
 	systemInstructionsTitle: 'Instructions système',
 	systemInstructionsDescription:
@@ -623,15 +614,11 @@ const fr = extendDictionary(en, {
 	download: 'Télécharger',
 	imagesSettingsDescription: 'Quel modèle dessine, et lequel écrit le prompt pour lui.',
 	defaultImageModel: "Modèle d'image par défaut",
-	defaultImageModelHelp:
-		'Celui sur lequel la galerie démarre. Vous pouvez toujours en choisir un autre à chaque image.',
+	defaultImageModelHelp: 'Ce sur quoi la galerie démarre.',
 	imagePromptWriter: 'Rédacteur de prompt',
 	imagePromptWriterOff: 'Désactivé',
 	imagePromptWriterModel: "Quel modèle l'écrit",
-	imagePromptWriterHelp:
-		'Un modèle de texte qui transforme une description simple en prompt plus complet. Laissez-le désactivé pour envoyer exactement ce que vous tapez.',
-	imagePromptEditableHint:
-		"Ce qu'il écrit est toujours affiché dans un champ modifiable avant que quoi que ce soit soit dessiné. Ses instructions sont dans l'onglet Prompts.",
+	imagePromptWriterHelp: 'Transforme une description simple en un prompt plus riche.',
 	imagesSharing: "Partage des défauts d'images",
 	imagesSharingDescription:
 		"Transmettez votre modèle d'image et votre rédacteur de prompt à toute l'instance.",
@@ -944,7 +931,7 @@ const fr = extendDictionary(en, {
 	mentionInsert: 'insérer',
 	mentionsSequential: 'Les personas appelés ensemble se lisent entre eux',
 	mentionsSequentialHelp:
-		"Activé, ils répondent dans l'ordre où vous les avez nommés, chacun ayant lu les précédents. Désactivé, chacun reçoit la même question et aucune des autres réponses.",
+		"Activé, ils répondent dans l'ordre, chacun ayant lu les précédents. Désactivé, chacun répond seul.",
 	slashRun: 'Lancer',
 	clearCommandDescription:
 		'Repartir de zéro : replier cette conversation et rendre au modèle une page blanche',

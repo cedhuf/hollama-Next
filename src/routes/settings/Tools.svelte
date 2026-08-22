@@ -293,7 +293,6 @@
 							onSelect={(name) => ($settingsStore.imagePromptModel = name || null)}
 						/>
 					</SettingsField>
-					<SettingsHint>{$LL.imagePromptEditableHint()}</SettingsHint>
 				{/if}
 			{:else}
 				<SettingsField label={$LL.defaultImageModel()}>
@@ -316,7 +315,10 @@
 		</SettingsSection>
 	{/if}
 
-	<SettingsSection title={$LL.currentDateTitle()} description={$LL.currentDateDescription()} card>
+	<!-- No description: the title names the thing and the switch says what it does.
+	     A third sentence explaining why a model needs telling the date is a page of
+	     the documentation, not a line of this one. -->
+	<SettingsSection title={$LL.currentDateTitle()} card>
 		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />
 	</SettingsSection>
 </SettingsPanel>
