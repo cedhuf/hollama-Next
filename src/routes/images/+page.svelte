@@ -577,9 +577,9 @@
 			     close is already there and already pinned. Here it buys the picture that
 			     height back, which is the whole point of the dialog. -->
 			<div
-				class="relative flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2/70 bg-shade-0/75 px-4 backdrop-blur-sm"
+				class="relative flex h-12 shrink-0 items-center gap-3 border-b border-shade-2/50 bg-shade-0/45 px-4 backdrop-blur-md"
 			>
-				<div class="flex min-w-0 items-center gap-2">
+				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<span
 						class="inline-block h-2 w-2 shrink-0 rounded-full"
 						style="background-color: {badgeColor(image.serverId)}"
@@ -587,6 +587,31 @@
 					<span class="truncate text-sm font-semibold text-active">
 						{image.title || modelLabel(serverFor(image.serverId), image.model)}
 					</span>
+				</div>
+
+				<!-- What it took to make, in the bar rather than over the picture.
+				
+				     It was a floating label in the corner, which meant it took room from
+				     the image at every width, including the ones where it was too small to
+				     read. Here it takes room only where there is room, and below `sm` it is
+				     simply not drawn: four figures nobody came for should not be the reason
+				     a picture is smaller on a phone.
+				
+				     The model id is the one part with no ceiling of its own, since some run
+				     to forty characters, so it is given one. -->
+				<div class="hidden shrink-0 items-center gap-2 text-[10px] leading-4 text-muted sm:flex">
+					<span class="max-w-[9rem] truncate">
+						{modelLabel(serverFor(image.serverId), image.model)}
+					</span>
+					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
+					<span>{formatTimestampToNow(image.createdAt)}</span>
+					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
+					{#if costLabel(image)}
+						<span class="flex items-center gap-1 tabular-nums">
+							<Coins class="h-2.5 w-2.5" />
+							{costLabel(image)}
+						</span>
+					{/if}
 				</div>
 
 				<div class="flex shrink-0 items-center gap-1">
@@ -713,33 +738,6 @@
 									: ''}"
 							/>
 						</button>
-					{/if}
-				</div>
-
-				<!-- What it took to make, laid over the picture rather than under it. These
-				     are four short figures; giving them a band of their own cost more
-				     height than they are worth, and over a corner they are readable
-				     without taking anything from the image.
-
-				     Kept deliberately small. It is a caption on a photograph, not a panel:
-				     the picture is what the dialog is for, and anything up here that grows
-				     is growing at its expense. The model id is the one part with no ceiling
-				     of its own, since some of them run to forty characters, so it is given
-				     one and truncated. -->
-				<div
-					class="pointer-events-none absolute right-3 top-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center justify-end gap-x-2 gap-y-0.5 rounded-md bg-black/55 px-2 py-1 text-[10px] leading-4 text-white backdrop-blur-sm"
-				>
-					<span class="max-w-[9rem] truncate">
-						{modelLabel(serverFor(image.serverId), image.model)}
-					</span>
-					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
-					<span>{formatTimestampToNow(image.createdAt)}</span>
-					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
-					{#if costLabel(image)}
-						<span class="flex items-center gap-1 tabular-nums">
-							<Coins class="h-2.5 w-2.5" />
-							{costLabel(image)}
-						</span>
 					{/if}
 				</div>
 			</div>
