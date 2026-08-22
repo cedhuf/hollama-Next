@@ -623,11 +623,32 @@
 			<!-- `min-h-0` is what makes the rest of this work: without it a flex child
 			     refuses to shrink below its content, so the image would push the strip
 			     below it off the bottom instead of fitting between them. -->
-			<div class="relative flex min-h-0 flex-1 items-center justify-center bg-shade-1 p-3">
+			<div
+				class="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-shade-1 p-3"
+			>
+				<!-- The picture again, filling the space behind itself.
+				
+				     The same source, so the browser serves it from the cache it already
+				     has: this costs a paint, not a request. Scaled up past its own edges
+				     because a blur softens the border it is given, and a softened border
+				     against the panel reads as a mistake; enlarging it puts that edge
+				     outside the box, which is what `overflow-hidden` on the parent is for.
+				
+				     Dimmed hard, and that is the whole restraint here: what is underneath
+				     must never compete with what is on top, and the figures in the corner
+				     are white text that has to stay legible over whatever the picture
+				     happens to be. Decoration, so it is hidden from anything that reads. -->
+				<img
+					src={imageUrl(image.id)}
+					alt=""
+					aria-hidden="true"
+					class="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover opacity-25 blur-2xl"
+				/>
+
 				<img
 					src={imageUrl(image.id)}
 					alt={image.prompt}
-					class="max-h-full max-w-full rounded-lg object-contain shadow-sm"
+					class="relative max-h-full max-w-full rounded-lg object-contain shadow-lg"
 				/>
 
 				<!-- What it took to make, laid over the picture rather than under it. These
