@@ -38,6 +38,7 @@
 		id: string;
 		connectionType: string;
 		baseUrl?: string;
+		imageBaseUrl?: string | null;
 		label: string | null;
 		modelFilter?: string | null;
 		isEnabled: boolean;
@@ -88,6 +89,7 @@
 			id: v.id,
 			connectionType: v.connectionType as ConnectionType,
 			baseUrl: v.baseUrl ?? '',
+			imageBaseUrl: v.imageBaseUrl ?? undefined,
 			label: v.label ?? undefined,
 			modelFilter: v.modelFilter ?? undefined,
 			isEnabled: v.isEnabled,
@@ -235,6 +237,7 @@
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					baseUrl: server.baseUrl,
+					imageBaseUrl: server.imageBaseUrl ?? null,
 					label: server.label ?? null,
 					modelFilter: server.modelFilter ?? null,
 					isEnabled: server.isEnabled,

@@ -51,6 +51,21 @@ export interface Server {
 	 * name is the only signal there is, so the guess has to be correctable.
 	 */
 	modelKinds?: Record<string, ModelKind>;
+	/**
+	 * Where this connection's image endpoints live, when that is not where its
+	 * chat endpoint lives. Empty means the same base, which is the usual case.
+	 *
+	 * It exists because one base URL turned out to be an assumption rather than a
+	 * fact. OpenAI serves `chat/completions` and `images/generations` off the same
+	 * root, so appending a path reaches both. Infomaniak does not: chat is on API
+	 * version 2 under `/openai/v1`, images are only on version 1 under `/openai`,
+	 * and no amount of path appending gets from one to the other.
+	 *
+	 * Not an Infomaniak special case, though it is what forced the question. A
+	 * self-hosted setup running llama.cpp for chat and ComfyUI for pictures is two
+	 * different hosts, and this is the field that says so.
+	 */
+	imageBaseUrl?: string;
 }
 
 /**
@@ -298,10 +313,37 @@ export interface ProviderInfo {
  */
 export const INFOMANIAK_URL_TEMPLATE = 'https://api.infomaniak.com/2/ai/{productId}/openai/v1';
 
+/**
+ * Infomaniak's image endpoints, which are not under its chat endpoint.
+ *
+ * A different API version and no `/v1`, both of which are theirs to decide and
+ * neither of which can be reached from the chat base. Chat stays on version 2
+ * deliberately: version 1's chat route is marked deprecated in their own
+ * specification, and version 2 is the one that documents function calling and
+ * multimodal input, which this app uses. Images have no version 2 route at all.
+ */
+export const INFOMANIAK_IMAGE_URL_TEMPLATE = 'https://api.infomaniak.com/1/ai/{productId}/openai';
+
 /** The endpoint for a product ID, or nothing when there is no ID to build it from. */
 export function infomaniakBaseUrl(productId: string): string {
 	const id = productId.trim();
 	return id ? INFOMANIAK_URL_TEMPLATE.replace('{productId}', id) : '';
+}
+
+/** The image endpoint for a product ID, built from the same one field. */
+export function infomaniakImageBaseUrl(productId: string): string {
+	const id = productId.trim();
+	return id ? INFOMANIAK_IMAGE_URL_TEMPLATE.replace('{productId}', id) : '';
+}
+
+/**
+ * Where to send a drawing on this connection.
+ *
+ * The chat base whenever nothing says otherwise, so every provider that serves
+ * both from one root needs no configuration and none of this is visible to it.
+ */
+export function imageBaseUrl(server: Pick<Server, 'baseUrl' | 'imageBaseUrl'>): string {
+	return server.imageBaseUrl?.trim() || server.baseUrl;
 }
 
 /**
@@ -407,6 +449,23 @@ export function supportsNativeTools(connectionType: ConnectionType): boolean {
 		connectionType === ConnectionType.OpenAI ||
 		connectionType === ConnectionType.Anthropic ||
 		connectionType === ConnectionType.Infomaniak
+	);
+}
+
+/**
+ * Whether this kind of connection can draw at all.
+ *
+ * Ollama has no image endpoint, and Anthropic does not generate pictures — it
+ * reads them. What is left either serves OpenAI's `images/generations` or is
+ * something self-hosted pretending to, which is the same request either way.
+ * Used to decide whether the connection form has any business asking where its
+ * image endpoint lives.
+ */
+export function supportsImageGeneration(connectionType: ConnectionType): boolean {
+	return (
+		connectionType === ConnectionType.OpenAI ||
+		connectionType === ConnectionType.Infomaniak ||
+		connectionType === ConnectionType.OpenAICompatible
 	);
 }
 

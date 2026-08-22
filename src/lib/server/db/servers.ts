@@ -16,6 +16,8 @@ export interface ServerRow {
 	owner_user_id: string | null; // NULL = system/admin-shared
 	connection_type: string;
 	base_url: string;
+	/** Where image endpoints live, when that is not under `base_url`. NULL = same. */
+	image_base_url: string | null;
 	api_key_enc: string | null;
 	label: string | null;
 	model_filter: string | null;
@@ -54,6 +56,7 @@ export function createServer(input: {
 	ownerUserId: string | null;
 	connectionType: string;
 	baseUrl: string;
+	imageBaseUrl?: string | null;
 	apiKey?: string | null;
 	label?: string | null;
 	modelFilter?: string | null;
@@ -65,14 +68,15 @@ export function createServer(input: {
 	getDb()
 		.prepare(
 			`INSERT INTO servers
-			 (id, owner_user_id, connection_type, base_url, api_key_enc, label, model_filter, is_enabled, color, created_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			 (id, owner_user_id, connection_type, base_url, image_base_url, api_key_enc, label, model_filter, is_enabled, color, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		)
 		.run(
 			id,
 			input.ownerUserId,
 			input.connectionType,
 			input.baseUrl,
+			input.imageBaseUrl || null,
 			input.apiKey ? encrypt(input.apiKey) : null,
 			input.label ?? null,
 			input.modelFilter ?? null,
@@ -91,6 +95,7 @@ export function updateServer(
 	id: string,
 	patch: {
 		baseUrl?: string;
+		imageBaseUrl?: string | null;
 		apiKey?: string | null;
 		label?: string | null;
 		modelFilter?: string | null;
@@ -105,6 +110,12 @@ export function updateServer(
 	if (patch.baseUrl !== undefined) {
 		sets.push('base_url = ?');
 		values.push(patch.baseUrl);
+	}
+	if (patch.imageBaseUrl !== undefined) {
+		// Blank is stored as NULL, so "same base as chat" has one representation
+		// rather than two that the proxy would have to test for separately.
+		sets.push('image_base_url = ?');
+		values.push(patch.imageBaseUrl?.trim() || null);
 	}
 	if (patch.apiKey !== undefined) {
 		sets.push('api_key_enc = ?');

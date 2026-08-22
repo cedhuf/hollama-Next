@@ -396,6 +396,19 @@ const migrations: Migration[] = [
 			ALTER TABLE user_usage ADD COLUMN images INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE user_usage ADD COLUMN seconds REAL NOT NULL DEFAULT 0;
 		`
+	},
+	{
+		version: 17,
+		up: `
+			-- Where a connection's image endpoints live, when that is not where its
+			-- chat endpoint lives. NULL means the same base, which is every provider
+			-- that serves both from one root.
+			--
+			-- One base URL was an assumption, not a fact: Infomaniak puts chat on API
+			-- version 2 under /openai/v1 and images only on version 1 under /openai,
+			-- and no path appended to the first reaches the second.
+			ALTER TABLE servers ADD COLUMN image_base_url TEXT;
+		`
 	}
 ];
 

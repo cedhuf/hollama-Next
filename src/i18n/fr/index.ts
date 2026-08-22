@@ -29,6 +29,9 @@ const fr = extendDictionary(en, {
 	automaticallyCheckForUpdates: 'Vérifier automatiquement les mises à jour',
 	availableModels: 'Modèles disponibles',
 	baseUrl: 'URL de base',
+	imageEndpoint: "Endpoint d'images",
+	imageEndpointHelp:
+		"À laisser vide, sauf si ce fournisseur sert la génération d'images ailleurs que son endpoint de conversation. C'est le cas d'Infomaniak, qui le remplit seul depuis l'ID produit.",
 	browseModels: 'Parcourez la liste des modèles disponibles',
 	cancel: 'Annuler',
 	cantConnectToOllamaServer: 'Impossible de se connecter au serveur Ollama',

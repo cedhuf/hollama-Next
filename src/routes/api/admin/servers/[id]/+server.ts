@@ -25,6 +25,7 @@ export async function PUT(event) {
 
 	updateServer(event.params.id, {
 		baseUrl: body.baseUrl,
+		imageBaseUrl: body.imageBaseUrl,
 		apiKey: body.apiKey, // omit to keep, '' / null to clear
 		label: body.label,
 		modelFilter: body.modelFilter,

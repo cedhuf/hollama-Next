@@ -1,8 +1,14 @@
 import { error } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
+import { ConnectionType, infomaniakImageBaseUrl, infomaniakProductId } from '$lib/connections';
 import { requireUser } from '$lib/server/api';
-import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
+import {
+	getModelPricing,
+	getServer,
+	getServerApiKey,
+	type ServerRow
+} from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
 import { meter, meterImages } from '$lib/server/usageMeter';
@@ -23,19 +29,6 @@ const proxy: RequestHandler = async (event) => {
 		throw error(403, 'Forbidden');
 	}
 	if (!server.is_enabled) throw error(403, 'Server is disabled');
-
-	const path = event.params.path ? `/${event.params.path}` : '';
-	const url = `${server.base_url.replace(/\/+$/, '')}${path}`;
-
-	const headers = new Headers();
-	for (const name of ['content-type', 'accept']) {
-		const value = event.request.headers.get(name);
-		if (value) headers.set(name, value);
-	}
-	const key = getServerApiKey(server);
-	if (key) headers.set('authorization', `Bearer ${key}`);
-
-	let body = event.request.method === 'POST' ? await event.request.text() : undefined;
 
 	/**
 	 * Whether this request is a turn, as opposed to asking what models exist.
@@ -67,6 +60,29 @@ const proxy: RequestHandler = async (event) => {
 
 	/** Anything that makes the provider work, and therefore anything that costs. */
 	const isBillable = isCompletion || isImage;
+
+	/**
+	 * The root this request hangs off.
+	 *
+	 * Two, because one was an assumption: a provider may serve its image endpoints
+	 * from somewhere the chat base cannot reach by appending a path. Resolved here
+	 * and only here, so the browser keeps sending a plain relative path and never
+	 * learns either address — which is the whole point of this relay in server
+	 * mode.
+	 */
+	const base = isImage ? imageBaseFor(server) : server.base_url;
+	const path = event.params.path ? `/${event.params.path}` : '';
+	const url = `${base.replace(/\/+$/, '')}${path}`;
+
+	const headers = new Headers();
+	for (const name of ['content-type', 'accept']) {
+		const value = event.request.headers.get(name);
+		if (value) headers.set(name, value);
+	}
+	const key = getServerApiKey(server);
+	if (key) headers.set('authorization', `Bearer ${key}`);
+
+	let body = event.request.method === 'POST' ? await event.request.text() : undefined;
 
 	/**
 	 * Whether this account's spending is being watched at all.
@@ -152,6 +168,25 @@ const proxy: RequestHandler = async (event) => {
 		}
 	});
 };
+
+/**
+ * Where this connection's images live.
+ *
+ * What was configured, and failing that a guess for the one provider that is
+ * known to split them. An Infomaniak connection that predates the field has an
+ * empty one, and its owner has no reason to suspect that a form they filled in
+ * correctly months ago is now missing something: deriving it from the product ID
+ * already in the chat URL is the difference between working and a 404 nobody can
+ * explain. Anything else falls back to the chat base, which is where every
+ * provider that does not split serves them.
+ */
+function imageBaseFor(server: ServerRow): string {
+	if (server.image_base_url) return server.image_base_url;
+	if (server.connection_type === ConnectionType.Infomaniak) {
+		return infomaniakImageBaseUrl(infomaniakProductId(server.base_url)) || server.base_url;
+	}
+	return server.base_url;
+}
 
 /**
  * How many images a request asks for.

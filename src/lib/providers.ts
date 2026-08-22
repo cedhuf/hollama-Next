@@ -10,6 +10,7 @@ export interface ProviderView {
 	isEnabled: boolean;
 	models?: string[];
 	baseUrl?: string;
+	imageBaseUrl?: string | null;
 	modelFilter?: string | null;
 	color?: string | null;
 	modelLabels?: Record<string, string>;
@@ -44,6 +45,7 @@ export function providerToServer(provider: ProviderView): Server {
 		id: provider.id,
 		connectionType: provider.connectionType as ConnectionType,
 		baseUrl: provider.baseUrl ?? '', // unused in server mode (proxy resolves by id)
+		imageBaseUrl: provider.imageBaseUrl ?? undefined,
 		isVerified: new Date(),
 		isEnabled: provider.isEnabled,
 		label: provider.label ?? undefined,

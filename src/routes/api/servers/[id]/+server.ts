@@ -24,6 +24,7 @@ export async function PUT(event) {
 
 	updateServer(event.params.id, {
 		baseUrl: body.baseUrl,
+		imageBaseUrl: body.imageBaseUrl,
 		apiKey: body.apiKey,
 		label: body.label,
 		modelFilter: body.modelFilter,

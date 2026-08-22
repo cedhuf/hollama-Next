@@ -11,11 +11,13 @@
 		ConnectionType,
 		getProvider,
 		infomaniakBaseUrl,
+		infomaniakImageBaseUrl,
 		infomaniakProductId,
 		isOpenAiCompatible,
 		SERVER_COLORS,
 		serverBadge,
 		serverInitials,
+		supportsImageGeneration,
 		type Server
 	} from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
@@ -85,6 +87,7 @@
 	const isOpenAiFamily = $derived(isOpenAiCompatible(server.connectionType));
 	const isOllamaFamily = $derived(server.connectionType === ConnectionType.Ollama);
 	const isInfomaniak = $derived(server.connectionType === ConnectionType.Infomaniak);
+	const canDraw = $derived(supportsImageGeneration(server.connectionType));
 
 	const name = $derived(server.label || provider.name);
 	const initials = $derived(serverInitials(name));
@@ -239,10 +242,15 @@
 					</SettingsField>
 				{/if}
 
-				<!-- Infomaniak's endpoint differs only by the product ID in its path, so
-				     that is what the form asks for and the URL is derived from it. An
-				     empty ID leaves the URL empty, which is what stops the connection
-				     being synced before it can work. -->
+				<!-- Infomaniak's endpoints differ only by the product ID in their path, so
+				     that is what the form asks for and the URLs are derived from it. An
+				     empty ID leaves them empty, which is what stops the connection being
+				     synced before it can work.
+				
+				     Two URLs from the one field, because Infomaniak's images are not under
+				     its chat endpoint: chat is API version 2 under /openai/v1, images are
+				     version 1 under /openai. Asking twice for the same product ID would be
+				     asking the user to know that. -->
 				{#if isInfomaniak}
 					<SettingsField label={$LL.productId()}>
 						<input
@@ -250,7 +258,9 @@
 							value={infomaniakProductId(server.baseUrl)}
 							placeholder="123456"
 							oninput={(e) => {
-								server.baseUrl = infomaniakBaseUrl(e.currentTarget.value);
+								const id = e.currentTarget.value;
+								server.baseUrl = infomaniakBaseUrl(id);
+								server.imageBaseUrl = infomaniakImageBaseUrl(id);
 								persist();
 							}}
 						/>
@@ -365,15 +375,32 @@
 				<OllamaBaseURLHelp {server} />
 			{/if}
 
-			{#if provider.identified && showAdvanced}
-				<SettingsField label={$LL.baseUrl()}>
-					<input
-						class="settings-field font-mono text-xs"
-						bind:value={server.baseUrl}
-						placeholder={provider.baseUrl}
-						oninput={persist}
-					/>
-				</SettingsField>
+			{#if showAdvanced}
+				{#if provider.identified}
+					<SettingsField label={$LL.baseUrl()}>
+						<input
+							class="settings-field font-mono text-xs"
+							bind:value={server.baseUrl}
+							placeholder={provider.baseUrl}
+							oninput={persist}
+						/>
+					</SettingsField>
+				{/if}
+
+				<!-- Empty means "wherever chat is", which is true of every provider that
+				     serves both from one root, so this stays a field nobody has to think
+				     about until their provider makes them. The placeholder shows what it
+				     falls back to rather than a fictional example. -->
+				{#if canDraw}
+					<SettingsField label={$LL.imageEndpoint()} hint={$LL.imageEndpointHelp()}>
+						<input
+							class="settings-field font-mono text-xs"
+							bind:value={server.imageBaseUrl}
+							placeholder={server.baseUrl || provider.baseUrl}
+							oninput={persist}
+						/>
+					</SettingsField>
+				{/if}
 			{/if}
 
 			{#if isOllamaFamily}
@@ -394,7 +421,7 @@
 					</button>
 				{/if}
 
-				{#if provider.identified}
+				{#if provider.identified || canDraw}
 					<button
 						type="button"
 						onclick={() => (showAdvanced = !showAdvanced)}

@@ -92,6 +92,14 @@ type RootTranslation = {
 	 */
 	baseUrl: string
 	/**
+	 * I​m​a​g​e​ ​e​n​d​p​o​i​n​t
+	 */
+	imageEndpoint: string
+	/**
+	 * L​e​a​v​e​ ​e​m​p​t​y​ ​u​n​l​e​s​s​ ​t​h​i​s​ ​p​r​o​v​i​d​e​r​ ​s​e​r​v​e​s​ ​i​m​a​g​e​ ​g​e​n​e​r​a​t​i​o​n​ ​f​r​o​m​ ​s​o​m​e​w​h​e​r​e​ ​e​l​s​e​ ​t​h​a​n​ ​i​t​s​ ​c​h​a​t​ ​e​n​d​p​o​i​n​t​.​ ​I​n​f​o​m​a​n​i​a​k​ ​d​o​e​s​,​ ​a​n​d​ ​f​i​l​l​s​ ​t​h​i​s​ ​i​n​ ​o​n​ ​i​t​s​ ​o​w​n​ ​f​r​o​m​ ​t​h​e​ ​p​r​o​d​u​c​t​ ​I​D​.
+	 */
+	imageEndpointHelp: string
+	/**
 	 * B​r​o​w​s​e​ ​t​h​e​ ​l​i​s​t​ ​o​f​ ​a​v​a​i​l​a​b​l​e​ ​m​o​d​e​l​s
 	 */
 	browseModels: string
@@ -3220,6 +3228,14 @@ The completion in progress will stop
 	 * Base URL
 	 */
 	baseUrl: () => LocalizedString
+	/**
+	 * Image endpoint
+	 */
+	imageEndpoint: () => LocalizedString
+	/**
+	 * Leave empty unless this provider serves image generation from somewhere else than its chat endpoint. Infomaniak does, and fills this in on its own from the product ID.
+	 */
+	imageEndpointHelp: () => LocalizedString
 	/**
 	 * Browse the list of available models
 	 */

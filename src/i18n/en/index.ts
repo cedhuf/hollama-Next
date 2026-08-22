@@ -21,6 +21,9 @@ const en = {
 	automaticallyCheckForUpdates: 'Automatically check for updates',
 	availableModels: 'Available models',
 	baseUrl: 'Base URL',
+	imageEndpoint: 'Image endpoint',
+	imageEndpointHelp:
+		'Leave empty unless this provider serves image generation from somewhere else than its chat endpoint. Infomaniak does, and fills this in on its own from the product ID.',
 	browseModels: 'Browse the list of available models',
 	cancel: 'Cancel',
 	cantConnectToOllamaServer: "Can't connect to Ollama server",
