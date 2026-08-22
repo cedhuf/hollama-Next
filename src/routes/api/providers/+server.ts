@@ -4,7 +4,7 @@ import { requireUser } from '$lib/server/api';
 import { allowUserKeys } from '$lib/server/db/config';
 import { getSharedModels, listSystemServers, listUserServers } from '$lib/server/db/servers';
 import { listProviderModels } from '$lib/server/models';
-import { pickModelLabels, toProviderView } from '$lib/server/serverViews';
+import { pickModelKinds, pickModelLabels, toProviderView } from '$lib/server/serverViews';
 
 // The providers a user may use, with their available models:
 //   - system servers: ALL models for an admin (they manage them), the
@@ -21,12 +21,13 @@ export async function GET(event) {
 			.map(async (server) => {
 				const models =
 					user.role === 'admin' ? await listProviderModels(server) : getSharedModels(server.id);
-				// Display names ride along with the catalogue, so every model dropdown
-				// can render them without a second round-trip.
+				// Display names and kinds ride along with the catalogue, so every model
+				// dropdown can render and filter without a second round-trip.
 				return {
 					...toProviderView(server),
 					models,
-					modelLabels: pickModelLabels(server.id, models)
+					modelLabels: pickModelLabels(server.id, models),
+					modelKinds: pickModelKinds(server.id, models)
 				};
 			})
 	);
@@ -38,7 +39,8 @@ export async function GET(event) {
 				return {
 					...toProviderView(server),
 					models,
-					modelLabels: pickModelLabels(server.id, models)
+					modelLabels: pickModelLabels(server.id, models),
+					modelKinds: pickModelKinds(server.id, models)
 				};
 			})
 	);

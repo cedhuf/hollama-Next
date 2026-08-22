@@ -1,4 +1,5 @@
 import {
+	getModelKinds,
 	getModelLabels,
 	getModelPricing,
 	getSharedModels,
@@ -19,7 +20,8 @@ export function toAdminView(row: ServerRow) {
 		hasApiKey: !!row.api_key_enc,
 		sharedModels: getSharedModels(row.id),
 		modelLabels: getModelLabels(row.id),
-		modelPricing: getModelPricing(row.id)
+		modelPricing: getModelPricing(row.id),
+		modelKinds: getModelKinds(row.id)
 	};
 }
 
@@ -32,6 +34,18 @@ export function toAdminView(row: ServerRow) {
 export function pickModelLabels(serverId: string, models: string[]): Record<string, string> {
 	const all = getModelLabels(serverId);
 	const visible: Record<string, string> = {};
+	for (const name of models) if (all[name]) visible[name] = all[name];
+	return visible;
+}
+
+/**
+ * The kinds of the models a caller may see, filtered for the same reason the
+ * labels are: the map is keyed by model id, and handing it over whole would name
+ * models this account was never offered.
+ */
+export function pickModelKinds(serverId: string, models: string[]) {
+	const all = getModelKinds(serverId);
+	const visible: Record<string, (typeof all)[string]> = {};
 	for (const name of models) if (all[name]) visible[name] = all[name];
 	return visible;
 }

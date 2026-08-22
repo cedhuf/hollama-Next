@@ -5,7 +5,7 @@ import { requireUser } from '$lib/server/api';
 import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
-import { meter } from '$lib/server/usageMeter';
+import { meter, meterImages } from '$lib/server/usageMeter';
 
 import type { RequestHandler } from './$types';
 
@@ -40,13 +40,33 @@ const proxy: RequestHandler = async (event) => {
 	/**
 	 * Whether this request is a turn, as opposed to asking what models exist.
 	 *
-	 * Only a turn is metered and only a turn is refused. Listing models when you
+	 * Only work is metered and only work is refused. Listing models when you
 	 * are over your allowance still works, because an app that cannot draw its own
 	 * settings page is broken rather than restrained.
 	 */
 	const isCompletion = /(chat\/completions|\bapi\/chat|\bapi\/generate|\/completions)$/.test(
 		event.params.path ?? ''
 	);
+
+	/**
+	 * Whether this request draws something.
+	 *
+	 * Matched on the tail rather than on a whole path, because the prefix is not
+	 * ours to predict: OpenAI puts this under `/v1`, and Infomaniak puts it under
+	 * neither the same API version nor the same `/v1` as its own chat endpoint.
+	 * What every one of them ends in is `images/<verb>`.
+	 *
+	 * It is here because until now it matched nothing: a drawing went through this
+	 * relay unmetered, unlimited, and without anyone checking that its model had
+	 * ever been shared. That was not a decision, it was a regex written when the
+	 * only thing the app could ask for was a conversation.
+	 */
+	const isImage = /images\/(generations(\/[a-z_]+)?|edits|variations)$/.test(
+		event.params.path ?? ''
+	);
+
+	/** Anything that makes the provider work, and therefore anything that costs. */
+	const isBillable = isCompletion || isImage;
 
 	/**
 	 * Whether this account's spending is being watched at all.
@@ -56,7 +76,7 @@ const proxy: RequestHandler = async (event) => {
 	 * allowance nor refusing it in the name of one would be defensible.
 	 */
 	const metered = server.owner_user_id === null;
-	const limit = metered && isCompletion ? creditLimitFor(user.id) : 0;
+	const limit = metered && isBillable ? creditLimitFor(user.id) : 0;
 
 	const model = modelIn(body);
 
@@ -80,7 +100,19 @@ const proxy: RequestHandler = async (event) => {
 		}
 	}
 
+	// Only a conversation reports token counts, and only a conversation is asked
+	// to. An image endpoint handed an unknown field answers 400.
 	if (isCompletion) body = askForUsage(body);
+
+	/**
+	 * How many images this asks for, capped at what the request may say.
+	 *
+	 * Read before the call because it is the only place the number exists before
+	 * the answer does, and the answer is several megabytes of base64 that the
+	 * meter has no business opening. One when unstated, which is what every
+	 * provider defaults to.
+	 */
+	const imageCount = isImage ? imagesAskedFor(body) : 0;
 
 	// The admin's rules are applied here rather than in the browser: this is the
 	// only path a request can take, so a hand-crafted one is policed too.
@@ -91,14 +123,26 @@ const proxy: RequestHandler = async (event) => {
 		throw e;
 	}
 
+	// Started before the call because a model billed per minute is billed for the
+	// time this takes, and the only clock that can see it is this one.
+	const startedAt = Date.now();
 	const response = await fetch(url, { method: event.request.method, headers, body });
 
 	// Counted from what the provider reports, on the way past. The browser's half
 	// of the stream is untouched and waits for nothing.
-	const stream =
-		metered && isCompletion && response.ok && response.body && model
-			? meter(response.body, user.id, (name) => getModelPricing(server.id)[name], model)
-			: response.body;
+	const countable = metered && response.ok && response.body && model;
+	let stream: ReadableStream<Uint8Array> | null = response.body;
+	if (countable && isCompletion) {
+		stream = meter(response.body!, user.id, (name) => getModelPricing(server.id)[name], model!);
+	} else if (countable && isImage) {
+		stream = meterImages(
+			response.body!,
+			user.id,
+			getModelPricing(server.id)[model!],
+			imageCount,
+			startedAt
+		);
+	}
 
 	return new Response(stream, {
 		status: response.status,
@@ -108,6 +152,26 @@ const proxy: RequestHandler = async (event) => {
 		}
 	});
 };
+
+/**
+ * How many images a request asks for.
+ *
+ * Clamped rather than trusted: `n` is a number the browser sends, and a meter
+ * that multiplies a price by it would be a meter anyone could set to zero. The
+ * ceiling is the highest any provider the app talks to accepts, so a request
+ * above it was going to be refused by the provider anyway.
+ */
+function imagesAskedFor(body: string | undefined): number {
+	if (!body) return 1;
+	try {
+		const parsed = JSON.parse(body) as { n?: unknown };
+		const n = Math.floor(Number(parsed.n));
+		if (!Number.isFinite(n) || n < 1) return 1;
+		return Math.min(n, 10);
+	} catch {
+		return 1;
+	}
+}
 
 /** The model a request names, which is what its cost is looked up by. */
 function modelIn(body: string | undefined): string | undefined {

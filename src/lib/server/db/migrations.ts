@@ -362,6 +362,40 @@ const migrations: Migration[] = [
 				CREATE INDEX idx_persona_memory_user ON persona_memory(user_id);
 			`);
 		}
+	},
+	{
+		version: 16,
+		up: `
+			-- What each model is for, sparse like the labels and the prices beside it.
+			--
+			-- A row only where somebody disagreed with the guess the name gives. No
+			-- provider reports this: /v1/models returns ids and nothing else, and
+			-- Ollama does not list image models at all, so the name is the only signal
+			-- there is and it has to stay correctable.
+			CREATE TABLE model_kinds (
+				server_id  TEXT NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
+				model_name TEXT NOT NULL,
+				kind       TEXT NOT NULL,  -- 'text' | 'image' | 'embedding'
+				PRIMARY KEY (server_id, model_name)
+			);
+
+			-- What a price is billed by, and the single figure every unit that is not
+			-- tokens uses. NULL unit means tokens: every row written before this is a
+			-- token price, and rewriting them all to say so would be a migration that
+			-- changes nothing.
+			ALTER TABLE model_pricing ADD COLUMN unit TEXT;
+			ALTER TABLE model_pricing ADD COLUMN rate REAL;
+
+			-- What a drawing consumed, which is not tokens.
+			--
+			-- Beside the token columns rather than instead of them, because the two
+			-- are read together: a month that cost money with no tokens against it
+			-- looks like a bug to whoever reads the card, and a month of images with
+			-- no figure for them is the same hole the token counters were added to
+			-- close.
+			ALTER TABLE user_usage ADD COLUMN images INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE user_usage ADD COLUMN seconds REAL NOT NULL DEFAULT 0;
+		`
 	}
 ];
 

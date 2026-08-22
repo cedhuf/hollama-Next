@@ -76,6 +76,16 @@ export const today = (at = new Date()): string => at.toISOString().slice(0, 10);
 export interface Spend {
 	inputTokens: number;
 	outputTokens: number;
+	/**
+	 * Images returned, and the seconds they took.
+	 *
+	 * Beside the tokens rather than folded into them, because a drawing consumes
+	 * neither: a month whose whole cost came from images would otherwise show a
+	 * figure with nothing behind it, which reads as a bug rather than as a month
+	 * spent drawing.
+	 */
+	images: number;
+	seconds: number;
 	cost: number;
 }
 
@@ -85,12 +95,26 @@ export function spendSince(userId: string, from: string): Spend {
 		.prepare(
 			`SELECT COALESCE(SUM(input_tokens), 0) AS input_tokens,
 			        COALESCE(SUM(output_tokens), 0) AS output_tokens,
+			        COALESCE(SUM(images), 0) AS images,
+			        COALESCE(SUM(seconds), 0) AS seconds,
 			        COALESCE(SUM(cost), 0) AS cost
 			 FROM user_usage WHERE user_id = ? AND day >= ?`
 		)
-		.get(userId, from) as { input_tokens: number; output_tokens: number; cost: number };
+		.get(userId, from) as {
+		input_tokens: number;
+		output_tokens: number;
+		images: number;
+		seconds: number;
+		cost: number;
+	};
 
-	return { inputTokens: row.input_tokens, outputTokens: row.output_tokens, cost: row.cost };
+	return {
+		inputTokens: row.input_tokens,
+		outputTokens: row.output_tokens,
+		images: row.images,
+		seconds: row.seconds,
+		cost: row.cost
+	};
 }
 
 /** Every account's spend since a day, for the administrator's list. */
@@ -100,6 +124,8 @@ export function spendForAll(from: string): Record<string, Spend> {
 			`SELECT user_id,
 			        SUM(input_tokens) AS input_tokens,
 			        SUM(output_tokens) AS output_tokens,
+			        SUM(images) AS images,
+			        SUM(seconds) AS seconds,
 			        SUM(cost) AS cost
 			 FROM user_usage WHERE day >= ? GROUP BY user_id`
 		)
@@ -107,13 +133,21 @@ export function spendForAll(from: string): Record<string, Spend> {
 		user_id: string;
 		input_tokens: number;
 		output_tokens: number;
+		images: number;
+		seconds: number;
 		cost: number;
 	}[];
 
 	return Object.fromEntries(
 		rows.map((row) => [
 			row.user_id,
-			{ inputTokens: row.input_tokens, outputTokens: row.output_tokens, cost: row.cost }
+			{
+				inputTokens: row.input_tokens,
+				outputTokens: row.output_tokens,
+				images: row.images,
+				seconds: row.seconds,
+				cost: row.cost
+			}
 		])
 	);
 }
@@ -146,20 +180,27 @@ export function dailySpend(userId: string, from: string): { day: string; cost: n
 	return out;
 }
 
-/** Add one turn's consumption to today's row. */
-export function addUsage(userId: string, usage: Spend): void {
-	if (!usage.inputTokens && !usage.outputTokens && !usage.cost) return;
+/** Add one call's consumption to today's row. */
+export function addUsage(userId: string, usage: Partial<Spend>): void {
+	const inputTokens = usage.inputTokens ?? 0;
+	const outputTokens = usage.outputTokens ?? 0;
+	const images = usage.images ?? 0;
+	const seconds = usage.seconds ?? 0;
+	const cost = usage.cost ?? 0;
+	if (!inputTokens && !outputTokens && !images && !seconds && !cost) return;
 
 	getDb()
 		.prepare(
-			`INSERT INTO user_usage (user_id, day, input_tokens, output_tokens, cost)
-			 VALUES (?, ?, ?, ?, ?)
+			`INSERT INTO user_usage (user_id, day, input_tokens, output_tokens, images, seconds, cost)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)
 			 ON CONFLICT(user_id, day) DO UPDATE SET
 			   input_tokens = input_tokens + excluded.input_tokens,
 			   output_tokens = output_tokens + excluded.output_tokens,
+			   images = images + excluded.images,
+			   seconds = seconds + excluded.seconds,
 			   cost = cost + excluded.cost`
 		)
-		.run(userId, today(), usage.inputTokens, usage.outputTokens, usage.cost);
+		.run(userId, today(), inputTokens, outputTokens, images, seconds, cost);
 }
 
 /** The period one account is measured over: its own when set, the instance's otherwise. */

@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { modelPrice, type Server } from '$lib/connections';
+import { hasPriceFigure, modelPrice, type Server } from '$lib/connections';
 import { costOf, type TokenCount } from '$lib/usageCounts';
 
 /**
@@ -118,7 +118,9 @@ export function localCurrencies(servers: Server[]): string[] {
 	const codes = new Set<string>();
 	for (const server of servers) {
 		for (const price of Object.values(server.modelPricing ?? {})) {
-			if (price.input != null || price.output != null) codes.add(price.currency ?? 'USD');
+			// Which field carries the figure depends on the unit, so the question is
+			// "is this priced at all" rather than a test on the token fields.
+			if (hasPriceFigure(price)) codes.add(price.currency ?? 'USD');
 		}
 	}
 	return [...codes].sort();

@@ -1,4 +1,4 @@
-import type { ModelPrice } from '$lib/connections';
+import { hasPriceFigure, priceUnit, type ModelPrice } from '$lib/connections';
 
 /**
  * Reading what a turn consumed, out of what the provider said.
@@ -72,15 +72,45 @@ export function countsInBody(text: string): TokenCount | undefined {
 }
 
 /**
- * What a turn cost, or `undefined` when the model has no price.
+ * What one call consumed, whatever kind of call it was.
+ *
+ * `TokenCount` widened rather than replaced: a chat turn reports tokens and
+ * nothing else, and every existing caller keeps handing over exactly that. What
+ * a drawing consumes is a number of images and a length of time, neither of
+ * which a token count has anywhere to put.
+ */
+export interface RunUsage extends TokenCount {
+	/** Images returned. */
+	images?: number;
+	/** Wall-clock seconds the provider took, measured around the request. */
+	seconds?: number;
+}
+
+/**
+ * What a call cost, or `undefined` when the model has no price.
  *
  * Unpriced is not free. Returning nothing here is what keeps a model nobody got
  * round to pricing out of the totals entirely, rather than adding zero to them
  * and quietly reporting that somebody spent nothing.
+ *
+ * The unit decides which reading is used, and a reading the unit does not ask
+ * for is ignored rather than added: a model billed per image costs the same
+ * whether the request also happened to report tokens.
  */
-export function costOf(counts: TokenCount, price: ModelPrice | undefined): number | undefined {
-	if (!price || (price.input == null && price.output == null)) return undefined;
-	const input = ((price.input ?? 0) * counts.input) / 1_000_000;
-	const output = ((price.output ?? 0) * counts.output) / 1_000_000;
-	return input + output;
+export function costOf(used: RunUsage, price: ModelPrice | undefined): number | undefined {
+	if (!hasPriceFigure(price)) return undefined;
+
+	switch (priceUnit(price)) {
+		case 'image':
+			return (price!.rate ?? 0) * (used.images ?? 0);
+		case 'second':
+			return (price!.rate ?? 0) * (used.seconds ?? 0);
+		case 'minute':
+			return ((price!.rate ?? 0) * (used.seconds ?? 0)) / 60;
+		default: {
+			const input = ((price!.input ?? 0) * used.input) / 1_000_000;
+			const output = ((price!.output ?? 0) * used.output) / 1_000_000;
+			return input + output;
+		}
+	}
 }

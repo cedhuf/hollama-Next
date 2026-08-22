@@ -4,6 +4,7 @@ import { requireAdmin } from '$lib/server/api';
 import {
 	deleteServer,
 	getServer,
+	setModelKinds,
 	setModelLabels,
 	setModelPricing,
 	setSharedModels,
@@ -36,6 +37,9 @@ export async function PUT(event) {
 	}
 	if (body.modelPricing && typeof body.modelPricing === 'object') {
 		setModelPricing(event.params.id, body.modelPricing);
+	}
+	if (body.modelKinds && typeof body.modelKinds === 'object') {
+		setModelKinds(event.params.id, body.modelKinds);
 	}
 	if (Array.isArray(body.sharedModels)) setSharedModels(event.params.id, body.sharedModels);
 

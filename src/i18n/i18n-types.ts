@@ -128,7 +128,7 @@ type RootTranslation = {
 	 */
 	currency: string
 	/**
-	 * W​h​a​t​ ​a​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s​ ​c​o​s​t​s​,​ ​f​o​r​ ​t​h​e​ ​c​r​e​d​i​t​ ​l​i​m​i​t​s​.
+	 * W​h​a​t​ ​t​h​i​s​ ​m​o​d​e​l​ ​c​o​s​t​s​,​ ​f​o​r​ ​t​h​e​ ​c​r​e​d​i​t​ ​l​i​m​i​t​s​.
 	 */
 	pricingHelp: string
 	/**
@@ -140,11 +140,59 @@ type RootTranslation = {
 	 */
 	perMillionTokens: string
 	/**
+	 * /​i​m​a​g​e
+	 */
+	perImageShort: string
+	/**
+	 * /​s​e​c
+	 */
+	perSecondShort: string
+	/**
+	 * /​m​i​n
+	 */
+	perMinuteShort: string
+	/**
+	 * B​i​l​l​e​d​ ​b​y
+	 */
+	priceUnitLabel: string
+	/**
+	 * T​o​k​e​n​s
+	 */
+	priceUnitToken: string
+	/**
+	 * P​e​r​ ​i​m​a​g​e
+	 */
+	priceUnitImage: string
+	/**
+	 * P​e​r​ ​s​e​c​o​n​d
+	 */
+	priceUnitSecond: string
+	/**
+	 * P​e​r​ ​m​i​n​u​t​e
+	 */
+	priceUnitMinute: string
+	/**
+	 * W​h​a​t​ ​t​h​i​s​ ​m​o​d​e​l​ ​d​o​e​s
+	 */
+	modelKindLabel: string
+	/**
+	 * C​h​a​t
+	 */
+	modelKindText: string
+	/**
+	 * I​m​a​g​e​s
+	 */
+	modelKindImage: string
+	/**
+	 * E​m​b​e​d​d​i​n​g​s
+	 */
+	modelKindEmbedding: string
+	/**
 	 * C​l​e​a​r
 	 */
 	clearPrice: string
 	/**
-	 * O​p​e​n​ ​a​ ​m​o​d​e​l​ ​t​o​ ​p​r​i​c​e​ ​i​t​.​ ​P​r​i​c​e​s​ ​a​r​e​ ​p​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s​.
+	 * O​p​e​n​ ​a​ ​m​o​d​e​l​ ​t​o​ ​p​r​i​c​e​ ​i​t​.​ ​S​a​y​ ​w​h​a​t​ ​e​a​c​h​ ​m​o​d​e​l​ ​d​o​e​s​,​ ​s​o​ ​i​t​ ​i​s​ ​o​n​l​y​ ​o​f​f​e​r​e​d​ ​w​h​e​r​e​ ​i​t​ ​w​o​r​k​s​.
 	 */
 	pricingIntro: string
 	/**
@@ -3209,7 +3257,7 @@ The completion in progress will stop
 	 */
 	currency: () => LocalizedString
 	/**
-	 * What a million tokens costs, for the credit limits.
+	 * What this model costs, for the credit limits.
 	 */
 	pricingHelp: () => LocalizedString
 	/**
@@ -3221,11 +3269,59 @@ The completion in progress will stop
 	 */
 	perMillionTokens: () => LocalizedString
 	/**
+	 * /image
+	 */
+	perImageShort: () => LocalizedString
+	/**
+	 * /sec
+	 */
+	perSecondShort: () => LocalizedString
+	/**
+	 * /min
+	 */
+	perMinuteShort: () => LocalizedString
+	/**
+	 * Billed by
+	 */
+	priceUnitLabel: () => LocalizedString
+	/**
+	 * Tokens
+	 */
+	priceUnitToken: () => LocalizedString
+	/**
+	 * Per image
+	 */
+	priceUnitImage: () => LocalizedString
+	/**
+	 * Per second
+	 */
+	priceUnitSecond: () => LocalizedString
+	/**
+	 * Per minute
+	 */
+	priceUnitMinute: () => LocalizedString
+	/**
+	 * What this model does
+	 */
+	modelKindLabel: () => LocalizedString
+	/**
+	 * Chat
+	 */
+	modelKindText: () => LocalizedString
+	/**
+	 * Images
+	 */
+	modelKindImage: () => LocalizedString
+	/**
+	 * Embeddings
+	 */
+	modelKindEmbedding: () => LocalizedString
+	/**
 	 * Clear
 	 */
 	clearPrice: () => LocalizedString
 	/**
-	 * Open a model to price it. Prices are per million tokens.
+	 * Open a model to price it. Say what each model does, so it is only offered where it works.
 	 */
 	pricingIntro: () => LocalizedString
 	/**

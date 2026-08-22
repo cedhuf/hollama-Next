@@ -1,4 +1,4 @@
-import { ConnectionType, type Server } from '$lib/connections';
+import { ConnectionType, type ModelKind, type Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
 /** A usable provider as returned by /api/providers (server mode), without keys. */
@@ -13,6 +13,7 @@ export interface ProviderView {
 	modelFilter?: string | null;
 	color?: string | null;
 	modelLabels?: Record<string, string>;
+	modelKinds?: Record<string, ModelKind>;
 	hasApiKey?: boolean;
 	/** ISO date of the last successful sync; null when it has never been synced. */
 	verifiedAt?: string | null;
@@ -48,7 +49,8 @@ export function providerToServer(provider: ProviderView): Server {
 		label: provider.label ?? undefined,
 		modelFilter: provider.modelFilter ?? undefined,
 		color: provider.color ?? undefined,
-		modelLabels: provider.modelLabels ?? undefined
+		modelLabels: provider.modelLabels ?? undefined,
+		modelKinds: provider.modelKinds ?? undefined
 	};
 }
 

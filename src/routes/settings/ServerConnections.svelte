@@ -14,6 +14,8 @@
 		infomaniakBaseUrl,
 		infomaniakProductId,
 		PROVIDERS,
+		type ModelKind,
+		type ModelPrice,
 		type Server
 	} from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
@@ -42,7 +44,8 @@
 		verifiedAt?: string | null;
 		color?: string | null;
 		modelLabels?: Record<string, string>;
-		modelPricing?: Record<string, { input?: number; output?: number; currency?: string }>;
+		modelPricing?: Record<string, ModelPrice>;
+		modelKinds?: Record<string, ModelKind>;
 		sharedModels?: string[];
 		/** A stored key is never returned; this is all the browser gets to know. */
 		hasApiKey?: boolean;
@@ -93,6 +96,7 @@
 			color: v.color ?? undefined,
 			modelLabels: v.modelLabels ?? undefined,
 			modelPricing: v.modelPricing ?? undefined,
+			modelKinds: v.modelKinds ?? undefined,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -241,6 +245,7 @@
 					color: server.color ?? null,
 					modelLabels: server.modelLabels ?? {},
 					modelPricing: server.modelPricing ?? {},
+					modelKinds: server.modelKinds ?? {},
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			}).then(() => afterSave?.());

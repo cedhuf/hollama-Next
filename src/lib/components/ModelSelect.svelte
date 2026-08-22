@@ -3,7 +3,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Select, { type SelectOptionOrGroup } from '$lib/components/Select.svelte';
-	import { modelLabel, serverBadge } from '$lib/connections';
+	import { modelKind, modelLabel, serverBadge, type ModelKind } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
@@ -33,10 +33,25 @@
 		 * installs. Without an entry saying so, an empty field reads as unfinished.
 		 */
 		emptyLabel?: string;
+		/**
+		 * Which kinds of model this picker is choosing between.
+		 *
+		 * Text alone by default, which is what every existing caller means: an
+		 * embedding model in the chat picker is not clutter, it is a 400 with no
+		 * explanation attached, and it is exactly what somebody hit. The page that
+		 * draws asks for images instead, and neither has to know about the other.
+		 */
+		kinds?: ModelKind[];
 		onSelect?: (name: string) => void;
 	}
 
-	let { value = $bindable(), variant = 'default', emptyLabel, onSelect }: Props = $props();
+	let {
+		value = $bindable(),
+		variant = 'default',
+		emptyLabel,
+		kinds = ['text'],
+		onSelect
+	}: Props = $props();
 
 	/** Badge for a model's connection — honours the colour set on that connection. */
 	function badgeFor(serverId: string) {
@@ -57,7 +72,21 @@
 		};
 	}
 
-	const models = $derived($settingsStore.models ?? []);
+	/**
+	 * The catalogue, cut down to what this picker is for.
+	 *
+	 * A model already chosen stays in the list whatever its kind. Filtering it out
+	 * would empty the field of a conversation that has been running for weeks, and
+	 * a picker that silently forgets the answer it is showing is worse than one
+	 * offering a model somebody has mis-sorted.
+	 */
+	const models = $derived(
+		($settingsStore.models ?? []).filter((model) => {
+			if (model.name === value) return true;
+			const server = $serversStore.find((s) => s.id === model.serverId);
+			return kinds.includes(modelKind(server, model.name));
+		})
+	);
 	// Recently used, restricted to models that still exist in the catalogue.
 	const recent = $derived(
 		($settingsStore.lastUsedModels ?? []).filter((m) => models.some((x) => x.name === m.name))

@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import type { ModelPrice } from '$lib/connections';
+import {
+	guessModelKind,
+	hasPriceFigure,
+	MODEL_KINDS,
+	type ModelKind,
+	type ModelPrice
+} from '$lib/connections';
 import { decrypt, encrypt } from '$lib/server/crypto';
 
 import { getDb } from './index';
@@ -172,14 +178,18 @@ export function setModelLabels(serverId: string, labels: Record<string, string>)
 	}
 }
 
-/** What a million tokens costs on this connection, keyed by the real model id. */
+/** What each of this connection's models costs, keyed by the real model id. */
 export function getModelPricing(serverId: string): Record<string, ModelPrice> {
 	const rows = getDb()
-		.prepare('SELECT model_name, input, output, currency FROM model_pricing WHERE server_id = ?')
+		.prepare(
+			'SELECT model_name, unit, input, output, rate, currency FROM model_pricing WHERE server_id = ?'
+		)
 		.all(serverId) as {
 		model_name: string;
+		unit: string | null;
 		input: number | null;
 		output: number | null;
+		rate: number | null;
 		currency: string | null;
 	}[];
 
@@ -187,8 +197,13 @@ export function getModelPricing(serverId: string): Record<string, ModelPrice> {
 		rows.map((row) => [
 			row.model_name,
 			{
+				// NULL is the token unit, which is what every row written before units
+				// existed is. Left absent rather than filled in, so the shape the client
+				// gets back is the shape it sent.
+				unit: (row.unit as ModelPrice['unit']) ?? undefined,
 				input: row.input ?? undefined,
 				output: row.output ?? undefined,
+				rate: row.rate ?? undefined,
 				currency: row.currency ?? undefined
 			}
 		])
@@ -200,6 +215,8 @@ export function getModelPricing(serverId: string): Record<string, ModelPrice> {
  *
  * A model priced at zero keeps its row: free is a price, and it is not the same
  * answer as "nobody has said". The meter counts the first and skips the second.
+ * Which field carries the figure depends on the unit, so `hasPriceFigure`
+ * answers rather than a test on `input` that only ever knew about tokens.
  */
 export function setModelPricing(serverId: string, pricing: Record<string, ModelPrice>): void {
 	const db = getDb();
@@ -207,12 +224,65 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 	try {
 		db.prepare('DELETE FROM model_pricing WHERE server_id = ?').run(serverId);
 		const insert = db.prepare(
-			`INSERT INTO model_pricing (server_id, model_name, input, output, currency)
-			 VALUES (?, ?, ?, ?, ?)`
+			`INSERT INTO model_pricing (server_id, model_name, unit, input, output, rate, currency)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)`
 		);
 		for (const [name, price] of Object.entries(pricing)) {
-			if (price?.input == null && price?.output == null) continue;
-			insert.run(serverId, name, price.input ?? null, price.output ?? null, price.currency ?? null);
+			if (!hasPriceFigure(price)) continue;
+			insert.run(
+				serverId,
+				name,
+				price.unit ?? null,
+				price.input ?? null,
+				price.output ?? null,
+				price.rate ?? null,
+				price.currency ?? null
+			);
+		}
+		db.exec('COMMIT');
+	} catch (error) {
+		db.exec('ROLLBACK');
+		throw error;
+	}
+}
+
+/**
+ * What each of this connection's models is for, keyed by the real model id.
+ *
+ * Sparse: only the ones somebody corrected. Everything else is answered by
+ * `modelKind()` reading the name, on whichever side is asking.
+ */
+export function getModelKinds(serverId: string): Record<string, ModelKind> {
+	const rows = getDb()
+		.prepare('SELECT model_name, kind FROM model_kinds WHERE server_id = ?')
+		.all(serverId) as { model_name: string; kind: string }[];
+
+	return Object.fromEntries(
+		rows
+			.filter((row) => MODEL_KINDS.includes(row.kind as ModelKind))
+			.map((row) => [row.model_name, row.kind as ModelKind])
+	);
+}
+
+/**
+ * Replaces the whole set, keeping only what the guess would not already say.
+ *
+ * A row that agrees with `guessModelKind` is a row that says nothing, and it
+ * would go stale the day the heuristic improves. Storing only the corrections
+ * means the table stays small and the guess keeps getting better underneath it.
+ */
+export function setModelKinds(serverId: string, kinds: Record<string, ModelKind>): void {
+	const db = getDb();
+	db.exec('BEGIN');
+	try {
+		db.prepare('DELETE FROM model_kinds WHERE server_id = ?').run(serverId);
+		const insert = db.prepare(
+			'INSERT INTO model_kinds (server_id, model_name, kind) VALUES (?, ?, ?)'
+		);
+		for (const [name, kind] of Object.entries(kinds)) {
+			if (!MODEL_KINDS.includes(kind)) continue;
+			if (kind === guessModelKind(name)) continue;
+			insert.run(serverId, name, kind);
 		}
 		db.exec('COMMIT');
 	} catch (error) {
@@ -268,7 +338,8 @@ export function pricedCurrencies(): string[] {
 		.prepare(
 			`SELECT DISTINCT COALESCE(p.currency, 'USD') AS currency
 			 FROM model_pricing p JOIN servers s ON s.id = p.server_id
-			 WHERE s.owner_user_id IS NULL AND (p.input IS NOT NULL OR p.output IS NOT NULL)`
+			 WHERE s.owner_user_id IS NULL
+			   AND (p.input IS NOT NULL OR p.output IS NOT NULL OR p.rate IS NOT NULL)`
 		)
 		.all() as { currency: string }[];
 	return rows.map((row) => row.currency).sort();

@@ -1,5 +1,5 @@
 import type { ModelPrice } from '$lib/connections';
-import { costOf, countsInBody, type TokenCount } from '$lib/usageCounts';
+import { costOf, countsInBody, type RunUsage } from '$lib/usageCounts';
 
 import { getModelPricing, getServer } from './db/servers';
 import { addUsage } from './db/usage';
@@ -80,6 +80,49 @@ export function meter(
 }
 
 /**
+ * Watch a drawing on its way out, and record what it cost.
+ *
+ * The same passthrough as `meter`, reading nothing. There is nothing to read: an
+ * image response carries no token counts, and the two things it is billed by are
+ * both known without opening it — how many images were asked for, and how long
+ * the provider took. The count comes from the request, which is the only place
+ * it is stated before the answer exists, and the clock stops when the stream
+ * closes rather than when the headers land, because generation is still running
+ * while the body is on its way.
+ *
+ * A body that is several megabytes of base64 is therefore never buffered here.
+ */
+export function meterImages(
+	body: ReadableStream<Uint8Array>,
+	userId: string,
+	price: ModelPrice | undefined,
+	images: number,
+	startedAt: number
+): ReadableStream<Uint8Array> {
+	const watcher = new TransformStream<Uint8Array, Uint8Array>({
+		transform(chunk, controller) {
+			controller.enqueue(chunk);
+		},
+		flush() {
+			try {
+				const seconds = (Date.now() - startedAt) / 1000;
+				const cost = costOf({ input: 0, output: 0, images, seconds }, price);
+				// An unpriced model is not counted at all: see `costOf`.
+				if (cost === undefined) {
+					console.warn('[usage] image model has no price on this connection; nothing recorded');
+					return;
+				}
+				addUsage(userId, { images, seconds, cost });
+			} catch {
+				// A meter that throws must never be the reason a request fails.
+			}
+		}
+	});
+
+	return body.pipeThrough(watcher);
+}
+
+/**
  * Record what a server-side turn consumed.
  *
  * The counts arrive as an event rather than as bytes on a stream, because on
@@ -94,9 +137,11 @@ export function recordRunUsage(
 	userId: string,
 	serverId: string | undefined,
 	model: string | undefined,
-	used: TokenCount
+	used: RunUsage
 ): void {
-	if (!serverId || !model || (!used.input && !used.output)) return;
+	if (!serverId || !model || (!used.input && !used.output && !used.images && !used.seconds)) {
+		return;
+	}
 
 	const row = getServer(serverId);
 	if (!row || row.owner_user_id !== null) return;
@@ -107,5 +152,11 @@ export function recordRunUsage(
 		return;
 	}
 
-	addUsage(userId, { inputTokens: used.input, outputTokens: used.output, cost });
+	addUsage(userId, {
+		inputTokens: used.input,
+		outputTokens: used.output,
+		images: used.images,
+		seconds: used.seconds,
+		cost
+	});
 }

@@ -19,9 +19,20 @@ export interface ChatBody {
 	[key: string]: unknown;
 }
 
-/** Ollama and OpenAI-compatible chat endpoints alike. */
-function isChatPath(path: string): boolean {
-	return /(^|\/)(chat\/completions|api\/chat|api\/generate|responses)$/.test(path);
+/**
+ * The paths an admin's rules apply to.
+ *
+ * Chat, on every endpoint shape the app can talk to, plus the image endpoints —
+ * which were missing, and which is how a model nobody ever shared could be
+ * reached by anyone willing to type the request by hand. The image tail is
+ * matched loosely because its prefix varies by provider: OpenAI serves it under
+ * `/v1`, Infomaniak under a different API version with no `/v1` at all.
+ */
+function isPolicedPath(path: string): boolean {
+	return (
+		/(^|\/)(chat\/completions|api\/chat|api\/generate|responses)$/.test(path) ||
+		/images\/(generations(\/[a-z_]+)?|edits|variations)$/.test(path)
+	);
 }
 
 export class PolicyError extends Error {
@@ -34,11 +45,16 @@ export class PolicyError extends Error {
 }
 
 /**
- * Vets — and where needed rewrites — a chat request bound for a system server.
+ * Vets — and where needed rewrites — a request bound for a system server.
  *
  * Returns the body to forward, or the original string when there is nothing to
  * enforce. Admins are exempt: they set these rules, and a server they own is
  * their own business.
+ *
+ * Chat and drawing alike. The model check applies to both, because "is this
+ * model shared" is the same question whatever the model produces. The locked
+ * instruction only lands where there are messages to put it in front of, which
+ * an image request has none of.
  */
 export function applyChatPolicy(
 	server: ServerRow,
@@ -46,7 +62,7 @@ export function applyChatPolicy(
 	path: string,
 	body: string | undefined
 ): string | undefined {
-	if (!body || !isChatPath(path)) return body;
+	if (!body || !isPolicedPath(path)) return body;
 
 	let parsed: ChatBody;
 	try {
@@ -87,7 +103,7 @@ export function policeChatBody<T extends ChatBody>(
 		throw new PolicyError(403, `Model "${parsed.model}" is not shared on this server`);
 	}
 
-	// --- A locked instruction always applies -----------------------------------
+	// --- A locked instruction always applies, where there is anywhere to put it --
 	// Only guaranteed *present*, not exclusive: the client legitimately sends
 	// system messages of its own (search results, fetched pages, the persona,
 	// the date). Prepending is what makes a protective instruction impossible to

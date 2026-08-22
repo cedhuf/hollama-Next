@@ -37,7 +37,34 @@ export interface Server {
 	 * unpriced model is not counted rather than counted as zero.
 	 */
 	modelPricing?: Record<string, ModelPrice>;
+	/**
+	 * What each of this connection's models is for, keyed like the two maps above.
+	 *
+	 * Sparse, and only where somebody disagreed with the guess: `modelKind()` reads
+	 * the name when there is no entry, so a fresh connection is already sorted
+	 * without anyone touching a hundred rows. Stored per connection for the same
+	 * reason the price is: the same id can be a chat model on one endpoint and
+	 * absent from the next.
+	 *
+	 * It exists because no provider says. `/v1/models` returns a list of ids and
+	 * nothing else, and Ollama does not list image models at all. Guessing from the
+	 * name is the only signal there is, so the guess has to be correctable.
+	 */
+	modelKinds?: Record<string, ModelKind>;
 }
+
+/**
+ * What a model does, which is the question every picker in the app is really
+ * asking.
+ *
+ * Three answers, because three is what the app has to tell apart: something you
+ * hold a conversation with, something that draws, and something that returns a
+ * vector and cannot answer anything at all. An embedding model offered in the
+ * chat picker is not a cosmetic problem — it is a 400 with no explanation.
+ */
+export type ModelKind = 'text' | 'image' | 'embedding';
+
+export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding'];
 
 /** Default badge colour and short id per provider, dark-mode safe. */
 export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = {
@@ -63,18 +90,41 @@ export const SERVER_COLORS = [
 ] as const;
 
 /**
- * The price of a million tokens, in the connection's currency.
+ * What a model is billed by.
  *
- * Two numbers because that is how every provider publishes them, and because the
- * ratio between them is the whole reason a long conversation costs what it does.
- * Optional each: a provider that bills one and not the other is a provider, not
- * an error.
+ * Four, because that is what providers actually publish and the app converts
+ * nothing. Tokens for anything you talk to. An image model is billed per image
+ * by OpenAI, per second of compute by Replicate, and per minute by Infomaniak —
+ * and a minute is not a second scaled by sixty as far as the person typing the
+ * figure is concerned. Storing the unit as published means a price typed from an
+ * invoice reads back the way the invoice wrote it.
+ */
+export type PriceUnit = 'token' | 'image' | 'second' | 'minute';
+
+export const PRICE_UNITS: PriceUnit[] = ['token', 'image', 'second', 'minute'];
+
+/**
+ * The price of one model on one connection, in the currency beside it.
+ *
+ * Tokens keep two numbers, because that is how every text provider publishes
+ * them and because the ratio between them is the whole reason a long
+ * conversation costs what it does. Every other unit has one, since nothing that
+ * is billed per image or per second bills the way in differently from the way
+ * out.
+ *
+ * `unit` absent means tokens. Rows written before there was anything else are
+ * token prices, and rewriting them to say so would have been a migration that
+ * changes no behaviour.
  */
 export interface ModelPrice {
-	/** Per million tokens sent. */
+	/** What this is billed by. Absent means `token`. */
+	unit?: PriceUnit;
+	/** Per million tokens sent. `token` only. */
 	input?: number;
-	/** Per million tokens returned. */
+	/** Per million tokens returned. `token` only. */
 	output?: number;
+	/** Per image, per second or per minute, depending on `unit`. */
+	rate?: number;
 	/**
 	 * What this model is billed in, when it is not the connection's currency.
 	 *
@@ -85,14 +135,100 @@ export interface ModelPrice {
 	currency?: string;
 }
 
+/** What a price is billed by, with the default rows written before units spelled out. */
+export function priceUnit(price: Pick<ModelPrice, 'unit'> | undefined): PriceUnit {
+	return price?.unit ?? 'token';
+}
+
+/**
+ * Whether anybody has actually given this price a figure.
+ *
+ * The one place that decides, because "unpriced" is load-bearing: an unpriced
+ * model is not counted at all rather than counted as free, and while a credit
+ * limit is in force it is refused outright. Which field carries the figure
+ * depends on the unit, so asking about `input` alone stopped being the question
+ * the moment there was more than one unit.
+ */
+export function hasPriceFigure(price: ModelPrice | undefined): boolean {
+	if (!price) return false;
+	return priceUnit(price) === 'token'
+		? price.input != null || price.output != null
+		: price.rate != null;
+}
+
 /** What one model costs here, or nothing when it has never been priced. */
 export function modelPrice(
 	server: Pick<Server, 'modelPricing'> | undefined,
 	name: string
 ): ModelPrice | undefined {
 	const price = server?.modelPricing?.[name];
-	if (!price) return undefined;
-	return price.input == null && price.output == null ? undefined : price;
+	return hasPriceFigure(price) ? price : undefined;
+}
+
+/**
+ * Names that give a model away, checked before anything is assumed.
+ *
+ * Embeddings first: `bge_multilingual_gemma2` carries the name of a chat model
+ * inside it, and reading it as one is exactly the mistake this exists to stop.
+ * Substrings rather than exact ids because nobody ships one id — every family
+ * arrives as a dozen sizes, dates and quantisations, and a list of exact names
+ * is a list that is wrong by the end of the month.
+ */
+const EMBEDDING_HINTS = [
+	'embed',
+	'bge-',
+	'bge_',
+	'gte-',
+	'e5-',
+	'minilm',
+	'nomic-embed',
+	'mxbai',
+	'arctic-embed',
+	'reranker',
+	'rerank'
+];
+
+const IMAGE_HINTS = [
+	'dall-e',
+	'dalle',
+	'gpt-image',
+	'flux',
+	'stable-diffusion',
+	'sdxl',
+	'sd3',
+	'imagen',
+	'ideogram',
+	'recraft',
+	'playground-v',
+	'kandinsky',
+	'seedream',
+	'hidream',
+	'qwen-image',
+	'photomaker',
+	'janus'
+];
+
+/**
+ * What a model is, read from its name, for a connection nobody has sorted yet.
+ *
+ * A guess, and named one. It is right often enough that a freshly synced
+ * connection lands in the right sections on its own, and wrong often enough that
+ * the answer has to stay overridable — which is what `modelKinds` is for. Text
+ * is the fallback because it is both the commonest and the least destructive
+ * mistake: a text model offered for drawing fails loudly at the first request,
+ * where an image model quietly missing from the chat picker looks like the
+ * connection never synced.
+ */
+export function guessModelKind(name: string): ModelKind {
+	const id = name.toLowerCase();
+	if (EMBEDDING_HINTS.some((hint) => id.includes(hint))) return 'embedding';
+	if (IMAGE_HINTS.some((hint) => id.includes(hint))) return 'image';
+	return 'text';
+}
+
+/** What this model is here: what somebody said, or what its name suggests. */
+export function modelKind(server: Pick<Server, 'modelKinds'> | undefined, name: string): ModelKind {
+	return server?.modelKinds?.[name] ?? guessModelKind(name);
 }
 
 /** How a model should read on screen: its custom label when set, its id otherwise. */
