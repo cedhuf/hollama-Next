@@ -18,7 +18,6 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
-	import Button from '$lib/components/Button.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Menu from '$lib/components/Menu.svelte';
 	import MenuItem from '$lib/components/MenuItem.svelte';
@@ -85,10 +84,10 @@
 	/** One line of the prompt, at the leading the paragraph is given below. */
 	const PROMPT_LINE = 16;
 	/**
-	 * How much shows when it is closed: two whole lines, or the whole prompt when
-	 * it is shorter than that. Exact either way, so nothing is ever half a letter.
+	 * How much shows when it is closed: one whole line, or the whole prompt when it
+	 * is shorter than that. Exact either way, so nothing is ever half a letter.
 	 */
-	const collapsedHeight = $derived(Math.min(promptOnlyHeight, PROMPT_LINE * 2));
+	const collapsedHeight = $derived(Math.min(promptOnlyHeight, PROMPT_LINE));
 	let confirmingDelete = $state<string | null>(null);
 
 	/**
@@ -548,60 +547,117 @@
 		     it. That is what stops a large image from turning a dialog into a page
 		     you scroll to see the middle of. -->
 		<div class="flex h-full w-full flex-col">
-			<div class="flex shrink-0 items-center gap-2 border-b border-shade-2 px-4 py-3">
-				<span
-					class="inline-block h-2 w-2 shrink-0 rounded-full"
-					style="background-color: {badgeColor(image.serverId)}"
-				></span>
-				<span class="truncate text-sm font-medium text-active">
-					{modelLabel(serverFor(image.serverId), image.model)}
-				</span>
-				<button
-					type="button"
-					onclick={() => (opened = null)}
-					aria-label={$LL.close()}
-					class="ml-auto shrink-0 rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
-				>
-					<X class="h-4 w-4" />
-				</button>
+			<!-- Actions in the title bar, beside the close, and no footer at all. The
+			     library's editors settled this: a pinned band costs a full stripe of
+			     height on every dialog to hold two buttons, and the bar that carries the
+			     close is already there and already pinned. Here it buys the picture that
+			     height back, which is the whole point of the dialog. -->
+			<div
+				class="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-shade-2 px-4"
+			>
+				<div class="flex min-w-0 items-center gap-2">
+					<span
+						class="inline-block h-2 w-2 shrink-0 rounded-full"
+						style="background-color: {badgeColor(image.serverId)}"
+					></span>
+					<span class="truncate text-sm font-semibold text-active">
+						{modelLabel(serverFor(image.serverId), image.model)}
+					</span>
+				</div>
+
+				<div class="flex shrink-0 items-center gap-1">
+					<button
+						type="button"
+						onclick={() => reuse(image)}
+						title={$LL.imageReusePrompt()}
+						aria-label={$LL.imageReusePrompt()}
+						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					>
+						<RotateCcw class="h-4 w-4" />
+					</button>
+					<!-- A plain link to the same authenticated route the grid reads. The
+					     download attribute only names the file; the session is what allows
+					     it, exactly as for the picture already on screen. -->
+					<button
+						type="button"
+						onclick={() => saveAs(imageUrl(image.id), downloadName(image))}
+						title={$LL.download()}
+						aria-label={$LL.download()}
+						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					>
+						<ArrowDownToLine class="h-4 w-4" />
+					</button>
+					<button
+						type="button"
+						onclick={() =>
+							confirmingDelete === image.id ? remove(image.id) : (confirmingDelete = image.id)}
+						title={confirmingDelete === image.id ? $LL.confirmDeletion() : $LL.delete()}
+						aria-label={confirmingDelete === image.id ? $LL.confirmDeletion() : $LL.delete()}
+						class="rounded-md p-1.5 transition-colors {confirmingDelete === image.id
+							? 'bg-negative/10 text-negative'
+							: 'text-muted hover:bg-shade-2 hover:text-negative'}"
+					>
+						<Trash2 class="h-4 w-4" />
+					</button>
+
+					<!-- A rule between what the dialog does and what closes it: destructive
+					     controls should not sit flush against the one everybody aims for. -->
+					<span class="mx-1 h-5 w-px bg-shade-3"></span>
+
+					<button
+						type="button"
+						onclick={() => (opened = null)}
+						aria-label={$LL.close()}
+						class="rounded-md p-1.5 text-muted transition-colors hover:bg-shade-2 hover:text-active"
+					>
+						<X class="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<!-- `min-h-0` is what makes the rest of this work: without it a flex child
-			     refuses to shrink below its content, so the image would push the footer
-			     off the bottom instead of fitting between them. -->
-			<div class="flex min-h-0 flex-1 items-center justify-center bg-shade-1 p-3">
+			     refuses to shrink below its content, so the image would push the strip
+			     below it off the bottom instead of fitting between them. -->
+			<div class="relative flex min-h-0 flex-1 items-center justify-center bg-shade-1 p-3">
 				<img
 					src={imageUrl(image.id)}
 					alt={image.prompt}
 					class="max-h-full max-w-full rounded-lg object-contain shadow-sm"
 				/>
+
+				<!-- What it took to make, laid over the picture rather than under it. These
+				     are four short figures; giving them a band of their own cost more
+				     height than they are worth, and over a corner they are readable
+				     without taking anything from the image. -->
+				<div
+					class="pointer-events-none absolute right-4 top-4 flex flex-wrap items-center justify-end gap-x-2.5 gap-y-1 rounded-lg bg-black/55 px-2.5 py-1.5 text-[11px] text-white backdrop-blur-sm"
+				>
+					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
+					<span>{formatTimestampToNow(image.createdAt)}</span>
+					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
+					{#if costLabel(image)}
+						<span class="flex items-center gap-1 tabular-nums">
+							<Coins class="h-3 w-3" />
+							{costLabel(image)}
+						</span>
+					{/if}
+				</div>
 			</div>
 
-			<!-- Nothing here scrolls. A long prompt is clamped to two lines, and opening
-			     it takes its room from the picture — which shrinks, because it is the
-			     flexible one. A scrollbar inside a strip this short is a control nobody
-			     sees and everybody fights. -->
-			<div class="shrink-0 border-t border-shade-2 px-4 py-3">
-				<!-- A clamp cannot be animated: `line-clamp` has no in-between, so opening
-				     one is a jump whatever easing is asked for. A height can be animated, but
-				     only towards a number, and the number is whatever this text happens to
-				     be — so it is measured. The inner box keeps its natural height because
-				     the clipping is done by its parent, which is what makes the measurement
-				     available even while it is hidden. -->
+			<!-- One line, and a way to open it. Nothing here scrolls: opening the prompt
+			     takes its room from the picture, which shrinks because it is the flexible
+			     one. A scrollbar inside a strip this short is a control nobody sees and
+			     everybody fights. -->
+			<div class="shrink-0 border-t border-shade-2 px-4 py-2.5">
 				<div
 					class="overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none"
 					style="max-height: {expandedPrompt ? promptHeight : collapsedHeight}px"
 				>
 					<div bind:clientHeight={promptHeight}>
 						<!-- One prompt, and it is the one that was sent: the rewrite when there
-						     was one, the words as typed otherwise. Showing both put the same
-						     request on screen twice, which is a comparison nobody opened this
-						     dialog to make. The wand stays when it applies, because "these are
-						     not quite the words I typed" is the one thing the difference is
-						     worth saying.
-
-						     Set as a caption rather than as body text: what is being looked at
-						     is the picture, and the prompt is what is written under it.
+						     was one, the words as typed otherwise. The wand stays when it
+						     applies, because "these are not quite the words I typed" is the one
+						     thing the difference is worth saying.
 
 						     An explicit leading, because the collapsed height is a multiple of
 						     it. Left to the default it is a fraction nobody can divide by. -->
@@ -627,7 +683,7 @@
 						type="button"
 						onclick={() => (expandedPrompt = !expandedPrompt)}
 						aria-expanded={expandedPrompt}
-						class="mt-1.5 flex items-center gap-1 text-xs text-link"
+						class="mt-1 flex items-center gap-1 text-xs text-link"
 					>
 						<ChevronDown
 							class="h-3 w-3 transition-transform duration-300 motion-reduce:transition-none {expandedPrompt
@@ -637,52 +693,6 @@
 						{expandedPrompt ? $LL.showLess() : $LL.showMore()}
 					</button>
 				{/if}
-				<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-					{#if image.size}<span class="tabular-nums">{image.size}</span>{/if}
-					<span>{formatTimestampToNow(image.createdAt)}</span>
-					{#if image.seconds}<span class="tabular-nums">{image.seconds.toFixed(1)}s</span>{/if}
-					{#if costLabel(image)}
-						<span class="flex items-center gap-1 tabular-nums">
-							<Coins class="h-3 w-3" />
-							{costLabel(image)}
-						</span>
-					{/if}
-				</div>
-			</div>
-
-			<div class="flex shrink-0 flex-wrap items-center gap-2 border-t border-shade-2 px-4 py-3">
-				<Button variant="outline" onclick={() => reuse(image)}>
-					<RotateCcw class="h-4 w-4" />
-					{$LL.imageReusePrompt()}
-				</Button>
-				<!-- A plain link to the same authenticated route the grid reads. The
-				     download attribute only names the file; the session is what allows
-				     it, exactly as for the picture already on screen. -->
-				<Button variant="outline" href={imageUrl(image.id)} download={downloadName(image)}>
-					<ArrowDownToLine class="h-4 w-4" />
-					{$LL.download()}
-				</Button>
-
-				<div class="ml-auto flex items-center gap-2">
-					{#if confirmingDelete === image.id}
-						<span class="text-xs text-negative">{$LL.confirmDeletion()}</span>
-						<Button variant="outline" onclick={() => (confirmingDelete = null)}>
-							{$LL.cancel()}
-						</Button>
-						<button
-							type="button"
-							onclick={() => remove(image.id)}
-							class="rounded-md bg-negative px-3 py-2 text-sm font-medium text-shade-0"
-						>
-							{$LL.delete()}
-						</button>
-					{:else}
-						<Button variant="outline" onclick={() => (confirmingDelete = image.id)}>
-							<Trash2 class="h-4 w-4" />
-							{$LL.delete()}
-						</Button>
-					{/if}
-				</div>
 			</div>
 		</div>
 	{/if}
