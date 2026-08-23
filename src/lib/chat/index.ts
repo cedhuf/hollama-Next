@@ -62,6 +62,19 @@ export interface ChatRequest {
 	think?: boolean;
 	/** Tools the model may call this turn. Absent means none are offered. */
 	tools?: ToolSpec[];
+	/**
+	 * Whether the model may reach for those tools this turn.
+	 *
+	 * `none` keeps the definitions in the request and forbids calling them, which
+	 * is how a turn is made to stop asking and answer. Withdrawing the `tools`
+	 * array does the same thing by accident and costs twice: it changes the prefix
+	 * of the request, so the provider's prompt cache misses at the exact moment
+	 * the conversation is longest, and it leaves nothing saying why the model may
+	 * no longer call what it could call a moment ago.
+	 *
+	 * Absent means `auto`, which is every provider's default and needs no field.
+	 */
+	toolChoice?: 'auto' | 'none';
 }
 
 /**

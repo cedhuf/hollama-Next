@@ -184,13 +184,21 @@ export class OllamaStrategy implements ChatStrategy {
 	): Promise<void> {
 		// Forward the resolved boolean: `think: false` is always safe, and `think: true`
 		// only reaches models we already verified support it.
+		//
+		// `toolChoice` is dropped rather than forwarded: Ollama has no such field, and
+		// an unknown camelCase key on the wire is noise at best. The one value that
+		// changes anything is honoured below by withholding the tools, which is the
+		// only way to say "not this turn" to an endpoint with no parameter for it.
+		const { toolChoice, ...rest } = payload;
+		const offerTools = toolChoice !== 'none' && !!payload.tools?.length;
+
 		const body = {
-			...payload,
+			...rest,
 			think,
 			// Ollama takes the same shape as everyone else, one level deeper.
-			...(payload.tools?.length
+			...(offerTools
 				? {
-						tools: payload.tools.map((tool) => ({
+						tools: payload.tools!.map((tool) => ({
 							type: 'function',
 							function: {
 								name: tool.name,

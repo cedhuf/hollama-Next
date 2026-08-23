@@ -409,7 +409,16 @@ export async function runTurn(
 		if (webTools) {
 			chatMessages = [
 				...chatMessages,
-				{ role: 'system', content: resolvePrompt('toolPolicy', overrides) }
+				{ role: 'system', content: resolvePrompt('toolPolicy', overrides) },
+				// Said once, up front, rather than injected at the moment it becomes
+				// true. What stops the calls is `tool_choice`; this only asks for the
+				// gap to be admitted rather than papered over, and it reads the same
+				// whether or not the turn ever runs out of rounds.
+				{
+					role: 'system',
+					content:
+						'Tool calls are limited for each message. If you run out before you have checked everything, answer with what you have and say plainly what you were not able to check.'
+				}
 			];
 		}
 
@@ -651,23 +660,24 @@ export async function runTurn(
 			reasoning = '';
 			emit({ type: 'round', index: round });
 
-			// The last round is the one that has to produce a reply, so the tools are
-			// withdrawn for it. Declining the calls instead would leave the model's
-			// final word being a request nobody answers, and the user with an empty
-			// message; taking the tools away leaves it no choice but to write.
+			/**
+			 * The last round has to produce a reply, so this one forbids the calls.
+			 *
+			 * Left free, the model's final word would be a request nobody answers and
+			 * the user would get an empty message.
+			 *
+			 * `tool_choice: none` and not the tools taken away, which is what this used
+			 * to do. The definitions stay in the request, so its prefix is unchanged
+			 * and the provider's prompt cache still hits at the point the conversation
+			 * is longest. And it needs no explaining: withdrawing the array left the
+			 * model unable to call what it could call a moment earlier for no stated
+			 * reason, so a sentence was appended after the last tool result to say so,
+			 * and a system message in that position is a shape some chat templates
+			 * refuse outright. The rule is a parameter now, and the sentence about
+			 * running short is said once, up front, with the other policy lines.
+			 */
 			if (nativeTools.length && round === maxRounds - 1) {
-				chatRequest = {
-					...chatRequest,
-					tools: undefined,
-					messages: [
-						...chatRequest.messages,
-						{
-							role: 'system',
-							content:
-								'No further tool calls are possible for this message. Answer now with what you have, and say plainly what you were not able to check.'
-						}
-					]
-				};
+				chatRequest = { ...chatRequest, toolChoice: 'none' };
 			}
 
 			const reasoningProcessor = createReasoningProcessor(

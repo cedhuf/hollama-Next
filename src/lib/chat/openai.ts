@@ -17,6 +17,115 @@ import {
 	type Message
 } from './index';
 
+/**
+ * An id for a tool call the provider did not give one.
+ *
+ * Nine alphanumeric characters, which is not an arbitrary shape: OpenAI accepts
+ * any string, and Mistral validates this exact one and refuses everything else.
+ * The narrower rule is therefore the only one worth generating, and the old
+ * `call_0` satisfied neither its length nor its alphabet.
+ *
+ * It only has to be unique inside one turn, since that is the whole life of the
+ * pairing between a call and its answer, so there is nothing to keep and nothing
+ * to collide with later.
+ */
+const ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+function newToolCallId(): string {
+	// `crypto` rather than `Math.random`: uniqueness here only has to hold inside
+	// one turn, so either would do, but an identifier generator built on the
+	// non-cryptographic one is the sort of thing that gets copied somewhere it
+	// matters. Present in both the browser and Node.
+	const bytes = crypto.getRandomValues(new Uint8Array(9));
+	return Array.from(bytes, (byte) => ID_ALPHABET[byte % ID_ALPHABET.length]).join('');
+}
+
+/**
+ * Whether a refusal is about the thinking field rather than about the request.
+ *
+ * Providers word it differently and none of them give a code for it, so the name
+ * of the field is the only thing they reliably have in common. Read across the
+ * whole error rather than one property, because where the detail lands differs
+ * between the SDK's own shape and a body passed straight through by a proxy.
+ */
+function mentionsThinkingField(error: unknown): boolean {
+	// Guarded, because this runs inside a `catch`: a circular reference would make
+	// `JSON.stringify` throw and replace the real failure with an unrelated one,
+	// which is the worst thing a diagnostic can do.
+	const text = (value: unknown): string => {
+		if (value === undefined || value === null) return '';
+		if (typeof value === 'string') return value;
+		try {
+			return JSON.stringify(value) ?? '';
+		} catch {
+			return '';
+		}
+	};
+
+	const parts = [
+		text((error as { message?: string })?.message),
+		text((error as { error?: unknown })?.error),
+		text((error as { body?: unknown })?.body)
+	];
+	return parts.some((part) => /chat_template_kwargs|enable_thinking/i.test(part));
+}
+
+/**
+ * Endpoints that have already refused `chat_template_kwargs`, per model.
+ *
+ * Asked once and remembered, because the alternative is asking every turn: the
+ * refusal is a 400, and a 400 is a whole round trip spent to be told something
+ * that was already true last time. That is exactly what made one provider look
+ * slow, and it was invisible until the fallback started saying so.
+ *
+ * In memory rather than stored. It costs one refusal per session, and it heals
+ * itself the day the endpoint learns the field, which a saved answer would not.
+ * Keyed by connection as well as model: the same name is served by different
+ * builds in different places.
+ */
+const refusedThinking = new Set<string>();
+
+const thinkingKey = (serverId: string, model: string) => `${serverId}:${model}`;
+
+/**
+ * Run a request that carries `chat_template_kwargs`, and learn from a refusal.
+ *
+ * Shared by both paths on purpose. `chat()` asks for reasoning and `complete()`
+ * asks for it to be off, but they send the same field, so an endpoint that
+ * refuses it refuses both, and one of them finding out is enough for the other.
+ * They used to discover it separately, and `complete()` did so in silence, which
+ * meant every internal errand (naming a session, routing a search) quietly paid a
+ * failed round trip on top of the visible one.
+ *
+ * The refusal is recorded only once the same request has succeeded without the
+ * field. Recorded any earlier, a 400 that had nothing to do with thinking would
+ * switch reasoning off for the session on a model that reasons perfectly well.
+ */
+async function withThinkingField<T>(
+	serverId: string,
+	model: string,
+	run: (extraBody: Record<string, unknown> | undefined) => Promise<T>,
+	extraBody: Record<string, unknown> | undefined
+): Promise<T> {
+	if (!extraBody || refusedThinking.has(thinkingKey(serverId, model))) return run(undefined);
+
+	try {
+		return await run(extraBody);
+	} catch (error) {
+		const status = (error as { status?: number } | null)?.status;
+		if (status !== 400) throw error;
+
+		console.info(
+			`[${model}] 400 with chat_template_kwargs${
+				mentionsThinkingField(error) ? ' (the endpoint named the field)' : ' (field not named)'
+			}; retrying without it, and not asking again this session`
+		);
+		const result = await run(undefined);
+		refusedThinking.add(thinkingKey(serverId, model));
+		return result;
+	}
+}
+
 export class OpenAIStrategy implements ChatStrategy {
 	private openai: OpenAI;
 
@@ -40,7 +149,11 @@ export class OpenAIStrategy implements ChatStrategy {
 			if (message.role === 'tool') {
 				return {
 					role: 'tool',
-					tool_call_id: message.toolCallId ?? '',
+					// A last resort, and it cannot put back a pairing that was lost: an id
+					// invented here matches no call. It only makes the refusal legible,
+					// where an empty string is malformed as well as unmatched. Normally
+					// this is set when the call was assembled, and stays set.
+					tool_call_id: message.toolCallId || newToolCallId(),
 					content: message.content
 				};
 			}
@@ -122,32 +235,21 @@ export class OpenAIStrategy implements ChatStrategy {
 				}))
 			: undefined;
 
-		try {
-			await this.streamChat(
-				payload.model,
-				formattedMessages,
-				thinkBody,
-				tools,
-				abortSignal,
-				onChunk
-			);
-		} catch (error) {
-			// A server that doesn't understand `chat_template_kwargs` answers 400: drop
-			// the extra field and retry so the chat still completes (without reasoning).
-			const status = (error as { status?: number } | null)?.status;
-			if (thinkBody && status === 400) {
-				await this.streamChat(
+		await withThinkingField(
+			this.server.id,
+			payload.model,
+			(extraBody) =>
+				this.streamChat(
 					payload.model,
 					formattedMessages,
-					undefined,
+					extraBody,
 					tools,
+					payload.toolChoice,
 					abortSignal,
 					onChunk
-				);
-				return;
-			}
-			throw error;
-		}
+				),
+			thinkBody
+		);
 	}
 
 	private async streamChat(
@@ -155,6 +257,7 @@ export class OpenAIStrategy implements ChatStrategy {
 		messages: ChatCompletionMessageParam[],
 		extraBody: Record<string, unknown> | undefined,
 		tools: ChatCompletionTool[] | undefined,
+		toolChoice: 'auto' | 'none' | undefined,
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
@@ -167,6 +270,10 @@ export class OpenAIStrategy implements ChatStrategy {
 			// the field ignore it.
 			stream_options: { include_usage: true },
 			...(tools ? { tools } : {}),
+			// Sent only when it is `none`, which is the only value that says anything:
+			// `auto` is every provider's default, and a field nobody needs is a field
+			// an endpoint can refuse.
+			...(tools && toolChoice === 'none' ? { tool_choice: 'none' as const } : {}),
 			...extraBody
 		});
 
@@ -223,10 +330,10 @@ export class OpenAIStrategy implements ChatStrategy {
 
 		const toolCalls = [...pending.entries()]
 			.sort(([a], [b]) => a - b)
-			.map(([index, slot]) => ({
+			.map(([, slot]) => ({
 				// Some OpenAI-compatible servers omit the id entirely; the pairing still
 				// has to be unambiguous when the answer goes back.
-				id: slot.id || `call_${index}`,
+				id: slot.id || newToolCallId(),
 				name: slot.name,
 				arguments: slot.arguments
 			}))
@@ -256,14 +363,7 @@ export class OpenAIStrategy implements ChatStrategy {
 				...extraBody
 			});
 
-		let response;
-		try {
-			response = await send(noThinkBody);
-		} catch (error) {
-			const status = (error as { status?: number } | null)?.status;
-			if (!noThinkBody || status !== 400) throw error;
-			response = await send(undefined);
-		}
+		const response = await withThinkingField(this.server.id, payload.model, send, noThinkBody);
 
 		// Belt and braces: the flag is a request, not a guarantee, and a model that
 		// reasons anyway does it inline in the content.
