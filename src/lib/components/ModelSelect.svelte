@@ -23,8 +23,11 @@
 		 *   own (the wrapper owns it, so focus rings the whole group), only a divider
 		 *   towards its neighbour. Its width is fluid so it borrows whatever room the
 		 *   header has to spare.
+		 * `ghost`: the name on its own, no box at all, for a corner of a surface that
+		 *   already has edges. It is as wide as what it says and no wider, so it can
+		 *   be tucked against a right margin without reserving a column.
 		 */
-		variant?: 'default' | 'hero' | 'attached';
+		variant?: 'default' | 'hero' | 'attached' | 'ghost';
 		/**
 		 * The label for choosing no model at all.
 		 *
@@ -113,7 +116,21 @@
 	{#snippet trigger({ props, label, hasValue })}
 		<!-- Same bordered control everywhere, only the scale changes, so it reads as
 		     one component whether it anchors the home screen or sits in a header row. -->
-		{#if variant === 'attached'}
+		{#if variant === 'ghost'}
+			<!-- Nothing but the word and a chevron. The surface it sits in supplies the
+			     border, the background and the focus ring, so drawing another set here
+			     would be a control inside a control. It lights up on hover and on focus,
+			     which is the whole of the affordance and enough of it. -->
+			<button
+				{...props}
+				type="button"
+				aria-label={$LL.availableModels()}
+				class="text-muted hover:text-active focus-visible:text-active data-[state=open]:text-active flex max-w-[16rem] items-center gap-1 rounded-md bg-transparent px-1.5 py-1 text-xs transition-colors focus:outline-none"
+			>
+				<span class="truncate">{label}</span>
+				<ChevronDown class="h-3 w-3 shrink-0 opacity-60" />
+			</button>
+		{:else if variant === 'attached'}
 			<button
 				{...props}
 				type="button"

@@ -1485,7 +1485,7 @@ type RootTranslation = {
 	/**
 	 * #​#​ ​S​t​e​p​s​
 ​
-​1​.​ ​A​s​k​ ​w​h​a​t​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​e​ ​f​r​i​d​g​e​…
+​1​.​ ​A​s​k​ ​w​h​a​t​ ​i​s​ ​a​l​r​e​a​d​y​ ​i​n​ ​t​h​e​ ​f​r​i​d​g​e​.​.​.
 	 */
 	playbookInstructionsPlaceholder: string
 	/**
@@ -1924,7 +1924,7 @@ type RootTranslation = {
 	 */
 	send: string
 	/**
-	 * O​t​h​e​r​…
+	 * O​t​h​e​r​.​.​.
 	 */
 	otherChoice: string
 	/**
@@ -1980,7 +1980,7 @@ type RootTranslation = {
 	 */
 	globalPrompt: string
 	/**
-	 * e​.​g​.​ ​Y​o​u​ ​a​r​e​ ​c​o​n​c​i​s​e​ ​a​n​d​ ​a​n​s​w​e​r​ ​i​n​ ​t​h​e​ ​u​s​e​r​'​s​ ​l​a​n​g​u​a​g​e​…
+	 * e​.​g​.​ ​Y​o​u​ ​a​r​e​ ​c​o​n​c​i​s​e​ ​a​n​d​ ​a​n​s​w​e​r​ ​i​n​ ​t​h​e​ ​u​s​e​r​'​s​ ​l​a​n​g​u​a​g​e​.​.​.
 	 */
 	globalPromptPlaceholder: string
 	/**
@@ -1997,7 +1997,7 @@ type RootTranslation = {
 	 */
 	removeModelPrompt: RequiredParams<'model'>
 	/**
-	 * P​r​o​m​p​t​ ​f​o​r​ ​{​m​o​d​e​l​}​…
+	 * P​r​o​m​p​t​ ​f​o​r​ ​{​m​o​d​e​l​}​.​.​.
 	 * @param {string} model
 	 */
 	promptForModel: RequiredParams<'model'>
@@ -2253,6 +2253,10 @@ type RootTranslation = {
 	 */
 	shareImages: string
 	/**
+	 * S​t​a​r​t​ ​a​g​a​i​n
+	 */
+	imageComposerReset: string
+	/**
 	 * R​e​f​e​r​e​n​c​e​ ​i​m​a​g​e​s
 	 */
 	imageReferences: string
@@ -2291,6 +2295,10 @@ type RootTranslation = {
 	 * C​o​u​l​d​ ​n​o​t​ ​r​e​w​r​i​t​e​ ​t​h​e​ ​p​r​o​m​p​t
 	 */
 	imageRewriteFailed: string
+	/**
+	 * W​r​i​t​i​n​g​ ​a​ ​b​e​t​t​e​r​ ​p​r​o​m​p​t​.​.​.
+	 */
+	imageRewriting: string
 	/**
 	 * R​e​w​r​i​t​t​e​n​ ​p​r​o​m​p​t
 	 */
@@ -2732,7 +2740,7 @@ type RootTranslation = {
 	 */
 	optional: string
 	/**
-	 * V​e​r​i​f​y​i​n​g​…
+	 * V​e​r​i​f​y​i​n​g​.​.​.
 	 */
 	verifying: string
 	/**
@@ -3208,7 +3216,7 @@ type RootTranslation = {
 	 */
 	searchConversations: string
 	/**
-	 * S​e​a​r​c​h​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​…
+	 * S​e​a​r​c​h​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​.​.
 	 */
 	searchConversationsPlaceholder: string
 	/**
@@ -3337,7 +3345,7 @@ type RootTranslation = {
 	 */
 	undoCompactionHelp: string
 	/**
-	 * S​u​m​m​a​r​i​s​i​n​g​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​…
+	 * S​u​m​m​a​r​i​s​i​n​g​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​.​.
 	 */
 	compacting: string
 	/**
@@ -4985,7 +4993,7 @@ The completion in progress will stop
 	/**
 	 * ## Steps
 
-1. Ask what is already in the fridge…
+1. Ask what is already in the fridge...
 	 */
 	playbookInstructionsPlaceholder: () => LocalizedString
 	/**
@@ -5417,7 +5425,7 @@ The completion in progress will stop
 	 */
 	send: () => LocalizedString
 	/**
-	 * Other…
+	 * Other...
 	 */
 	otherChoice: () => LocalizedString
 	/**
@@ -5473,7 +5481,7 @@ The completion in progress will stop
 	 */
 	globalPrompt: () => LocalizedString
 	/**
-	 * e.g. You are concise and answer in the user's language…
+	 * e.g. You are concise and answer in the user's language...
 	 */
 	globalPromptPlaceholder: () => LocalizedString
 	/**
@@ -5489,7 +5497,7 @@ The completion in progress will stop
 	 */
 	removeModelPrompt: (arg: { model: string }) => LocalizedString
 	/**
-	 * Prompt for {model}…
+	 * Prompt for {model}...
 	 */
 	promptForModel: (arg: { model: string }) => LocalizedString
 	/**
@@ -5741,6 +5749,10 @@ The completion in progress will stop
 	 */
 	shareImages: () => LocalizedString
 	/**
+	 * Start again
+	 */
+	imageComposerReset: () => LocalizedString
+	/**
 	 * Reference images
 	 */
 	imageReferences: () => LocalizedString
@@ -5776,6 +5788,10 @@ The completion in progress will stop
 	 * Could not rewrite the prompt
 	 */
 	imageRewriteFailed: () => LocalizedString
+	/**
+	 * Writing a better prompt...
+	 */
+	imageRewriting: () => LocalizedString
 	/**
 	 * Rewritten prompt
 	 */
@@ -6205,7 +6221,7 @@ The completion in progress will stop
 	 */
 	optional: () => LocalizedString
 	/**
-	 * Verifying…
+	 * Verifying...
 	 */
 	verifying: () => LocalizedString
 	/**
@@ -6669,7 +6685,7 @@ The completion in progress will stop
 	 */
 	searchConversations: () => LocalizedString
 	/**
-	 * Search in every conversation…
+	 * Search in every conversation...
 	 */
 	searchConversationsPlaceholder: () => LocalizedString
 	/**
@@ -6789,7 +6805,7 @@ The completion in progress will stop
 	 */
 	undoCompactionHelp: () => LocalizedString
 	/**
-	 * Summarising the conversation…
+	 * Summarising the conversation...
 	 */
 	compacting: () => LocalizedString
 	/**

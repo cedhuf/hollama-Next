@@ -21,10 +21,13 @@ import { serversStore, settingsStore } from '$lib/localStorage';
  * words. That is also why the instruction behind it can afford to be opinionated:
  * being overruled costs one keystroke.
  */
-export async function writeImagePrompt(description: string): Promise<string | null> {
+export async function writeImagePrompt(
+	description: string,
+	onText?: (text: string) => void
+): Promise<string | null> {
 	const defaults = get(chatDefaultsConfig);
 	if (!defaults.images.imagePromptWriter || !description.trim()) return null;
-	return ask('imagePrompt', description, 400);
+	return ask('imagePrompt', description, 400, onText);
 }
 
 /**
@@ -47,11 +50,29 @@ export async function writeImageTitle(prompt: string): Promise<string | null> {
 	}
 }
 
+/**
+ * What a model has written so far, ready to be read.
+ *
+ * Applied to every fragment as well as to the finished answer, so the field
+ * filling in is the same text as the field that settles rather than a raw
+ * transcript that tidies itself at the end. An unclosed `<think>` returns
+ * nothing: `think: false` is requested, but a model that ignores it should be
+ * left waiting rather than shown reasoning in a prompt field.
+ */
+function readable(raw: string): string {
+	if (/<think>(?![\s\S]*<\/think>)/.test(raw)) return '';
+	return stripThinkTags(raw)
+		.trim()
+		.replace(/^["'`]+|["'`]+$/g, '')
+		.trim();
+}
+
 /** One question, one answer, no history. The shape both of the above share. */
 async function ask(
 	instruction: 'imagePrompt' | 'imageTitle',
 	input: string,
-	limit: number
+	limit: number,
+	onText?: (text: string) => void
 ): Promise<string | null> {
 	const defaults = get(chatDefaultsConfig);
 	if (!input.trim()) return null;
@@ -89,15 +110,15 @@ async function ask(
 		controller.signal,
 		(part) => {
 			result += part.content ?? '';
+			// Reported as it arrives, cleaned the same way the final answer is, so a
+			// caller can show the words landing instead of a spinner and a jump.
+			onText?.(readable(result).slice(0, limit));
 		}
 	);
 
 	// Models like to introduce themselves, and a leading "Sure, here is" would be
 	// drawn as part of the picture. Quotes go for the same reason.
-	const text = stripThinkTags(result)
-		.trim()
-		.replace(/^["'`]+|["'`]+$/g, '')
-		.trim();
+	const text = readable(result);
 
 	return text ? text.slice(0, limit) : null;
 }

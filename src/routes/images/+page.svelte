@@ -1,21 +1,24 @@
 <script lang="ts">
 	import {
 		ArrowDownToLine,
+		Ban,
 		ChevronDown,
 		Coins,
+		Eraser,
 		FileArchive,
 		ImageIcon,
 		LoaderCircle,
 		Paperclip,
 		RotateCcw,
-		SlidersHorizontal,
 		Sparkles,
 		Trash2,
 		Wand2,
 		X
 	} from '@lucide/svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { cubicOut } from 'svelte/easing';
+	import { fade, slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
@@ -26,6 +29,8 @@
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
+	import Select from '$lib/components/Select.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import {
 		IMAGE_QUALITIES,
 		IMAGE_RATIOS,
@@ -36,6 +41,7 @@
 		type ImageQuality,
 		type ImageRatio
 	} from '$lib/connections';
+	import { clearDraft, IMAGE_DRAFT, readDraft, writeDraft } from '$lib/drafts';
 	import {
 		downloadName,
 		hasTrigger,
@@ -69,7 +75,7 @@
 	 * floating at the bottom where a composer would.
 	 */
 
-	let prompt = $state('');
+	let prompt = $state(readDraft(IMAGE_DRAFT));
 	let negativePrompt = $state('');
 	let model = $state('');
 	let ratio = $state<ImageRatio>('square');
@@ -176,6 +182,48 @@
 		if (images.length > room) toast.warning($LL.imageReferencesFull({ count: accepts.max }));
 	}
 
+	/**
+	 * Whether there is anything to put down.
+	 *
+	 * The button is drawn only when the answer is yes. A control that resets an
+	 * empty composer is a control that does nothing, and one sitting over the
+	 * placeholder is the first thing you see on a page you have not used yet.
+	 */
+	const composerFilled = $derived(
+		!!prompt.trim() || !!rewritten.trim() || !!negativePrompt.trim() || references.length > 0
+	);
+
+	/**
+	 * Put down everything composed for the next drawing.
+	 *
+	 * The words, the rewrite, the negative prompt and the pictures brought along:
+	 * all of it belongs to the message being written, so a reset that left any of it
+	 * behind would be a reset you have to check. What it does not touch is the
+	 * model, the shape, the quality and the count, which are how you work rather
+	 * than what you are asking for this time.
+	 */
+	function resetComposer() {
+		prompt = '';
+		clearDraft(IMAGE_DRAFT);
+		rewritten = '';
+		negativePrompt = '';
+		references = [];
+	}
+
+	/**
+	 * The words survive a reload; the pictures brought along do not.
+	 *
+	 * Only the prompt is kept. A reference is measured in megabytes and the whole
+	 * of local storage in five, so keeping one would evict the galleries and the
+	 * conversations it sits beside. The negative prompt stays out for a smaller
+	 * reason: it is behind a toggle, and restoring a field somebody cannot see is
+	 * how a request goes out carrying something nobody remembered writing.
+	 */
+	$effect(() => {
+		void prompt;
+		untrack(() => writeDraft(IMAGE_DRAFT, prompt));
+	});
+
 	async function pickReferences() {
 		const { images, rejected } = await pickImageFiles();
 		warnRejected(rejected);
@@ -192,6 +240,27 @@
 		standard: $LL.imageQualityStandard(),
 		high: $LL.imageQualityHigh()
 	});
+
+	/**
+	 * The three lists on the strip, in the shape the shared picker takes.
+	 *
+	 * Built here rather than inline so the markup stays one component per control.
+	 * The values are strings because that is what a picked option carries; the two
+	 * that are really a union and the one that is really a number are converted back
+	 * on the way in, which is the only place the conversion belongs.
+	 */
+	const RATIO_OPTIONS = $derived(
+		IMAGE_RATIOS.map((value) => ({ value, label: RATIO_LABELS[value] }))
+	);
+	const QUALITY_OPTIONS = $derived(
+		IMAGE_QUALITIES.map((value) => ({ value, label: QUALITY_LABELS[value] }))
+	);
+	const COUNT_OPTIONS = $derived(
+		Array.from({ length: IMAGE_LIMITS.maxPerRequest }, (_, i) => ({
+			value: String(i + 1),
+			label: $LL.imageCountOption({ count: i + 1 })
+		}))
+	);
 
 	/**
 	 * Whether to offer the rewriter: switched on, and with a model to run it,
@@ -214,11 +283,17 @@
 	async function rewrite() {
 		if (!prompt.trim()) return;
 		rewriting = true;
+		// Emptied first, so a second run does not read as the first one still there
+		// while the model thinks. The panel opens on `rewriting`, not on the text.
+		rewritten = '';
 		try {
-			const text = await writeImagePrompt(prompt);
+			const text = await writeImagePrompt(prompt, (partial) => (rewritten = partial));
 			if (text) rewritten = text;
 			else toast.error($LL.imageRewriteFailed());
 		} catch (error) {
+			// Whatever landed before it failed is half a sentence, and half a sentence
+			// left in the field is one somebody sends by mistake.
+			rewritten = '';
 			toast.error($LL.imageRewriteFailed(), {
 				description: error instanceof Error ? error.message : undefined
 			});
@@ -262,6 +337,11 @@
 				n: count,
 				references: references.length ? references.map((image) => image.dataUrl) : undefined
 			});
+
+			// Sent, so it is no longer a draft. The field keeps the words on purpose,
+			// but there is nothing left to restore after a reload that it would not
+			// already have.
+			clearDraft(IMAGE_DRAFT);
 
 			// Not awaited: the pictures are already on screen, and a label arriving a
 			// moment later is a label arriving a moment later.
@@ -350,6 +430,21 @@
 	}
 </script>
 
+<!-- One trigger for the three lists on the strip: the value and a chevron, no box
+     of its own, because the group around them owns the border. Sized to what it
+     says, so the strip does not reserve three equal columns for three answers of
+     very different lengths. -->
+{#snippet compactTrigger({ props, label }: { props: Record<string, unknown>; label: string })}
+	<button
+		{...props}
+		type="button"
+		class="text-muted hover:bg-shade-2 hover:text-active data-[state=open]:text-active flex h-9 items-center gap-1 bg-transparent px-2.5 text-xs transition-colors focus:outline-none disabled:opacity-50"
+	>
+		<span class="truncate">{label}</span>
+		<ChevronDown class="h-3 w-3 shrink-0 opacity-60" />
+	</button>
+{/snippet}
+
 <Head title={$LL.images()} />
 
 <!-- Frameless like the library and the sessions landing, and carrying a surface
@@ -415,39 +510,98 @@
 					class="library-section bg-shade-0 focus-within:border-accent section-tint mb-8 overflow-hidden rounded-2xl border shadow-sm transition-colors"
 					style="--section-turn: 40"
 				>
-					<textarea
-						bind:value={prompt}
-						rows="3"
-						maxlength={IMAGE_LIMITS.prompt}
-						placeholder={$LL.imagePromptPlaceholder()}
-						class="placeholder:text-muted w-full resize-none border-0 bg-transparent px-4 pt-4 pb-2 text-base leading-relaxed outline-none"
-					></textarea>
-
-					{#if canRewrite && rewritten}
-						<!-- Shown, not applied. What is in this box is what gets sent; empty it
-						     and the words above are sent instead. Tinted with the accent so it
-						     reads as something the app added rather than something you typed. -->
-						<div class="bg-accent/[0.07] mx-4 mb-3 flex flex-col gap-1.5 rounded-xl p-3">
-							<div class="flex items-center gap-2">
-								<Wand2 class="text-accent h-3.5 w-3.5 shrink-0" />
-								<span class="text-active text-xs font-medium">{$LL.imageRewritten()}</span>
-								<button
-									type="button"
-									onclick={() => (rewritten = '')}
-									class="text-link ml-auto text-xs"
-								>
-									{$LL.imageUseOriginal()}
-								</button>
+					<!-- The words and the model that will draw them, in one box. The model
+					     sits in the corner rather than on the strip below because it is not a
+					     setting you adjust, it is the thing being addressed: you write to a
+					     model the way you write to somebody. `pb-11` is the room it needs, so
+					     a third line of prompt stops above it instead of running underneath. -->
+					<div class="relative">
+						<textarea
+							bind:value={prompt}
+							rows="3"
+							maxlength={IMAGE_LIMITS.prompt}
+							placeholder={$LL.imagePromptPlaceholder()}
+							class="placeholder:text-muted w-full resize-none border-0 bg-transparent pt-4 pr-11 pb-2 pl-4 text-base leading-relaxed outline-none"
+						></textarea>
+						{#if composerFilled}
+							<!-- The opposite corner from the model, and only while there is
+							     something to undo. Fading in rather than appearing keeps it from
+							     flicking on and off as the first character is typed and deleted. -->
+							<div class="absolute top-2.5 right-2.5" transition:fade={{ duration: 120 }}>
+								<Tooltip side="left">
+									{#snippet trigger({ props })}
+										<button
+											{...props}
+											type="button"
+											onclick={resetComposer}
+											aria-label={$LL.imageComposerReset()}
+											class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors focus:outline-none"
+										>
+											<Eraser class="h-3.5 w-3.5" />
+										</button>
+									{/snippet}
+									{$LL.imageComposerReset()}
+								</Tooltip>
 							</div>
-							<textarea
-								bind:value={rewritten}
-								rows="3"
-								maxlength={IMAGE_LIMITS.prompt}
-								class="border-shade-3 bg-shade-0 focus:border-accent w-full resize-none rounded-lg border p-2 text-sm leading-relaxed outline-none"
-							></textarea>
-							<span class="text-muted text-xs leading-snug">{$LL.imageRewrittenHint()}</span>
+						{/if}
+						{#if canRewrite && (rewriting || rewritten)}
+							<!-- Opened by the asking, not by the answer. It used to wait for the
+							     finished text, so the one thing that said anything was happening
+							     was a spinner on a button at the other end of the strip, and then
+							     a box appeared fully formed. Now the panel is there from the
+							     click and the words land inside it.
+
+							     Shown, not applied: what is in this box is what gets sent, and
+							     emptying it sends the words above instead. Tinted with the accent
+							     so it reads as something the app added rather than something you
+							     typed. -->
+							<div
+								transition:slide={{ duration: 180, easing: cubicOut }}
+								class="mx-4 mb-3 overflow-hidden"
+							>
+								<div class="bg-accent/[0.07] flex flex-col gap-1.5 rounded-xl p-3">
+									<div class="flex items-center gap-2">
+										{#if rewriting}
+											<LoaderCircle class="text-accent h-3.5 w-3.5 shrink-0 animate-spin" />
+										{:else}
+											<Wand2 class="text-accent h-3.5 w-3.5 shrink-0" />
+										{/if}
+										<span class="text-active text-xs font-medium">{$LL.imageRewritten()}</span>
+										{#if !rewriting}
+											<button
+												type="button"
+												onclick={() => (rewritten = '')}
+												class="text-link ml-auto text-xs"
+											>
+												{$LL.imageUseOriginal()}
+											</button>
+										{/if}
+									</div>
+									<!-- Read-only while it fills, because the caret would be fighting
+									     the model for the same field, and a word typed into it would
+									     be overwritten by the next fragment. -->
+									<textarea
+										bind:value={rewritten}
+										readonly={rewriting}
+										rows="3"
+										maxlength={IMAGE_LIMITS.prompt}
+										placeholder={rewriting ? $LL.imageRewriting() : ''}
+										class="border-shade-3 bg-shade-0 focus:border-accent placeholder:text-muted w-full resize-none rounded-lg border p-2 text-sm leading-relaxed outline-none read-only:cursor-default"
+									></textarea>
+									<span class="text-muted text-xs leading-snug">
+										{rewriting ? $LL.imageRewriting() : $LL.imageRewrittenHint()}
+									</span>
+								</div>
+							</div>
+						{/if}
+
+						<!-- On its own row at the foot of the box rather than laid over it: the
+						     rewrite panel appears above it, and an absolute corner would have
+						     been covered by it the moment it opened. -->
+						<div class="flex justify-end px-2.5 pb-2">
+							<ModelSelect bind:value={model} kinds={['image']} variant="ghost" />
 						</div>
-					{/if}
+					</div>
 
 					{#if showAdvanced}
 						<div class="mx-4 mb-3 flex flex-col gap-1.5">
@@ -503,80 +657,107 @@
 					<div
 						class="border-shade-2 bg-shade-1/60 flex flex-wrap items-center gap-2 border-t px-3 py-2.5"
 					>
-						<div class="min-w-40 flex-1">
-							<ModelSelect bind:value={model} kinds={['image']} />
-						</div>
-
-						<!-- The other way in, for a pointer that would rather not drag. Disabled
-						     rather than hidden on a model that takes none, for the same reason
-						     the two selects below are: the control still says what it would have
-						     done. -->
-						<button
-							type="button"
-							onclick={pickReferences}
-							disabled={!accepts || roomLeft <= 0}
-							aria-label={$LL.imageReferences()}
-							title={accepts
-								? $LL.imageReferencesRoom({ count: roomLeft })
-								: $LL.imageReferencesUnsupported()}
-							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors disabled:opacity-50 {references.length
-								? 'border-accent/50 bg-accent/10 text-accent'
-								: 'border-shade-3 text-muted hover:text-active'}"
+						<!-- Two groups rather than five boxes. What you hand the model sits on
+						     the left, how it should draw sits beside it, and each group owns one
+						     border so the strip reads as two objects instead of a row of fields
+						     all shouting the same way. It is the joined control the conversation
+						     header already uses, applied twice. -->
+						<div
+							class="border-shade-3 focus-within:border-accent flex shrink-0 items-center overflow-hidden rounded-lg border transition-colors"
 						>
-							<Paperclip class="h-3.5 w-3.5" />
-						</button>
+							<!-- The other way in, for a pointer that would rather not drag.
+							     Disabled rather than hidden on a model that takes none, for the
+							     same reason the selects beside it are: the control still says what
+							     it would have done. -->
+							<Tooltip side="top">
+								{#snippet trigger({ props })}
+									<!-- The tooltip listens on the wrapper, not on the button. A
+									     disabled button emits no pointer events at all, so hanging it
+									     there would hide the explanation in exactly the case it exists
+									     for: the model this one cannot work with. -->
+									<span {...props} class="inline-flex">
+										<button
+											type="button"
+											onclick={pickReferences}
+											disabled={!accepts || roomLeft <= 0}
+											aria-label={$LL.imageReferences()}
+											class="border-shade-3 flex h-9 w-9 items-center justify-center border-r transition-colors focus:outline-none disabled:opacity-50 {references.length
+												? 'bg-accent/10 text-accent'
+												: 'text-muted hover:bg-shade-2 hover:text-active'}"
+										>
+											<Paperclip class="h-3.5 w-3.5" />
+										</button>
+									</span>
+								{/snippet}
+								{accepts
+									? $LL.imageReferencesRoom({ count: roomLeft })
+									: $LL.imageReferencesUnsupported()}
+							</Tooltip>
+
+							<!-- The rarely-used half, as a toggle rather than a link that reads
+							     like a page. `Ban` and not a slider: what this opens is the list of
+							     things you do not want in the picture, which is a refusal, where a
+							     slider would promise settings to adjust. It shows it is on by
+							     staying lit. -->
+							<Tooltip side="top">
+								{#snippet trigger({ props })}
+									<button
+										{...props}
+										type="button"
+										onclick={() => (showAdvanced = !showAdvanced)}
+										aria-expanded={showAdvanced}
+										aria-label={$LL.imageNegativePrompt()}
+										class="flex h-9 w-9 items-center justify-center transition-colors focus:outline-none {showAdvanced
+											? 'bg-accent/10 text-accent'
+											: 'text-muted hover:bg-shade-2 hover:text-active'}"
+									>
+										<Ban class="h-3.5 w-3.5" />
+									</button>
+								{/snippet}
+								{$LL.imageNegativePrompt()}
+							</Tooltip>
+						</div>
 
 						<!-- Disabled, not hidden, where the app has no translation: the control
 						     still says what it would have controlled, and the request simply
-						     leaves the field out so the model uses its own default. -->
-						<select
-							bind:value={ratio}
-							disabled={!options.sizes}
-							aria-label={$LL.imageRatio()}
-							title={options.sizes ? $LL.imageRatio() : $LL.imageOptionUnavailable()}
-							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none disabled:opacity-50"
-						>
-							{#each IMAGE_RATIOS as value (value)}
-								<option {value}>{RATIO_LABELS[value]}</option>
-							{/each}
-						</select>
+						     leaves the field out so the model uses its own default.
 
-						<select
-							bind:value={quality}
-							disabled={!options.qualities}
-							aria-label={$LL.imageQuality()}
-							title={options.qualities ? $LL.imageQuality() : $LL.imageOptionUnavailable()}
-							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none disabled:opacity-50"
-						>
-							{#each IMAGE_QUALITIES as value (value)}
-								<option {value}>{QUALITY_LABELS[value]}</option>
-							{/each}
-						</select>
+						     The app's own picker, not a raw `<select>`: portalled so the panel is
+						     never clipped by the composer's `overflow-hidden`, flipped when there
+						     is no room below, and drawn by the app rather than by the operating
+						     system, which is the difference between three controls that match the
+						     strip and three that match whatever platform you are on.
 
-						<select
-							bind:value={count}
-							aria-label={$LL.imageCount()}
-							class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-9 shrink-0 rounded-lg border px-2 text-xs transition-colors outline-none"
+						     The divider sits on the wrapper rather than on each trigger, so one
+						     snippet serves all three. -->
+						<div
+							class="border-shade-3 focus-within:border-accent flex shrink-0 items-center overflow-hidden rounded-lg border transition-colors"
 						>
-							{#each Array.from({ length: IMAGE_LIMITS.maxPerRequest }, (_, i) => i + 1) as n (n)}
-								<option value={n}>{$LL.imageCountOption({ count: n })}</option>
-							{/each}
-						</select>
-
-						<!-- The rarely-used half, as an icon that toggles rather than a link that
-						     reads like a page. It shows it is on by staying lit. -->
-						<button
-							type="button"
-							onclick={() => (showAdvanced = !showAdvanced)}
-							aria-expanded={showAdvanced}
-							aria-label={$LL.advancedSettings()}
-							title={$LL.imageNegativePrompt()}
-							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors {showAdvanced
-								? 'border-accent/50 bg-accent/10 text-accent'
-								: 'border-shade-3 text-muted hover:text-active'}"
-						>
-							<SlidersHorizontal class="h-3.5 w-3.5" />
-						</button>
+							<div class="border-shade-3 border-r">
+								<Select
+									value={ratio}
+									options={RATIO_OPTIONS}
+									disabled={!options.sizes}
+									trigger={compactTrigger}
+									onChange={(option) => (ratio = option.value as ImageRatio)}
+								/>
+							</div>
+							<div class="border-shade-3 border-r">
+								<Select
+									value={quality}
+									options={QUALITY_OPTIONS}
+									disabled={!options.qualities}
+									trigger={compactTrigger}
+									onChange={(option) => (quality = option.value as ImageQuality)}
+								/>
+							</div>
+							<Select
+								value={String(count)}
+								options={COUNT_OPTIONS}
+								trigger={compactTrigger}
+								onChange={(option) => (count = Number(option.value))}
+							/>
+						</div>
 
 						<div class="ml-auto flex items-center gap-2">
 							{#if canRewrite}
@@ -615,9 +796,16 @@
 			{/if}
 
 			<!-- The gallery. Newest first, because the one you just made is the one you
-			     want to look at. -->
+			     want to look at.
+
+			     Two columns on a phone, stated rather than left to `auto-fill`. A 190px
+			     floor needs 392px for two tracks and a gap, which no phone has once the
+			     page's own margins are taken out, so the fill rule quietly collapsed to a
+			     single column of pictures the width of the screen. Above `sm` the floor
+			     fits and the fill rule is the better answer, because it keeps the tiles
+			     the same size at every window width instead of stretching them. -->
 			{#if $imagesStore.length || busy}
-				<div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-3">
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))]">
 					{#if busy}
 						<!-- One placeholder per picture asked for, at the front, where the
 						     pictures will be. Thirty seconds of a spinner somewhere else reads

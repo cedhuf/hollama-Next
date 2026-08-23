@@ -192,7 +192,7 @@
 		<Select.Content
 			sideOffset={6}
 			collisionPadding={12}
-			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] min-w-[var(--bits-select-anchor-width)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none"
+			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] min-w-[max(var(--bits-select-anchor-width),16rem)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none"
 		>
 			{#if searchable}
 				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal
