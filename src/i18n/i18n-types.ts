@@ -280,7 +280,7 @@ type RootTranslation = {
 	 */
 	lastSynced: RequiredParams<'date'>
 	/**
-	 * N​e​v​e​r​ ​s​y​n​c​e​d​ ​—​ ​r​u​n​ ​a​ ​s​y​n​c​ ​t​o​ ​l​o​a​d​ ​i​t​s​ ​m​o​d​e​l​s
+	 * N​e​v​e​r​ ​s​y​n​c​e​d​.​ ​R​u​n​ ​a​ ​s​y​n​c​ ​t​o​ ​l​o​a​d​ ​i​t​s​ ​m​o​d​e​l​s
 	 */
 	neverSynced: string
 	/**
@@ -1063,7 +1063,7 @@ type RootTranslation = {
 	 */
 	currentlySharingWebFetch: RequiredParams<'chars' | 'pages'>
 	/**
-	 * C​u​r​r​e​n​t​l​y​ ​s​h​a​r​i​n​g​:​ ​o​f​f​ ​—​ ​n​o​ ​u​s​e​r​ ​m​a​y​ ​r​e​a​d​ ​p​a​g​e​s​.
+	 * C​u​r​r​e​n​t​l​y​ ​s​h​a​r​i​n​g​:​ ​o​f​f​,​ ​n​o​ ​u​s​e​r​ ​m​a​y​ ​r​e​a​d​ ​p​a​g​e​s​.
 	 */
 	currentlySharingWebFetchOff: string
 	/**
@@ -1095,7 +1095,7 @@ type RootTranslation = {
 	 */
 	webFetchHint: string
 	/**
-	 * E​n​a​b​l​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​—​ ​u​p​ ​t​o​ ​{​p​a​g​e​s​}​ ​p​a​g​e​s​ ​p​e​r​ ​m​e​s​s​a​g​e​.
+	 * E​n​a​b​l​e​d​ ​b​y​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​,​ ​u​p​ ​t​o​ ​{​p​a​g​e​s​}​ ​p​a​g​e​s​ ​p​e​r​ ​m​e​s​s​a​g​e​.
 	 * @param {unknown} pages
 	 */
 	webFetchLockedOn: RequiredParams<'pages'>
@@ -1314,7 +1314,7 @@ type RootTranslation = {
 	 */
 	resetEverythingDescription: string
 	/**
-	 * T​h​i​s​ ​w​i​l​l​ ​p​e​r​m​a​n​e​n​t​l​y​ ​d​e​l​e​t​e​ ​A​L​L​ ​y​o​u​r​ ​d​a​t​a​ ​—​ ​s​e​s​s​i​o​n​s​,​ ​k​n​o​w​l​e​d​g​e​,​ ​s​e​r​v​e​r​s​ ​a​n​d​ ​p​r​e​f​e​r​e​n​c​e​s​.​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.​ ​M​a​k​e​ ​s​u​r​e​ ​y​o​u​ ​h​a​v​e​ ​a​ ​b​a​c​k​u​p​.​ ​C​o​n​t​i​n​u​e​?
+	 * T​h​i​s​ ​w​i​l​l​ ​p​e​r​m​a​n​e​n​t​l​y​ ​d​e​l​e​t​e​ ​A​L​L​ ​y​o​u​r​ ​d​a​t​a​:​ ​s​e​s​s​i​o​n​s​,​ ​k​n​o​w​l​e​d​g​e​,​ ​s​e​r​v​e​r​s​ ​a​n​d​ ​p​r​e​f​e​r​e​n​c​e​s​.​ ​T​h​i​s​ ​c​a​n​n​o​t​ ​b​e​ ​u​n​d​o​n​e​.​ ​M​a​k​e​ ​s​u​r​e​ ​y​o​u​ ​h​a​v​e​ ​a​ ​b​a​c​k​u​p​.​ ​C​o​n​t​i​n​u​e​?
 	 */
 	resetEverythingConfirm: string
 	/**
@@ -1601,7 +1601,7 @@ type RootTranslation = {
 	 */
 	user: string
 	/**
-	 * E​v​e​r​y​t​h​i​n​g​ ​y​o​u​ ​c​r​e​a​t​e​ ​l​i​v​e​s​ ​h​e​r​e​ ​—​ ​y​o​u​r​ ​p​e​r​s​o​n​a​s​ ​a​n​d​ ​y​o​u​r​ ​k​n​o​w​l​e​d​g​e​.
+	 * E​v​e​r​y​t​h​i​n​g​ ​y​o​u​ ​c​r​e​a​t​e​ ​l​i​v​e​s​ ​h​e​r​e​:​ ​y​o​u​r​ ​p​e​r​s​o​n​a​s​ ​a​n​d​ ​y​o​u​r​ ​k​n​o​w​l​e​d​g​e​.
 	 */
 	librarySubtitle: string
 	/**
@@ -2118,7 +2118,7 @@ type RootTranslation = {
 	 */
 	systemInstructionsTitle: string
 	/**
-	 * T​h​e​ ​b​e​h​i​n​d​-​t​h​e​-​s​c​e​n​e​s​ ​p​r​o​m​p​t​s​ ​{​a​p​p​}​ ​i​n​j​e​c​t​s​ ​f​o​r​ ​t​h​e​ ​f​e​a​t​u​r​e​s​ ​a​b​o​v​e​.​ ​P​i​c​k​ ​o​n​e​ ​t​o​ ​v​i​e​w​ ​o​r​ ​t​w​e​a​k​ ​i​t​ ​—​ ​l​e​a​v​e​ ​i​t​ ​o​n​ ​t​h​e​ ​d​e​f​a​u​l​t​ ​u​n​l​e​s​s​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​y​o​u​ ​a​r​e​ ​c​h​a​n​g​i​n​g​.
+	 * T​h​e​ ​b​e​h​i​n​d​-​t​h​e​-​s​c​e​n​e​s​ ​p​r​o​m​p​t​s​ ​{​a​p​p​}​ ​i​n​j​e​c​t​s​ ​f​o​r​ ​t​h​e​ ​f​e​a​t​u​r​e​s​ ​a​b​o​v​e​.​ ​P​i​c​k​ ​o​n​e​ ​t​o​ ​v​i​e​w​ ​o​r​ ​t​w​e​a​k​ ​i​t​.​ ​L​e​a​v​e​ ​i​t​ ​o​n​ ​t​h​e​ ​d​e​f​a​u​l​t​ ​u​n​l​e​s​s​ ​y​o​u​ ​k​n​o​w​ ​w​h​a​t​ ​y​o​u​ ​a​r​e​ ​c​h​a​n​g​i​n​g​.
 	 * @param {string} app
 	 */
 	systemInstructionsDescription: RequiredParams<'app'>
@@ -2757,7 +2757,7 @@ type RootTranslation = {
 	 */
 	connectionFailed: string
 	/**
-	 * C​o​n​n​e​c​t​i​o​n​ ​v​e​r​i​f​i​e​d​ ​—​ ​{​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}
+	 * C​o​n​n​e​c​t​i​o​n​ ​v​e​r​i​f​i​e​d​,​ ​{​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}
 	 * @param {number} count
 	 */
 	connectionVerifiedWithModels: RequiredParams<'count'>
@@ -2906,7 +2906,7 @@ type RootTranslation = {
 	 */
 	allowUserPersonas: string
 	/**
-	 * L​o​c​k​e​d​ ​—​ ​u​s​e​r​s​ ​c​a​n​'​t​ ​c​h​a​n​g​e​ ​t​h​i​s
+	 * L​o​c​k​e​d​,​ ​u​s​e​r​s​ ​c​a​n​'​t​ ​c​h​a​n​g​e​ ​t​h​i​s
 	 */
 	lockedForUsers: string
 	/**
@@ -2926,7 +2926,7 @@ type RootTranslation = {
 	 */
 	shareSearchEngine: string
 	/**
-	 * N​o​ ​e​n​g​i​n​e​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​ ​—​ ​s​e​t​ ​o​n​e​ ​u​p​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​f​i​r​s​t​,​ ​t​h​e​n​ ​y​o​u​ ​c​a​n​ ​s​h​a​r​e​ ​i​t​.
+	 * N​o​ ​e​n​g​i​n​e​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​.​ ​S​e​t​ ​o​n​e​ ​u​p​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​f​i​r​s​t​,​ ​t​h​e​n​ ​y​o​u​ ​c​a​n​ ​s​h​a​r​e​ ​i​t​.
 	 */
 	noEngineConfigured: string
 	/**
@@ -2947,7 +2947,7 @@ type RootTranslation = {
 	 */
 	shareSystemPrompts: string
 	/**
-	 * N​o​t​h​i​n​g​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​ ​—​ ​s​e​t​ ​u​p​ ​y​o​u​r​ ​p​r​o​m​p​t​s​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​t​o​ ​s​h​a​r​e​ ​s​o​m​e​t​h​i​n​g​.
+	 * N​o​t​h​i​n​g​ ​c​o​n​f​i​g​u​r​e​d​ ​y​e​t​.​ ​S​e​t​ ​u​p​ ​y​o​u​r​ ​p​r​o​m​p​t​s​ ​i​n​ ​t​h​e​ ​C​h​a​t​ ​t​a​b​ ​t​o​ ​s​h​a​r​e​ ​s​o​m​e​t​h​i​n​g​.
 	 */
 	noPromptsConfigured: string
 	/**
@@ -2975,7 +2975,7 @@ type RootTranslation = {
 	 */
 	sharedModelsDescription: string
 	/**
-	 * N​o​ ​s​y​s​t​e​m​ ​s​e​r​v​e​r​s​ ​y​e​t​ ​—​ ​a​d​d​ ​o​n​e​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 * N​o​ ​s​y​s​t​e​m​ ​s​e​r​v​e​r​s​ ​y​e​t​.​ ​A​d​d​ ​o​n​e​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
 	 */
 	noSystemServers: string
 	/**
@@ -2983,11 +2983,11 @@ type RootTranslation = {
 	 */
 	defaultModelForUsers: string
 	/**
-	 * —​ ​n​o​n​e​ ​—
+	 * (​n​o​n​e​)
 	 */
 	none: string
 	/**
-	 * D​e​f​a​u​l​t​ ​—​ ​u​s​e​r​s​ ​m​a​y​ ​c​h​a​n​g​e​ ​i​t
+	 * D​e​f​a​u​l​t​,​ ​u​s​e​r​s​ ​m​a​y​ ​c​h​a​n​g​e​ ​i​t
 	 */
 	defaultUsersMayChange: string
 	/**
@@ -3000,7 +3000,7 @@ type RootTranslation = {
 	 */
 	sharedCount: RequiredParams<'count'>
 	/**
-	 * N​o​ ​m​o​d​e​l​s​ ​a​v​a​i​l​a​b​l​e​ ​—​ ​c​h​e​c​k​ ​t​h​i​s​ ​s​e​r​v​e​r​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 * N​o​ ​m​o​d​e​l​s​ ​a​v​a​i​l​a​b​l​e​.​ ​C​h​e​c​k​ ​t​h​i​s​ ​s​e​r​v​e​r​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
 	 */
 	noModelsCheckServersTab: string
 	/**
@@ -3270,7 +3270,7 @@ type RootTranslation = {
 	 */
 	shortcutNewLine: string
 	/**
-	 * I​n​ ​t​h​e​ ​e​x​p​a​n​d​e​d​ ​c​o​m​p​o​s​e​r​,​ ​{​m​o​d​}​↵​ ​s​e​n​d​s​ ​a​n​d​ ​↵​ ​i​n​s​e​r​t​s​ ​a​ ​l​i​n​e​ ​—​ ​s​o​ ​a​ ​l​o​n​g​ ​m​e​s​s​a​g​e​ ​c​a​n​ ​b​e​ ​w​r​i​t​t​e​n​ ​w​i​t​h​o​u​t​ ​f​i​r​i​n​g​ ​o​n​ ​e​v​e​r​y​ ​r​e​t​u​r​n​.
+	 * I​n​ ​t​h​e​ ​e​x​p​a​n​d​e​d​ ​c​o​m​p​o​s​e​r​,​ ​{​m​o​d​}​↵​ ​s​e​n​d​s​ ​a​n​d​ ​↵​ ​i​n​s​e​r​t​s​ ​a​ ​l​i​n​e​,​ ​s​o​ ​a​ ​l​o​n​g​ ​m​e​s​s​a​g​e​ ​c​a​n​ ​b​e​ ​w​r​i​t​t​e​n​ ​w​i​t​h​o​u​t​ ​f​i​r​i​n​g​ ​o​n​ ​e​v​e​r​y​ ​r​e​t​u​r​n​.
 	 * @param {string} mod
 	 */
 	shortcutExpandedNote: RequiredParams<'mod'>
@@ -3491,7 +3491,7 @@ type RootTranslation = {
 	 */
 	shortcutCompleteCommand: string
 	/**
-	 * T​y​p​e​ ​/​ ​a​t​ ​t​h​e​ ​s​t​a​r​t​ ​o​f​ ​a​n​ ​e​m​p​t​y​ ​m​e​s​s​a​g​e​ ​t​o​ ​s​e​e​ ​t​h​e​ ​c​o​m​m​a​n​d​s​.​ ​A​ ​m​e​s​s​a​g​e​ ​t​h​a​t​ ​r​e​a​l​l​y​ ​s​t​a​r​t​s​ ​w​i​t​h​ ​a​ ​s​l​a​s​h​ ​i​s​ ​w​r​i​t​t​e​n​ ​/​/​,​ ​a​n​d​ ​a​n​y​t​h​i​n​g​ ​e​l​s​e​ ​—​ ​a​ ​p​a​t​h​,​ ​a​ ​d​a​t​e​ ​—​ ​i​s​ ​s​e​n​t​ ​a​s​ ​t​y​p​e​d​.
+	 * T​y​p​e​ ​/​ ​a​t​ ​t​h​e​ ​s​t​a​r​t​ ​o​f​ ​a​n​ ​e​m​p​t​y​ ​m​e​s​s​a​g​e​ ​t​o​ ​s​e​e​ ​t​h​e​ ​c​o​m​m​a​n​d​s​.​ ​A​ ​m​e​s​s​a​g​e​ ​t​h​a​t​ ​r​e​a​l​l​y​ ​s​t​a​r​t​s​ ​w​i​t​h​ ​a​ ​s​l​a​s​h​ ​i​s​ ​w​r​i​t​t​e​n​ ​/​/​,​ ​a​n​d​ ​a​n​y​t​h​i​n​g​ ​e​l​s​e​ ​(​a​ ​p​a​t​h​,​ ​a​ ​d​a​t​e​)​ ​i​s​ ​s​e​n​t​ ​a​s​ ​t​y​p​e​d​.
 	 */
 	shortcutCommandsNote: string
 	/**
@@ -3499,7 +3499,7 @@ type RootTranslation = {
 	 */
 	compaction: string
 	/**
-	 * S​u​m​m​a​r​i​s​e​ ​t​h​e​ ​e​a​r​l​i​e​r​ ​p​a​r​t​ ​o​f​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​o​ ​i​t​ ​k​e​e​p​s​ ​f​i​t​t​i​n​g​ ​i​n​ ​t​h​e​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​.​ ​N​o​t​h​i​n​g​ ​i​s​ ​d​e​l​e​t​e​d​ ​—​ ​t​h​e​ ​s​u​m​m​a​r​y​ ​r​e​p​l​a​c​e​s​ ​t​h​o​s​e​ ​m​e​s​s​a​g​e​s​ ​o​n​l​y​ ​i​n​ ​w​h​a​t​ ​i​s​ ​s​e​n​t​,​ ​a​n​d​ ​c​a​n​ ​b​e​ ​u​n​d​o​n​e​.
+	 * S​u​m​m​a​r​i​s​e​ ​t​h​e​ ​e​a​r​l​i​e​r​ ​p​a​r​t​ ​o​f​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​o​ ​i​t​ ​k​e​e​p​s​ ​f​i​t​t​i​n​g​ ​i​n​ ​t​h​e​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​.​ ​N​o​t​h​i​n​g​ ​i​s​ ​d​e​l​e​t​e​d​:​ ​t​h​e​ ​s​u​m​m​a​r​y​ ​r​e​p​l​a​c​e​s​ ​t​h​o​s​e​ ​m​e​s​s​a​g​e​s​ ​o​n​l​y​ ​i​n​ ​w​h​a​t​ ​i​s​ ​s​e​n​t​,​ ​a​n​d​ ​c​a​n​ ​b​e​ ​u​n​d​o​n​e​.
 	 */
 	compactionDescription: string
 	/**
@@ -3523,7 +3523,7 @@ type RootTranslation = {
 	 */
 	compactThreshold: string
 	/**
-	 * A​l​s​o​ ​t​h​e​ ​c​e​i​l​i​n​g​ ​t​h​e​ ​l​o​a​d​ ​i​n​d​i​c​a​t​o​r​ ​m​e​a​s​u​r​e​s​ ​a​g​a​i​n​s​t​ ​w​h​e​n​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​d​o​e​s​ ​n​o​t​ ​a​n​n​o​u​n​c​e​ ​i​t​s​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​ ​—​ ​w​h​i​c​h​ ​i​s​ ​m​o​s​t​ ​o​f​ ​t​h​e​m​.
+	 * A​l​s​o​ ​t​h​e​ ​c​e​i​l​i​n​g​ ​t​h​e​ ​l​o​a​d​ ​i​n​d​i​c​a​t​o​r​ ​m​e​a​s​u​r​e​s​ ​a​g​a​i​n​s​t​ ​w​h​e​n​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​d​o​e​s​ ​n​o​t​ ​a​n​n​o​u​n​c​e​ ​i​t​s​ ​c​o​n​t​e​x​t​ ​w​i​n​d​o​w​,​ ​w​h​i​c​h​ ​i​s​ ​m​o​s​t​ ​o​f​ ​t​h​e​m​.
 	 */
 	compactThresholdHelp: string
 	/**
@@ -3807,7 +3807,7 @@ The completion in progress will stop
 	 */
 	lastSynced: (arg: { date: string }) => LocalizedString
 	/**
-	 * Never synced — run a sync to load its models
+	 * Never synced. Run a sync to load its models
 	 */
 	neverSynced: () => LocalizedString
 	/**
@@ -4571,7 +4571,7 @@ The completion in progress will stop
 	 */
 	currentlySharingWebFetch: (arg: { chars: unknown, pages: unknown }) => LocalizedString
 	/**
-	 * Currently sharing: off — no user may read pages.
+	 * Currently sharing: off, no user may read pages.
 	 */
 	currentlySharingWebFetchOff: () => LocalizedString
 	/**
@@ -4603,7 +4603,7 @@ The completion in progress will stop
 	 */
 	webFetchHint: () => LocalizedString
 	/**
-	 * Enabled by your administrator — up to {pages} pages per message.
+	 * Enabled by your administrator, up to {pages} pages per message.
 	 */
 	webFetchLockedOn: (arg: { pages: unknown }) => LocalizedString
 	/**
@@ -4819,7 +4819,7 @@ The completion in progress will stop
 	 */
 	resetEverythingDescription: () => LocalizedString
 	/**
-	 * This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?
+	 * This will permanently delete ALL your data: sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?
 	 */
 	resetEverythingConfirm: () => LocalizedString
 	/**
@@ -5101,7 +5101,7 @@ The completion in progress will stop
 	 */
 	user: () => LocalizedString
 	/**
-	 * Everything you create lives here — your personas and your knowledge.
+	 * Everything you create lives here: your personas and your knowledge.
 	 */
 	librarySubtitle: () => LocalizedString
 	/**
@@ -5609,7 +5609,7 @@ The completion in progress will stop
 	 */
 	systemInstructionsTitle: () => LocalizedString
 	/**
-	 * The behind-the-scenes prompts {app} injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.
+	 * The behind-the-scenes prompts {app} injects for the features above. Pick one to view or tweak it. Leave it on the default unless you know what you are changing.
 	 */
 	systemInstructionsDescription: (arg: { app: string }) => LocalizedString
 	/**
@@ -6229,7 +6229,7 @@ The completion in progress will stop
 	 */
 	connectionFailed: () => LocalizedString
 	/**
-	 * Connection verified — {count} model{{s}}
+	 * Connection verified, {count} model{{s}}
 	 */
 	connectionVerifiedWithModels: (arg: { count: number }) => LocalizedString
 	/**
@@ -6377,7 +6377,7 @@ The completion in progress will stop
 	 */
 	allowUserPersonas: () => LocalizedString
 	/**
-	 * Locked — users can't change this
+	 * Locked, users can't change this
 	 */
 	lockedForUsers: () => LocalizedString
 	/**
@@ -6397,7 +6397,7 @@ The completion in progress will stop
 	 */
 	shareSearchEngine: () => LocalizedString
 	/**
-	 * No engine configured yet — set one up in the Chat tab first, then you can share it.
+	 * No engine configured yet. Set one up in the Chat tab first, then you can share it.
 	 */
 	noEngineConfigured: () => LocalizedString
 	/**
@@ -6417,7 +6417,7 @@ The completion in progress will stop
 	 */
 	shareSystemPrompts: () => LocalizedString
 	/**
-	 * Nothing configured yet — set up your prompts in the Chat tab to share something.
+	 * Nothing configured yet. Set up your prompts in the Chat tab to share something.
 	 */
 	noPromptsConfigured: () => LocalizedString
 	/**
@@ -6445,7 +6445,7 @@ The completion in progress will stop
 	 */
 	sharedModelsDescription: () => LocalizedString
 	/**
-	 * No system servers yet — add one in the Servers tab.
+	 * No system servers yet. Add one in the Servers tab.
 	 */
 	noSystemServers: () => LocalizedString
 	/**
@@ -6453,11 +6453,11 @@ The completion in progress will stop
 	 */
 	defaultModelForUsers: () => LocalizedString
 	/**
-	 * — none —
+	 * (none)
 	 */
 	none: () => LocalizedString
 	/**
-	 * Default — users may change it
+	 * Default, users may change it
 	 */
 	defaultUsersMayChange: () => LocalizedString
 	/**
@@ -6469,7 +6469,7 @@ The completion in progress will stop
 	 */
 	sharedCount: (arg: { count: number }) => LocalizedString
 	/**
-	 * No models available — check this server in the Servers tab.
+	 * No models available. Check this server in the Servers tab.
 	 */
 	noModelsCheckServersTab: () => LocalizedString
 	/**
@@ -6729,7 +6729,7 @@ The completion in progress will stop
 	 */
 	shortcutNewLine: () => LocalizedString
 	/**
-	 * In the expanded composer, {mod}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.
+	 * In the expanded composer, {mod}↵ sends and ↵ inserts a line, so a long message can be written without firing on every return.
 	 */
 	shortcutExpandedNote: (arg: { mod: string }) => LocalizedString
 	/**
@@ -6933,7 +6933,7 @@ The completion in progress will stop
 	 */
 	shortcutCompleteCommand: () => LocalizedString
 	/**
-	 * Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else — a path, a date — is sent as typed.
+	 * Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else (a path, a date) is sent as typed.
 	 */
 	shortcutCommandsNote: () => LocalizedString
 	/**
@@ -6941,7 +6941,7 @@ The completion in progress will stop
 	 */
 	compaction: () => LocalizedString
 	/**
-	 * Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted — the summary replaces those messages only in what is sent, and can be undone.
+	 * Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted: the summary replaces those messages only in what is sent, and can be undone.
 	 */
 	compactionDescription: () => LocalizedString
 	/**
@@ -6965,7 +6965,7 @@ The completion in progress will stop
 	 */
 	compactThreshold: () => LocalizedString
 	/**
-	 * Also the ceiling the load indicator measures against when the provider does not announce its context window — which is most of them.
+	 * Also the ceiling the load indicator measures against when the provider does not announce its context window, which is most of them.
 	 */
 	compactThresholdHelp: () => LocalizedString
 	/**

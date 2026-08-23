@@ -39,7 +39,7 @@
 
 	/**
 	 * Every match as one flat sequence, so the arrow keys move between passages
-	 * rather than between conversations — the conversation heading is a grouping,
+	 * rather than between conversations: the conversation heading is a grouping,
 	 * not a stop.
 	 */
 	const rows = $derived(

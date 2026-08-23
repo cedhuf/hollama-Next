@@ -16,7 +16,7 @@ import { serversStore, settingsStore } from '$lib/localStorage';
  * for the same reason: it is one question with one answer and no history.
  *
  * What it returns is never sent anywhere on its own. The caller puts it in a
- * field the person can read and edit before a single request is made — which is
+ * field the person can read and edit before a single request is made, which is
  * the whole difference between a helper and a thing that quietly rewrites your
  * words. That is also why the instruction behind it can afford to be opinionated:
  * being overruled costs one keystroke.

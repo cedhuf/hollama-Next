@@ -13,7 +13,7 @@ import type { Message } from '$lib/sessions';
  * the server by a migration, once in the browser when local storage is first
  * read, and on the way in from any backup file.
  *
- * TODO (note migration) — the storage conversions can go a few versions after
+ * TODO (note migration): the storage conversions can go a few versions after
  * this shipped, at which point this file goes with them. The exception is the
  * backup path: an exported file does not age out, so if anything survives here
  * it is the import conversion, moved next to the importer.

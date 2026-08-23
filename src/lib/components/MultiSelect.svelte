@@ -3,7 +3,7 @@
 	import { Select } from 'bits-ui';
 
 	/**
-	 * Picks *several values from a list* — the multiple counterpart of `Select`.
+	 * Picks *several values from a list*: the multiple counterpart of `Select`.
 	 *
 	 * bits-ui keeps the panel open while entries are toggled, so this replaces the
 	 * scrolling checkbox lists we used to hand-roll, and inherits the same

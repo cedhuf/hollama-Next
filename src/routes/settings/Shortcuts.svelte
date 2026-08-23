@@ -8,7 +8,7 @@
 	/**
 	 * The shortcuts the app actually listens for.
 	 *
-	 * Read-only for now, and written from the handlers rather than from memory —
+	 * Read-only for now, and written from the handlers rather than from memory,
 	 * a shortcut list that drifts from the code is worse than none, because it
 	 * teaches the wrong thing. Each group below names where its keys are handled.
 	 */

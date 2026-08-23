@@ -13,7 +13,7 @@ import type { Backup } from './repository';
 
 /**
  * Apply one category of imported/restored data to its store. Assigning the
- * store persists it automatically through the active repository — no direct
+ * store persists it automatically through the active repository: no direct
  * storage access needed in components.
  */
 export function applyToStore(storageKey: StorageKey, data: unknown) {
@@ -24,7 +24,7 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 		case StorageKey.Servers:
 			serversStore.set(data as Parameters<typeof serversStore.set>[0]);
 			break;
-		// Restoring really does mean "this is now the whole collection" — the one
+		// Restoring really does mean "this is now the whole collection": the one
 		// place the wholesale write is the correct operation.
 		//
 		// An exported file never ages out, so a backup written before notes became

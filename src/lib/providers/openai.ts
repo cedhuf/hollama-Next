@@ -6,11 +6,11 @@ import type { ProviderDescriptor } from './types';
  * The one provider here that serves two image models with different answers, and
  * the reason model rules exist at all: a portrait is 1024x1536 on `gpt-image-1`
  * and 1024x1792 on `dall-e-3`, and their quality words are not the same words
- * either — `low`/`medium`/`high` against `standard`/`hd`.
+ * either. `low`/`medium`/`high` against `standard`/`hd`.
  *
  * `dall-e-2` is absent on purpose, though its edit endpoint exists. It takes one
  * square PNG under 4 MB and an optional mask, and none of those three conditions
- * can be said in a descriptor — so claiming it would offer a control that fails
+ * can be said in a descriptor, so claiming it would offer a control that fails
  * on most pictures. Left out, it simply takes no reference, which is a missing
  * convenience rather than a broken one.
  *

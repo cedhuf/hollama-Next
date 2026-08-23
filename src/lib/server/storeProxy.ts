@@ -40,7 +40,7 @@ export async function serveFromStore(options: {
 	base: string;
 	/** The path under it, as the route matched it. */
 	path: string | undefined;
-	/** Skip the held copy — what the Refresh control asks for. */
+	/** Skip the held copy, what the Refresh control asks for. */
 	fresh: boolean;
 	/** What to call it when something goes wrong, e.g. "persona store". */
 	label: string;

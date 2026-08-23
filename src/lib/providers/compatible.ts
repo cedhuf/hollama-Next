@@ -11,7 +11,7 @@ import type { ProviderDescriptor } from './types';
  * Almost nothing is claimed on its behalf, and the silence is the content. It is
  * llama.cpp, or vLLM, or SGLang, or a proxy somebody wrote last week. Some
  * support tool calling, some accept the field and ignore it, some answer 400,
- * and there is no way to ask — so the honest answer is no, and whoever knows
+ * and there is no way to ask, so the honest answer is no, and whoever knows
  * better says so with the `force` setting. Same for image sizes: whatever was
  * installed accepts whatever it accepts, so nothing is sent and the model
  * decides.

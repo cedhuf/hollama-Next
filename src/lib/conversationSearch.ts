@@ -54,7 +54,7 @@ export function splitExcerpt(excerpt: string): { text: string; match: boolean }[
 	return segments;
 }
 
-/** Every word has to appear, in any order — the local echo of FTS5's implicit AND. */
+/** Every word has to appear, in any order: the local echo of FTS5's implicit AND. */
 function words(query: string): string[] {
 	return query.toLowerCase().trim().split(/\s+/).filter(Boolean);
 }
@@ -102,7 +102,7 @@ function markTerm(text: string, term: string): string {
 /**
  * Local mode's search: a scan of the conversations already in memory.
  *
- * No index to maintain — there is no server to ask, and everything is loaded
+ * No index to maintain, no server to ask, and everything is loaded
  * anyway. Ordered by how many messages matched, then by recency, which is the
  * closest honest approximation of a relevance ranking without a scorer.
  */

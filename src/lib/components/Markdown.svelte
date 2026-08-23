@@ -72,7 +72,7 @@
 	md.linkify.set({ fuzzyLink: false, fuzzyEmail: false, fuzzyIP: false });
 
 	// Indented code blocks off: in Markdown four leading spaces mean "code", and
-	// models indent constantly — nested bullets, sub-points, reasoning outlines.
+	// models indent constantly: nested bullets, sub-points, reasoning outlines.
 	// Prose was landing in a code block, which by design never wraps, so a
 	// paragraph became as wide as its longest line and had to be scrolled
 	// sideways to read. Fenced blocks (```) are unaffected, and they are how a
@@ -104,7 +104,7 @@
 	}
 
 	// Shorten the visible text of links that are just their own URL. Links with
-	// authored text are left alone — the author chose those words.
+	// authored text are left alone: the author chose those words.
 	md.core.ruler.push('shorten-urls', (state) => {
 		for (const block of state.tokens) {
 			if (block.type !== 'inline' || !block.children) continue;
@@ -207,8 +207,8 @@
 	@reference "../../app.pcss";
 
 	/* As a flex child (of the message bubble), allow shrinking below content width
-	   so a long code line / table / URL scrolls or wraps instead of widening — and
-	   ultimately horizontally scrolling — the whole chat panel on mobile. */
+	   so a long code line / table / URL scrolls or wraps instead of widening (and
+	   ultimately horizontally scrolling) the whole chat panel on mobile. */
 	.markdown {
 		min-width: 0;
 		max-width: 100%;
@@ -223,7 +223,7 @@
 	}
 
 	/* Headings: a restrained, monotonic scale tuned for chat answers (close to
-	   ChatGPT/Claude) — strong colour, tight tracking, more space above than below
+	   ChatGPT/Claude): strong colour, tight tracking, more space above than below
 	   so a heading hugs the text it introduces. No width cap (it forced odd wraps). */
 	.markdown :global(h1),
 	.markdown :global(h2),
@@ -272,7 +272,7 @@
 
 	/* Reasoning is an aside, not the answer, and has to read as one at a glance.
 	   The rules above set an absolute size, so the container's `text-xs` was
-	   overridden and the two ended up identical in size and weight — the left rule
+	   overridden and the two ended up identical in size and weight: the left rule
 	   alone wasn't carrying the hierarchy. Stepped down a size and desaturated
 	   here, where the specificity is enough to win. */
 	/* `.markdown--aside` is the same treatment under a name that does not claim to
@@ -462,7 +462,7 @@
 	}
 
 	/* Fading it out until hover only makes sense where hovering exists. On touch it
-	   stays put — otherwise a code block or shell command can never be copied. */
+	   stays put: otherwise a code block or shell command can never be copied. */
 	@media (hover: hover) {
 		.markdown :global(pre > .copy-button) {
 			@apply opacity-0 transition-opacity;

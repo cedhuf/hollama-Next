@@ -59,7 +59,7 @@ export function imageOptionsFor(connectionType: string, model: string): ImageOpt
  * Reference pictures this model takes, if it takes any.
  *
  * The model's own rule first, the provider's answer second, and nothing when
- * neither says — which is what leaves the drop zone shut rather than offering a
+ * neither says, which is what leaves the drop zone shut rather than offering a
  * control the endpoint would refuse.
  */
 export function referencesFor(connectionType: string, model: string): ReferenceImages | undefined {

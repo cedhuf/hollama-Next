@@ -15,7 +15,7 @@ type CollectionTable = 'sessions' | 'knowledge' | 'personas' | 'playbooks';
  *
  * This is what a save actually is. Replacing the whole collection made the cost
  * of writing a message grow with the entire history, and let any client holding
- * a stale list delete what the others had added — the wholesale path below is
+ * a stale list delete what the others had added: the wholesale path below is
  * now reserved for restoring a backup.
  */
 export function upsertItem(
@@ -25,7 +25,7 @@ export function upsertItem(
 ): void {
 	// `id` is a global primary key, not scoped per user, so the conflict clause has
 	// to check the owner: without it, writing a guessed id would overwrite another
-	// user's row. A mismatch updates nothing rather than raising — the caller has
+	// user's row. A mismatch updates nothing rather than raising: the caller has
 	// no business knowing whether that id exists elsewhere.
 	getDb()
 		.prepare(
@@ -71,7 +71,7 @@ function replaceCollection(
 	if (table === 'sessions') reindexAllSessions(userId);
 }
 
-/** One item, scoped to its owner. `null` when it doesn't exist — or isn't theirs. */
+/** One item, scoped to its owner. `null` when it doesn't exist, or isn't theirs. */
 export function getItem<T>(table: CollectionTable, userId: string, id: string): T | null {
 	const row = getDb()
 		.prepare(`SELECT data FROM ${table} WHERE id = ? AND user_id = ?`)
@@ -82,7 +82,7 @@ export function getItem<T>(table: CollectionTable, userId: string, id: string): 
 /**
  * The conversation list, without the conversations.
  *
- * Every field the sidebar and the home page read, and none of the messages —
+ * Every field the sidebar and the home page read, and none of the messages,
  * which is the whole point: this response used to carry the entire history on
  * every boot and every return to the foreground.
  */

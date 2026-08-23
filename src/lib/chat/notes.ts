@@ -6,7 +6,7 @@ import type { Message } from '$lib/sessions';
  * A conversation carries two sorts of thing. Most of it is what was said. The
  * rest is what happened *to* it: it was compacted, it was set aside, it was
  * inspected. Those are notes, and they had been growing one hardcoded field
- * each — `compaction`, then `cleared` — with the question "does the model read
+ * each (`compaction`, then `cleared`) with the question "does the model read
  * this?" answered separately in four places, in three languages: two backwards
  * loops here, a `reduce` in the client search, and `json_extract` in SQL.
  *

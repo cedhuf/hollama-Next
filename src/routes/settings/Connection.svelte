@@ -27,7 +27,7 @@
 	/**
 	 * One provider connection, as a card that stays quiet until you open it.
 	 *
-	 * Collapsed it answers the only questions worth asking at a glance — is it
+	 * Collapsed it answers the only questions worth asking at a glance: is it
 	 * live, and how many models does it bring? Everything editable lives inside,
 	 * on the same `SettingsField` / `settings-field` grid as the other settings
 	 * tabs, so this stops being the one screen with its own look.
@@ -43,7 +43,7 @@
 		startEditing?: boolean;
 		/**
 		 * Server mode never sends keys back to the browser, so `server.apiKey` is
-		 * blank even when one is stored — this says whether to show "Key saved"
+		 * blank even when one is stored. This says whether to show "Key saved"
 		 * instead of an empty field that reads as "no key".
 		 */
 		hasApiKey?: boolean;
@@ -105,7 +105,7 @@
 	/**
 	 * One action for the whole round-trip: check the endpoint answers, stamp the
 	 * verified date (persisted by the parent) and pull this provider's models in.
-	 * There is no separate "verify" and "refresh" — syncing is what both meant.
+	 * There is no separate "verify" and "refresh": syncing is what both meant.
 	 */
 	async function syncServer() {
 		isLoading = true;

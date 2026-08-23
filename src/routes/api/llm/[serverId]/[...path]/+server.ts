@@ -12,7 +12,7 @@ import type { RequestHandler } from './$types';
 
 /**
  * Authenticated LLM proxy for server mode. The client references a server by id
- * only — never a URL or key. We verify the session and that the user may use
+ * only. Never a URL or key. We verify the session and that the user may use
  * this server (system, or their own), then forward to the real endpoint with
  * the decrypted key injected. The key never reaches the browser.
  */
@@ -62,7 +62,7 @@ const proxy: RequestHandler = async (event) => {
 	 * Two, because one was an assumption: a provider may serve its image endpoints
 	 * from somewhere the chat base cannot reach by appending a path. Resolved here
 	 * and only here, so the browser keeps sending a plain relative path and never
-	 * learns either address — which is the whole point of this relay in server
+	 * learns either address, which is the whole point of this relay in server
 	 * mode.
 	 */
 	const base = (isImage && server.image_base_url) || server.base_url;
@@ -199,7 +199,7 @@ function modelIn(body: string | undefined): string | undefined {
  * Ask an OpenAI-compatible provider to report usage on a streamed answer.
  *
  * Without `stream_options.include_usage` there is no `usage` block on a stream
- * at all, so every streamed turn — which is every turn — would go uncounted.
+ * at all, so every streamed turn (which is every turn) would go uncounted.
  * Ollama reports its counts unasked, and ignores the field.
  *
  * Left alone if the body is not JSON or already says otherwise: this is a meter,

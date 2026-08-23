@@ -1,13 +1,13 @@
 /**
  * The `<read>` protocol.
  *
- * Web search hands the model a title, a URL and a snippet per result — a sentence
- * or two, sometimes marketing copy — and asks it to write a factual answer from
+ * Web search hands the model a title, a URL and a snippet per result (a sentence
+ * or two, sometimes marketing copy) and asks it to write a factual answer from
  * that. It fills the gaps, which is a polite word for inventing.
  *
  * So the model is allowed to say it needs more: answering with `<read>1,3</read>`
  * asks for the full text of results 1 and 3, which is fetched and handed back for
- * a second, informed pass. The cost is paid only when it asks — a question the
+ * a second, informed pass. The cost is paid only when it asks: a question the
  * snippets already answer costs nothing extra.
  *
  * A result number only means something within the turn that was given that list,

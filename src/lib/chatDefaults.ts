@@ -138,7 +138,7 @@ export const chatDefaultsConfig = derived(
 				: { ...$srv.title, ...$srv.title.admin };
 
 		// Compaction: same three states. "Own" here means the user picked a model of
-		// their own — the threshold and the auto toggle stay theirs either way once
+		// their own: the threshold and the auto toggle stay theirs either way once
 		// sharing is overridable, since those are about their patience, not policy.
 		const c = !$srv.compact.editable
 			? $srv.compact

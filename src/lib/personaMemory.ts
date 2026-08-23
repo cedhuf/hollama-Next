@@ -83,7 +83,7 @@ export function emptyMemory(personaId: string): PersonaMemory {
 
 /** One note's cost in the always-present index: what the model reads to choose. */
 export function indexLine(note: MemoryNote): string {
-	return `- [${note.id}] ${note.title} — ${note.when}`;
+	return `- [${note.id}] ${note.title}: ${note.when}`;
 }
 
 /** What the memory costs on every turn, whether or not anything is opened. */

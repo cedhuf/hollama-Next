@@ -22,7 +22,7 @@ const DEBOUNCE_MS = 800;
 /**
  * Mode `server`: data lives in SQLite behind the guarded `/api/data` endpoints.
  *
- * Writes are debounced and coalesced per collection — the stores persist the
+ * Writes are debounced and coalesced per collection: the stores persist the
  * whole collection on every change (e.g. each streamed token), so without this
  * we'd PUT the entire session list dozens of times per message. Pending writes
  * are flushed on `pagehide` (with `keepalive`) so nothing is lost on close.
@@ -49,7 +49,7 @@ export class ApiRepository implements DataRepository {
 	}
 
 	/**
-	 * A 404 means "no such conversation yet" — opening an unknown id is how a new
+	 * A 404 means "no such conversation yet": opening an unknown id is how a new
 	 * chat begins. Anything else throws, so a server that is merely unreachable is
 	 * never mistaken for an empty conversation.
 	 */
@@ -106,7 +106,7 @@ export class ApiRepository implements DataRepository {
 
 	/**
 	 * Deletions are sent immediately, and cancel any write still queued for that
-	 * item — a debounced save landing after its own delete would resurrect it.
+	 * item: a debounced save landing after its own delete would resurrect it.
 	 */
 	async deleteSession(id: string): Promise<void> {
 		await this.#delete(`/api/data/sessions/${id}`);
@@ -187,7 +187,7 @@ export class ApiRepository implements DataRepository {
 	 *
 	 * It must never answer "empty" for "I could not tell". The stores persist the
 	 * whole collection at once, so a failed read that returned `[]` would leave the
-	 * store empty and the next save would replace every stored row with nothing —
+	 * store empty and the next save would replace every stored row with nothing,
 	 * the caller has to be able to distinguish the two and leave the data alone.
 	 * `null`/absent from the server is a genuine empty, and keeps the fallback.
 	 */
@@ -212,7 +212,7 @@ export class ApiRepository implements DataRepository {
 	 *
 	 * A streaming answer saves its session on every chunk, so the debounce still
 	 * earns its keep. Keying on the item's own URL means a burst on the open
-	 * conversation is no longer merged with — or delayed by — an unrelated edit to
+	 * conversation is no longer merged with (or delayed by) an unrelated edit to
 	 * another one.
 	 */
 	#schedule(url: string, value: unknown): void {

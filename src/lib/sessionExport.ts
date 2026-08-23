@@ -3,7 +3,7 @@ import { resolveSessionTitle, type Message, type Session } from '$lib/sessions';
 
 export type ExportFormat = 'json' | 'markdown';
 
-/** The raw message array — the shape the app stores, for re-import or tooling. */
+/** The raw message array: the shape the app stores, for re-import or tooling. */
 export function sessionToJson(session: Session): string {
 	return JSON.stringify(session.messages, null, 2);
 }
@@ -26,7 +26,7 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 	if (session.updatedAt) parts.push(`_${new Date(session.updatedAt).toLocaleString()}_`);
 
 	for (const message of session.messages) {
-		// A knowledge attachment is a document, not a turn — name it rather than
+		// A knowledge attachment is a document, not a turn: name it rather than
 		// dumping its full body into the transcript.
 		if (message.knowledge) {
 			parts.push(`## ${speaker(message, assistantLabel)}`, `📎 **${message.knowledge.name}**`);
@@ -42,7 +42,7 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 		// Earlier rounds first, so the transcript reads in the order it happened.
 		for (const step of message.reasoningTrace ?? []) {
 			if (step.type === 'search') {
-				parts.push(`🌐 _Searched: ${step.query} — ${step.resultCount ?? 0} results_`);
+				parts.push(`🌐 _Searched: ${step.query}: ${step.resultCount ?? 0} results_`);
 			} else if (step.type === 'read') {
 				parts.push(
 					step.pages?.length

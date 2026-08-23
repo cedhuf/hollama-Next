@@ -53,7 +53,7 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 		placeholders: ['{datetime}'],
 		hint: 'Anchors the model in the present so it trusts recent facts.',
 		default:
-			'The current date and time is {datetime}. Treat this as the authoritative present — it overrides any date you would infer from your training data. Do not reject something as impossible, fake, or a rumour merely because it postdates your training cutoff; weigh it on its own merits and on any sources you are given.'
+			'The current date and time is {datetime}. Treat this as the authoritative present. It overrides any date you would infer from your training data. Do not reject something as impossible, fake, or a rumour merely because it postdates your training cutoff; weigh it on its own merits and on any sources you are given.'
 	},
 	conversationTitle: {
 		label: 'Conversation title',
@@ -108,17 +108,17 @@ export const DEFAULT_PROMPTS: Record<PromptKey, PromptDef> = {
 
 Reply with EITHER a single web search query (a few keywords, no quotes, nothing else) OR the single word NONE.
 
-The current date is {datetime} — use it to resolve "today/now/latest" and never to write an outdated year.
+The current date is {datetime}: use it to resolve "today/now/latest" and never to write an outdated year.
 
 Output a query when the message involves: weather, news, prices, stocks, sports, schedules, opening hours; anything tied to "today/now/current/latest/aujourd'hui/actualités" or a recent or upcoming date; events, releases or facts that may have changed after your training; or an explicit request to search.
 
-Output a query as well when the message asks for a specific fact about a NAMED thing — a game, film, book, product, company, person, place, API — and you are not certain of that fact. Unfamiliar or niche names are the strongest reason to search, not a reason to give up: a lookup costs little, a confident wrong answer costs the user. This holds even when the subject is timeless (game mechanics, plot details, specifications, discography): timeless is about the fact not changing, not about you knowing it.
+Output a query as well when the message asks for a specific fact about a NAMED thing (a game, film, book, product, company, person, place, API) and you are not certain of that fact. Unfamiliar or niche names are the strongest reason to search, not a reason to give up: a lookup costs little, a confident wrong answer costs the user. This holds even when the subject is timeless (game mechanics, plot details, specifications, discography): timeless is about the fact not changing, not about you knowing it.
 
-Search too when the conversation shows the previous answer fell short — the user pushes back, corrects, insists the thing exists, or repeats the question after an "I don't know" or a request for clarification. In that case write the query from the ORIGINAL question, not from the pushback.
+Search too when the conversation shows the previous answer fell short: the user pushes back, corrects, insists the thing exists, or repeats the question after an "I don't know" or a request for clarification. In that case write the query from the ORIGINAL question, not from the pushback.
 
 Reply NONE for requests you can genuinely answer yourself from general knowledge: definitions, explanations, math, translation, coding, writing, and messages that ask nothing factual (greetings, thanks, questions about you or this conversation).
 
-Reply NONE too when the user is asking you to PRODUCE something — a recipe, a plan, a text, code, a suggestion — even when it has a name and even when they name a specific one. Naming what they want made is not asking for a fact about it.
+Reply NONE too when the user is asking you to PRODUCE something (a recipe, a plan, a text, code, a suggestion) even when it has a name and even when they name a specific one. Naming what they want made is not asking for a fact about it.
 
 Write the query for the USER's information need, not your own beliefs:
 - Use neutral, factual keywords (the topic itself). Do NOT add words like "rumor", "leak", "fake" or "hoax" just because you doubt something exists or has been released yet.
@@ -250,7 +250,7 @@ Notes you have kept. Only their titles are here, with a line saying when each on
 	},
 	toolSearch: {
 		label: 'Native tool: web_search',
-		hint: 'What the provider is told the search tool does. Says the same thing as “Web search — query”, for models that call tools instead of writing them.',
+		hint: 'What the provider is told the search tool does. Says the same thing as “Web search: query”, for models that call tools instead of writing them.',
 		default: `Search the web. Returns a numbered list of results, each with a title, an address and a short snippet. Use it for anything you are not certain of: current events, prices, schedules, opening hours, releases, and facts about a named thing such as a game, film, product, company, place or API. An unfamiliar or niche name is the strongest reason to search, not a reason to guess. Search again rather than taking back an earlier answer you have started to doubt. Cite the results you use inline with their [number].`
 	},
 	toolSearchQuery: {
@@ -260,7 +260,7 @@ Notes you have kept. Only their titles are here, with a line saying when each on
 	},
 	toolReadPage: {
 		label: 'Native tool: read_page',
-		hint: 'What the provider is told the page-reading tool does. The native counterpart of “Web search — read a result”.',
+		hint: 'What the provider is told the page-reading tool does. The native counterpart of “Web search: read a result”.',
 		default: `Fetch the full text of a page whose address you have already been given, in a search result or earlier in this conversation. Snippets are a sentence or two; use this when the detail decides the answer, and whenever you are about to contradict, doubt or take back something you said earlier from a source. You cannot open an address that has not appeared in this conversation.`
 	},
 	toolReadUrl: {
@@ -280,7 +280,7 @@ Notes you have kept. Only their titles are here, with a line saying when each on
 		label: 'Interactive choices',
 		hint: 'Teaches the model the <ask> quick-choice protocol.',
 		default: `# Interactive choices
-When the user's request is genuinely ambiguous and hinges on a personal preference you cannot infer, you MAY ask for a quick choice instead of guessing. To do so, output a SINGLE block exactly like this and then STOP — write nothing before or after it:
+When the user's request is genuinely ambiguous and hinges on a personal preference you cannot infer, you MAY ask for a quick choice instead of guessing. To do so, output a SINGLE block exactly like this and then STOP: write nothing before or after it:
 
 <ask>
 {"questions":[{"question":"...","type":"single_select","options":["...","..."]}]}
@@ -291,7 +291,7 @@ Rules:
 - Write the questions and options in the user's language.
 - Use this ONLY to clarify a preference before carrying out a task (planning, recommendations, design choices, …).
 - Do NOT use it for factual or direct questions, when the user already gave enough constraints, or when they are asking for YOUR opinion between options.
-- When you use it, the block must be the entire message — no greeting, no explanation, no answer.`
+- When you use it, the block must be the entire message: no greeting, no explanation, no answer.`
 	},
 	compactInstruction: {
 		label: 'Compaction: what the user asked for',
@@ -308,7 +308,7 @@ Write what this asks for and nothing else. Do not add sections it did not ask fo
 		hint: 'Condenses the earlier part of a conversation so it keeps fitting in the context.',
 		default: `You are compacting a conversation so it keeps fitting in the model's context window. Everything before this point will be REPLACED by what you write: whatever you leave out is lost to the assistant, permanently, for the rest of the conversation.
 
-Write a dense, factual record — not a description of the conversation. Never write "the user asked about X"; write X itself, with its answer.
+Write a dense, factual record. Not a description of the conversation. Never write "the user asked about X"; write X itself, with its answer.
 
 Cover, in this order, skipping any section that has nothing in it:
 
@@ -319,7 +319,7 @@ What the user is trying to do, and any deadline or context that frames it.
 Every choice that was settled, and the reason it was settled that way. Include choices that were rejected and why, so they are not proposed again.
 
 ## Facts and constraints
-Names, values, versions, paths, URLs, identifiers, preferences, requirements. Verbatim where precision matters — an approximated identifier is worse than an absent one.
+Names, values, versions, paths, URLs, identifiers, preferences, requirements. Verbatim where precision matters: an approximated identifier is worse than an absent one.
 
 ## Code and artifacts
 Any code, command, configuration or text that was produced and is still in use. Keep it exactly as written, in fenced blocks. Summarise only what has since been superseded.
@@ -330,7 +330,7 @@ What is done, what is in progress, and what is left.
 ## Open questions
 Anything asked and not yet answered, or explicitly deferred.
 
-Write in the language of the conversation. Be concise but never lossy: prefer a longer summary over a missing fact. Output only the summary — no preamble, no closing remark, no mention of these instructions.`
+Write in the language of the conversation. Be concise but never lossy: prefer a longer summary over a missing fact. Output only the summary, with no preamble, no closing remark, no mention of these instructions.`
 	},
 	compactContext: {
 		label: 'Compaction: use the summary',

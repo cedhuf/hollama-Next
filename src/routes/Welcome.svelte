@@ -31,7 +31,7 @@
 	 * The welcome tour shown once on a user's first connection (server mode). Unlike
 	 * the local-mode wizard it configures nothing mandatory: the account already
 	 * exists and its profile comes from the identity provider, so this is an
-	 * introduction — what the app is, how it can look, and who you can talk to.
+	 * introduction, what the app is, how it can look, and who you can talk to.
 	 */
 	let step = $state(0);
 
@@ -265,7 +265,7 @@
 			</div>
 		</div>
 	{:else if step === 1}
-		<!-- 2. Make it yours — applies live, saved as you click -->
+		<!-- 2. Make it yours: applies live, saved as you click -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 pb-1 text-center">
 				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
@@ -469,7 +469,7 @@
 
 			<!-- A gallery filling in, played rather than described: the same shapes the
 			     page shows while it is drawing, then the pictures landing one by one.
-			     Nothing is fetched — these are the app's own accent, not photographs. -->
+			     Nothing is fetched. These are the app's own accent, not photographs. -->
 			<div class="grid grid-cols-3 gap-2">
 				{#each tileImages as image, tile (tile)}
 					<div

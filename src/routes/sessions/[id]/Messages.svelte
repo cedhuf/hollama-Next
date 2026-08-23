@@ -65,8 +65,8 @@
 	/**
 	 * Everything before the last marker is out of context: on screen, but not sent.
 	 *
-	 * While a compaction runs, every message qualifies in advance — the summary
-	 * covers all of them — so the fade lands with the pending pill rather than
+	 * While a compaction runs, every message qualifies in advance (the summary
+	 * covers all of them) so the fade lands with the pending pill rather than
 	 * after it, and the two read as one action.
 	 */
 	const foldedBefore = $derived(
@@ -108,7 +108,7 @@
 			at === -1 ? [] : session.messages.slice(0, at).filter((m) => m.note?.kind !== 'cleared');
 	});
 
-	// While the model is streaming an <ask> block the visible text is empty — show
+	// While the model is streaming an <ask> block the visible text is empty: show
 	// a choices skeleton instead of a bare "…".
 	//
 	// A <read> block is protocol too, and its whole round is thrown away once the

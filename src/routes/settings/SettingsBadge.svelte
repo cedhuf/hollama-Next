@@ -5,7 +5,7 @@
 	 * The little grey pill that says where a setting's value comes from when it
 	 * isn't the user's own: "set by admin", "env", "shared by admin".
 	 *
-	 * It reads as an annotation on the label, never as something clickable — which
+	 * It reads as an annotation on the label, never as something clickable, which
 	 * is why it stays a plain span rather than reusing `Badge` (bordered, mono,
 	 * and used for identifiers elsewhere).
 	 */

@@ -38,7 +38,7 @@ export type NativeToolsPreference = 'off' | 'auto' | 'force';
  * assistant: it hands the turn to somebody else, with their model, their
  * options, their prompt and their tools. Which is why a speaker carries the
  * fields it overrides rather than a persona id the runner would have to look up
- * — the run has no library, and by the time it starts every question about who
+ *: the run has no library, and by the time it starts every question about who
  * is answering has to be settled.
  *
  * The ordinary turn is one speaker with no persona, and says so by having none.

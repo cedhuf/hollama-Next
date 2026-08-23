@@ -194,7 +194,7 @@
 	});
 
 	/**
-	 * Whether to offer the rewriter: switched on, and with a model to run it —
+	 * Whether to offer the rewriter: switched on, and with a model to run it,
 	 * its own, or failing that the one this account uses for everything else.
 	 */
 	const canRewrite = $derived(
@@ -203,7 +203,7 @@
 	);
 
 	// The instance's or the account's default, and failing both the first model
-	// that can draw — so the field is never empty on arrival.
+	// that can draw, so the field is never empty on arrival.
 	onMount(() => {
 		if (model) return;
 		const preferred = $chatDefaultsConfig.images.defaultImageModel;
@@ -281,7 +281,7 @@
 	 * Hand a file to the browser.
 	 *
 	 * An anchor rather than a navigation, because the picture route serves its
-	 * bytes `inline` — going to it would show the image instead of saving it, and
+	 * bytes `inline`: going to it would show the image instead of saving it, and
 	 * `download` is what says which of the two is meant. Both routes are
 	 * same-origin and behind the same session as the page itself.
 	 */
@@ -701,7 +701,7 @@
      on a click outside as well as on its own button, and those two routes are the
      dialog's own business. Handed a plain expression it shut itself while
      `opened` stayed full, and since the expression never changed value nothing
-     could open it again — every later click set a different picture behind a
+     could open it again, every later click set a different picture behind a
      dialog that had already decided it was closed.
 
      A pair of functions rather than a plain `bind:`, because what the dialog
@@ -847,14 +847,14 @@
 			     a second translucent white on the bar added to the first and the bar came
 			     out nearly opaque. Blur adds nothing. It softens what is already there
 			     until it stops competing with text, which is the whole job, and it is the
-			     same trade the app's own surfaces make everywhere else — transparency and
+			     same trade the app's own surfaces make everywhere else: transparency and
 			     blur move together, and neither is any use alone. -->
 			<!-- The picture stops where the prompt starts.
 			
 			     It used to run underneath it, which is what a floating bar does by
 			     definition, and on a landscape image the bar sat squarely across the
-			     bottom of the subject. The bar keeps its floating look — it is still over
-			     the blurred backdrop, not in a band of its own — but the box the picture
+			     bottom of the subject. The bar keeps its floating look (it is still over
+			     the blurred backdrop, not in a band of its own) but the box the picture
 			     is fitted into gives up exactly the room the bar occupies.
 			
 			     Measured rather than assumed, because that height is one line or ten
@@ -878,7 +878,7 @@
 
 				     No ellipsis, and that is a choice rather than an oversight. The clip
 				     lands on a line boundary, so it never cuts through a letter, and the
-				     control sitting at the end of the line already says there is more —
+				     control sitting at the end of the line already says there is more,
 				     which is the only job an ellipsis would have had. It also keeps the
 				     opening animation honest in both directions: `line-clamp` has no
 				     in-between, so re-applying one on the way closed would snap the text to

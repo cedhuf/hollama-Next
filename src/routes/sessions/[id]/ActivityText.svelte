@@ -22,7 +22,7 @@
 		children: Snippet;
 		/** Height, in pixels, beyond which the step is cut off. */
 		max?: number;
-		/** Off for the step still being written — its newest text is at the bottom. */
+		/** Off for the step still being written, its newest text is at the bottom. */
 		clamp?: boolean;
 	} = $props();
 

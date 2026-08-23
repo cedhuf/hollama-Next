@@ -3,7 +3,7 @@
  *
  * Deliberately not a framework: a small registry and one regex. A command is
  * recognised only when the whole prompt is a single line starting with `/` and
- * naming a known command — so a message that merely begins with a slash (a path,
+ * naming a known command, so a message that merely begins with a slash (a path,
  * a regex, a date) is sent as text, and an unknown `/word` is too rather than
  * being swallowed with an error. `//` at the start escapes to a literal `/`.
  */
@@ -81,7 +81,7 @@ export function unescapeSlash(prompt: string): string {
 }
 
 /**
- * The prefix being typed, for the autocomplete — `null` unless the caret sits in
+ * The prefix being typed, for the autocomplete. `null` unless the caret sits in
  * a lone `/word` on the first and only line. Returned lowercased and without the
  * slash, so `/Comp` matches `compact`.
  */

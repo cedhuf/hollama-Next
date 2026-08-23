@@ -20,13 +20,13 @@
 		<Dialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
 		<!-- Full screen on phones, a floating card from `sm` up.
 		     90vw × 85vh left a 5% gutter of unreachable page around a dialog that
-		     already needed every pixel — neither a card nor a screen. These dialogs
+		     already needed every pixel: neither a card nor a screen. These dialogs
 		     are whole tasks (settings, a persona, a conversation's config), so on a
 		     phone they take the screen; the border, radius and shadow only earn
 		     their keep once the dialog is genuinely floating above something.
 
 		     `overflow-clip` rather than `hidden`: both clip identically, but `hidden`
-		     still makes this a scroll container, and the browser used it — revealing a
+		     still makes this a scroll container, and the browser used it: revealing a
 		     control deep inside a panel scrolled the dialog itself to bring the newly
 		     focused element into view, sliding its whole body up by that distance and
 		     leaving it there. `clip` cannot be scrolled at all. -->

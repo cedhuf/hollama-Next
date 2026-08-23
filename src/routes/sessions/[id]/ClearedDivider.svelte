@@ -120,7 +120,7 @@
 							? ''
 							: 'line-clamp-1'}"
 					>
-						{entry.content.trim() || '—'}
+						{entry.content.trim() || $LL.none()}
 					</span>
 				</button>
 			{/each}

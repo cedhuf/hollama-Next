@@ -6,7 +6,7 @@
 	 * Dropdown menu of *actions* (the value-picking counterpart is `Select`).
 	 *
 	 * Built on bits-ui so every instance gets flipping, collision detection, focus
-	 * handling, Escape/outside-click and ARIA for free — and, because the content is
+	 * handling, Escape/outside-click and ARIA for free, and, because the content is
 	 * portalled, it is never clipped by an `overflow-hidden` ancestor (the session
 	 * card is one).
 	 *

@@ -9,7 +9,7 @@
 export function extractUrls(text: string): string[] {
 	const found = text.match(/\bhttps?:\/\/[^\s<>"'`]+/gi) ?? [];
 	const cleaned = found.map((url) =>
-		// Trailing punctuation usually belongs to the sentence, not the URL —
+		// Trailing punctuation usually belongs to the sentence, not the URL:
 		// unless it closes a pair that opened inside it.
 		url.replace(/[.,;:!?]+$/, '').replace(/\)+$/, (parens) => {
 			const opened = (url.match(/\(/g) ?? []).length;

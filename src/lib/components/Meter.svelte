@@ -8,8 +8,8 @@
 	 * exists: a bar drawn with a width is a picture, and a screen reader is handed
 	 * nothing. This one carries its value, its bounds and its label.
 	 *
-	 * The colour is the same reading as the context ring, deliberately — warm past
-	 * two thirds, red at the top — so two gauges in the same app never mean
+	 * The colour is the same reading as the context ring, deliberately (warm past
+	 * two thirds, red at the top) so two gauges in the same app never mean
 	 * opposite things.
 	 */
 	interface Props {

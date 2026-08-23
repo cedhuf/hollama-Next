@@ -91,7 +91,7 @@
 		if (isCheckingForUpdates || isCurrentVersionLatest || !latestVersion) return;
 
 		// On a shared instance only an admin can act on this. A user would get a
-		// notice about something they can't do anything about — the About tab still
+		// notice about something they can't do anything about: the About tab still
 		// lets them check by hand.
 		if (isServerMode && $currentRole !== 'admin') return;
 
@@ -119,8 +119,8 @@
 	 * The server is now serving a build this client isn't running.
 	 *
 	 * Distinct from the release notice above: that one says a newer version exists
-	 * somewhere, this one says the instance in front of you has already moved —
-	 * after a `podman auto-update`, say — and everyone's tab is running yesterday's
+	 * somewhere, this one says the instance in front of you has already moved:
+	 * after a `podman auto-update`, say, and everyone's tab is running yesterday's
 	 * code until it reloads. It notifies rather than reloading on its own: a reload
 	 * would take an unsent message or a running generation with it.
 	 */
@@ -154,7 +154,7 @@
 	 *
 	 * A browser tab is opened, used and closed; an installed PWA is suspended and
 	 * resumed for days without ever re-running its boot. Both things it reads once
-	 * at startup — the stored conversations and the running build — can have moved
+	 * at startup (the stored conversations and the running build) can have moved
 	 * on in the meantime, so both are checked here, on the way back in.
 	 */
 	/**
@@ -292,7 +292,7 @@
 			document.documentElement.setAttribute('data-color-theme', theme);
 
 			// Keep the OS/browser chrome tint in sync with the live safe-area chrome
-			// colour (shade-1), across all theme styles — Dracula, Catppuccin, …
+			// colour (shade-1), across all theme styles. Dracula, Catppuccin, …
 			if (browser) {
 				const chrome = getComputedStyle(document.documentElement)
 					.getPropertyValue('--color-shade-1')
@@ -341,7 +341,7 @@
 		loadLocale($settingsStore.userLanguage);
 		setLocale($settingsStore.userLanguage);
 
-		// Migrate old server settings to new format (local mode only — legacy localStorage data)
+		// Migrate old server settings to new format (local mode only: legacy localStorage data)
 		const settingsLocalStorage =
 			env.PUBLIC_MODE !== 'server' ? localStorage.getItem(StorageKey.Preferences) : null;
 		if (settingsLocalStorage) {
@@ -421,7 +421,7 @@
 		}
 
 		// Server mode has no first-run wizard (the account and its profile are
-		// provisioned for the user), so new users get the welcome tour instead —
+		// provisioned for the user), so new users get the welcome tour instead:
 		// once, on their first connection.
 		// Shown again when an administrator says so, which is what the epoch is for:
 		// each browser remembers the stamp it acknowledged, so a newer one plays the
@@ -600,7 +600,7 @@
 		letter-spacing: normal;
 	}
 
-	/* Mobile: the app shell is shade-1, so the root background must match it — the OS-managed
+	/* Mobile: the app shell is shade-1, so the root background must match it, because the OS-managed
 	   status-bar and home-indicator strips then blend in seamlessly. */
 	@media (max-width: 1023px) {
 		:global(html),

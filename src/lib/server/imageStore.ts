@@ -12,8 +12,8 @@ import { extensionFor } from '$lib/generatedImages';
  * megabytes that are only ever read whole and never queried, which is the one
  * shape a database is worst at and a filesystem is best at.
  *
- * One directory per account. Not for security — every read goes through a query
- * scoped to the owner before it gets here — but because it makes "what is this
+ * One directory per account. Not for security (every read goes through a query
+ * scoped to the owner before it gets here) but because it makes "what is this
  * person holding" and "delete this person" answerable with a path.
  */
 

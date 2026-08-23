@@ -38,7 +38,7 @@
 		return answered ? (choices.selected?.[qi] ?? []) : effective(qi);
 	}
 
-	/** Locked-in answers that aren't one of the offered options — i.e. free-text answers. */
+	/** Locked-in answers that aren't one of the offered options, i.e. free-text answers. */
 	function customAnswers(qi: number): string[] {
 		const opts = choices.questions[qi].options;
 		return (choices.selected?.[qi] ?? []).filter((v) => !opts.includes(v));

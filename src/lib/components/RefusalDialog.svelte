@@ -11,7 +11,7 @@
 	 * A toast is right for "the server did not answer": it is transient, it is
 	 * nobody's decision, and trying again is a reasonable next move. A refusal is
 	 * neither of those. Somebody decided this, trying again will do the same
-	 * thing, and what the person needs is who to ask — so it stops the page and
+	 * thing, and what the person needs is who to ask, so it stops the page and
 	 * says so, with the address.
 	 *
 	 * `AlertDialog` rather than `Dialog`, because that is what it is: a message

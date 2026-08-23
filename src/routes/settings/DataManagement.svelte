@@ -72,7 +72,7 @@
 		description: string;
 	}
 
-	// Reactive (labels come from $LL) — one source of truth for the per-category rows.
+	// Reactive (labels come from $LL): one source of truth for the per-category rows.
 	const dataSources = $derived<DataSource[]>([
 		{
 			storageKey: StorageKey.Servers,
@@ -135,7 +135,7 @@
 	/**
 	 * Exported from storage, not from the store.
 	 *
-	 * The conversation store holds summaries — titles and dates, no messages — so
+	 * The conversation store holds summaries (titles and dates, no messages) so
 	 * reading it here would have written a backup file that looked complete and
 	 * restored empty conversations.
 	 */

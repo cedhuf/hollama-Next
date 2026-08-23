@@ -36,7 +36,7 @@
 	 * What this connection knows about each of its models: what to call it, what
 	 * it is for, and what it costs.
 	 *
-	 * The name is display only — the real id is still what gets sent to the
+	 * The name is display only: the real id is still what gets sent to the
 	 * provider, matched by `modelFilter` and stored on sessions. The price is two
 	 * numbers per million tokens, which is how every provider publishes them.
 	 *
@@ -51,7 +51,7 @@
 		 * The models this instance offers its users.
 		 *
 		 * Only these are coloured. An unpriced model matters when somebody else can
-		 * reach it — a model nobody is offered is nobody's allowance, and marking it
+		 * reach it: a model nobody is offered is nobody's allowance, and marking it
 		 * red would be an alarm about nothing.
 		 */
 		shared?: string[];
@@ -137,7 +137,7 @@
 	 * The list, cut into what each part of it is for.
 	 *
 	 * Chat first because that is what most connections are mostly made of, then
-	 * images, then the embeddings — which are here to be seen and left alone, and
+	 * images, then the embeddings, which are here to be seen and left alone, and
 	 * which no picker in the app offers any more. Empty sections are not drawn: a
 	 * heading over nothing says a connection is missing something it never had.
 	 */
@@ -194,7 +194,7 @@
 	 *
 	 * A figure is worth keeping, and so is a unit on its own: saying "this one is
 	 * billed per minute" is an answer, given before the rate is typed and often
-	 * before it is known. Dropping it there was a bug you could watch happen — the
+	 * before it is known. Dropping it there was a bug you could watch happen: the
 	 * unit snapped back to tokens the instant it was chosen, because the row it
 	 * lived in had just been deleted for being empty.
 	 *
@@ -359,7 +359,7 @@
 			     one list: the models you hold a conversation with, the ones that draw
 			     and the ones that return a vector are three different tools. Telling
 			     them apart here is what lets every picker in the app stop offering the
-			     wrong one, which is not a tidiness problem — an embedding model chosen
+			     wrong one, which is not a tidiness problem: an embedding model chosen
 			     for a conversation is a 400 with no explanation attached. -->
 			{#each sections as section (section.kind)}
 				<div class="flex flex-col gap-1.5">
@@ -372,7 +372,7 @@
 
 					<!-- One row per model, one column at every width: the editable name on
 					     top, the real id underneath. Side by side, both halves were too
-					     narrow to read on a phone — and the id was printed twice, once as
+					     narrow to read on a phone, and the id was printed twice, once as
 					     the placeholder of its own field. -->
 					{#each section.models as name (name)}
 						{@const label = server.modelLabels?.[name] ?? ''}
@@ -449,7 +449,7 @@
 									{#if hasPrice}
 										<span class="tabular-nums">
 											{#if unit === 'token'}
-												{price?.input ?? '—'} / {price?.output ?? '—'}
+												{price?.input ?? '-'} / {price?.output ?? '-'}
 											{:else}
 												{price?.rate}
 											{/if}
@@ -472,7 +472,7 @@
 								>
 									<!-- Everything about this price on one row: what it is billed by,
 									     what it costs, in what, and the way back to nothing. Spread
-									     across the width rather than bunched at the left — each field
+									     across the width rather than bunched at the left, each field
 									     hugs its own value, so left to themselves they pile up in a
 									     corner of a panel that is mostly empty. -->
 									<div class="flex flex-wrap items-center gap-2">
@@ -568,7 +568,7 @@
 										</select>
 
 										<!-- Zero is a price: free, and counted as such. Clearing is the
-										     other answer — nobody has said — and a field cannot be walked
+										     other answer (nobody has said) and a field cannot be walked
 										     back to it. -->
 										<button
 											type="button"

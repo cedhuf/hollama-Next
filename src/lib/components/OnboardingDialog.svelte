@@ -14,7 +14,7 @@
 		/** Current step index (0-based). */
 		step: number;
 		totalSteps: number;
-		/** Called when the dialog is dismissed — the flow decides what "done" means. */
+		/** Called when the dialog is dismissed: the flow decides what "done" means. */
 		onDismiss: () => void;
 		children: Snippet;
 		footer?: Snippet;

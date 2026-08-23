@@ -68,9 +68,9 @@ export interface ChatRequest {
  * A single streamed delta: regular `content`, separate reasoning `thinking`,
  * and/or the tool calls the turn ended on.
  *
- * Tool calls arrive whole. Providers stream them in fragments — OpenAI sends the
+ * Tool calls arrive whole. Providers stream them in fragments. OpenAI sends the
  * name and then the arguments a few characters at a time, keyed by an index that
- * has to be reassembled — and every caller doing that reassembly itself would be
+ * has to be reassembled, and every caller doing that reassembly itself would be
  * the same bug written three times. Each strategy accumulates internally and
  * emits the finished calls once, at the end of the stream.
  */
@@ -94,7 +94,7 @@ export type ChatChunk = {
  * Providers that expose reasoning in a field of its own (Ollama's `thinking`,
  * `reasoning_content` over OpenAI-compatible endpoints) are already separated for
  * us. The rest emit `<think>…</think>` inline in the content, which the streaming
- * path splits out downstream — but `complete()` returns the raw string, so every
+ * path splits out downstream, but `complete()` returns the raw string, so every
  * one-shot caller has to do it here or read the model's deliberation as if it were
  * the answer. A router that replies `<think>Hmm, is this real?…</think>NONE` is
  * indistinguishable from one that replies nothing at all.

@@ -21,7 +21,7 @@ export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
  * Persistence is suspended until the first hydration completes. In server mode
  * the stores load asynchronously, and any write before that finishes (a page
  * creating a session, the model-list cache, a default theme…) would PUT
- * empty/default values and clobber the server data — the cause of data vanishing
+ * empty/default values and clobber the server data: the cause of data vanishing
  * on refresh. Local mode hydrates synchronously, so it's ready immediately.
  */
 let persistenceReady = !!repository.hydrate;
@@ -29,7 +29,7 @@ let persistenceReady = !!repository.hydrate;
 /**
  * A writable store that persists every change through the active repository.
  *
- * The very first (synchronous) emission — the seed echo — is skipped: there's
+ * The very first (synchronous) emission (the seed echo) is skipped: there's
  * nothing new to persist, and in server mode persisting the empty seed before
  * async hydration would clobber the user's server-side data. `setQuiet()` sets
  * the value without persisting, used to hydrate from the repository at boot.
@@ -70,8 +70,8 @@ function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise
  * `persistedStore` above persists whatever the store now holds, which is right
  * for a single value (the settings) and wrong for a collection: the array is all
  * the repository ever sees, so "this session changed" and "these are the only
- * sessions left" become the same write. Here the operation is explicit —
- * `upsert` saves one item, `remove` deletes one item — and the in-memory array
+ * sessions left" become the same write. Here the operation is explicit:
+ * `upsert` saves one item, `remove` deletes one item, and the in-memory array
  * is kept in step for the components reading it.
  *
  * `setQuiet` fills the store from storage without writing anything back;
@@ -203,11 +203,11 @@ export async function hydrateStores(): Promise<void> {
 	} catch (error) {
 		// Persistence stays suspended. The stores still hold their empty seed, and
 		// letting a write out now would replace the user's stored collections with
-		// it — the boot equivalent of the refresh wipe guarded against below.
+		// it: the boot equivalent of the refresh wipe guarded against below.
 		reportLoadFailure(error);
 		return;
 	}
-	// Only now may writes reach the server — the stores hold real data.
+	// Only now may writes reach the server: the stores hold real data.
 	persistenceReady = true;
 }
 
@@ -216,8 +216,8 @@ export async function hydrateStores(): Promise<void> {
  *
  * The stores are filled once at boot and never again, which is right for a page
  * that lives as long as its data. A PWA doesn't: it is suspended and resumed for
- * days, so conversations written from the browser — or from another device
- * against the same server — never appeared until it was force-quit. Called when
+ * days, so conversations written from the browser (or from another device
+ * against the same server) never appeared until it was force-quit. Called when
  * the app comes back to the foreground.
  *
  * Unlike `hydrateStores` this also refreshes local mode, where a second window
@@ -245,7 +245,7 @@ export async function refreshStores(): Promise<void> {
 	if (!persistenceReady) return;
 
 	// A refresh that fails must change nothing. This runs when the app comes back
-	// to the foreground — typically right after the server restarted under it, so
+	// to the foreground: typically right after the server restarted under it, so
 	// the read failing is the expected case, not the exotic one. Emptying the
 	// stores here would arm the next `saveSession` to replace every stored session
 	// with the single one still open on screen.
@@ -278,7 +278,7 @@ export async function refreshStores(): Promise<void> {
  * Tell the user their data could not be read.
  *
  * Silence here is what makes the failure dangerous: an empty sidebar looks like
- * an empty account, and the natural reaction — carry on typing — is what used to
+ * an empty account, and the natural reaction (carry on typing) is what used to
  * destroy the rest. Saving is off until a load succeeds, so say so.
  */
 function reportLoadFailure(error: unknown): void {
@@ -289,7 +289,7 @@ function reportLoadFailure(error: unknown): void {
 
 	toast.error('Could not load your data', {
 		id: 'data-load-error',
-		description: `${error instanceof Error ? error.message : 'Unknown error'} — saving is paused; reload once the server is back.`,
+		description: `${error instanceof Error ? error.message : 'Unknown error'}: saving is paused; reload once the server is back.`,
 		duration: Number.POSITIVE_INFINITY
 	});
 }

@@ -45,7 +45,7 @@
 				{#snippet badge()}
 					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
 				{/snippet}
-				<input class="settings-field" disabled value={dmValue ?? '—'} />
+				<input class="settings-field" disabled value={dmValue ?? $LL.none()} />
 			</SettingsField>
 		{/if}
 
@@ -92,7 +92,7 @@
 					class="settings-field"
 					disabled
 					value={titleCfg.generateTitlesWithAI
-						? `${$LL.on()} — ${titleCfg.titleModel || '—'}`
+						? `${$LL.on()}: ${titleCfg.titleModel || $LL.none()}`
 						: $LL.off()}
 				/>
 			</SettingsField>
@@ -142,14 +142,14 @@
 			<SettingsHint>{$LL.compactThresholdHelp()}</SettingsHint>
 		{:else}
 			<SettingsField label={$LL.compactModel()}>
-				<input class="settings-field" disabled value={compactCfg.compactModel || '—'} />
+				<input class="settings-field" disabled value={compactCfg.compactModel || $LL.none()} />
 			</SettingsField>
 			<SettingsField label={$LL.autoCompact()}>
 				<input
 					class="settings-field"
 					disabled
 					value={compactCfg.autoCompact
-						? `${$LL.on()} — ${compactCfg.compactThreshold.toLocaleString()}`
+						? `${$LL.on()}: ${compactCfg.compactThreshold.toLocaleString()}`
 						: $LL.off()}
 				/>
 			</SettingsField>

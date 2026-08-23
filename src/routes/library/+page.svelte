@@ -230,9 +230,9 @@
 	 *
 	 * Three menu entries all opened the same picker and then failed if you chose
 	 * the wrong kind, which is a quiz about a format nobody memorises. Every one of
-	 * these announces itself — a bundle says `llooma.persona` or `llooma.playbook`,
+	 * these announces itself: a bundle says `llooma.persona` or `llooma.playbook`,
 	 * an OpenWebUI export has its own shape, a knowledge file is a name and some
-	 * text — so the file is asked instead.
+	 * text, so the file is asked instead.
 	 *
 	 * Anything that is not JSON at all is a document: a Markdown note dropped here
 	 * becomes knowledge under its own file name, which is what somebody handing a
@@ -412,7 +412,7 @@
 
 			<!-- Equal rows: a card's height comes from how many lines its tags wrap
 			     onto, so two rows of personas ended up visibly different heights. Only
-			     within a section — the three hold different things and forcing a
+			     within a section: the three hold different things and forcing a
 			     knowledge card to the height of a persona card would be padding, not
 			     alignment. -->
 			<div

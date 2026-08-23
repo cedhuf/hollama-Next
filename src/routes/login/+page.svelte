@@ -26,7 +26,7 @@
 	 * "Sign-in failed" is what somebody can act on; the code is what whoever runs
 	 * the instance can act on, and it was being dropped. `Configuration` means the
 	 * provider could not be built or its discovery document could not be fetched
-	 * *from the server* — which looks identical, from a browser that can reach the
+	 * *from the server*, which looks identical, from a browser that can reach the
 	 * identity provider perfectly well. Hiding that turns a one-line diagnosis
 	 * into an evening.
 	 */

@@ -28,8 +28,8 @@
 	 * The accounts on this instance.
 	 *
 	 * Its own tab rather than a section at the bottom of Admin. Admin is about how
-	 * the instance behaves — what is shared, what is locked, what users may change
-	 * — and every control there is a policy. This is a list of people, with two
+	 * the instance behaves (what is shared, what is locked, what users may change
+	 *) and every control there is a policy. This is a list of people, with two
 	 * actions that are neither of those: adding somebody, and removing them along
 	 * with everything they wrote. It was the one thing on that page you scrolled
 	 * to rather than read.
@@ -226,7 +226,7 @@
 				</label>
 
 				<!-- Not a <label>: it forwards its click to the control it labels, which
-				     on a menu trigger is a second click — the menu opens and shuts in the
+				     on a menu trigger is a second click: the menu opens and shuts in the
 				     same gesture. Sized for the longest option, so choosing a short one
 				     does not move everything beside it. -->
 				<div class="flex flex-col gap-1 text-sm">

@@ -5,7 +5,7 @@ const scryptAsync = promisify(scrypt);
 const KEY_LENGTH = 64;
 
 /**
- * Password hashing with `scrypt` from `node:crypto` — no native dependency,
+ * Password hashing with `scrypt` from `node:crypto`: no native dependency,
  * no build step (works in Alpine/Nix). Format: `scrypt$<salt>$<hash>`, base64.
  */
 export async function hashPassword(password: string): Promise<string> {

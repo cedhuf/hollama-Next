@@ -313,7 +313,7 @@ export function setModelKinds(serverId: string, kinds: Record<string, ModelKind>
  *
  * The hole a credit limit has if this is not checked: a model with no price is
  * not counted, so a limit that is in force everywhere else is simply absent on
- * that one — and it is absent for everybody, silently, because it was an
+ * that one, and it is absent for everybody, silently, because it was an
  * oversight rather than a decision. An administrator has to be able to see the
  * list, and the relay has to refuse it in the meantime.
  */

@@ -26,7 +26,7 @@
 	 * Shown whether or not there is a limit, and to administrators as much as to
 	 * anyone: somebody who can raise their own ceiling still wants to know what
 	 * they are spending under it. Without a limit there is no bar, because a bar
-	 * needs two numbers — the figure alone is the whole answer.
+	 * needs two numbers: the figure alone is the whole answer.
 	 */
 	interface Usage {
 		period: 'month' | 'week' | 'day';
@@ -90,7 +90,7 @@
 	 * At a fifth of a euro per million, a week of real use rounds to a thousandth
 	 * and the amount alone says almost nothing. The token count is the same fact
 	 * at a scale somebody can feel, and it is the one the provider actually
-	 * reported — the money is our arithmetic on top of it.
+	 * reported: the money is our arithmetic on top of it.
 	 */
 	const tokens = $derived(usage ? usage.spend.inputTokens + usage.spend.outputTokens : 0);
 

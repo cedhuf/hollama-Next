@@ -1,6 +1,6 @@
 <script lang="ts">
 	/**
-	 * A placeholder for content still being fetched — but only once the wait is
+	 * A placeholder for content still being fetched, but only once the wait is
 	 * long enough to be worth acknowledging.
 	 *
 	 * A skeleton that appears and vanishes inside 100ms is worse than no skeleton
@@ -14,8 +14,8 @@
 	 */
 	interface Props {
 		/**
-		 * `card` — a connection-card row: tile, two lines, trailing control.
-		 * `row` — a single bordered line, for lists of compact rows.
+		 * `card`, a connection-card row: tile, two lines, trailing control.
+		 * `row`: a single bordered line, for lists of compact rows.
 		 */
 		variant?: 'card' | 'row';
 		count?: number;

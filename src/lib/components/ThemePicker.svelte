@@ -6,7 +6,7 @@
 
 	/**
 	 * Theme mode + style picker. Writes straight to the settings store, so every
-	 * change applies live and persists on its own — shared by the Interface settings
+	 * change applies live and persists on its own: shared by the Interface settings
 	 * panel and the welcome tour.
 	 */
 	const themeModes = [
@@ -132,7 +132,7 @@
 		}
 	] as const;
 
-	// `system` follows the OS, so the previews have to follow it too — including
+	// `system` follows the OS, so the previews have to follow it too: including
 	// when it flips while the panel is open.
 	let systemPrefersDark = $state(false);
 
@@ -150,7 +150,7 @@
 	 * Touching either control settles the question for good.
 	 *
 	 * An instance can hand out a starting theme without fixing it, and that offer
-	 * has to stop the moment someone makes a choice of their own — including the
+	 * has to stop the moment someone makes a choice of their own: including the
 	 * choice of what the instance happened to be giving them. Guessing from the
 	 * stored values cannot tell "never chose" from "chose the default".
 	 */

@@ -7,7 +7,7 @@ import { costOf, type TokenCount } from '$lib/usageCounts';
  *
  * The server keeps this in SQLite, per account, and enforces a limit with it.
  * Here there is no account to limit and nobody to limit it: what is left is the
- * part that is useful to somebody paying their own provider — knowing what the
+ * part that is useful to somebody paying their own provider: knowing what the
  * week cost. So this counts and shows, and refuses nothing.
  *
  * Same shape as the server's table, deliberately: a row per day, summed over

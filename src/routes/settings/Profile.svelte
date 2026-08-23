@@ -47,7 +47,7 @@
 
 	// An OIDC-provisioned identity is owned by the provider: name and avatar are
 	// re-read from its claims, so editing them here would silently diverge. The
-	// panel stays visible — the fields simply become read-only.
+	// panel stays visible: the fields simply become read-only.
 	const oidcManaged = $derived(isServerMode && !!$currentUser?.oidc);
 </script>
 

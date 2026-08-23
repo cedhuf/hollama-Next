@@ -30,7 +30,7 @@ export function toAdminView(row: ServerRow) {
  * The custom display names for the models a caller is actually allowed to see.
  *
  * Labels are keyed by model id, so handing over the whole map would disclose the
- * ids of models a user isn't offered — hence the filter through the visible list.
+ * ids of models a user isn't offered: hence the filter through the visible list.
  */
 export function pickModelLabels(serverId: string, models: string[]): Record<string, string> {
 	const all = getModelLabels(serverId);

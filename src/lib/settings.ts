@@ -86,7 +86,7 @@ export interface Settings {
 	 * Tokens at which a conversation counts as full.
 	 *
 	 * Also the ceiling the load indicator measures against whenever the real one
-	 * is unknown — which is most providers, since only Ollama's `num_ctx` is
+	 * is unknown, which is most providers, since only Ollama's `num_ctx` is
 	 * something the app is told.
 	 */
 	compactThreshold: number;
@@ -98,7 +98,7 @@ export interface Settings {
 	 *
 	 * `off` keeps the `<read>` blocks and the router pre-pass, which work on every
 	 * endpoint the app can talk to. `auto` uses native calling wherever it is known
-	 * to be supported — Ollama says so per model, the hosted providers all take it —
+	 * to be supported (Ollama says so per model, the hosted providers all take it)
 	 * and falls back to the text path everywhere else. `force` is for a
 	 * self-hosted OpenAI-compatible server that supports it without any way to say so.
 	 */
@@ -227,8 +227,8 @@ export interface Settings {
 	/**
 	 * Whether the app's framing surfaces are translucent at all. Its own switch
 	 * rather than the bottom of the slider: turning the effect off is a decision
-	 * about legibility and about cost — `backdrop-filter` is paid on every frame
-	 * of every scroll — not a taste one, and it deserves to be reachable in one
+	 * about legibility and about cost (`backdrop-filter` is paid on every frame
+	 * of every scroll) not a taste one, and it deserves to be reachable in one
 	 * click. The system's reduced-transparency preference forces it off whatever
 	 * this says.
 	 */
@@ -237,7 +237,7 @@ export interface Settings {
 	 * Where along the axis, from 0 to 100, with 50 the reference the surfaces are
 	 * drawn for and the middle of the track, marked so it can be found again. Low is glass: see-through, barely blurred, the content behind
 	 * readable. High is tint: dense and heavily blurred, closer to paint. The two
-	 * properties move together because either one alone is unusable — transparency
+	 * properties move together because either one alone is unusable: transparency
 	 * without blur leaves two texts fighting, blur without transparency shows
 	 * nothing.
 	 */

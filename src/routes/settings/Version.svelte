@@ -49,7 +49,7 @@
 	 *
 	 * Deliberately not a "checking" state: a status that swaps to a long sentence
 	 * mid-check and back is what made this row jump between one and two lines. The
-	 * last known answer stays put, and the button carries the spinner instead —
+	 * last known answer stays put, and the button carries the spinner instead,
 	 * the same split macOS uses in Software Update.
 	 */
 	const status = $derived.by<{
@@ -105,7 +105,7 @@
 	<div class="flex items-center justify-center gap-4 py-2">
 		<Logo class="h-20 w-20 shrink-0" />
 		<div class="flex flex-col items-start gap-1.5">
-			<!-- Name, how to say it, and which build — one line, because they are one
+			<!-- Name, how to say it, and which build: one line, because they are one
 			     thought. The pronunciation is a phonemic transcription (IPA), muted so
 			     it reads as a gloss on the name rather than part of it. -->
 			<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">

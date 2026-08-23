@@ -245,7 +245,7 @@ export async function runTurn(
 		if (memory && memoryTooling) nativeTools.push(...memoryTools(overrides));
 
 		// Pages the user linked to are read in full, and take precedence over a
-		// search: given an address, looking it up by keyword is the wrong move —
+		// search: given an address, looking it up by keyword is the wrong move,
 		// the model would answer from snippets about the page instead of the page.
 		const linkedUrls = input.flags.webFetch
 			? extractUrls(input.messages.filter((m) => m.role === 'user').at(-1)?.content ?? '')
@@ -293,7 +293,7 @@ export async function runTurn(
 			// search entirely and nothing is shown.
 			if (query && input.flags.webSearchAuto) {
 				// The query writer: decides whether to search and reformulates a neutral,
-				// date-anchored query (query rewriting). Fed only the recent turns — not
+				// date-anchored query (query rewriting). Fed only the recent turns. Not
 				// the session system prompt, which would bias it toward chatting. Run at
 				// temperature 0 for determinism. Editable in Settings → Tools.
 				const routerInstruction = resolvePrompt('searchRouter', overrides, {
@@ -330,7 +330,7 @@ export async function runTurn(
 						query = null;
 					}
 				} catch {
-					// Router failed — fall back to searching the raw user message.
+					// Router failed: fall back to searching the raw user message.
 				}
 			}
 
@@ -373,7 +373,7 @@ export async function runTurn(
 				});
 			} else {
 				// The router declined. Without this note nothing in the context tells the
-				// model apart "I searched and found nothing" from "I never searched" —
+				// model apart "I searched and found nothing" from "I never searched",
 				// and models fill that silence by claiming they looked it up, sometimes
 				// staging fake searches in their reasoning first.
 				//
@@ -706,7 +706,7 @@ export async function runTurn(
 			reasoningProcessor.finalize();
 
 			// The native path. A turn ends when the model stops asking for tools, or
-			// when it runs out of rounds — never on the tools failing, since a failure
+			// when it runs out of rounds. Never on the tools failing, since a failure
 			// is text it can read and answer around.
 			if (nativeTools.length) {
 				if (!toolCalls.length || signal.aborted) break;
@@ -831,7 +831,7 @@ export async function runTurn(
 						{
 							role: 'system',
 							content:
-								'The pages you asked to read could not be retrieved. Answer from the search snippets alone, and say plainly that you could not open the pages — do not present their contents as if you had read them.'
+								'The pages you asked to read could not be retrieved. Answer from the search snippets alone, and say plainly that you could not open the pages: do not present their contents as if you had read them.'
 						}
 					]
 				};

@@ -35,7 +35,7 @@
 	 * There were two of these, one per catalogue, and the mechanism was the same
 	 * in both. The argument that settled it is the one nobody thinks of as design:
 	 * "is anything of mine out of date" was a question you had to ask twice, in two
-	 * windows, with two buttons and two settings — and three times once plugins
+	 * windows, with two buttons and two settings, and three times once plugins
 	 * arrive. A store that holds everything answers it once.
 	 *
 	 * The views follow: what you can install, what is yours, what this instance

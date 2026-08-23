@@ -13,7 +13,7 @@
 	 * persona editor pinned Export and Delete to a footer; the playbook editor,
 	 * three days younger, put a delete button at the bottom of the body where it
 	 * scrolled out of reach, and had no export at all. Neither of those was a
-	 * decision — they are what happens when the same dialog is built again from
+	 * decision. They are what happens when the same dialog is built again from
 	 * memory.
 	 *
 	 * The two actions live in the title bar, next to the close, rather than in a

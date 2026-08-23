@@ -116,7 +116,7 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
  * Three outcomes, not two. `none` is the router doing its job and declining;
  * `unreadable` is the router failing to answer the question it was asked. They
  * used to be the same value, and the caller could only treat both as "don't
- * search" — which meant a model whose reply we couldn't parse silently disabled
+ * search", which meant a model whose reply we couldn't parse silently disabled
  * web search for that message, and then got told it had chosen not to look
  * anything up. Keeping them apart lets the caller fall back instead.
  */

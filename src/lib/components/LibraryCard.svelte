@@ -13,8 +13,8 @@
 	 * bigger, in a grid of its own, and the page stopped reading as one library.
 	 *
 	 * So there is one card. A persona wears a face; a playbook does not, and that
-	 * is the whole of the difference between them here. Everything else — the size,
-	 * the clamped description, the tags, the footer, the two layouts — is the same
+	 * is the whole of the difference between them here. Everything else (the size,
+	 * the clamped description, the tags, the footer, the two layouts) is the same
 	 * because there was never a reason for it not to be.
 	 *
 	 * Three rules, each of them a fault this replaced:

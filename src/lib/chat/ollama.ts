@@ -96,7 +96,7 @@ export class OllamaStrategy implements ChatStrategy {
 	 * Ask `/api/show` whether a model can call tools.
 	 *
 	 * The opposite default to `supportsThinking`: unknown means no. Thinking has a
-	 * runtime fallback to catch a wrong guess, tool calling has none — a model that
+	 * runtime fallback to catch a wrong guess, tool calling has none: a model that
 	 * cannot call tools but is offered them does not fail, it improvises, and the
 	 * user gets an answer with a JSON blob in it or a promise to search that never
 	 * happened. Better to keep the text protocol, which works everywhere.
@@ -296,7 +296,7 @@ export class OllamaStrategy implements ChatStrategy {
 		if (!response.ok) return '';
 		const data = await response.json();
 		// Ollama returns reasoning in `message.thinking`, so `content` is normally
-		// clean — but a model that ignores `think: false` falls back to inline tags.
+		// clean, but a model that ignores `think: false` falls back to inline tags.
 		return stripThinkTags(data?.message?.content ?? '');
 	}
 

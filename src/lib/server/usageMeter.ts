@@ -19,7 +19,7 @@ import { addUsage } from './db/usage';
  * A tee has two consumers: one is the response, the other is a loop running in
  * the background with nobody waiting for it, and when the request ends the
  * second half can be cancelled before it has read the chunk that carries the
- * totals — which is the last one. Nothing was counted, and nothing said so.
+ * totals, which is the last one. Nothing was counted, and nothing said so.
  *
  * Here there is one consumer. Every chunk passes through on its way out, the
  * meter sees exactly what the browser sees, and the recording happens when the
@@ -84,7 +84,7 @@ export function meter(
  *
  * The same passthrough as `meter`, reading nothing. There is nothing to read: an
  * image response carries no token counts, and the two things it is billed by are
- * both known without opening it — how many images were asked for, and how long
+ * both known without opening it: how many images were asked for, and how long
  * the provider took. The count comes from the request, which is the only place
  * it is stated before the answer exists, and the clock stops when the stream
  * closes rather than when the headers land, because generation is still running

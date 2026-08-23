@@ -58,7 +58,7 @@ export function personaOrigin(persona: Persona): string | undefined {
 /**
  * A reusable "character": a named bundle of a system prompt (its soul), a base
  * model, an avatar and a few capabilities. Created in the Library, chatted with
- * as an ongoing relationship. A persona is a *template* — when a chat starts its
+ * as an ongoing relationship. A persona is a *template*, when a chat starts its
  * values are snapshotted into the session, so the persona never acts as a live
  * resolution layer (which would fight the per-session/per-model/global resolver).
  */
@@ -229,7 +229,7 @@ export async function launchPersona(persona: Persona, models: Model[]): Promise<
 				.filter(Boolean)
 				.join('\n\n')
 		},
-		systemPromptEdited: true, // fixed by the persona — don't auto-resolve over it
+		systemPromptEdited: true, // fixed by the persona: don't auto-resolve over it
 		options: persona.params?.temperature != null ? { temperature: persona.params.temperature } : {},
 		model,
 		title: persona.name,
@@ -245,8 +245,8 @@ export async function launchPersona(persona: Persona, models: Model[]): Promise<
 }
 
 /**
- * Personas you've actually talked to — i.e. whose bound conversation still
- * exists — most recent first. Drives both the sidebar launchers and the home
+ * Personas you've actually talked to, i.e. whose bound conversation still
+ * exists, most recent first. Drives both the sidebar launchers and the home
  * "recent personas" row. A persona leaves this list when its conversation is
  * deleted (see `unbindPersonaSession`).
  */

@@ -2,7 +2,7 @@
 	/**
 	 * Shown while the model is generating but hasn't emitted any text yet.
 	 *
-	 * Three dots riding a wave — the same idiom as a typing indicator, so it reads as
+	 * Three dots riding a wave: the same idiom as a typing indicator, so it reads as
 	 * "something is coming" rather than as content. Pure CSS: bits-ui has no
 	 * indeterminate loader (its Progress/Meter are determinate), and Tailwind's
 	 * built-ins (pulse/bounce/ping) can't stagger across siblings.

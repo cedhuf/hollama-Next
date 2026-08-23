@@ -28,7 +28,7 @@
 		/** The glyphs on offer. Empty (the default) leaves the section out entirely. */
 		glyphs?: readonly PersonaGlyph[];
 		size?: number;
-		/** Read-only rendering — no menu, no hover affordance (e.g. OIDC-managed). */
+		/** Read-only rendering: no menu, no hover affordance (e.g. OIDC-managed). */
 		readonly?: boolean;
 		label?: string;
 		onColorChange?: (color: string) => void;

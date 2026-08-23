@@ -23,7 +23,7 @@ export interface Server {
 	color?: string;
 	/**
 	 * Display-only overrides, keyed by the real model id. Never sent to the API and
-	 * never persisted on sessions — `model.name` stays the single identifier.
+	 * never persisted on sessions. `model.name` stays the single identifier.
 	 */
 	modelLabels?: Record<string, string>;
 	/**
@@ -114,7 +114,7 @@ export const SERVER_COLORS = [
  *
  * Four, because that is what providers actually publish and the app converts
  * nothing. Tokens for anything you talk to. An image model is billed per image
- * by OpenAI, per second of compute by Replicate, and per minute by Infomaniak —
+ * by OpenAI, per second of compute by Replicate, and per minute by Infomaniak,
  * and a minute is not a second scaled by sixty as far as the person typing the
  * figure is concerned. Storing the unit as published means a price typed from an
  * invoice reads back the way the invoice wrote it.
@@ -190,7 +190,7 @@ export function modelPrice(
  *
  * Embeddings first: `bge_multilingual_gemma2` carries the name of a chat model
  * inside it, and reading it as one is exactly the mistake this exists to stop.
- * Substrings rather than exact ids because nobody ships one id — every family
+ * Substrings rather than exact ids because nobody ships one id, every family
  * arrives as a dozen sizes, dates and quantisations, and a list of exact names
  * is a list that is wrong by the end of the month.
  */
@@ -238,7 +238,7 @@ const IMAGE_HINTS = [
  *
  * A guess, and named one. It is right often enough that a freshly synced
  * connection lands in the right sections on its own, and wrong often enough that
- * the answer has to stay overridable — which is what `modelKinds` is for. Text
+ * the answer has to stay overridable, which is what `modelKinds` is for. Text
  * is the fallback because it is both the commonest and the least destructive
  * mistake: a text model offered for drawing fails loudly at the first request,
  * where an image model quietly missing from the chat picker looks like the
@@ -272,7 +272,7 @@ export function serverBadge(server: Pick<Server, 'connectionType' | 'color'>) {
 }
 
 /**
- * A colour for a new connection, preferring one nobody else is using — two
+ * A colour for a new connection, preferring one nobody else is using: two
  * providers sharing an accent would defeat the point of colouring them at all.
  * Once the palette is exhausted it just picks at random.
  */
@@ -316,7 +316,7 @@ export function imageBaseUrl(server: Pick<Server, 'baseUrl' | 'imageBaseUrl'>): 
  */
 export interface ProviderInfo {
 	type: ConnectionType;
-	/** Display name — proper nouns, not translated. */
+	/** Display name: proper nouns, not translated. */
 	name: string;
 	/** OpenAI-compatible providers use the OpenAI chat strategy. */
 	family: 'ollama' | 'openai';

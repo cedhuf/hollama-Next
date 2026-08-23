@@ -35,7 +35,7 @@ export async function GET(event) {
 	 *
 	 * With no limit anywhere, an unpriced model is simply uncounted and nothing is
 	 * wrong. The moment one account has an allowance, the same model becomes a way
-	 * around it — and the relay refuses it, so this list is also the list of what
+	 * around it, and the relay refuses it, so this list is also the list of what
 	 * has stopped working and why.
 	 */
 	const users = listUsers();

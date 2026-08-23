@@ -25,8 +25,8 @@ export async function GET(event) {
 	/**
 	 * The manifest, first, because it is the part that cannot be recovered.
 	 *
-	 * A folder of pictures is a folder of pictures; what made each one — the
-	 * prompt, the model, what it cost — only exists in the app until it is written
+	 * A folder of pictures is a folder of pictures; what made each one (the
+	 * prompt, the model, what it cost) only exists in the app until it is written
 	 * down beside them.
 	 */
 	const manifest = images.map((image) => ({

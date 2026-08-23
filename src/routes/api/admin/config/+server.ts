@@ -150,7 +150,7 @@ export async function PUT(event) {
 	}
 
 	// Web fetch: the admin shares their own configuration, exactly as they share
-	// their search engine — Admin only decides who else gets it.
+	// their search engine. Admin only decides who else gets it.
 	if (['off', 'locked', 'overridable'].includes(body?.webFetchSharing)) {
 		setConfig('webFetchSharing', body.webFetchSharing);
 	}
@@ -178,7 +178,7 @@ export async function PUT(event) {
 	if (typeof body?.titleServerId === 'string') setConfig('titleServerId', body.titleServerId);
 
 	// Compaction: the admin shares the model that writes the summaries, plus the
-	// automatic trigger and its ceiling — the ceiling matters most for providers
+	// automatic trigger and its ceiling: the ceiling matters most for providers
 	// that never announce their context window, where it is the only limit there is.
 	if (typeof body?.compactModel === 'string') setConfig('compactModel', body.compactModel);
 	if (typeof body?.compactServerId === 'string') {

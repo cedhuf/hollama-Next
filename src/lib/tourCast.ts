@@ -3,7 +3,7 @@
  *
  * Fixed here rather than read from the store, and that is the point. The tour is
  * the first thing anyone sees, it runs before a single request has had to
- * succeed, and it explains what a persona *is* — a question whose answer does not
+ * succeed, and it explains what a persona *is*: a question whose answer does not
  * change with what a particular catalogue happens to list today. Built on the
  * store it was a first impression that depended on a network call: a cold cache
  * meant a skeleton, an unreachable listing meant an apology, and a curated

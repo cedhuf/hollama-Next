@@ -18,7 +18,7 @@ interface Migration {
 }
 
 /**
- * Ordered, append-only list of schema migrations. Never edit a past migration —
+ * Ordered, append-only list of schema migrations. Never edit a past migration:
  * add a new one. Applied inside a transaction and recorded in
  * `schema_migrations`.
  */

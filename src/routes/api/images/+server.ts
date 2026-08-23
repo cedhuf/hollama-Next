@@ -16,7 +16,7 @@ export async function GET(event) {
  * Draw something.
  *
  * Long, and deliberately not a job queue. The work happens here, in the server,
- * and what it produces is written to the gallery before this answers — so a tab
+ * and what it produces is written to the gallery before this answers, so a tab
  * that closes halfway through loses the response and nothing else. The picture
  * is on the next page load. A queue would buy a progress bar, and cost a whole
  * second lifecycle to keep correct.

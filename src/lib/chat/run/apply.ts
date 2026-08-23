@@ -212,7 +212,7 @@ export function applyRunEvent(
 
 		case 'usage':
 			// Local mode only: the server counts in its relay, where it can also refuse.
-			// Here nobody is refused anything, and what is left is worth knowing —
+			// Here nobody is refused anything, and what is left is worth knowing:
 			// somebody paying their own provider wants to see what the week cost.
 			if (!isServerMode) {
 				// The event names its own model and connection, so a persona answering

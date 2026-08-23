@@ -4,8 +4,8 @@
  * It began as one folder of personas and a setting pointing at it. Adding
  * playbooks made the shape of that mistake obvious: a second address, a second
  * setting, a second proxy route, a second admin field, and a person running a
- * mirror having to move both and remember which is which. Whatever comes next —
- * plugins, prompts, whole instance presets — would have added a third of each.
+ * mirror having to move both and remember which is which. Whatever comes next:
+ * plugins, prompts, whole instance presets: would have added a third of each.
  *
  * So there is one address, and what lives under it is a folder per kind:
  *

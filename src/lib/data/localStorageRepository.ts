@@ -34,7 +34,7 @@ export class LocalStorageRepository implements DataRepository {
 	 * changed: on the overwhelmingly common load where there is nothing to do it
 	 * costs one parse and no write.
 	 *
-	 * TODO (note migration) — removable a few versions after this shipped, along
+	 * TODO (note migration): removable a few versions after this shipped, along
 	 * with `chat/legacyNotes`.
 	 */
 	#adoptLegacyNotes(): void {
@@ -87,7 +87,7 @@ export class LocalStorageRepository implements DataRepository {
 	}
 
 	/**
-	 * localStorage holds one blob, so the messages are read either way — but they
+	 * localStorage holds one blob, so the messages are read either way, but they
 	 * are dropped here rather than kept in the store, so both modes present the
 	 * lists with the same shape and nothing can save a summary as a conversation.
 	 */

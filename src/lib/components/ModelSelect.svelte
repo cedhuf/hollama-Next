@@ -10,16 +10,16 @@
 	/**
 	 * The single model chooser for the whole app.
 	 *
-	 * One list everywhere: recently used first, then the rest — each row carrying its
+	 * One list everywhere: recently used first, then the rest, each row carrying its
 	 * parameter size and a provider badge. Only the trigger changes between contexts;
 	 * the panel, grouping, search and keyboard handling are always identical.
 	 */
 	interface Props {
 		value?: string;
 		/**
-		 * `hero` — wide home-screen field.
-		 * `default` — standard form field, filling its `SettingsField`.
-		 * `attached` — left half of a joined control: it draws no outer border of its
+		 * `hero`: wide home-screen field.
+		 * `default`: standard form field, filling its `SettingsField`.
+		 * `attached`: left half of a joined control: it draws no outer border of its
 		 *   own (the wrapper owns it, so focus rings the whole group), only a divider
 		 *   towards its neighbour. Its width is fluid so it borrows whatever room the
 		 *   header has to spare.
@@ -53,7 +53,7 @@
 		onSelect
 	}: Props = $props();
 
-	/** Badge for a model's connection — honours the colour set on that connection. */
+	/** Badge for a model's connection: honours the colour set on that connection. */
 	function badgeFor(serverId: string) {
 		const server = $serversStore.find((s) => s.id === serverId);
 		return server ? serverBadge(server) : { id: '', color: '#888780' };
@@ -111,7 +111,7 @@
 	onChange={(option) => onSelect?.(option.value)}
 >
 	{#snippet trigger({ props, label, hasValue })}
-		<!-- Same bordered control everywhere — only the scale changes, so it reads as
+		<!-- Same bordered control everywhere, only the scale changes, so it reads as
 		     one component whether it anchors the home screen or sits in a header row. -->
 		{#if variant === 'attached'}
 			<button

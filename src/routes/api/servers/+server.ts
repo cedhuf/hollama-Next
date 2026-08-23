@@ -5,7 +5,7 @@ import { allowUserKeys } from '$lib/server/db/config';
 import { createServer } from '$lib/server/db/servers';
 import { toProviderView } from '$lib/server/serverViews';
 
-// Personal servers — only when the admin has enabled allowUserKeys.
+// Personal servers, only when the admin has enabled allowUserKeys.
 export async function POST(event) {
 	const user = await requireUser(event);
 	if (!allowUserKeys()) throw error(403, 'User-provided keys are disabled');

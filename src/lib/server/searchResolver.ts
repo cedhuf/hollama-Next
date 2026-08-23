@@ -23,7 +23,7 @@ const envToken = () => privateEnv.SEARCH_TOKEN?.trim() || '';
 /**
  * Resolve the effective web-search config for a user (server mode):
  *   env (locked) > the user's own (admins always) > the admin-shared config.
- * The admin shares their own config (snapshotted into app_config) — there's a
+ * The admin shares their own config (snapshotted into app_config), there's a
  * single place to configure it (Chat settings), Admin only chooses the sharing.
  */
 export function resolveSearch(userSettings: Settings | null, isAdmin: boolean): ResolvedSearch {

@@ -29,8 +29,8 @@
 
 	// Server-mode connections. Admins manage shared SYSTEM servers; users their
 	// own PERSONAL servers (when enabled). Saved servers use the full Connection
-	// UI (verify, Ollama pull, model filter, advanced, enable, delete) — same as
-	// local mode — just persisted via the API. New servers are added through a
+	// UI (verify, Ollama pull, model filter, advanced, enable, delete) (same as
+	// local mode) just persisted via the API. New servers are added through a
 	// Verify → Save card.
 
 	interface ApiServer {
@@ -57,7 +57,7 @@
 	/**
 	 * True until the first `load()` settles. Without it the tab renders its
 	 * "no permission" / empty state from the default values and then swaps it for
-	 * the real one — a wrong answer shown confidently for as long as the request takes.
+	 * the real one: a wrong answer shown confidently for as long as the request takes.
 	 */
 	let loading = $state(true);
 	/** Which connections already hold a key, keyed by id (see `ApiServer.hasApiKey`). */
@@ -122,7 +122,7 @@
 
 	/**
 	 * `force` re-fetches after a mutation; otherwise the session-wide
-	 * `/api/providers` cache answers, which is usually already warm — the sessions
+	 * `/api/providers` cache answers, which is usually already warm: the sessions
 	 * layout fills it at boot to build the model list.
 	 */
 	async function load(force = false) {
@@ -154,7 +154,7 @@
 			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 		);
 		// The model dropdowns read colours and display names off `serversStore`,
-		// which is otherwise only filled at boot — refresh it too, or the change
+		// which is otherwise only filled at boot: refresh it too, or the change
 		// stays invisible until a reload.
 		serversStore.setQuiet(providers.map(providerToServer));
 	}

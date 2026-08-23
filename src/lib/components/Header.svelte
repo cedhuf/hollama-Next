@@ -11,7 +11,7 @@
 		 * The two are genuinely different objects, not two skins. The edge paints once
 		 * beside what it heads, so the wallpaper reaches it and the two columns share
 		 * one top line. The pill lies over the conversation, so its tint multiplies
-		 * with the one underneath and it reads as solid — which is what a card is for.
+		 * with the one underneath and it reads as solid, which is what a card is for.
 		 * What it buys instead is the text passing around it, the same way it passes
 		 * around the composer.
 		 *

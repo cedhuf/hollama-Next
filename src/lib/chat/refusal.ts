@@ -4,7 +4,7 @@
  * A refusal has to survive the trip: it leaves as an HTTP status and a sentence,
  * and arrives at the browser as an `Error` whose message is whatever the
  * provider SDK made of the body. The status does not survive that, so the
- * sentence is the protocol — and a protocol written twice is one that drifts the
+ * sentence is the protocol, and a protocol written twice is one that drifts the
  * first time somebody rewords a message.
  *
  * Hence one module, imported by the relay that writes it and by the page that

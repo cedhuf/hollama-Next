@@ -6,8 +6,8 @@ import { settingsStore } from '$lib/localStorage';
 /**
  * Reading the pages a message links to.
  *
- * Web search hands the model titles and snippets — a sentence or two, sometimes
- * marketing copy — and asks it to write a factual answer from that. This closes
+ * Web search hands the model titles and snippets (a sentence or two, sometimes
+ * marketing copy) and asks it to write a factual answer from that. This closes
  * the gap: when the user names a URL, the model gets the page.
  */
 

@@ -74,12 +74,12 @@
 		onChoose?: (selected: string[][]) => void;
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
-		/** Whether the running lookup is a search or a page read — they read differently. */
+		/** Whether the running lookup is a search or a page read. They read differently. */
 		searchActivity?: 'search' | 'read';
 		searchQuery?: string;
-		/** True while the model is streaming an <ask> block — show a choices skeleton. */
+		/** True while the model is streaming an <ask> block: show a choices skeleton. */
 		preparingChoices?: boolean;
-		/** Label for assistant bubbles — the persona's name when in a persona chat. */
+		/** Label for assistant bubbles: the persona's name when in a persona chat. */
 		assistantLabel?: string;
 		currentRawReasoning?: string;
 		currentRawCompletion?: string;
@@ -138,8 +138,8 @@
 
 	/**
 	 * The timeline, oldest first: the recorded steps, then the round still being
-	 * written. The last round lives in `reasoning` rather than in the trace — it is
-	 * still streaming — but it belongs at the end of the same list, which is what
+	 * written. The last round lives in `reasoning` rather than in the trace (it is
+	 * still streaming) but it belongs at the end of the same list, which is what
 	 * keeps it from jumping when a second round pushes it into history.
 	 */
 	const steps = $derived([
@@ -167,7 +167,7 @@
 	 */
 	const showDone = $derived(steps.length > 0 && !isThinking);
 
-	/** What it is doing, or — once done — what it did. */
+	/** What it is doing, or (once done) what it did. */
 	const activityLabel = $derived.by(() => {
 		if (isSearching) return searchActivity === 'read' ? $LL.readingPages() : $LL.searchingTheWeb();
 		if (isThinking && message.reasoning) return $LL.thinkingActivity();
@@ -455,7 +455,7 @@
 						{/each}
 
 						<!-- The timeline needs an end, otherwise the last step reads as one that
-						     was cut short — especially when it's a page read with no thinking after. -->
+						     was cut short: especially when it's a page read with no thinking after. -->
 						{#if showDone}
 							<div class="flex gap-2">
 								<div class="text-muted flex w-4 shrink-0 flex-col items-center">
@@ -567,7 +567,7 @@
 			</div>
 		{/if}
 
-		<!-- Actions hang under the message they act on, along its own edge — the same
+		<!-- Actions hang under the message they act on, along its own edge: the same
 		     rule for both roles, so they read as belonging to that turn rather than
 		     sitting at some fixed corner of the thread. Small and muted: they are
 		     always secondary to the text. -->

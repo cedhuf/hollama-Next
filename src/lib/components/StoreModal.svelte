@@ -24,7 +24,7 @@
 	/**
 	 * The store, as a page: search, views, layout, refresh, and a grid of cards.
 	 *
-	 * Everything here is true of any store — what a view is, what the one button
+	 * Everything here is true of any store, what a view is, what the one button
 	 * says, when "update all" appears, what an unreachable store looks like. What
 	 * differs between the personas and the playbooks is the card, and the card is
 	 * a snippet the caller supplies.
@@ -78,8 +78,8 @@
 		updatableCount?: number;
 		onUpdateAll?: () => Promise<void> | void;
 		/**
-		 * Whether sharing exists here at all — it does not in local mode, where there
-		 * is one person and nobody to share with — and whether this person may.
+		 * Whether sharing exists here at all (it does not in local mode, where there
+		 * is one person and nobody to share with) and whether this person may.
 		 *
 		 * Drawn for everyone and refused where it is not allowed, rather than
 		 * absent: a card that loses a control depending on who is looking is a

@@ -6,7 +6,7 @@
 	/**
 	 * Autocomplete for slash commands, docked above the composer.
 	 *
-	 * Shown only while the prompt is a bare `/word` — the moment a space or a
+	 * Shown only while the prompt is a bare `/word`: the moment a space or a
 	 * second line is typed, the caller stops rendering it, because from then on
 	 * the user is writing a message, not naming a command.
 	 *

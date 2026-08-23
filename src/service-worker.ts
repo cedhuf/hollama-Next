@@ -42,7 +42,7 @@ sw.addEventListener('fetch', (event) => {
 	// Dynamic + auth endpoints must always hit the network.
 	if (url.pathname.startsWith('/api') || url.pathname.startsWith('/auth')) return;
 
-	// Hashed build assets and static files never change — serve them from cache.
+	// Hashed build assets and static files never change: serve them from cache.
 	if (ASSETS.includes(url.pathname)) {
 		event.respondWith(caches.match(request).then((cached) => cached ?? fetch(request)));
 		return;

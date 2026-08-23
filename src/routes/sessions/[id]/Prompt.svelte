@@ -105,7 +105,7 @@
 	);
 	const menuOpen = $derived(matches.length > 0 && !editor.isCompletionInProgress);
 
-	/** Positions the arrows may land on — an unavailable command is listed, not chosen. */
+	/** Positions the arrows may land on: an unavailable command is listed, not chosen. */
 	const selectable = $derived(
 		matches.map((c, i) => (c.available ? i : -1)).filter((i) => i !== -1)
 	);
@@ -240,7 +240,7 @@
 		return ct !== undefined && supportsReasoningToggle(ct);
 	});
 
-	// Persona chats keep the composer minimal — no parameters/controls tab and no
+	// Persona chats keep the composer minimal: no parameters/controls tab and no
 	// expand-to-code-editor toggle.
 	const isPersona = $derived(!!session.personaId);
 
@@ -388,7 +388,7 @@
 		if (isTouchPrimary()) editor.promptTextarea?.blur();
 
 		// A recognised command never becomes a message: it runs, and the composer
-		// clears. Anything else — including an unknown `/word` — is sent as typed,
+		// clears. Anything else (including an unknown `/word`) is sent as typed,
 		// minus the `//` escape for a message that really does start with a slash.
 		const command = parseSlashCommand(editor.prompt ?? '', knownCommands);
 		if (command) {
@@ -583,7 +583,7 @@
 
 <style lang="postcss">
 	.prompt-editor__textarea {
-		/* Grows with what's typed, bounded by min/max-height — no manual resize needed. */
+		/* Grows with what's typed, bounded by min/max-height: no manual resize needed. */
 		field-sizing: content;
 		font-variant-ligatures: none;
 	}
@@ -637,8 +637,8 @@
 		color: var(--color-active);
 	}
 
-	/* Colour alone, and that is not only taste. Anything with a box around it —
-	   a background, a border, padding — is a rectangle drawn under a caret that
+	/* Colour alone, and that is not only taste. Anything with a box around it,
+	   a background, a border, padding: is a rectangle drawn under a caret that
 	   moves through it, and it looks like a mistake at every position but one.
 	   Colour changes no metric either, so the mirror stays exactly under the text
 	   it is standing in for. */

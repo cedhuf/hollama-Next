@@ -30,7 +30,7 @@ export function setServerSystemPrompts(resolved: SystemPromptsView | null): void
  * Both kinds of prompt, in one request.
  *
  * The system prompt and the app's own instructions are two screens' worth of
- * one question — what does this instance let you say to the model — and they are
+ * one question (what does this instance let you say to the model) and they are
  * resolved by the same rules, so they arrive together rather than racing.
  */
 export async function loadServerPrompts(): Promise<void> {

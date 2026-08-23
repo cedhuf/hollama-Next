@@ -24,8 +24,8 @@ import { catalogBase } from '$lib/store';
  * fetching so one machine holds the listing for everyone.
  *
  * Not folded into one client for both. They agree on the mechanism and disagree
- * on everything the mechanism carries — what a row holds, what installing means,
- * what "you have edited this" is computed from — and a single client taking a
+ * on everything the mechanism carries (what a row holds, what installing means,
+ * what "you have edited this" is computed from) and a single client taking a
  * schema, a parser, a store and an installer as parameters would be the same
  * code with the differences moved into its arguments. What is genuinely shared
  * is the hash and the server proxy, and both of those are imported.

@@ -7,8 +7,8 @@
 	 * always on screen.
 	 *
 	 * Built on bits-ui, so it is portalled (never clipped by the composer's
-	 * `overflow-hidden`), dismisses on Escape, and — the part a `title` attribute
-	 * cannot do — opens on keyboard focus as well as on hover.
+	 * `overflow-hidden`), dismisses on Escape, and (the part a `title` attribute
+	 * cannot do) opens on keyboard focus as well as on hover.
 	 *
 	 * For explanation only: the trigger must still work, and mean the same thing,
 	 * for anyone who never sees this.

@@ -62,7 +62,7 @@ export interface GeneratedImage {
  * A cap on one image and a cap on an account, because neither alone is enough:
  * without the first a provider returning something enormous fills the disk in
  * one request, and without the second it fills the same disk in a thousand
- * small ones. The numbers are deliberately generous — this is a guard against
+ * small ones. The numbers are deliberately generous. This is a guard against
  * runaway, not a quota anybody should meet in normal use.
  */
 export const IMAGE_LIMITS = {
@@ -87,7 +87,7 @@ export const IMAGE_LIMITS = {
  * The types the app accepts as an *input* picture.
  *
  * Narrower than what it serves back, and narrower on purpose: the providers that
- * take reference pictures take these two and refuse the rest — Infomaniak
+ * take reference pictures take these two and refuse the rest. Infomaniak
  * answers `must be a file of type: jpg, jpeg, png`. Accepting a third here would
  * be accepting something that fails after the upload rather than before it.
  */
@@ -122,7 +122,7 @@ export function sniffImageType(bytes: Uint8Array): string | undefined {
 
 	if (starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return 'image/png';
 	if (starts(0xff, 0xd8, 0xff)) return 'image/jpeg';
-	// RIFF....WEBP — the four bytes in between are the length, so they are skipped.
+	// RIFF....WEBP: the four bytes in between are the length, so they are skipped.
 	if (
 		starts(0x52, 0x49, 0x46, 0x46) &&
 		[0x57, 0x45, 0x42, 0x50].every((b, i) => bytes[8 + i] === b)
@@ -141,7 +141,7 @@ export function extensionFor(contentType: string): string {
  * A filename somebody would recognise in their downloads folder.
  *
  * Built from the title when there is one and from the prompt otherwise, because a
- * folder of `image-1.png` is a folder nobody can search — and because a filename
+ * folder of `image-1.png` is a folder nobody can search, and because a filename
  * is the one piece of metadata every file manager and every desktop search
  * already indexes, without anyone writing a byte of EXIF. Stripped to what every filesystem accepts, and truncated: a
  * two-thousand-character prompt is not a filename.

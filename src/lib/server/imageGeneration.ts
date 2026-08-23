@@ -40,7 +40,7 @@ import { costOf } from '$lib/usageCounts';
  *
  * Server-side and only server-side, which is not an implementation detail. The
  * key is here, the admin's rules are here, and the picture that arrives has to
- * be looked at before it is stored — none of which a browser can be asked to do
+ * be looked at before it is stored. None of which a browser can be asked to do
  * on its own behalf.
  *
  * It is also what makes a generation survive the tab that started it. The
@@ -116,7 +116,7 @@ function requestBody(input: ImageRequest, count: number, options: ImageOptions) 
 		n: count,
 		// Base64, always. A URL would mean fetching a host the provider named,
 		// which is a request the app makes on its own network from its own
-		// address — the shape of every SSRF there has ever been.
+		// address: the shape of every SSRF there has ever been.
 		response_format: 'b64_json',
 		...(input.negativePrompt?.trim() ? { negative_prompt: input.negativePrompt.trim() } : {}),
 		...(size ? { size } : {}),
@@ -131,7 +131,7 @@ function requestBody(input: ImageRequest, count: number, options: ImageOptions) 
  * Inspected exactly like a picture coming back from a provider, and for the same
  * reason: the type is read from the bytes, never from what the sender labelled
  * them. The list is the input one rather than the one the app serves back, which
- * is narrower — a WebP passes every check here and is then refused by the
+ * is narrower: a WebP passes every check here and is then refused by the
  * endpoint, so refusing it before the upload is the honest place.
  */
 function decodeReference(dataUrl: string): { bytes: Buffer; contentType: string } {
@@ -152,7 +152,7 @@ function decodeReference(dataUrl: string): { bytes: Buffer; contentType: string 
 /**
  * The request that carries reference pictures.
  *
- * Multipart, because that is what both endpoints want — their specifications
+ * Multipart, because that is what both endpoints want, their specifications
  * disagree, and the endpoints do not. The same fields as a plain drawing, so
  * there is one answer to "what does the app send" rather than two, plus the
  * pictures under whatever this provider calls that field.
@@ -222,7 +222,7 @@ export async function generateImages(
 	 * The relay learned to meter and refuse drawings, but only the ones a browser
 	 * sends through it. This route holds the provider connection itself, so a
 	 * limit enforced only there would be a limit that images walked straight past
-	 * — which is the hole that was just closed, reopened one level up.
+	 *, which is the hole that was just closed, reopened one level up.
 	 *
 	 * Only on the instance's own connections. A personal one is somebody's own key
 	 * and their own bill.
@@ -247,7 +247,7 @@ export async function generateImages(
 	 * Where this request goes, and in what shape.
 	 *
 	 * With no reference picture it is the drawing endpoint, unchanged. With one it
-	 * is whatever the descriptor says this model takes them on — and a model that
+	 * is whatever the descriptor says this model takes them on, and a model that
 	 * says nothing takes none, so the pictures are refused here rather than sent
 	 * to an endpoint that would ignore them and bill for the ignoring.
 	 */
@@ -346,7 +346,7 @@ export async function generateImages(
 	 * The request is what the provider bills: one stretch of time, or a count of
 	 * images. Dividing it is only for the gallery, so a row can answer "what did
 	 * this one cost" without implying it was charged four times. `undefined` stays
-	 * undefined all the way down — an unpriced model is not free.
+	 * undefined all the way down: an unpriced model is not free.
 	 */
 	const total = costOf({ input: 0, output: 0, images: usable.length, seconds }, price);
 	const share = total === undefined ? undefined : total / usable.length;

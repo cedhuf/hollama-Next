@@ -69,7 +69,7 @@ const en = {
 	synced: 'Synced',
 	notSynced: 'Not synced',
 	lastSynced: 'Last synced {date:string}',
-	neverSynced: 'Never synced — run a sync to load its models',
+	neverSynced: 'Never synced. Run a sync to load its models',
 	modelsCount: '{count:number} model{{s}}',
 	connecting: 'Connecting...',
 	connectionIsVerified: 'Connection has been verified and is ready to use',
@@ -269,7 +269,7 @@ const en = {
 		'Let users read the pages their messages link to, with your own limits. Sharing it while it is off in your Tools tab disables it for everyone.',
 	shareWebFetch: 'Share web fetch with users',
 	currentlySharingWebFetch: 'Currently sharing: {pages} pages, {chars}k characters per page.',
-	currentlySharingWebFetchOff: 'Currently sharing: off — no user may read pages.',
+	currentlySharingWebFetchOff: 'Currently sharing: off, no user may read pages.',
 	webFetchTitle: 'Web fetch',
 	webFetchDescription: 'Read the pages a message links to, instead of searching around them.',
 	webFetchToggle: 'Read linked pages',
@@ -277,7 +277,7 @@ const en = {
 	webFetchMaxPages: 'Pages read per message',
 	webFetchMaxChars: 'Characters kept per page',
 	webFetchHint: 'Only explicit http(s) links are read.',
-	webFetchLockedOn: 'Enabled by your administrator — up to {pages} pages per message.',
+	webFetchLockedOn: 'Enabled by your administrator, up to {pages} pages per message.',
 	webFetchLockedOff: 'Disabled by your administrator.',
 	version: 'Version',
 	viewRelease: 'View release',
@@ -337,7 +337,7 @@ const en = {
 	resetEverything: 'Reset everything',
 	resetEverythingDescription: 'Permanently delete all data and reset the app',
 	resetEverythingConfirm:
-		'This will permanently delete ALL your data — sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?',
+		'This will permanently delete ALL your data: sessions, knowledge, servers and preferences. This cannot be undone. Make sure you have a backup. Continue?',
 
 	// Sidebar / navigation chrome
 	newChat: 'New chat',
@@ -418,7 +418,7 @@ const en = {
 	user: 'User',
 
 	// Library
-	librarySubtitle: 'Everything you create lives here — your personas and your knowledge.',
+	librarySubtitle: 'Everything you create lives here: your personas and your knowledge.',
 	shared: 'Shared',
 	newPersona: 'New persona',
 	sharedByAdmin: 'Shared by admin',
@@ -566,7 +566,7 @@ const en = {
 	currentDateToggle: "Tell the model today's date and time",
 	systemInstructionsTitle: 'System instructions',
 	systemInstructionsDescription:
-		'The behind-the-scenes prompts {app:string} injects for the features above. Pick one to view or tweak it — leave it on the default unless you know what you are changing.',
+		'The behind-the-scenes prompts {app:string} injects for the features above. Pick one to view or tweak it. Leave it on the default unless you know what you are changing.',
 	placeholders: 'Placeholders',
 	resetToDefault: 'Reset to default',
 
@@ -750,7 +750,7 @@ const en = {
 	requestFailed: 'Request failed',
 	baseUrlRequired: 'Base URL is required',
 	connectionFailed: 'Connection failed',
-	connectionVerifiedWithModels: 'Connection verified — {count:number} model{{s}}',
+	connectionVerifiedWithModels: 'Connection verified, {count:number} model{{s}}',
 
 	// --- Settings › Interface --------------------------------------------------
 	appearance: 'Appearance',
@@ -796,21 +796,21 @@ const en = {
 	userPermissionsDescription: 'What signed-in users are allowed to do on this instance.',
 	allowUserProviders: 'Allow users to add their own provider connections',
 	allowUserPersonas: 'Allow users to create their own personas',
-	lockedForUsers: "Locked — users can't change this",
+	lockedForUsers: "Locked, users can't change this",
 	overridableForUsers: 'Users may override for themselves',
 	webSearchSharing: 'Web search sharing',
 	webSearchSharingDescription:
 		"Configure the search engine in the Chat tab; here you choose whether it's shared with users.",
 	shareSearchEngine: 'Share my search engine with users',
 	noEngineConfigured:
-		'No engine configured yet — set one up in the Chat tab first, then you can share it.',
+		'No engine configured yet. Set one up in the Chat tab first, then you can share it.',
 	currentlySharing: 'Currently sharing: {value:string}',
 	systemPromptsSharing: 'System prompts sharing',
 	systemPromptsSharingDescription:
 		"Configure your prompts in the Chat tab; here you choose whether they're shared with all users (read-only for them). Per-user prompts will come with groups.",
 	shareSystemPrompts: 'Share my system prompts with users',
 	noPromptsConfigured:
-		'Nothing configured yet — set up your prompts in the Chat tab to share something.',
+		'Nothing configured yet. Set up your prompts in the Chat tab to share something.',
 	titleGenerationSharing: 'Title generation sharing',
 	titleGenerationSharingDescription:
 		"Share your title-generation settings (from the Chat tab) with users. The title model works even if it isn't in the shared models list.",
@@ -819,13 +819,13 @@ const en = {
 	sharedModels: 'Shared models',
 	sharedModelsDescription:
 		'Pick which models from each system server are available to users. Configure the servers themselves in the Servers tab.',
-	noSystemServers: 'No system servers yet — add one in the Servers tab.',
+	noSystemServers: 'No system servers yet. Add one in the Servers tab.',
 	defaultModelForUsers: 'Default model for users',
-	none: '— none —',
-	defaultUsersMayChange: 'Default — users may change it',
+	none: '(none)',
+	defaultUsersMayChange: 'Default, users may change it',
 	selectModelsToShare: 'Select models to share',
 	sharedCount: '{count:number} shared',
-	noModelsCheckServersTab: 'No models available — check this server in the Servers tab.',
+	noModelsCheckServersTab: 'No models available. Check this server in the Servers tab.',
 	usageSpent: '{spent:string} spent',
 	credits: 'Credit limits',
 	creditsApproximate:
@@ -899,7 +899,7 @@ const en = {
 	shortcutSendMessage: 'Send',
 	shortcutNewLine: 'New line',
 	shortcutExpandedNote:
-		'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line — so a long message can be written without firing on every return.',
+		'In the expanded composer, {mod:string}↵ sends and ↵ inserts a line, so a long message can be written without firing on every return.',
 	shortcutMoveBetweenTabs: 'Move between tabs',
 	close: 'Close',
 
@@ -957,12 +957,12 @@ const en = {
 	shortcutsCommands: 'Slash commands',
 	shortcutCompleteCommand: 'Complete',
 	shortcutCommandsNote:
-		'Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else — a path, a date — is sent as typed.',
+		'Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else (a path, a date) is sent as typed.',
 
 	// Settings → Chat → Compaction
 	compaction: 'Compaction',
 	compactionDescription:
-		'Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted — the summary replaces those messages only in what is sent, and can be undone.',
+		'Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted: the summary replaces those messages only in what is sent, and can be undone.',
 	compactModel: 'Compaction model',
 	compactModelHelp:
 		'Leave empty to use each conversation’s own model. Whatever this summary leaves out is lost to the assistant, so prefer a capable model over a cheap one.',
@@ -970,7 +970,7 @@ const en = {
 	autoCompactHelp: 'Summarise on its own once a conversation reaches the threshold below.',
 	compactThreshold: 'Threshold (tokens)',
 	compactThresholdHelp:
-		'Also the ceiling the load indicator measures against when the provider does not announce its context window — which is most of them.',
+		'Also the ceiling the load indicator measures against when the provider does not announce its context window, which is most of them.',
 	compactModelOwn: 'each conversation’s model',
 	compactionSharing: 'Compaction sharing',
 	compactionSharingDescription:

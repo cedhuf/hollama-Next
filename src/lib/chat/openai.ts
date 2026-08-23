@@ -102,7 +102,7 @@ export class OpenAIStrategy implements ChatStrategy {
 
 		// Self-hosted OpenAI-compatible servers (vLLM, llama.cpp, SGLang, …) and
 		// Infomaniak gate the model's chain-of-thought behind a chat-template flag that
-		// has to be passed per request — the server-side default isn't always applied.
+		// has to be passed per request: the server-side default isn't always applied.
 		// Real OpenAI / Claude reject unknown body fields, so this is scoped to the
 		// endpoints that accept it, and retried once without it if rejected.
 		const wantThink = payload.think !== false;
@@ -132,7 +132,7 @@ export class OpenAIStrategy implements ChatStrategy {
 				onChunk
 			);
 		} catch (error) {
-			// A server that doesn't understand `chat_template_kwargs` answers 400 — drop
+			// A server that doesn't understand `chat_template_kwargs` answers 400: drop
 			// the extra field and retry so the chat still completes (without reasoning).
 			const status = (error as { status?: number } | null)?.status;
 			if (thinkBody && status === 400) {
@@ -163,7 +163,7 @@ export class OpenAIStrategy implements ChatStrategy {
 			messages,
 			stream: true,
 			// Without this a streamed answer carries no `usage` block at all, so every
-			// turn — which is every turn — would go uncounted. Servers that do not know
+			// turn (which is every turn) would go uncounted. Servers that do not know
 			// the field ignore it.
 			stream_options: { include_usage: true },
 			...(tools ? { tools } : {}),
@@ -238,8 +238,8 @@ export class OpenAIStrategy implements ChatStrategy {
 	async complete(payload: ChatRequest): Promise<string> {
 		const messages = this.formatMessages(payload.messages);
 
-		// `complete()` serves the short internal errands — routing a search, naming a
-		// session — where the answer is a handful of words and reasoning is pure cost:
+		// `complete()` serves the short internal errands (routing a search, naming a
+		// session) where the answer is a handful of words and reasoning is pure cost:
 		// a round trip spent deliberating, and a reply the caller then has to dig the
 		// answer out of. Ask for it to be off, with the same scoping and the same
 		// retry-on-400 as `chat()`, since the field is not universally understood.

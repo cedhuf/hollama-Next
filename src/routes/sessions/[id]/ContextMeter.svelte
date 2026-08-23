@@ -7,13 +7,13 @@
 	/**
 	 * How full the conversation's context is: a ring that fills as it grows.
 	 *
-	 * Discreet by design — at rest it is a quiet outline nobody has to read. It
+	 * Discreet by design, at rest it is a quiet outline nobody has to read. It
 	 * only earns attention as it fills: the colour warms past 60%, and the token
 	 * count appears next to it past that, because by then the number is the point.
 	 *
 	 * Clicking it opens the figures, nothing more. It used to put `/compact` in the
 	 * composer, which meant the one way to read the numbers on a phone was to also
-	 * be handed a command you had not asked for — there is no hover on a touch
+	 * be handed a command you had not asked for. There is no hover on a touch
 	 * screen, so the tap has to be what opens the panel.
 	 */
 	interface Props {

@@ -78,7 +78,7 @@
 	);
 
 	// Empty until the conversation has a real title (or a first user message to
-	// derive one from) — the header falls back to "Session #id" until then.
+	// derive one from): the header falls back to "Session #id" until then.
 	const sessionTitle = $derived(chat.editor.isNewSession ? '' : resolveSessionTitle(chat.session));
 
 	$effect(() => {
@@ -130,8 +130,8 @@
 	});
 
 	/**
-	 * The message may not be in the DOM yet — the conversation has just been
-	 * swapped in and its articles render over the following frames — so wait for
+	 * The message may not be in the DOM yet (the conversation has just been
+	 * swapped in and its articles render over the following frames) so wait for
 	 * it rather than giving up on the first miss.
 	 */
 	async function highlightMessage(index: number): Promise<void> {
@@ -226,8 +226,8 @@
 
 	/**
 	 * "Near enough to the bottom" needs slack: an exact comparison flips to
-	 * `userScrolledUp` on a single pixel of sub-pixel rounding — which happens
-	 * constantly while streamed content grows — and auto-follow silently stops.
+	 * `userScrolledUp` on a single pixel of sub-pixel rounding (which happens
+	 * constantly while streamed content grows) and auto-follow silently stops.
 	 */
 	const SCROLL_BOTTOM_THRESHOLD = 32;
 
@@ -316,7 +316,7 @@
 
 	/**
 	 * `smooth` is for the deliberate jump back (the button): the animation shows
-	 * how far you travelled. Auto-follow during streaming stays instant — animating
+	 * how far you travelled. Auto-follow during streaming stays instant: animating
 	 * a scroll that retriggers on every token would never settle.
 	 */
 	async function scrollToBottom(shouldForceScroll = false, smooth = false) {
@@ -333,7 +333,7 @@
 			if (!messagesWindow) return;
 			// Re-checked here, not only on the way in: the user may have started
 			// scrolling up between the call and this frame, and yanking them back
-			// then also cleared `userScrolledUp` — so auto-follow resumed and the
+			// then also cleared `userScrolledUp`, so auto-follow resumed and the
 			// page fought every attempt to read further up.
 			if (!shouldForceScroll && userScrolledUp) return;
 			messagesWindow.scrollTo({
@@ -390,7 +390,7 @@
 				<!-- Model + settings as one control: the model belongs to this conversation's
 			     configuration, so it sits with the button that opens it. Keeping it out
 			     of the headline also leaves the title its full height. On mobile only the
-			     settings half shows — the model is changed from inside the panel.
+			     settings half shows: the model is changed from inside the panel.
 			     The border lives on the group rather than on each half, so focusing (or
 			     opening) the picker rings the whole control instead of stopping mid-way. -->
 				<div

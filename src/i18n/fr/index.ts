@@ -4,7 +4,7 @@ import { extendDictionary } from '../i18n-util';
 /**
  * French overrides on top of the English base. Every key not listed here falls
  * back to its English string automatically, so adding a key to `en/` never
- * breaks this file and never leaves a blank in the UI — translate it when you
+ * breaks this file and never leaves a blank in the UI. Translate it when you
  * get to it. Run `pnpm run i18n:status` to see what's still untranslated.
  */
 const fr = extendDictionary(en, {
@@ -77,7 +77,7 @@ const fr = extendDictionary(en, {
 	synced: 'Synchronisé',
 	notSynced: 'Non synchronisé',
 	lastSynced: 'Dernière synchro {date:string}',
-	neverSynced: 'Jamais synchronisé — lancez une synchro pour charger ses modèles',
+	neverSynced: 'Jamais synchronisé. Lancez une synchro pour charger ses modèles',
 	modelsCount: '{count:number} modèle{{s}}',
 	connecting: 'Connexion...',
 	connectionIsVerified: 'La connexion a été vérifiée et est prête à être utilisée',
@@ -273,8 +273,7 @@ const fr = extendDictionary(en, {
 		"Autoriser les utilisateurs à lire les pages liées dans leurs messages, avec vos propres limites. La partager alors qu'elle est désactivée dans votre onglet Outils la désactive pour tout le monde.",
 	shareWebFetch: 'Partager la lecture de pages',
 	currentlySharingWebFetch: 'Partagé actuellement : {pages} pages, {chars}k caractères par page.',
-	currentlySharingWebFetchOff:
-		'Partagé actuellement : désactivée — personne ne peut lire de pages.',
+	currentlySharingWebFetchOff: 'Partagé actuellement : désactivée, personne ne peut lire de pages.',
 	webFetchTitle: 'Lecture de pages',
 	webFetchDescription: 'Lire les pages liées dans un message, au lieu de chercher autour.',
 	webFetchToggle: 'Lire les pages liées',
@@ -282,7 +281,7 @@ const fr = extendDictionary(en, {
 	webFetchMaxPages: 'Pages lues par message',
 	webFetchMaxChars: 'Caractères conservés par page',
 	webFetchHint: 'Seuls les liens http(s) explicites sont lus.',
-	webFetchLockedOn: "Activé par votre administrateur — jusqu'à {pages} pages par message.",
+	webFetchLockedOn: "Activé par votre administrateur, jusqu'à {pages} pages par message.",
 	webFetchLockedOff: 'Désactivé par votre administrateur.',
 	version: 'Version',
 	viewRelease: 'Voir la version',
@@ -331,7 +330,7 @@ const fr = extendDictionary(en, {
 	resetEverythingDescription:
 		"Supprimer définitivement toutes les données et réinitialiser l'application",
 	resetEverythingConfirm:
-		"Cela supprimera définitivement TOUTES vos données — sessions, connaissances, serveurs et préférences. Cette action est irréversible. Assurez-vous d'avoir une sauvegarde. Continuer ?",
+		"Cela supprimera définitivement TOUTES vos données : sessions, connaissances, serveurs et préférences. Cette action est irréversible. Assurez-vous d'avoir une sauvegarde. Continuer ?",
 
 	// Sidebar / navigation chrome
 	newChat: 'Nouveau chat',
@@ -415,7 +414,7 @@ const fr = extendDictionary(en, {
 	user: 'Utilisateur',
 
 	// Library
-	librarySubtitle: 'Tout ce que vous créez vit ici — vos personas et vos connaissances.',
+	librarySubtitle: 'Tout ce que vous créez vit ici : vos personas et vos connaissances.',
 	shared: 'Partagé',
 	newPersona: 'Nouveau persona',
 	sharedByAdmin: "Partagé par l'admin",
@@ -587,7 +586,7 @@ const fr = extendDictionary(en, {
 	currentDateToggle: "Indiquer au modèle la date et l'heure du jour",
 	systemInstructionsTitle: 'Instructions système',
 	systemInstructionsDescription:
-		"Les invites en coulisses que {app} injecte pour les fonctions ci-dessus. Choisissez-en une pour la consulter ou l'ajuster — laissez la valeur par défaut sauf si vous savez ce que vous changez.",
+		"Les invites en coulisses que {app} injecte pour les fonctions ci-dessus. Choisissez-en une pour la consulter ou l'ajuster. Laissez la valeur par défaut sauf si vous savez ce que vous changez.",
 	placeholders: 'Variables',
 	resetToDefault: 'Rétablir la valeur par défaut',
 
@@ -778,7 +777,7 @@ const fr = extendDictionary(en, {
 	requestFailed: 'La requête a échoué',
 	baseUrlRequired: "L'URL de base est requise",
 	connectionFailed: 'Échec de la connexion',
-	connectionVerifiedWithModels: 'Connexion vérifiée — {count:number} modèle{{s}}',
+	connectionVerifiedWithModels: 'Connexion vérifiée, {count:number} modèle{{s}}',
 
 	// --- Paramètres › Interface ------------------------------------------------
 	appearance: 'Apparence',
@@ -825,21 +824,21 @@ const fr = extendDictionary(en, {
 	userPermissionsDescription: 'Ce que les utilisateurs connectés ont le droit de faire ici.',
 	allowUserProviders: 'Autoriser les utilisateurs à ajouter leurs propres connexions',
 	allowUserPersonas: 'Autoriser les utilisateurs à créer leurs propres personas',
-	lockedForUsers: 'Verrouillé — les utilisateurs ne peuvent pas le changer',
+	lockedForUsers: 'Verrouillé, les utilisateurs ne peuvent pas le changer',
 	overridableForUsers: 'Les utilisateurs peuvent le remplacer pour eux-mêmes',
 	webSearchSharing: 'Partage de la recherche web',
 	webSearchSharingDescription:
 		"Configurez le moteur de recherche dans l'onglet Chat ; ici vous choisissez s'il est partagé avec les utilisateurs.",
 	shareSearchEngine: 'Partager mon moteur de recherche avec les utilisateurs',
 	noEngineConfigured:
-		"Aucun moteur configuré — commencez par en définir un dans l'onglet Chat, vous pourrez ensuite le partager.",
+		"Aucun moteur configuré. Commencez par en définir un dans l'onglet Chat, vous pourrez ensuite le partager.",
 	currentlySharing: 'Partagé actuellement : {value:string}',
 	systemPromptsSharing: 'Partage des invites système',
 	systemPromptsSharingDescription:
 		"Configurez vos invites dans l'onglet Chat ; ici vous choisissez si elles sont partagées avec tous les utilisateurs (en lecture seule pour eux). Les invites par utilisateur viendront avec les groupes.",
 	shareSystemPrompts: 'Partager mes invites système avec les utilisateurs',
 	noPromptsConfigured:
-		"Rien de configuré — définissez vos invites dans l'onglet Chat pour avoir quelque chose à partager.",
+		"Rien de configuré. Définissez vos invites dans l'onglet Chat pour avoir quelque chose à partager.",
 	titleGenerationSharing: 'Partage de la génération de titres',
 	titleGenerationSharingDescription:
 		"Partagez vos réglages de génération de titres (onglet Chat) avec les utilisateurs. Le modèle de titre fonctionne même s'il n'est pas dans la liste des modèles partagés.",
@@ -848,13 +847,13 @@ const fr = extendDictionary(en, {
 	sharedModels: 'Modèles partagés',
 	sharedModelsDescription:
 		"Choisissez les modèles de chaque serveur système mis à disposition des utilisateurs. Les serveurs eux-mêmes se configurent dans l'onglet Serveurs.",
-	noSystemServers: "Aucun serveur système — ajoutez-en un dans l'onglet Serveurs.",
+	noSystemServers: "Aucun serveur système. Ajoutez-en un dans l'onglet Serveurs.",
 	defaultModelForUsers: 'Modèle par défaut des utilisateurs',
-	none: '— aucun —',
-	defaultUsersMayChange: 'Par défaut — les utilisateurs peuvent le changer',
+	none: '(aucun)',
+	defaultUsersMayChange: 'Par défaut, les utilisateurs peuvent le changer',
 	selectModelsToShare: 'Sélectionnez les modèles à partager',
 	sharedCount: '{count:number} partagé{{s}}',
-	noModelsCheckServersTab: "Aucun modèle disponible — vérifiez ce serveur dans l'onglet Serveurs.",
+	noModelsCheckServersTab: "Aucun modèle disponible. Vérifiez ce serveur dans l'onglet Serveurs.",
 	usageSpent: '{spent} dépensé',
 	credits: 'Plafonds de crédit',
 	creditsApproximate:
@@ -929,7 +928,7 @@ const fr = extendDictionary(en, {
 	shortcutSendMessage: 'Envoyer',
 	shortcutNewLine: 'Nouvelle ligne',
 	shortcutExpandedNote:
-		"Dans l'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne — pour écrire un long message sans qu'il parte à chaque retour.",
+		"Dans l'éditeur agrandi, {mod:string}↵ envoie et ↵ insère une ligne, pour écrire un long message sans qu'il parte à chaque retour.",
 	shortcutMoveBetweenTabs: 'Naviguer entre les onglets',
 	close: 'Fermer',
 
@@ -987,7 +986,7 @@ const fr = extendDictionary(en, {
 	shortcutsCommands: 'Commandes',
 	shortcutCompleteCommand: 'Compléter',
 	shortcutCommandsNote:
-		'Tapez / au début d’un message vide pour voir les commandes. Un message qui commence vraiment par une barre oblique s’écrit //, et tout le reste — un chemin, une date — part tel quel.',
+		'Tapez / au début d’un message vide pour voir les commandes. Un message qui commence vraiment par une barre oblique s’écrit //, et tout le reste (un chemin, une date) part tel quel.',
 
 	// Réglages → Discussion → Compaction
 	compaction: 'Compaction',
@@ -1000,7 +999,7 @@ const fr = extendDictionary(en, {
 	autoCompactHelp: 'Résume tout seul dès qu’une conversation atteint le palier ci-dessous.',
 	compactThreshold: 'Palier (tokens)',
 	compactThresholdHelp:
-		'Sert aussi de plafond à l’indicateur de charge quand le fournisseur n’annonce pas sa fenêtre de contexte — c’est le cas de la plupart.',
+		'Sert aussi de plafond à l’indicateur de charge quand le fournisseur n’annonce pas sa fenêtre de contexte, c’est le cas de la plupart.',
 	compactModelOwn: 'modèle de la conversation',
 	compactionSharing: 'Partage de la compaction',
 	compactionSharingDescription:

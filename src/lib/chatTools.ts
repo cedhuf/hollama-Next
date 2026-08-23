@@ -3,7 +3,7 @@ import type { TranslationFunctions } from '$i18n/i18n-types';
 /**
  * The switches behind the composer's lightning button.
  *
- * Both composers — the home screen and a conversation — show the same menu, but
+ * Both composers (the home screen and a conversation) show the same menu, but
  * each used to build its own list from its own state. The two drifted: a tool
  * added to one was simply missing from the other, and the labels were hardcoded
  * in English in both. The list is defined once here; the callers supply the
@@ -18,7 +18,7 @@ export interface ChatToolValues {
 	thinking: boolean;
 }
 
-/** What this conversation can actually offer — an absent tool is not listed. */
+/** What this conversation can actually offer: an absent tool is not listed. */
 export interface ChatToolAvailability {
 	webSearch: boolean;
 	webFetch: boolean;
@@ -28,7 +28,7 @@ export interface ChatToolAvailability {
 export type ChatToolLabels = Record<keyof ChatToolValues, string>;
 
 /**
- * The menu wording, from the keys the Tools settings already use — so a tool is
+ * The menu wording, from the keys the Tools settings already use, so a tool is
  * named the same wherever it appears, and translated rather than hardcoded.
  */
 export function toolLabels(LL: TranslationFunctions): ChatToolLabels {

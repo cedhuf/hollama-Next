@@ -22,7 +22,7 @@
 	 *
 	 * Built on bits-ui, so it is portalled (never clipped by an `overflow-hidden`
 	 * ancestor), flips when there is no room below, matches the trigger's width and
-	 * supports keyboard typeahead — none of which a hand-rolled panel or a raw
+	 * supports keyboard typeahead. None of which a hand-rolled panel or a raw
 	 * `<select>` gave us consistently.
 	 */
 	interface Props {
@@ -30,12 +30,12 @@
 		options: SelectOptionOrGroup[];
 		placeholder?: string;
 		disabled?: boolean;
-		/** Rendered as the first, empty entry — lets the user pick "nothing". */
+		/** Rendered as the first, empty entry: lets the user pick "nothing". */
 		emptyLabel?: string;
 		id?: string;
 		name?: string;
 		class?: string;
-		/** Adds a filter box above the list — for long lists like model catalogues. */
+		/** Adds a filter box above the list, for long lists like model catalogues. */
 		searchable?: boolean;
 		searchPlaceholder?: string;
 		/** Replaces the default trigger; receives the props to spread onto your button. */

@@ -14,7 +14,7 @@ import { stripTitleMarkdown } from './titleText';
 /**
  * Generates a concise session title from the first user message using the
  * model selected in settings (`titleModel`). Returns `null` if titling is
- * not configured or if anything goes wrong — title generation is best-effort
+ * not configured or if anything goes wrong: title generation is best-effort
  * and must never break the chat flow.
  */
 export async function generateTitle(firstUserMessage: string): Promise<string | null> {
@@ -24,7 +24,7 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 	if (!modelName) return null;
 
 	// The model may live on a system server the user can't list (an admin shared
-	// title model) — the proxy authorizes by server, so we use the shared serverId.
+	// title model): the proxy authorizes by server, so we use the shared serverId.
 	const model =
 		settings.models.find((m) => m.name === modelName) ??
 		(titleConfig.titleServerId
@@ -50,7 +50,7 @@ export async function generateTitle(firstUserMessage: string): Promise<string | 
 					{ role: 'system', content: resolvePrompt('conversationTitle', get(effectivePrompts)) },
 					{ role: 'user', content: firstUserMessage }
 				],
-				think: false // Titles are a quick one-shot — never spend reasoning on them.
+				think: false // Titles are a quick one-shot. Never spend reasoning on them.
 			},
 			controller.signal,
 			(part) => {

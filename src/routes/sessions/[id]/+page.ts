@@ -6,7 +6,7 @@ import type { PageLoad } from './$types';
 /**
  * The conversation is read here, before the component exists.
  *
- * The list only carries summaries now, so the messages have to be fetched — and
+ * The list only carries summaries now, so the messages have to be fetched, and
  * awaiting them in `load` rather than inside the component is what keeps
  * `session` a whole conversation from its very first line. A component that
  * started empty and filled itself in later would, for those few frames, hold
@@ -15,7 +15,7 @@ import type { PageLoad } from './$types';
  *
  * A failed read throws, which SvelteKit turns into an error page. Refusing to
  * open is right; quietly showing an empty conversation over a real one is not.
- * `null` is different — it means no such conversation yet, which is how a new
+ * `null` is different. It means no such conversation yet, which is how a new
  * chat begins.
  */
 export const load = (async ({ params, fetch }) => {

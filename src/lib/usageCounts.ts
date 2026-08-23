@@ -47,7 +47,7 @@ function countsIn(value: unknown): TokenCount | undefined {
  * The counts in a whole response body, streamed or not.
  *
  * The last ones win: a stream repeats the running totals, and the final chunk is
- * the one that is true. Parsing is per line and failures are silent by design —
+ * the one that is true. Parsing is per line and failures are silent by design,
  * this is a meter reading a body it does not own, and a malformed chunk must
  * cost the user nothing, least of all their answer.
  */

@@ -150,7 +150,7 @@ export class Conversation implements RunSurface {
 
 	/**
 	 * Tracks the last system prompt we auto-resolved, so a model switch can update
-	 * it — but we never overwrite a hand-edited or knowledge-based prompt.
+	 * it, but we never overwrite a hand-edited or knowledge-based prompt.
 	 */
 	#lastAutoSystemPrompt = '';
 
@@ -189,7 +189,7 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * There has to be enough conversation for a summary to be worth a request —
+	 * There has to be enough conversation for a summary to be worth a request:
 	 * below a handful of messages, compacting costs more context than it frees.
 	 */
 	readonly canCompact = $derived(
@@ -211,7 +211,7 @@ export class Conversation implements RunSurface {
 	);
 
 	/**
-	 * The unanswered quick-choice awaiting input — shown docked above the composer
+	 * The unanswered quick-choice awaiting input: shown docked above the composer
 	 * (Claude-style) instead of inline, and skipped in the message list until answered.
 	 */
 	readonly pendingChoice = $derived.by(() => {
@@ -343,7 +343,7 @@ export class Conversation implements RunSurface {
 		if (this.session.systemPromptEdited) return;
 		if (this.session.messages.some((m) => m.role === 'assistant')) return; // conversation already started
 		const current = this.session.systemPrompt.content;
-		if (current && current !== this.#lastAutoSystemPrompt) return; // manual / knowledge content — leave it
+		if (current && current !== this.#lastAutoSystemPrompt) return; // manual / knowledge content: leave it
 		const resolved = effectiveSystemPrompt(this.modelName, get(systemPromptsConfig).prompts);
 		if (resolved === current) return;
 		this.session.systemPrompt = { ...this.session.systemPrompt, content: resolved };
@@ -976,7 +976,7 @@ export class Conversation implements RunSurface {
 	 * the boundary will land, so there is no success toast: the divider appearing
 	 * is the confirmation. Failure still goes to a toast, because the user asked
 	 * for the context to be shortened and if it was not, the next message goes out
-	 * full-length — silently letting them believe otherwise is how a conversation
+	 * full-length: silently letting them believe otherwise is how a conversation
 	 * hits a provider's wall.
 	 */
 	async compact(automatic = false, instruction = ''): Promise<boolean> {
@@ -1041,7 +1041,7 @@ export class Conversation implements RunSurface {
 		}
 		if (name !== 'compact') return;
 		// The menu hides `/compact` when there is nothing to compact, but the name
-		// can still be typed in full — so the refusal lives here rather than only in
+		// can still be typed in full, so the refusal lives here rather than only in
 		// what the autocomplete offers.
 		if (!this.canCompact) {
 			toast.info(strings.nothingToCompact());

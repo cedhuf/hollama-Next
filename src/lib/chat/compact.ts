@@ -16,7 +16,7 @@ import { OpenAIStrategy } from './openai';
  * Compaction: replace the earlier part of a conversation with a summary of it,
  * so the conversation can keep going without outgrowing the model's context.
  *
- * The result is a marker message appended to the transcript, not a rewrite —
+ * The result is a marker message appended to the transcript, not a rewrite:
  * `messagesInContext` starts the sent context at the last marker, and deleting
  * the marker restores everything. Nothing is destroyed, so a bad compaction
  * costs one request and is undone by removing one message.
@@ -30,7 +30,7 @@ function transcribe(message: Message): string {
 	if (message.images?.length) parts.push(`[${message.images.length} image(s) attached]`);
 	if (message.knowledge?.content) parts.push(`[Knowledge: ${message.knowledge.name}]`);
 	// Reasoning is deliberately dropped: it is the bulkiest part of a heavy
-	// conversation and the least worth carrying — what the model concluded is in
+	// conversation and the least worth carrying: what the model concluded is in
 	// the answer, and a summary of scratch thinking is noise in the next turn.
 	return `${role}: ${parts.join('\n')}`;
 }
@@ -41,7 +41,7 @@ function transcribe(message: Message): string {
  * Defaults to the conversation's own model: it already has the right window, the
  * user already trusts it here, and it needs no configuration. A dedicated model
  * can be set in Settings (or shared by an admin) when a cheaper or longer-window
- * one is preferred — the title model is deliberately NOT reused, since a model
+ * one is preferred: the title model is deliberately NOT reused, since a model
  * picked to write six words will quietly drop facts over fifty thousand tokens.
  */
 function resolveCompactModel(session: Session): { name: string; serverId: string } | null {
@@ -52,7 +52,7 @@ function resolveCompactModel(session: Session): { name: string; serverId: string
 		const known = settings.models.find((m) => m.name === config.compactModel);
 		if (known) return { name: known.name, serverId: known.serverId };
 		// The model may live on a system server the user cannot list (an admin's
-		// shared compaction model) — the proxy authorizes by server, so use the id
+		// shared compaction model): the proxy authorizes by server, so use the id
 		// the server handed us.
 		if (config.compactServerId) {
 			return { name: config.compactModel, serverId: config.compactServerId };
@@ -76,7 +76,7 @@ export interface CompactionOutcome {
  * Summarise everything currently in context and return the marker to append.
  *
  * Throws on failure rather than returning null: unlike a title, a compaction the
- * user asked for must not fail silently — they need to know the context was not
+ * user asked for must not fail silently. They need to know the context was not
  * shortened, so the caller can say so.
  */
 export async function compactSession(
@@ -119,7 +119,7 @@ export async function compactSession(
 					// it, length and structure included.
 					//
 					// It was written the other way round first, with a wrapper ending "this
-					// does not licence a shorter or looser summary" — which is the model
+					// does not licence a shorter or looser summary", which is the model
 					// being told to ignore the user. `/compact one word only` produced the
 					// full six-section record, correctly, because that is what it had been
 					// asked for. A request that cannot lose is not a request.
@@ -147,7 +147,7 @@ export async function compactSession(
 	return {
 		marker: {
 			role: 'system',
-			// The bare summary, without the instructions that frame it for the model —
+			// The bare summary, without the instructions that frame it for the model,
 			// those are added at send time. Storing them here would put a paragraph of
 			// prompt engineering in front of the user every time they unfold the
 			// divider, and would freeze the wording of an overridable prompt into the

@@ -38,7 +38,7 @@ export interface WebSearchInfo {
  *
  * A turn can take two rounds: the model thinks, asks to read some results with a
  * `<read>` block, and thinks again with the pages in hand. Shown as a single
- * timeline — searching, thinking, reading, thinking — rather than as separate
+ * timeline (searching, thinking, reading, thinking) rather than as separate
  * widgets appearing and replacing each other while it works.
  *
  * Holds every step but the last round of thinking, which stays in `reasoning`:
@@ -122,7 +122,7 @@ export interface Session {
 	model?: Model;
 	updatedAt?: string;
 	title?: string;
-	/** True once the user edits the system prompt by hand — stops auto-resolution. */
+	/** True once the user edits the system prompt by hand: stops auto-resolution. */
 	systemPromptEdited?: boolean;
 	/**
 	 * The playbooks switched on for this conversation, in the order they were.
@@ -176,7 +176,7 @@ export interface Editor {
 	/** Allow native model reasoning (Ollama). Default on (auto-detected); off never requests it. */
 	thinking?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
-	/** Which of the two the live status is about — they read very differently. */
+	/** Which of the two the live status is about. They read very differently. */
 	searchActivity?: 'search' | 'read';
 	searchQuery?: string; // The query being searched, shown live while isSearching
 	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article
@@ -256,7 +256,7 @@ export function formatSessionMetadata(session: SessionSummary, servers: Server[]
  * Toggle a session's pinned state (pinned sessions sort to the top).
  *
  * Asynchronous because the list only holds summaries: pinning changes the
- * conversation, so the conversation is what has to be read and written back —
+ * conversation, so the conversation is what has to be read and written back:
  * saving the summary would be saving a conversation with no messages.
  */
 export async function toggleSessionPin(id: string): Promise<void> {
@@ -280,7 +280,7 @@ export type SessionGroupKey =
 	'pinned' | 'today' | 'yesterday' | 'previous7Days' | 'previous30Days' | 'older';
 
 export interface SessionGroup {
-	/** i18n key — the component resolves it via $LL (e.g. groupToday). */
+	/** i18n key: the component resolves it via $LL (e.g. groupToday). */
 	key: SessionGroupKey;
 	sessions: SessionSummary[];
 }

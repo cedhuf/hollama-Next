@@ -51,7 +51,7 @@ function adminTools(): { enabled: boolean; maxPages: number; maxChars: number } 
 /**
  * The effective tool policy for one user (server mode).
  *
- * Admins answer to their own settings — sharing is a separate decision, made in
+ * Admins answer to their own settings: sharing is a separate decision, made in
  * the Admin tab, and locking themselves out of a tool they administer would be
  * absurd.
  */

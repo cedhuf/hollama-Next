@@ -6,7 +6,7 @@ import type { Model } from '$lib/settings';
  * coming out of storage has to be filled in with.
  *
  * Deliberately its own module, importing nothing but types. `sessions.ts` pulls
- * in the stores and the chat defaults, which in turn read the stores back — so
+ * in the stores and the chat defaults, which in turn read the stores back, so
  * the moment the store layer needed a *value* from there rather than a type, the
  * two started initialising each other and `settingsStore` was read before it
  * existed. Pure functions with no dependencies can be imported from anywhere,
@@ -20,7 +20,7 @@ export const MAX_TITLE_LENGTH = 56;
  * A conversation as the lists know it: everything but what was said.
  *
  * The sidebar, the home page and the model history need a title, a date, a model
- * and a couple of flags. They never needed the messages — but the store held
+ * and a couple of flags. They never needed the messages, but the store held
  * them anyway, so every boot and every refresh shipped the whole history to the
  * browser and kept it in memory. A distinct type rather than a `Session` with an
  * empty `messages`: that shape would be indistinguishable from a conversation

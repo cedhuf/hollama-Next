@@ -46,8 +46,8 @@ export interface ImageOptions {
  * A rule about model names, not an entry about one model.
  *
  * The difference is the whole reason this stays small. One provider can serve
- * several image models that disagree — on OpenAI a portrait is 1024x1536 for
- * `gpt-image-1` and 1024x1792 for `dall-e-3` — but families share behaviour, so
+ * several image models that disagree (on OpenAI a portrait is 1024x1536 for
+ * `gpt-image-1` and 1024x1792 for `dall-e-3`) but families share behaviour, so
  * a handful of substrings covers what an enumerated catalogue would chase for
  * ever. First match wins; nothing matching falls back to the provider's own
  * defaults, and failing those, to sending nothing.
@@ -76,12 +76,12 @@ export interface ModelRule {
  * route has none at all, because there the endpoint is the model.
  *
  * There is deliberately no encoding to choose. Their specification announces
- * JSON with base64 strings, and it is wrong — the endpoint answers
+ * JSON with base64 strings, and it is wrong: the endpoint answers
  * `images.0 must be a file`. So one shape until something genuinely differs,
  * rather than a switch designed from two samples and a misreading.
  *
  * What is deliberately *not* here: `response_format`, the accepted types and the
- * size limits. Those are not vocabulary, they are the defences — asking for a
+ * size limits. Those are not vocabulary, they are the defences: asking for a
  * URL instead of base64 would have the app fetch a host the provider named, from
  * inside its own network. A descriptor may describe. It may never weaken a rule.
  */
@@ -103,7 +103,7 @@ export interface ReferenceImages {
 	 *
 	 * Some endpoints inject the likeness at a place the prompt names rather than
 	 * at the start of it, so the word is how they are told where. Missing, the
-	 * request is refused outright — after the wait, and after the meter has run.
+	 * request is refused outright: after the wait, and after the meter has run.
 	 *
 	 * The token only. What to say about it is the application's, translated with
 	 * everything else, because a descriptor holds vocabulary and never wording.
@@ -170,7 +170,7 @@ export interface ProviderDescriptor {
 	 * Models this provider serves that its catalogue does not list.
 	 *
 	 * A dedicated endpoint has no entry in `/models`, because it is not a model
-	 * there — it is a route. Naming it here gives it one, and from that point on
+	 * there. It is a route. Naming it here gives it one, and from that point on
 	 * it is priced, shared, refused and metered by exactly the machinery every
 	 * other model goes through, rather than by a second path written beside it.
 	 */

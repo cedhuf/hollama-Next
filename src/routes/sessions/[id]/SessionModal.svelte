@@ -12,8 +12,8 @@
 
 	/**
 	 * Per-conversation settings. Same shell as the persona editor and the settings
-	 * dialog — title bar with a close button, then a scrollable body of
-	 * `SettingsSection`s — so the three read as one family.
+	 * dialog (title bar with a close button, then a scrollable body of
+	 * `SettingsSection`s) so the three read as one family.
 	 */
 	interface Props {
 		open: boolean;

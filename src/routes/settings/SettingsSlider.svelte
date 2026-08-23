@@ -2,7 +2,7 @@
 	import { Slider } from 'bits-ui';
 
 	/**
-	 * A count you pick by feel rather than by typing — "how many to show" and the
+	 * A count you pick by feel rather than by typing: "how many to show" and the
 	 * like. A number input made you aim at a 16px box and click a spinner twice to
 	 * go from 3 to 5; the track answers the same question in one gesture.
 	 *
@@ -25,8 +25,8 @@
 		/** Shown but not answering, when the switch above it is off. */
 		disabled?: boolean;
 		/**
-		 * Drop the readout. For a scale with no unit anyone would quote — how much
-		 * of an effect, not how many of something — the number is noise, and the
+		 * Drop the readout. For a scale with no unit anyone would quote (how much
+		 * of an effect, not how many of something) the number is noise, and the
 		 * result is on screen behind the dialog anyway.
 		 */
 		showValue?: boolean;

@@ -6,7 +6,7 @@ import { env as publicEnv } from '$env/dynamic/public';
  *   PROXY_ALLOWED_ORIGINS="https://api.openai.com,http://localhost:11434"
  *
  * Empty (the default) means the proxy forwards anywhere. That is the price of a
- * frictionless local instance — the browser has to reach Ollama on localhost and
+ * frictionless local instance: the browser has to reach Ollama on localhost and
  * whatever endpoint the user typed, so no address range can be blocked here the
  * way `fetchPage` blocks them. Local mode has a single user and no session to
  * check, so this is only ever as exposed as the instance itself; an instance put
@@ -26,7 +26,7 @@ export async function POST({ request, params }) {
 }
 
 async function proxy(request: Request, path: string | undefined) {
-	// Server mode never uses this route — the browser talks to `/api/llm/<id>`,
+	// Server mode never uses this route: the browser talks to `/api/llm/<id>`,
 	// which checks the session and injects the key server-side. Left reachable it
 	// would be an unauthenticated relay in front of a multi-user instance, and the
 	// auth guard exempts every `/api` path, so the refusal has to live here.

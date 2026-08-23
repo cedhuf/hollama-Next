@@ -14,7 +14,7 @@ import type { StorageKey } from './keys';
  *
  * Distinct from a read that failed, because the two deserve opposite reactions:
  * a failure has to be shouted about, since an empty sidebar looks exactly like
- * an empty account. Being signed out is not a failure at all — the login page
+ * an empty account. Being signed out is not a failure at all: the login page
  * asks the same questions as the app and would answer 401 to every one of them.
  * Saving still stays suspended either way.
  */
@@ -49,7 +49,7 @@ export type Backup = Partial<Record<StorageKey, unknown>>;
 /**
  * The single seam between the app and where its data lives.
  *
- * Components never touch storage directly — they read/write the reactive
+ * Components never touch storage directly. They read/write the reactive
  * stores, which delegate persistence here. Two implementations:
  *   - `LocalStorageRepository` (mode `local`): browser `localStorage`, sync.
  *   - `ApiRepository` (mode `server`): SvelteKit endpoints backed by SQLite.
@@ -65,7 +65,7 @@ export interface DataRepository {
 
 	loadSettings(): Promise<Settings | null>;
 	loadServers(): Promise<Server[]>;
-	/** The conversation list: titles, dates and models — never the messages. */
+	/** The conversation list: titles, dates and models. Never the messages. */
 	loadSessions(): Promise<SessionSummary[]>;
 	/**
 	 * One whole conversation, or `null` if there is no such conversation yet.
@@ -113,7 +113,7 @@ export interface DataRepository {
 	deletePersonaMemory(personaId: string): Promise<void>;
 
 	/**
-	 * Wholesale replacement, for restoring a backup — the one case where the
+	 * Wholesale replacement, for restoring a backup: the one case where the
 	 * caller really does mean "this is now the entire collection".
 	 */
 	replaceSessions(sessions: Session[]): Promise<void>;
@@ -126,7 +126,7 @@ export interface DataRepository {
 	 * Conversations matching a content search, best first.
 	 *
 	 * Server mode asks SQLite's full-text index; local mode scans what is already
-	 * in memory. Same result shape either way — the caller doesn't get to know
+	 * in memory. Same result shape either way: the caller doesn't get to know
 	 * which, and the modal renders one thing.
 	 */
 	/** `everything` includes what a clear set aside and what a compaction replaced. */

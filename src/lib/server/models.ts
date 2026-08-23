@@ -41,7 +41,7 @@ export async function fetchModels(target: ProviderTarget): Promise<string[]> {
  *
  * Both of its roots, when it has two. A provider that serves images from a
  * different base usually lists them from that base as well, and asking only the
- * chat one returns a catalogue with no image model in it — which is not a
+ * chat one returns a catalogue with no image model in it, which is not a
  * missing feature, it is a section of the settings that stays empty for ever
  * while the connection works perfectly. Infomaniak is the case in hand: its chat
  * root lists eleven models and its image root is the only place `flux` appears.

@@ -4,8 +4,8 @@
  * Search results are injected as a system block for one request and then dropped.
  * The turn after, the model reads its own answer citing `[1]` and `[3]` with no
  * `[1]` or `[3]` anywhere in front of it, and its own weights are the only thing
- * left to check the claim against. When the weights disagree — a niche game, a
- * product released after training, anything unfamiliar — it concludes it made the
+ * left to check the claim against. When the weights disagree (a niche game, a
+ * product released after training, anything unfamiliar) it concludes it made the
  * whole thing up, apologises, and takes back an answer that was correct and
  * sourced. Watching that happen is what this module is for.
  *
@@ -15,7 +15,7 @@
  * searches ran, and which sources the answers actually leaned on. Measured on a
  * real five-result search, that is about 80 tokens a turn against roughly 600 to
  * replay the snippets. The evidence itself stays one `<read>` away, paid for only
- * when the model asks — the same bargain `readProtocol.ts` already makes.
+ * when the model asks: the same bargain `readProtocol.ts` already makes.
  */
 import type { Message, SearchSource } from '$lib/sessions';
 
@@ -36,7 +36,7 @@ export interface RecalledSearch {
  * Ceilings, not expiry dates.
  *
  * An index entry is two lines and costs a few dozen tokens, so a conversation has
- * to be long before this is worth bounding at all — and when it is, the answer is
+ * to be long before this is worth bounding at all, and when it is, the answer is
  * to shed the oldest, not to blank the lot on a timer. A three-turn window would
  * put us back where we started, one turn later.
  */
@@ -58,8 +58,8 @@ function citedNumbers(content: string): number[] {
  *
  * Only the sources an answer cited: a result the model was shown and did not use
  * contributed nothing, and paying to remember it forever is paying for noise. An
- * answer that cited none of them is the exception — the model ignoring the
- * citation instruction, not a turn where nothing mattered — so those keep the
+ * answer that cited none of them is the exception (the model ignoring the
+ * citation instruction, not a turn where nothing mattered) so those keep the
  * whole list rather than vanishing.
  */
 export function recallSearches(messages: Message[]): RecalledSearch[] {

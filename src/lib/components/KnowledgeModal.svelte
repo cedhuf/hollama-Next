@@ -24,7 +24,7 @@
 	 * It writes as you type, like every other editor in the app, and that is a
 	 * repair rather than a preference. It used to hold a draft behind a Save
 	 * button, which meant the cross, Escape and a click on the backdrop all threw
-	 * the work away without a word — three of the four ways out of a dialog. A
+	 * the work away without a word: three of the four ways out of a dialog. A
 	 * draft model has to guard every exit to be worth anything, and this one
 	 * guarded none.
 	 */

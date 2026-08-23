@@ -22,7 +22,7 @@ export interface ChatBody {
 /**
  * The paths an admin's rules apply to.
  *
- * Chat, on every endpoint shape the app can talk to, plus the image endpoints —
+ * Chat, on every endpoint shape the app can talk to, plus the image endpoints,
  * which were missing, and which is how a model nobody ever shared could be
  * reached by anyone willing to type the request by hand. The image tail is
  * matched loosely because its prefix varies by provider: OpenAI serves it under
@@ -45,7 +45,7 @@ export class PolicyError extends Error {
 }
 
 /**
- * Vets — and where needed rewrites — a request bound for a system server.
+ * Vets (and where needed rewrites) a request bound for a system server.
  *
  * Returns the body to forward, or the original string when there is nothing to
  * enforce. Admins are exempt: they set these rules, and a server they own is
@@ -107,7 +107,7 @@ export function policeChatBody<T extends ChatBody>(
 	// Only guaranteed *present*, not exclusive: the client legitimately sends
 	// system messages of its own (search results, fetched pages, the persona,
 	// the date). Prepending is what makes a protective instruction impossible to
-	// drop — including from under a persona, which is the case that motivated it.
+	// drop: including from under a persona, which is the case that motivated it.
 	if (getConfig('systemPromptsSharing') !== 'locked') return parsed;
 
 	const locked = (getConfig('systemPromptsGlobal') ?? '').trim();

@@ -87,7 +87,7 @@ export async function generateImages(input: GenerateInput): Promise<GeneratedIma
  *
  * After the fact and never awaited by the caller: the pictures are already
  * stored and already on screen, and a label arriving a second later is a label
- * arriving a second later. A failure is silent by design — everything that reads
+ * arriving a second later. A failure is silent by design: everything that reads
  * a title falls back to the prompt, which is what it did before titles existed.
  *
  * One call for the batch, because four pictures from one request share one

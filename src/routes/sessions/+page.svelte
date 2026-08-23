@@ -302,7 +302,7 @@
 							type="button"
 							onclick={() => launch(persona)}
 							class="transition-transform hover:scale-105"
-							title={`${persona.name} — ${persona.tagline}`}
+							title={`${persona.name}: ${persona.tagline}`}
 						>
 							<PersonaAvatar {persona} size={48} />
 						</button>

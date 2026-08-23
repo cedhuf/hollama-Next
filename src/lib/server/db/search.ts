@@ -25,8 +25,8 @@ export interface SearchHit {
  * Rebuild a conversation's entries in the index.
  *
  * Reads back from the row that was just written rather than from the object in
- * hand: the extraction then lives in exactly one place — this statement and the
- * backfill in migration 6 are the same SELECT — so the index cannot drift from
+ * hand: the extraction then lives in exactly one place (this statement and the
+ * backfill in migration 6 are the same SELECT) so the index cannot drift from
  * what the stored data actually contains.
  */
 /**
@@ -77,7 +77,7 @@ export function dropSessionFromIndex(sessionId: string): void {
 	db.prepare('DELETE FROM session_markers WHERE session_id = ?').run(sessionId);
 }
 
-/** Rebuild every conversation of one user — after restoring a backup. */
+/** Rebuild every conversation of one user: after restoring a backup. */
 export function reindexAllSessions(userId: string): void {
 	const db = getDb();
 	db.prepare('DELETE FROM sessions_fts WHERE user_id = ?').run(userId);
@@ -122,7 +122,7 @@ export function toMatchExpression(query: string): string | null {
  * Matching messages, best first.
  *
  * `rank` is FTS5's relevance ordering (more distinctive terms, closer together,
- * in shorter messages, score higher) — the caller groups by conversation while
+ * in shorter messages, score higher): the caller groups by conversation while
  * keeping this order.
  */
 export function searchSessions(userId: string, query: string, limit = 100): SearchHit[] {

@@ -83,7 +83,7 @@
 		}
 	}
 
-	/* Remove the 300 ms tap delay on interactive elements — only touch is relevant
+	/* Remove the 300 ms tap delay on interactive elements, only touch is relevant
 	   on mobile, so there's no need to wait for a potential double-tap. */
 	a,
 	button,
@@ -120,7 +120,7 @@
  * ships. So each section takes the accent and turns it: same lightness, same
  * chroma, a different hue. Change the theme and the three move together.
  *
- * `oklch(from …)` is what makes that honest — it is the accent, rotated, not a
+ * `oklch(from …)` is what makes that honest. It is the accent, rotated, not a
  * colour picked to look like it. Where relative colours are unsupported the
  * variable falls back to the accent itself and the sections simply share it,
  * which is exactly what they did before.
@@ -132,7 +132,7 @@
 	/* The turn is a plain number, not an angle. In relative colour syntax `h` is a
 	   <number>, so `calc(h + 150deg)` is a type error: the colour is invalid at
 	   computed-value time, `color-mix` fails with it, and the border falls back to
-	   `currentColor` — which is how a faint tint came out as a black outline on
+	   `currentColor`, which is how a faint tint came out as a black outline on
 	   every card. `calc(h + 150)` is the same rotation and is valid. */
 	@supports (color: oklch(from red l c calc(h + 1))) {
 		--section: oklch(from var(--color-accent) l c calc(h + var(--section-turn, 0)));
@@ -146,8 +146,8 @@
 	border-color: var(--color-shade-3);
 
 	@supports (color: oklch(from red l c calc(h + 1))) {
-		/* The fallback is not decoration. A card drawn outside any section — in the
-		   store, in a picker — has no `--section` at all, and a `color-mix` with a
+		/* The fallback is not decoration. A card drawn outside any section (in the
+		   store, in a picker) has no `--section` at all, and a `color-mix` with a
 		   missing colour is invalid, which lands on `currentColor` and paints a
 		   black outline. Same symptom as the bad angle, different cause: there, the
 		   value was wrong; here, there is no value. */
@@ -290,7 +290,7 @@
 }
 
 /* On phones the dialog is the screen, so it rises from the bottom edge like a
-   sheet instead of zooming from the middle — scaling something full-bleed reads
+   sheet instead of zooming from the middle: scaling something full-bleed reads
    as the whole page flexing. */
 @media (max-width: 639px) {
 	@keyframes modal-content-in {
@@ -485,7 +485,7 @@
 
 	/* Gruvbox: warm, low-saturation retro palette. Its greys are tinted towards
 	   orange rather than blue, which is what distinguishes it from the two themes
-	   above — so the shade ramps carry a small hue/saturation rather than being
+	   above, so the shade ramps carry a small hue/saturation rather than being
 	   neutral. */
 	[data-theme-style='gruvbox'] {
 		--hsl-primary: 24 88% 45%;
@@ -528,7 +528,7 @@
 	}
 
 	/* Nord: cool blue-grey. Polar Night for the dark ramp, Snow Storm for the light
-	   one, with Frost supplying the accent — bright enough on the dark background,
+	   one, with Frost supplying the accent: bright enough on the dark background,
 	   deeper on the light one. */
 	[data-theme-style='nord'] {
 		--hsl-primary: 213 32% 52%;
@@ -613,7 +613,7 @@
 	}
 
 	/* Syntax-highlighting (highlight.js) token colours, driven by colour mode so code
-	   stays legible on both the light and dark `shade-0` code background — across every
+	   stays legible on both the light and dark `shade-0` code background: across every
 	   theme style. Replaces highlight.js's bundled stylesheet, which was light-only and
 	   washed out in dark mode. Palette = GitHub Primer (proven contrast both ways). */
 	:root {
@@ -879,12 +879,12 @@
  * `surface-floating` for a card that hovers over the content it acts on. The first
  * two are tint alone; only the third filters what is behind it, because it is the
  * only one with something behind it that moves. The gaps
- * between them are what read as a hierarchy, so the values live together here —
+ * between them are what read as a hierarchy, so the values live together here:
  * raising a blur in one place and forgetting the others is how a set of surfaces
  * stops looking like a set.
  *
  * Two of them are enough for the sidebar: its edges, then everything between them.
- * A third, splitting the controls from the list underneath, was tried and dropped —
+ * A third, splitting the controls from the list underneath, was tried and dropped:
  * two levels four points apart read as a column, three levels two points apart read
  * as a smear.
  *
@@ -892,7 +892,7 @@
  * looks like at the middle of the settings slider) and how far the slider moves
  * it (`--surface-tint-range`, `--surface-blur-range`). The two move together and
  * in the same direction: down is glass, see-through and barely blurred, up is
- * tint, dense and heavily blurred. Either alone is unusable — see-through without
+ * tint, dense and heavily blurred. Either alone is unusable: see-through without
  * blur leaves two texts fighting, blur without transparency is just paint.
  *
  * The ranges deliberately stop short of opaque. Fully solid is the switch's job,
@@ -1010,7 +1010,7 @@
 	 *
 	 * A surface reveals what is under it, and under a column there is only a flat
 	 * colour of the app's own. Revealing it gains nothing, costs a filtered layer on
-	 * every frame, and — because the tint being mixed is not that colour — shifts
+	 * every frame, and (because the tint being mixed is not that colour) shifts
 	 * every shade of the theme by a hair. Which is exactly what it looks like: a
 	 * palette that is almost right.
 	 *

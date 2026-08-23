@@ -82,7 +82,7 @@ export function setPersonaAutoUpdateForced(value: boolean): void {
  * address has to be one an administrator sets. `STORE_URL` seeds it for a
  * deployment that would rather not click, and the admin panel overrides it.
  *
- * One address for every catalogue under it — personas, playbooks, and whatever
+ * One address for every catalogue under it: personas, playbooks, and whatever
  * follows. Somebody running a mirror moves one folder and changes one field.
  */
 export function storeUrl(): string | undefined {

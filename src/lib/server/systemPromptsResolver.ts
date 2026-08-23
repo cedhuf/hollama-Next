@@ -25,7 +25,7 @@ function adminSnapshot(): SystemPrompts {
 	try {
 		perModel = JSON.parse(getConfig('systemPromptsPerModel') ?? '{}');
 	} catch {
-		/* malformed — ignore */
+		/* malformed: ignore */
 	}
 	return { global: getConfig('systemPromptsGlobal') ?? '', perModel };
 }

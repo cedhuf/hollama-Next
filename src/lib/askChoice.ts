@@ -3,8 +3,8 @@
 // Like web search, this is NOT a native tool call (model/tool support is too
 // uneven across the Ollama + OpenAI-compatible backends we target). Instead the
 // model is instructed to emit a single <ask>…</ask> block when it wants to
-// clarify a preference; we parse it out of the streamed reply — the same way
-// reasoning <think> tags are handled — and render buttons. The user's selection
+// clarify a preference; we parse it out of the streamed reply (the same way
+// reasoning <think> tags are handled) and render buttons. The user's selection
 // becomes a normal `user` message, so the history stays clean and natural.
 
 export type AskQuestionType = 'single_select' | 'multi_select';
@@ -73,7 +73,7 @@ export function parseAskBlock(raw: string): { content: string; choices?: AskChoi
 }
 
 /**
- * While streaming we don't yet have a complete block — hide anything from the
+ * While streaming we don't yet have a complete block: hide anything from the
  * opening tag onward so the raw JSON never flashes in the bubble.
  */
 export function stripAskBlock(raw: string): string {

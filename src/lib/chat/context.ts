@@ -11,7 +11,7 @@ import { formatSourceIndex, recallSearches } from './sourceIndex';
 /**
  * How heavy a conversation is, and how much of the model's context it uses.
  *
- * There is no tokenizer in the browser — shipping one would mean a megabyte of
+ * There is no tokenizer in the browser: shipping one would mean a megabyte of
  * vocabulary per model family, for a number that only has to be right enough to
  * colour an icon and to decide when to compact. So this estimates from character
  * counts and says so everywhere it is shown: the tooltip labels the figure as an
@@ -23,7 +23,7 @@ import { formatSourceIndex, recallSearches } from './sourceIndex';
  *
  * ~4 for English, ~3 for French and other accented languages (accents and
  * agglutinated words split more). 3.7 sits between the two: it overestimates a
- * little on English prose, which is the safe direction — compacting slightly
+ * little on English prose, which is the safe direction: compacting slightly
  * early costs one summary, compacting late costs a refused request.
  */
 const CHARS_PER_TOKEN = 3.7;
@@ -48,7 +48,7 @@ export function estimateTokens(text: string): number {
 export function estimateMessageTokens(message: Message): number {
 	let tokens = TOKENS_PER_MESSAGE + estimateTokens(message.content ?? '');
 	// Reasoning is sent back on some providers and, more to the point, it is what
-	// makes a conversation heavy — leaving it out would report a reassuring number
+	// makes a conversation heavy: leaving it out would report a reassuring number
 	// about a context that is nearly full.
 	tokens += estimateTokens(message.reasoning ?? '');
 	tokens += (message.images?.length ?? 0) * TOKENS_PER_IMAGE;
@@ -120,7 +120,7 @@ export interface ContextUsage {
 	tokens: number;
 	/** The ceiling used for the ratio. */
 	limit: number;
-	/** Where the ceiling comes from — the tooltip words itself differently for each. */
+	/** Where the ceiling comes from: the tooltip words itself differently for each. */
 	limitSource: 'model' | 'threshold';
 	/** `tokens / limit`, clamped to 1. */
 	ratio: number;
@@ -136,7 +136,7 @@ export interface ContextUsage {
  *
  * `num_ctx` is the only context size the app actually knows: Ollama takes it per
  * request, so when the user set it, it is the truth. Every other provider keeps
- * its window to itself — some (Infomaniak today) do not even publish it — so the
+ * its window to itself (some (Infomaniak today) do not even publish it) so the
  * fallback is the user's own threshold from Settings. That is the whole reason
  * the threshold is configurable rather than derived.
  */
@@ -159,7 +159,7 @@ export function contextUsage(session: Session, threshold: number): ContextUsage 
 	// The index of earlier sources is built at send time, so it is in the request
 	// without being in the messages. Left out, the gauge would read low on exactly
 	// the conversations that carry the most of it, and auto-compaction would fire
-	// late — the failure the estimate exists to prevent.
+	// late: the failure the estimate exists to prevent.
 	tokens += estimateSourceIndexTokens(active);
 
 	const { limit, limitSource } = resolveContextLimit(session, threshold);

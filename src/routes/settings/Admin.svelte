@@ -179,8 +179,8 @@
 
 	/**
 	 * Models offered by each system server. `/api/providers` already returns the
-	 * full (unfiltered) list for admins — the same `listProviderModels` call the
-	 * old per-server "Load models" button made — so there is nothing to fetch here.
+	 * full (unfiltered) list for admins (the same `listProviderModels` call the
+	 * old per-server "Load models" button made) so there is nothing to fetch here.
 	 * Refreshing the catalogue is done from the Servers tab.
 	 */
 	const availableByServer = $derived.by(() => {
@@ -216,7 +216,7 @@
 
 	/**
 	 * Web fetch is configured once, in the Tools tab; here the admin only decides
-	 * who else gets that configuration — the tool being off is shareable too, and
+	 * who else gets that configuration: the tool being off is shareable too, and
 	 * that is what turns it off for the whole instance.
 	 */
 	async function saveWebFetch() {
@@ -543,7 +543,7 @@
 			<Select bind:value={titleSharing} options={sharingOptions} onChange={saveTitle} />
 			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.generateTitlesWithAI
-					? `${$LL.on()} — ${$settingsStore.titleModel || '—'}`
+					? `${$LL.on()}: ${$settingsStore.titleModel || $LL.none()}`
 					: $LL.off()}{$settingsStore.generateTitlesWithAI && $settingsStore.regenerateTitle
 					? ` · ${$LL.regenerateTitleAfterValue({ count: $settingsStore.regenerateTitleAfter })}`
 					: ''}
@@ -567,7 +567,7 @@
 			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.compactModel || $LL.compactModelOwn()}
 				· {$settingsStore.autoCompact
-					? `${$LL.on()} — ${$settingsStore.compactThreshold.toLocaleString()}`
+					? `${$LL.on()}: ${$settingsStore.compactThreshold.toLocaleString()}`
 					: $LL.off()}
 			</span>
 		{/if}
