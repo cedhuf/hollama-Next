@@ -15,6 +15,37 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 </div>
 
+> [!WARNING]
+> **Local mode is going away, and your data will go with it.** If you are using it today, export a
+> backup from _Settings → Data → Backup & restore_ before you update. Read on for why, and for
+> how to push back if you disagree.
+>
+> I have tried to keep the spirit of Hollama while modernising it and pushing on features, usability
+> and flexibility. The more I do that, the clearer it gets that keeping local mode around costs me
+> real time, and costs the codebase more than it gives back.
+>
+> Some of it is concrete. Everything in local mode lives in the browser's `localStorage`, which is
+> about 5 MB for all your conversations, knowledge, personas, playbooks and persona memory put
+> together. API keys sit there in plain text, where any browser extension can read them. Image
+> generation cannot work at all, because the bytes have nowhere to go. And a few features exist
+> twice: conversation search, for instance, is written once for the browser and once as SQLite full
+> text search. Around 75 places in the code branch on which mode you are running.
+>
+> Both modes are the same install anyway. You run the same Node server either way, and a single
+> environment variable decides the rest.
+>
+> Llooma is not getting much attention right now, so most of what I add is what I need myself, and I
+> am aware that may not be what anyone else wants. Nobody has told me what they would want from an
+> app like this, so I am guessing. If someone turns up with a good reason to keep local mode, I will
+> happily talk it through in
+> [Discussions](https://github.com/cedhuf/llooma/discussions) and I am willing to change my mind.
+> Otherwise I will start merging towards removing it.
+>
+> This is not me dropping the Hollama spirit. The plan is to keep a local mode on top of the server
+> architecture: no account, no login screen, everything created for you on first run. You get the
+> same quick single user access, plus proper storage, keys actually encrypted at rest, and room to do
+> things `localStorage` cannot, image generation being the obvious one.
+
 ![The sidebar, the Library, the Interface settings, and a conversation over a wallpaper](static/screenshots/sections.png)
 
 > [!WARNING]
