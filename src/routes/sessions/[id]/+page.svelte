@@ -87,6 +87,13 @@
 
 	$effect(() => chat.syncModel());
 
+	// Kept as it is typed, so a reload or a closed tab costs nothing. Watched here
+	// rather than inside the conversation, which holds no effects of its own.
+	$effect(() => {
+		void chat.editor.prompt;
+		untrack(() => chat.rememberDraft());
+	});
+
 	// Re-resolve the system prompt when the model changes (new/unedited sessions).
 	$effect(() => {
 		void chat.modelName;

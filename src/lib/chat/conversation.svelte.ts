@@ -8,6 +8,7 @@ import { formatAskAnswer } from '$lib/askChoice';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import type { Server } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
+import { clearDraft, readDraft, sessionDraft, writeDraft } from '$lib/drafts';
 import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
 import { languageInstruction } from '$lib/personas';
 import { playbookInstructions, playbooksOf } from '$lib/playbooks';
@@ -277,6 +278,11 @@ export class Conversation implements RunSurface {
 			return;
 		}
 
+		// Whatever was left in the composer last time. After the two hand-offs above
+		// and never before them: they arrive with something to send right now, and a
+		// draft is what you had not decided to send yet.
+		this.editor.prompt = readDraft(sessionDraft(this.session.id));
+
 		// The reason any of this exists: a turn that was still going when the page
 		// went away is picked back up here, transcript and all.
 		void this.reattach();
@@ -329,6 +335,16 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
+	 * Remember what is in the composer, for this conversation.
+	 *
+	 * Called by whoever draws it rather than watched from here, so this class keeps
+	 * no effects of its own and a second interface can wire it its own way.
+	 */
+	rememberDraft = (): void => {
+		writeDraft(sessionDraft(this.session.id), this.editor.prompt ?? '');
+	};
+
+	/**
 	 * Resolve the picked name into the conversation's model.
 	 *
 	 * Reads both of the things it depends on, so whoever watches it is watching a
@@ -358,6 +374,9 @@ export class Conversation implements RunSurface {
 		this.editor.isExpanded = false;
 		this.editor.isNewSession = false;
 		this.editor.view = 'messages';
+		// Sent is no longer a draft. Dropped here rather than after the turn, because
+		// the message is already on its way and the composer is already empty.
+		clearDraft(sessionDraft(this.session.id));
 
 		if (this.editor.messageIndexToEdit !== null) void this.#submitEdit(images);
 		else void this.#submitNew(images);
@@ -371,6 +390,15 @@ export class Conversation implements RunSurface {
 		};
 		if (images && images.length) message.images = images;
 		this.session.messages = [...this.session.messages, message];
+		// Written before the turn goes out, not after it comes back.
+		//
+		// The conversation used to reach storage only when a reply landed, which is
+		// the same write and so covers both messages at once. The hole is the turn
+		// that never produces one: a reload, a crash, a closed tab or a failure
+		// between sending and answering took the message with it, and no refresh
+		// brought it back because it had never been written. What you typed and sent
+		// is yours from the moment you send it.
+		this.save();
 		await this.#view.scrollToBottom(true); // Force scroll after submitting prompt
 		await this.complete(this.session.messages);
 	}
@@ -392,6 +420,9 @@ export class Conversation implements RunSurface {
 		this.editor.messageIndexToEdit = null;
 		this.editor.prompt = '';
 
+		// Same reason as a new message: the edit is what you meant to say, and the
+		// messages after it are already gone from the array above.
+		this.save();
 		await this.complete(this.session.messages);
 	}
 
