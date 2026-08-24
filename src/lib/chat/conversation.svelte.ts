@@ -532,16 +532,17 @@ export class Conversation implements RunSurface {
 		if (wants.title && titleConfig.titleModel) {
 			input.title = {
 				model: titleConfig.titleModel,
-				serverId: titleConfig.titleServerId || this.session.model.serverId
+				serverId: this.#connectionFor(titleConfig.titleModel, titleConfig.titleServerId)
 			};
 		}
 		if (
 			wants.compact &&
 			contextUsage(this.session, this.compactConfig.compactThreshold).ratio >= 1
 		) {
+			const model = this.compactConfig.compactModel || this.session.model.name;
 			input.compact = {
-				model: this.compactConfig.compactModel || this.session.model.name,
-				serverId: this.compactConfig.compactServerId || this.session.model.serverId,
+				model,
+				serverId: this.#connectionFor(model, this.compactConfig.compactServerId),
 				keepRecent: 0
 			};
 		}
@@ -561,6 +562,24 @@ export class Conversation implements RunSurface {
 			// and the message is still in the conversation and still in the composer.
 			this.#handleError(error instanceof Error ? error : new Error(String(error)));
 		}
+	}
+
+	/**
+	 * Which connection serves a model chosen for an errand.
+	 *
+	 * A named connection wins, and the catalogue answers when there is none: these
+	 * settings store a model by name alone, so the connection has to be looked up
+	 * rather than assumed. It used to fall back to the conversation's own server,
+	 * which is right only while every model lives on one connection. Point the
+	 * title model at a hosted provider, hold the conversation on a local Ollama,
+	 * and every turn asked that Ollama for a model it has never heard of. The 404
+	 * went nowhere: naming is best-effort, so the conversation simply stayed
+	 * untitled and nothing said why.
+	 */
+	#connectionFor(model: string, preferred: string): string {
+		if (preferred) return preferred;
+		const known = this.#settings.current.models.find((entry) => entry.name === model);
+		return known?.serverId ?? this.session.model!.serverId;
 	}
 
 	/** Everything the turn is, gathered from where each part of it is kept. */

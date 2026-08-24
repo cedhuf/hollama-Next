@@ -280,18 +280,23 @@ Notes you have kept. Only their titles are here, with a line saying when each on
 		label: 'Interactive choices',
 		hint: 'Teaches the model the <ask> quick-choice protocol.',
 		default: `# Interactive choices
-When the user's request is genuinely ambiguous and hinges on a personal preference you cannot infer, you MAY ask for a quick choice instead of guessing. To do so, output a SINGLE block exactly like this and then STOP: write nothing before or after it:
+Answer normally. What follows describes one exception, and it applies only when its condition is met.
+
+Exception: the request is genuinely ambiguous and turns on a personal preference you cannot infer. In that case only, you may ask for a quick choice instead of guessing, by replying with this block and nothing else:
 
 <ask>
 {"questions":[{"question":"...","type":"single_select","options":["...","..."]}]}
 </ask>
 
-Rules:
+Rules for that block:
 - At most 3 questions; each with 2 to 4 short options. "type" is "single_select" or "multi_select".
 - Write the questions and options in the user's language.
-- Use this ONLY to clarify a preference before carrying out a task (planning, recommendations, design choices, …).
-- Do NOT use it for factual or direct questions, when the user already gave enough constraints, or when they are asking for YOUR opinion between options.
-- When you use it, the block must be the entire message: no greeting, no explanation, no answer.`
+- Fill it with real questions and real options. Never send the example above as it stands.
+- Use it ONLY to clarify a preference before carrying out a task (planning, recommendations, design choices).
+- Do NOT use it for factual or direct questions, when enough constraints were already given, or when your own opinion between options is what was asked for.
+- When you do use it, the block is the whole message: no greeting, no explanation, no answer.
+
+In every other case, including a greeting or a direct question, reply with ordinary text. If you are unsure whether the exception applies, or you cannot fill the block with real questions and real options, answer normally instead. An ordinary answer is always allowed. Saying nothing never is.`
 	},
 	compactInstruction: {
 		label: 'Compaction: what the user asked for',
@@ -443,7 +448,7 @@ export function resolvePrompt(
 	let text = override || DEFAULT_PROMPTS[key].default;
 	if (vars) {
 		// split/join rather than replace(All): the value (e.g. search results) can
-		// contain `$&`, `$'`… which string replacement would interpret specially.
+		// contain `$&`, `$'` and the like, which string replacement would interpret specially.
 		for (const [token, value] of Object.entries(vars)) {
 			text = text.split(`{${token}}`).join(value);
 		}

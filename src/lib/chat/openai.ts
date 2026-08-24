@@ -16,6 +16,7 @@ import {
 	type ChatStrategy,
 	type Message
 } from './index';
+import type { OllamaOptions } from './ollama';
 
 /**
  * An id for a tool call the provider did not give one.
@@ -124,6 +125,42 @@ async function withThinkingField<T>(
 		refusedThinking.add(thinkingKey(serverId, model));
 		return result;
 	}
+}
+
+/**
+ * The sampling settings a conversation carries, in the words this API uses.
+ *
+ * These are stored under Ollama's names because that is the vocabulary the app
+ * grew up with, and they used to reach Ollama and nowhere else: every other
+ * provider was handed a request with no sampling at all, so a temperature set on
+ * a conversation, or carried by a persona, silently did nothing the moment the
+ * model was not local. That was an omission rather than a decision.
+ *
+ * Only what this API actually defines. `top_k`, `min_p`, `tfs_z`, `typical_p`,
+ * `repeat_penalty` and the mirostat trio are llama.cpp's, and an endpoint that
+ * does not know a field answers 400 rather than ignoring it, which is a whole
+ * turn lost to a setting nobody asked to be strict about.
+ *
+ * `undefined` is the only absent value: zero is a real temperature and a real
+ * seed, so nothing here may be tested for truthiness.
+ */
+function samplingFrom(options: Partial<OllamaOptions> | undefined) {
+	if (!options) return {};
+	const set = <T>(value: T | undefined) => value !== undefined && value !== null;
+
+	return {
+		...(set(options.temperature) ? { temperature: options.temperature } : {}),
+		...(set(options.top_p) ? { top_p: options.top_p } : {}),
+		...(set(options.seed) ? { seed: options.seed } : {}),
+		...(set(options.presence_penalty) ? { presence_penalty: options.presence_penalty } : {}),
+		...(set(options.frequency_penalty) ? { frequency_penalty: options.frequency_penalty } : {}),
+		...(options.stop?.length ? { stop: options.stop } : {}),
+		// Ollama's name for the same ceiling, and its "no limit" is -1 where this API
+		// wants the field left out entirely.
+		...(set(options.num_predict) && options.num_predict! > 0
+			? { max_tokens: options.num_predict }
+			: {})
+	};
 }
 
 export class OpenAIStrategy implements ChatStrategy {
@@ -245,6 +282,7 @@ export class OpenAIStrategy implements ChatStrategy {
 					extraBody,
 					tools,
 					payload.toolChoice,
+					samplingFrom(payload.options),
 					abortSignal,
 					onChunk
 				),
@@ -258,6 +296,7 @@ export class OpenAIStrategy implements ChatStrategy {
 		extraBody: Record<string, unknown> | undefined,
 		tools: ChatCompletionTool[] | undefined,
 		toolChoice: 'auto' | 'none' | undefined,
+		sampling: Record<string, unknown>,
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
@@ -269,6 +308,7 @@ export class OpenAIStrategy implements ChatStrategy {
 			// turn (which is every turn) would go uncounted. Servers that do not know
 			// the field ignore it.
 			stream_options: { include_usage: true },
+			...sampling,
 			...(tools ? { tools } : {}),
 			// Sent only when it is `none`, which is the only value that says anything:
 			// `auto` is every provider's default, and a field nobody needs is a field
