@@ -730,10 +730,14 @@
 
 						     The divider sits on the wrapper rather than on each trigger, so one
 						     snippet serves all three. -->
+						<!-- Allowed to shrink, unlike the icons beside it: three answers of very
+						     different lengths ("Landscape", "Standard", "1 image") are what push
+						     this strip past a phone's width, and the triggers already truncate.
+						     Fixed again above `sm`, where it reads better at its natural size. -->
 						<div
-							class="border-shade-3 focus-within:border-accent flex shrink-0 items-center overflow-hidden rounded-lg border transition-colors"
+							class="border-shade-3 focus-within:border-accent flex min-w-0 flex-1 items-center overflow-hidden rounded-lg border transition-colors sm:flex-none sm:shrink-0"
 						>
-							<div class="border-shade-3 border-r">
+							<div class="border-shade-3 min-w-0 border-r">
 								<Select
 									value={ratio}
 									options={RATIO_OPTIONS}
@@ -742,7 +746,7 @@
 									onChange={(option) => (ratio = option.value as ImageRatio)}
 								/>
 							</div>
-							<div class="border-shade-3 border-r">
+							<div class="border-shade-3 min-w-0 border-r">
 								<Select
 									value={quality}
 									options={QUALITY_OPTIONS}
@@ -759,7 +763,14 @@
 							/>
 						</div>
 
-						<div class="ml-auto flex items-center gap-2">
+						<!-- A row of their own below `sm`, decided rather than left to the
+						     wrap: with everything set to shrink last, the browser broke the line
+						     wherever it ran out and `ml-auto` then pushed the remainder around.
+						     Three ragged rows on a phone. Above `sm` they go back to the right
+						     end of the single row. -->
+						<div
+							class="flex w-full items-center justify-end gap-2 max-sm:order-last sm:ml-auto sm:w-auto"
+						>
 							{#if canRewrite}
 								<button
 									type="button"
@@ -781,7 +792,7 @@
 								type="button"
 								onclick={generate}
 								disabled={busy || !prompt.trim() || !model}
-								class="bg-accent text-shade-0 disabled:bg-shade-3 disabled:text-muted flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-opacity hover:opacity-90 disabled:pointer-events-none"
+								class="bg-accent text-shade-0 disabled:bg-shade-3 disabled:text-muted flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-opacity hover:opacity-90 disabled:pointer-events-none max-sm:flex-1"
 							>
 								{#if busy}
 									<LoaderCircle class="h-3.5 w-3.5 animate-spin" />

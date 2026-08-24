@@ -428,13 +428,26 @@ export async function runTurn(
 			];
 		}
 
+		/**
+		 * Ahead of the conversation, never after it.
+		 *
+		 * These three used to be appended, so the instruction sat closest to the
+		 * question and carried the most weight. It cost more than it bought. One
+		 * provider's chat template refuses a system message that follows the
+		 * conversation outright, and another accepts it and answers with an empty
+		 * string: a turn that searched, read a page and then said nothing at all,
+		 * with nothing in any log to say why.
+		 *
+		 * A placement that is silently fatal on some endpoints is not a placement,
+		 * whatever it buys on the others. Every other injection in this file already
+		 * goes to the front; these now do too.
+		 */
 		// Native mode: when to reach for a tool, as an instruction rather than as a
 		// line in a tool description. The text path has a whole pre-pass whose only job
 		// is deciding whether to look something up, and dropping that left the decision
 		// resting on a description the model weighs far more lightly.
 		if (webTools) {
 			chatMessages = [
-				...chatMessages,
 				{ role: 'system', content: resolvePrompt('toolPolicy', overrides) },
 				// Said once, up front, rather than injected at the moment it becomes
 				// true. What stops the calls is `tool_choice`; this only asks for the
@@ -444,7 +457,8 @@ export async function runTurn(
 					role: 'system',
 					content:
 						'Tool calls are limited for each message. If you run out before you have checked everything, answer with what you have and say plainly what you were not able to check.'
-				}
+				},
+				...chatMessages
 			];
 		}
 
@@ -453,8 +467,8 @@ export async function runTurn(
 		// answer by narrating that they have remembered something.
 		if (memory && memoryTooling) {
 			chatMessages = [
-				...chatMessages,
-				{ role: 'system', content: resolvePrompt('memoryPolicy', overrides) }
+				{ role: 'system', content: resolvePrompt('memoryPolicy', overrides) },
+				...chatMessages
 			];
 		}
 
@@ -462,8 +476,8 @@ export async function runTurn(
 		// and the model has a real call to make instead of a block to write.
 		if (!native && mayReread && (sentSnippets || recalled.length)) {
 			chatMessages = [
-				...chatMessages,
-				{ role: 'system', content: resolvePrompt('searchRead', overrides) }
+				{ role: 'system', content: resolvePrompt('searchRead', overrides) },
+				...chatMessages
 			];
 		}
 
