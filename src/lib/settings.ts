@@ -103,20 +103,6 @@ export interface Settings {
 	 * self-hosted OpenAI-compatible server that supports it without any way to say so.
 	 */
 	nativeTools: 'off' | 'auto' | 'force';
-	/**
-	 * Run a turn in the server rather than in this tab.
-	 *
-	 * On by default, because the alternative loses answers: a generation that
-	 * lives in the page dies with it, and a reload, a navigation or iOS reclaiming
-	 * a backgrounded tab all count. Run in the server it survives all three, and a
-	 * tab that comes back reattaches to it.
-	 *
-	 * It stays a setting rather than becoming simply how the app works, because
-	 * which process holds a turn is a real choice: turned off, the turn is driven
-	 * from this tab and only survives as long as the tab does. The provider is
-	 * addressed through the instance either way.
-	 */
-	serverSideGeneration: boolean;
 	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
 	webFetchEnabled: boolean;
 	webFetchByDefault: boolean;
@@ -309,7 +295,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	// Off by default: the text protocols work everywhere and have the mileage, and
 	// a small model that calls tools badly fails in ways a user did not ask for.
 	nativeTools: 'off',
-	serverSideGeneration: true,
 	webFetchEnabled: true,
 	webFetchByDefault: true,
 	webFetchMaxPages: 3,

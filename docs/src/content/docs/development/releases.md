@@ -56,12 +56,12 @@ to people whose data is at stake. See the note in
 ## Changes that move data
 
 A release that changes **where a conversation travels** must say so in its notes, in as many words,
-and must name the setting that turns it back.
+and must name the setting that turns it back, when there is one.
 
-There is one so far: server-side generation, which decides whether a turn is driven by the server
-or by the tab that asked for it. The setting (_Chat → Generate on the server_) is what moves it, and
-turning it off means a reload loses the answer. None of that makes it something to discover
-afterwards.
+There has been one so far: server-side generation, which moved the turn out of the tab and into the
+server. It was a setting for a while and is not any more, since keys, admin rules and the proxy all
+live in the server already and a second path was a second way of writing the same conversation.
+None of that is something to discover afterwards.
 
 Same reasoning as the migration note above. Both are promises to people who cannot read the diff,
 and neither can be generated from a commit log.

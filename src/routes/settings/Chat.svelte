@@ -102,12 +102,6 @@
 			bind:checked={$settingsStore.autoExpandReasoningBlocks}
 		/>
 		<SettingsHint>{$LL.autoExpandReasoningBlocksHelp()}</SettingsHint>
-
-		<FieldCheckbox
-			label={$LL.serverSideGeneration()}
-			bind:checked={$settingsStore.serverSideGeneration}
-		/>
-		<SettingsHint>{$LL.serverSideGenerationHelp()}</SettingsHint>
 	</SettingsSection>
 
 	<SettingsSection title={$LL.compaction()} description={$LL.compactionDescription()} card>

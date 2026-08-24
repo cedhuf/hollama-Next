@@ -36,7 +36,6 @@ import {
 	runForSession,
 	startRun
 } from './run/client';
-import { runLocally } from './run/local';
 import type { RunInput, RunSpeaker } from './run/types';
 
 /* eslint-disable svelte/prefer-svelte-reactivity -- the rule guards against a
@@ -114,17 +113,6 @@ export class Conversation implements RunSurface {
 	 * turns it back into a model, or into nothing.
 	 */
 	modelName: string | undefined = $state();
-
-	/**
-	 * Where the turn in progress is running.
-	 *
-	 * One value rather than two, and set before the request goes out rather than
-	 * when the answer to it comes back. Derived from a pair, there was a moment
-	 * between "a turn started" and "the server acknowledged it" where the page
-	 * believed the turn was in this tab, and leaving during that moment asked
-	 * whether to abandon something that was in no danger.
-	 */
-	runLocation: 'none' | 'tab' | 'server' = $state('none');
 
 	/** The id of the run being watched, if one is being watched. */
 	activeRun: string | null = $state(null);
@@ -237,7 +225,6 @@ export class Conversation implements RunSurface {
 	async open(session: Session, entry: OpenEntry = {}): Promise<void> {
 		this.detach();
 		this.activeRun = null;
-		this.runLocation = 'none';
 		this.editor.isCompletionInProgress = false;
 		this.editor.completion = '';
 		this.editor.reasoning = '';
@@ -544,23 +531,8 @@ export class Conversation implements RunSurface {
 		this.editor.searchQuery = undefined;
 		this.editor.webSearchInfo = undefined;
 
-		// Compaction acts here and nowhere else: the conversation keeps every message
-		// it ever had, and only what leaves for the model is cut back to the last
-		// summary. Without a marker this returns the array untouched, which is what
-		// every conversation written before compaction existed gets.
-		const onServer = this.#settings.current.serverSideGeneration;
-		// Said now rather than when the server answers: between the two there is a
-		// round trip, and a page that thinks the turn is in this tab for the length
-		// of it will warn about losing something that is not at risk.
-		this.runLocation = onServer ? 'server' : 'tab';
-
 		const input = this.#inputFor(messages, server);
 		const wants = this.#wants();
-
-		if (!onServer) {
-			await this.#runHere(input, wants);
-			return;
-		}
 
 		// The server writes the title and the summary itself, so it has to be told
 		// which model to use for each: the browser is where that configuration lives.
@@ -586,12 +558,11 @@ export class Conversation implements RunSurface {
 			const run = await startRun(input);
 			await this.#follow(run.id, 0);
 		} catch (error) {
-			// The handover itself failed, which is different from the turn failing:
-			// nothing has been started, so the tab runs it rather than losing the
-			// message. A server that is down should cost a promise, not an answer.
-			console.warn('Falling back to a local run:', error);
-			this.runLocation = 'tab';
-			await this.#runHere(input, wants);
+			// The handover failed, so there is no turn: nothing was started, and this
+			// tab has nowhere to run one. Said plainly rather than worked around,
+			// because the workaround used to be a second way of producing an answer,
+			// and the message is still in the conversation and still in the composer.
+			this.#handleError(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 
@@ -624,6 +595,10 @@ export class Conversation implements RunSurface {
 			// account. Everything else about the persona is already resolved into the
 			// fields above, which is deliberate and stays that way.
 			personaId: this.session.personaId,
+			// Compaction acts here and nowhere else: the conversation keeps every
+			// message it ever had, and only what leaves for the model is cut back to
+			// the last summary. Without a marker this returns the array untouched,
+			// which is what every conversation written before compaction existed gets.
 			messages: messagesInContext(messages),
 			flags: {
 				webSearch: !!this.editor.webSearch,
@@ -673,20 +648,6 @@ export class Conversation implements RunSurface {
 		};
 	}
 
-	async #runHere(input: RunInput, wants: { title: boolean; compact: boolean }): Promise<void> {
-		try {
-			await runLocally(
-				input,
-				this.session,
-				wants,
-				(event) => applyRunEvent(event, this),
-				this.editor.abortController!.signal
-			);
-		} finally {
-			this.runLocation = 'none';
-		}
-	}
-
 	// --- following, and picking back up ----------------------------------------
 
 	/**
@@ -697,7 +658,6 @@ export class Conversation implements RunSurface {
 	 */
 	async #follow(runId: string, from: number, replayThrough = 0): Promise<void> {
 		this.activeRun = runId;
-		this.runLocation = 'server';
 		rememberRun(this.session.id, runId);
 		this.editor.isCompletionInProgress = true;
 
@@ -724,7 +684,6 @@ export class Conversation implements RunSurface {
 		} finally {
 			this.#stopFollowing = null;
 			this.activeRun = null;
-			this.runLocation = 'none';
 			// Only an ending clears the note. Closing the window on a turn that is
 			// still going is the case the note exists for, so leaving must not erase
 			// the one thing that says there is something to come back to.
@@ -741,7 +700,6 @@ export class Conversation implements RunSurface {
 	 * only a hint that there may be something to collect.
 	 */
 	async reattach(): Promise<void> {
-		if (!this.#settings.current.serverSideGeneration) return;
 		if (this.activeRun) return;
 
 		const sessionId = this.session.id;

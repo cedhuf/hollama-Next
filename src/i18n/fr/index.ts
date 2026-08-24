@@ -23,7 +23,6 @@ const fr = extendDictionary(en, {
 	areYouSureYouWantToDeleteAllServers: 'Êtes-vous sûr de vouloir supprimer tous les serveurs ?',
 	areYouSureYouWantToImportData:
 		'Êtes-vous sûr de vouloir importer ? Cela écrasera les données existantes',
-	areYouSureYouWantToLeave: "Êtes-vous sûr de vouloir quitter?\nLa complétion en cours s'arrêtera",
 	assistant: 'Assistant',
 	automatic: 'Auto',
 	automaticallyCheckForUpdates: 'Vérifier automatiquement les mises à jour',
@@ -314,9 +313,6 @@ const fr = extendDictionary(en, {
 	regenerateTitleAfterValue: '{count:number} réponse{{s}}',
 	generateTitlesWithAIHelp:
 		'Nomme automatiquement les nouvelles sessions après la première réponse, avec le modèle choisi',
-	serverSideGeneration: 'Générer sur le serveur',
-	serverSideGenerationHelp:
-		"Garde une réponse en cours quand vous rechargez, changez de page ou que le téléphone met l'application en veille, et la reprend à votre retour. Désactivez pour générer dans cet onglet, afin que rien ne passe par le serveur llooma en route vers le modèle.",
 	theme: 'Thème',
 	surfaceTransparency: 'Surfaces translucides',
 	surfaceTransparencyStrength: 'Quantité de transparence',

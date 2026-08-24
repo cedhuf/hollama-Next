@@ -201,22 +201,11 @@
 	}
 
 	beforeNavigate((navigation) => {
-		// Only a turn running in this tab is at risk from leaving it. One running in
-		// the server keeps going and is waiting when the conversation is opened
-		// again, so asking whether to abandon it would be asking about a danger that
-		// no longer exists.
-		if (chat.editor.isCompletionInProgress && chat.runLocation !== 'server') {
-			const userConfirmed = confirm($LL.areYouSureYouWantToLeave());
-			if (userConfirmed) {
-				chat.stop();
-				return;
-			}
-			navigation.cancel();
-			return;
-		}
-
-		// Leaving a server-side turn only stops watching it.
-		if (chat.runLocation === 'server') chat.detach();
+		// Leaving never abandons a turn any more: it runs in the server, it is
+		// written down there as it goes, and it is waiting when the conversation is
+		// opened again. So there is nothing to ask about, and leaving only stops
+		// watching.
+		chat.detach();
 
 		// Only show confirmation when navigating outside of /sessions/ path
 		if (

@@ -1,17 +1,9 @@
-import { derived, get, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
 import { env } from '$env/dynamic/public';
-import { effectivePrompts } from '$lib/appPrompts';
-import { resolvePrompt } from '$lib/defaultPrompts';
 
 const envUrl = env.PUBLIC_SEARCH_URL?.trim() || '';
 const envBackend = env.PUBLIC_SEARCH_BACKEND?.trim() || 'degoog';
-
-export interface SearchResult {
-	title: string;
-	url: string;
-	snippet: string;
-}
 
 export interface SearchView {
 	available: boolean;
@@ -66,22 +58,6 @@ export const searchConfig = derived(serverSearch, ($server): SearchView => {
 	return { ...$server, available: !!$server.url };
 });
 
-export async function searchWeb(query: string): Promise<SearchResult[]> {
-	const cfg = get(searchConfig);
-	if (!cfg.available) return [];
-
-	const params = new URLSearchParams({ q: query });
-
-	try {
-		const response = await fetch(`/api/search?${params}`);
-		if (!response.ok) return [];
-		const data = await response.json();
-		return Array.isArray(data?.results) ? data.results : [];
-	} catch {
-		return [];
-	}
-}
-
 /**
  * What the router came back with.
  *
@@ -127,37 +103,4 @@ export function parseRouterDecision(raw: string | undefined): RouterDecision {
 	if (/[.!?:;]$/.test(first)) return { kind: 'unreadable' };
 
 	return { kind: 'query', query: first };
-}
-
-export interface SearchContext {
-	context: string;
-	query: string;
-	resultCount: number;
-	results: SearchResult[];
-}
-
-/**
- * Run a search and format the results as a context block.
- *
- * `startNumber` continues the numbering from earlier results in the same turn,
- * which native tool calling makes possible: a model that searches twice would
- * otherwise be handed two lists both starting at [1], and its citations would say
- * nothing about which one it meant.
- */
-export async function buildSearchContext(
-	query: string,
-	startNumber = 1
-): Promise<SearchContext | null> {
-	const results = await searchWeb(query);
-	if (!results.length) return null;
-
-	const body = results
-		.map((r, i) => `[${startNumber + i}] ${r.title}\n${r.url}\n${r.snippet}`)
-		.join('\n\n');
-	return {
-		context: resolvePrompt('searchContext', get(effectivePrompts), { results: body }),
-		query,
-		resultCount: results.length,
-		results
-	};
 }

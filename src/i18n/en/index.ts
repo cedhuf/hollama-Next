@@ -14,7 +14,6 @@ const en = {
 	areYouSureYouWantToDeleteAllServers: 'Are you sure you want to delete all servers?',
 	areYouSureYouWantToImportData:
 		'Are you sure you want to import? This will overwrite any existing data',
-	areYouSureYouWantToLeave: 'Are you sure you want to leave?\nThe completion in progress will stop',
 	assistant: 'Assistant',
 	attachImage: 'Attach image',
 	automatic: 'Auto',
@@ -322,9 +321,6 @@ const en = {
 	regenerateTitleAfterValue: '{count:number} repl{{y|ies}}',
 	generateTitlesWithAIHelp:
 		'Automatically name new sessions after the first reply, using the selected model',
-	serverSideGeneration: 'Generate on the server',
-	serverSideGenerationHelp:
-		'Keeps a reply going when you reload, navigate away or your phone puts the app to sleep, and picks it back up when you return. Turn it off to generate in this tab instead, so nothing passes through the llooma server on its way to the model.',
 	theme: 'Theme',
 	surfaceTransparency: 'Translucent surfaces',
 	surfaceTransparencyStrength: 'Amount of transparency',

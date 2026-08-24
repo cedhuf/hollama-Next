@@ -63,11 +63,6 @@ type RootTranslation = {
 	 */
 	areYouSureYouWantToImportData: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​l​e​a​v​e​?​
-​T​h​e​ ​c​o​m​p​l​e​t​i​o​n​ ​i​n​ ​p​r​o​g​r​e​s​s​ ​w​i​l​l​ ​s​t​o​p
-	 */
-	areYouSureYouWantToLeave: string
-	/**
 	 * A​s​s​i​s​t​a​n​t
 	 */
 	assistant: string
@@ -1261,14 +1256,6 @@ type RootTranslation = {
 	 * A​u​t​o​m​a​t​i​c​a​l​l​y​ ​n​a​m​e​ ​n​e​w​ ​s​e​s​s​i​o​n​s​ ​a​f​t​e​r​ ​t​h​e​ ​f​i​r​s​t​ ​r​e​p​l​y​,​ ​u​s​i​n​g​ ​t​h​e​ ​s​e​l​e​c​t​e​d​ ​m​o​d​e​l
 	 */
 	generateTitlesWithAIHelp: string
-	/**
-	 * G​e​n​e​r​a​t​e​ ​o​n​ ​t​h​e​ ​s​e​r​v​e​r
-	 */
-	serverSideGeneration: string
-	/**
-	 * K​e​e​p​s​ ​a​ ​r​e​p​l​y​ ​g​o​i​n​g​ ​w​h​e​n​ ​y​o​u​ ​r​e​l​o​a​d​,​ ​n​a​v​i​g​a​t​e​ ​a​w​a​y​ ​o​r​ ​y​o​u​r​ ​p​h​o​n​e​ ​p​u​t​s​ ​t​h​e​ ​a​p​p​ ​t​o​ ​s​l​e​e​p​,​ ​a​n​d​ ​p​i​c​k​s​ ​i​t​ ​b​a​c​k​ ​u​p​ ​w​h​e​n​ ​y​o​u​ ​r​e​t​u​r​n​.​ ​T​u​r​n​ ​i​t​ ​o​f​f​ ​t​o​ ​g​e​n​e​r​a​t​e​ ​i​n​ ​t​h​i​s​ ​t​a​b​ ​i​n​s​t​e​a​d​,​ ​s​o​ ​n​o​t​h​i​n​g​ ​p​a​s​s​e​s​ ​t​h​r​o​u​g​h​ ​t​h​e​ ​l​l​o​o​m​a​ ​s​e​r​v​e​r​ ​o​n​ ​i​t​s​ ​w​a​y​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​.
-	 */
-	serverSideGenerationHelp: string
 	/**
 	 * T​h​e​m​e
 	 */
@@ -3602,11 +3589,6 @@ export type TranslationFunctions = {
 	 */
 	areYouSureYouWantToImportData: () => LocalizedString
 	/**
-	 * Are you sure you want to leave?
-The completion in progress will stop
-	 */
-	areYouSureYouWantToLeave: () => LocalizedString
-	/**
 	 * Assistant
 	 */
 	assistant: () => LocalizedString
@@ -4774,14 +4756,6 @@ The completion in progress will stop
 	 * Automatically name new sessions after the first reply, using the selected model
 	 */
 	generateTitlesWithAIHelp: () => LocalizedString
-	/**
-	 * Generate on the server
-	 */
-	serverSideGeneration: () => LocalizedString
-	/**
-	 * Keeps a reply going when you reload, navigate away or your phone puts the app to sleep, and picks it back up when you return. Turn it off to generate in this tab instead, so nothing passes through the llooma server on its way to the model.
-	 */
-	serverSideGenerationHelp: () => LocalizedString
 	/**
 	 * Theme
 	 */

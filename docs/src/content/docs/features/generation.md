@@ -49,21 +49,12 @@ always was: a reply cut short is more useful than an empty one.
 
 ## Where your conversation goes
 
-This is worth stating plainly, because it is a real change and it is why the behaviour is a
-setting rather than simply how the app works.
+This is worth stating plainly, because it is a real change.
 
 Nothing moves. Your conversation already passes through the instance: it holds the accounts, the
 connections and the provider keys, and the proxy is the path between the browser and the model. A
 turn that runs in the same process reaches the provider the same way, under the same admin rules
 about which models are shared and which instruction is locked.
-
-## Turning it off
-
-**Settings → Chat → Generate on the server.** On by default. Turned off, the turn is driven from
-the tab instead: the same steps, the same path to the provider, but the run dies with the page, so
-a reload costs you the reply. The trade is that plain.
-
-The setting travels with your other settings, so it applies wherever you use the same profile.
 
 ## What it does not survive
 
