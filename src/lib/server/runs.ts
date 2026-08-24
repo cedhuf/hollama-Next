@@ -112,13 +112,28 @@ export function getRun(id: string, userId: string | null): Run | undefined {
 	return run;
 }
 
-/** The run still going for a conversation, which is what a reloading tab asks for. */
+/**
+ * The conversation's most recent run, which is what a reloading tab asks for.
+ *
+ * The most recent, and it used to be whichever came out of the map first, which
+ * is the oldest one still held. So a conversation answered twice inside the
+ * retention window handed a returning tab the turn before last: it replayed a
+ * finished run, saw its ending, and sat there looking idle while the real one was
+ * still being written a few metres away.
+ *
+ * A turn still going wins over a finished one whatever their order, since that is
+ * the one there is anything left to watch.
+ */
 export function findRunForSession(sessionId: string, userId: string | null): Run | undefined {
+	let best: Run | undefined;
 	for (const run of runs.values()) {
 		if (run.sessionId !== sessionId || run.userId !== userId) continue;
-		if (!run.finishedAt || Date.now() - run.finishedAt < RETAIN_MS) return run;
+		if (run.finishedAt && Date.now() - run.finishedAt >= RETAIN_MS) continue;
+		if (!best) best = run;
+		else if (!run.finishedAt && best.finishedAt) best = run;
+		else if (!run.finishedAt === !best.finishedAt && run.startedAt > best.startedAt) best = run;
 	}
-	return undefined;
+	return best;
 }
 
 export function cancelRun(run: Run): void {

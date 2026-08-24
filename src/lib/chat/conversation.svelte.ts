@@ -697,16 +697,19 @@ export class Conversation implements RunSurface {
 	/**
 	 * Pick up a turn that was already running when this page loaded.
 	 *
-	 * Most of what this used to do is gone, and none of it is missed. A finished
-	 * run needed collecting, so a note was kept in local storage saying there might
-	 * be something to come back for, and its whole log was replayed to get the
-	 * answer out of it. The run writes the answer itself now, so a conversation
-	 * read from storage already holds everything a finished turn produced, and
-	 * there is nothing to collect: only a turn still being written is worth
-	 * joining.
+	 * Simpler than it was in the part that mattered: the note this browser used to
+	 * keep in local storage, saying there might be an answer waiting somewhere, is
+	 * gone. The run writes what it produces, so nothing is waiting anywhere. The
+	 * server is asked instead, since it is the one running the turn and the only
+	 * one that can say whether it still is.
 	 *
-	 * The server is asked, rather than this browser remembering: it is the one
-	 * running the turn, and the only one that can say whether it still is.
+	 * A run that has already ended is still followed, though, and that is not a
+	 * leftover. The conversation was read from storage a moment before this, and a
+	 * turn that landed inside that moment wrote itself into a row this page had
+	 * already read: a reload two seconds before the last word arrived showed the
+	 * question with no answer under it until the next visit. Replaying the log
+	 * closes exactly that gap, and costs nothing now that replaying it stores
+	 * nothing.
 	 */
 	async reattach(): Promise<void> {
 		if (this.activeRun) return;
@@ -715,12 +718,13 @@ export class Conversation implements RunSurface {
 		const run = await runForSession(sessionId).catch(() => null);
 		// The conversation may have changed under us while that was in flight.
 		if (sessionId !== this.session.id) return;
-		if (!run || run.status !== 'running') return;
+		if (!run) return;
 
-		// From zero, so the half-written answer is rebuilt as it stands rather than
+		// From zero, so a half-written answer is rebuilt as it stands rather than
 		// picked up mid-sentence. What had already landed before this page opened is
 		// applied as history rather than performed: on a local model at ten tokens a
 		// second, a reply worth leaving the room for is not worth watching twice.
+		// Anything the conversation already holds is recognised and skipped.
 		await this.#follow(run.id, 0, run.lastEventId);
 	}
 
