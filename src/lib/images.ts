@@ -1,6 +1,5 @@
 import { derived, get, writable } from 'svelte/store';
 
-import { isServerMode } from '$lib/chat/endpoint';
 import { modelKind, type ImageQuality, type ImageRatio } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
 import { writeImageTitle } from '$lib/imagePrompt';
@@ -9,10 +8,8 @@ import { serversStore, settingsStore } from '$lib/localStorage';
 /**
  * The gallery, on the browser's side.
  *
- * Its own store rather than a collection in the repository, because images only
- * exist in server mode: the repository is the one interface both modes have to
- * satisfy, and putting something there that local mode cannot implement would
- * make the seam lie about what it is.
+ * Its own store rather than a collection in the repository: a picture is bytes
+ * the server holds and hands out by id, not a document the repository syncs.
  */
 
 export const imagesStore = writable<GeneratedImage[]>([]);
@@ -22,10 +19,6 @@ export const imagesLoaded = writable(false);
 export const imageUrl = (id: string) => `/api/images/${id}/blob`;
 
 export async function loadImages(): Promise<void> {
-	if (!isServerMode) {
-		imagesLoaded.set(true);
-		return;
-	}
 	try {
 		const response = await fetch('/api/images');
 		if (!response.ok) return;
@@ -139,7 +132,7 @@ export const imageModels = derived([settingsStore, serversStore], ([$settings, $
  * once it is shared. An administrator who does not want this offers no image
  * model, which is the same decision expressed where the models already are.
  */
-export const canDrawImages = derived(imageModels, ($models) => isServerMode && $models.length > 0);
+export const canDrawImages = derived(imageModels, ($models) => $models.length > 0);
 
 /** The connection a model belongs to, which the server needs named explicitly. */
 export function serverIdFor(model: string): string | undefined {

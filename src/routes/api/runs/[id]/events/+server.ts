@@ -1,6 +1,5 @@
 import { error } from '@sveltejs/kit';
 
-import { env as publicEnv } from '$env/dynamic/public';
 import type { SequencedRunEvent } from '$lib/chat/run/types';
 import { requireUser } from '$lib/server/api';
 import { getRun, subscribe } from '$lib/server/runs';
@@ -18,7 +17,7 @@ import { getRun, subscribe } from '$lib/server/runs';
  * answer instead of finding an empty conversation.
  */
 export async function GET(event) {
-	const userId = publicEnv.PUBLIC_MODE === 'server' ? (await requireUser(event)).id : null;
+	const userId = (await requireUser(event)).id;
 
 	const run = getRun(event.params.id, userId);
 	if (!run) throw error(404, 'No such run');

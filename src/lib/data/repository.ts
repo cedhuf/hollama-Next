@@ -25,11 +25,7 @@ export class NotAuthenticatedError extends Error {
 	}
 }
 
-/**
- * The full set of app data, as held in memory by the reactive stores.
- * Returned synchronously by `DataRepository.hydrate()` in local mode so the
- * stores can seed without a loading flash.
- */
+/** The full set of app data, as held in memory by the reactive stores. */
 export interface AppData {
 	settings: Settings;
 	servers: Server[];
@@ -49,20 +45,12 @@ export type Backup = Partial<Record<StorageKey, unknown>>;
 /**
  * The single seam between the app and where its data lives.
  *
- * Components never touch storage directly. They read/write the reactive
- * stores, which delegate persistence here. Two implementations:
- *   - `LocalStorageRepository` (mode `local`): browser `localStorage`, sync.
- *   - `ApiRepository` (mode `server`): SvelteKit endpoints backed by SQLite.
- *
- * The interface is async so the server implementation fits without changing
- * any call sites. `hydrate()` is the one synchronous escape hatch: local mode
- * implements it to seed the stores instantly; async-only repos omit it and
- * rely on the `load*()` methods at boot.
+ * Components never touch storage directly. They read and write the reactive
+ * stores, which delegate persistence here: `ApiRepository`, the SvelteKit
+ * endpoints backed by SQLite. Asynchronous throughout, so the stores are filled
+ * by the `load*()` methods at boot rather than seeded synchronously.
  */
 export interface DataRepository {
-	/** Synchronous seed for no-flash local mode. Absent on async-only repos. */
-	hydrate?(): AppData;
-
 	loadSettings(): Promise<Settings | null>;
 	loadServers(): Promise<Server[]>;
 	/** The conversation list: titles, dates and models. Never the messages. */
@@ -123,13 +111,10 @@ export interface DataRepository {
 	replacePersonaMemory(memories: PersonaMemory[]): Promise<void>;
 
 	/**
-	 * Conversations matching a content search, best first.
-	 *
-	 * Server mode asks SQLite's full-text index; local mode scans what is already
-	 * in memory. Same result shape either way: the caller doesn't get to know
-	 * which, and the modal renders one thing.
+	 * Conversations matching a content search, best first, from SQLite's full-text
+	 * index. `everything` includes what a clear set aside and what a compaction
+	 * replaced.
 	 */
-	/** `everything` includes what a clear set aside and what a compaction replaced. */
 	searchSessions(query: string, everything?: boolean): Promise<ConversationResult[]>;
 
 	/**

@@ -1,5 +1,4 @@
 import type { OllamaOptions } from '$lib/chat/ollama';
-import type { Server } from '$lib/connections';
 import type { Message, ReasoningStep, WebSearchInfo } from '$lib/sessions';
 
 /**
@@ -16,17 +15,6 @@ import type { Message, ReasoningStep, WebSearchInfo } from '$lib/sessions';
  * emits, which is also what makes reattaching after a reload nothing more than
  * replaying the log.
  */
-
-/**
- * Which endpoint a run talks to.
- *
- * Two shapes because two trust models. In server mode the client names a server
- * by id and the server resolves the address and the key from its own database,
- * which is the whole point of the proxy: a key never reaches a browser. In local
- * mode there is no database and the browser is the owner of its connections, so
- * it hands over the connection it already holds.
- */
-export type RunServer = { kind: 'id'; id: string } | { kind: 'inline'; server: Server };
 
 /** How eagerly to use the provider's own tool calling. The setting's own values. */
 export type NativeToolsPreference = 'off' | 'auto' | 'force';
@@ -47,7 +35,12 @@ export interface RunSpeaker {
 	personaId: string;
 	/** How the reply is attributed, on screen and in what later turns are sent. */
 	name: string;
-	server: RunServer;
+	/**
+	 * The connection to talk to, named rather than described: the server resolves
+	 * its address and its key from its own database, which is the whole point of
+	 * the proxy. A key never reaches a browser, so a browser has none to hand over.
+	 */
+	serverId: string;
 	model: string;
 	options?: Partial<OllamaOptions>;
 	think: boolean;
@@ -78,7 +71,8 @@ export interface RunCapabilities {
 export interface RunInput {
 	/** The conversation this belongs to, so a reattaching client can find its run. */
 	sessionId: string;
-	server: RunServer;
+	/** The connection to talk to. Named by id; the server resolves the rest. */
+	serverId: string;
 	model: string;
 	options?: Partial<OllamaOptions>;
 	/** Whether the model may reason. False never asks for it. */
@@ -129,17 +123,6 @@ export interface RunInput {
 	title?: {
 		model: string;
 		serverId?: string;
-	};
-	/**
-	 * Configuration the browser owns, and only in local mode.
-	 *
-	 * Ignored outright in server mode, where the same questions are answered by
-	 * the instance's own settings: a client that sends a search endpoint there is
-	 * a client trying to choose one, which is not its call.
-	 */
-	local?: {
-		search?: { url: string; backend: string; token: string };
-		fetch?: { maxPages: number; maxChars: number };
 	};
 	/** Set when the conversation is due for compaction once this turn lands. */
 	compact?: {

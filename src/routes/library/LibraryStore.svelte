@@ -2,7 +2,6 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
-	import { isServerMode } from '$lib/chat/endpoint';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import StoreModal from '$lib/components/StoreModal.svelte';
 	import { personasStore, playbooksStore, settingsStore } from '$lib/localStorage';
@@ -286,7 +285,7 @@
 	emptyMine={$LL.personaStoreNothingMine()}
 	emptyShared={$LL.personaStoreNothingOffered()}
 	unreachable={$LL.personaStoreUnreachable()}
-	sharing={isServerMode}
+	sharing={true}
 	shareAllowed={canShare}
 	onUpdateAll={updateAll}
 	onRefresh={() => {

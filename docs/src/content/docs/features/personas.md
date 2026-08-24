@@ -160,11 +160,9 @@ The app knows one address, and every path in the listing is relative to it, so p
 else is a single change with nothing to migrate. Copy the `personas/` folder, serve it over HTTP,
 and give the app its address.
 
-That address is under _Settings → Tools → Personas_:
-
-- **Local mode**: yours, in your own settings.
-- **Server mode**: the instance's. Everyone sees it, only an admin changes it, and the server is
-  what fetches it. `PERSONA_STORE_URL` sets what it starts as; the admin panel overrides that.
+That address is under _Settings → Tools → Personas_. It is the instance's rather than each
+person's: everyone sees it, only an admin changes it, and the server is what fetches it.
+`PERSONA_STORE_URL` sets what it starts as; the admin panel overrides that.
 
 A store is a folder with an `index.json` and the bundles it names. Anything that serves static files
 will do: a web server, an object bucket, a Pages site, a share on the local network. Nothing about
@@ -178,12 +176,9 @@ perfectly good answer, and the one that survives you changing providers.
 ### If the store cannot be reached
 
 Nothing is bundled, so a first launch with no network shows an empty store. The listing is cached
-once it has arrived, so only that very first launch depends on it. In server mode the instance
-fetches on your behalf, so one machine holds the listing for everyone on it.
-
-The address is under _Settings → Tools → Personas_. In local mode it is yours. In server mode it is
-the instance's: everyone sees it, only an admin can change it, and `PERSONA_STORE_URL` sets what it
-starts as.
+once it has arrived, so only that very first launch depends on it. The instance fetches on your
+behalf, so one machine holds the listing for everyone on it, and a browser with no way out still
+gets a catalogue.
 
 ### Is it still the one I installed?
 

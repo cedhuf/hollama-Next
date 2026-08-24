@@ -147,10 +147,9 @@ days as a chart, because a total says how much but not whether it happened yeste
 happening all month. Administrators see theirs too; being able to raise your own ceiling is not a reason to be
 unable to see it.
 
-The same card appears in **local mode**, where there is no account to limit and nobody to limit it.
-What is left is the half that is still useful to somebody paying their own provider: price the
-models in _Settings → Servers_, and the card counts what each week costs. Nothing is ever refused
-there.
+The card is drawn whether or not there is a limit. Without one there is no bar, because a bar needs
+two numbers: on a personal instance the figure alone is the whole answer, and nothing is ever
+refused.
 
 ### It never cuts a conversation
 

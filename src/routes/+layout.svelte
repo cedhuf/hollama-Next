@@ -16,12 +16,10 @@
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
 	import { page, updated } from '$app/stores';
-	import { isServerMode } from '$lib/chat/endpoint';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import KnowledgeModal from '$lib/components/KnowledgeModal.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
-	import { ConnectionType, getDefaultServer } from '$lib/connections';
 	import { releaseUrl } from '$lib/github';
 	import { loadImages } from '$lib/images';
 	import {
@@ -37,8 +35,7 @@
 		refreshStores,
 		serversStore,
 		sessionsStore,
-		settingsStore,
-		StorageKey
+		settingsStore
 	} from '$lib/localStorage';
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerPlaybooks } from '$lib/playbooksConfig';
@@ -65,10 +62,10 @@
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	// In server mode, wait for the async hydration before rendering the app, so
-	// pages always read fully-loaded stores (otherwise a refresh can show an
-	// empty session until you navigate away and back). Local mode is ready now.
-	let booted = $state(env.PUBLIC_MODE !== 'server');
+	// Wait for the async hydration before rendering the app, so pages always read
+	// fully-loaded stores (otherwise a refresh can show an empty session until you
+	// navigate away and back).
+	let booted = $state(false);
 
 	$effect(() => {
 		currentUser.set(data.user);
@@ -93,7 +90,7 @@
 		// On a shared instance only an admin can act on this. A user would get a
 		// notice about something they can't do anything about: the About tab still
 		// lets them check by hand.
-		if (isServerMode && $currentRole !== 'admin') return;
+		if ($currentRole !== 'admin') return;
 
 		// Read through `get` rather than `$settingsStore`: subscribing here would
 		// make the write below re-run this effect.
@@ -312,7 +309,7 @@
 	});
 
 	onMount(async () => {
-		// Fill the stores from the repository (no-op in local mode, network load in server mode).
+		// Fill the stores from the repository.
 		await hydrateStores();
 		await loadServerSearch();
 		await loadWebFetchConfig();
@@ -341,99 +338,36 @@
 		loadLocale($settingsStore.userLanguage);
 		setLocale($settingsStore.userLanguage);
 
-		// Migrate old server settings to new format (local mode only: legacy localStorage data)
-		const settingsLocalStorage =
-			env.PUBLIC_MODE !== 'server' ? localStorage.getItem(StorageKey.Preferences) : null;
-		if (settingsLocalStorage) {
-			const settings = JSON.parse(settingsLocalStorage);
-
-			if (settings.ollamaServer || settings.openaiServer) {
-				// Migrate Ollama server settings
-				if (settings.ollamaServer) {
-					console.warn('Migrating Ollama server settings');
-					serversStore.update((servers) => [
-						...servers,
-						{
-							...getDefaultServer(ConnectionType.Ollama),
-							baseUrl: settings.ollamaServer
-						}
-					]);
-
-					delete settings.ollamaServer;
-					delete settings.ollamaModel;
-					delete settings.ollamaServerStatus;
-					delete settings.ollamaModels;
-				}
-
-				// Migrate OpenAI server settings
-				if (settings.openaiServer) {
-					console.warn('Migrating OpenAI server settings');
-					serversStore.update((servers) => [
-						...servers,
-						{
-							...getDefaultServer(ConnectionType.OpenAI),
-							baseUrl: settings.openaiServer,
-							apiKey: settings.openaiApiKey
-						}
-					]);
-
-					delete settings.openaiServer;
-					delete settings.openaiApiKey;
-				}
-
-				// Reset the settings store with the removed keys
-				localStorage.removeItem(StorageKey.Preferences);
-				settingsStore.set(settings);
-
-				// Ask the user to re-verify the server connections
-				toast.warning($LL.serverSettingsUpdated());
-			}
-		}
-
 		// Color theme
 		if (browser && !$settingsStore.themeMode) {
 			$settingsStore.themeMode = 'system';
 		}
 
-		// Pre-configure an Ollama server from env on a fresh local install, for
-		// reproducible deployments (only when no server exists yet).
-		const ollamaUrl = env.PUBLIC_OLLAMA_URL;
-		if (env.PUBLIC_MODE !== 'server' && ollamaUrl && $serversStore.length === 0) {
-			serversStore.update((servers) => [
-				...servers,
-				{ ...getDefaultServer(ConnectionType.Ollama), baseUrl: ollamaUrl, isEnabled: true }
-			]);
-		}
-
-		// First-run onboarding: local mode only, can be disabled via env, and only
-		// when there is truly no data yet.
-		if (
-			env.PUBLIC_MODE !== 'server' &&
-			env.PUBLIC_DISABLE_ONBOARDING !== 'true' &&
+		// Two first runs, and which one you get depends on whether the instance is
+		// already somebody's. Nothing at all means this install has just been stood
+		// up, and the wizard is the one that asks for the connection it cannot work
+		// without. An account on an instance that already has connections needs none
+		// of that, so it gets the tour instead.
+		//
+		// Exclusive on purpose: they answer the same question, and a new arrival
+		// walked through setup does not then need to be shown around it.
+		const nothingYet =
 			!$settingsStore.onboardingComplete &&
 			$serversStore.length === 0 &&
 			$sessionsStore.length === 0 &&
 			$knowledgeStore.length === 0 &&
 			!$settingsStore.profileFirstName &&
-			!$settingsStore.profileLastName
-		) {
-			$onboardingOpen = true;
-		}
+			!$settingsStore.profileLastName;
 
-		// Server mode has no first-run wizard (the account and its profile are
-		// provisioned for the user), so new users get the welcome tour instead:
-		// once, on their first connection.
 		// Shown again when an administrator says so, which is what the epoch is for:
 		// each browser remembers the stamp it acknowledged, so a newer one plays the
 		// tour once for everybody and then stops, with nothing tracking who saw what.
 		const epoch = data.instance?.onboardingEpoch ?? 0;
 		const seen = $settingsStore.onboardingEpochSeen ?? 0;
-		if (
-			env.PUBLIC_MODE === 'server' &&
-			env.PUBLIC_DISABLE_ONBOARDING !== 'true' &&
-			(!$settingsStore.welcomeComplete || epoch > seen)
-		) {
-			$welcomeOpen = true;
+
+		if (env.PUBLIC_DISABLE_ONBOARDING !== 'true') {
+			if (nothingYet) $onboardingOpen = true;
+			else if (!$settingsStore.welcomeComplete || epoch > seen) $welcomeOpen = true;
 		}
 
 		// The web component is only ever loaded in the browser: it registers a custom

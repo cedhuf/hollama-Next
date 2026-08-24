@@ -48,15 +48,13 @@ export function normalizeStoreUrl(url: string): string {
 }
 
 /**
- * The address a catalogue is read from, which is not always the store's.
+ * The address a catalogue is read from, which is never the store's directly.
  *
- * In server mode the instance reads on the app's behalf: one machine holds the
- * listing for all its users, an instance whose browsers have no way out can
- * still be given a store, and the address is set once by an administrator rather
- * than by each person. In local mode the browser reads it directly, from the
- * setting or from ours.
+ * The instance reads on the app's behalf: one machine holds the listing for all
+ * its users, an instance whose browsers have no way out can still be given a
+ * store, and the address is set once by an administrator rather than by each
+ * person.
  */
-export function catalogBase(kind: StoreKind, isServerMode: boolean, configured?: string): string {
-	if (isServerMode) return `/api/store/${kind}/`;
-	return `${normalizeStoreUrl(configured?.trim() || DEFAULT_STORE)}${kind}/`;
+export function catalogBase(kind: StoreKind): string {
+	return `/api/store/${kind}/`;
 }

@@ -1,8 +1,3 @@
-import { get } from 'svelte/store';
-
-import { isServerMode } from '$lib/chat/endpoint';
-import { serversStore } from '$lib/localStorage';
-import { recordLocalUsage } from '$lib/localUsage';
 import type { Editor, Message, Session } from '$lib/sessions';
 
 import type { RunEvent } from './types';
@@ -211,20 +206,8 @@ export function applyRunEvent(
 			return;
 
 		case 'usage':
-			// Local mode only: the server counts in its relay, where it can also refuse.
-			// Here nobody is refused anything, and what is left is worth knowing:
-			// somebody paying their own provider wants to see what the week cost.
-			if (!isServerMode) {
-				// The event names its own model and connection, so a persona answering
-				// on its own model is priced at its own rate rather than the
-				// conversation's.
-				const serverId = event.serverId ?? session.model?.serverId;
-				recordLocalUsage(
-					get(serversStore)?.find((server) => server.id === serverId),
-					event.model ?? session.model?.name ?? '',
-					event.used
-				);
-			}
+			// Counted where it can also be refused, which is the relay the request went
+			// through. Nothing to do here.
 			return;
 
 		case 'error':

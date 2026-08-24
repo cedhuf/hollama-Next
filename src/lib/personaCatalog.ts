@@ -1,6 +1,5 @@
 import { get, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { browser } from '$app/environment';
 import { LOCAL_STORAGE_PREFIX } from '$lib/data/keys';
 import { personasStore, settingsStore } from '$lib/localStorage';
@@ -30,8 +29,6 @@ import { catalogBase } from '$lib/store';
 /** Where the last listing is kept, so a second launch does not depend on the network. */
 const CACHE_KEY = `${LOCAL_STORAGE_PREFIX}-persona-catalog`;
 
-const isServer = env.PUBLIC_MODE === 'server';
-
 export type CatalogState =
 	| { status: 'idle' }
 	| { status: 'loading' }
@@ -44,15 +41,15 @@ const state = writable<CatalogState>({ status: 'idle' });
 export const catalogState = { subscribe: state.subscribe };
 
 /**
- * The address to read, which is not always the address of the store.
+ * The address to read, which is not the address of the store.
  *
- * In server mode the instance reads on the app's behalf: one machine holds the
- * listing for all its users, an instance whose browsers have no way out can
- * still be given a store, and the address is set once by an administrator rather
- * than by each person.
+ * The instance reads on the app's behalf: one machine holds the listing for all
+ * its users, an instance whose browsers have no way out can still be given a
+ * store, and the address is set once by an administrator rather than by each
+ * person.
  */
 function base(): string {
-	return catalogBase('personas', isServer, get(settingsStore).storeUrl);
+	return catalogBase('personas');
 }
 
 function readCache(): Catalog | undefined {

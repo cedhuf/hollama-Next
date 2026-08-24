@@ -1,6 +1,5 @@
 import { error, json } from '@sveltejs/kit';
 
-import { env as publicEnv } from '$env/dynamic/public';
 import { runSpeakers } from '$lib/chat/run/speakers';
 import type { RunInput } from '$lib/chat/run/types';
 import { requireUser } from '$lib/server/api';
@@ -27,12 +26,10 @@ export async function POST(event) {
 	// what the request claims. Here rather than deeper down because this is where
 	// the client's word arrives, and a rule enforced past that point is a rule
 	// somebody can reach around by calling the API directly.
-	if (publicEnv.PUBLIC_MODE === 'server') {
-		input.promptOverrides = resolveClaimedAppPrompts(
-			input.promptOverrides,
-			principal.isAdmin
-		).overrides;
-	}
+	input.promptOverrides = resolveClaimedAppPrompts(
+		input.promptOverrides,
+		principal.isAdmin
+	).overrides;
 
 	// One at a time per conversation. Two turns writing into the same transcript
 	// is not a race the transcript can win, and a second tab hitting send is the
@@ -89,15 +86,8 @@ export async function GET(event) {
 	return json(run ? summarise(run) : null);
 }
 
-/**
- * Who is asking.
- *
- * Server mode has accounts and every run belongs to one. Local mode has none,
- * and the instance is the user's own machine: everything belongs to the same
- * nobody, which is the honest description of a single-user deployment.
- */
+/** Who is asking. Every run belongs to an account, even the implicit one. */
 async function principalFor(event: Parameters<typeof requireUser>[0]): Promise<RunPrincipal> {
-	if (publicEnv.PUBLIC_MODE !== 'server') return { userId: null, isAdmin: true };
 	const user = await requireUser(event);
 	return { userId: user.id, isAdmin: user.role === 'admin' };
 }

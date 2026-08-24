@@ -921,7 +921,7 @@ export async function runTurn(
 			type: 'usage',
 			used,
 			model: input.model,
-			serverId: input.server.kind === 'id' ? input.server.id : undefined
+			serverId: input.serverId
 		});
 		emit({ type: 'done' });
 	} catch (error) {

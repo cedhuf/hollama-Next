@@ -1,9 +1,8 @@
 import { get, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { browser } from '$app/environment';
 import { LOCAL_STORAGE_PREFIX } from '$lib/data/keys';
-import { playbooksStore, settingsStore } from '$lib/localStorage';
+import { playbooksStore } from '$lib/localStorage';
 import { playbookDigest } from '$lib/playbookDigest';
 import { newPlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
 import {
@@ -33,8 +32,6 @@ import { catalogBase } from '$lib/store';
 
 const CACHE_KEY = `${LOCAL_STORAGE_PREFIX}-playbook-catalog`;
 
-const isServer = env.PUBLIC_MODE === 'server';
-
 export type PlaybookCatalogState =
 	| { status: 'idle' }
 	| { status: 'loading' }
@@ -46,7 +43,7 @@ const state = writable<PlaybookCatalogState>({ status: 'idle' });
 export const playbookCatalogState = { subscribe: state.subscribe };
 
 function base(): string {
-	return catalogBase('playbooks', isServer, get(settingsStore).storeUrl);
+	return catalogBase('playbooks');
 }
 
 function readCache(): PlaybookCatalog | undefined {

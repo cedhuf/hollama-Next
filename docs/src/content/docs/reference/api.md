@@ -27,7 +27,6 @@ inside its own handler.
 | --------------- | ------------------------------------------------------------------------------------- |
 | `/api/data/*`   | The user's own collections (sessions, knowledge, personas), read and written per item |
 | `/api/llm/…`    | Authenticated provider proxy; the server injects the API key                          |
-| `/api/proxy/…`  | Local-mode-only CORS proxy; **404 in server mode**                                    |
 | `/api/admin/…`  | Instance configuration, users, shared servers. Admin only                             |
 | `/api/search/…` | Full-text search across the user's conversations                                      |
 | `/api/*/config` | The resolved, per-user view of an admin-shared setting                                |

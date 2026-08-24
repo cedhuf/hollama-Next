@@ -37,9 +37,6 @@ still typing. Operators are not exposed: `-`, `*`, `"`, `NEAR` and `OR` mean som
 stray dash in an ordinary query would turn a search into a syntax error, so every word is passed
 through as a literal.
 
-**Local mode** scans the conversations already in the browser and cuts the excerpt itself. No index,
-no server, same modal, same result shape.
-
 :::note[Excerpts are never HTML]
 A match is marked with private-use code points and turned back into plain text segments at render
 time. An excerpt is message content, and building HTML out of it would hand any conversation

@@ -12,7 +12,7 @@
 	import { onboardingOpen } from '$lib/stores/modal';
 
 	import Profile from './settings/Profile.svelte';
-	import Servers from './settings/Servers.svelte';
+	import ServerConnections from './settings/ServerConnections.svelte';
 
 	let step = $state(0);
 	let fileInput: HTMLInputElement | undefined = $state();
@@ -110,7 +110,7 @@
 	{:else if step === 1}
 		<Profile />
 	{:else if step === 2}
-		<Servers />
+		<ServerConnections />
 	{:else if step === 3}
 		<div class="flex flex-col items-center gap-4 py-6 text-center">
 			<div class="bg-accent flex h-14 w-14 items-center justify-center rounded-full">

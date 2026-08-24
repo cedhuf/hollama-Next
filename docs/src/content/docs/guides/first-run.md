@@ -31,12 +31,12 @@ You can add several. Each connection gets a colour, assigned from the unused one
 follows its models everywhere they appear, so you always know which endpoint is about to be billed.
 
 :::note[Ollama on another machine]
-The browser talks to Ollama directly in local mode, so Ollama's own CORS policy applies. It needs
-your Llooma origin in `OLLAMA_ORIGINS`. See [Installation](/guides/installation/).
+The Llooma server is what talks to Ollama, so Ollama has to accept it: give it the address in
+`OLLAMA_HOST`, and see [Installation](/guides/installation/).
 :::
 
-In **server mode** the connections are the admin's business, not yours: models simply appear in the
-picker. An admin may or may not allow you to add your own on top.
+On a shared instance the connections are the admin's business, not yours: models simply appear in
+the picker. An admin may or may not allow you to add your own on top.
 
 ## A first answer
 
@@ -60,5 +60,4 @@ The conversation names itself after the first reply.
 - Write down the instructions you keep repeating, once:
   [Knowledge](/features/knowledge/).
 - Build a character around them: [Personas](/features/personas/).
-- In local mode, export a backup before you have anything to lose:
-  [Data](/features/data/).
+- Export a backup before you have anything to lose: [Data](/features/data/).

@@ -1,11 +1,10 @@
 import { error, json } from '@sveltejs/kit';
 
 import { env as privateEnv } from '$env/dynamic/private';
-import { env as publicEnv } from '$env/dynamic/public';
 import { requireUser } from '$lib/server/api';
 import { getSettings } from '$lib/server/db/collections';
 import { fetchPage, FetchPageError, type FetchedPage } from '$lib/server/fetchPage';
-import { resolveTools, WEB_FETCH_CEILINGS, WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
+import { resolveTools } from '$lib/server/toolsResolver';
 
 /** Optional allow-list, mirroring `PROXY_ALLOWED_ORIGINS`. Empty = any public host. */
 const allowedOrigins = () =>
@@ -21,29 +20,10 @@ const allowedOrigins = () =>
  * for an instance can't be reached by calling the endpoint directly.
  */
 export async function POST(event) {
-	const isServer = publicEnv.PUBLIC_MODE === 'server';
-
-	let limits = { maxPages: WEB_FETCH_DEFAULTS.maxPages, maxChars: WEB_FETCH_DEFAULTS.maxChars };
-	if (isServer) {
-		const user = await requireUser(event);
-		const tools = resolveTools(getSettings(user.id), user.role === 'admin');
-		if (!tools.webFetch) throw error(403, 'Web fetch is disabled on this instance');
-		limits = { maxPages: tools.maxPages, maxChars: tools.maxChars };
-	} else {
-		// Local mode has no server-side settings: the browser owns the limits, but
-		// the ceilings still apply so a stray value can't ask for the whole web.
-		const body = event.url.searchParams;
-		limits = {
-			maxPages: Math.min(
-				Number(body.get('maxPages')) || WEB_FETCH_DEFAULTS.maxPages,
-				WEB_FETCH_CEILINGS.maxPages
-			),
-			maxChars: Math.min(
-				Number(body.get('maxChars')) || WEB_FETCH_DEFAULTS.maxChars,
-				WEB_FETCH_CEILINGS.maxChars
-			)
-		};
-	}
+	const user = await requireUser(event);
+	const tools = resolveTools(getSettings(user.id), user.role === 'admin');
+	if (!tools.webFetch) throw error(403, 'Web fetch is disabled on this instance');
+	const limits = { maxPages: tools.maxPages, maxChars: tools.maxChars };
 
 	const body = await event.request.json().catch(() => null);
 	const urls: unknown = body?.urls;

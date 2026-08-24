@@ -1,5 +1,10 @@
 # Architecture — Llooma
 
+> **Historical document.** Local mode has since been retired: there is one
+> install, and accounts are the only thing an instance chooses. What follows was
+> the plan for the two-mode split, kept for the reasoning behind the repository
+> seam, not as a description of the code today.
+
 > Plan de référence avant le chantier « modes local / serveur ».
 > Objectif : un code propre et léger, deux modes de fonctionnement à partir
 > d'une **seule** base de code, sans dupliquer l'interface.

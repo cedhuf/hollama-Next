@@ -16,18 +16,12 @@ pnpm run dev
 
 ## The one seam that matters
 
-`local` and `server` are the same application. What differs is where data lives, and that
-difference is confined to a **repository**: `src/lib/data/` exports a `repository` chosen at
-startup from `PUBLIC_MODE`, backed either by `localStorage` or by HTTP calls to `/api/data`.
+Where data lives is confined to a **repository**: `src/lib/data/` exports a `repository` backed by
+HTTP calls to `/api/data`, and everything above it (components, stores, features) is written once
+against that interface rather than against storage.
 
-Everything above it (components, stores, features) is written once against that interface. If you
-find yourself branching on the mode outside `src/lib/data/` or `src/lib/server/`, that is the signal
-you are about to duplicate the interface.
-
-[`ARCHITECTURE.md`](https://github.com/cedhuf/blob/main/ARCHITECTURE.md) is the original
-design document for that split. It stays in the repository rather than on this site: it is written
-in French, and it is a plan rather than a description. Treat it as intent, and the code as the
-reference.
+The seam earned its keep when the browser-only mode was retired: what had two implementations went
+back to having one, and nothing above the interface had to be told.
 
 ## The other seam
 

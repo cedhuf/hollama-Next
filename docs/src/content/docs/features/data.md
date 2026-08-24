@@ -36,24 +36,24 @@ today: both sets of keys are read.
 
 ## What a backup contains, and does not
 
-**In local mode, the file contains your provider API keys**, in clear text, because that is how they
-are stored in the browser. It is a file worth treating like a password manager export.
+**Servers are excluded.** Connections are administered on the server, and the keys never leave it,
+so there is nothing to put in the file. The backup is your conversations, knowledge, personas and
+preferences.
 
-**In server mode, servers are excluded.** Connections are administered on the server, and the keys
-never leave it, so there is nothing to put in the file. The backup is your conversations, knowledge,
-personas and preferences.
-
-## Moving from local to server
+## Moving between instances
 
 There is no migration tool, and there does not need to be one:
 
-1. In your local installation, _Settings → Data → Backup_.
-2. Sign in to the server instance.
+1. On the instance you are leaving, _Settings → Data → Backup_.
+2. Open the other one, signing in if it asks.
 3. _Settings → Data → Restore_, and pick the file.
 
 Conversations, knowledge, personas and preferences land in your account. Provider connections do
-not, and are the one thing to set up again on the other side (or to ask the admin for, since a server
-instance usually shares them). It works in the other direction too.
+not, and are the one thing to set up again on the other side (or to ask the admin for, since a shared
+instance usually provides them).
+
+This is also the way out of an installation still running the old browser-only mode: export before
+you upgrade, restore afterwards.
 
 The first-run wizard offers the same restore, so a fresh install can start from a backup rather than
 from nothing.
@@ -63,4 +63,4 @@ from nothing.
 At the bottom of the page, outlined in the negative colour so it is not skimmed past. It wipes every
 category and reloads into a fresh app, first-run wizard included. It asks twice.
 
-In server mode this resets **your account**, not the instance.
+This resets **your account**, not the instance.

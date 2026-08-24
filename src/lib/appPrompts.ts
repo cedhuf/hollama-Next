@@ -1,6 +1,5 @@
 import { derived, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
 import { settingsStore } from '$lib/localStorage';
 
@@ -13,8 +12,6 @@ import { settingsStore } from '$lib/localStorage';
  * An admin who rewrote the router and a user who rewrote the summary each keep
  * what they wrote, because they are not the same setting, only the same screen.
  */
-const isServer = env.PUBLIC_MODE === 'server';
-
 export type PromptOverrides = Partial<Record<PromptKey, string>>;
 
 export interface AppPromptsView {
@@ -49,17 +46,6 @@ export const appPromptsConfig = derived(
 	[settingsStore, serverConfig],
 	([$settings, $server]): AppPromptsView => {
 		const own = clean($settings.promptOverrides);
-
-		// Local mode: one person, nobody to share with or be shared to.
-		if (!isServer) {
-			return {
-				overrides: own,
-				editable: true,
-				source: 'user',
-				shared: false,
-				adminOverrides: EMPTY
-			};
-		}
 
 		// Before the config lands: the defaults, and nothing editable yet. Showing
 		// the user's own rewrites here would let them edit prompts the instance may

@@ -1,12 +1,10 @@
 import { derived, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { setServerAppPrompts } from '$lib/appPrompts';
 import { settingsStore } from '$lib/localStorage';
 
 import type { SystemPrompts } from './settings';
 
-const isServer = env.PUBLIC_MODE === 'server';
 const EMPTY: SystemPrompts = { global: '', perModel: {} };
 
 const hasContent = (p: SystemPrompts) => !!p.global.trim() || Object.keys(p.perModel).length > 0;
@@ -34,7 +32,6 @@ export function setServerSystemPrompts(resolved: SystemPromptsView | null): void
  * resolved by the same rules, so they arrive together rather than racing.
  */
 export async function loadServerPrompts(): Promise<void> {
-	if (!isServer) return;
 	try {
 		const response = await fetch('/api/prompts/config');
 		if (!response.ok) return;
@@ -46,21 +43,10 @@ export async function loadServerPrompts(): Promise<void> {
 	}
 }
 
-/** The effective, reactive system-prompts config for the current user/mode. */
+/** The effective, reactive system-prompts config for the current user. */
 export const systemPromptsConfig = derived(
 	[settingsStore, serverConfig],
 	([$settings, $server]): SystemPromptsView => {
-		if (!isServer) {
-			// Local mode: the user's own prompts (localStorage).
-			return {
-				prompts: $settings.systemPrompts,
-				editable: true,
-				source: 'user',
-				shared: false,
-				adminPrompts: EMPTY
-			};
-		}
-
 		if (!$server) {
 			return {
 				prompts: EMPTY,

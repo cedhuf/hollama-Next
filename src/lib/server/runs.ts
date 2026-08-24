@@ -27,7 +27,7 @@ const MAX_RUNS = 200;
 interface Run {
 	id: string;
 	sessionId: string;
-	/** The owner in server mode. Null in local mode, where there are no accounts. */
+	/** The account this run belongs to. */
 	userId: string | null;
 	status: RunStatus;
 	startedAt: string;

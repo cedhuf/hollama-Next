@@ -7,24 +7,22 @@ sidebar:
 
 Copy `.env.example` to `.env` and adjust. Everything here is read at startup.
 
-## Both modes
+## General
 
-| Variable                    | Default     | Description                                                                                                                                                                                 |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                                                    |
-| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                                                             |
-| `PROXY_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of provider origins the proxy may forward to; empty = **any**. See [Security](/guides/security/)                                                                                  |
-| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                                                   |
-| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard (local mode)                                                                                                                                              |
-| `PUBLIC_OLLAMA_URL`         | _(unset)_   | Pre-configure an Ollama server on a fresh install (local mode)                                                                                                                              |
-| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI                                |
-| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                                                       |
-| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                                                  |
-| `PERSONA_STORE_URL`         | _(public)_  | Starting address of the [persona store](/features/personas/) (server mode). The instance fetches it, so browsers with no way out still get a catalogue; an admin can change it in the panel |
+| Variable                    | Default     | Description                                                                                                                                                                   |
+| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                                      |
+| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                                               |
+| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                                     |
+| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard and the welcome tour                                                                                                                        |
+| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI                  |
+| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                                         |
+| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                                    |
+| `PERSONA_STORE_URL`         | _(public)_  | Starting address of the [persona store](/features/personas/). The instance fetches it, so browsers with no way out still get a catalogue; an admin can change it in the panel |
 
 ## Documents and OCR
 
-Read in both modes. [Documents](/features/documents/) has the full story.
+[Documents](/features/documents/) has the full story.
 
 | Variable                   | Default   | Description                                                                                                         |
 | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -36,18 +34,15 @@ Read in both modes. [Documents](/features/documents/) has the full story.
 Set the three OCR paths together for an instance that must make no third-party requests. Budget
 roughly 30 MB for the engine and 3 to 11 MB per language.
 
-## Server mode
+## Accounts and storage
 
-Only read when `PUBLIC_MODE=server`.
-
-Server mode with nothing else configured is a personal instance: no login screen, one implicit
-owner created on first run, everything kept in SQLite. Setting `AUTH_CREDENTIALS` or `OIDC_ISSUER`
-turns it into a shared one, with accounts and a login page. Whether an instance has accounts is read
-from those two variables rather than from a switch of its own, so the two can never disagree.
+With nothing here configured, Llooma is a personal instance: no login screen, one implicit owner
+created on first run, everything kept in SQLite. Setting `AUTH_CREDENTIALS` or `OIDC_ISSUER` turns
+it into a shared one, with accounts and a login page. Whether an instance has accounts is read from
+those two variables rather than from a switch of its own, so the two can never disagree.
 
 | Variable                                | Default                | Description                                                                                                                       |
 | --------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_MODE`                           | `local`                | Set `server` for multi-user mode                                                                                                  |
 | `DATA_DIR`                              | `./data`               | Directory for the SQLite database and server state. Bind-mount this                                                               |
 | `AUTH_SECRET`                           | _(generated)_          | Signs sessions and encrypts provider keys. Generated on first run and stored in the database if unset (`openssl rand -base64 32`) |
 | `ADMIN_EMAIL`                           | _(none)_               | Bootstraps the first admin; also marks this email as admin for OIDC                                                               |

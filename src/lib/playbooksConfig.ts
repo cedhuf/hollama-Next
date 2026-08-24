@@ -1,6 +1,5 @@
 import { derived, get, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { playbooksStore } from '$lib/localStorage';
 import type { Playbook } from '$lib/playbooks';
 
@@ -16,8 +15,6 @@ import type { Playbook } from '$lib/playbooks';
  * store, so it is the same answer for both and is read from the same place.
  */
 
-const isServer = env.PUBLIC_MODE === 'server';
-
 export interface PlaybooksConfig {
 	/** Playbooks an admin has shared, offered to users to install. */
 	shared: Playbook[];
@@ -31,8 +28,8 @@ export interface PlaybooksConfig {
 const DEFAULT: PlaybooksConfig = {
 	shared: [],
 	sharedFromStore: [],
-	// Local mode has one person, who is therefore allowed everything and has
-	// nobody to share with.
+	// Before the instance has answered: the permissive reading of what is shown,
+	// and nothing shared, since sharing is the instance's to grant.
 	storeMode: 'open',
 	canShare: false
 };
@@ -40,7 +37,6 @@ const DEFAULT: PlaybooksConfig = {
 const serverPlaybooks = writable<PlaybooksConfig | null>(null);
 
 export async function loadServerPlaybooks(): Promise<void> {
-	if (!isServer) return;
 	try {
 		const response = await fetch('/api/playbooks/config');
 		if (response.ok) serverPlaybooks.set(await response.json());
@@ -49,8 +45,9 @@ export async function loadServerPlaybooks(): Promise<void> {
 	}
 }
 
-export const playbooksConfig = derived(serverPlaybooks, ($server): PlaybooksConfig =>
-	isServer ? ($server ?? DEFAULT) : DEFAULT
+export const playbooksConfig = derived(
+	serverPlaybooks,
+	($server): PlaybooksConfig => $server ?? DEFAULT
 );
 
 /**
@@ -61,7 +58,6 @@ export const playbooksConfig = derived(serverPlaybooks, ($server): PlaybooksConf
  * is published from here like anything else they wrote.
  */
 export async function publishSharedPlaybooks(): Promise<void> {
-	if (!isServer) return;
 	const shared = (get(playbooksStore) || []).filter((playbook) => playbook.shared);
 	try {
 		await fetch('/api/admin/playbooks', {
@@ -77,7 +73,6 @@ export async function publishSharedPlaybooks(): Promise<void> {
 
 /** Admin: relay one of the store's playbooks, or stop. */
 export async function relayCatalogPlaybook(id: string, relay: boolean): Promise<void> {
-	if (!isServer) return;
 	await fetch(`/api/admin/playbooks/store/${encodeURIComponent(id)}`, {
 		method: relay ? 'PUT' : 'DELETE'
 	});

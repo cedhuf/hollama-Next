@@ -1,10 +1,7 @@
 import { derived, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { settingsStore } from '$lib/localStorage';
 import { DEFAULT_SETTINGS } from '$lib/settings';
-
-const isServer = env.PUBLIC_MODE === 'server';
 
 export interface ChatDefaultsView {
 	defaultModel: { value: string; editable: boolean; source: 'admin' | 'user'; adminValue: string };
@@ -53,7 +50,6 @@ export interface ChatDefaultsView {
 const serverConfig = writable<ChatDefaultsView | null>(null);
 
 export async function loadServerChatDefaults(): Promise<void> {
-	if (!isServer) return;
 	try {
 		const response = await fetch('/api/chat-defaults/config');
 		if (response.ok) serverConfig.set(await response.json());
@@ -113,7 +109,7 @@ export const chatDefaultsConfig = derived(
 			}
 		};
 
-		if (!isServer || !$srv) return own;
+		if (!$srv) return own;
 
 		// Default model: locked → admin's; editable → live own, falling back to the admin default.
 		const dm = !$srv.defaultModel.editable

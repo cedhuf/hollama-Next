@@ -96,8 +96,7 @@
 	/** Show the stored-key affordance until the user opts into typing a new one. */
 	const keyIsStored = $derived(hasApiKey && !server.apiKey && !replacingKey);
 
-	// Bindings mutate `server` in place; let the parent persist however it wants
-	// (force a fresh store array in local mode, PUT to the API in server mode).
+	// Bindings mutate `server` in place; let the parent persist however it wants.
 	function persist() {
 		onChange();
 	}

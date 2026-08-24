@@ -1,14 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 
 import { env as privateEnv } from '$env/dynamic/private';
-import { env as publicEnv } from '$env/dynamic/public';
 import { accountsEnabled } from '$lib/server/authMode';
 
 export const load = async ({ url, locals }) => {
-	// Login only exists in server mode, and only where there is something to sign
-	// in to: an instance with no accounts would otherwise show a page with no
-	// buttons on it.
-	if (publicEnv.PUBLIC_MODE !== 'server' || !accountsEnabled()) throw redirect(303, '/');
+	// Only where there is something to sign in to: an instance with no accounts
+	// would otherwise show a page with no buttons on it.
+	if (!accountsEnabled()) throw redirect(303, '/');
 
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 

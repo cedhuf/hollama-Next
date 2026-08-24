@@ -5,22 +5,18 @@ sidebar:
   order: 4
 ---
 
-Two features make your server act as a network client on someone else's behalf. Both are useful,
-both are worth understanding before you expose an instance.
+Your server acts as a network client on someone else's behalf in two places. Both are useful, both
+are worth understanding before you expose an instance.
 
 ## The provider proxy
 
-`/api/proxy/…` forwards a request to whatever origin it is given, and **requires no signed-in
-user**. That is deliberate: in local mode the browser holds the keys and the proxy only exists to
-get past CORS, including reaching Ollama on `localhost`, so it cannot refuse private addresses the
-way the fetch tool does.
+The browser never holds a provider key and never addresses a provider. It calls `/api/llm/{id}`,
+which resolves the connection by id, checks that the caller may use it, and injects the key
+server-side. There is no unauthenticated relay: the generic CORS proxy that used to serve the
+browser-only mode has been removed, along with `PROXY_ALLOWED_ORIGINS`.
 
-- **In server mode the route is disabled outright** (404). The browser goes through the
-  authenticated `/api/llm/…` proxy instead, which checks the session and injects the key
-  server-side.
-- **In local mode**, if the instance is reachable from your network, set `PROXY_ALLOWED_ORIGINS`
-  to your providers' origins. With the default empty allowlist it is an open proxy for anyone who
-  can reach it.
+The rules an admin sets about which models are shared are applied there, and again on a turn that
+runs in the server, so neither path is a way around the other.
 
 ## The web fetch tool
 

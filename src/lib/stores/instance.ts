@@ -8,8 +8,6 @@ import { derived, writable } from 'svelte/store';
  * `load…()` call at boot. A theme that arrives a frame late is a flash of the
  * wrong one, and a tour that arrives after the page has been read is a tour
  * nobody reads.
- *
- * `null` in local mode, where there is one person and nobody to decide for them.
  */
 export interface InstanceConfig {
 	/**

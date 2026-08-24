@@ -22,7 +22,6 @@ import { webFetchConfig } from '$lib/webFetch';
 import type { CommandName } from './commands';
 import { compactSession } from './compact';
 import { contextSnapshot, contextUsage } from './context';
-import { isServerMode } from './endpoint';
 import { recordMention } from './mentionRecord';
 import { mentionedPersonas } from './mentions';
 import { messagesInContext } from './notes';
@@ -496,7 +495,7 @@ export class Conversation implements RunSurface {
 			speakers.push({
 				personaId: persona.id,
 				name: persona.name,
-				server: isServerMode ? { kind: 'id', id: server.id } : { kind: 'inline', server },
+				serverId: server.id,
 				model: model.name,
 				options:
 					persona.params?.temperature != null ? { temperature: persona.params.temperature } : {},
@@ -599,14 +598,13 @@ export class Conversation implements RunSurface {
 	/** Everything the turn is, gathered from where each part of it is kept. */
 	#inputFor(messages: Message[], server: Server): RunInput {
 		const settings = this.#settings.current;
-		const search = this.#search.current;
 		const fetchConfig = this.#webFetch.current;
 
 		return {
 			sessionId: this.session.id,
-			// Server mode names a connection and lets the instance resolve it, keys
-			// included. Local mode owns its connections, so it hands one over.
-			server: isServerMode ? { kind: 'id', id: server.id } : { kind: 'inline', server },
+			// Named rather than described: the instance resolves the address and the
+			// key from its own database, and a browser never holds either.
+			serverId: server.id,
 			model: this.session.model!.name,
 			options: this.session.options,
 			think: this.editor.thinking !== false,
@@ -641,21 +639,7 @@ export class Conversation implements RunSurface {
 			},
 			promptOverrides: get(effectivePrompts),
 			speakers: this.#speakersFor(messages),
-			sequential: settings.mentionsSequential !== false,
-			// Only local mode sends these: they are the browser's own configuration,
-			// and in server mode the instance answers the same questions itself.
-			local: isServerMode
-				? undefined
-				: {
-						search: {
-							url: search.url,
-							backend: search.backend,
-							// The token is deliberately not in the view the interface reads: it
-							// is a credential, so it is taken from where it is stored.
-							token: settings.searchToken ?? ''
-						},
-						fetch: { maxPages: fetchConfig.maxPages, maxChars: fetchConfig.maxChars }
-					}
+			sequential: settings.mentionsSequential !== false
 		};
 	}
 

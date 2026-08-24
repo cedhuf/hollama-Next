@@ -78,8 +78,7 @@
 		updatableCount?: number;
 		onUpdateAll?: () => Promise<void> | void;
 		/**
-		 * Whether sharing exists here at all (it does not in local mode, where there
-		 * is one person and nobody to share with) and whether this person may.
+		 * Whether sharing exists here at all, and whether this person may.
 		 *
 		 * Drawn for everyone and refused where it is not allowed, rather than
 		 * absent: a card that loses a control depending on who is looking is a

@@ -26,9 +26,9 @@ export const load = (async ({ params, fetch }) => {
 /**
  * No server rendering for this route.
  *
- * The data lives in the browser (local mode) or behind the authenticated API
- * called from the browser (server mode), so the server has nothing to render
- * with: it produced an empty conversation that hydration immediately replaced.
- * Turning it off removes that flash and lets `load` run where the data is.
+ * The data lives behind the authenticated API, called from the browser, so the
+ * server has nothing to render with: it produced an empty conversation that
+ * hydration immediately replaced. Turning it off removes that flash and lets
+ * `load` run where the data is.
  */
 export const ssr = false;

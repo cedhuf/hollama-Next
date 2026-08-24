@@ -11,7 +11,7 @@
 		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
 		"test": "playwright test --trace on --ignore-snapshots ",
-		"screenshots": "SCREENSHOTS=1 PUBLIC_MODE=local playwright test tests/screenshots.test.ts",
+		"screenshots": "SCREENSHOTS=1 playwright test tests/screenshots.test.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",

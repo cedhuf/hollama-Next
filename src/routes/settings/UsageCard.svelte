@@ -2,18 +2,8 @@
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { isServerMode } from '$lib/chat/endpoint';
 	import Meter from '$lib/components/Meter.svelte';
 	import SpendChart from '$lib/components/SpendChart.svelte';
-	import { serversStore } from '$lib/localStorage';
-	import {
-		daysAgo,
-		localCurrencies,
-		localDaily,
-		localPeriodStart,
-		localSpend,
-		nextMonthStart
-	} from '$lib/localUsage';
 
 	/**
 	 * What you have spent this period, and what you are allowed.
@@ -42,23 +32,6 @@
 	let usage = $state<Usage | null>(null);
 
 	onMount(async () => {
-		// Local mode has no server to ask and nobody to limit: the ledger is in this
-		// browser, and what it can still answer is what the month cost. Same shape,
-		// so the card below does not know the difference.
-		if (!isServerMode) {
-			const from = localPeriodStart();
-			usage = {
-				period: 'month',
-				from,
-				resetsAt: nextMonthStart(from),
-				limit: 0,
-				spend: localSpend(from),
-				currencies: localCurrencies($serversStore ?? []),
-				history: localDaily(daysAgo(29))
-			};
-			return;
-		}
-
 		try {
 			const response = await fetch('/api/usage');
 			if (response.ok) usage = await response.json();

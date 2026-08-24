@@ -78,8 +78,8 @@
 	</div>
 
 	<!-- What this account has spent, between who you are and what you may change:
-	     it is a fact about you rather than a setting of yours. Drawn in local mode
-	     too, where there is no limit but the same question: what did this cost. -->
+	     it is a fact about you rather than a setting of yours. Drawn whether or not
+	     there is a limit: the question is the same either way, what did this cost. -->
 	<UsageCard />
 
 	<!-- Identity -->

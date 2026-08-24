@@ -65,11 +65,9 @@ threshold you guessed.
 
 ## How requests travel
 
-**Local mode**: the browser holds the keys and calls the provider itself, through `/api/proxy` when
-CORS requires it. Ollama on another machine needs your origin in `OLLAMA_ORIGINS`.
-
-**Server mode**: the browser calls `/api/llm`, and the server injects the key. Keys never reach a
-browser, and the generic proxy is disabled outright. See [Security](/guides/security/).
+The browser calls `/api/llm/{id}`, naming a connection rather than describing one, and the server
+resolves its address and injects the key. Keys never reach a browser, and there is no unauthenticated
+relay to go around it. See [Security](/guides/security/).
 
 ## Yours is not in the list
 

@@ -27,11 +27,10 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
-	// Server-mode connections. Admins manage shared SYSTEM servers; users their
-	// own PERSONAL servers (when enabled). Saved servers use the full Connection
-	// UI (verify, Ollama pull, model filter, advanced, enable, delete) (same as
-	// local mode) just persisted via the API. New servers are added through a
-	// Verify → Save card.
+	// Admins manage shared SYSTEM servers; users their own PERSONAL servers (when
+	// enabled). Saved servers use the full Connection UI (verify, Ollama pull,
+	// model filter, advanced, enable, delete), persisted via the API. New servers
+	// are added through a Verify then Save card.
 
 	interface ApiServer {
 		id: string;

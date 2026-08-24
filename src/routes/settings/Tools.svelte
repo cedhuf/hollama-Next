@@ -1,6 +1,5 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { isServerMode } from '$lib/chat/endpoint';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
@@ -36,17 +35,14 @@
 	/**
 	 * The persona store's address, which belongs to whoever owns the instance.
 	 *
-	 * Local mode: your own preference, and your browser is what fetches it. Server
-	 * mode: the instance's, fetched by the server, so it is shown to everyone and
-	 * writable only by an admin. Same field, two owners, which is why the value and
-	 * the writer are read separately rather than both from the settings store.
+	 * The instance's rather than each person's, fetched by the server, so it is
+	 * shown to everyone and writable only by an admin.
 	 */
-	const storeEditable = $derived(!isServerMode || $personasConfig.canEditStore);
-	const storeValue = $derived(isServerMode ? $personasConfig.storeUrl : $settingsStore.storeUrl);
+	const storeEditable = $derived($personasConfig.canEditStore);
+	const storeValue = $derived($personasConfig.storeUrl);
 
 	function setStoreUrl(value: string) {
-		if (isServerMode) void saveStoreUrl(value);
-		else $settingsStore.storeUrl = value;
+		void saveStoreUrl(value);
 	}
 </script>
 
@@ -176,7 +172,7 @@
 	     it is one folder and one field rather than one of each per kind. -->
 	<SettingsSection title={$LL.store()} description={$LL.storeDescription()} card>
 		{#snippet badge()}
-			{#if isServerMode && !$personasConfig.canEditStore}
+			{#if !$personasConfig.canEditStore}
 				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 			{/if}
 		{/snippet}

@@ -18,7 +18,7 @@ import { policeChatBody, PolicyError, type ChatBody } from '$lib/server/llmPolic
 import { serverMemory } from '$lib/server/personaMemoryAccess';
 import { webSearch, type SearchTarget } from '$lib/server/search';
 import { resolveSearch } from '$lib/server/searchResolver';
-import { resolveTools, WEB_FETCH_CEILINGS, WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
+import { resolveTools } from '$lib/server/toolsResolver';
 import type { Message } from '$lib/sessions';
 
 /**
@@ -36,33 +36,19 @@ import type { Message } from '$lib/sessions';
  * running a turn server-side would be a way to ask for a model nobody shared.
  */
 
-const isServerMode = publicEnv.PUBLIC_MODE === 'server';
-
 export interface RunPrincipal {
-	/** Null in local mode, where there are no accounts to be. */
-	userId: string | null;
+	userId: string;
 	isAdmin: boolean;
 }
 
 /** The connection a run names, resolved by the only party allowed to resolve it. */
 export function resolveRunServer(input: RunInput, principal: RunPrincipal): Server {
-	if (isServerMode) {
-		if (input.server.kind !== 'id') {
-			// A browser handing over a URL and a key is how local mode works and is
-			// meaningless here: server mode's whole point is that the client never
-			// holds either.
-			throw new PolicyError(400, 'This instance resolves servers by id');
-		}
-		const row = getServer(input.server.id);
-		if (!row) throw new PolicyError(404, 'Server not found');
-		if (row.owner_user_id !== null && row.owner_user_id !== principal.userId) {
-			throw new PolicyError(403, 'Not your server');
-		}
-		return fromRow(row);
+	const row = getServer(input.serverId);
+	if (!row) throw new PolicyError(404, 'Server not found');
+	if (row.owner_user_id !== null && row.owner_user_id !== principal.userId) {
+		throw new PolicyError(403, 'Not your server');
 	}
-
-	if (input.server.kind !== 'inline') throw new PolicyError(400, 'Expected a connection');
-	return input.server.server;
+	return fromRow(row);
 }
 
 function fromRow(row: ServerRow): Server {
@@ -118,16 +104,10 @@ function searchTarget(input: RunInput, principal: RunPrincipal): SearchTarget | 
 		};
 	}
 
-	if (isServerMode) {
-		if (!principal.userId) return null;
-		const resolved = resolveSearch(getSettings(principal.userId), principal.isAdmin);
-		return resolved.url
-			? { url: resolved.url, backend: resolved.backend, token: resolved.token }
-			: null;
-	}
-
-	const own = input.local?.search;
-	return own?.url ? { url: own.url, backend: own.backend, token: own.token } : null;
+	const resolved = resolveSearch(getSettings(principal.userId), principal.isAdmin);
+	return resolved.url
+		? { url: resolved.url, backend: resolved.backend, token: resolved.token }
+		: null;
 }
 
 /** How much of a page may be read, with the instance's ceilings applied either way. */
@@ -135,24 +115,14 @@ function fetchLimits(
 	input: RunInput,
 	principal: RunPrincipal
 ): { maxPages: number; maxChars: number } | null {
-	if (isServerMode) {
-		if (!principal.userId) return null;
-		const tools = resolveTools(getSettings(principal.userId), principal.isAdmin);
-		if (!tools.webFetch) return null;
-		return { maxPages: tools.maxPages, maxChars: tools.maxChars };
-	}
-
-	const own = input.local?.fetch;
-	return {
-		maxPages: Math.min(own?.maxPages || WEB_FETCH_DEFAULTS.maxPages, WEB_FETCH_CEILINGS.maxPages),
-		maxChars: Math.min(own?.maxChars || WEB_FETCH_DEFAULTS.maxChars, WEB_FETCH_CEILINGS.maxChars)
-	};
+	const tools = resolveTools(getSettings(principal.userId), principal.isAdmin);
+	if (!tools.webFetch) return null;
+	return { maxPages: tools.maxPages, maxChars: tools.maxChars };
 }
 
 export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 	const server = resolveRunServer(input, principal);
-	const row =
-		isServerMode && input.server.kind === 'id' ? (getServer(input.server.id) ?? null) : null;
+	const row = getServer(input.serverId) ?? null;
 	const strategy = policed(strategyFor(server), row, principal.isAdmin);
 
 	const target = searchTarget(input, principal);
@@ -163,7 +133,7 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 	const oneShot = async (model: string, messages: Message[], serverId?: string) => {
 		const helperServer = serverId && serverId !== server.id ? helper(serverId, principal) : server;
 		if (!helperServer) return '';
-		const helperRow = isServerMode && serverId ? (getServer(serverId) ?? row) : row;
+		const helperRow = serverId ? (getServer(serverId) ?? row) : row;
 		const strat = policed(strategyFor(helperServer), helperRow, principal.isAdmin);
 		let out = '';
 		await strat.chat(
@@ -290,7 +260,6 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 }
 
 function helper(serverId: string, principal: RunPrincipal): Server | null {
-	if (!isServerMode) return null;
 	const row = getServer(serverId);
 	if (!row) return null;
 	if (row.owner_user_id !== null && row.owner_user_id !== principal.userId) return null;

@@ -18,13 +18,12 @@ import { NotAuthenticatedError } from './data/repository';
 export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
 
 /**
- * Persistence is suspended until the first hydration completes. In server mode
- * the stores load asynchronously, and any write before that finishes (a page
- * creating a session, the model-list cache, a default theme…) would PUT
- * empty/default values and clobber the server data: the cause of data vanishing
- * on refresh. Local mode hydrates synchronously, so it's ready immediately.
+ * Persistence is suspended until the first hydration completes. The stores load
+ * asynchronously, and any write before that finishes (a page creating a session,
+ * the model-list cache, a default theme...) would PUT empty or default values
+ * and clobber the stored data: the cause of data vanishing on refresh.
  */
-let persistenceReady = !!repository.hydrate;
+let persistenceReady = false;
 
 /**
  * A writable store that persists every change through the active repository.
@@ -136,7 +135,7 @@ export function sortStore<T extends { updatedAt?: string }>(store: T[]) {
 	});
 }
 
-const seed = repository.hydrate?.() ?? {
+const seed = {
 	settings: DEFAULT_SETTINGS,
 	servers: [] as Server[],
 	sessions: [] as SessionSummary[],
@@ -191,13 +190,10 @@ export const playbooksStore = collectionStore<Playbook>(seed.playbooks, {
 });
 
 /**
- * Fill the stores from the repository at boot. A no-op in local mode (the seed
- * is already synchronous via `hydrate()`); in server mode it loads each
- * collection over the network and sets the stores quietly (no write-back).
+ * Fill the stores from the repository at boot: each collection is loaded over
+ * the network and set quietly, without writing anything back.
  */
 export async function hydrateStores(): Promise<void> {
-	if (repository.hydrate) return; // local mode: already seeded synchronously, ready
-
 	try {
 		await loadIntoStores();
 	} catch (error) {
@@ -220,25 +216,12 @@ export async function hydrateStores(): Promise<void> {
  * against the same server) never appeared until it was force-quit. Called when
  * the app comes back to the foreground.
  *
- * Unlike `hydrateStores` this also refreshes local mode, where a second window
- * writing to the same localStorage leaves the first one just as stale.
- *
  * Settings and servers are deliberately left alone: they are edited in place in
  * the Settings modal, and replacing them under an open field would throw away
  * what is being typed. Only the collections the user browses are re-read.
  */
 export async function refreshStores(): Promise<void> {
 	if (!browser) return;
-
-	const local = repository.hydrate?.();
-	if (local) {
-		sessionsStore.setQuiet(local.sessions);
-		knowledgeStore.setQuiet(local.knowledge);
-		personasStore.setQuiet(local.personas);
-		personaMemoryStore.setQuiet(local.personaMemory);
-		playbooksStore.setQuiet(local.playbooks);
-		return;
-	}
 
 	// Never before the boot hydration has completed: the stores would be filled
 	// with data the app isn't yet allowed to write back.

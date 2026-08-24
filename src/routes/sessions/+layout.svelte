@@ -4,12 +4,8 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { getLastUsedModels } from '$lib/chat';
-	import { isServerMode } from '$lib/chat/endpoint';
-	import { OllamaStrategy } from '$lib/chat/ollama';
-	import { OpenAIStrategy } from '$lib/chat/openai';
 	import RobotsNoIndex from '$lib/components/RobotsNoIndex.svelte';
-	import { isOpenAiCompatible } from '$lib/connections';
-	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { settingsStore } from '$lib/localStorage';
 	import { fetchProviders, providerModels } from '$lib/providerCatalogue';
 	import { type Model } from '$lib/settings';
 
@@ -18,35 +14,15 @@
 	// The landing page is frameless (like Library); a conversation sits in a card.
 	const isHome = $derived(page.route.id === '/sessions');
 
+	/**
+	 * The models on offer, from `/api/providers`: the admin's shared list, plus
+	 * whatever a personal connection answers when the server asks it.
+	 */
 	async function listModels(): Promise<Model[]> {
-		// In server mode, models come from /api/providers (system: admin-curated
-		// shared list; personal: live fetch performed server-side).
-		if (isServerMode) {
-			const { servers } = await fetchProviders();
-			return providerModels(servers).sort((a, b) =>
-				a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-			);
-		}
-
-		const models: Model[] = [];
-
-		for (const server of $serversStore) {
-			if (!server.isEnabled) continue;
-
-			// Asked of the provider rather than enumerated here. The list used to name
-			// every connection type in a switch, which meant a provider added to
-			// `$lib/providers` matched no case and quietly listed nothing at all.
-			const strategy = isOpenAiCompatible(server.connectionType)
-				? new OpenAIStrategy(server)
-				: new OllamaStrategy(server);
-			models.push(...(await strategy.getModels().catch(() => [])));
-		}
-
-		return models.sort((a, b) => {
-			const nameA = a.name;
-			const nameB = b.name;
-			return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
-		});
+		const { servers } = await fetchProviders();
+		return providerModels(servers).sort((a, b) =>
+			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		);
 	}
 
 	$effect(() => {

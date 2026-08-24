@@ -47,7 +47,7 @@ export async function runSpeakers(
 			...input,
 			...(speaker
 				? {
-						server: speaker.server,
+						serverId: speaker.serverId,
 						model: speaker.model,
 						options: speaker.options,
 						think: speaker.think,

@@ -7,7 +7,7 @@
 
 # Llooma /ˈluː.mə/
 
-**A (less) minimal LLM chat app that runs _entirely_ in your browser.**
+**A (less) minimal LLM chat app you host yourself.**
 
 [Documentation](https://llooma.eu) · [Roadmap](https://llooma.eu/roadmap/) · [Changes from Hollama](https://llooma.eu/changes-from-hollama/)
 
@@ -16,9 +16,9 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 </div>
 
 > [!WARNING]
-> **Local mode is going away, and your data will go with it.** If you are using it today, export a
-> backup from _Settings → Data → Backup & restore_ before you update. Read on for why, and for
-> how to push back if you disagree.
+> **Local mode is gone, and your data does not come with it.** If you were using it, export a
+> backup from _Settings → Data → Backup & restore_ **before** you update, and restore it afterwards.
+> Read on for why.
 >
 > I have tried to keep the spirit of Hollama while modernising it and pushing on features, usability
 > and flexibility. The more I do that, the clearer it gets that keeping local mode around costs me
@@ -39,12 +39,12 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 > app like this, so I am guessing. If someone turns up with a good reason to keep local mode, I will
 > happily talk it through in
 > [Discussions](https://github.com/cedhuf/llooma/discussions) and I am willing to change my mind.
-> Otherwise I will start merging towards removing it.
+> Nobody did, so it has been removed.
 >
-> This is not me dropping the Hollama spirit. The plan is to keep a local mode on top of the server
-> architecture: no account, no login screen, everything created for you on first run. You get the
-> same quick single user access, plus proper storage, keys actually encrypted at rest, and room to do
-> things `localStorage` cannot, image generation being the obvious one.
+> This is not me dropping the Hollama spirit. What replaces it sits on the server architecture: no
+> account, no login screen, everything created for you on first run. You get the same quick single
+> user access, plus proper storage, keys actually encrypted at rest, and room to do things
+> `localStorage` cannot, image generation being the obvious one.
 
 ![The sidebar, the Library, the Interface settings, and a conversation over a wallpaper](static/screenshots/sections.png)
 
@@ -58,15 +58,14 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 Bring your own models, from Ollama, OpenAI, Claude, Infomaniak or anything OpenAI-compatible, and
 chat with them from an app that is yours.
 
-- **Two ways to run it.** _Local_ keeps everything in your browser with your own keys. _Server_
-  signs users in, stores their data per account, and keeps the API keys where a browser can never
-  read them.
+- **Personal or shared.** With nothing configured it is yours alone, with no login screen and an
+  owner created on first run. Configure a way to sign in and the same install stores each account's
+  data separately, keeping the API keys where a browser can never read them.
 - **Personas.** Give a model a face, a voice and a name. A coach, a tutor, a companion, each with
   its own avatar, prompt, model, greeting and knowledge. Import existing ones, including OpenWebUI
   exports, and share them across a team.
 - **Knowledge and documents.** Write down what you keep re-explaining and attach it anywhere. Drop
-  in a PDF, a spreadsheet or a Word file and it is read _in your browser_, never uploaded, even in
-  server mode.
+  in a PDF, a spreadsheet or a Word file and it is read _in your browser_, never uploaded.
 - **Tools that stay yours.** Web search, page reading, interactive choices. Every instruction behind
   them is a text box you can rewrite.
 - **Replies that survive the page.** A generation runs in the server, so reloading, navigating away
@@ -85,13 +84,14 @@ The [documentation](https://llooma.eu/features/) covers each of these properly.
 docker run --rm -d -p 4173:4173 --name llooma ghcr.io/cedhuf/llooma:latest
 ```
 
-Then open <http://localhost:4173>. That is local mode, with nothing stored outside your browser.
+Then open <http://localhost:4173>. Nothing is persisted without a volume, so bind-mount `DATA_DIR`
+before you put anything in it.
 
-For a real deployment, Docker Compose, server mode, every environment variable, and the security
-notes that matter before exposing an instance:
+For a real deployment, Docker Compose, accounts, every environment variable, and the security notes
+that matter before exposing an instance:
 
 - [Installation](https://llooma.eu/guides/installation/)
-- [Running modes](https://llooma.eu/guides/running-modes/)
+- [Personal or shared](https://llooma.eu/guides/running-modes/)
 - [First run](https://llooma.eu/guides/first-run/)
 - [Configuration](https://llooma.eu/reference/configuration/)
 - [Security](https://llooma.eu/guides/security/)

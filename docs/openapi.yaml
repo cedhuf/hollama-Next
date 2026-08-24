@@ -299,25 +299,6 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
-  /api/proxy/{path}:
-    parameters:
-      - name: path
-        in: path
-        required: true
-        schema: { type: string }
-        description: Catch-all segment; may contain slashes.
-    get:
-      tags: [proxy]
-      summary: TODO
-      x-status: todo
-      responses:
-        '200': { description: TODO }
-    post:
-      tags: [proxy]
-      summary: TODO
-      x-status: todo
-      responses:
-        '200': { description: TODO }
   /api/runs:
     get:
       tags: [runs]

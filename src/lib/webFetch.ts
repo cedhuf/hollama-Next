@@ -1,8 +1,5 @@
 import { get, writable } from 'svelte/store';
 
-import { isServerMode } from '$lib/chat/endpoint';
-import { settingsStore } from '$lib/localStorage';
-
 /**
  * Reading the pages a message links to.
  *
@@ -43,19 +40,8 @@ export const webFetchConfig = writable<WebFetchConfig>({
 	maxChars: 20_000
 });
 
-/** In server mode the policy comes from the instance; locally it's the settings. */
+/** The policy comes from the instance, which is also the one that enforces it. */
 export async function loadWebFetchConfig(): Promise<void> {
-	if (!isServerMode) {
-		const settings = get(settingsStore);
-		webFetchConfig.set({
-			available: settings.webFetchEnabled !== false,
-			editable: true,
-			maxPages: settings.webFetchMaxPages ?? 3,
-			maxChars: settings.webFetchMaxChars ?? 20_000
-		});
-		return;
-	}
-
 	try {
 		const resolved = await (await fetch('/api/fetch/config')).json();
 		webFetchConfig.set({
@@ -83,9 +69,7 @@ export async function buildPageContext(
 	const wanted = urls.slice(0, config.maxPages);
 	if (!wanted.length) return null;
 
-	const query = isServerMode ? '' : `?maxPages=${config.maxPages}&maxChars=${config.maxChars}`;
-
-	const response = await fetch(`/api/fetch${query}`, {
+	const response = await fetch('/api/fetch', {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({ urls: wanted })

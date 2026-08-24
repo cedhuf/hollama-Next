@@ -17,7 +17,6 @@
 	import type { Component } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { env } from '$env/dynamic/public';
 	import Modal from '$lib/components/Modal.svelte';
 	import { currentUser } from '$lib/stores/auth';
 	import { hasAccounts } from '$lib/stores/instance';
@@ -29,12 +28,11 @@
 	import Interface from './Interface.svelte';
 	import Profile from './Profile.svelte';
 	import Prompts from './Prompts.svelte';
-	import Servers from './Servers.svelte';
+	import ServerConnections from './ServerConnections.svelte';
 	import Tools from './Tools.svelte';
 	import Users from './Users.svelte';
 	import Version from './Version.svelte';
 
-	const serverMode = env.PUBLIC_MODE === 'server';
 	const isAdmin = $derived($currentUser?.role === 'admin');
 
 	let activeTab = $state('profile');
@@ -50,7 +48,7 @@
 		[
 			{ id: 'profile', label: $LL.profile(), icon: User },
 			{ id: 'servers', label: $LL.servers(), icon: Server },
-			{ id: 'admin', label: 'Admin', icon: Shield, visible: serverMode && isAdmin },
+			{ id: 'admin', label: 'Admin', icon: Shield, visible: isAdmin },
 			// Beside Admin and gated the same way, because it is the other half of
 			// running an instance: Admin is how it behaves, this is who is on it.
 			// Unlike Admin, this one goes away where nobody signs in: a list of
@@ -186,7 +184,7 @@
 			</div>
 			<div id="settings-panel" role="tabpanel" class="flex-1 overflow-auto p-4">
 				{#if activeTab === 'servers'}
-					<Servers />
+					<ServerConnections />
 				{:else if activeTab === 'admin'}
 					<Admin />
 				{:else if activeTab === 'users'}

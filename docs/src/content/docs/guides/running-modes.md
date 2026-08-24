@@ -1,57 +1,57 @@
 ---
-title: Running modes
-description: Local keeps everything in the browser; server signs users in and keeps the keys.
+title: Personal or shared
+description: One install, and accounts are the only thing that changes between a personal instance and a shared one.
 sidebar:
   order: 2
 ---
 
-Llooma runs in one of two modes, chosen at deploy time with `PUBLIC_MODE`. This is the decision
-everything else follows from: where data lives, who can see it, and whether provider API keys ever
-reach a browser.
+Llooma is one application, installed one way. Data lives server-side in SQLite, provider API keys
+are encrypted there and never reach a browser, and a turn runs in the server so a reload does not
+lose it.
 
-## `local` (default)
+What an instance decides is whether anyone signs in.
 
-Single user, browser only. Sessions, knowledge, server connections and preferences all live in
-the browser's `localStorage`, and you bring your own providers from _Settings → Servers_. No
-accounts, no database.
+## A personal instance
 
-Best for personal use, a phone PWA, or the upcoming desktop app.
-
-The catch: nothing syncs. Two browsers are two separate installations, and clearing site data
-clears everything. Export a backup from _Settings → Data_ if that matters to you.
-
-## `server`
-
-Multi-user, self-hosted. Users sign in with email and password, OIDC, or both. Data is stored
-server-side in SQLite **per user**, and **provider API keys never leave the server**. They are
-encrypted at rest and injected into requests server-side, so a signed-in user can use a model
-without ever being able to read the key behind it.
-
-An admin configures the shared providers and which models to expose, and may allow users to add
-their own keys on top.
+Install it, start it, use it. No login screen, no secret to generate, no account to create: the
+instance belongs to whoever opens it, and that owner is created on first run.
 
 ```shell
-PUBLIC_MODE=server
+DATA_DIR=./data
 ```
 
-All server-mode state lives under `DATA_DIR`, one directory to bind-mount to persist everything.
+That is the whole configuration. All state lives under `DATA_DIR`, one directory to bind-mount to
+persist everything, including the secret the instance generates for itself to encrypt provider keys
+with.
 
-:::tip[Why server mode exists]
-It is what makes device synchronisation possible (a conversation started on a phone continues on
-a laptop), and what makes a shared instance possible at all.
-:::
+## A shared instance
+
+Configure a way to sign in and the same install becomes a multi-user one: a login page appears,
+data is stored per user, and an admin configures the shared providers and which models to expose,
+and may allow users to add their own keys on top.
+
+```shell
+AUTH_CREDENTIALS=true   # email and password
+OIDC_ISSUER=https://id.example.com   # or an identity provider, or both
+```
+
+There is no separate switch for this, on purpose. A switch and the configuration could disagree,
+and both ways of disagreeing are bad: accounts demanded with no provider configured is an instance
+nobody can enter, and accounts turned off with an identity provider configured is one anybody can.
 
 ## What changes between them
 
-|                       | `local`                              | `server`                                           |
-| --------------------- | ------------------------------------ | -------------------------------------------------- |
-| Where data lives      | Browser `localStorage`               | SQLite under `DATA_DIR`, per user                  |
-| Sync across devices   | No                                   | Yes                                                |
-| Accounts              | None                                 | Email + password and/or OIDC                       |
-| Provider keys         | In the browser                       | On the server, encrypted                           |
-| Talking to a provider | Browser → provider, via `/api/proxy` | Browser → `/api/llm`, server → provider            |
-| Sharing settings      | _(none)_                             | Admin can share and lock providers, prompts, tools |
+|                     | Personal                       | Shared                                             |
+| ------------------- | ------------------------------ | -------------------------------------------------- |
+| Signing in          | Nobody does                    | Email and password, OIDC, or both                  |
+| Who the data is for | The instance's implicit owner  | Each account, separately                           |
+| Sync across devices | Yes, the data is on the server | Yes                                                |
+| Provider keys       | On the server, encrypted       | On the server, encrypted                           |
+| Sharing settings    | Nobody to share with           | Admin can share and lock providers, prompts, tools |
 
-That last row is the reason the generic proxy is **disabled outright in server mode**: it takes
-whatever origin it is given and needs no signed-in user, which in front of a multi-user instance
-would be an open relay. See [Security](/guides/security/).
+:::note[Local mode is gone]
+Earlier versions had a `local` mode that kept everything in the browser's `localStorage` and ran
+turns in the tab. It has been retired: a personal instance is now a server instance that nobody
+signs into. Data held in a browser does not migrate on its own, so export a backup from
+_Settings → Data_ before upgrading, and import it afterwards.
+:::

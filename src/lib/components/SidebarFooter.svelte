@@ -2,7 +2,6 @@
 	import { Settings2 } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { env } from '$env/dynamic/public';
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
@@ -14,9 +13,10 @@
 
 	let { rail }: Props = $props();
 
-	const connected = $derived(
-		env.PUBLIC_MODE === 'server' ? true : $serversStore.some((s) => s.isEnabled && s.isVerified)
-	);
+	// A connection that is enabled and has answered at least once. The providers an
+	// instance hands out arrive already verified, so this reads as "is there
+	// anything to talk to" rather than "did you finish setting one up".
+	const connected = $derived($serversStore.some((s) => s.isEnabled && s.isVerified));
 	const hasName = $derived(!!($settingsStore.profileFirstName || $settingsStore.profileLastName));
 
 	function initials(): string {

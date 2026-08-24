@@ -235,8 +235,8 @@ What it is not is fragile. The server holds the provider connection, and it writ
 **before** it answers. Closing the tab halfway through loses the response, not the picture: it is
 in the gallery on the next load.
 
-## Local mode
+## When it is offered
 
-There is no image generation in local mode. The bytes have nowhere to go: browser storage is
-measured in a handful of megabytes and a single image can be several. The sidebar entry and the
-settings section simply do not exist there.
+The sidebar entry and the settings section appear once there is a model that draws: a model marked
+as one under _Models and pricing_, and, on a system connection, shared. An instance that offers no
+image model offers no gallery either.

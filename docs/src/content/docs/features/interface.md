@@ -162,8 +162,7 @@ width, the sidebar collapses, and the composer's menus become sheets.
 It installs as a PWA. On iOS, _Share → Add to Home Screen_; on Android, the install prompt in
 Chrome's menu. Installed, it runs without browser chrome and keeps its own theme colour.
 
-:::caution[Installed does not mean synced]
-In local mode the installed app is a browser profile like any other. Two devices are two separate
-installations. If you want the same conversations on both, that is what
-[server mode](/guides/running-modes/) is for.
+:::note[Installed on two devices]
+Both talk to the same instance, so both show the same conversations: what is installed is the
+interface, not the data. See [Personal or shared](/guides/running-modes/).
 :::

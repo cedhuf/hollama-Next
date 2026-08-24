@@ -15,7 +15,7 @@ For the full list of everything this fork changed from
 
 | Feature                             | What it means                                                                                                                                                                    |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Running modes](/guides/running-modes/)                                                           |
+| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Personal or shared](/guides/running-modes/)                                                      |
 | **Sharing enforced server-side**    | Shared tools, model allow-lists and locked prompts are applied in the endpoints, so a hand-crafted request is policed too                                                        |
 | **Locked prompts survive personas** | A locked instance prompt is prepended in the proxy, so a persona's own prompt adds to it instead of replacing it                                                                 |
 | **Translations reworked**           | English and French are complete, and adding a locale no longer means auditing every key. See [Translations](/development/translations/)                                          |
@@ -57,7 +57,7 @@ built there, so the work may be as much reading as writing.
 | **The end-to-end suite is broken**         | The Playwright tests carry failures inherited from the fork, so nothing built since has automated regression cover. Fixing it would help a lot |
 | **The Svelte 5 migration is not finished** | A few legacy `on:` directives remain                                                                                                           |
 | **Rename migrations still ship**           | One-shot carry-overs from the rename to Llooma. The release that drops them must name the version to pin first                                 |
-| **Local mode needs a verification pass**   | Recent work focused on server mode, and local mode may have inconsistencies                                                                    |
+| **Local mode has just been retired**       | The browser-only mode is gone and a personal instance is now a server nobody signs into. Anything that assumed the old shape may still bite    |
 
 ## Asking for something
 

@@ -21,7 +21,10 @@ services:
     restart: unless-stopped
     ports:
       - '${HOST_PORT:-4173}:4173'
+    volumes:
+      - ./data:/app/data
     environment:
+      - DATA_DIR=/app/data
       - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-localhost}
 ```
 
@@ -31,42 +34,32 @@ docker compose up -d
 
 Then open <http://localhost:4173>.
 
-That runs Llooma in **local mode**, where everything lives in your browser and the container holds
-no state at all. [Running modes](/guides/running-modes/) explains the difference and why you
-might want the other one.
+That is a personal instance: no login screen, one implicit owner created on first run, and nothing
+else to configure. `./data` is everything, the SQLite database included, so back up that directory
+and you have backed up the instance.
 
-### For server mode
+### Adding accounts
 
-Server mode keeps data on the server, so it needs a secret and a volume:
+Configure a way to sign in and the same container becomes a shared instance:
 
 ```yaml
-services:
-  llooma:
-    image: ghcr.io/cedhuf/llooma:latest
-    restart: unless-stopped
-    ports:
-      - '${HOST_PORT:-4173}:4173'
-    volumes:
-      - ./data:/app/data
-    environment:
-      - PUBLIC_MODE=server
-      - DATA_DIR=/app/data
-      - AUTH_SECRET=${AUTH_SECRET}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - AUTH_CREDENTIALS=true
-      - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-localhost}
+environment:
+  - DATA_DIR=/app/data
+  - AUTH_CREDENTIALS=true
+  - ADMIN_EMAIL=${ADMIN_EMAIL}
+  - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+  - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-localhost}
 ```
 
-Generate the secret once and keep it:
+`AUTH_SECRET` is optional: the instance generates one on first run and keeps it in the database with
+the data it protects. Set it yourself, before first run, if you would rather hold it:
 
 ```shell
 openssl rand -base64 32
 ```
 
-`./data` is everything: the SQLite database, the sessions, the encrypted provider keys. Back up that
-directory and `AUTH_SECRET` together, since one is useless without the other. Every variable is
-listed in [Configuration](/reference/configuration/).
+Every variable is listed in [Configuration](/reference/configuration/). See
+[Personal or shared](/guides/running-modes/) for what changes.
 
 The repository also ships a `docker-compose.yml` and a `.env.example` if you would rather start from
 those:
@@ -82,8 +75,8 @@ docker compose up -d
 docker run --rm -d -p 4173:4173 --name llooma ghcr.io/cedhuf/llooma:latest
 ```
 
-This starts Llooma in local mode with no persistence outside your browser. For server mode you need
-at least `AUTH_SECRET` and a bind-mounted `DATA_DIR`.
+Nothing is persisted without a volume: bind-mount `DATA_DIR` (`-v ./data:/app/data -e
+DATA_DIR=/app/data`) or the instance starts empty every time.
 
 ## Updating
 
@@ -99,11 +92,11 @@ jumping several versions at once.
 
 ## Connecting to Ollama on another machine
 
-If your Ollama server runs on a separate device, it has to allow your Llooma instance's domain
-in `OLLAMA_ORIGINS`. The browser talks to it directly in local mode, so its CORS policy applies.
+If your Ollama server runs on a separate device, the Llooma server is what reaches it, so Ollama has
+to listen somewhere other than loopback:
 
 ```shell
-OLLAMA_ORIGINS=https://your-llooma-domain.com ollama serve
+OLLAMA_HOST=0.0.0.0 ollama serve
 ```
 
 See [Ollama's FAQ](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server)

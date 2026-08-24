@@ -22,9 +22,12 @@ import type { RunEvent, RunInput } from './types';
 /**
  * A turn run in the tab that asked for it.
  *
- * The fallback, and the only path when the run service is turned off. It is the
- * same orchestrator the server uses, wired to the browser's own capabilities:
- * the two differ in what they can reach, never in what they do.
+ * The fallback, and the path taken when server-side generation is turned off. It
+ * is the same orchestrator the server uses, wired to the browser's own
+ * capabilities: the two differ in what they can reach, never in what they do.
+ *
+ * The provider is still addressed through the instance's proxy, so this is about
+ * which process holds the turn, not about who holds the keys.
  */
 
 export function strategyFor(server: Server): ChatStrategy {
@@ -107,9 +110,7 @@ export function browserDeps(
 
 /** Resolve the connection a run names, from what this browser knows. */
 export function resolveServer(input: RunInput): Server | undefined {
-	const named = input.server;
-	if (named.kind === 'inline') return named.server;
-	return get(serversStore).find((s) => s.id === named.id);
+	return get(serversStore).find((s) => s.id === input.serverId);
 }
 
 export async function runLocally(

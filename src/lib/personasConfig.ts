@@ -1,10 +1,7 @@
 import { derived, get, writable } from 'svelte/store';
 
-import { env } from '$env/dynamic/public';
 import { personasStore } from '$lib/localStorage';
 import type { Persona } from '$lib/personas';
-
-const isServer = env.PUBLIC_MODE === 'server';
 
 export interface PersonasConfig {
 	/** Personas an admin has shared, offered to users to "install". */
@@ -14,9 +11,8 @@ export interface PersonasConfig {
 	/**
 	 * Where the instance reads its persona store, shown to everyone.
 	 *
-	 * Empty in local mode, where the address is the user's own preference and the
-	 * store is fetched by the browser. In server mode it is the instance's, so a
-	 * user sees it and only an admin can change it.
+	 * The instance's rather than each person's, so a user sees it and only an
+	 * admin can change it.
 	 */
 	storeUrl: string;
 	/** Whether the current user may change that address. */
@@ -56,8 +52,8 @@ const DEFAULT: PersonasConfig = {
 	canCreate: true,
 	storeUrl: '',
 	canEditStore: false,
-	// Local mode has one person, who is therefore allowed everything and has
-	// nobody to share with.
+	// Before the instance has answered: the permissive reading of what is shown,
+	// and nothing shared, since sharing is the instance's to grant.
 	storeMode: 'open',
 	canShare: false,
 	autoUpdateForced: false,
@@ -68,7 +64,6 @@ const DEFAULT: PersonasConfig = {
 const serverPersonas = writable<PersonasConfig | null>(null);
 
 export async function loadServerPersonas(): Promise<void> {
-	if (!isServer) return;
 	try {
 		const response = await fetch('/api/personas/config');
 		if (response.ok) serverPersonas.set(await response.json());
@@ -77,14 +72,14 @@ export async function loadServerPersonas(): Promise<void> {
 	}
 }
 
-/** The effective personas governance for the current user/mode. */
-export const personasConfig = derived(serverPersonas, ($server): PersonasConfig =>
-	isServer ? ($server ?? DEFAULT) : DEFAULT
+/** The effective personas governance for the current user. */
+export const personasConfig = derived(
+	serverPersonas,
+	($server): PersonasConfig => $server ?? DEFAULT
 );
 
 /** Admin: point the instance at another persona store. */
 export async function saveStoreUrl(url: string): Promise<void> {
-	if (!isServer) return;
 	await fetch('/api/admin/config', {
 		method: 'PUT',
 		headers: { 'content-type': 'application/json' },
@@ -101,7 +96,6 @@ export async function saveStoreUrl(url: string): Promise<void> {
  * published from here like anything else they wrote.
  */
 export async function publishSharedPersonas(): Promise<void> {
-	if (!isServer) return;
 	const shared = (get(personasStore) || [])
 		.filter((p) => p.shared)
 		.map((p) => ({ ...p, sessionId: undefined }));
@@ -124,7 +118,6 @@ export async function publishSharedPersonas(): Promise<void> {
  * people already installed, which is theirs.
  */
 export async function relayCatalogPersona(id: string, relay: boolean): Promise<void> {
-	if (!isServer) return;
 	await fetch(`/api/admin/personas/store/${encodeURIComponent(id)}`, {
 		method: relay ? 'PUT' : 'DELETE'
 	});
