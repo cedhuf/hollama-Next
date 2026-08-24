@@ -675,6 +675,18 @@ type RootTranslation = {
 	 */
 	light: string
 	/**
+	 * M​o​d​e​l​ ​l​o​a​d​i​n​g
+	 */
+	loadOptions: string
+	/**
+	 * L​e​t​ ​t​h​e​ ​s​e​r​v​e​r​ ​d​e​c​i​d​e​ ​e​v​e​r​y​t​h​i​n​g
+	 */
+	loadOptionsClear: string
+	/**
+	 * H​o​w​ ​t​h​i​s​ ​O​l​l​a​m​a​ ​l​o​a​d​s​ ​a​ ​m​o​d​e​l​.​ ​S​e​t​ ​o​n​c​e​ ​h​e​r​e​,​ ​u​s​e​d​ ​b​y​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​h​e​l​d​ ​o​n​ ​t​h​i​s​ ​c​o​n​n​e​c​t​i​o​n​.​ ​L​e​a​v​e​ ​a​ ​f​i​e​l​d​ ​b​l​a​n​k​ ​t​o​ ​l​e​t​ ​O​l​l​a​m​a​ ​d​e​c​i​d​e​.
+	 */
+	loadOptionsHelp: string
+	/**
 	 * L​o​w​ ​V​R​A​M
 	 */
 	lowVram: string
@@ -4184,6 +4196,18 @@ export type TranslationFunctions = {
 	 * Light
 	 */
 	light: () => LocalizedString
+	/**
+	 * Model loading
+	 */
+	loadOptions: () => LocalizedString
+	/**
+	 * Let the server decide everything
+	 */
+	loadOptionsClear: () => LocalizedString
+	/**
+	 * How this Ollama loads a model. Set once here, used by every conversation held on this connection. Leave a field blank to let Ollama decide.
+	 */
+	loadOptionsHelp: () => LocalizedString
 	/**
 	 * Low VRAM
 	 */

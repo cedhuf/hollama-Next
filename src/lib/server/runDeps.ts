@@ -5,6 +5,7 @@ import { compactTranscript } from '$lib/chat/compact';
 import { stripThinkTags } from '$lib/chat/index';
 import { OllamaStrategy } from '$lib/chat/ollama';
 import { OpenAIStrategy } from '$lib/chat/openai';
+import { parseLoadOptions } from '$lib/chat/options';
 import type { RunDeps } from '$lib/chat/run/orchestrator';
 import type { RunInput } from '$lib/chat/run/types';
 import { stripTitleMarkdown } from '$lib/chat/titleText';
@@ -60,7 +61,12 @@ function fromRow(row: ServerRow): Server {
 		label: row.label ?? undefined,
 		modelFilter: row.model_filter ?? undefined,
 		isEnabled: !!row.is_enabled,
-		isVerified: row.verified_at ? new Date(row.verified_at) : null
+		isVerified: row.verified_at ? new Date(row.verified_at) : null,
+		// Carried here rather than merged at the call site: every request a turn
+		// makes goes through a strategy built from this, so the machine settings
+		// ride along without the orchestrator, the summariser or the router each
+		// having to remember them.
+		loadOptions: parseLoadOptions(row.load_options)
 	};
 }
 

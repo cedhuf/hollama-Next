@@ -1,3 +1,4 @@
+import { stripLoadOptions } from '$lib/chat/options';
 import type { Message, Session } from '$lib/sessions';
 import type { Model } from '$lib/settings';
 
@@ -5,8 +6,9 @@ import type { Model } from '$lib/settings';
  * The pure shape of a conversation: how a list sees it, and what a conversation
  * coming out of storage has to be filled in with.
  *
- * Deliberately its own module, importing nothing but types. `sessions.ts` pulls
- * in the stores and the chat defaults, which in turn read the stores back, so
+ * Deliberately its own module, importing nothing that has a runtime dependency
+ * of its own. `sessions.ts` pulls in the stores and the chat defaults, which in
+ * turn read the stores back, so
  * the moment the store layer needed a *value* from there rather than a type, the
  * two started initialising each other and `settingsStore` was read before it
  * existed. Pure functions with no dependencies can be imported from anywhere,
@@ -67,6 +69,12 @@ export const defaultSystemPrompt = (): Message => ({ role: 'system', content: ''
  */
 export const normalizeSession = (session: Session): Session => ({
 	...session,
-	options: session.options || {},
+	// The loading options are stripped here rather than migrated in place: they
+	// describe the machine, they now live on the connection, and doing it on the
+	// way out of storage covers an export restored from months ago as well as a
+	// row already in the database. A conversation that carried them keeps
+	// everything else and simply stops sending them; the next save writes it back
+	// without them, so nothing has to be rewritten in bulk.
+	options: stripLoadOptions(session.options),
 	systemPrompt: session.systemPrompt || defaultSystemPrompt()
 });

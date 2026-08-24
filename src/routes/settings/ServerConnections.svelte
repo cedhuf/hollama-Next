@@ -4,6 +4,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import type { LoadOptions } from '$lib/chat/options';
 	import Button from '$lib/components/Button.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -45,6 +46,7 @@
 		modelLabels?: Record<string, string>;
 		modelPricing?: Record<string, ModelPrice>;
 		modelKinds?: Record<string, ModelKind>;
+		loadOptions?: LoadOptions;
 		sharedModels?: string[];
 		/** A stored key is never returned; this is all the browser gets to know. */
 		hasApiKey?: boolean;
@@ -102,6 +104,7 @@
 			modelLabels: v.modelLabels ?? undefined,
 			modelPricing: v.modelPricing ?? undefined,
 			modelKinds: v.modelKinds ?? undefined,
+			loadOptions: v.loadOptions ?? undefined,
 			apiKey: '' // never returned; type in the field to set/replace
 		};
 	}
@@ -255,6 +258,7 @@
 					modelLabels: server.modelLabels ?? {},
 					modelPricing: server.modelPricing ?? {},
 					modelKinds: server.modelKinds ?? {},
+					loadOptions: server.loadOptions ?? {},
 					...(server.apiKey ? { apiKey: server.apiKey } : {})
 				})
 			}).then(() => afterSave?.());

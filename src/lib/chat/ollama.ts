@@ -17,6 +17,7 @@ import {
 	type ChatChunk,
 	type ChatStrategy
 } from './index';
+import { withLoadOptions } from './options';
 
 export interface OllamaOptions {
 	numa: boolean;
@@ -153,6 +154,19 @@ export class OllamaStrategy implements ChatStrategy {
 		}
 	}
 
+	/**
+	 * The `options` block for one request: what the conversation asked for, over
+	 * how this connection loads a model.
+	 *
+	 * Merged here rather than by each caller because there are four of them (the
+	 * turn, the summariser, the title, the prompt writer) and a merge written per
+	 * call site is a merge missing from the fifth. Nothing above this line has to
+	 * know that a connection has loading settings at all.
+	 */
+	private optionsFor(payload: AppChatRequest) {
+		return withLoadOptions(payload.options, this.server.loadOptions);
+	}
+
 	async chat(
 		payload: AppChatRequest,
 		abortSignal: AbortSignal,
@@ -194,6 +208,7 @@ export class OllamaStrategy implements ChatStrategy {
 
 		const body = {
 			...rest,
+			options: this.optionsFor(payload),
 			think,
 			// Ollama takes the same shape as everyone else, one level deeper.
 			...(offerTools
@@ -293,7 +308,7 @@ export class OllamaStrategy implements ChatStrategy {
 			body: JSON.stringify({
 				model: payload.model,
 				messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
-				options: payload.options,
+				options: this.optionsFor(payload),
 				stream: false,
 				// The short internal errands don't want reasoning: it costs a round trip
 				// and buries the one line the caller is after. `false` is accepted by

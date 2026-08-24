@@ -1,3 +1,4 @@
+import type { LoadOptions } from '$lib/chat/options';
 import { describeProvider, PROVIDER_DESCRIPTORS, type ProviderDescriptor } from '$lib/providers';
 
 import { generateRandomId } from './utils';
@@ -68,6 +69,20 @@ export interface Server {
 	 * different hosts, and this is the field that says so.
 	 */
 	imageBaseUrl?: string;
+	/**
+	 * How this Ollama loads a model: threads, GPU layers, mmap and the rest.
+	 *
+	 * On the connection because that is what they describe. They are facts about
+	 * one machine, decided once by whoever runs it, and identical for every
+	 * conversation held against it. They used to live on the conversation, where
+	 * they were neither: merely opening the parameters panel bound half a dozen
+	 * checkboxes to it and wrote `false` into every one, so a server configured to
+	 * memory-map its weights was told not to, by a conversation, forever.
+	 *
+	 * Ignored by every other kind of connection, which is why nothing outside the
+	 * Ollama strategy reads it.
+	 */
+	loadOptions?: LoadOptions;
 }
 
 /**

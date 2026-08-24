@@ -434,6 +434,26 @@ const migrations: Migration[] = [
 			);
 			CREATE INDEX idx_generated_images_user ON generated_images(user_id, created_at DESC);
 		`
+	},
+	{
+		version: 19,
+		up: `
+			-- How this Ollama loads a model: threads, GPU layers, mmap and the rest.
+			--
+			-- One JSON column rather than ten, because nothing ever queries them: they
+			-- are read whole when a request is built and written whole when somebody
+			-- edits the connection. Ten columns would buy a WHERE clause nobody wants
+			-- and cost a migration every time llama.cpp grows another knob.
+			--
+			-- A column rather than a side table for the same reason the base URL is a
+			-- column: it is one small record per connection, not a map keyed by model
+			-- like the labels and the prices.
+			--
+			-- NULL means nothing was set, which is what every existing row gets and is
+			-- also what the app wants: an absent field lets Ollama decide, and deciding
+			-- for it is exactly what the old per-conversation panel got wrong.
+			ALTER TABLE servers ADD COLUMN load_options TEXT;
+		`
 	}
 ];
 

@@ -31,7 +31,8 @@ export async function PUT(event) {
 		modelFilter: body.modelFilter,
 		isEnabled: body.isEnabled,
 		verifiedAt: body.verifiedAt,
-		color: body.color
+		color: body.color,
+		loadOptions: body.loadOptions
 	});
 	if (body.modelLabels && typeof body.modelLabels === 'object') {
 		setModelLabels(event.params.id, body.modelLabels);

@@ -1,3 +1,4 @@
+import { parseLoadOptions } from '$lib/chat/options';
 import {
 	getModelKinds,
 	getModelLabels,
@@ -19,6 +20,7 @@ export function toAdminView(row: ServerRow) {
 		verifiedAt: row.verified_at,
 		color: row.color,
 		hasApiKey: !!row.api_key_enc,
+		loadOptions: parseLoadOptions(row.load_options),
 		sharedModels: getSharedModels(row.id),
 		modelLabels: getModelLabels(row.id),
 		modelPricing: getModelPricing(row.id),
@@ -66,7 +68,13 @@ export function toProviderView(row: ServerRow) {
 			isEnabled: !!row.is_enabled,
 			verifiedAt: row.verified_at,
 			color: row.color,
-			models: getSharedModels(row.id)
+			models: getSharedModels(row.id),
+			// Not a secret, unlike the endpoint and the key: these say how the machine
+			// loads a model, and a client-side helper call (a summary, a title) has to
+			// build the same request the server would. Withholding them would mean the
+			// same connection loaded two different ways depending on which side of the
+			// app happened to ask.
+			loadOptions: parseLoadOptions(row.load_options)
 		};
 	}
 	return {
@@ -80,6 +88,7 @@ export function toProviderView(row: ServerRow) {
 		isEnabled: !!row.is_enabled,
 		verifiedAt: row.verified_at,
 		color: row.color,
-		hasApiKey: !!row.api_key_enc
+		hasApiKey: !!row.api_key_enc,
+		loadOptions: parseLoadOptions(row.load_options)
 	};
 }

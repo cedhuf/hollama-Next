@@ -1,3 +1,4 @@
+import type { LoadOptions } from '$lib/chat/options';
 import { ConnectionType, type ModelKind, type Server } from '$lib/connections';
 import type { Model } from '$lib/settings';
 
@@ -16,6 +17,8 @@ export interface ProviderView {
 	modelLabels?: Record<string, string>;
 	modelKinds?: Record<string, ModelKind>;
 	hasApiKey?: boolean;
+	/** How this Ollama loads a model. Absent on anything that is not one. */
+	loadOptions?: LoadOptions;
 	/** ISO date of the last successful sync; null when it has never been synced. */
 	verifiedAt?: string | null;
 }
@@ -52,7 +55,8 @@ export function providerToServer(provider: ProviderView): Server {
 		modelFilter: provider.modelFilter ?? undefined,
 		color: provider.color ?? undefined,
 		modelLabels: provider.modelLabels ?? undefined,
-		modelKinds: provider.modelKinds ?? undefined
+		modelKinds: provider.modelKinds ?? undefined,
+		loadOptions: provider.loadOptions ?? undefined
 	};
 }
 

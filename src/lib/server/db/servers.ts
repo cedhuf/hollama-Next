@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { parseLoadOptions, type LoadOptions } from '$lib/chat/options';
 import {
 	guessModelKind,
 	hasPriceFigure,
@@ -26,6 +27,8 @@ export interface ServerRow {
 	verified_at: string | null;
 	/** Badge colour override; NULL falls back to the provider default. */
 	color: string | null;
+	/** JSON `LoadOptions` for an Ollama connection; NULL means nothing was set. */
+	load_options: string | null;
 	created_at: string;
 }
 
@@ -101,6 +104,7 @@ export function updateServer(
 		isEnabled?: boolean;
 		verifiedAt?: string | null;
 		color?: string | null;
+		loadOptions?: LoadOptions | null;
 	}
 ): void {
 	const sets: string[] = [];
@@ -139,6 +143,15 @@ export function updateServer(
 	if (patch.color !== undefined) {
 		sets.push('color = ?');
 		values.push(patch.color);
+	}
+	if (patch.loadOptions !== undefined) {
+		// Filtered on the way in as well as on the way out: the column is the only
+		// copy, so a field that should not be there is a field that gets sent to
+		// Ollama on every turn until somebody notices. An empty set is stored as
+		// NULL so "nothing configured" has one representation rather than two.
+		const kept = parseLoadOptions(patch.loadOptions);
+		sets.push('load_options = ?');
+		values.push(Object.keys(kept).length ? JSON.stringify(kept) : null);
 	}
 	if (sets.length === 0) return;
 

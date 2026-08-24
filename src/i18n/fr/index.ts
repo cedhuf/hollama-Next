@@ -177,6 +177,10 @@ const fr = extendDictionary(en, {
 	language: 'Langue',
 	lastUsedModels: 'Modèles utilisés récemment',
 	light: 'Clair',
+	loadOptions: 'Chargement du modèle',
+	loadOptionsClear: 'Laisser le serveur tout décider',
+	loadOptionsHelp:
+		"Comment cet Ollama charge un modèle. Réglé une fois ici, utilisé par toutes les conversations tenues sur cette connexion. Laissez un champ vide pour qu'Ollama décide.",
 	lowVram: 'Faible VRAM',
 	mainGpu: 'GPU principal',
 	messages: 'Messages',

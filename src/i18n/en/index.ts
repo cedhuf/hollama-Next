@@ -171,6 +171,10 @@ const en = {
 	language: 'Language',
 	lastUsedModels: 'Recently used models',
 	light: 'Light',
+	loadOptions: 'Model loading',
+	loadOptionsClear: 'Let the server decide everything',
+	loadOptionsHelp:
+		'How this Ollama loads a model. Set once here, used by every conversation held on this connection. Leave a field blank to let Ollama decide.',
 	lowVram: 'Low VRAM',
 	mainGpu: 'Main GPU',
 	messages: 'Messages',
