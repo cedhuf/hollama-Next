@@ -305,7 +305,9 @@ paths:
       summary: The generation still running for a conversation, if there is one.
       description: >
         What a page asks on load so it can pick a turn back up. Returns null when
-        the conversation has nothing in flight and nothing recent to collect.
+        the conversation has nothing in flight and nothing recent to collect. Only
+        a run still running is worth joining: a finished one has already written
+        what it produced into the conversation.
       parameters:
         - name: sessionId
           in: query
@@ -318,11 +320,16 @@ paths:
       summary: Start a generation that outlives the page that asked for it.
       description: >
         Returns as soon as the run has an identity, not when the model has
-        answered: the turn then belongs to the server, and the client follows it
-        over the event stream. Answers 409 with the existing run when the
+        answered: the turn then belongs to the server, which writes what it
+        produces into the conversation, and the client follows it over the event
+        stream to draw it. A client never has to store what a run produced, and
+        must not: the stream is what the turn looks like, not where it is kept.
+        The conversation must already exist, which is what makes the question
+        older than the answer. Answers 409 with the existing run when the
         conversation already has one going.
       responses:
         '201': { description: The run that was started. }
+        '404': { description: No such conversation. }
         '409': { description: That conversation is already generating. }
   /api/runs/{id}/cancel:
     parameters:

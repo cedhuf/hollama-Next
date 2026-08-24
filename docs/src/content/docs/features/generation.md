@@ -15,8 +15,10 @@ Llooma now runs the turn in the server instead, and the page watches it.
 ## What changes for you
 
 Send a message and then reload. The conversation comes back with the reply still arriving, from
-wherever it had got to. Close the tab and open it again a minute later, and the finished answer
-is there. Switch to another conversation while one is generating, and come back to it.
+wherever it had got to. Close the tab and open it again, in a minute or tomorrow, and the finished
+answer is there: the turn writes what it produces as it produces it, so nothing is waiting on a
+browser to come back and store it. Switch to another conversation while one is generating, and
+come back to it.
 
 The confirmation dialog that used to ask whether you really wanted to leave a conversation
 mid-reply is gone with it, because leaving no longer costs anything.
@@ -60,19 +62,11 @@ about which models are shared and which instruction is locked.
 
 Honest limits, since a promise half-kept is worse than none.
 
-**A server restart.** Runs live in the server's memory. Restart it, or redeploy, and whatever was
-in flight is lost. It is not written to disk, deliberately: the failure it would protect against
-is a restart landing inside the few seconds a model takes to answer.
-
-**Applying the same answer twice.** A finished run is kept for a few minutes so a tab that was
-closed mid-answer can still collect it, and coming back to the conversation inside that window
-replays its log from the start. Every message a run produces carries the instant it was created,
-stamped once and never rewritten, so an event delivered twice is recognised and applied once.
-Without that, revisiting a conversation put the same reply in it again.
+**A server restart, and only that.** Leaving for a day is fine: the reply was written to the
+database as it was produced, not held in memory waiting for a tab to come and collect it. What a
+restart loses is the turn that was in flight when it happened: an answer half written is not in the
+conversation yet, because nothing has finished it. Everything that landed before is.
 
 **Several replicas.** If you run llooma behind a load balancer with more than one instance, each
-one keeps its own runs, and a browser that reconnects to a different replica will not find its
-turn. Single-instance deployments, which is nearly all of them, are unaffected.
-
-**A long absence.** The conversation is written by the browser, so a finished run is held for a few
-minutes and collected when the tab comes back. Leave it until tomorrow and it is gone.
+one keeps its own runs, and a browser that reconnects to a different replica will not find the
+turn to watch. It will still find the answer, since both write to the same database.
