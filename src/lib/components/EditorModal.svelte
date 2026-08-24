@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Download, Trash2, X } from '@lucide/svelte';
+	import { Download, X } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 
 	/**
@@ -75,15 +76,10 @@
 					</button>
 				{/if}
 				{#if onDelete}
-					<button
-						type="button"
-						onclick={onDelete}
-						title={$LL.delete()}
-						aria-label={$LL.delete()}
-						class="text-muted hover:bg-shade-2 hover:text-negative rounded-md p-1.5 transition-colors"
-					>
-						<Trash2 class="h-4 w-4" />
-					</button>
+					<!-- Asks here rather than through the browser: the three editors behind
+					     this header each put up their own `confirm()`, which is the one
+					     dialog in the app that does not look like the app. -->
+					<ButtonConfirm onConfirm={onDelete} />
 				{/if}
 
 				<!-- A rule between what the dialog does and what closes it: destructive

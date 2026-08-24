@@ -254,12 +254,6 @@
 				label={$LL.showRecentImages()}
 				bind:checked={$settingsStore.homeShowRecentImages}
 			/>
-			{#if $settingsStore.homeShowRecentImages}
-				<SettingsSlider
-					label={$LL.howManyToShow()}
-					bind:value={$settingsStore.homeRecentImagesCount}
-				/>
-			{/if}
 		{/if}
 
 		<FieldCheckbox

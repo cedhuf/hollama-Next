@@ -15,7 +15,6 @@
 	import SettingsBadge from '../../settings/SettingsBadge.svelte';
 	import SettingsField from '../../settings/SettingsField.svelte';
 	import SettingsHint from '../../settings/SettingsHint.svelte';
-	import SettingsSection from '../../settings/SettingsSection.svelte';
 
 	/**
 	 * Per-conversation settings. Same shell as the persona editor and the settings
@@ -96,99 +95,102 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<!-- Header: live title + close, aligned with the persona and settings modals -->
-		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
-			<span class="text-active truncate text-sm font-semibold">
-				{session.title?.trim() || resolveSessionTitle(session) || 'Conversation settings'}
-			</span>
+		<!-- The bar is the title field. It used to print the name and then ask for it
+		     again in the first card below, which is one question twice: naming a
+		     conversation is renaming what is already on screen. Ghost input, as
+		     everywhere else a name is edited in place. -->
+		<div class="border-shade-2 flex h-12 shrink-0 items-center gap-2 border-b px-4">
+			<input
+				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-0 min-w-0 flex-1 rounded-md border border-transparent px-2 py-1 text-sm font-semibold outline-none"
+				bind:value={session.title}
+				oninput={onTitleInput}
+				placeholder={resolveSessionTitle(session) || $LL.untitled()}
+				aria-label={$LL.conversationTitle()}
+			/>
 			<button
 				type="button"
 				onclick={() => (open = false)}
-				aria-label="Close"
-				class="text-muted hover:bg-shade-2 hover:text-active rounded-md p-1.5 transition-colors"
+				aria-label={$LL.close()}
+				class="text-muted hover:bg-shade-2 hover:text-active shrink-0 rounded-md p-1.5 transition-colors"
 			>
 				<X class="h-4 w-4" />
 			</button>
 		</div>
 
-		<!-- Body -->
+		<!-- Body: the model, then two folded rows. Everything a conversation can be
+		     told, in a dialog that fits without scrolling, each row already saying
+		     what it holds. -->
 		<div class="min-h-0 flex-1 overflow-auto p-4">
-			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
-				<SettingsSection title="Conversation" card>
-					<SettingsField label="Title">
-						<input
-							class="settings-field"
-							bind:value={session.title}
-							oninput={onTitleInput}
-							placeholder={resolveSessionTitle(session) || 'Untitled'}
-						/>
-					</SettingsField>
+			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-3">
+				<SettingsField label={$LL.model()}>
+					<ModelSelect bind:value={modelName} />
+				</SettingsField>
 
-					<SettingsField label="Model">
-						<ModelSelect bind:value={modelName} />
-					</SettingsField>
-				</SettingsSection>
-
-				<SettingsSection
-					title="System prompt"
-					description="Specific to this conversation. Pre-filled from your global / per-model prompts; edit to override just here."
-					card
+				<!-- The biggest block in the dialog, for the thing changed least often.
+				     Folded, its summary says whether this conversation departs from the
+				     prompts in Settings, which is the question that used to require
+				     reading seven lines of textarea to answer. -->
+				<Collapsible
+					title={$LL.systemPrompt()}
+					summary={isOverridden ? $LL.overridden() : $LL.fromMySettings()}
 				>
-					{#snippet badge()}
+					<div class="flex flex-col gap-2">
+						<SettingsHint>{$LL.sessionSystemPromptHelp()}</SettingsHint>
+
+						<textarea
+							class="settings-field field-grow min-h-32"
+							rows="5"
+							bind:value={session.systemPrompt.content}
+							oninput={onSystemPromptInput}
+							placeholder={$LL.sessionSystemPromptPlaceholder()}></textarea>
+
 						{#if isOverridden}
-							<SettingsBadge>overridden</SettingsBadge>
-						{/if}
-					{/snippet}
-
-					<textarea
-						class="settings-field field-grow min-h-40"
-						rows="7"
-						bind:value={session.systemPrompt.content}
-						oninput={onSystemPromptInput}
-						placeholder="Instructions for this conversation only…"></textarea>
-
-					{#if isOverridden}
-						<button
-							type="button"
-							class="text-link self-start text-xs hover:underline"
-							onclick={resetSystemPromptToDefault}
-						>
-							Reset to settings default
-						</button>
-					{/if}
-				</SettingsSection>
-
-				<!-- Folded, because a dozen numeric fields would swamp the three things
-				     people open this dialog for. The summary on the closed row is what
-				     makes that safe: it already says whether this conversation departs
-				     from the settings, so opening it is a decision rather than a search. -->
-				<Collapsible title={$LL.sampling()} summary={samplingSummary}>
-					<SettingsHint>{$LL.samplingSessionDescription()}</SettingsHint>
-
-					{#if samplingCfg.editable}
-						<SamplingFields
-							bind:values={session.options}
-							inherited={samplingCfg.value}
-							ollama={isOllama}
-							onChange={onSamplingChange}
-						/>
-
-						{#if overrideCount}
 							<button
 								type="button"
 								class="text-link self-start text-xs hover:underline"
-								onclick={clearSampling}
+								onclick={resetSystemPromptToDefault}
 							>
-								{$LL.samplingSessionReset()}
+								{$LL.resetToSettingsDefault()}
 							</button>
 						{/if}
-					{:else}
-						<!-- Locked means locked everywhere, not only in Settings: a
-						     conversation that could still override would be the same policy
-						     with a hole in it. -->
-						<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
-						<SamplingFields values={samplingCfg.value} ollama={isOllama} disabled />
-					{/if}
+					</div>
+				</Collapsible>
+
+				<!-- One level of folding, not two: the sampling groups fold themselves,
+				     so wrapping them in a fold of their own buried the two fields anybody
+				     actually reaches for. -->
+				<!-- Open on arrival, unlike the prompt above it: it is what people come
+				     to this dialog for, and the two fields at the top of it are the two
+				     they reach for. The groups underneath stay folded. -->
+				<Collapsible title={$LL.sampling()} summary={samplingSummary} open>
+					<div class="flex flex-col gap-2">
+						<SettingsHint>{$LL.samplingSessionDescription()}</SettingsHint>
+
+						{#if samplingCfg.editable}
+							<SamplingFields
+								bind:values={session.options}
+								inherited={samplingCfg.value}
+								ollama={isOllama}
+								onChange={onSamplingChange}
+							/>
+
+							{#if overrideCount}
+								<button
+									type="button"
+									class="text-link self-start text-xs hover:underline"
+									onclick={clearSampling}
+								>
+									{$LL.resetToSettingsDefault()}
+								</button>
+							{/if}
+						{:else}
+							<!-- Locked means locked everywhere, not only in Settings: a
+							     conversation that could still override would be the same policy
+							     with a hole in it. -->
+							<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
+							<SamplingFields values={samplingCfg.value} ollama={isOllama} disabled />
+						{/if}
+					</div>
 				</Collapsible>
 			</div>
 		</div>

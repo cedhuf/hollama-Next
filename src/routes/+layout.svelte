@@ -17,6 +17,7 @@
 	import { page, updated } from '$app/stores';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 	import KnowledgeModal from '$lib/components/KnowledgeModal.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
@@ -401,6 +402,7 @@
 </svelte:head>
 
 <Toasts />
+<ConfirmDialog />
 
 <!-- Global drawer swipe gestures (mobile). -->
 <svelte:window ontouchstart={onTouchStart} ontouchend={onTouchEnd} />

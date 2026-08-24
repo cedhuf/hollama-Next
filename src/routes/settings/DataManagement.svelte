@@ -11,6 +11,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import { APP_SLUG } from '$lib/brand';
 	import Button from '$lib/components/Button.svelte';
+	import { confirmAction } from '$lib/components/ConfirmDialog.svelte';
 	import type { Server } from '$lib/connections';
 	import { repository } from '$lib/data';
 	import { applyBackupToStores, applyToStore } from '$lib/data/applyBackup';
@@ -144,12 +145,17 @@
 		download(JSON.stringify(backup[storageKey] ?? defaults[storageKey]), fileName);
 	}
 
-	function importData(event: Event, storageKey: StorageKey) {
+	async function importData(event: Event, storageKey: StorageKey) {
 		const input = event.target as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
 		const file = input.files[0];
 
-		if (!confirm($LL.areYouSureYouWantToImportData())) {
+		const go = await confirmAction({
+			title: $LL.areYouSureYouWantToImportData(),
+			action: $LL.import(),
+			destructive: true
+		});
+		if (!go) {
 			input.value = ''; // Reset the file input
 			return;
 		}
@@ -179,12 +185,17 @@
 	}
 
 	// Restores every data source from a single backup file.
-	function importBackup(event: Event) {
+	async function importBackup(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
 		const file = input.files[0];
 
-		if (!confirm($LL.areYouSureYouWantToImportData())) {
+		const go = await confirmAction({
+			title: $LL.areYouSureYouWantToImportData(),
+			action: $LL.import(),
+			destructive: true
+		});
+		if (!go) {
 			input.value = '';
 			return;
 		}
@@ -204,7 +215,7 @@
 		reader.readAsText(file);
 	}
 
-	function deleteData(storageKey: StorageKey) {
+	async function deleteData(storageKey: StorageKey) {
 		const confirmMessages: Record<StorageKey, string> = {
 			[StorageKey.Preferences]: $LL.areYouSureYouWantToDeleteAllPreferences(),
 			[StorageKey.Servers]: $LL.areYouSureYouWantToDeleteAllServers(),
@@ -215,10 +226,14 @@
 			[StorageKey.PersonaMemory]: $LL.areYouSureYouWantToDeleteAllPersonaMemory()
 		};
 
-		if (confirm(confirmMessages[storageKey])) {
-			replaceStore[storageKey](defaults[storageKey]);
-			toast.info($LL.deleteSuccess());
-		}
+		const go = await confirmAction({
+			title: confirmMessages[storageKey],
+			action: $LL.delete(),
+			destructive: true
+		});
+		if (!go) return;
+		replaceStore[storageKey](defaults[storageKey]);
+		toast.info($LL.deleteSuccess());
 	}
 
 	let confirmReset = $state(false);

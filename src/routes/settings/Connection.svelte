@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { ChevronDown, KeyRound, LoaderCircle, RefreshCw, Tags, Trash2, X } from '@lucide/svelte';
+	import { ChevronDown, KeyRound, LoaderCircle, RefreshCw, Tags, X } from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import { OpenAIStrategy } from '$lib/chat/openai';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import {
 		ConnectionType,
 		getProvider,
@@ -66,7 +67,6 @@
 
 	let isLoading = $state(false);
 	let showAdvanced = $state(false);
-	let confirmingDelete = $state(false);
 	/** Set once the user chooses to type a new key over a stored one. */
 	let replacingKey = $state(false);
 	// svelte-ignore state_referenced_locally
@@ -444,34 +444,7 @@
 				{/if}
 
 				<div class="ml-auto flex items-center gap-2">
-					{#if confirmingDelete}
-						<span class="text-muted text-xs">{$LL.confirmDeletion()}</span>
-						<button
-							type="button"
-							onclick={onDelete}
-							aria-label={$LL.deleteServer()}
-							class="bg-negative text-shade-0 rounded-md px-2 py-1 text-xs font-medium"
-						>
-							{$LL.delete()}
-						</button>
-						<button
-							type="button"
-							onclick={() => (confirmingDelete = false)}
-							class="text-muted hover:text-active text-xs transition-colors"
-						>
-							{$LL.cancel()}
-						</button>
-					{:else}
-						<button
-							type="button"
-							onclick={() => (confirmingDelete = true)}
-							aria-label={$LL.deleteServer()}
-							class="text-muted hover:text-negative flex items-center gap-1.5 text-xs transition-colors"
-						>
-							<Trash2 class="h-3.5 w-3.5" />
-							{$LL.delete()}
-						</button>
-					{/if}
+					<ButtonConfirm onConfirm={onDelete} label={$LL.deleteServer()} />
 				</div>
 			</div>
 		</div>

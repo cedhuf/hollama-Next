@@ -215,14 +215,6 @@
 	@apply p-4 lg:p-6 xl:p-8;
 }
 
-@utility confirm-deletion {
-	@apply bg-gradient-to-r from-transparent to-red-50;
-
-	&:where([data-color-theme='dark'], [data-color-theme='dark'] *) {
-		@apply bg-gradient-to-r from-transparent to-red-900;
-	}
-}
-
 @utility confirm-editing {
 	@apply bg-gradient-to-r from-transparent to-amber-50;
 

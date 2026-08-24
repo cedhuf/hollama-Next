@@ -11,7 +11,6 @@
 		Plus,
 		RotateCcw,
 		Store,
-		Trash2,
 		Upload
 	} from '@lucide/svelte';
 	import { tick } from 'svelte';
@@ -19,6 +18,8 @@
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
+	import { confirmAction } from '$lib/components/ConfirmDialog.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
@@ -74,7 +75,6 @@
 	let renamingId = $state<string | null>(null);
 	let draftName = $state('');
 	let nameField = $state<HTMLInputElement | null>(null);
-	let confirmingDeleteId = $state<string | null>(null);
 
 	const isCollapsed = (id: string) => ($settingsStore.collapsedCollections ?? []).includes(id);
 
@@ -127,7 +127,6 @@
 	/** Deletes the grouping only: its knowledge comes back to the top level. */
 	function removeCollection(id: string) {
 		deleteCollection(id);
-		confirmingDeleteId = null;
 	}
 
 	/**
@@ -169,7 +168,10 @@
 		if (!entry) return;
 		if (
 			personaState(persona, entry.contentDigest) !== 'outdated' &&
-			!confirm($LL.personaStoreUpdateConfirm({ name: persona.name }))
+			!(await confirmAction({
+				title: $LL.personaStoreUpdateConfirm({ name: persona.name }),
+				action: $LL.personaStoreUpdate()
+			}))
 		) {
 			return;
 		}
@@ -679,52 +681,26 @@
 							</button>
 						{/if}
 
-						{#if confirmingDeleteId === collection.id}
-							<!-- Says what survives, because "delete the folder" reads as "delete
-							     what is in it" to most people, and here it does not. -->
-							<span class="text-muted ml-auto flex items-center gap-2 text-xs">
-								<span class="hidden sm:inline">
-									{$LL.deleteCollectionConfirm({ name: collection.name })}
-								</span>
-								<button
-									type="button"
-									onclick={() => removeCollection(collection.id)}
-									class="text-negative font-medium transition-opacity hover:opacity-80"
-								>
-									{$LL.delete()}
-								</button>
-								<button
-									type="button"
-									onclick={() => (confirmingDeleteId = null)}
-									class="hover:text-active transition-colors"
-								>
-									{$LL.cancel()}
-								</button>
-							</span>
-						{:else}
-							<div
-								class="text-muted ml-auto flex shrink-0 items-center gap-0.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/section:opacity-100"
+						<div
+							class="text-muted ml-auto flex shrink-0 items-center gap-0.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/section:opacity-100"
+						>
+							<button
+								type="button"
+								onclick={() => startRenaming(collection.id, collection.name)}
+								title={$LL.rename()}
+								aria-label={$LL.rename()}
+								class="hover:text-active rounded p-1 transition-colors"
 							>
-								<button
-									type="button"
-									onclick={() => startRenaming(collection.id, collection.name)}
-									title={$LL.rename()}
-									aria-label={$LL.rename()}
-									class="hover:text-active rounded p-1 transition-colors"
-								>
-									<Pencil class="h-3.5 w-3.5" />
-								</button>
-								<button
-									type="button"
-									onclick={() => (confirmingDeleteId = collection.id)}
-									title={$LL.delete()}
-									aria-label={$LL.delete()}
-									class="hover:text-negative rounded p-1 transition-colors"
-								>
-									<Trash2 class="h-3.5 w-3.5" />
-								</button>
-							</div>
-						{/if}
+								<Pencil class="h-3.5 w-3.5" />
+							</button>
+							<!-- What survives is on the tooltip: "delete the folder" reads as
+							     "delete what is in it" to most people, and here it does not. -->
+							<ButtonConfirm
+								compact
+								onConfirm={() => removeCollection(collection.id)}
+								label={$LL.deleteCollectionConfirm({ name: collection.name })}
+							/>
+						</div>
 					</div>
 
 					{#if !collapsed}

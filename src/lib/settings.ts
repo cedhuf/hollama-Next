@@ -169,7 +169,6 @@ export interface Settings {
 	homeRecentPersonasCount: number;
 	/** A strip of the latest pictures on the home screen, and how many it holds. */
 	homeShowRecentImages: boolean;
-	homeRecentImagesCount: number;
 	homeShowRecentSessions: boolean;
 	homeRecentSessionsCount: number;
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
@@ -329,7 +328,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentPersonas: true,
 	homeRecentPersonasCount: 3,
 	homeShowRecentImages: true,
-	homeRecentImagesCount: 8,
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,

@@ -677,10 +677,6 @@ type RootTranslation = {
 	 */
 	knowledgeDeleted: string
 	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​t​h​i​s​ ​k​n​o​w​l​e​d​g​e​?
-	 */
-	areYouSureYouWantToDeleteThisKnowledge: string
-	/**
 	 * K​n​o​w​l​e​d​g​e​ ​s​a​v​e​d
 	 */
 	knowledgeSaved: string
@@ -992,10 +988,6 @@ type RootTranslation = {
 	 */
 	samplingSessionDescription: string
 	/**
-	 * U​s​e​ ​m​y​ ​s​e​t​t​i​n​g​s​ ​f​o​r​ ​e​v​e​r​y​t​h​i​n​g
-	 */
-	samplingSessionReset: string
-	/**
 	 * {​c​o​u​n​t​}​ ​f​i​e​l​d​{​{​s​}​}​ ​s​e​t
 	 * @param {number} count
 	 */
@@ -1077,6 +1069,38 @@ type RootTranslation = {
 	 */
 	system: string
 	/**
+	 * C​o​n​v​e​r​s​a​t​i​o​n​ ​s​e​t​t​i​n​g​s
+	 */
+	conversationSettings: string
+	/**
+	 * T​i​t​l​e
+	 */
+	conversationTitle: string
+	/**
+	 * M​o​d​e​l
+	 */
+	model: string
+	/**
+	 * S​p​e​c​i​f​i​c​ ​t​o​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​ ​P​r​e​-​f​i​l​l​e​d​ ​f​r​o​m​ ​y​o​u​r​ ​g​l​o​b​a​l​ ​a​n​d​ ​p​e​r​-​m​o​d​e​l​ ​p​r​o​m​p​t​s​;​ ​e​d​i​t​ ​t​o​ ​o​v​e​r​r​i​d​e​ ​i​t​ ​h​e​r​e​ ​o​n​l​y​.
+	 */
+	sessionSystemPromptHelp: string
+	/**
+	 * I​n​s​t​r​u​c​t​i​o​n​s​ ​f​o​r​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​o​n​l​y
+	 */
+	sessionSystemPromptPlaceholder: string
+	/**
+	 * o​v​e​r​r​i​d​d​e​n
+	 */
+	overridden: string
+	/**
+	 * B​a​c​k​ ​t​o​ ​m​y​ ​s​e​t​t​i​n​g​s
+	 */
+	resetToSettingsDefault: string
+	/**
+	 * f​r​o​m​ ​m​y​ ​s​e​t​t​i​n​g​s
+	 */
+	fromMySettings: string
+	/**
 	 * S​y​s​t​e​m​ ​p​r​o​m​p​t
 	 */
 	systemPrompt: string
@@ -1106,10 +1130,6 @@ type RootTranslation = {
 	 * T​y​p​i​c​a​l​ ​P
 	 */
 	typicalP: string
-	/**
-	 * Y​o​u​ ​h​a​v​e​ ​u​n​s​a​v​e​d​ ​c​h​a​n​g​e​s​ ​t​h​a​t​ ​w​i​l​l​ ​b​e​ ​l​o​s​t​.​ ​C​o​n​t​i​n​u​e​?
-	 */
-	unsavedChangesWillBeLost: string
 	/**
 	 * U​s​e​ ​M​L​O​C​K
 	 */
@@ -1570,10 +1590,6 @@ type RootTranslation = {
 	 * P​l​a​y​b​o​o​k​ ​d​e​l​e​t​e​d
 	 */
 	playbookDeleted: string
-	/**
-	 * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​d​e​l​e​t​e​ ​t​h​i​s​ ​p​l​a​y​b​o​o​k​?
-	 */
-	areYouSureYouWantToDeleteThisPlaybook: string
 	/**
 	 * P​i​n​n​e​d
 	 */
@@ -2541,7 +2557,7 @@ type RootTranslation = {
 	 */
 	tourKnowledgeItem3: string
 	/**
-	 * L​a​t​e​s​t​ ​i​m​a​g​e​s
+	 * G​e​n​e​r​a​t​e​d​ ​i​m​a​g​e​s
 	 */
 	recentImages: string
 	/**
@@ -4299,10 +4315,6 @@ export type TranslationFunctions = {
 	 */
 	knowledgeDeleted: () => LocalizedString
 	/**
-	 * Are you sure you want to delete this knowledge?
-	 */
-	areYouSureYouWantToDeleteThisKnowledge: () => LocalizedString
-	/**
 	 * Knowledge saved
 	 */
 	knowledgeSaved: () => LocalizedString
@@ -4611,10 +4623,6 @@ export type TranslationFunctions = {
 	 */
 	samplingSessionDescription: () => LocalizedString
 	/**
-	 * Use my settings for everything
-	 */
-	samplingSessionReset: () => LocalizedString
-	/**
 	 * {count} field{{s}} set
 	 */
 	samplingFieldCount: (arg: { count: number }) => LocalizedString
@@ -4695,6 +4703,38 @@ export type TranslationFunctions = {
 	 */
 	system: () => LocalizedString
 	/**
+	 * Conversation settings
+	 */
+	conversationSettings: () => LocalizedString
+	/**
+	 * Title
+	 */
+	conversationTitle: () => LocalizedString
+	/**
+	 * Model
+	 */
+	model: () => LocalizedString
+	/**
+	 * Specific to this conversation. Pre-filled from your global and per-model prompts; edit to override it here only.
+	 */
+	sessionSystemPromptHelp: () => LocalizedString
+	/**
+	 * Instructions for this conversation only
+	 */
+	sessionSystemPromptPlaceholder: () => LocalizedString
+	/**
+	 * overridden
+	 */
+	overridden: () => LocalizedString
+	/**
+	 * Back to my settings
+	 */
+	resetToSettingsDefault: () => LocalizedString
+	/**
+	 * from my settings
+	 */
+	fromMySettings: () => LocalizedString
+	/**
 	 * System prompt
 	 */
 	systemPrompt: () => LocalizedString
@@ -4722,10 +4762,6 @@ export type TranslationFunctions = {
 	 * Typical P
 	 */
 	typicalP: () => LocalizedString
-	/**
-	 * You have unsaved changes that will be lost. Continue?
-	 */
-	unsavedChangesWillBeLost: () => LocalizedString
 	/**
 	 * Use MLOCK
 	 */
@@ -5176,10 +5212,6 @@ export type TranslationFunctions = {
 	 * Playbook deleted
 	 */
 	playbookDeleted: () => LocalizedString
-	/**
-	 * Are you sure you want to delete this playbook?
-	 */
-	areYouSureYouWantToDeleteThisPlaybook: () => LocalizedString
 	/**
 	 * Pinned
 	 */
@@ -6129,7 +6161,7 @@ export type TranslationFunctions = {
 	 */
 	tourKnowledgeItem3: () => LocalizedString
 	/**
-	 * Latest images
+	 * Generated images
 	 */
 	recentImages: () => LocalizedString
 	/**

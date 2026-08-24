@@ -4,11 +4,12 @@
 	import { fly } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
-	import { beforeNavigate } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { Conversation, type QueryEntry } from '$lib/chat/conversation.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonDelete from '$lib/components/ButtonDelete.svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Menu from '$lib/components/Menu.svelte';
@@ -16,9 +17,9 @@
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import RefusalDialog from '$lib/components/RefusalDialog.svelte';
 	import SessionMenu from '$lib/components/SessionMenu.svelte';
-	import { personasStore, settingsStore } from '$lib/localStorage';
+	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { unbindPersonaSession } from '$lib/personas';
 	import { resolveSessionTitle } from '$lib/sessions';
-	import { Sitemap } from '$lib/sitemap';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { formatTimestampToNow, isTouchPrimary } from '$lib/utils';
 
@@ -50,6 +51,13 @@
 	let messagesWindow: HTMLDivElement | undefined = $state();
 	let userScrolledUp = $state(false);
 	let shouldConfirmDeletion = $state(false);
+
+	/** What the delete button on this page does, now that the button itself does not. */
+	function deleteSession() {
+		sessionsStore.remove(chat.session.id);
+		unbindPersonaSession(chat.session.id);
+		void goto(resolve('/sessions'));
+	}
 	let sessionModalOpen = $state(false);
 
 	/**
@@ -199,24 +207,17 @@
 		void chat.open(data.session, { pending, query, atBottom: searchMatchIndex === null });
 	}
 
-	beforeNavigate((navigation) => {
+	beforeNavigate(() => {
 		// Leaving never abandons a turn any more: it runs in the server, it is
 		// written down there as it goes, and it is waiting when the conversation is
 		// opened again. So there is nothing to ask about, and leaving only stops
 		// watching.
 		chat.detach();
 
-		// Only show confirmation when navigating outside of /sessions/ path
-		if (
-			chat.editor.prompt &&
-			chat.editor.prompt.trim() !== '' &&
-			!navigation.to?.url.pathname.startsWith('/sessions/')
-		) {
-			const userConfirmed = confirm($LL.unsavedChangesWillBeLost());
-			if (!userConfirmed) {
-				navigation.cancel();
-			}
-		}
+		// And nothing is lost by leaving either: what is in the composer is written
+		// down on every keystroke, per conversation, and is there again when this one
+		// is reopened. The warning that used to stand here dated from when it was
+		// not, and it was the browser's own box asking it.
 	});
 
 	/**
@@ -340,7 +341,7 @@
 </script>
 
 {#snippet topBar(floating: boolean)}
-	<Header confirmDeletion={shouldConfirmDeletion} {floating}>
+	<Header {floating}>
 		{#snippet headline()}
 			{#if persona}
 				<!-- Persona identity, laid out like the classic title/meta pair: avatar + name,
@@ -408,10 +409,15 @@
 				</div>
 			{/if}
 			{#if !chat.editor.isNewSession}
-				{#if !shouldConfirmDeletion}
-					<ButtonCopyConversation session={chat.session} assistantLabel={persona?.name} />
-				{/if}
-				<ButtonDelete sitemap={Sitemap.SESSIONS} id={chat.session.id} bind:shouldConfirmDeletion />
+				<!-- Nothing moves while the question stands: the button says so itself
+				     now, so the bar no longer turns red and its neighbour no longer
+				     disappears out from under the pointer. -->
+				<ButtonCopyConversation session={chat.session} assistantLabel={persona?.name} />
+				<ButtonConfirm
+					bind:armed={shouldConfirmDeletion}
+					onConfirm={deleteSession}
+					label={$LL.deleteSession()}
+				/>
 			{/if}
 		{/snippet}
 
@@ -419,7 +425,11 @@
 		     answer, rather than asking somewhere else: there is nowhere else. -->
 		{#snippet compact()}
 			{#if shouldConfirmDeletion}
-				<ButtonDelete sitemap={Sitemap.SESSIONS} id={chat.session.id} bind:shouldConfirmDeletion />
+				<ButtonConfirm
+					bind:armed={shouldConfirmDeletion}
+					onConfirm={deleteSession}
+					label={$LL.deleteSession()}
+				/>
 			{:else}
 				<button
 					type="button"

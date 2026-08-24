@@ -17,11 +17,13 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Head from '$lib/components/Head.svelte';
+	import ImageViewer from '$lib/components/ImageViewer.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
+	import type { GeneratedImage } from '$lib/generatedImages';
 	import { canDrawImages, imagesStore, imageUrl } from '$lib/images';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas, launchPersona, type Persona } from '$lib/personas';
@@ -133,10 +135,18 @@
 		shownCategory ? suggestionsByCategory[shownCategory] || [] : []
 	);
 
-	/** The newest few, as many as the slider asks for. */
-	const recentImages = $derived(
-		$imagesStore.slice(0, Math.max(1, $settingsStore.homeRecentImagesCount))
-	);
+	/**
+	 * All of them, newest first.
+	 *
+	 * The strip used to stop at a number set by a slider, which meant the row was
+	 * a sample of the gallery rather than the gallery. It scrolls sideways and
+	 * every thumbnail loads lazily, so the count costs a row of `<img>` tags that
+	 * fetch nothing until they are scrolled into view.
+	 */
+	const recentImages = $derived($imagesStore);
+
+	/** The picture the strip has open, in the viewer the gallery uses. */
+	let openedImage = $state<GeneratedImage | null>(null);
 
 	const recentSessions = $derived(
 		($sessionsStore ?? []).slice(0, $settingsStore.homeRecentSessionsCount)
@@ -326,7 +336,11 @@
 					</h2>
 
 					{#if recentImages.length > 0}
-						<div class="flex items-center gap-3">
+						<!-- The button floats over the strip rather than taking a column beside
+						     it. Reserving 36 pixels for it left a block of plain background
+						     interrupting the row, which read as a hole in the pictures rather
+						     than as a control's neighbourhood. -->
+						<div class="relative flex items-center">
 							<!-- `min-w-0` so the strip can be narrower than its content, which is
 							     what lets it scroll rather than push the button off the row.
 
@@ -334,8 +348,17 @@
 							     out, and under a row of 64px thumbnails it is a grey line drawn
 							     permanently across the section. A thumbnail cut off at the edge
 							     already says there is more to the right. -->
-							<div class="overflow-quiet min-w-0 flex-1 overflow-y-hidden">
-								<div class="flex w-max gap-2">
+							<!-- The last stretch dissolves instead of stopping at an edge, which
+							     gives the button something quiet to sit on and says the row goes on.
+							     A mask rather than a gradient in the page's colour: it fades to
+							     nothing, so it is right over a wallpaper as well as over a plain
+							     background. -->
+							<div
+								class="overflow-quiet min-w-0 flex-1 overflow-y-hidden [mask-image:linear-gradient(to_right,black_calc(100%-4.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-4.5rem),transparent)]"
+							>
+								<!-- Room at the end so the last thumbnail can be scrolled clear of
+								     the button instead of stopping under it. -->
+								<div class="flex w-max gap-2 pr-16">
 									{#each recentImages as image (image.id)}
 										<!-- The app's own tooltip rather than the browser's: a strip of
 										     thumbnails is unreadable without one, and a `title` attribute
@@ -343,9 +366,14 @@
 										     the operating system instead of by the app. -->
 										<Tooltip side="bottom">
 											{#snippet trigger({ props })}
-												<a
+												<!-- Opens the picture here, over the home page. Sending people to
+												     the gallery to see what they had already clicked would make the
+												     button at the end of the strip pointless, and that button is the
+												     way to the page. -->
+												<button
 													{...props}
-													href={resolve('/images')}
+													type="button"
+													onclick={() => (openedImage = image)}
 													class="group border-shade-3 bg-shade-0 relative block h-16 w-16 shrink-0 overflow-hidden rounded-lg border"
 												>
 													<img
@@ -354,7 +382,7 @@
 														loading="lazy"
 														class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
 													/>
-												</a>
+												</button>
 											{/snippet}
 											{image.title || image.sentPrompt || image.prompt}
 										</Tooltip>
@@ -374,7 +402,7 @@
 								href={resolve('/images')}
 								title={$LL.images()}
 								aria-label={$LL.images()}
-								class="border-shade-3 text-muted hover:border-accent hover:text-accent flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border transition-colors"
+								class="border-shade-3 text-muted hover:border-accent hover:text-accent absolute top-1/2 right-0 flex h-9 w-9 shrink-0 -translate-y-1/2 items-center justify-center rounded-full border bg-transparent backdrop-blur-sm transition-colors"
 							>
 								<ArrowRight class="h-4 w-4" />
 							</a>
@@ -423,3 +451,6 @@
 		</div>
 	</div>
 </div>
+
+<!-- The gallery's own viewer, opened from the strip above. -->
+<ImageViewer bind:image={openedImage} />

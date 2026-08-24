@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
+	import { confirmAction } from '$lib/components/ConfirmDialog.svelte';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import StoreModal from '$lib/components/StoreModal.svelte';
 	import { personasStore, playbooksStore, settingsStore } from '$lib/localStorage';
@@ -104,7 +105,15 @@
 			(row) => row.id === persona.source?.id || row.name.trim() === persona.name.trim()
 		);
 		if (!entry) return;
-		if (ask && !confirm($LL.personaStoreUpdateConfirm({ name: persona.name }))) return;
+		if (
+			ask &&
+			!(await confirmAction({
+				title: $LL.personaStoreUpdateConfirm({ name: persona.name }),
+				action: $LL.personaStoreUpdate()
+			}))
+		) {
+			return;
+		}
 
 		const bundle = await fetchBundle(entry);
 		applyBundleToPersona(persona, bundle, {
@@ -158,7 +167,15 @@
 			(row) => row.id === playbook.source?.id
 		);
 		if (!entry) return;
-		if (ask && !confirm($LL.personaStoreUpdateConfirm({ name: playbook.name }))) return;
+		if (
+			ask &&
+			!(await confirmAction({
+				title: $LL.personaStoreUpdateConfirm({ name: playbook.name }),
+				action: $LL.personaStoreUpdate()
+			}))
+		) {
+			return;
+		}
 
 		const bundle = await fetchPlaybookBundle(entry);
 		applyBundleToPlaybook(playbook, bundle, {

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Trash2 } from '@lucide/svelte';
+	import { Eraser, Trash2 } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EditorModal from '$lib/components/EditorModal.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
@@ -23,7 +24,6 @@
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsHint from '../settings/SettingsHint.svelte';
-	import SettingsLink from '../settings/SettingsLink.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
 
 	interface Props {
@@ -71,7 +71,6 @@
 	}
 
 	function forgetEverything() {
-		if (!confirm($LL.memoryForgetAllConfirm({ name: persona.name || 'this persona' }))) return;
 		saveMemory({ ...memory, profile: '', notes: [] });
 	}
 
@@ -128,7 +127,6 @@
 	}
 
 	function remove() {
-		if (!confirm(`Delete “${persona.name.trim() || 'this persona'}”?`)) return;
 		const wasShared = persona.shared;
 		deletePersona(persona.id);
 		// Deleting a shared persona has to stop offering it too, or it lingers in
@@ -282,7 +280,14 @@
 						</div>
 					{/each}
 				</div>
-				<SettingsLink onclick={forgetEverything}>{$LL.memoryForgetAll()}</SettingsLink>
+				<!-- Same two-click answer as everywhere else, rather than the browser's
+				     own box: forgetting every note is a deletion like the others. -->
+				<ButtonConfirm
+					onConfirm={forgetEverything}
+					icon={Eraser}
+					text={$LL.memoryForgetAll()}
+					label={$LL.memoryForgetAllConfirm({ name: persona.name || '' })}
+				/>
 			{:else}
 				<SettingsHint>{$LL.memoryNoNotes()}</SettingsHint>
 			{/if}

@@ -112,7 +112,6 @@
 	}
 
 	function remove() {
-		if (!confirm($LL.areYouSureYouWantToDeleteThisKnowledge())) return;
 		knowledgeStore.remove(id);
 		toast.info($LL.knowledgeDeleted());
 		$knowledgeModalOpen = false;

@@ -83,7 +83,6 @@
 	}
 
 	function remove() {
-		if (!confirm($LL.areYouSureYouWantToDeleteThisPlaybook())) return;
 		deletePlaybook(playbook.id);
 		if (playbook.shared) void publishSharedPlaybooks();
 		toast.info($LL.playbookDeleted());

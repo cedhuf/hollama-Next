@@ -44,7 +44,18 @@
 </script>
 
 <Tooltip.Provider>
-	<Tooltip.Root delayDuration={200} bind:open disableCloseOnTriggerClick={keepOpenOnTriggerClick}>
+	<!-- `ignoreNonKeyboardFocus`, and it is not a detail. A trigger that opens a
+	     dialog gets the focus back when the dialog closes, because that is what a
+	     dialog does; without this the tooltip reads that as "focused" and reopens
+	     itself over a page nobody is pointing at, staying until the pointer is moved
+	     away and back. Keyboard focus still opens it, which is the case the
+	     behaviour exists for. -->
+	<Tooltip.Root
+		delayDuration={200}
+		ignoreNonKeyboardFocus
+		bind:open
+		disableCloseOnTriggerClick={keepOpenOnTriggerClick}
+	>
 		<Tooltip.Trigger>
 			{#snippet child({ props })}
 				{@render trigger({ props })}

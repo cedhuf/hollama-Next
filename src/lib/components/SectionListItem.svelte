@@ -3,12 +3,15 @@
 	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { settingsStore } from '$lib/localStorage';
+	import { knowledgeStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { unbindPersonaSession } from '$lib/personas';
 	import { toggleSessionPin } from '$lib/sessions';
 	import { Sitemap } from '$lib/sitemap';
 
-	import ButtonDelete from './ButtonDelete.svelte';
+	import ButtonConfirm from './ButtonConfirm.svelte';
 	import { generateNewUrl } from './ButtonNew';
 	import ContextMenu from './ContextMenu.svelte';
 	import MenuItem from './MenuItem.svelte';
@@ -28,6 +31,24 @@
 	let isDeleting = $state(false);
 
 	const isSession = $derived(sitemap === Sitemap.SESSIONS);
+
+	/**
+	 * Removing the record this row stands for.
+	 *
+	 * It lives here rather than inside the button: a button that reaches into the
+	 * stores can only ever delete the two kinds somebody remembered to write into
+	 * its switch, which is exactly what the old one did. The row already knows what
+	 * it is listing.
+	 */
+	function remove() {
+		if (sitemap === Sitemap.KNOWLEDGE) {
+			knowledgeStore.remove(id);
+			return;
+		}
+		sessionsStore.remove(id);
+		unbindPersonaSession(id);
+		void goto(resolve('/sessions'));
+	}
 	const isActive = $derived(page.url.pathname.includes(id));
 
 	/**
@@ -98,7 +119,12 @@
 							? ''
 							: 'opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100'}"
 					>
-						<ButtonDelete {sitemap} {id} compact bind:shouldConfirmDeletion={isDeleting} />
+						<ButtonConfirm
+							compact
+							bind:armed={isDeleting}
+							onConfirm={remove}
+							label={sitemap === Sitemap.KNOWLEDGE ? $LL.deleteKnowledge() : $LL.deleteSession()}
+						/>
 					</div>
 				{/if}
 			</div>

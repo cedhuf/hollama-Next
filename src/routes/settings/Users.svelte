@@ -1,14 +1,5 @@
 <script lang="ts">
-	import {
-		ChevronDown,
-		Info,
-		Plus,
-		RotateCcw,
-		Trash2,
-		TriangleAlert,
-		Wallet,
-		X
-	} from '@lucide/svelte';
+	import { ChevronDown, Info, Plus, RotateCcw, TriangleAlert, Wallet, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -16,6 +7,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -179,7 +171,6 @@
 	}
 
 	async function removeUser(id: string) {
-		if (!confirm($LL.deleteUserConfirm())) return;
 		await api(`/api/admin/users/${id}`, 'DELETE');
 		await load();
 	}
@@ -285,9 +276,7 @@
 					<span class="text-muted ml-auto shrink-0 text-[11px] tabular-nums">
 						{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
 					</span>
-					<Button variant="icon" onclick={() => removeUser(user.id)}>
-						<Trash2 class="base-icon" />
-					</Button>
+					<ButtonConfirm onConfirm={() => removeUser(user.id)} label={$LL.deleteUserConfirm()} />
 				</div>
 
 				<!-- What they have spent this period, and what they may. An empty field

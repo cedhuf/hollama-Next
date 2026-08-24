@@ -4,7 +4,6 @@
 	import SidebarToggle from './SidebarToggle.svelte';
 
 	interface Props {
-		confirmDeletion?: boolean;
 		/**
 		 * A pill hovering over the conversation rather than the column's top edge.
 		 *
@@ -37,7 +36,7 @@
 		compact?: Snippet;
 	}
 
-	let { confirmDeletion = false, floating = false, headline, nav, compact }: Props = $props();
+	let { floating = false, headline, nav, compact }: Props = $props();
 </script>
 
 <!-- One header bar everywhere: same design on mobile and desktop, for classic
@@ -69,9 +68,7 @@
 				<SidebarToggle variant="floating" />
 
 				<div
-					class="surface-floating border-shade-3 pointer-events-auto flex h-12 items-center gap-1 rounded-full border px-1.5 shadow-lg [--surface-tint:66%] {confirmDeletion
-						? 'confirm-deletion'
-						: ''}"
+					class="surface-floating border-shade-3 pointer-events-auto flex h-12 items-center gap-1 rounded-full border px-1.5 shadow-lg [--surface-tint:66%]"
 				>
 					{@render compact()}
 				</div>
@@ -81,7 +78,7 @@
 		<header
 			class="surface-floating border-shade-3 pointer-events-auto h-16 w-full items-center justify-between rounded-full border px-5 text-xs shadow-lg [--surface-tint:66%] {compact
 				? 'hidden lg:flex'
-				: 'flex'} {confirmDeletion ? 'confirm-deletion' : ''}"
+				: 'flex'}"
 		>
 			{@render contents()}
 		</header>
@@ -91,9 +88,7 @@
 	     bar and its height grows by as much, rather than the whole thing being pushed
 	     down and leaving a strip of something else above it. -->
 	<header
-		class="surface-chrome flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))] max-lg:pt-[env(safe-area-inset-top)] {confirmDeletion
-			? 'confirm-deletion'
-			: ''}"
+		class="surface-chrome flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))] max-lg:pt-[env(safe-area-inset-top)]"
 	>
 		{@render contents()}
 	</header>
