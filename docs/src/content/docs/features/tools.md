@@ -65,7 +65,7 @@ The tool refuses private, loopback and link-local addresses, including the cloud
 and re-checks every redirect hop. An instance open to people you do not know still deserves
 `FETCH_ALLOWED_ORIGINS`. See [Security](/guides/security/).
 
-An admin can turn it off for everyone, and `/api/fetch` enforces that itself rather than the
+An admin can turn it off for everyone, and the turn enforces that itself rather than the
 interface merely hiding the button.
 
 ## Interactive choices

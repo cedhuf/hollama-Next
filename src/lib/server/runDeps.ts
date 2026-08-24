@@ -13,7 +13,7 @@ import { ConnectionType, type Server } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { getSettings } from '$lib/server/db/collections';
 import { getServer, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
-import { fetchPage } from '$lib/server/fetchPage';
+import { allowedFetchOrigins, fetchPage } from '$lib/server/fetchPage';
 import { policeChatBody, PolicyError, type ChatBody } from '$lib/server/llmPolicy';
 import { serverMemory } from '$lib/server/personaMemoryAccess';
 import { webSearch, type SearchTarget } from '$lib/server/search';
@@ -182,7 +182,10 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 			const pages: { title: string; url: string; text: string }[] = [];
 			for (const url of wanted) {
 				try {
-					const page = await fetchPage(url, limits.maxChars);
+					// The allow-list, which this path used to skip: it was applied only by
+					// the browser-facing route, so the setting restricted the caller that
+					// no longer exists and never the turn that actually reads the page.
+					const page = await fetchPage(url, limits.maxChars, allowedFetchOrigins());
 					pages.push({ title: page.title, url: page.url, text: page.text });
 				} catch {
 					// One unreachable page must not cost the others, exactly as the

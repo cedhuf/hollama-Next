@@ -103,7 +103,7 @@ export interface Settings {
 	 * self-hosted OpenAI-compatible server that supports it without any way to say so.
 	 */
 	nativeTools: 'off' | 'auto' | 'force';
-	/** Read the pages a message links to. Enforced server-side by `/api/fetch`. */
+	/** Read the pages a message links to. Enforced server-side, inside the turn. */
 	webFetchEnabled: boolean;
 	webFetchByDefault: boolean;
 	webFetchMaxPages: number;

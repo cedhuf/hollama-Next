@@ -218,13 +218,6 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
-  /api/fetch:
-    post:
-      tags: [fetch]
-      summary: TODO
-      x-status: todo
-      responses:
-        '200': { description: TODO }
   /api/fetch/config:
     get:
       tags: [fetch]
@@ -365,13 +358,6 @@ paths:
         A finished run replays its log and closes.
       responses:
         '200': { description: A text/event-stream of run events. }
-  /api/search:
-    get:
-      tags: [search]
-      summary: TODO
-      x-status: todo
-      responses:
-        '200': { description: TODO }
   /api/search/config:
     get:
       tags: [search]

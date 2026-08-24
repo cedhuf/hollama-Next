@@ -154,8 +154,9 @@
 				</SettingsField>
 			{/if}
 		{:else}
-			<!-- Locked by the admin: `/api/fetch` applies the same policy, so this is
-			     a statement of fact rather than a disabled control. -->
+			<!-- Locked by the admin: the run applies the same policy when it resolves
+			     its tools, so this is a statement of fact rather than a disabled
+			     control. -->
 			<div class="flex items-center gap-2">
 				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 				<span class="text-muted text-xs">

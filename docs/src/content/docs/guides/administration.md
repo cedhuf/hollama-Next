@@ -176,7 +176,7 @@ counter that restarts at zero.
 ## Sharing is enforced, not suggested
 
 This is the part worth trusting. Shared tools, model allow-lists and locked prompts are applied in
-the endpoints, `/api/fetch` and `/api/llm`, not only in the interface. A hand-crafted request from a
+the server, when a turn resolves its tools and when it reaches a provider, not only in the interface. A hand-crafted request from a
 signed-in user is policed exactly like the app's own.
 
 Locked prompt rewrites are checked when a turn starts, in `/api/runs`, against the account that

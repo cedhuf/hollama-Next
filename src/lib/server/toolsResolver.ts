@@ -4,8 +4,9 @@ import type { Settings } from '$lib/settings';
 /**
  * Which tools a user may use, and with what limits.
  *
- * Enforced where it is decided: `/api/fetch` calls `resolveTools` itself and
- * refuses, so turning a tool off is a real boundary rather than a hidden button.
+ * Enforced where it is decided: the run resolves the tools it may offer through
+ * here, so turning a tool off is a real boundary rather than a hidden button. The
+ * browser is never asked, and never believed.
  * The shared models and the locked prompt are policed the same way, in
  * `llmPolicy`.
  */

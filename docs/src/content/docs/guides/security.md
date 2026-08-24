@@ -32,7 +32,7 @@ hidden in the interface.
 ## Sharing is enforced server-side
 
 Shared tools, shared model allow-lists and locked instance prompts are applied in the endpoints
-(`/api/fetch`, `/api/llm`), not only in the interface. A hand-crafted request is policed the same
+(the turn that resolves them, and `/api/llm`), not only in the interface. A hand-crafted request is policed the same
 way the app's own is.
 
 A locked instance prompt is guaranteed **present** rather than exclusive: it is prepended in the

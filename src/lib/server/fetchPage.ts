@@ -1,6 +1,7 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
+import { env } from '$env/dynamic/private';
 import { APP_NAME } from '$lib/brand';
 
 /**
@@ -155,6 +156,21 @@ async function readCapped(response: Response): Promise<string> {
  * Redirects are followed by hand so each hop can be checked: `redirect: 'follow'`
  * would let a public host bounce the request to a private one.
  */
+/**
+ * The hosts this instance will fetch, or none named and therefore any public one.
+ *
+ * Read here rather than by each caller, because it is a security control and a
+ * control applied by whoever remembers to pass it is not a control. It used to
+ * live in the browser-facing route, which meant the setting was honoured on the
+ * one path nothing used and ignored on the path that actually reads pages.
+ */
+export function allowedFetchOrigins(): string[] {
+	return (env.FETCH_ALLOWED_ORIGINS ?? '')
+		.split(',')
+		.map((origin) => origin.trim())
+		.filter(Boolean);
+}
+
 export async function fetchPage(
 	target: string,
 	maxChars: number,
