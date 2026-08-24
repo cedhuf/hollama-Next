@@ -54,14 +54,29 @@ The per-conversation reasoning toggle appears for the endpoints that can actuall
 Hosted OpenAI and Claude reject unknown body fields, so the toggle is not offered there. Their
 reasoning models still reason; they simply decide it themselves.
 
-## Ollama specifics
+## Model parameters
 
-Ollama models can be pulled from inside the app, and Ollama conversations expose the advanced
-parameters (`num_ctx` among them).
+Temperature, top-p, seed, stop sequences, the penalties and a token ceiling are set in _Settings,
+Chat_, and any conversation can override them from its own settings. They go to every provider now.
+They used to reach Ollama and nowhere else, so a temperature set on a hosted model quietly did
+nothing.
+
+A second group only Ollama understands (`top_k`, `min_p`, `mirostat` and friends) sits in its own
+subsection and says so. It is not sent elsewhere on purpose: a provider that does not know a field
+answers 400 rather than ignoring it.
 
 `num_ctx` is worth setting: it is the one case where Llooma knows the model's real context window,
-which makes the [load meter](/features/compaction/) exact instead of measuring against the
-threshold you guessed.
+which makes the [load meter](/features/compaction/) exact instead of measuring against the threshold
+you guessed.
+
+## Ollama specifics
+
+Ollama models can be pulled from inside the app.
+
+How Ollama loads a model, the GPU and thread counts, memory mapping and the rest, belongs to the
+connection rather than to a conversation, so it is set once under _Advanced_ on the connection. Each
+one has three positions and starts on _Auto_, which leaves the decision to Ollama. That matters more
+than it sounds: `use_mmap` is on by default there, so "off" and "not set" are different answers.
 
 ## How requests travel
 

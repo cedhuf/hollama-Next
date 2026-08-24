@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { LOAD_BOOLEAN_KEYS, LOAD_NUMBER_KEYS, type LoadOptions } from '$lib/chat/options';
-	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import type { Server } from '$lib/connections';
 
 	import SettingsField from './SettingsField.svelte';
@@ -45,11 +45,6 @@
 		use_mlock: $LL.useMlock()
 	});
 
-	function write(patch: LoadOptions) {
-		server.loadOptions = { ...options, ...patch };
-		onChange();
-	}
-
 	/**
 	 * A blank field means "let Ollama decide", which is not the same answer as any
 	 * number, so it removes the key instead of storing a zero.
@@ -59,6 +54,26 @@
 		const value = Number(raw);
 		if (raw.trim() === '' || !Number.isFinite(value)) delete next[key];
 		else next[key] = Math.round(value);
+		server.loadOptions = next;
+		onChange();
+	}
+
+	/**
+	 * Three positions, not two, for the same reason the number fields have a blank
+	 * one: `false` and "unset" are different answers. `use_mmap` is on by default in
+	 * Ollama, so a switch that could only say true or false left no way back once it
+	 * had been touched, and wrote a preference nobody expressed.
+	 */
+	const switchOptions = $derived([
+		{ value: 'auto', label: $LL.automatic() },
+		{ value: 'on', label: $LL.on() },
+		{ value: 'off', label: $LL.off() }
+	]);
+
+	function setBoolean(key: (typeof LOAD_BOOLEAN_KEYS)[number], choice: string) {
+		const next: LoadOptions = { ...options };
+		if (choice === 'auto') delete next[key];
+		else next[key] = choice === 'on';
 		server.loadOptions = next;
 		onChange();
 	}
@@ -91,12 +106,13 @@
 
 	<div class="flex flex-col gap-2">
 		{#each LOAD_BOOLEAN_KEYS as key (key)}
-			<FieldCheckbox
-				label={booleanLabels[key]}
-				name={key}
-				checked={options[key] ?? false}
-				onChange={(checked) => write({ [key]: checked })}
-			/>
+			<SettingsField label={booleanLabels[key]}>
+				<Select
+					value={options[key] === undefined ? 'auto' : options[key] ? 'on' : 'off'}
+					options={switchOptions}
+					onChange={(option) => setBoolean(key, option.value)}
+				/>
+			</SettingsField>
 		{/each}
 	</div>
 
