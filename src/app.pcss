@@ -272,6 +272,58 @@
 	}
 }
 
+/*
+ * What a dialog puts between itself and the page.
+ *
+ * One declaration for the four dialogs, which each carried their own wash at
+ * their own opacity: 40, 50 and 40 percent of flat black, over four pixels of
+ * blur. That reads as grime on a light theme, because a dark veil that thin does
+ * not separate anything, it only dulls what is underneath.
+ *
+ * The trade runs the other way instead: less paint, much more blur. Light
+ * themes get a light hand and a wide blur, so the page behind turns into texture
+ * rather than into grey; dark themes need the paint, since blurring something
+ * already dark leaves it dark and the dialog has nothing to stand against. The
+ * touch of saturation is what keeps the blur from washing colour out, which is
+ * the difference between frosted glass and a dirty window.
+ */
+/*
+ * The edge of a dialog, so it is an object rather than a lighter patch.
+ *
+ * A drop shadow alone stopped working the day the image viewer started painting
+ * the picture behind its own panel: when the picture and the page agree on a
+ * colour, a shadow has nothing to darken and the dialog dissolves into what it
+ * is supposed to be sitting on top of.
+ *
+ * A hairline fixes that where a shadow cannot, because it does not depend on
+ * what is underneath: white at a tenth on a dark theme, black at a twelfth on a
+ * light one, which is the trick every frosted surface uses to keep a border in
+ * the middle of a blur. The shadow stays, wider and softer, for the depth.
+ */
+@utility modal-panel {
+	box-shadow:
+		0 0 0 1px rgb(0 0 0 / 0.08),
+		0 24px 60px -24px rgb(0 0 0 / 0.45);
+
+	&:where([data-color-theme='dark'], [data-color-theme='dark'] *) {
+		box-shadow:
+			0 0 0 1px rgb(255 255 255 / 0.1),
+			0 24px 60px -24px rgb(0 0 0 / 0.7);
+	}
+}
+
+@utility modal-scrim {
+	background-color: rgb(0 0 0 / 0.22);
+	backdrop-filter: blur(16px) saturate(125%);
+	-webkit-backdrop-filter: blur(16px) saturate(125%);
+
+	&:where([data-color-theme='dark'], [data-color-theme='dark'] *) {
+		background-color: rgb(0 0 0 / 0.5);
+		backdrop-filter: blur(10px) saturate(115%);
+		-webkit-backdrop-filter: blur(10px) saturate(115%);
+	}
+}
+
 .modal-overlay[data-state='open'] {
 	animation: modal-overlay-in 160ms ease-out;
 }

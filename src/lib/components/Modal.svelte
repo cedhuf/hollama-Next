@@ -17,7 +17,7 @@
 	<Dialog.Portal>
 		<!-- Blurred, not just dimmed: the page behind stays recognisable as context
 		     while losing enough detail to stop competing with the dialog. -->
-		<Dialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+		<Dialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<!-- Full screen on phones, a floating card from `sm` up.
 		     90vw × 85vh left a 5% gutter of unreachable page around a dialog that
 		     already needed every pixel: neither a card nor a screen. These dialogs
@@ -39,7 +39,7 @@
 		     height in viewport units can disagree with it, which on iOS is exactly the
 		     kind of disagreement that leaves a band along the bottom. -->
 		<Dialog.Content
-			class="modal-content bg-shade-1 fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[env(safe-area-inset-top)] max-sm:pb-[env(safe-area-inset-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl sm:shadow-xl"
+			class="modal-content bg-shade-1 sm:modal-panel fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[env(safe-area-inset-top)] max-sm:pb-[env(safe-area-inset-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl"
 		>
 			{#if closeButton}
 				<!-- An absolutely positioned box is laid out against the padding box, which

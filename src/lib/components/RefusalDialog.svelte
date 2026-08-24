@@ -31,9 +31,9 @@
 
 <AlertDialog.Root bind:open>
 	<AlertDialog.Portal>
-		<AlertDialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+		<AlertDialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<AlertDialog.Content
-			class="modal-content bg-shade-1 fixed inset-0 z-50 m-auto flex h-fit w-[92vw] max-w-sm flex-col gap-3 rounded-2xl p-5 shadow-xl"
+			class="modal-content bg-shade-1 modal-panel fixed inset-0 z-50 m-auto flex h-fit w-[92vw] max-w-sm flex-col gap-3 rounded-2xl p-5"
 		>
 			<div class="flex items-center gap-2.5">
 				<span

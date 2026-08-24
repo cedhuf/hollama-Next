@@ -53,9 +53,9 @@
 	}}
 >
 	<Dialog.Portal>
-		<Dialog.Overlay class="modal-overlay fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+		<Dialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<Dialog.Content
-			class="modal-content bg-shade-1 fixed inset-0 z-50 m-auto flex h-fit max-h-[88vh] w-[92vw] max-w-lg flex-col overflow-hidden rounded-2xl shadow-xl"
+			class="modal-content bg-shade-1 modal-panel fixed inset-0 z-50 m-auto flex h-fit max-h-[88vh] w-[92vw] max-w-lg flex-col overflow-hidden rounded-2xl"
 		>
 			<!-- Step indicator -->
 			<div class="flex items-center gap-3 px-5 pt-5 pb-3">
