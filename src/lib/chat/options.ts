@@ -197,6 +197,83 @@ function definedOnly<T extends object>(source: T): T {
 }
 
 /**
+ * What this app asks for when nobody has asked for anything.
+ *
+ * One set, shipped with the app, the same on every instance and the same for
+ * every model. It is deliberately empty: an absent field is the provider
+ * deciding for itself, and every provider's own default is better tuned to its
+ * own models than a number picked here would be. Sending a temperature of 0.8 to
+ * a model that ships with 0.6 would be this app overruling the people who
+ * trained it, on no evidence.
+ *
+ * It exists as a named constant rather than as `{}` inline because it is a
+ * destination: the reset control in Settings puts every field back to exactly
+ * this, and "back to how the app ships" has to be one thing that one edit can
+ * change if that judgement ever turns out to be wrong.
+ */
+export const SYSTEM_SAMPLING_DEFAULTS: SamplingOptions = {};
+
+/** Sampling settings read back from wherever they were stored, minus anything else. */
+export function parseSamplingOptions(raw: unknown): SamplingOptions {
+	if (typeof raw === 'string') {
+		try {
+			return parseSamplingOptions(JSON.parse(raw));
+		} catch {
+			return {};
+		}
+	}
+	if (!raw || typeof raw !== 'object') return {};
+	const source = raw as Record<string, unknown>;
+	const out: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(source)) {
+		if (!isSamplingKey(key) || value === undefined || value === null) continue;
+		if (key === 'stop') {
+			const list = Array.isArray(value) ? value.filter((entry) => typeof entry === 'string') : [];
+			if (list.length) out[key] = list;
+			continue;
+		}
+		if (typeof value === 'number' ? Number.isFinite(value) : typeof value === 'boolean') {
+			out[key] = value;
+		}
+	}
+	return out as SamplingOptions;
+}
+
+/**
+ * One set of settings over another, where an absent key means "whatever is
+ * underneath" and never `undefined` laid on top of it.
+ *
+ * The distinction is the whole of the old bug in miniature: the retired panel
+ * wrote `false` and `undefined` into a conversation for fields nobody had
+ * touched, and both were then sent as though somebody had chosen them.
+ */
+export function mergeSampling(
+	base: SamplingOptions,
+	over: SamplingOptions | undefined
+): SamplingOptions {
+	const out: Record<string, unknown> = { ...base };
+	for (const [key, value] of Object.entries(over ?? {})) {
+		if (value !== undefined) out[key] = value;
+	}
+	return out as SamplingOptions;
+}
+
+/** Whether anything has been set here at all, which is what a reset control asks. */
+export function isSystemDefault(options: SamplingOptions | undefined): boolean {
+	const own = parseSamplingOptions(options);
+	const system = SYSTEM_SAMPLING_DEFAULTS as Record<string, unknown>;
+	const keys = new Set([...Object.keys(own), ...Object.keys(system)]);
+	for (const key of keys) {
+		const a = (own as Record<string, unknown>)[key];
+		const b = system[key];
+		if (Array.isArray(a) || Array.isArray(b)) {
+			if (JSON.stringify(a ?? null) !== JSON.stringify(b ?? null)) return false;
+		} else if (a !== b) return false;
+	}
+	return true;
+}
+
+/**
  * Which sampling settings a request may carry, given who is answering it.
  *
  * The second family is dropped for anything that is not Ollama rather than left

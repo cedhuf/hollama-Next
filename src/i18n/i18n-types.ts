@@ -930,6 +930,75 @@ type RootTranslation = {
 	 */
 	runtimeOptions: string
 	/**
+	 * S​a​m​p​l​i​n​g
+	 */
+	sampling: string
+	/**
+	 * S​a​m​p​l​i​n​g​ ​i​s​ ​s​e​t​ ​i​n​ ​C​h​a​t​,​ ​b​y​ ​y​o​u​ ​l​i​k​e​ ​e​v​e​r​y​o​n​e​ ​e​l​s​e​.​ ​T​h​i​s​ ​o​n​l​y​ ​d​e​c​i​d​e​s​ ​w​h​o​ ​e​l​s​e​ ​g​e​t​s​ ​y​o​u​r​ ​v​a​l​u​e​s​.
+	 */
+	samplingAdminDescription: string
+	/**
+	 * H​o​w​ ​t​h​e​ ​m​o​d​e​l​ ​p​i​c​k​s​ ​i​t​s​ ​n​e​x​t​ ​w​o​r​d​.​ ​A​p​p​l​i​e​s​ ​t​o​ ​e​v​e​r​y​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​;​ ​e​a​c​h​ ​o​n​e​ ​c​a​n​ ​s​t​i​l​l​ ​d​i​f​f​e​r​.
+	 */
+	samplingDescription: string
+	/**
+	 * S​e​n​t​ ​t​o​ ​e​v​e​r​y​ ​p​r​o​v​i​d​e​r​.
+	 */
+	samplingEveryProviderHelp: string
+	/**
+	 * L​o​c​k​ ​t​h​e​ ​i​n​s​t​a​n​c​e​ ​d​e​f​a​u​l​t​s
+	 */
+	samplingLocked: string
+	/**
+	 * E​v​e​r​y​o​n​e​ ​g​e​t​s​ ​t​h​e​ ​v​a​l​u​e​s​ ​a​b​o​v​e​ ​a​n​d​ ​c​a​n​ ​c​h​a​n​g​e​ ​n​o​n​e​ ​o​f​ ​t​h​e​m​,​ ​i​n​ ​S​e​t​t​i​n​g​s​ ​o​r​ ​i​n​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​.
+	 */
+	samplingLockedHelp: string
+	/**
+	 * n​o​t​ ​i​n​ ​u​s​e​ ​h​e​r​e
+	 */
+	samplingNotApplicable: string
+	/**
+	 * O​l​l​a​m​a​ ​o​n​l​y
+	 */
+	samplingOllamaOnly: string
+	/**
+	 * O​n​l​y​ ​a​n​ ​O​l​l​a​m​a​ ​e​n​d​p​o​i​n​t​ ​u​n​d​e​r​s​t​a​n​d​s​ ​t​h​e​s​e​.​ ​T​h​e​y​ ​a​r​e​ ​n​e​v​e​r​ ​s​e​n​t​ ​a​n​y​w​h​e​r​e​ ​e​l​s​e​,​ ​b​e​c​a​u​s​e​ ​a​ ​p​r​o​v​i​d​e​r​ ​t​h​a​t​ ​d​o​e​s​ ​n​o​t​ ​k​n​o​w​ ​a​ ​f​i​e​l​d​ ​r​e​f​u​s​e​s​ ​t​h​e​ ​w​h​o​l​e​ ​r​e​q​u​e​s​t​.
+	 */
+	samplingOllamaOnlyHelp: string
+	/**
+	 * T​h​i​s​ ​m​o​d​e​l​ ​i​s​ ​n​o​t​ ​o​n​ ​a​n​ ​O​l​l​a​m​a​ ​c​o​n​n​e​c​t​i​o​n​,​ ​s​o​ ​t​h​e​s​e​ ​a​r​e​ ​k​e​p​t​ ​b​u​t​ ​n​o​t​ ​s​e​n​t​.
+	 */
+	samplingOllamaOnlyInactiveHelp: string
+	/**
+	 * R​e​s​e​t​ ​t​o​ ​t​h​e​ ​s​y​s​t​e​m​ ​d​e​f​a​u​l​t​s
+	 */
+	samplingReset: string
+	/**
+	 * C​l​e​a​r​s​ ​e​v​e​r​y​ ​f​i​e​l​d​ ​a​b​o​v​e​,​ ​b​a​c​k​ ​t​o​ ​h​o​w​ ​t​h​e​ ​a​p​p​ ​s​h​i​p​s​:​ ​e​a​c​h​ ​p​r​o​v​i​d​e​r​ ​t​h​e​n​ ​a​p​p​l​i​e​s​ ​i​t​s​ ​o​w​n​.
+	 */
+	samplingResetHint: string
+	/**
+	 * F​o​r​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​o​n​l​y​.​ ​A​n​ ​e​m​p​t​y​ ​f​i​e​l​d​ ​u​s​e​s​ ​y​o​u​r​ ​v​a​l​u​e​ ​f​r​o​m​ ​S​e​t​t​i​n​g​s​.
+	 */
+	samplingSessionDescription: string
+	/**
+	 * U​s​e​ ​m​y​ ​s​e​t​t​i​n​g​s​ ​f​o​r​ ​e​v​e​r​y​t​h​i​n​g
+	 */
+	samplingSessionReset: string
+	/**
+	 * {​c​o​u​n​t​}​ ​f​i​e​l​d​{​{​s​}​}​ ​s​e​t
+	 * @param {number} count
+	 */
+	samplingFieldCount: RequiredParams<'count'>
+	/**
+	 * n​o​t​h​i​n​g​ ​s​e​t​:​ ​e​v​e​r​y​o​n​e​ ​k​e​e​p​s​ ​t​h​e​ ​s​y​s​t​e​m​ ​d​e​f​a​u​l​t​s
+	 */
+	samplingNothingSet: string
+	/**
+	 * S​h​a​r​e​ ​y​o​u​r​ ​s​a​m​p​l​i​n​g​ ​s​e​t​t​i​n​g​s
+	 */
+	shareSampling: string
+	/**
 	 * S​a​v​e
 	 */
 	save: string
@@ -4448,6 +4517,74 @@ export type TranslationFunctions = {
 	 * Runtime options
 	 */
 	runtimeOptions: () => LocalizedString
+	/**
+	 * Sampling
+	 */
+	sampling: () => LocalizedString
+	/**
+	 * Sampling is set in Chat, by you like everyone else. This only decides who else gets your values.
+	 */
+	samplingAdminDescription: () => LocalizedString
+	/**
+	 * How the model picks its next word. Applies to every new conversation; each one can still differ.
+	 */
+	samplingDescription: () => LocalizedString
+	/**
+	 * Sent to every provider.
+	 */
+	samplingEveryProviderHelp: () => LocalizedString
+	/**
+	 * Lock the instance defaults
+	 */
+	samplingLocked: () => LocalizedString
+	/**
+	 * Everyone gets the values above and can change none of them, in Settings or in a conversation.
+	 */
+	samplingLockedHelp: () => LocalizedString
+	/**
+	 * not in use here
+	 */
+	samplingNotApplicable: () => LocalizedString
+	/**
+	 * Ollama only
+	 */
+	samplingOllamaOnly: () => LocalizedString
+	/**
+	 * Only an Ollama endpoint understands these. They are never sent anywhere else, because a provider that does not know a field refuses the whole request.
+	 */
+	samplingOllamaOnlyHelp: () => LocalizedString
+	/**
+	 * This model is not on an Ollama connection, so these are kept but not sent.
+	 */
+	samplingOllamaOnlyInactiveHelp: () => LocalizedString
+	/**
+	 * Reset to the system defaults
+	 */
+	samplingReset: () => LocalizedString
+	/**
+	 * Clears every field above, back to how the app ships: each provider then applies its own.
+	 */
+	samplingResetHint: () => LocalizedString
+	/**
+	 * For this conversation only. An empty field uses your value from Settings.
+	 */
+	samplingSessionDescription: () => LocalizedString
+	/**
+	 * Use my settings for everything
+	 */
+	samplingSessionReset: () => LocalizedString
+	/**
+	 * {count} field{{s}} set
+	 */
+	samplingFieldCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * nothing set: everyone keeps the system defaults
+	 */
+	samplingNothingSet: () => LocalizedString
+	/**
+	 * Share your sampling settings
+	 */
+	shareSampling: () => LocalizedString
 	/**
 	 * Save
 	 */

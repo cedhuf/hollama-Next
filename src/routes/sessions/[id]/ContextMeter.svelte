@@ -1,6 +1,8 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import { contextUsage, formatTokens, type ContextUsage } from '$lib/chat/context';
+	import { mergeSampling } from '$lib/chat/options';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import type { Session } from '$lib/sessions';
 
@@ -25,7 +27,17 @@
 
 	let tipOpen = $state(false);
 
-	const usage = $derived<ContextUsage>(contextUsage(session, threshold));
+	// The ceiling can come from the account's settings rather than from this
+	// conversation, so the meter has to measure against the same options the turn
+	// will be sent with. Reading only the conversation's own would show the
+	// fallback threshold to everybody who set `num_ctx` once, globally.
+	const usage = $derived<ContextUsage>(
+		contextUsage(
+			session,
+			threshold,
+			mergeSampling($chatDefaultsConfig.sampling.value, session.options)
+		)
+	);
 	const percent = $derived(Math.round(usage.ratio * 100));
 
 	// Geometry for the ring. 16×16 to sit on the same baseline as the lucide icons

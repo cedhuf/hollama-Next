@@ -235,6 +235,30 @@ const en = {
 	retry: 'Retry',
 	run: 'Run',
 	runtimeOptions: 'Runtime options',
+	sampling: 'Sampling',
+	samplingAdminDescription:
+		'Sampling is set in Chat, by you like everyone else. This only decides who else gets your values.',
+	samplingDescription:
+		'How the model picks its next word. Applies to every new conversation; each one can still differ.',
+	samplingEveryProviderHelp: 'Sent to every provider.',
+	samplingLocked: 'Lock the instance defaults',
+	samplingLockedHelp:
+		'Everyone gets the values above and can change none of them, in Settings or in a conversation.',
+	samplingNotApplicable: 'not in use here',
+	samplingOllamaOnly: 'Ollama only',
+	samplingOllamaOnlyHelp:
+		'Only an Ollama endpoint understands these. They are never sent anywhere else, because a provider that does not know a field refuses the whole request.',
+	samplingOllamaOnlyInactiveHelp:
+		'This model is not on an Ollama connection, so these are kept but not sent.',
+	samplingReset: 'Reset to the system defaults',
+	samplingResetHint:
+		'Clears every field above, back to how the app ships: each provider then applies its own.',
+	samplingSessionDescription:
+		'For this conversation only. An empty field uses your value from Settings.',
+	samplingSessionReset: 'Use my settings for everything',
+	samplingFieldCount: '{count:number} field{{s}} set',
+	samplingNothingSet: 'nothing set: everyone keeps the system defaults',
+	shareSampling: 'Share your sampling settings',
 	save: 'Save',
 	search: 'Search',
 	searchEmpty: 'No results found',

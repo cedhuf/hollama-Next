@@ -6,6 +6,7 @@ import { personasConfig } from '$lib/personasConfig';
 import type { Message, Session } from '$lib/sessions';
 
 import { conversationBoundary, messagesInContext, type ContextNote } from './notes';
+import type { SamplingOptions } from './options';
 import { formatSourceIndex, recallSearches } from './sourceIndex';
 
 /**
@@ -142,14 +143,20 @@ export interface ContextUsage {
  */
 export function resolveContextLimit(
 	session: Session,
-	threshold: number
+	threshold: number,
+	/** The conversation's own options over the account's; its own alone when omitted. */
+	options: SamplingOptions = session.options
 ): { limit: number; limitSource: 'model' | 'threshold' } {
-	const numCtx = session.options?.num_ctx;
+	const numCtx = options?.num_ctx;
 	if (typeof numCtx === 'number' && numCtx > 0) return { limit: numCtx, limitSource: 'model' };
 	return { limit: threshold, limitSource: 'threshold' };
 }
 
-export function contextUsage(session: Session, threshold: number): ContextUsage {
+export function contextUsage(
+	session: Session,
+	threshold: number,
+	options: SamplingOptions = session.options
+): ContextUsage {
 	const boundary = conversationBoundary(session.messages);
 	const compacted = boundary.note?.kind === 'compaction' ? boundary.index : -1;
 	const active = messagesInContext(session.messages);
@@ -162,7 +169,7 @@ export function contextUsage(session: Session, threshold: number): ContextUsage 
 	// late: the failure the estimate exists to prevent.
 	tokens += estimateSourceIndexTokens(active);
 
-	const { limit, limitSource } = resolveContextLimit(session, threshold);
+	const { limit, limitSource } = resolveContextLimit(session, threshold, options);
 	const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0;
 
 	return {

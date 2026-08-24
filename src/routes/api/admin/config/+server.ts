@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 
+import { parseSamplingOptions } from '$lib/chat/options';
 import { requireAdmin } from '$lib/server/api';
 import { appPromptsSharing, setAdminAppPrompts } from '$lib/server/appPromptsResolver';
 import {
@@ -52,6 +53,7 @@ export async function GET(event) {
 		defaultModel: getConfig('defaultModel') ?? '',
 		titleSharing: getConfig('titleSharing') ?? 'off',
 		compactSharing: getConfig('compactSharing') ?? 'off',
+		samplingSharing: getConfig('samplingSharing') ?? 'off',
 		imagesSharing: getConfig('imagesSharing') ?? 'off',
 		defaultImageModel: getConfig('defaultImageModel') ?? '',
 		imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
@@ -133,6 +135,18 @@ export async function PUT(event) {
 	}
 	if (['off', 'locked', 'overridable'].includes(body?.compactSharing)) {
 		setConfig('compactSharing', body.compactSharing);
+	}
+	// Sampling: the sharing choice, plus a snapshot of the administrator's own
+	// Chat settings taken when they made it. The values are never typed here, the
+	// same way the compaction model above is not: one set of fields, in Settings,
+	// and this tab decides who else gets them. Stored as JSON rather than a column
+	// apiece because nothing queries them and the list of knobs is llama.cpp's to
+	// change, not this app's.
+	if (['off', 'locked', 'overridable'].includes(body?.samplingSharing)) {
+		setConfig('samplingSharing', body.samplingSharing);
+	}
+	if (body?.sampling && typeof body.sampling === 'object') {
+		setConfig('sampling', JSON.stringify(parseSamplingOptions(body.sampling)));
 	}
 	// Images: which model draws and which one writes the prompt for it, shared the
 	// same three ways.

@@ -87,6 +87,20 @@
 	let imagesSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let imagesShareEnabled = $state(false);
 	let compactShareEnabled = $state(false);
+	let samplingSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let samplingShareEnabled = $state(false);
+	/**
+	 * What is about to be handed over, said while the panel is closed.
+	 *
+	 * A count rather than the numbers themselves: nineteen fields do not fit on
+	 * one line, and the question this row has to answer is "am I sharing anything
+	 * at all", not "what exactly". The values are one tab away, where they are
+	 * edited.
+	 */
+	const samplingCount = $derived(Object.keys($settingsStore.sampling ?? {}).length);
+	const samplingSummary = $derived(
+		samplingCount ? $LL.samplingFieldCount({ count: samplingCount }) : $LL.samplingNothingSet()
+	);
 
 	const sharedModelNames = $derived(
 		Array.from(new Set(servers.flatMap((s) => s.sharedModels))).sort((a, b) =>
@@ -117,6 +131,29 @@
 	function syncTitleShare() {
 		titleSharing = titleShareEnabled ? (titleSharing === 'off' ? 'locked' : titleSharing) : 'off';
 		saveTitle();
+	}
+
+	/**
+	 * Sharing only, with no fields of its own.
+	 *
+	 * The numbers are typed in Settings, by everyone including whoever is looking
+	 * at this tab. A second set of inputs here would be the same decision in two
+	 * places, and the two would disagree the first time somebody edited one of them.
+	 */
+	function syncSamplingShare() {
+		samplingSharing = samplingShareEnabled
+			? samplingSharing === 'off'
+				? 'locked'
+				: samplingSharing
+			: 'off';
+		saveSampling();
+	}
+
+	async function saveSampling() {
+		await api('/api/admin/config', 'PUT', {
+			samplingSharing,
+			sampling: $settingsStore.sampling ?? {}
+		});
 	}
 
 	function syncCompactShare() {
@@ -171,6 +208,8 @@
 			imagesSharing = config.imagesSharing ?? 'off';
 			imagesShareEnabled = imagesSharing !== 'off';
 			compactShareEnabled = compactSharing !== 'off';
+			samplingSharing = config.samplingSharing ?? 'off';
+			samplingShareEnabled = samplingSharing !== 'off';
 			servers = serverList as SystemServer[];
 		} finally {
 			loading = false;
@@ -317,6 +356,7 @@
 		if (appPromptsShareEnabled) saveAppPrompts();
 		if (titleShareEnabled) saveTitle();
 		if (compactShareEnabled) saveCompact();
+		if (samplingShareEnabled) saveSampling();
 		if (imagesShareEnabled) saveImagesSharing();
 	});
 
@@ -569,6 +609,22 @@
 				· {$settingsStore.autoCompact
 					? `${$LL.on()}: ${$settingsStore.compactThreshold.toLocaleString()}`
 					: $LL.off()}
+			</span>
+		{/if}
+	</SettingsSection>
+
+	<!-- Sampling sharing. No fields: the numbers live in Settings, the same ones
+	     this administrator uses, and the only decision here is who else gets them. -->
+	<SettingsSection title={$LL.sampling()} description={$LL.samplingAdminDescription()} card>
+		<FieldCheckbox
+			label={$LL.shareSampling()}
+			bind:checked={samplingShareEnabled}
+			onChange={syncSamplingShare}
+		/>
+		{#if samplingShareEnabled}
+			<Select bind:value={samplingSharing} options={sharingOptions} onChange={saveSampling} />
+			<span class="text-muted text-xs">
+				{$LL.sharingLabel()}: {samplingSummary}
 			</span>
 		{/if}
 	</SettingsSection>

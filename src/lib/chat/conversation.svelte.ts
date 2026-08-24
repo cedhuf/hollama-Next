@@ -5,6 +5,7 @@ import { fromStore, get } from 'svelte/store';
 import LL from '$i18n/i18n-svelte';
 import { effectivePrompts } from '$lib/appPrompts';
 import { formatAskAnswer } from '$lib/askChoice';
+import { mergeSampling, type SamplingOptions } from '$lib/chat/options';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import type { Server } from '$lib/connections';
 import { repository } from '$lib/data';
@@ -166,6 +167,19 @@ export class Conversation implements RunSurface {
 
 	get compactConfig() {
 		return this.#chatDefaults.current.compact;
+	}
+
+	/**
+	 * The sampling this turn will actually use: the account's settings, with
+	 * whatever this conversation says of its own laid over them.
+	 *
+	 * Resolved here at send time rather than copied into the conversation when it
+	 * was created, so changing a number in Settings reaches every conversation
+	 * that never disagreed. A conversation that did disagree keeps its own, which
+	 * is the whole point of it having said so.
+	 */
+	get options(): SamplingOptions {
+		return mergeSampling(this.#chatDefaults.current.sampling.value, this.session.options);
 	}
 
 	/**
@@ -537,7 +551,7 @@ export class Conversation implements RunSurface {
 		}
 		if (
 			wants.compact &&
-			contextUsage(this.session, this.compactConfig.compactThreshold).ratio >= 1
+			contextUsage(this.session, this.compactConfig.compactThreshold, this.options).ratio >= 1
 		) {
 			const model = this.compactConfig.compactModel || this.session.model.name;
 			input.compact = {
@@ -593,7 +607,7 @@ export class Conversation implements RunSurface {
 			// key from its own database, and a browser never holds either.
 			serverId: server.id,
 			model: this.session.model!.name,
-			options: this.session.options,
+			options: this.options,
 			think: this.editor.thinking !== false,
 			// The playbooks in force are appended to the conversation's own prompt
 			// rather than replacing it: a procedure says how a job is done, not who is

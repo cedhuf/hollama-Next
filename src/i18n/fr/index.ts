@@ -240,6 +240,30 @@ const fr = extendDictionary(en, {
 	retry: 'Réessayer',
 	run: 'Exécuter',
 	runtimeOptions: 'Options d’exécution',
+	sampling: 'Échantillonnage',
+	samplingAdminDescription:
+		"L'échantillonnage se règle dans Chat, par vous comme par les autres. Ceci décide seulement qui reçoit vos valeurs.",
+	samplingDescription:
+		'Comment le modèle choisit son mot suivant. Vaut pour toute nouvelle conversation ; chacune peut ensuite différer.',
+	samplingEveryProviderHelp: 'Envoyé à tous les fournisseurs.',
+	samplingLocked: "Verrouiller les valeurs par défaut de l'instance",
+	samplingLockedHelp:
+		'Tout le monde reçoit les valeurs ci-dessus et ne peut en changer aucune, ni dans les réglages ni dans une conversation.',
+	samplingNotApplicable: 'inutilisé ici',
+	samplingOllamaOnly: 'Ollama uniquement',
+	samplingOllamaOnlyHelp:
+		'Seul un point de terminaison Ollama comprend ces valeurs. Elles ne sont jamais envoyées ailleurs, car un fournisseur qui ignore un champ refuse toute la requête.',
+	samplingOllamaOnlyInactiveHelp:
+		"Ce modèle n'est pas sur une connexion Ollama : ces valeurs sont conservées mais pas envoyées.",
+	samplingReset: 'Revenir aux valeurs par défaut du système',
+	samplingResetHint:
+		'Vide tous les champs ci-dessus et revient à la livraison : chaque fournisseur applique alors les siennes.',
+	samplingSessionDescription:
+		'Pour cette conversation uniquement. Un champ vide utilise votre valeur des réglages.',
+	samplingSessionReset: 'Utiliser mes réglages partout',
+	samplingFieldCount: '{count:number} champ{{s}} défini{{s}}',
+	samplingNothingSet: 'rien de défini : chacun garde les valeurs par défaut du système',
+	shareSampling: "Partager vos réglages d'échantillonnage",
 	save: 'Enregistrer',
 	search: 'Rechercher',
 	searchEmpty: 'Aucun résultat trouvé',

@@ -1,5 +1,6 @@
 import type { Locales } from '$i18n/i18n-types';
 import { version } from '$app/environment';
+import { SYSTEM_SAMPLING_DEFAULTS, type SamplingOptions } from '$lib/chat/options';
 
 import type { LloomaMetadata } from '../routes/api/metadata/+server';
 import type { PromptKey } from './defaultPrompts';
@@ -80,6 +81,15 @@ export interface Settings {
 	 * turned off.
 	 */
 	imagePromptModel: string | null;
+	/**
+	 * The sampling settings every conversation starts from.
+	 *
+	 * A plain set rather than anything cleverer: an absent field is the provider
+	 * deciding, which is also what the system defaults say, so there is no third
+	 * answer to represent. A conversation lays its own overrides on top of this
+	 * and nothing else sits underneath.
+	 */
+	sampling: SamplingOptions;
 	/** Compact on its own once the conversation crosses `compactThreshold`. */
 	autoCompact: boolean;
 	/**
@@ -288,6 +298,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	imagePromptWriter: true,
 	imageAutoTitle: true,
 	imagePromptModel: null,
+	sampling: { ...SYSTEM_SAMPLING_DEFAULTS },
 	autoCompact: false,
 	compactThreshold: 80000,
 	webSearchByDefault: false,

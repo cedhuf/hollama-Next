@@ -1,3 +1,4 @@
+import { parseSamplingOptions, type SamplingOptions } from '$lib/chat/options';
 import { getConfig } from '$lib/server/db/config';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
 
@@ -55,6 +56,24 @@ export interface ResolvedChatDefaults {
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
+	};
+	/**
+	 * The sampling settings every conversation on this account starts from.
+	 *
+	 * Shared the same three ways as everything else here, and for the same reason
+	 * it is here at all: the question is which numbers an account starts from and
+	 * who gets to decide, which is the question this whole resolver answers.
+	 *
+	 * The values themselves are only ever typed in Settings, by everyone including
+	 * the administrator. What the Admin tab holds is the sharing choice, and the
+	 * snapshot below is the administrator's own set as it stood when they made it.
+	 * Nothing is published by merely existing: `off` keeps their numbers personal.
+	 */
+	sampling: {
+		value: SamplingOptions;
+		editable: boolean;
+		source: 'admin' | 'user';
+		adminValue: SamplingOptions;
 	};
 }
 
@@ -176,5 +195,32 @@ export function resolveChatDefaults(
 			: { ...adminImages, editable: true, source: 'admin', admin: adminImages };
 	}
 
-	return { defaultModel, title, compact, images };
+	// --- sampling ---
+	//
+	// The same three states as the groups above, with the same sentinel: an
+	// account that has set nothing of its own takes the shared set, and the first
+	// number it types makes the whole set its own. Not a merge, deliberately: half
+	// a temperature from one place and half a top-k from another is a combination
+	// nobody chose and nobody could reason about.
+	const adminSampling = parseSamplingOptions(getConfig('sampling'));
+	const ownSampling = parseSamplingOptions(userSettings?.sampling);
+	const samplingSharing = (getConfig('samplingSharing') as Sharing) || 'off';
+
+	let sampling: ResolvedChatDefaults['sampling'];
+	if (isAdmin || samplingSharing === 'off') {
+		sampling = { value: ownSampling, editable: true, source: 'user', adminValue: adminSampling };
+	} else if (samplingSharing === 'locked') {
+		sampling = {
+			value: adminSampling,
+			editable: false,
+			source: 'admin',
+			adminValue: adminSampling
+		};
+	} else {
+		sampling = Object.keys(ownSampling).length
+			? { value: ownSampling, editable: true, source: 'user', adminValue: adminSampling }
+			: { value: adminSampling, editable: true, source: 'admin', adminValue: adminSampling };
+	}
+
+	return { defaultModel, title, compact, images, sampling };
 }

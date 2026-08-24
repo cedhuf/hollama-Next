@@ -1,5 +1,6 @@
 import { derived, writable } from 'svelte/store';
 
+import { parseSamplingOptions, type SamplingOptions } from '$lib/chat/options';
 import { settingsStore } from '$lib/localStorage';
 import { DEFAULT_SETTINGS } from '$lib/settings';
 
@@ -45,6 +46,13 @@ export interface ChatDefaultsView {
 		source: 'admin' | 'user';
 		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
+	/** See `ResolvedChatDefaults['sampling']`; this is the same shape client-side. */
+	sampling: {
+		value: SamplingOptions;
+		editable: boolean;
+		source: 'admin' | 'user';
+		adminValue: SamplingOptions;
+	};
 }
 
 const serverConfig = writable<ChatDefaultsView | null>(null);
@@ -62,6 +70,8 @@ export async function loadServerChatDefaults(): Promise<void> {
 export const chatDefaultsConfig = derived(
 	[settingsStore, serverConfig],
 	([$s, $srv]): ChatDefaultsView => {
+		const ownSampling = parseSamplingOptions($s.sampling);
+
 		const own: ChatDefaultsView = {
 			defaultModel: {
 				value: $s.defaultModel ?? '',
@@ -106,7 +116,8 @@ export const chatDefaultsConfig = derived(
 				editable: true,
 				source: 'user',
 				admin: { defaultImageModel: '', imagePromptWriter: true, imagePromptModel: '' }
-			}
+			},
+			sampling: { value: ownSampling, editable: true, source: 'user', adminValue: {} }
 		};
 
 		if (!$srv) return own;
@@ -164,6 +175,15 @@ export const chatDefaultsConfig = derived(
 					}
 				: { ...$srv.images, ...$srv.images.admin };
 
-		return { defaultModel: dm, title: t, compact: c, images: i };
+		// Sampling: the same three states again, and the same sentinel. Read live
+		// from the store once this account has a set of its own, so a number typed in
+		// Settings reaches an open conversation without a round trip.
+		const sampling = !$srv.sampling.editable
+			? $srv.sampling
+			: Object.keys(ownSampling).length
+				? { ...$srv.sampling, value: ownSampling, source: 'user' as const }
+				: { ...$srv.sampling, value: $srv.sampling.adminValue };
+
+		return { defaultModel: dm, title: t, compact: c, images: i, sampling };
 	}
 );
