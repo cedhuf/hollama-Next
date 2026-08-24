@@ -15,43 +15,17 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 </div>
 
-> [!WARNING]
-> **Local mode is gone, and your data does not come with it.** If you were using it, export a
-> backup from _Settings → Data → Backup & restore_ **before** you update, and restore it afterwards.
-> Read on for why.
+> [!IMPORTANT]
+> **Local mode is gone**. If you were using it, export a backup from _Settings → Data → Backup & restore_ **before** you update, and restore it afterwards.
 >
-> I have tried to keep the spirit of Hollama while modernising it and pushing on features, usability
-> and flexibility. The more I do that, the clearer it gets that keeping local mode around costs me
-> real time, and costs the codebase more than it gives back.
->
-> Some of it is concrete. Everything in local mode lives in the browser's `localStorage`, which is
-> about 5 MB for all your conversations, knowledge, personas, playbooks and persona memory put
-> together. API keys sit there in plain text, where any browser extension can read them. Image
-> generation cannot work at all, because the bytes have nowhere to go. And a few features exist
-> twice: conversation search, for instance, is written once for the browser and once as SQLite full
-> text search. Around 75 places in the code branch on which mode you are running.
->
-> Both modes are the same install anyway. You run the same Node server either way, and a single
-> environment variable decides the rest.
->
-> Llooma is not getting much attention right now, so most of what I add is what I need myself, and I
-> am aware that may not be what anyone else wants. Nobody has told me what they would want from an
-> app like this, so I am guessing. If someone turns up with a good reason to keep local mode, I will
-> happily talk it through in
-> [Discussions](https://github.com/cedhuf/llooma/discussions) and I am willing to change my mind.
-> Nobody did, so it has been removed.
->
-> This is not me dropping the Hollama spirit. What replaces it sits on the server architecture: no
-> account, no login screen, everything created for you on first run. You get the same quick single
-> user access, plus proper storage, keys actually encrypted at rest, and room to do things
-> `localStorage` cannot, image generation being the obvious one.
+> More details on why in [Discussions](https://github.com/cedhuf/llooma/discussions).
 
 ![The sidebar, the Library, the Interface settings, and a conversation over a wallpaper](static/screenshots/sections.png)
 
 > [!WARNING]
-> This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges.
+> This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges. You are warned 😅
 >
-> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR is more than welcome. If AI is not your thing, you can check the original project instead or other forks, no hard feelings, just being transparent.
+> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR is more than welcome. If AI is not your thing, you can check the original project instead, or check [Similar projects].
 
 ## What it is
 
@@ -99,7 +73,7 @@ that matter before exposing an instance:
 ## Contributing
 
 > [!IMPORTANT]
-> Feel free to participate, there is no bad contribution. One rule to keep the project manageable: **issues are for bugs only**. For a feature request or anything else, please open a discussion. If the community backs it, and we agree on the technical approach, it will become an issue. Thanks!
+> Feel free to participate ! I would love to have some feedback on everything you feel about this project, or issues you may encounter. To keep the project manageable please note that **issues are for bugs only**. For a feature request or anything else, please open a discussion. If the community backs it, and we agree on the technical approach, it will become an issue. Thanks!
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), and
 [Working on Llooma](https://llooma.eu/development/) for how the codebase is laid out.
@@ -143,7 +117,7 @@ after, one of these probably is.
   **[Jan](https://github.com/menloresearch/jan)** come at it from the desktop instead of the server.
 
 [every-chatgpt-gui](https://github.com/billmei/every-chatgpt-gui) keeps the exhaustive list, which
-is longer than anyone expects.
+is longer than anyone expects!
 
 ## License
 
