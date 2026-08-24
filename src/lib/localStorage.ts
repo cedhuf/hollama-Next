@@ -95,17 +95,30 @@ function collectionStore<
 ) {
 	const store = writable<S[]>(seed);
 
+	/**
+	 * Show what an item has become, without writing it back.
+	 *
+	 * For the changes somebody else has already stored. A turn is written by the
+	 * server as it produces it, so a reply landing has to reach the lists this
+	 * store feeds, while saving it from here would be this tab writing over a row
+	 * it does not own.
+	 */
+	const reflect = (item: T) => {
+		const summary = ops.summarize(item);
+		store.update((items) => {
+			const index = items.findIndex((existing) => existing.id === summary.id);
+			const next = index === -1 ? [...items, summary] : items.with(index, summary);
+			return sortStore(next);
+		});
+	};
+
 	return {
 		subscribe: store.subscribe,
 		setQuiet: (items: S[]) => store.set(items),
+		reflect,
 
 		upsert: (item: T) => {
-			const summary = ops.summarize(item);
-			store.update((items) => {
-				const index = items.findIndex((existing) => existing.id === summary.id);
-				const next = index === -1 ? [...items, summary] : items.with(index, summary);
-				return sortStore(next);
-			});
+			reflect(item);
 			if (persistenceReady) void ops.save(item);
 		},
 

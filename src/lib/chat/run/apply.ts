@@ -3,43 +3,31 @@ import type { Editor, Message, Session } from '$lib/sessions';
 import type { RunEvent } from './types';
 
 /**
- * What a run's events do to what is on screen.
+ * What a run's events do to what is on screen. Only to what is on screen.
  *
- * One reducer, deliberately, because there are two sources and they must not
- * drift: a turn running in this tab and a turn running in the Node process
- * produce the same events, and a tab that comes back after a reload replays the
- * ones it missed. If catching up did not go through exactly this function, a
- * reattached conversation would be a second implementation of the first, and the
- * two would disagree the first time either changed.
+ * This used to be where the conversation was written down, and that was the
+ * defect: the turn ran in the server and the answer only reached the database if
+ * a browser was still there to put it there. The run now writes as it produces,
+ * so what is left here is the live picture of a turn happening, which is the one
+ * job a page actually has.
  *
- * Everything here is additive and order-dependent, which is what makes a replay
- * land in the same place as having watched it live.
+ * Nothing in here persists anything, and that is a property worth keeping rather
+ * than a detail: a second interface, or a third-party client, can follow a run
+ * without being trusted to store it correctly.
+ *
+ * Everything is additive and order-dependent, which is what makes a replay land
+ * in the same place as having watched it live.
  */
 
 export interface RunSurface {
 	editor: Editor;
 	session: Session;
-	/** Called once the conversation itself changed and is worth persisting. */
-	save(): void;
 	/** Called when new text arrived, so a follower can keep the bottom in view. */
 	onProgress?(): void;
 	/** Called when the turn ends, whichever way it ended. */
 	onFinish?(outcome: { aborted: boolean; error?: string }): void;
 	/** Whether a summary is being written, drawn where the divider will land. */
 	setCompacting?(active: boolean): void;
-	/**
-	 * A persona called in with `@` has just answered, for the first time.
-	 *
-	 * Inside the idempotence guard rather than beside it, which is the whole
-	 * reason it is here and not in the page: a finished run is replayed to a tab
-	 * that comes back, and a notification sent on every delivery would write the
-	 * same record into the persona's conversation on every visit.
-	 *
-	 * A notification, not a side effect of its own: this file changes the
-	 * conversation it was given and nothing else, and what a persona's own
-	 * conversation does about it is the page's business.
-	 */
-	onPersonaReply?(reply: Message): void;
 }
 
 export interface ApplyOptions {
@@ -60,8 +48,12 @@ export interface ApplyOptions {
  *
  * By the instant it was created, which the run stamps once and never rewrites, so
  * it identifies that message across every delivery of the event carrying it.
- * Compared against the tail rather than the whole conversation: a run appends,
- * always, so anything it produced is at the end or is not there at all.
+ *
+ * Still needed now that nothing here writes, and for a plainer reason than
+ * before: a conversation is read from storage when the page opens, so a run that
+ * is still going has already put some of what it is about to replay into it. The
+ * check is what lets the replay rebuild the half-written bubble without laying a
+ * second copy of the finished messages on top.
  */
 function alreadyApplied(session: Session, createdAt: string | undefined): boolean {
 	if (!createdAt) return false;
@@ -126,23 +118,10 @@ export function applyRunEvent(
 			return;
 
 		case 'message': {
-			// Already here: this event has been applied before.
-			//
-			// Which happens for an ordinary reason, not an exotic one. A finished run
-			// is kept for a few minutes so a tab that was closed mid-answer can still
-			// collect it, and coming back to the conversation in that window replays
-			// the log from the start. The tab that watched it live had already applied
-			// and saved every one of those events, so the reply landed a second time,
-			// and a third on the next visit.
-			//
-			// Identity rather than a guard: the timestamp is stamped once, by the run,
-			// when the message is built, so the same event carries the same one however
-			// many times it is delivered. That is what makes replay idempotent, which
-			// is the property this whole file claims and did not have.
-			//
-			// The streaming state is still cleared, because the event still happened:
-			// applying it twice has to land in the same place as applying it once, and
-			// that includes the half-written bubble it closes.
+			// Already here, because the conversation was read from storage after the
+			// run had written this into it. The streaming state is still cleared,
+			// since the event still happened: applying it twice has to land where
+			// applying it once does, and that includes the bubble it closes.
 			if (alreadyApplied(session, event.message.createdAt)) {
 				editor.completion = '';
 				editor.reasoning = '';
@@ -152,19 +131,17 @@ export function applyRunEvent(
 
 			// The live reasoning panel's state is stamped on at this point rather than
 			// after the message mounts, so the completed article appears with the panel
-			// already in the right state instead of re-opening a frame later.
+			// already in the right state instead of re-opening a frame later. A view
+			// decision, which is why it is added here and not carried on the event.
 			const message: Message = {
 				...event.message,
-				reasoningTrace: editor.reasoningTrace,
 				isReasoningVisible: !!(editor.streamingReasoningExpanded && event.message.reasoning)
 			};
 			session.messages = [...session.messages, message];
 			session.updatedAt = message.createdAt ?? new Date().toISOString();
-			if (message.personaId) surface.onPersonaReply?.(message);
 			editor.completion = '';
 			editor.reasoning = '';
 			editor.reasoningTrace = undefined;
-			surface.save();
 			progress();
 			return;
 		}
@@ -180,7 +157,6 @@ export function applyRunEvent(
 			if (session.title) session.titleRegenerated = true;
 			session.title = event.title;
 			session.updatedAt = new Date().toISOString();
-			surface.save();
 			return;
 
 		case 'compacting':
@@ -188,13 +164,12 @@ export function applyRunEvent(
 			return;
 
 		case 'compaction':
-			// Same reasoning as `message`: a replayed compaction would append a second
-			// marker, and two boundaries where there is one is a conversation that
-			// hides half of itself twice over.
+			// Same reasoning as `message`: replayed onto a conversation that already
+			// holds the marker, this would draw a second boundary where there is one,
+			// and a conversation that hides half of itself twice over.
 			if (alreadyApplied(session, event.marker.createdAt)) return;
 			session.messages = [...session.messages, event.marker];
 			session.updatedAt = new Date().toISOString();
-			surface.save();
 			return;
 
 		case 'done':
@@ -212,30 +187,10 @@ export function applyRunEvent(
 
 		case 'error':
 			editor.isCompletionInProgress = false;
-			// What the model had already written is kept: an answer cut off halfway is
-			// still worth more than an empty conversation, and the user can see where
-			// it stopped. Only a turn that produced nothing leaves nothing behind.
-			if (!event.aborted || editor.completion || editor.reasoning) {
-				if (editor.completion || editor.reasoning) {
-					session.messages = [
-						...session.messages,
-						{
-							role: 'assistant',
-							content: editor.completion || '',
-							reasoning: editor.reasoning,
-							reasoningTrace: editor.reasoningTrace,
-							isReasoningVisible: !!(editor.streamingReasoningExpanded && editor.reasoning),
-							createdAt: new Date().toISOString(),
-							// A half-written answer keeps its author: it is still theirs, and a
-							// later turn has to attribute it as such.
-							personaId: editor.speakerPersonaId,
-							personaName: editor.speakerName
-						}
-					];
-					session.updatedAt = new Date().toISOString();
-					surface.save();
-				}
-			}
+			// Whatever the turn had written by the time it stopped arrived as a
+			// `message` of its own, just before this. Rebuilding it from the
+			// half-written bubble is what this used to do, and it was the reason a
+			// stopped answer could be appended twice.
 			editor.speakerPersonaId = undefined;
 			editor.speakerName = undefined;
 			editor.completion = '';

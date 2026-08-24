@@ -7,9 +7,10 @@ import { effectivePrompts } from '$lib/appPrompts';
 import { formatAskAnswer } from '$lib/askChoice';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import type { Server } from '$lib/connections';
+import { repository } from '$lib/data';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { clearDraft, readDraft, sessionDraft, writeDraft } from '$lib/drafts';
-import { personasStore, serversStore, settingsStore } from '$lib/localStorage';
+import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
 import { languageInstruction } from '$lib/personas';
 import { playbookInstructions, playbooksOf } from '$lib/playbooks';
 import { contextMessages, imagesPayload } from '$lib/promptAttachments';
@@ -22,20 +23,11 @@ import { webFetchConfig } from '$lib/webFetch';
 import type { CommandName } from './commands';
 import { compactSession } from './compact';
 import { contextSnapshot, contextUsage } from './context';
-import { recordMention } from './mentionRecord';
 import { mentionedPersonas } from './mentions';
 import { messagesInContext } from './notes';
 import { refusalIn } from './refusal';
 import { applyRunEvent, type RunSurface } from './run/apply';
-import {
-	cancelRun,
-	followRun,
-	forgetRun,
-	rememberedRun,
-	rememberRun,
-	runForSession,
-	startRun
-} from './run/client';
+import { cancelRun, followRun, runForSession, startRun } from './run/client';
 import type { RunInput, RunSpeaker } from './run/types';
 
 /* eslint-disable svelte/prefer-svelte-reactivity -- the rule guards against a
@@ -555,6 +547,11 @@ export class Conversation implements RunSurface {
 		}
 
 		try {
+			// The server reads the conversation to write into it, so everything this
+			// tab has to say about it has to have landed first. Ordinary saves are
+			// coalesced a moment at a time, which is right for an edit and wrong for
+			// the message the turn is about to answer.
+			await repository.flush?.();
 			const run = await startRun(input);
 			await this.#follow(run.id, 0);
 		} catch (error) {
@@ -658,7 +655,6 @@ export class Conversation implements RunSurface {
 	 */
 	async #follow(runId: string, from: number, replayThrough = 0): Promise<void> {
 		this.activeRun = runId;
-		rememberRun(this.session.id, runId);
 		this.editor.isCompletionInProgress = true;
 
 		let ended = false;
@@ -668,6 +664,13 @@ export class Conversation implements RunSurface {
 			(event, replay) => {
 				if (event.type === 'done' || event.type === 'error') ended = true;
 				applyRunEvent(event, this, { replay });
+				// The run has already stored what these three changed, and the lists
+				// around the conversation are drawn from a summary this tab holds in
+				// memory. Without this the sidebar keeps yesterday's snippet and the
+				// name written mid-turn appears only after a reload.
+				if (event.type === 'message' || event.type === 'title' || event.type === 'compaction') {
+					sessionsStore.reflect(this.session);
+				}
 			},
 			{
 				replayThrough,
@@ -684,49 +687,40 @@ export class Conversation implements RunSurface {
 		} finally {
 			this.#stopFollowing = null;
 			this.activeRun = null;
-			// Only an ending clears the note. Closing the window on a turn that is
-			// still going is the case the note exists for, so leaving must not erase
-			// the one thing that says there is something to come back to.
-			if (ended) forgetRun(this.session.id);
-			else this.editor.isCompletionInProgress = false;
+			// Stopped watching without the turn ending, which is what leaving the
+			// conversation does: the composer is given back rather than left looking
+			// like something is still arriving here.
+			if (!ended) this.editor.isCompletionInProgress = false;
 		}
 	}
 
 	/**
 	 * Pick up a turn that was already running when this page loaded.
 	 *
-	 * The whole point of the exercise, and deliberately asked of the server rather
-	 * than trusted from what this browser remembers: the note in local storage is
-	 * only a hint that there may be something to collect.
+	 * Most of what this used to do is gone, and none of it is missed. A finished
+	 * run needed collecting, so a note was kept in local storage saying there might
+	 * be something to come back for, and its whole log was replayed to get the
+	 * answer out of it. The run writes the answer itself now, so a conversation
+	 * read from storage already holds everything a finished turn produced, and
+	 * there is nothing to collect: only a turn still being written is worth
+	 * joining.
+	 *
+	 * The server is asked, rather than this browser remembering: it is the one
+	 * running the turn, and the only one that can say whether it still is.
 	 */
 	async reattach(): Promise<void> {
 		if (this.activeRun) return;
 
 		const sessionId = this.session.id;
-		// The note the tab that started it left behind. It is only a hint, and the
-		// server is still asked; but it is enough to say "still going" immediately
-		// rather than after a round trip, which is the difference between coming
-		// back to a conversation that looks stalled and one that looks alive.
-		const hint = rememberedRun(sessionId);
-		if (hint) this.editor.isCompletionInProgress = true;
-
 		const run = await runForSession(sessionId).catch(() => null);
 		// The conversation may have changed under us while that was in flight.
 		if (sessionId !== this.session.id) return;
+		if (!run || run.status !== 'running') return;
 
-		if (!run) {
-			if (hint) {
-				forgetRun(sessionId);
-				this.editor.isCompletionInProgress = false;
-			}
-			return;
-		}
-
-		// From zero: the log is replayed in full, so what the tab missed and what it
-		// would have seen are the same thing. What the run had already written by the
-		// time it answered is history, and is applied as history rather than
-		// performed: on a local model at ten tokens a second, a reply worth leaving
-		// the room for is not worth watching a second time.
+		// From zero, so the half-written answer is rebuilt as it stands rather than
+		// picked up mid-sentence. What had already landed before this page opened is
+		// applied as history rather than performed: on a local model at ten tokens a
+		// second, a reply worth leaving the room for is not worth watching twice.
 		await this.#follow(run.id, 0, run.lastEventId);
 	}
 
@@ -771,15 +765,6 @@ export class Conversation implements RunSurface {
 
 	onFinish({ error }: { aborted: boolean; error?: string }): void {
 		if (error) this.#handleError(new Error(error));
-	}
-
-	/**
-	 * Best-effort on purpose: the answer is already in the conversation the user
-	 * is looking at, and a persona's own conversation failing to load is not a
-	 * reason to make this turn look like it failed.
-	 */
-	onPersonaReply(reply: Message): void {
-		if (reply.personaId) void recordMention(reply.personaId, this.session, reply);
 	}
 
 	#handleError(error: Error): void {

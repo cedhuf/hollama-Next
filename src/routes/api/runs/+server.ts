@@ -4,9 +4,11 @@ import { runSpeakers } from '$lib/chat/run/speakers';
 import type { RunInput } from '$lib/chat/run/types';
 import { requireUser } from '$lib/server/api';
 import { resolveClaimedAppPrompts } from '$lib/server/appPromptsResolver';
+import { getItem } from '$lib/server/db/collections';
 import { PolicyError } from '$lib/server/llmPolicy';
 import { serverDeps, type RunPrincipal } from '$lib/server/runDeps';
 import { createRun, emitTo, findRunForSession, summarise } from '$lib/server/runs';
+import { sessionWriter } from '$lib/server/runSession';
 import { recordRunUsage } from '$lib/server/usageMeter';
 
 /**
@@ -31,6 +33,14 @@ export async function POST(event) {
 		principal.isAdmin
 	).overrides;
 
+	// The question has to exist before the answer does. The page saves the message
+	// it just sent before handing the turn over, so a conversation that is not
+	// there is a client that skipped that step, and starting anyway would produce
+	// an answer with nowhere to go.
+	if (!getItem('sessions', principal.userId, input.sessionId)) {
+		throw error(404, 'No such conversation');
+	}
+
 	// One at a time per conversation. Two turns writing into the same transcript
 	// is not a race the transcript can win, and a second tab hitting send is the
 	// ordinary way it would happen.
@@ -48,6 +58,11 @@ export async function POST(event) {
 	}
 
 	const run = createRun(input.sessionId, principal.userId);
+
+	// What the turn produces is written down here, as it is produced, and only
+	// then handed to whoever is watching. That order is the point: a client that
+	// reads a message and reloads on the spot finds it stored.
+	const write = sessionWriter(principal.userId, input.sessionId);
 
 	// Deliberately not awaited: this is the handover. Failures inside become
 	// `error` events on the run, which is where a client will look for them.
@@ -68,6 +83,7 @@ export async function POST(event) {
 			if (ev.type === 'usage' && principal.userId) {
 				recordRunUsage(principal.userId, ev.serverId, ev.model, ev.used);
 			}
+			write(ev);
 			emitTo(run, ev);
 		},
 		run.controller.signal

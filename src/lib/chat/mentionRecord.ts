@@ -1,8 +1,4 @@
-import { get } from 'svelte/store';
-
-import { repository } from '$lib/data';
-import { personasStore } from '$lib/localStorage';
-import { saveSession, type Message, type Session } from '$lib/sessions';
+import type { Message, Session } from '$lib/sessions';
 import { resolveSessionTitle } from '$lib/sessionShape';
 
 import type { MentionNote } from './notes';
@@ -20,6 +16,10 @@ import type { MentionNote } from './notes';
  * copy somebody else's conversation into this one, and the record is offered to
  * the model on request, where anything bigger would be spending a context window
  * on a thread the persona was not part of.
+ *
+ * What is here is only the note itself, decided from two conversations and
+ * nothing else. Writing it is the business of whoever is producing the reply,
+ * which is the run.
  */
 
 /** Roughly a page of text each way, past which a record stops being a record. */
@@ -27,55 +27,29 @@ const MAX_RECORDED = 4000;
 
 function trim(text: string): string {
 	const clean = text.trim();
-	return clean.length > MAX_RECORDED ? `${clean.slice(0, MAX_RECORDED)}…` : clean;
+	return clean.length > MAX_RECORDED ? `${clean.slice(0, MAX_RECORDED)}...` : clean;
 }
 
-/**
- * Write the record, unless there is nowhere to write it.
- *
- * A persona nobody has opened yet has no conversation of its own, and this does
- * not create one: a conversation appearing in the sidebar because you mentioned
- * somebody once is a conversation you did not start. The record is skipped, and
- * the exchange still lives where it happened.
- */
-export async function recordMention(
-	personaId: string,
-	source: Session,
-	reply: Message
-): Promise<void> {
-	const persona = (get(personasStore) ?? []).find((p) => p.id === personaId);
-	if (!persona?.sessionId) return;
-	// Mentioning a persona inside its own conversation is not being called away:
-	// the exchange is already right there, and a record of it would be the same
-	// two messages a second time.
-	if (persona.sessionId === source.id) return;
-
+/** The record of one exchange, or nothing when there is no exchange to record. */
+export function buildMentionNote(source: Session, reply: Message): MentionNote | null {
 	const asked = [...source.messages].reverse().find((m) => m.role === 'user' && !m.knowledge);
-	if (!asked?.content || !reply.content) return;
+	if (!asked?.content || !reply.content) return null;
 
-	const session = await repository.loadSession(persona.sessionId);
-	if (!session) return;
-
-	const at = reply.createdAt ?? new Date().toISOString();
-	// The reply's own timestamp identifies the exchange, so a replayed run and a
-	// second tab cannot both leave the same record.
-	const already = session.messages.some(
-		(message) => message.note?.kind === 'mention' && message.note.generatedAt === at
-	);
-	if (already) return;
-
-	const note: MentionNote = {
+	return {
 		kind: 'mention',
-		generatedAt: at,
+		// The reply's own timestamp identifies the exchange, so the same answer
+		// cannot leave two records however many times it is read.
+		generatedAt: reply.createdAt ?? new Date().toISOString(),
 		sessionId: source.id,
 		title: resolveSessionTitle(source),
 		asked: trim(asked.content),
 		answered: trim(reply.content)
 	};
+}
 
-	saveSession({
-		...session,
-		messages: [...session.messages, { role: 'system', content: '', createdAt: at, note }],
-		updatedAt: at
-	});
+/** Whether this exchange has already been recorded in the persona's conversation. */
+export function mentionRecorded(session: Session, generatedAt: string): boolean {
+	return session.messages.some(
+		(message) => message.note?.kind === 'mention' && message.note.generatedAt === generatedAt
+	);
 }

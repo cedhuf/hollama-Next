@@ -24,7 +24,7 @@ import {
 } from '$lib/personaMemory';
 import { parseReadBlock, stripReadBlock } from '$lib/readProtocol';
 import { parseRouterDecision } from '$lib/search';
-import type { Message, WebSearchInfo } from '$lib/sessions';
+import type { Message, ReasoningStep, WebSearchInfo } from '$lib/sessions';
 import { extractUrls } from '$lib/urls';
 import type { TokenCount } from '$lib/usageCounts';
 
@@ -121,10 +121,36 @@ export type Emit = (event: RunEvent) => void;
 export async function runTurn(
 	input: RunInput,
 	deps: RunDeps,
-	emit: Emit,
+	report: Emit,
 	signal: AbortSignal
 ): Promise<void> {
 	const overrides = input.promptOverrides;
+
+	/**
+	 * The finished steps of the answer being written, kept as they go out.
+	 *
+	 * They are emitted one at a time, and they also belong to the message they
+	 * were reasoned for: whoever stores that message stores the trace with it. The
+	 * page used to be the only one keeping the running list, which made the trace
+	 * something you had to have watched the turn to end up with.
+	 */
+	let trace: ReasoningStep[] = [];
+	const emit: Emit = (event) => {
+		if (event.type === 'trace') trace = [...trace, event.step];
+		report(event);
+	};
+
+	/**
+	 * What has been written so far, for the ending that is not an ending.
+	 *
+	 * Declared out here so the catch below can still see it: a turn that was
+	 * stopped, or that failed halfway, has usually written something, and that is
+	 * worth keeping. It leaves as a `message` like any other, so a client has one
+	 * rule for what ends up in the conversation instead of a second one for
+	 * partial answers.
+	 */
+	let completion = '';
+	let reasoning = '';
 
 	/**
 	 * What the provider says this turn consumed, across every round of it.
@@ -652,9 +678,6 @@ export async function runTurn(
 		// bounded number of requests, and then owes an answer with what it has.
 		const maxRounds = nativeTools.length ? 4 : 2;
 
-		let completion = '';
-		let reasoning = '';
-
 		for (let round = 0; round < maxRounds; round++) {
 			completion = '';
 			reasoning = '';
@@ -876,6 +899,7 @@ export async function runTurn(
 			role: 'assistant',
 			content,
 			reasoning,
+			reasoningTrace: trace.length ? trace : undefined,
 			webSearch: searchInfo,
 			choices,
 			createdAt: new Date().toISOString(),
@@ -885,6 +909,7 @@ export async function runTurn(
 			personaName: input.speaker?.name
 		};
 
+		trace = [];
 		emit({ type: 'message', message });
 
 		// Naming and compaction are part of the turn rather than something the page
@@ -927,6 +952,29 @@ export async function runTurn(
 	} catch (error) {
 		const typed = error instanceof Error ? error : new Error(String(error));
 		const aborted = typed.name === 'AbortError' || signal.aborted;
+
+		// An answer cut off halfway is still worth more than an empty conversation,
+		// and the user can see where it stopped. Sent before the ending rather than
+		// left for the client to reconstruct from the fragments it happened to
+		// receive: a client that joined late never saw them, and one that is not a
+		// browser has no half-written bubble to salvage.
+		if (completion || reasoning) {
+			emit({
+				type: 'message',
+				message: {
+					role: 'assistant',
+					content: completion,
+					reasoning: reasoning || undefined,
+					reasoningTrace: trace.length ? trace : undefined,
+					createdAt: new Date().toISOString(),
+					// A half-written answer keeps its author: it is still theirs, and a
+					// later turn has to attribute it as such.
+					personaId: input.speaker?.personaId,
+					personaName: input.speaker?.name
+				}
+			});
+		}
+
 		emit({ type: 'error', message: typed.message, aborted });
 	}
 }

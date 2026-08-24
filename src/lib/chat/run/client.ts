@@ -8,34 +8,6 @@ import type { RunEvent, RunInput, RunSummary } from './types';
  * what lets the page treat a run in the server exactly like a run in the tab.
  */
 
-/** Where a conversation's run is remembered between page loads. */
-const runKey = (sessionId: string) => `llooma-run-${sessionId}`;
-
-export function rememberRun(sessionId: string, runId: string): void {
-	try {
-		localStorage.setItem(runKey(sessionId), runId);
-	} catch {
-		// Private browsing, or a full quota. The run still finishes; only coming
-		// back to it after a reload is lost, which is no worse than before.
-	}
-}
-
-export function forgetRun(sessionId: string): void {
-	try {
-		localStorage.removeItem(runKey(sessionId));
-	} catch {
-		// See above.
-	}
-}
-
-export function rememberedRun(sessionId: string): string | null {
-	try {
-		return localStorage.getItem(runKey(sessionId));
-	} catch {
-		return null;
-	}
-}
-
 /** Hand a turn over to the server. Returns as soon as it has an id, not an answer. */
 export async function startRun(input: RunInput): Promise<RunSummary> {
 	const response = await fetch('/api/runs', {
