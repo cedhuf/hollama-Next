@@ -156,7 +156,7 @@
 	{:else}
 		<Select.Trigger
 			{id}
-			class="select-trigger border-shade-3 bg-shade-0 text-active focus:border-accent flex w-full items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50 {className}"
+			class="select-trigger settings-field flex items-center justify-between gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 {className}"
 		>
 			<span class="min-w-0 truncate text-left {selected ? '' : 'text-muted'}">
 				{selected?.label ?? emptyLabel ?? placeholder}

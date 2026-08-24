@@ -15,10 +15,12 @@
 		card?: boolean;
 		/** Optional content beside the title (e.g. a status badge). */
 		badge?: Snippet;
+		/** Optional control pinned to the right of the title row, e.g. a reset. */
+		action?: Snippet;
 		children: Snippet;
 	}
 
-	let { title, description, card = false, badge, children }: Props = $props();
+	let { title, description, card = false, badge, action, children }: Props = $props();
 </script>
 
 <section
@@ -28,6 +30,9 @@
 		<div class="flex items-center gap-2">
 			<h3 class="text-active text-sm font-medium">{title}</h3>
 			{@render badge?.()}
+			{#if action}
+				<span class="ml-auto shrink-0">{@render action()}</span>
+			{/if}
 		</div>
 		{#if description}
 			<p class="text-muted text-xs leading-snug">{description}</p>

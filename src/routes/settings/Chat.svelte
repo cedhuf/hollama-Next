@@ -1,9 +1,12 @@
 <script lang="ts">
+	import { RotateCcw } from '@lucide/svelte';
+
 	import LL from '$i18n/i18n-svelte';
 	import { isSystemDefault, SYSTEM_SAMPLING_DEFAULTS } from '$lib/chat/options';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
+	import NumberField from '$lib/components/NumberField.svelte';
 	import { settingsStore } from '$lib/localStorage';
 
 	import SamplingFields from './SamplingFields.svelte';
@@ -23,10 +26,14 @@
 
 	const samplingCfg = $derived($chatDefaultsConfig.sampling);
 	/**
-	 * Nothing to reset once the administrator has locked the values, and nothing
-	 * to reset when the fields already say exactly what the app ships with. The
-	 * control names its one destination rather than saying "reset", because a
-	 * reset that does not say where it lands is a reset nobody dares press.
+	 * Nothing to clear once the administrator has locked the values, and nothing
+	 * to clear when every field is already empty.
+	 *
+	 * The control says "clear" rather than "reset to the defaults" because that is
+	 * what it does: `SYSTEM_SAMPLING_DEFAULTS` is empty on purpose, so the app has
+	 * no numbers of its own to go back to, and emptying the fields is what hands
+	 * each provider back to its own. A button promising defaults that do not exist
+	 * is one nobody dares press.
 	 */
 	const canResetSampling = $derived(
 		samplingCfg.editable && !isSystemDefault($settingsStore.sampling)
@@ -132,26 +139,28 @@
 			{/if}
 		{/snippet}
 
+		<!-- Same control, same words and same corner as the reset on an Ollama
+		     connection: both put a panel of fields back to Auto. -->
+		{#snippet action()}
+			{#if samplingCfg.editable}
+				<button
+					type="button"
+					class="text-link flex shrink-0 items-center gap-1.5 text-xs hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline"
+					disabled={!canResetSampling}
+					onclick={resetSampling}
+				>
+					<RotateCcw class="h-3.5 w-3.5" />
+					{$LL.resetToAuto()}
+				</button>
+			{/if}
+		{/snippet}
+
 		<!-- Two branches rather than one, because a locked panel shows the published
 		     set and must not be able to write to it: there is nothing to bind to. -->
 		{#if samplingCfg.editable}
 			<SamplingFields bind:values={$settingsStore.sampling} ollama={true} />
 		{:else}
 			<SamplingFields values={samplingCfg.value} ollama={true} disabled />
-		{/if}
-
-		{#if samplingCfg.editable}
-			<div class="flex flex-col gap-1">
-				<button
-					type="button"
-					class="text-link self-start text-xs hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-					disabled={!canResetSampling}
-					onclick={resetSampling}
-				>
-					{$LL.samplingReset()}
-				</button>
-				<SettingsHint>{$LL.samplingResetHint()}</SettingsHint>
-			</div>
 		{/if}
 	</SettingsSection>
 
@@ -175,13 +184,11 @@
 			<SettingsHint>{$LL.autoCompactHelp()}</SettingsHint>
 
 			<SettingsField label={$LL.compactThreshold()}>
-				<input
-					class="settings-field"
-					type="number"
-					min="4000"
-					step="1000"
+				<NumberField
+					min={4000}
+					step={1000}
 					value={$settingsStore.compactThreshold}
-					onchange={(event) => setThreshold(event.currentTarget.value)}
+					onChange={setThreshold}
 				/>
 			</SettingsField>
 			<SettingsHint>{$LL.compactThresholdHelp()}</SettingsHint>

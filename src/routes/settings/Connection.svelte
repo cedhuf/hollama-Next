@@ -399,21 +399,24 @@
 						/>
 					</SettingsField>
 				{/if}
-
-				<!-- How the model is loaded, which is a fact about this machine and not
-				     about any one conversation. Under Advanced because a working Ollama
-				     needs none of it: every field left blank is Ollama deciding, which is
-				     the right answer until somebody has a reason it is not. -->
-				{#if isOllamaFamily}
-					<div class="border-shade-3 flex flex-col gap-3 border-t pt-3">
-						<span class="text-active text-sm font-medium">{$LL.loadOptions()}</span>
-						<ConnectionLoadOptions bind:server onChange={persist} />
-					</div>
-				{/if}
 			{/if}
 
 			{#if isOllamaFamily}
 				<PullModel {server} />
+			{/if}
+
+			<!-- How the model is loaded, which is a fact about this machine and not
+			     about any one conversation. Under Advanced because a working Ollama
+			     needs none of it: every field left blank is Ollama deciding, which is
+			     the right answer until somebody has a reason it is not.
+
+			     Below the pull field rather than above it, following the order of the
+			     work: you fetch a model first, and only then wonder how the machine
+			     should load it. -->
+			{#if showAdvanced && isOllamaFamily}
+				<div class="border-shade-3 border-t pt-3">
+					<ConnectionLoadOptions bind:server onChange={persist} />
+				</div>
 			{/if}
 
 			<!-- Footer: the occasional actions, kept out of the way of the fields.

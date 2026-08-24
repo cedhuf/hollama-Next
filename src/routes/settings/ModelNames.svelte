@@ -5,14 +5,16 @@
 		ChevronDown,
 		Coins,
 		RotateCcw,
-		Search,
-		X
+		Search
 	} from '@lucide/svelte';
 	import { quadInOut } from 'svelte/easing';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
+	import NumberField from '$lib/components/NumberField.svelte';
+	import Select from '$lib/components/Select.svelte';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 	import {
 		guessModelKind,
 		hasPriceFigure,
@@ -108,17 +110,27 @@
 	});
 
 	/** What each unit is called, and what it reads as beside a figure. */
-	const UNIT_LABELS = $derived<Record<PriceUnit, string>>({
-		token: $LL.priceUnitToken(),
-		image: $LL.priceUnitImage(),
-		second: $LL.priceUnitSecond(),
-		minute: $LL.priceUnitMinute()
-	});
+	/** "Cost in EUR, per million tokens", for the tooltip and the accessible name. */
+	function priceLabel(price: ModelPrice | undefined, unit: PriceUnit): string {
+		return $LL.priceTooltip({
+			currency: price?.currency ?? DEFAULT_CURRENCY,
+			unit: UNIT_LABELS[unit].toLocaleLowerCase()
+		});
+	}
+
+	/** The scale in two or three characters, for the folded row. */
 	const UNIT_SUFFIX = $derived<Record<PriceUnit, string>>({
 		token: $LL.perMillionShort(),
 		image: $LL.perImageShort(),
 		second: $LL.perSecondShort(),
 		minute: $LL.perMinuteShort()
+	});
+
+	const UNIT_LABELS = $derived<Record<PriceUnit, string>>({
+		token: $LL.priceUnitToken(),
+		image: $LL.priceUnitImage(),
+		second: $LL.priceUnitSecond(),
+		minute: $LL.priceUnitMinute()
 	});
 
 	// Match on the id *and* the custom name: once a model is renamed, its new name
@@ -307,8 +319,8 @@
 	{#if models.length}
 		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
 		     reach one. -->
-		<div class="flex items-center gap-2">
-			<div class="relative flex-1">
+		<div class="flex flex-wrap items-center gap-2">
+			<div class="relative min-w-40 flex-1">
 				<Search
 					class="text-muted pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2"
 				/>
@@ -370,10 +382,11 @@
 						<span class="text-muted text-xs tabular-nums">{section.models.length}</span>
 					</div>
 
-					<!-- One row per model, one column at every width: the editable name on
-					     top, the real id underneath. Side by side, both halves were too
-					     narrow to read on a phone, and the id was printed twice, once as
-					     the placeholder of its own field. -->
+					<!-- One row per model. The name reads as text until you touch it, the
+					     id lives on its tooltip rather than on a second line, and the two
+					     controls sit at the right. On a phone the name takes the line and
+					     they drop underneath, which is what the old two-column row could not
+					     do without crushing both halves. -->
 					{#each section.models as name (name)}
 						{@const label = server.modelLabels?.[name] ?? ''}
 						{@const price = server.modelPricing?.[name]}
@@ -391,138 +404,186 @@
 								: 'border-shade-3'}"
 						>
 							<div class="flex items-center gap-1.5">
-								<input
-									class="settings-field py-1 text-sm"
-									value={label}
-									placeholder={name}
-									oninput={(e) => setLabel(name, e.currentTarget.value)}
-									aria-label={name}
-								/>
-								{#if label.trim()}
-									<button
-										type="button"
-										onclick={() => setLabel(name, '')}
-										aria-label={$LL.clear()}
-										title={$LL.clear()}
-										class="text-muted hover:text-active shrink-0 rounded-md p-1.5 transition-colors"
-									>
-										<X class="h-4 w-4" />
-									</button>
-								{/if}
-							</div>
-							<div class="flex items-center gap-2 px-1">
-								<span class="text-muted min-w-0 flex-1 truncate font-mono text-[11px]" title={name}>
-									{name}
-								</span>
-
-								<!-- What this model is, on the row that describes it. Three answers
-								     and no free text: this decides which picker offers it, so a value
-								     nobody recognises would be a model that quietly exists nowhere.
-								     Prefilled from the name, which is the only thing any provider gives
-								     us to go on, and left correctable because that guess is wrong often
-								     enough to matter. -->
-								<select
-									class="border-shade-3 bg-shade-0 text-muted hover:text-active focus:border-accent h-6 shrink-0 rounded-md border px-1 text-[11px] transition-colors outline-none"
-									value={modelKind(server, name)}
-									aria-label="{name} · {$LL.modelKindLabel()}"
-									title={$LL.modelKindLabel()}
-									onchange={(e) => setKind(name, e.currentTarget.value as ModelKind)}
-								>
-									{#each MODEL_KINDS as kind (kind)}
-										<option value={kind}>{KIND_LABELS[kind]}</option>
-									{/each}
-								</select>
-
-								<!-- The way in to the prices, on the row it prices. Says what it
-								     holds when closed, so a shared model with nothing set is
-								     readable without opening anything. -->
-								<button
-									type="button"
-									onclick={() => (priced.has(name) ? priced.delete(name) : priced.add(name))}
-									aria-expanded={priced.has(name)}
-									class="hover:bg-shade-2 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] transition-colors {hasPrice
-										? 'text-active'
-										: 'text-muted'}"
-									title={$LL.pricingHelp()}
-								>
-									<Coins class="h-3 w-3" />
-									{#if hasPrice}
-										<span class="tabular-nums">
-											{#if unit === 'token'}
-												{price?.input ?? '-'} / {price?.output ?? '-'}
-											{:else}
-												{price?.rate}
+								<!-- A field that does not look like one until it is wanted: this is a
+								     list to read, not a form to fill, and eighty boxed inputs made it
+								     the other way round. The id is the placeholder and the tooltip, so
+								     it is never printed twice. -->
+								<!-- The app's tooltip rather than a `title`: it is the one every
+								     other hint in the app uses, it opens on keyboard focus too, and it
+								     is not at the mercy of the platform's own delay and styling. -->
+								<Tooltip side="top" align="start">
+									{#snippet trigger({ props })}
+										<span {...props} class="flex min-w-0 flex-1 items-center gap-1">
+											<input
+												class="text-active placeholder:text-muted hover:border-shade-3 focus:border-shade-3 focus:bg-shade-0 min-w-0 flex-1 rounded-md border border-transparent px-2 py-1 text-sm outline-none"
+												value={label}
+												placeholder={name}
+												oninput={(e) => setLabel(name, e.currentTarget.value)}
+												aria-label={name}
+											/>
+											{#if label.trim()}
+												<!-- The old cross read as "remove this model". This puts the
+												     name back to what the provider calls it, which is what it
+												     does, and it is the same icon every other reset wears. -->
+												<button
+													type="button"
+													onclick={() => setLabel(name, '')}
+													aria-label="{name} · {$LL.resetName()}"
+													title={$LL.resetName()}
+													class="text-muted hover:text-active hover:bg-shade-2 shrink-0 rounded-md p-1.5 transition-colors"
+												>
+													<RotateCcw class="h-3.5 w-3.5" />
+												</button>
 											{/if}
-											{#if price?.currency}<span class="uppercase">{price.currency}</span>{/if}
-											<span class="opacity-70">{UNIT_SUFFIX[unit]}</span>
 										</span>
-									{:else}
-										{$LL.priceUnset()}
-									{/if}
-									<ChevronDown
-										class="h-3 w-3 transition-transform {priced.has(name) ? 'rotate-180' : ''}"
-									/>
-								</button>
+									{/snippet}
+									<span class="font-mono">{name}</span>
+								</Tooltip>
+
+								<!-- The one summary on the row, and the way in to everything else. It
+								     says the figures and what they are counted in; what they are counted
+								     per is the same for every model here, so it sits on the tooltip and
+								     inside the fold rather than on eighty rows. -->
+								<!-- The app's tooltip here too, and one plain sentence in it:
+								     "Cost in EUR, per million tokens". The row shows the figures and
+								     the scale; the tooltip is where the words go. -->
+								<Tooltip side="top" align="end">
+									{#snippet trigger({ props })}
+										<button
+											{...props}
+											type="button"
+											onclick={() => (priced.has(name) ? priced.delete(name) : priced.add(name))}
+											aria-expanded={priced.has(name)}
+											aria-label="{name} · {priceLabel(price, unit)}"
+											class="hover:bg-shade-2 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-xs transition-colors {hasPrice
+												? 'text-active'
+												: 'text-muted'}"
+										>
+											<Coins class="h-3.5 w-3.5" />
+											{#if hasPrice}
+												<!-- The same two arrows as inside the fold, up for what you send
+												     and down for what comes back, instead of a slash between the
+												     figures. One slash on the row is the scale; a second one
+												     separating a pair read as a division. -->
+												<span class="flex items-center gap-1.5 tabular-nums">
+													{#if unit === 'token'}
+														<span class="flex items-center gap-0.5">
+															<ArrowUpRight class="h-3 w-3 opacity-70" />
+															{price?.input ?? '-'}
+														</span>
+														<span class="flex items-center gap-0.5">
+															<ArrowDownRight class="h-3 w-3 opacity-70" />
+															{price?.output ?? '-'}
+														</span>
+													{:else}
+														<span>{price?.rate}</span>
+													{/if}
+													<!-- No currency here. A connection bills in one currency, so
+													     printing it on every row says the same word eighty times.
+													     It is in the tooltip and in the fold, where it is a thing
+													     to check rather than a thing to read past. -->
+													<span class="opacity-70">{UNIT_SUFFIX[unit]}</span>
+												</span>
+											{:else}
+												{$LL.priceUnset()}
+											{/if}
+											<ChevronDown
+												class="h-3.5 w-3.5 transition-transform {priced.has(name)
+													? 'rotate-180'
+													: ''}"
+											/>
+										</button>
+									{/snippet}
+									{priceLabel(price, unit)}
+								</Tooltip>
 							</div>
 
 							{#if priced.has(name)}
+								<!-- Everything a model is worth saying, in two lines that are two
+								     lines on purpose: what it is and how it is billed, then what it
+								     costs. The kind lives here rather than on the row above because
+								     it is set once from the name and corrected rarely, and it was
+								     taking the width the names needed on a phone. -->
 								<div
 									class="border-shade-3 bg-shade-1 mt-1 flex flex-col gap-2 rounded-md border p-2"
 									transition:slide={{ duration: 160, easing: quadInOut }}
 								>
-									<!-- Everything about this price on one row: what it is billed by,
-									     what it costs, in what, and the way back to nothing. Spread
-									     across the width rather than bunched at the left, each field
-									     hugs its own value, so left to themselves they pile up in a
-									     corner of a panel that is mostly empty. -->
 									<div class="flex flex-wrap items-center gap-2">
-										<!-- First, because it decides what the rest of the row is. A model
-										     billed per minute has no way in and no way out, only a length
-										     of time, and showing two token fields for it would be asking
-										     two questions the invoice does not answer. -->
-										<select
-											class="border-shade-3 bg-shade-0 text-active focus:border-accent h-8 w-auto shrink-0 rounded-md border px-2 text-xs outline-none"
-											value={unit}
-											aria-label="{name} · {$LL.priceUnitLabel()}"
-											onchange={(e) => setUnit(name, e.currentTarget.value as PriceUnit)}
-										>
-											{#each PRICE_UNITS as code (code)}
-												<option value={code}>{UNIT_LABELS[code]}</option>
-											{/each}
-										</select>
+										<!-- Three answers and no free text: this decides which picker
+										     offers the model, so a value nobody recognises would be a model
+										     that quietly exists nowhere. Prefilled from the name, which is
+										     the only thing any provider gives us to go on, and left
+										     correctable because that guess is wrong often enough. -->
+										<span class="min-w-0 flex-1 basis-28">
+											<Select
+												value={modelKind(server, name)}
+												options={MODEL_KINDS.map((kind) => ({
+													value: kind,
+													label: KIND_LABELS[kind]
+												}))}
+												onChange={(option) => setKind(name, option.value as ModelKind)}
+											/>
+										</span>
 
+										<!-- Beside the kind because it is the other thing this model *is*,
+										     and because it decides what the line below asks. A model billed
+										     per minute has no way in and no way out, only a length of time,
+										     and two token fields for it would be asking two questions the
+										     invoice does not answer. It also says "per million tokens" once,
+										     for the whole block: the figures below carry no suffix, where
+										     the same words used to be printed twice. -->
+										<span class="min-w-0 flex-1 basis-40">
+											<Select
+												value={unit}
+												options={PRICE_UNITS.map((code) => ({
+													value: code,
+													label: UNIT_LABELS[code]
+												}))}
+												onChange={(option) => setUnit(name, option.value as PriceUnit)}
+											/>
+										</span>
+
+										<!-- Zero is a price: free, and counted as such. Clearing is the
+										     other answer (nobody has said) and a field cannot be walked
+										     back to it. -->
+										<button
+											type="button"
+											onclick={() => clearPrice(name)}
+											title={$LL.clearPrice()}
+											aria-label="{name} · {$LL.clearPrice()}"
+											class="border-shade-3 text-muted hover:border-shade-4 hover:text-active ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors"
+										>
+											<RotateCcw class="h-3.5 w-3.5" />
+										</button>
+									</div>
+
+									<!-- One line, always: two figures and their currency fit on a
+									     phone, and wrapping the currency underneath left it alone on a
+									     row of its own with the width beside it unused. -->
+									<div class="flex items-center gap-2">
 										{#if unit === 'token'}
 											{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownRight, label: $LL.pricePerMillionOut() }] as field (field.side)}
 												{@const Icon = field.icon}
 												<!-- The arrow is the whole label: up for what you send, down for
-												     what comes back, both leaning the same way so the pair reads as
-												     one movement rather than two opposed ones. The words are on the
-												     tooltip and the accessible name, where they cost no width. -->
+												     what comes back, both leaning the same way so the pair reads
+												     as one movement rather than two opposed ones. The words are on
+												     the tooltip and the accessible name, where they cost no width. -->
 												<label
 													class="flex min-w-0 flex-1 items-center gap-1.5"
-													title="{field.label} · {$LL.perMillionTokens()}"
+													title="{field.label} · {UNIT_LABELS[unit]}"
 												>
 													<Icon class="text-muted h-4 w-4 shrink-0" />
-
-													<!-- The unit sits immediately after the figure, inside the box,
-													     so the field reads as one thing: 0,2 /M Tokens. The figure is
-													     right-aligned in a box that takes its share of the row, which
-													     keeps the two together while the pair fills the line. -->
-													<span
-														class="border-shade-3 bg-shade-0 focus-within:border-accent flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border px-2"
-													>
-														<input
-															class="text-active placeholder:text-muted w-full min-w-0 bg-transparent text-right text-xs tabular-nums outline-none"
-															type="text"
-															inputmode="decimal"
+													<span class="min-w-0 flex-1">
+														<NumberField
+															decimal
+															min={0}
+															step={0.1}
+															class="text-right text-xs tabular-nums"
 															value={price?.[field.side] ?? ''}
 															placeholder={$LL.priceUnset()}
-															aria-label="{name} · {field.label} · {$LL.perMillionTokens()}"
-															oninput={(e) => setPrice(name, field.side, e.currentTarget.value)}
+															label="{name} · {field.label} · {UNIT_LABELS[unit]}"
+															onChange={(raw) => setPrice(name, field.side, raw)}
 														/>
-														<span class="text-muted shrink-0 text-[10px] whitespace-nowrap">
-															{$LL.perMillionShort()}
-														</span>
 													</span>
 												</label>
 											{/each}
@@ -534,51 +595,30 @@
 												title={UNIT_LABELS[unit]}
 											>
 												<Coins class="text-muted h-4 w-4 shrink-0" />
-												<span
-													class="border-shade-3 bg-shade-0 focus-within:border-accent flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md border px-2"
-												>
-													<input
-														class="text-active placeholder:text-muted w-full min-w-0 bg-transparent text-right text-xs tabular-nums outline-none"
-														type="text"
-														inputmode="decimal"
+												<span class="min-w-0 flex-1">
+													<NumberField
+														decimal
+														min={0}
+														step={0.1}
+														class="text-right text-xs tabular-nums"
 														value={price?.rate ?? ''}
 														placeholder={$LL.priceUnset()}
-														aria-label="{name} · {UNIT_LABELS[unit]}"
-														oninput={(e) => setRate(name, e.currentTarget.value)}
+														label="{name} · {UNIT_LABELS[unit]}"
+														onChange={(raw) => setRate(name, raw)}
 													/>
-													<span class="text-muted shrink-0 text-[10px] whitespace-nowrap">
-														{UNIT_SUFFIX[unit]}
-													</span>
 												</span>
 											</label>
 										{/if}
 
 										<!-- No empty option: a price without a currency is a number nobody
-										     can add up, and USD is what providers publish in. Same box as
-										     the fields beside it, so the row sits on one line. -->
-										<select
-											class="border-shade-3 bg-shade-0 text-active focus:border-accent h-8 w-auto shrink-0 rounded-md border px-2 text-xs uppercase outline-none"
-											value={price?.currency ?? DEFAULT_CURRENCY}
-											aria-label="{name} · {$LL.currency()}"
-											onchange={(e) => setCurrency(name, e.currentTarget.value)}
-										>
-											{#each CURRENCIES as code (code)}
-												<option value={code}>{code}</option>
-											{/each}
-										</select>
-
-										<!-- Zero is a price: free, and counted as such. Clearing is the
-										     other answer (nobody has said) and a field cannot be walked
-										     back to it. -->
-										<button
-											type="button"
-											onclick={() => clearPrice(name)}
-											title={$LL.clearPrice()}
-											aria-label="{name} · {$LL.clearPrice()}"
-											class="border-shade-3 text-muted hover:border-shade-4 hover:text-active flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors"
-										>
-											<RotateCcw class="h-3.5 w-3.5" />
-										</button>
+										     can add up, and USD is what providers publish in. -->
+										<span class="w-20 shrink-0">
+											<Select
+												value={price?.currency ?? DEFAULT_CURRENCY}
+												options={CURRENCIES.map((code) => ({ value: code, label: code }))}
+												onChange={(option) => setCurrency(name, option.value)}
+											/>
+										</span>
 									</div>
 								</div>
 							{/if}

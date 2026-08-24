@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { RotateCcw } from '@lucide/svelte';
+
 	import LL from '$i18n/i18n-svelte';
 	import { LOAD_BOOLEAN_KEYS, LOAD_NUMBER_KEYS, type LoadOptions } from '$lib/chat/options';
+	import NumberField from '$lib/components/NumberField.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import type { Server } from '$lib/connections';
-
-	import SettingsField from './SettingsField.svelte';
-	import SettingsHint from './SettingsHint.svelte';
 
 	/**
 	 * How this Ollama loads a model, configured once on the connection.
@@ -86,39 +86,53 @@
 </script>
 
 <div class="flex flex-col gap-3">
-	<SettingsHint>{$LL.loadOptionsHelp()}</SettingsHint>
-
-	<div class="grid grid-cols-2 gap-3">
-		{#each LOAD_NUMBER_KEYS as key (key)}
-			<SettingsField label={numberLabels[key]}>
-				<input
-					class="settings-field"
-					type="number"
-					min={key === 'main_gpu' || key === 'num_gpu' ? 0 : 1}
-					step="1"
-					placeholder={$LL.automatic()}
-					value={options[key] ?? ''}
-					onchange={(event) => setNumber(key, event.currentTarget.value)}
-				/>
-			</SettingsField>
-		{/each}
-	</div>
-
-	<div class="flex flex-col gap-2">
-		{#each LOAD_BOOLEAN_KEYS as key (key)}
-			<SettingsField label={booleanLabels[key]}>
-				<Select
-					value={options[key] === undefined ? 'auto' : options[key] ? 'on' : 'off'}
-					options={switchOptions}
-					onChange={(option) => setBoolean(key, option.value)}
-				/>
-			</SettingsField>
-		{/each}
-	</div>
-
-	{#if isSet}
-		<button type="button" class="text-link self-start text-xs hover:underline" onclick={clearAll}>
-			{$LL.loadOptionsClear()}
+	<!-- The heading carries the reset, which greys out instead of disappearing: a
+	     control you only see once you have already changed something is one nobody
+	     knows they can fall back on. What these fields do belongs in the
+	     documentation, not in a paragraph above a grid somebody opened on purpose. -->
+	<div class="flex items-center justify-between gap-4">
+		<span class="text-active text-sm font-medium">{$LL.loadOptions()}</span>
+		<button
+			type="button"
+			class="text-link flex shrink-0 items-center gap-1.5 text-xs hover:underline disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:no-underline"
+			disabled={!isSet}
+			onclick={clearAll}
+		>
+			<RotateCcw class="h-3.5 w-3.5" />
+			{$LL.resetToAuto()}
 		</button>
-	{/if}
+	</div>
+
+	<!-- Label on the left, control on the right, two to a row. Ten settings nobody
+	     touches on a working Ollama do not deserve ten full-width rows: stacked the
+	     old way they pushed the pull-a-model field off the bottom of the panel. The
+	     labels are short enough to sit beside their field. -->
+	<div class="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+		{#each LOAD_NUMBER_KEYS as key (key)}
+			<label class="flex items-center justify-between gap-3">
+				<span class="text-active truncate text-sm">{numberLabels[key]}</span>
+				<span class="w-28 shrink-0">
+					<NumberField
+						min={key === 'main_gpu' || key === 'num_gpu' ? 0 : 1}
+						placeholder={$LL.automatic()}
+						value={options[key] ?? ''}
+						onChange={(raw) => setNumber(key, raw)}
+					/>
+				</span>
+			</label>
+		{/each}
+
+		{#each LOAD_BOOLEAN_KEYS as key (key)}
+			<div class="flex items-center justify-between gap-3">
+				<span class="text-active truncate text-sm">{booleanLabels[key]}</span>
+				<span class="w-28 shrink-0">
+					<Select
+						value={options[key] === undefined ? 'auto' : options[key] ? 'on' : 'off'}
+						options={switchOptions}
+						onChange={(option) => setBoolean(key, option.value)}
+					/>
+				</span>
+			</div>
+		{/each}
+	</div>
 </div>

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
 	import type { SamplingKey, SamplingOptions } from '$lib/chat/options';
+	import Collapsible from '$lib/components/Collapsible.svelte';
+	import NumberField from '$lib/components/NumberField.svelte';
+	import Select from '$lib/components/Select.svelte';
 
-	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
 
@@ -48,37 +50,55 @@
 	}: Props = $props();
 
 	/**
-	 * One field, and what the endpoint does when nobody sets it.
+	 * One field, and what happens when nobody sets it.
 	 *
-	 * `fallback` is the provider's own default, shown as the placeholder when
-	 * nothing above has an opinion either, so the box always reads as the value
-	 * that will be used instead of as an empty space.
+	 * An empty box reads as _Auto_ rather than as a number, because there is no
+	 * number to print: these settings now reach every provider, and each one
+	 * defaults differently. The panel used to show Ollama's own figures here, so
+	 * somebody on OpenAI read 0.8 for a temperature that would arrive as 1.0, and
+	 * a few of those figures had gone stale at Ollama too.
+	 *
+	 * `fallback` is for the rare field whose absence has a meaning worth naming in
+	 * words, and `seed` is the only one: no seed is not a default value, it is a
+	 * different draw every time.
 	 */
 	interface FieldSpec {
 		key: SamplingKey;
 		label: string;
 		kind: 'number' | 'text' | 'switch';
-		fallback: string;
+		fallback?: string;
 		min?: number;
 		max?: number;
 		step?: number;
 	}
 
-	const portable: FieldSpec[] = $derived([
+	/**
+	 * The two fields people actually come here for. Everything else is folded away:
+	 * nineteen boxes open at once said this panel was for everybody, when in truth
+	 * a handful of people ever move anything but these.
+	 *
+	 * The context window earns its place over the other seventeen because it is the
+	 * one that decides whether the model still remembers the start of the
+	 * conversation. It is also the only one the app reads for itself, for the load
+	 * meter, so it means something here beyond what goes on the wire.
+	 */
+	const common: FieldSpec[] = $derived([
 		{
 			key: 'temperature',
 			label: $LL.temperature(),
 			kind: 'number',
-			fallback: '0.8',
 			min: 0,
 			max: 2,
 			step: 0.1
 		},
+		{ key: 'num_ctx', label: $LL.numCtx(), kind: 'number', min: 1, step: 1024 }
+	]);
+
+	const portable: FieldSpec[] = $derived([
 		{
 			key: 'top_p',
 			label: $LL.topP(),
 			kind: 'number',
-			fallback: '0.9',
 			min: 0,
 			max: 1,
 			step: 0.05
@@ -88,7 +108,6 @@
 			key: 'num_predict',
 			label: $LL.numPredict(),
 			kind: 'number',
-			fallback: '128',
 			min: -2,
 			step: 1
 		},
@@ -96,37 +115,32 @@
 			key: 'presence_penalty',
 			label: $LL.presencePenalty(),
 			kind: 'number',
-			fallback: $LL.automatic(),
 			step: 0.01
 		},
 		{
 			key: 'frequency_penalty',
 			label: $LL.frequencyPenalty(),
 			kind: 'number',
-			fallback: $LL.automatic(),
 			step: 0.01
 		},
-		{ key: 'stop', label: $LL.stop(), kind: 'text', fallback: $LL.automatic() },
-		{ key: 'num_ctx', label: $LL.numCtx(), kind: 'number', fallback: '2048', min: 1, step: 1 }
+		{ key: 'stop', label: $LL.stop(), kind: 'text' }
 	]);
 
 	const ollamaOnly: FieldSpec[] = $derived([
-		{ key: 'top_k', label: $LL.topK(), kind: 'number', fallback: '40', min: 1, step: 1 },
+		{ key: 'top_k', label: $LL.topK(), kind: 'number', min: 1, step: 1 },
 		{
 			key: 'min_p',
 			label: $LL.minP(),
 			kind: 'number',
-			fallback: '0.0',
 			min: 0,
 			max: 1,
 			step: 0.01
 		},
-		{ key: 'tfs_z', label: $LL.tfsZ(), kind: 'number', fallback: '1', min: 1, step: 0.1 },
+		{ key: 'tfs_z', label: $LL.tfsZ(), kind: 'number', min: 1, step: 0.1 },
 		{
 			key: 'typical_p',
 			label: $LL.typicalP(),
 			kind: 'number',
-			fallback: $LL.automatic(),
 			min: 0,
 			max: 1,
 			step: 0.01
@@ -135,14 +149,12 @@
 			key: 'repeat_penalty',
 			label: $LL.repeatPenalty(),
 			kind: 'number',
-			fallback: '1.1',
 			step: 0.1
 		},
 		{
 			key: 'repeat_last_n',
 			label: $LL.repeatLastN(),
 			kind: 'number',
-			fallback: '64',
 			min: -1,
 			step: 1
 		},
@@ -150,7 +162,6 @@
 			key: 'num_keep',
 			label: $LL.numKeep(),
 			kind: 'number',
-			fallback: $LL.automatic(),
 			min: 0,
 			step: 1
 		},
@@ -158,20 +169,20 @@
 			key: 'mirostat',
 			label: $LL.mirostat(),
 			kind: 'number',
-			fallback: '0',
 			min: 0,
 			max: 2,
 			step: 1
 		},
-		{ key: 'mirostat_tau', label: $LL.mirostatTau(), kind: 'number', fallback: '5.0', step: 0.1 },
-		{ key: 'mirostat_eta', label: $LL.mirostatEta(), kind: 'number', fallback: '0.1', step: 0.01 },
-		{
-			key: 'penalize_newline',
-			label: $LL.penalizeNewline(),
-			kind: 'switch',
-			fallback: $LL.automatic()
-		}
+		{ key: 'mirostat_tau', label: $LL.mirostatTau(), kind: 'number', step: 0.1 },
+		{ key: 'mirostat_eta', label: $LL.mirostatEta(), kind: 'number', step: 0.01 },
+		{ key: 'penalize_newline', label: $LL.penalizeNewline(), kind: 'switch' }
 	]);
+
+	/** Read on the folded rows, so opening one is a decision rather than a search. */
+	function summaryOf(specs: FieldSpec[]): string {
+		const count = specs.filter((spec) => values[spec.key] !== undefined).length;
+		return count ? $LL.samplingFieldCount({ count }) : $LL.automatic();
+	}
 
 	/** `stop` is the one field that is a list on the wire and a single box on screen. */
 	function display(source: SamplingOptions, key: SamplingKey): string {
@@ -184,7 +195,7 @@
 
 	function placeholderFor(spec: FieldSpec): string {
 		const above = display(inherited, spec.key);
-		return above !== '' ? above : spec.fallback;
+		return above !== '' ? above : (spec.fallback ?? $LL.automatic());
 	}
 
 	/**
@@ -215,19 +226,20 @@
 {#snippet field(spec: FieldSpec)}
 	<SettingsField label={spec.label}>
 		{#if spec.kind === 'switch'}
-			<select
-				class="settings-field"
+			<!-- The same three-position control as on an Ollama connection, and the
+			     app's own `Select` rather than the browser's: a raw `<select>` here was
+			     the last field in either panel drawn by the platform. -->
+			<Select
 				{disabled}
 				value={values[spec.key] === undefined ? 'inherit' : values[spec.key] ? 'on' : 'off'}
-				onchange={(event) => {
-					const choice = event.currentTarget.value;
-					write(spec.key, choice === 'inherit' ? undefined : choice === 'on');
-				}}
-			>
-				<option value="inherit">{placeholderFor(spec)}</option>
-				<option value="on">{$LL.on()}</option>
-				<option value="off">{$LL.off()}</option>
-			</select>
+				options={[
+					{ value: 'inherit', label: placeholderFor(spec) },
+					{ value: 'on', label: $LL.on() },
+					{ value: 'off', label: $LL.off() }
+				]}
+				onChange={(option) =>
+					write(spec.key, option.value === 'inherit' ? undefined : option.value === 'on')}
+			/>
 		{:else if spec.kind === 'text'}
 			<input
 				class="settings-field"
@@ -238,51 +250,60 @@
 				onchange={(event) => onText(spec, event.currentTarget.value)}
 			/>
 		{:else}
-			<input
-				class="settings-field"
-				type="number"
+			<NumberField
 				{disabled}
 				min={spec.min}
 				max={spec.max}
 				step={spec.step}
 				placeholder={placeholderFor(spec)}
 				value={display(values, spec.key)}
-				onchange={(event) => onNumber(spec, event.currentTarget.value)}
+				onChange={(raw) => onNumber(spec, raw)}
 			/>
 		{/if}
 	</SettingsField>
 {/snippet}
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-3">
-		<SettingsHint>{$LL.samplingEveryProviderHelp()}</SettingsHint>
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-			{#each portable as spec (spec.key)}
-				{@render field(spec)}
-			{/each}
-		</div>
+<div class="flex flex-col gap-3">
+	<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+		{#each common as spec (spec.key)}
+			{@render field(spec)}
+		{/each}
 	</div>
 
-	<!-- Marked out rather than mixed in: these reach an Ollama and nothing else,
-	     and the difference is invisible until a turn fails. Still shown when the
-	     model is not on one, dimmed and labelled, because hiding them would make a
-	     value somebody set look as though it had gone. Dimmed rather than
-	     disabled: "not in play" is the message, not "broken", and a value set for a
-	     model you are about to switch back to still has to be correctable. -->
-	<div class="border-shade-3 flex flex-col gap-3 border-t pt-4" class:opacity-60={!ollama}>
-		<div class="flex items-center gap-2">
-			<h4 class="text-active text-sm font-medium">{$LL.samplingOllamaOnly()}</h4>
-			{#if !ollama}
-				<SettingsBadge>{$LL.samplingNotApplicable()}</SettingsBadge>
-			{/if}
+	<Collapsible title={$LL.samplingMore()} summary={summaryOf(portable)}>
+		<div class="flex flex-col gap-3">
+			<SettingsHint>{$LL.samplingEveryProviderHelp()}</SettingsHint>
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+				{#each portable as spec (spec.key)}
+					{@render field(spec)}
+				{/each}
+			</div>
 		</div>
-		<SettingsHint>
-			{ollama ? $LL.samplingOllamaOnlyHelp() : $LL.samplingOllamaOnlyInactiveHelp()}
-		</SettingsHint>
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-			{#each ollamaOnly as spec (spec.key)}
-				{@render field(spec)}
-			{/each}
-		</div>
+	</Collapsible>
+
+	<!-- Its own fold rather than a marked-out block at the bottom: these reach an
+	     Ollama and nothing else, and the difference is invisible until a turn
+	     fails. Still there when the model is not on one, dimmed and labelled,
+	     because hiding them would make a value somebody set look as though it had
+	     gone. Dimmed rather than disabled: "not in play" is the message, not
+	     "broken", and a value set for a model you are about to switch back to still
+	     has to be correctable. -->
+	<div class:opacity-60={!ollama}>
+		<Collapsible
+			title={$LL.samplingOllamaOnly()}
+			description={ollama ? undefined : $LL.samplingNotApplicable()}
+			summary={summaryOf(ollamaOnly)}
+		>
+			<div class="flex flex-col gap-3">
+				<SettingsHint>
+					{ollama ? $LL.samplingOllamaOnlyHelp() : $LL.samplingOllamaOnlyInactiveHelp()}
+				</SettingsHint>
+				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+					{#each ollamaOnly as spec (spec.key)}
+						{@render field(spec)}
+					{/each}
+				</div>
+			</div>
+		</Collapsible>
 	</div>
 </div>

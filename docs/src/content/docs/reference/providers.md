@@ -74,9 +74,11 @@ you guessed.
 Ollama models can be pulled from inside the app.
 
 How Ollama loads a model, the GPU and thread counts, memory mapping and the rest, belongs to the
-connection rather than to a conversation, so it is set once under _Advanced_ on the connection. Each
-one has three positions and starts on _Auto_, which leaves the decision to Ollama. That matters more
-than it sounds: `use_mmap` is on by default there, so "off" and "not set" are different answers.
+connection rather than to a conversation, so it is set once under _Advanced_ on the connection and
+every conversation held on it follows. A count left blank and a switch left on _Auto_ both mean the
+same thing: Ollama decides. That matters more than it sounds. `use_mmap` is on by default there, so
+"off" and "not set" are different answers, which is why the switches have three positions rather than
+two.
 
 ## How requests travel
 

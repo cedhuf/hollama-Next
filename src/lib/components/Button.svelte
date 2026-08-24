@@ -42,14 +42,21 @@
 			: ''}
 			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
-			{variant === 'link' ? 'text-link inline rounded-none' : ''}
+			{variant === 'link' ? 'hover:text-accent inline rounded-none' : ''}
 			{variant === 'icon' ? 'text-muted hover:text-active px-2.5 py-2' : ''}
 			{variant === 'icon-sm' ? 'text-muted hover:text-active px-1.5 py-1' : ''}
 			{className}
 		"
 		{onclick}
 	>
-		{@render children?.()}
+		{#if variant === 'link'}
+			<!-- The words are underlined, the arrow after them is not: an underline
+			     running under a glyph that is not part of the sentence reads as a gap
+			     in the line rather than as emphasis. -->
+			<span class="underline underline-offset-4">{@render children?.()}</span>
+		{:else}
+			{@render children?.()}
+		{/if}
 	</a>
 	<!-- eslint-enable svelte/no-navigation-without-resolve -->
 {:else}
@@ -64,7 +71,7 @@
 			: ''}
 			{variant === 'default' ? 'border-accent bg-accent text-shade-0' : ''}
 			{variant === 'outline' ? 'border-shade-4 hover:border-shade-6 hover:text-active' : ''}
-			{variant === 'link' ? 'text-link inline rounded-none' : ''}
+			{variant === 'link' ? 'hover:text-accent inline rounded-none' : ''}
 			{variant === 'icon' ? 'text-muted hover:text-active px-2.5 py-2' : ''}
 			{variant === 'icon-sm' ? 'text-muted hover:text-active px-1.5 py-1' : ''}
 			{isActive ? 'text-active' : ''}
@@ -80,13 +87,19 @@
 		>
 			<LoaderCircle class="base-icon animate-spin" />
 		</span>
-		{@render children?.()}
+		{#if variant === 'link'}
+			<span class="underline underline-offset-4">{@render children?.()}</span>
+		{:else}
+			{@render children?.()}
+		{/if}
 	</button>
 {/if}
 
 <style lang="postcss">
+	/* Outside the underlined span, so it needs its own bit of air. */
 	.button--link[target='_blank']:after {
-		content: ' ↗';
+		content: '↗';
+		margin-left: 0.1em;
 	}
 
 	/**

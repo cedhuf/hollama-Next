@@ -131,17 +131,47 @@ type RootTranslation = {
 	 */
 	currency: string
 	/**
+	 * C​o​s​t​ ​i​n​ ​{​c​u​r​r​e​n​c​y​}​,​ ​{​u​n​i​t​}
+	 * @param {string} currency
+	 * @param {string} unit
+	 */
+	priceTooltip: RequiredParams<'currency' | 'unit'>
+	/**
+	 * A​P​I​ ​k​e​y
+	 */
+	providerNeedsKey: string
+	/**
+	 * N​o​ ​k​e​y​ ​n​e​e​d​e​d
+	 */
+	providerNoKey: string
+	/**
+	 * Y​o​u​r​ ​o​w​n​ ​e​n​d​p​o​i​n​t
+	 */
+	providerOwnEndpoint: string
+	/**
+	 * S​e​a​r​c​h​ ​p​r​o​v​i​d​e​r​s
+	 */
+	searchProviders: string
+	/**
+	 * C​h​a​n​g​e
+	 */
+	change: string
+	/**
 	 * W​h​a​t​ ​t​h​i​s​ ​m​o​d​e​l​ ​c​o​s​t​s​,​ ​f​o​r​ ​t​h​e​ ​c​r​e​d​i​t​ ​l​i​m​i​t​s​.
 	 */
 	pricingHelp: string
 	/**
-	 * /​M​ ​T​o​k​e​n​s
-	 */
-	perMillionShort: string
-	/**
 	 * P​r​i​c​e​ ​p​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s
 	 */
 	perMillionTokens: string
+	/**
+	 * B​i​l​l​e​d​ ​b​y
+	 */
+	priceUnitLabel: string
+	/**
+	 * /​M​ ​T​o​k​e​n​s
+	 */
+	perMillionShort: string
 	/**
 	 * /​i​m​a​g​e
 	 */
@@ -155,11 +185,7 @@ type RootTranslation = {
 	 */
 	perMinuteShort: string
 	/**
-	 * B​i​l​l​e​d​ ​b​y
-	 */
-	priceUnitLabel: string
-	/**
-	 * T​o​k​e​n​s
+	 * P​e​r​ ​m​i​l​l​i​o​n​ ​t​o​k​e​n​s
 	 */
 	priceUnitToken: string
 	/**
@@ -226,6 +252,10 @@ type RootTranslation = {
 	 */
 	modelNames: string
 	/**
+	 * B​a​c​k​ ​t​o​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​n​a​m​e
+	 */
+	resetName: string
+	/**
 	 * R​e​s​e​t​ ​a​l​l
 	 */
 	resetAllNames: string
@@ -283,6 +313,10 @@ type RootTranslation = {
 	 * @param {number} count
 	 */
 	modelsCount: RequiredParams<'count'>
+	/**
+	 * C​o​n​n​e​c​t
+	 */
+	connect: string
 	/**
 	 * C​o​n​n​e​c​t​i​n​g​.​.​.
 	 */
@@ -671,13 +705,9 @@ type RootTranslation = {
 	 */
 	loadOptions: string
 	/**
-	 * L​e​t​ ​t​h​e​ ​s​e​r​v​e​r​ ​d​e​c​i​d​e​ ​e​v​e​r​y​t​h​i​n​g
+	 * E​v​e​r​y​t​h​i​n​g​ ​b​a​c​k​ ​t​o​ ​A​u​t​o
 	 */
-	loadOptionsClear: string
-	/**
-	 * H​o​w​ ​t​h​i​s​ ​O​l​l​a​m​a​ ​l​o​a​d​s​ ​a​ ​m​o​d​e​l​.​ ​S​e​t​ ​o​n​c​e​ ​h​e​r​e​,​ ​u​s​e​d​ ​b​y​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​h​e​l​d​ ​o​n​ ​t​h​i​s​ ​c​o​n​n​e​c​t​i​o​n​.​ ​L​e​a​v​e​ ​a​ ​f​i​e​l​d​ ​b​l​a​n​k​ ​t​o​ ​l​e​t​ ​O​l​l​a​m​a​ ​d​e​c​i​d​e​.
-	 */
-	loadOptionsHelp: string
+	resetToAuto: string
 	/**
 	 * L​o​w​ ​V​R​A​M
 	 */
@@ -938,6 +968,10 @@ type RootTranslation = {
 	 */
 	samplingLockedHelp: string
 	/**
+	 * O​t​h​e​r​ ​p​a​r​a​m​e​t​e​r​s
+	 */
+	samplingMore: string
+	/**
 	 * n​o​t​ ​i​n​ ​u​s​e​ ​h​e​r​e
 	 */
 	samplingNotApplicable: string
@@ -954,14 +988,6 @@ type RootTranslation = {
 	 */
 	samplingOllamaOnlyInactiveHelp: string
 	/**
-	 * R​e​s​e​t​ ​t​o​ ​t​h​e​ ​s​y​s​t​e​m​ ​d​e​f​a​u​l​t​s
-	 */
-	samplingReset: string
-	/**
-	 * C​l​e​a​r​s​ ​e​v​e​r​y​ ​f​i​e​l​d​ ​a​b​o​v​e​,​ ​b​a​c​k​ ​t​o​ ​h​o​w​ ​t​h​e​ ​a​p​p​ ​s​h​i​p​s​:​ ​e​a​c​h​ ​p​r​o​v​i​d​e​r​ ​t​h​e​n​ ​a​p​p​l​i​e​s​ ​i​t​s​ ​o​w​n​.
-	 */
-	samplingResetHint: string
-	/**
 	 * F​o​r​ ​t​h​i​s​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​o​n​l​y​.​ ​A​n​ ​e​m​p​t​y​ ​f​i​e​l​d​ ​u​s​e​s​ ​y​o​u​r​ ​v​a​l​u​e​ ​f​r​o​m​ ​S​e​t​t​i​n​g​s​.
 	 */
 	samplingSessionDescription: string
@@ -975,7 +1001,7 @@ type RootTranslation = {
 	 */
 	samplingFieldCount: RequiredParams<'count'>
 	/**
-	 * n​o​t​h​i​n​g​ ​s​e​t​:​ ​e​v​e​r​y​o​n​e​ ​k​e​e​p​s​ ​t​h​e​ ​s​y​s​t​e​m​ ​d​e​f​a​u​l​t​s
+	 * n​o​t​h​i​n​g​ ​s​e​t​:​ ​e​a​c​h​ ​p​r​o​v​i​d​e​r​ ​k​e​e​p​s​ ​i​t​s​ ​o​w​n​ ​d​e​f​a​u​l​t​s
 	 */
 	samplingNothingSet: string
 	/**
@@ -1100,10 +1126,6 @@ type RootTranslation = {
 	 * S​y​n​c
 	 */
 	sync: string
-	/**
-	 * V​e​r​i​f​y
-	 */
-	verify: string
 	/**
 	 * W​e​b​ ​f​e​t​c​h
 	 */
@@ -2792,10 +2814,6 @@ type RootTranslation = {
 	 */
 	optional: string
 	/**
-	 * V​e​r​i​f​y​i​n​g​.​.​.
-	 */
-	verifying: string
-	/**
 	 * {​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}​ ​f​o​u​n​d
 	 * @param {number} count
 	 */
@@ -2816,11 +2834,6 @@ type RootTranslation = {
 	 * C​o​n​n​e​c​t​i​o​n​ ​f​a​i​l​e​d
 	 */
 	connectionFailed: string
-	/**
-	 * C​o​n​n​e​c​t​i​o​n​ ​v​e​r​i​f​i​e​d​,​ ​{​c​o​u​n​t​}​ ​m​o​d​e​l​{​{​s​}​}
-	 * @param {number} count
-	 */
-	connectionVerifiedWithModels: RequiredParams<'count'>
 	/**
 	 * A​p​p​e​a​r​a​n​c​e
 	 */
@@ -3758,17 +3771,45 @@ export type TranslationFunctions = {
 	 */
 	currency: () => LocalizedString
 	/**
+	 * Cost in {currency}, {unit}
+	 */
+	priceTooltip: (arg: { currency: string, unit: string }) => LocalizedString
+	/**
+	 * API key
+	 */
+	providerNeedsKey: () => LocalizedString
+	/**
+	 * No key needed
+	 */
+	providerNoKey: () => LocalizedString
+	/**
+	 * Your own endpoint
+	 */
+	providerOwnEndpoint: () => LocalizedString
+	/**
+	 * Search providers
+	 */
+	searchProviders: () => LocalizedString
+	/**
+	 * Change
+	 */
+	change: () => LocalizedString
+	/**
 	 * What this model costs, for the credit limits.
 	 */
 	pricingHelp: () => LocalizedString
 	/**
-	 * /M Tokens
-	 */
-	perMillionShort: () => LocalizedString
-	/**
 	 * Price per million tokens
 	 */
 	perMillionTokens: () => LocalizedString
+	/**
+	 * Billed by
+	 */
+	priceUnitLabel: () => LocalizedString
+	/**
+	 * /M Tokens
+	 */
+	perMillionShort: () => LocalizedString
 	/**
 	 * /image
 	 */
@@ -3782,11 +3823,7 @@ export type TranslationFunctions = {
 	 */
 	perMinuteShort: () => LocalizedString
 	/**
-	 * Billed by
-	 */
-	priceUnitLabel: () => LocalizedString
-	/**
-	 * Tokens
+	 * Per million tokens
 	 */
 	priceUnitToken: () => LocalizedString
 	/**
@@ -3850,6 +3887,10 @@ export type TranslationFunctions = {
 	 */
 	modelNames: () => LocalizedString
 	/**
+	 * Back to the provider name
+	 */
+	resetName: () => LocalizedString
+	/**
 	 * Reset all
 	 */
 	resetAllNames: () => LocalizedString
@@ -3905,6 +3946,10 @@ export type TranslationFunctions = {
 	 * {count} model{{s}}
 	 */
 	modelsCount: (arg: { count: number }) => LocalizedString
+	/**
+	 * Connect
+	 */
+	connect: () => LocalizedString
 	/**
 	 * Connecting...
 	 */
@@ -4282,13 +4327,9 @@ export type TranslationFunctions = {
 	 */
 	loadOptions: () => LocalizedString
 	/**
-	 * Let the server decide everything
+	 * Everything back to Auto
 	 */
-	loadOptionsClear: () => LocalizedString
-	/**
-	 * How this Ollama loads a model. Set once here, used by every conversation held on this connection. Leave a field blank to let Ollama decide.
-	 */
-	loadOptionsHelp: () => LocalizedString
+	resetToAuto: () => LocalizedString
 	/**
 	 * Low VRAM
 	 */
@@ -4546,6 +4587,10 @@ export type TranslationFunctions = {
 	 */
 	samplingLockedHelp: () => LocalizedString
 	/**
+	 * Other parameters
+	 */
+	samplingMore: () => LocalizedString
+	/**
 	 * not in use here
 	 */
 	samplingNotApplicable: () => LocalizedString
@@ -4562,14 +4607,6 @@ export type TranslationFunctions = {
 	 */
 	samplingOllamaOnlyInactiveHelp: () => LocalizedString
 	/**
-	 * Reset to the system defaults
-	 */
-	samplingReset: () => LocalizedString
-	/**
-	 * Clears every field above, back to how the app ships: each provider then applies its own.
-	 */
-	samplingResetHint: () => LocalizedString
-	/**
 	 * For this conversation only. An empty field uses your value from Settings.
 	 */
 	samplingSessionDescription: () => LocalizedString
@@ -4582,7 +4619,7 @@ export type TranslationFunctions = {
 	 */
 	samplingFieldCount: (arg: { count: number }) => LocalizedString
 	/**
-	 * nothing set: everyone keeps the system defaults
+	 * nothing set: each provider keeps its own defaults
 	 */
 	samplingNothingSet: () => LocalizedString
 	/**
@@ -4705,10 +4742,6 @@ export type TranslationFunctions = {
 	 * Sync
 	 */
 	sync: () => LocalizedString
-	/**
-	 * Verify
-	 */
-	verify: () => LocalizedString
 	/**
 	 * Web fetch
 	 */
@@ -6360,10 +6393,6 @@ export type TranslationFunctions = {
 	 */
 	optional: () => LocalizedString
 	/**
-	 * Verifying...
-	 */
-	verifying: () => LocalizedString
-	/**
 	 * {count} model{{s}} found
 	 */
 	modelsFound: (arg: { count: number }) => LocalizedString
@@ -6383,10 +6412,6 @@ export type TranslationFunctions = {
 	 * Connection failed
 	 */
 	connectionFailed: () => LocalizedString
-	/**
-	 * Connection verified, {count} model{{s}}
-	 */
-	connectionVerifiedWithModels: (arg: { count: number }) => LocalizedString
 	/**
 	 * Appearance
 	 */

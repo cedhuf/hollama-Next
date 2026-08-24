@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, LoaderCircle } from '@lucide/svelte';
+	import { Check, LoaderCircle, Plus } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -11,7 +11,6 @@
 		ConnectionType,
 		getDefaultServer,
 		getProvider,
-		PROVIDERS,
 		type ModelKind,
 		type ModelPrice,
 		type Server
@@ -24,6 +23,7 @@
 
 	import Connection from './Connection.svelte';
 	import ModelNames from './ModelNames.svelte';
+	import ProviderPicker from './ProviderPicker.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
@@ -84,8 +84,20 @@
 	/** Set on the providers whose endpoint is built from one short value. */
 	const draftUrlField = $derived(draftDescriptor.urlField);
 
-	let verifying = $state(false);
-	let verified = $state(false);
+	/** The form is folded away until somebody asks for it, and reset when it closes. */
+	let adding = $state(false);
+	/** Step two. Separate from `draft.connectionType`, which always holds something. */
+	let chosen = $state(false);
+
+	/**
+	 * One click, three steps.
+	 *
+	 * Verifying, saving and then syncing the catalogue used to be three separate
+	 * presses, and the third one was not even in this section: a connection could
+	 * sit there saved and empty until somebody found the sync button on it. They
+	 * are one action because they are one intention.
+	 */
+	let connecting = $state(false);
 	let modelCount = $state(0);
 	let justAddedId = $state<string | null>(null);
 
@@ -177,14 +189,22 @@
 			modelFilter: preset.modelFilter ?? '',
 			color: preset.color ?? ''
 		};
-		verified = false;
 	}
 
-	const touch = () => (verified = false);
+	function choose(type: ConnectionType) {
+		selectPreset(type);
+		chosen = true;
+	}
 
-	async function verifyDraft() {
+	function cancelDraft() {
+		adding = false;
+		chosen = false;
+		selectPreset(ConnectionType.Ollama);
+	}
+
+	async function connectDraft() {
 		if (!draft.baseUrl) return toast.error($LL.baseUrlRequired());
-		verifying = true;
+		connecting = true;
 		try {
 			const result = await api<{ ok: boolean; models?: string[]; error?: string }>(
 				'/api/servers/verify',
@@ -196,42 +216,37 @@
 					modelFilter: draft.modelFilter || null
 				}
 			);
-			if (result?.ok) {
-				verified = true;
-				modelCount = result.models?.length ?? 0;
-				toast.success($LL.connectionVerifiedWithModels({ count: modelCount }));
-			} else {
+			if (!result?.ok) {
 				toast.error($LL.connectionFailed(), { description: result?.error });
+				return;
 			}
-		} finally {
-			verifying = false;
-		}
-	}
+			modelCount = result.models?.length ?? 0;
 
-	async function saveDraft() {
-		const created = await api<{ id: string }>(base, 'POST', {
-			connectionType: draft.connectionType,
-			baseUrl: draft.baseUrl,
-			imageBaseUrl: draft.imageBaseUrl || null,
-			label: draft.label || null,
-			modelFilter: draft.modelFilter || null,
-			apiKey: draft.apiKey || null,
-			color: draft.color || null,
-			isEnabled: true
-		});
-		draft = {
-			connectionType: ConnectionType.Ollama,
-			baseUrl: '',
-			imageBaseUrl: '',
-			label: '',
-			apiKey: '',
-			modelFilter: '',
-			color: ''
-		};
-		verified = false;
-		await load(true);
-		justAddedId = created?.id ?? null;
-		toast.success($LL.serverAdded());
+			const created = await api<{ id: string }>(base, 'POST', {
+				connectionType: draft.connectionType,
+				baseUrl: draft.baseUrl,
+				imageBaseUrl: draft.imageBaseUrl || null,
+				label: draft.label || null,
+				modelFilter: draft.modelFilter || null,
+				apiKey: draft.apiKey || null,
+				color: draft.color || null,
+				isEnabled: true
+			});
+
+			await load(true);
+			// The catalogue is cached for the session, so a new connection stays
+			// invisible in every model picker until this runs. It is the step people
+			// used to have to find on their own.
+			await refreshCatalogue();
+
+			justAddedId = created?.id ?? null;
+			cancelDraft();
+			toast.success($LL.serverAdded(), { description: $LL.modelsFound({ count: modelCount }) });
+		} catch {
+			// `api()` has already said what went wrong.
+		} finally {
+			connecting = false;
+		}
 	}
 
 	// Debounced PUT per server; the key is sent only when (re)typed.
@@ -319,97 +334,152 @@
 		</SettingsSection>
 
 		{#if canManage && !loading}
-			<!-- Add a server: pick a provider, Verify, then Save. Dashed border so it
-			     reads as a slot to fill rather than another connection. -->
+			<!-- Adding one is two steps, and only one of them is on screen at a time:
+			     which provider, then what it needs. The old card asked both at once,
+			     with every field visible before anyone had said what they were
+			     connecting to, and a row of chips that only worked while there were
+			     five of them. -->
 			<SettingsSection title={$LL.addAServer()}>
-				<div class="border-shade-4 flex flex-col gap-3 rounded-xl border border-dashed p-4">
-					<div class="flex flex-wrap gap-1.5">
-						{#each PROVIDERS as provider (provider.type)}
+				{#if !adding}
+					<button
+						type="button"
+						onclick={() => (adding = true)}
+						class="border-shade-4 text-muted hover:border-accent hover:text-active flex items-center justify-center gap-2 rounded-xl border border-dashed p-4 text-sm transition-colors"
+					>
+						<Plus class="base-icon" />
+						{$LL.addAServer()}
+					</button>
+				{:else}
+					<div class="border-shade-4 flex flex-col gap-3 rounded-xl border border-dashed p-4">
+						{#if !chosen}
+							<ProviderPicker onSelect={choose} />
 							<button
 								type="button"
-								onclick={() => selectPreset(provider.type)}
-								class="hover:border-shade-6 rounded-md border px-2.5 py-1 text-xs transition-colors {draft.connectionType ===
-								provider.type
-									? 'border-accent text-active'
-									: 'border-shade-4 text-muted'}"
+								onclick={cancelDraft}
+								class="text-muted hover:text-active self-start text-xs transition-colors"
 							>
-								{provider.name}
+								{$LL.cancel()}
 							</button>
-						{/each}
-					</div>
-
-					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<!-- Same rule as an existing connection: a provider whose endpoint is a
-						     function of one value asks for that value. Leaving it empty leaves
-						     the URL empty, and Verify stays disabled. Which providers work this
-						     way is in their own file, not here. -->
-						{#if draftUrlField}
-							<SettingsField label={$LL[draftUrlField.label as 'productId']()}>
-								<input
-									class="settings-field font-mono text-xs"
-									value={draftUrlField.fromBaseUrl(draft.baseUrl)}
-									placeholder={draftUrlField.placeholder}
-									oninput={(e) => {
-										draft.baseUrl = draftUrlField.toBaseUrl(e.currentTarget.value);
-										draft.imageBaseUrl = draftDescriptor.imageBaseFrom?.(draft.baseUrl) ?? '';
-										touch();
-									}}
-								/>
-							</SettingsField>
-						{:else if !draftProvider.identified}
-							<!-- Only the providers whose endpoint is theirs to choose. OpenAI and
-							     Claude have one fixed address that the app already knows, so asking
-							     for it offers nothing but a chance to get it wrong; anyone pointing
-							     at something else wants the OpenAI-compatible entry, which is what
-							     it is there for. An existing connection can still be redirected,
-							     under Advanced, where a rare need belongs. -->
-							<SettingsField label={$LL.baseUrl()}>
-								<input
-									class="settings-field font-mono text-xs"
-									bind:value={draft.baseUrl}
-									oninput={touch}
-									placeholder={draftProvider.baseUrl}
-								/>
-							</SettingsField>
-						{/if}
-
-						<SettingsField label={$LL.apiKey()}>
-							<input
-								class="settings-field"
-								type="password"
-								autocomplete="off"
-								bind:value={draft.apiKey}
-								oninput={touch}
-								placeholder={draftProvider.requiresApiKey ? 'sk-…' : $LL.optional()}
-							/>
-						</SettingsField>
-
-						<SettingsField label={$LL.label()}>
-							<input
-								class="settings-field"
-								bind:value={draft.label}
-								oninput={touch}
-								placeholder={draftProvider.name}
-							/>
-						</SettingsField>
-					</div>
-
-					<div class="flex items-center gap-2">
-						{#if !verified}
-							<Button onclick={verifyDraft} disabled={verifying || !draft.baseUrl}>
-								{#if verifying}
-									<LoaderCircle class="base-icon animate-spin" />
-									{$LL.verifying()}
-								{:else}
-									{$LL.verify()}
-								{/if}
-							</Button>
 						{:else}
-							<Button onclick={saveDraft}><Check class="base-icon" /> {$LL.save()}</Button>
-							<span class="text-muted text-xs">{$LL.modelsFound({ count: modelCount })}</span>
+							<!-- The choice, kept in view and reversible in one click. A form that
+							     hides what it is a form for makes people cancel to check. -->
+							<div class="flex items-center gap-2.5">
+								<span
+									class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-medium"
+									style="background-color: color-mix(in srgb, {draftDescriptor.badge
+										.color} 16%, transparent); color: {draftDescriptor.badge.color}"
+									aria-hidden="true"
+								>
+									{draftProvider.name.slice(0, 1)}
+								</span>
+								<!-- The heading is the label. Naming a connection is renaming what
+								     is already on screen, so it is the same field, the same ghost input
+								     as a model's name: text until it is wanted, the provider's own name
+								     as the placeholder. A row of its own for it was a second question
+								     asking the same thing. -->
+								<input
+									class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-0 min-w-0 flex-1 rounded-md border border-transparent px-2 py-1 text-sm font-medium outline-none"
+									bind:value={draft.label}
+									placeholder={draftProvider.name}
+									aria-label={$LL.label()}
+									title={$LL.label()}
+								/>
+								<button
+									type="button"
+									onclick={() => (chosen = false)}
+									class="text-link shrink-0 text-xs hover:underline"
+								>
+									{$LL.change()}
+								</button>
+							</div>
+
+							<!-- One column, and only what it takes to connect. Two fields in a
+							     two-column grid left a half-width box beside a hole, and most
+							     providers ask for a single thing. The label, the model filter and
+							     the rest are on the connection itself, which opens as soon as this
+							     succeeds: they are things to adjust, not things to answer. -->
+							<div class="flex flex-col gap-3">
+								<!-- Same rule as an existing connection: a provider whose endpoint is
+								     a function of one value asks for that value. Leaving it empty
+								     leaves the URL empty, and the button stays disabled. Which
+								     providers work this way is in their own file, not here. -->
+								{#if draftUrlField}
+									<SettingsField label={$LL[draftUrlField.label as 'productId']()}>
+										<input
+											class="settings-field font-mono text-xs"
+											value={draftUrlField.fromBaseUrl(draft.baseUrl)}
+											placeholder={draftUrlField.placeholder}
+											oninput={(e) => {
+												draft.baseUrl = draftUrlField.toBaseUrl(e.currentTarget.value);
+												draft.imageBaseUrl = draftDescriptor.imageBaseFrom?.(draft.baseUrl) ?? '';
+											}}
+										/>
+									</SettingsField>
+								{:else if !draftProvider.identified}
+									<!-- Only the providers whose endpoint is theirs to choose. OpenAI and
+									     Claude have one fixed address that the app already knows, so asking
+									     for it offers nothing but a chance to get it wrong; anyone pointing
+									     at something else wants the OpenAI-compatible entry, which is what
+									     it is there for. An existing connection can still be redirected,
+									     under Advanced, where a rare need belongs. -->
+									<SettingsField label={$LL.baseUrl()}>
+										<input
+											class="settings-field font-mono text-xs"
+											bind:value={draft.baseUrl}
+											placeholder={draftProvider.baseUrl}
+										/>
+									</SettingsField>
+								{/if}
+
+								{#if draftProvider.requiresApiKey || !draftProvider.identified}
+									<!-- Asked for where it is wanted. A local Ollama has no key, and a
+									     field for one is a question with no answer. -->
+									<SettingsField label={$LL.apiKey()}>
+										<input
+											class="settings-field"
+											type="password"
+											autocomplete="off"
+											bind:value={draft.apiKey}
+											placeholder={draftProvider.requiresApiKey ? 'sk-…' : $LL.optional()}
+										/>
+										{#if draftProvider.apiKeyHelpUrl}
+											<!-- Under the field it answers, and out of the provider's own
+											     descriptor: nothing here knows where anybody's keys live. -->
+											<Button
+												variant="link"
+												href={draftProvider.apiKeyHelpUrl}
+												target="_blank"
+												class="w-fit text-xs"
+											>
+												{$LL.howToObtainApiKey()}
+											</Button>
+										{/if}
+									</SettingsField>
+								{/if}
+							</div>
+
+							<!-- The footer fills the line. Two small buttons touching in the left
+							     corner of a card this wide read as leftovers; the one you came for
+							     takes the room, and the way out keeps its own end. -->
+							<div class="border-shade-3 flex items-center gap-2 border-t pt-3">
+								<Button
+									class="flex-1"
+									onclick={connectDraft}
+									disabled={connecting || !draft.baseUrl}
+								>
+									{#if connecting}
+										<LoaderCircle class="base-icon animate-spin" />
+										{$LL.connecting()}
+									{:else}
+										<Check class="base-icon" />
+										{$LL.connect()}
+									{/if}
+								</Button>
+								<Button variant="outline" onclick={cancelDraft}>{$LL.cancel()}</Button>
+							</div>
 						{/if}
 					</div>
-				</div>
+				{/if}
 			</SettingsSection>
 		{/if}
 	</SettingsPanel>

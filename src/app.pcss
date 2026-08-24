@@ -96,9 +96,14 @@
 }
 
 /* Shared control style for settings inputs/selects/textareas (one source of
-   truth instead of a per-file class string). */
+   truth instead of a per-file class string).
+
+   `min-h-9` is what keeps a row of controls level. Without it the height came
+   out of the font size, so a field a call site had set in `text-xs` stood two
+   pixels shorter than the select beside it, and only where the two happened to
+   be neighbours did anyone see it. */
 @utility settings-field {
-	@apply border-shade-3 bg-shade-0 text-active focus:border-accent w-full rounded-md border px-2.5 py-1.5 text-sm outline-none;
+	@apply border-shade-3 bg-shade-0 text-active focus:border-accent min-h-9 w-full rounded-md border px-2.5 py-1.5 text-sm outline-none;
 }
 
 /*
@@ -191,6 +196,9 @@
 
 @custom-variant dark (&:where([data-color-theme='dark']));
 
+/* The composer's textarea, and only that: the two components that also used it
+   were unreachable Svelte 4 leftovers with a field style of their own, and went
+   with them. Settings controls use `settings-field`. */
 @utility base-input {
 	@apply placeholder:text-shade-6 flex w-full bg-transparent px-3 pb-2.5 outline-none disabled:cursor-not-allowed disabled:opacity-50;
 }
