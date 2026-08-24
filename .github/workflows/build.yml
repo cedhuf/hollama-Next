@@ -4,6 +4,10 @@ name: Build & publish
 # minutes, and `:latest` is only meaningful if the version it carries is the one
 # `package.json` was tagged with. Use "Run workflow" to publish from `main`
 # without cutting a release.
+#
+# "Run workflow" also takes any other branch, and publishes it as `:nightly`
+# instead. That is how a working branch gets an image people can try without it
+# claiming to be the release.
 on:
   workflow_dispatch:
   # Called by `versioning.yml` once a release lands. A commit pushed by an Action
@@ -41,11 +45,22 @@ jobs:
 
       # Read from the checkout rather than from the event: on a `workflow_call`,
       # `github.sha` is the caller's commit, not the one being built.
+      # The branch decides which tags this build may claim. Anything that is not
+      # `main` publishes `:nightly` and its commit, and nothing else. `:latest` has
+      # to keep meaning "the last release", and the version in `package.json` on a
+      # working branch is whatever `main` released last, so pushing it from here
+      # would replace a published image with different code under the same name.
       - name: Read the build's identity
         id: meta
         run: |
+          branch="${{ inputs.ref || github.ref_name }}"
           echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          if [ "$branch" = "main" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -67,6 +82,10 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/llooma:latest
-            ghcr.io/${{ github.repository_owner }}/llooma:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.release == 'true'
+              && format('ghcr.io/{0}/llooma:latest', github.repository_owner)
+              || format('ghcr.io/{0}/llooma:nightly', github.repository_owner) }}
+            ${{ steps.meta.outputs.release == 'true'
+              && format('ghcr.io/{0}/llooma:{1}', github.repository_owner, steps.meta.outputs.version)
+              || '' }}
             ghcr.io/${{ github.repository_owner }}/llooma:${{ steps.meta.outputs.sha }}
