@@ -16,7 +16,6 @@
 		X
 	} from '@lucide/svelte';
 	import { onMount, untrack } from 'svelte';
-	import { toast } from 'svelte-sonner';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 
@@ -63,6 +62,7 @@
 	} from '$lib/images';
 	import { serversStore } from '$lib/localStorage';
 	import type { ImageAttachment } from '$lib/promptAttachments';
+	import { toast } from '$lib/toast';
 	import { formatTimestampToNow } from '$lib/utils';
 
 	/**

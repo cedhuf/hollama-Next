@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { LoaderCircle, Zap } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
@@ -17,6 +16,7 @@
 	import type { Knowledge } from '$lib/knowledge';
 	import { knowledgeStore, settingsStore } from '$lib/localStorage';
 	import type { Attachment, ImageAttachment } from '$lib/promptAttachments';
+	import { toast } from '$lib/toast';
 	import { generateRandomId } from '$lib/utils';
 
 	import AddContextMenu from './AddContextMenu.svelte';
@@ -133,7 +133,6 @@
 
 		toast.warning(hadSomeText ? $LL.documentMostlyImages() : $LL.documentLooksScanned(), {
 			description: $LL.documentPagesAsImagesHelp({ max: MAX_PAGES_AS_IMAGES }),
-			duration: 12_000,
 			action: {
 				label: $LL.documentPagesAsImages(),
 				onClick: () => void attachPageImages(file)

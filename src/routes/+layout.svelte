@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { LoaderCircle } from '@lucide/svelte';
 	import { onMount, type Snippet } from 'svelte';
-	import { toast, Toaster } from 'svelte-sonner';
 	import { get } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import { navigatorDetector } from 'typesafe-i18n/detectors';
@@ -20,6 +19,7 @@
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
 	import KnowledgeModal from '$lib/components/KnowledgeModal.svelte';
 	import SearchModal from '$lib/components/SearchModal.svelte';
+	import Toasts from '$lib/components/Toasts.svelte';
 	import { releaseUrl } from '$lib/github';
 	import { loadImages } from '$lib/images';
 	import {
@@ -51,6 +51,7 @@
 	} from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerPrompts } from '$lib/systemPrompts';
+	import { toast } from '$lib/toast';
 	import { checkForUpdates, updateStatusStore } from '$lib/updates';
 	import { wallpaperImage } from '$lib/wallpapers';
 	import { loadWebFetchConfig } from '$lib/webFetch';
@@ -72,17 +73,6 @@
 		setInstanceConfig(data.instance ?? null);
 	});
 
-	const updateToastClasses = {
-		toast: 'flex-col items-start gap-y-1 bg-shade-1 text-active border border-shade-3 pr-8',
-		description: 'text-muted',
-		actionButton: 'text-accent font-medium hover:underline',
-		// The close button is the toast's first child, so the `flex-col` above would
-		// stack it on top of the title. Taking it out of the flow puts it back in the
-		// corner every other dialog in the app closes from.
-		closeButton:
-			'absolute! left-auto! right-1! top-1! translate-x-0! translate-y-0! border-0! bg-transparent! text-muted hover:text-active'
-	};
-
 	$effect(() => {
 		const { latestVersion, isCurrentVersionLatest, isCheckingForUpdates } = $updateStatusStore;
 		if (isCheckingForUpdates || isCurrentVersionLatest || !latestVersion) return;
@@ -97,18 +87,12 @@
 		if (get(settingsStore).notifiedUpdateVersion === latestVersion) return;
 		settingsStore.update((settings) => ({ ...settings, notifiedUpdateVersion: latestVersion }));
 
-		toast($LL.isLatestVersion(), {
+		toast.notice($LL.isLatestVersion(), {
 			description: latestVersion,
-			position: 'bottom-right',
-			// It stays until dismissed: an update notice that disappears on its own
-			// is one the user never had a chance to act on.
-			duration: Number.POSITIVE_INFINITY,
-			closeButton: true,
 			action: {
 				label: $LL.viewRelease(),
 				onClick: () => window.open(releaseUrl(latestVersion), '_blank', 'noopener,noreferrer')
-			},
-			classes: updateToastClasses
+			}
 		});
 	});
 
@@ -126,15 +110,11 @@
 		if (!$updated || notifiedReload) return;
 		notifiedReload = true;
 
-		toast($LL.isLatestVersion(), {
-			position: 'bottom-right',
-			duration: Number.POSITIVE_INFINITY,
-			closeButton: true,
+		toast.notice($LL.isLatestVersion(), {
 			action: {
 				label: $LL.refreshToUpdate(),
 				onClick: () => location.reload()
-			},
-			classes: updateToastClasses
+			}
 		});
 	});
 
@@ -420,21 +400,7 @@
 	{/if}
 </svelte:head>
 
-<Toaster
-	toastOptions={{
-		unstyled: true,
-		classes: {
-			toast:
-				'shadow-xl px-4 py-3 flex items-center gap-x-3 max-w-full w-full rounded mx-auto text-xs mx-0',
-			loading: 'bg-shade-0',
-			error: 'text-red-50 bg-red-700',
-			success: 'text-emerald-50 bg-emerald-700',
-			warning: 'text-yellow-50 bg-yellow-700',
-			info: 'bg-shade-1 text-muted'
-		}
-	}}
-	position="top-center"
-/>
+<Toasts />
 
 <!-- Global drawer swipe gestures (mobile). -->
 <svelte:window ontouchstart={onTouchStart} ontouchend={onTouchEnd} />

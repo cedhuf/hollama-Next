@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Trash2 } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
@@ -20,6 +19,7 @@
 		type Persona
 	} from '$lib/personas';
 	import { personasConfig, publishSharedPersonas } from '$lib/personasConfig';
+	import { toast } from '$lib/toast';
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsHint from '../settings/SettingsHint.svelte';

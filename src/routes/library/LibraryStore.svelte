@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
-
 	import LL from '$i18n/i18n-svelte';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import StoreModal from '$lib/components/StoreModal.svelte';
@@ -27,6 +25,7 @@
 	import type { StoreKind } from '$lib/store';
 	import { personaOffers, playbookOffers, type PersonaOffer } from '$lib/store/offers';
 	import type { Offer, OfferView } from '$lib/storeOffer';
+	import { toast } from '$lib/toast';
 
 	/**
 	 * The store: one door, several catalogues.

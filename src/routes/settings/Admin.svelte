@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { PlayCircle, RotateCcw } from '@lucide/svelte';
+	import { Bell, PlayCircle, RotateCcw } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -9,8 +8,10 @@
 	import MultiSelect from '$lib/components/MultiSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { GITHUB_RELEASES_URL } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
 	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
+	import { toast } from '$lib/toast';
 
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
@@ -422,6 +423,40 @@
 	}
 
 	/** Replay the first-connection welcome tour, so it can be reviewed on demand. */
+	/**
+	 * One of each severity, so a change to the toast styling can be looked at
+	 * without having to break something first. Staggered: they arrive one after
+	 * the other in real life, and a stack that appears all at once does not show
+	 * how they pile up.
+	 */
+	function previewToasts() {
+		$settingsModalOpen = false;
+		const messages = [
+			() => toast.success($LL.toastPreviewSuccess()),
+			() => toast.info($LL.toastPreviewInfo()),
+			() => toast.warning($LL.toastPreviewWarning()),
+			() =>
+				toast.error($LL.toastPreviewError(), {
+					description: $LL.toastPreviewErrorDescription()
+				}),
+			() => toast.loading($LL.toastPreviewLoading(), { id: 'toast-preview-loading' }),
+			() =>
+				toast.notice($LL.toastPreviewNotice(), {
+					action: {
+						label: $LL.viewRelease(),
+						onClick: () => window.open(GITHUB_RELEASES_URL, '_blank', 'noopener,noreferrer')
+					}
+				})
+		];
+
+		// One after the other, because that is how they arrive in real life, and a
+		// stack that appears all at once shows neither the entrance nor the way the
+		// older ones recede. More of them than fit on purpose: the far end of the
+		// stack is the part worth looking at.
+		messages.forEach((send, index) => setTimeout(send, index * 350));
+		setTimeout(() => toast.dismiss('toast-preview-loading'), messages.length * 350 + 2_000);
+	}
+
 	function replayWelcome() {
 		$settingsStore.welcomeComplete = false;
 		$settingsModalOpen = false;
@@ -762,6 +797,20 @@
 			</div>
 			<Button variant="outline" disabled={resettingOnboarding} onclick={askForOnboarding}>
 				<RotateCcw class="base-icon" />
+				{$LL.launch()}
+			</Button>
+		</div>
+
+		<!-- Closes the dialog, because the notifications land behind it. -->
+		<div
+			class="border-shade-3 mt-2 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+		>
+			<div class="flex min-w-0 flex-col">
+				<span class="text-active font-medium">{$LL.toastPreview()}</span>
+				<span class="text-muted text-xs">{$LL.toastPreviewHelp()}</span>
+			</div>
+			<Button variant="outline" onclick={previewToasts}>
+				<Bell class="base-icon" />
 				{$LL.launch()}
 			</Button>
 		</div>

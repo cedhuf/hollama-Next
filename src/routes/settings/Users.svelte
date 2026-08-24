@@ -10,7 +10,6 @@
 		X
 	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
 	import { quadInOut } from 'svelte/easing';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { slide } from 'svelte/transition';
@@ -20,6 +19,7 @@
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { toast } from '$lib/toast';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';

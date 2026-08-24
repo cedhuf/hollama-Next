@@ -3244,6 +3244,42 @@ type RootTranslation = {
 	 */
 	emailAndPasswordRequired: string
 	/**
+	 * N​o​t​i​f​i​c​a​t​i​o​n​s
+	 */
+	toastPreview: string
+	/**
+	 * S​e​n​d​ ​o​n​e​ ​n​o​t​i​f​i​c​a​t​i​o​n​ ​o​f​ ​e​a​c​h​ ​k​i​n​d​,​ ​t​o​ ​s​e​e​ ​h​o​w​ ​t​h​e​y​ ​l​o​o​k​ ​a​n​d​ ​s​t​a​c​k​.
+	 */
+	toastPreviewHelp: string
+	/**
+	 * S​a​v​e​d
+	 */
+	toastPreviewSuccess: string
+	/**
+	 * C​o​p​i​e​d​ ​t​o​ ​t​h​e​ ​c​l​i​p​b​o​a​r​d
+	 */
+	toastPreviewInfo: string
+	/**
+	 * T​h​a​t​ ​m​o​d​e​l​ ​d​o​e​s​ ​n​o​t​ ​s​u​p​p​o​r​t​ ​t​o​o​l​s
+	 */
+	toastPreviewWarning: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​r​e​a​c​h​ ​t​h​e​ ​s​e​r​v​e​r
+	 */
+	toastPreviewError: string
+	/**
+	 * C​h​e​c​k​ ​t​h​e​ ​a​d​d​r​e​s​s​ ​a​n​d​ ​t​h​e​ ​k​e​y​ ​i​n​ ​t​h​e​ ​S​e​r​v​e​r​s​ ​t​a​b​.
+	 */
+	toastPreviewErrorDescription: string
+	/**
+	 * A​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​i​s​ ​a​v​a​i​l​a​b​l​e
+	 */
+	toastPreviewNotice: string
+	/**
+	 * P​u​l​l​i​n​g​ ​a​ ​m​o​d​e​l
+	 */
+	toastPreviewLoading: string
+	/**
 	 * D​e​v​e​l​o​p​e​r​ ​o​p​t​i​o​n​s
 	 */
 	developerOptions: string
@@ -6763,6 +6799,42 @@ export type TranslationFunctions = {
 	 * Email and password are required
 	 */
 	emailAndPasswordRequired: () => LocalizedString
+	/**
+	 * Notifications
+	 */
+	toastPreview: () => LocalizedString
+	/**
+	 * Send one notification of each kind, to see how they look and stack.
+	 */
+	toastPreviewHelp: () => LocalizedString
+	/**
+	 * Saved
+	 */
+	toastPreviewSuccess: () => LocalizedString
+	/**
+	 * Copied to the clipboard
+	 */
+	toastPreviewInfo: () => LocalizedString
+	/**
+	 * That model does not support tools
+	 */
+	toastPreviewWarning: () => LocalizedString
+	/**
+	 * Could not reach the server
+	 */
+	toastPreviewError: () => LocalizedString
+	/**
+	 * Check the address and the key in the Servers tab.
+	 */
+	toastPreviewErrorDescription: () => LocalizedString
+	/**
+	 * A new version is available
+	 */
+	toastPreviewNotice: () => LocalizedString
+	/**
+	 * Pulling a model
+	 */
+	toastPreviewLoading: () => LocalizedString
 	/**
 	 * Developer options
 	 */

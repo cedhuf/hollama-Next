@@ -13,13 +13,13 @@
 		X
 	} from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Tooltip from '$lib/components/Tooltip.svelte';
 	import type { StoreKind } from '$lib/store';
 	import { matches, type Offer, type OfferAction, type OfferView } from '$lib/storeOffer';
+	import { toast } from '$lib/toast';
 
 	/**
 	 * The store, as a page: search, views, layout, refresh, and a grid of cards.

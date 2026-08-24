@@ -15,7 +15,6 @@
 		Upload
 	} from '@lucide/svelte';
 	import { tick } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
@@ -53,6 +52,7 @@
 	import { newPlaybook, playbookSteps, type Playbook } from '$lib/playbooks';
 	import { parsePlaybookBundle } from '$lib/playbookStore';
 	import { openKnowledge } from '$lib/stores/modal';
+	import { toast } from '$lib/toast';
 	import { formatTimestampToNow, generateRandomId } from '$lib/utils';
 
 	import LibraryStore from './LibraryStore.svelte';

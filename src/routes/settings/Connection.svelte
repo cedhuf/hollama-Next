@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ChevronDown, KeyRound, LoaderCircle, RefreshCw, Tags, Trash2, X } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
@@ -19,6 +18,7 @@
 	} from '$lib/connections';
 	import { settingsStore } from '$lib/localStorage';
 	import { describeProvider } from '$lib/providers';
+	import { toast } from '$lib/toast';
 
 	import ConnectionLoadOptions from './ConnectionLoadOptions.svelte';
 	import OllamaBaseURLHelp from './ollama/BaseURLHelp.svelte';

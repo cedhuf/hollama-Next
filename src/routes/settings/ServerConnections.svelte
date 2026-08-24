@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Check, LoaderCircle } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import type { LoadOptions } from '$lib/chat/options';
@@ -21,6 +20,7 @@
 	import { fetchProviders, providerModels, providerToServer } from '$lib/providerCatalogue';
 	import { describeProvider } from '$lib/providers';
 	import { currentUser } from '$lib/stores/auth';
+	import { toast } from '$lib/toast';
 
 	import Connection from './Connection.svelte';
 	import ModelNames from './ModelNames.svelte';

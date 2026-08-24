@@ -1,4 +1,3 @@
-import { toast } from 'svelte-sonner';
 import { writable } from 'svelte/store';
 
 import { browser } from '$app/environment';
@@ -10,6 +9,7 @@ import type { Playbook } from '$lib/playbooks';
 import type { Session } from '$lib/sessions';
 import { summarizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
+import { toast } from '$lib/toast';
 
 import { repository } from './data';
 import { NotAuthenticatedError } from './data/repository';
@@ -286,7 +286,7 @@ function reportLoadFailure(error: unknown): void {
 	toast.error('Could not load your data', {
 		id: 'data-load-error',
 		description: `${error instanceof Error ? error.message : 'Unknown error'}: saving is paused; reload once the server is back.`,
-		duration: Number.POSITIVE_INFINITY
+		persist: true
 	});
 }
 

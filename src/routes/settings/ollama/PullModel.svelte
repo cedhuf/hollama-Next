@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { CloudDownload } from '@lucide/svelte';
 	import type { ErrorResponse, ProgressResponse, StatusResponse } from 'ollama/browser';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { OllamaStrategy } from '$lib/chat/ollama';
 	import Button from '$lib/components/Button.svelte';
 	import type { Server } from '$lib/connections';
+	import { toast } from '$lib/toast';
 
 	import SettingsField from '../SettingsField.svelte';
 

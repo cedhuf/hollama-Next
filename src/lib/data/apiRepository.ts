@@ -1,5 +1,3 @@
-import { toast } from 'svelte-sonner';
-
 import { browser } from '$app/environment';
 import type { Server } from '$lib/connections';
 import type { ConversationResult } from '$lib/conversationSearch';
@@ -11,6 +9,7 @@ import { fetchProviders, providerToServer } from '$lib/providerCatalogue';
 import type { Session } from '$lib/sessions';
 import { normalizeSession, type SessionSummary } from '$lib/sessionShape';
 import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
+import { toast } from '$lib/toast';
 
 import { NotAuthenticatedError, type Backup, type DataRepository } from './repository';
 

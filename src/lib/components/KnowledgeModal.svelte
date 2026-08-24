@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Code, Pencil, Type } from '@lucide/svelte';
 	import { tick } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { loadKnowledge, saveKnowledge } from '$lib/knowledge';
 	import { knowledgeStore } from '$lib/localStorage';
 	import { knowledgeDraft, knowledgeModalOpen } from '$lib/stores/modal';
+	import { toast } from '$lib/toast';
 	import { formatTimestampToNow, generateRandomId, getUpdatedAtDate } from '$lib/utils';
 
 	import CodeEditor from './CodeEditor.svelte';

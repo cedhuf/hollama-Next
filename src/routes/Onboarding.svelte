@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ArrowLeft, ArrowRight, Check, Upload } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { APP_NAME } from '$lib/brand';
@@ -10,6 +9,7 @@
 	import { applyBackupToStores } from '$lib/data/applyBackup';
 	import { settingsStore } from '$lib/localStorage';
 	import { onboardingOpen } from '$lib/stores/modal';
+	import { toast } from '$lib/toast';
 
 	import Profile from './settings/Profile.svelte';
 	import ServerConnections from './settings/ServerConnections.svelte';

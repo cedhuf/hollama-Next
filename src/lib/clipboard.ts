@@ -1,7 +1,7 @@
-import { toast } from 'svelte-sonner';
 import { get } from 'svelte/store';
 
 import LL from '$i18n/i18n-svelte';
+import { toast } from '$lib/toast';
 
 /**
  * Put text on the clipboard, wherever the app happens to be running.

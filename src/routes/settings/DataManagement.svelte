@@ -7,7 +7,6 @@
 		Trash2,
 		TriangleAlert
 	} from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import { APP_SLUG } from '$lib/brand';
@@ -31,6 +30,7 @@
 	import type { Playbook } from '$lib/playbooks';
 	import type { Session } from '$lib/sessions';
 	import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
+	import { toast } from '$lib/toast';
 
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';

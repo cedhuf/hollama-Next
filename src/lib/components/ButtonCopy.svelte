@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Files } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
+	import { toast } from '$lib/toast';
 
 	import Button from './Button.svelte';
 

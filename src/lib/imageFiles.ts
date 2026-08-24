@@ -1,9 +1,9 @@
-import { toast } from 'svelte-sonner';
 import { get } from 'svelte/store';
 
 import LL from '$i18n/i18n-svelte';
 import { IMAGE_INPUT_TYPES } from '$lib/generatedImages';
 import type { ImageAttachment } from '$lib/promptAttachments';
+import { toast } from '$lib/toast';
 import { generateRandomId } from '$lib/utils';
 
 /**

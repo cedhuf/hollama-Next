@@ -1,5 +1,4 @@
 import { tick } from 'svelte';
-import { toast } from 'svelte-sonner';
 import { fromStore, get } from 'svelte/store';
 
 import LL from '$i18n/i18n-svelte';
@@ -19,6 +18,7 @@ import { searchConfig } from '$lib/search';
 import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
 import type { PendingMessage } from '$lib/stores/pendingMessage';
 import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
+import { toast } from '$lib/toast';
 import { webFetchConfig } from '$lib/webFetch';
 
 import type { CommandName } from './commands';

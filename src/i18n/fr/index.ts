@@ -924,6 +924,16 @@ const fr = extendDictionary(en, {
 	addUser: 'Ajouter un utilisateur',
 	userCreated: 'Utilisateur créé',
 	emailAndPasswordRequired: "L'e-mail et le mot de passe sont requis",
+	toastPreview: 'Notifications',
+	toastPreviewHelp:
+		'Envoie une notification de chaque type, pour voir leur allure et leur empilement.',
+	toastPreviewSuccess: 'Enregistré',
+	toastPreviewInfo: 'Copié dans le presse-papiers',
+	toastPreviewWarning: 'Ce modèle ne gère pas les outils',
+	toastPreviewError: 'Serveur injoignable',
+	toastPreviewErrorDescription: "Vérifiez l'adresse et la clé dans l'onglet Serveurs.",
+	toastPreviewNotice: 'Une nouvelle version est disponible',
+	toastPreviewLoading: "Téléchargement d'un modèle",
 	developerOptions: 'Options développeur',
 	developerOptionsDescription:
 		"Outils pour vérifier des parcours qu'un utilisateur ne voit normalement qu'une fois.",

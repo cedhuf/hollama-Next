@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
-
 	import LL from '$i18n/i18n-svelte';
 	import EditorModal from '$lib/components/EditorModal.svelte';
 	import { deletePlaybook, savePlaybook, type Playbook } from '$lib/playbooks';
 	import { publishSharedPlaybooks } from '$lib/playbooksConfig';
+	import { toast } from '$lib/toast';
 
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
