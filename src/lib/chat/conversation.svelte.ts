@@ -140,7 +140,6 @@ export class Conversation implements RunSurface {
 		this.session = session;
 		this.editor = {
 			prompt: '',
-			view: 'messages',
 			messageIndexToEdit: null,
 			isExpanded: false,
 			isCompletionInProgress: false,
@@ -242,7 +241,6 @@ export class Conversation implements RunSurface {
 
 		this.session = session;
 		this.modelName = session.model?.name || '';
-		this.editor.view = 'messages';
 		this.editor.isNewSession = !session?.messages?.length;
 		this.editor.interactiveChoices = this.#settings.current.interactiveChoices;
 		this.editor.sendCurrentDate = this.#settings.current.sendCurrentDate;
@@ -365,7 +363,6 @@ export class Conversation implements RunSurface {
 		if (!this.session.model) return;
 		this.editor.isExpanded = false;
 		this.editor.isNewSession = false;
-		this.editor.view = 'messages';
 		// Sent is no longer a draft. Dropped here rather than after the turn, because
 		// the message is already on its way and the composer is already empty.
 		clearDraft(sessionDraft(this.session.id));

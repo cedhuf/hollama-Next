@@ -83,9 +83,6 @@ const fr = extendDictionary(en, {
 	connectionFailedToVerify:
 		'Échec de la vérification de la connexion, vérifiez les paramètres de connexion et réessayez',
 	content: 'Contenu',
-	controls: 'Contrôles',
-	controlsOnlyAvailableForOllama:
-		'Les contrôles avancés sont actuellement uniquement disponibles pour les modèles Ollama',
 	copy: 'Copier',
 	couldntReachServer: 'Serveur injoignable',
 	couldntReachReleases: 'GitHub injoignable',
@@ -189,7 +186,6 @@ const fr = extendDictionary(en, {
 	mirostatEta: 'Mirostat ETA',
 	mirostatTau: 'Mirostat Tau',
 	modelNotFound: 'Modèle non trouvé',
-	modelOptions: 'Options de modèle',
 	modelWasDownloaded: '{model:string} a été téléchargé',
 	modelsFilter: 'Filtre des noms de modèles',
 	name: 'Nom',
@@ -239,7 +235,6 @@ const fr = extendDictionary(en, {
 	repeatPenalty: 'Pénalité de répétition',
 	retry: 'Réessayer',
 	run: 'Exécuter',
-	runtimeOptions: 'Options d’exécution',
 	sampling: 'Échantillonnage',
 	samplingAdminDescription:
 		"L'échantillonnage se règle dans Chat, par vous comme par les autres. Ceci décide seulement qui reçoit vos valeurs.",

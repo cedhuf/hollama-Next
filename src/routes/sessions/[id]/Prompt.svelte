@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { CircleStop, FoldVertical, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
-	import Settings_2 from '@lucide/svelte/icons/settings-2';
 	import { tick } from 'svelte';
-	import { toast } from 'svelte-sonner';
 
 	import LL from '$i18n/i18n-svelte';
 	import {
@@ -17,7 +15,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import ImageDrop from '$lib/components/ImageDrop.svelte';
-	import { ConnectionType, supportsReasoningToggle } from '$lib/connections';
+	import { supportsReasoningToggle } from '$lib/connections';
 	import { readPastedImages, warnRejected } from '$lib/imageFiles';
 	import { personasStore, serversStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
@@ -230,11 +228,6 @@
 		choiceBypassed = false;
 	});
 
-	const isOllamaFamily = $derived(
-		$serversStore.find((s) => s.id === session.model?.serverId)?.connectionType ===
-			ConnectionType.Ollama
-	);
-
 	const supportsReasoning = $derived.by(() => {
 		const ct = $serversStore.find((s) => s.id === session.model?.serverId)?.connectionType;
 		return ct !== undefined && supportsReasoningToggle(ct);
@@ -265,11 +258,6 @@
 		)
 	);
 
-	function toggleControls() {
-		if (editor.view === 'controls') switchToMessages();
-		else switchToControls();
-	}
-
 	$effect(() => {
 		if (attachments.length) scrollToBottom(true);
 	});
@@ -283,19 +271,6 @@
 	function toggleExpanded() {
 		editor.isExpanded = !editor.isExpanded;
 		editor.promptTextarea?.focus();
-	}
-
-	function switchToMessages() {
-		editor.view = 'messages';
-		scrollToBottom(true);
-	}
-
-	function switchToControls() {
-		if (!isOllamaFamily) {
-			toast.warning($LL.controlsOnlyAvailableForOllama());
-			return;
-		}
-		editor.view = 'controls';
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -413,7 +388,7 @@
 		: ''}"
 >
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
-		{#if pendingChoice?.choices && editor.view === 'messages' && !editor.isExpanded && !choiceBypassed}
+		{#if pendingChoice?.choices && !editor.isExpanded && !choiceBypassed}
 			{@const choice = pendingChoice}
 			<!-- Interactive quick-choice temporarily takes over the composer (Claude-style):
 			     one question at a time, numbered + scrollable, dismiss (✕) to type freely. -->
@@ -507,15 +482,6 @@
 								<ContextMeter {session} threshold={contextThreshold} />
 							{/if}
 							{#if !isPersona}
-								<Button
-									variant="icon"
-									title={$LL.controls()}
-									aria-label={$LL.controls()}
-									isActive={editor.view === 'controls'}
-									onclick={toggleControls}
-								>
-									<Settings_2 class="base-icon" />
-								</Button>
 								<Button
 									variant="icon"
 									class="prompt-editor__toggle hidden lg:inline-flex"

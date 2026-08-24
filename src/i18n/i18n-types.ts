@@ -300,14 +300,6 @@ type RootTranslation = {
 	 */
 	content: string
 	/**
-	 * C​o​n​t​r​o​l​s
-	 */
-	controls: string
-	/**
-	 * A​d​v​a​n​c​e​d​ ​c​o​n​t​r​o​l​s​ ​a​r​e​ ​c​u​r​r​e​n​t​l​y​ ​o​n​l​y​ ​a​v​a​i​l​a​b​l​e​ ​f​o​r​ ​O​l​l​a​m​a​ ​m​o​d​e​l​s
-	 */
-	controlsOnlyAvailableForOllama: string
-	/**
 	 * C​o​p​y
 	 */
 	copy: string
@@ -719,10 +711,6 @@ type RootTranslation = {
 	 */
 	modelNotFound: string
 	/**
-	 * M​o​d​e​l​ ​o​p​t​i​o​n​s
-	 */
-	modelOptions: string
-	/**
 	 * {​m​o​d​e​l​}​ ​w​a​s​ ​d​o​w​n​l​o​a​d​e​d
 	 * @param {string} model
 	 */
@@ -925,10 +913,6 @@ type RootTranslation = {
 	 * R​u​n
 	 */
 	run: string
-	/**
-	 * R​u​n​t​i​m​e​ ​o​p​t​i​o​n​s
-	 */
-	runtimeOptions: string
 	/**
 	 * S​a​m​p​l​i​n​g
 	 */
@@ -3902,14 +3886,6 @@ export type TranslationFunctions = {
 	 */
 	content: () => LocalizedString
 	/**
-	 * Controls
-	 */
-	controls: () => LocalizedString
-	/**
-	 * Advanced controls are currently only available for Ollama models
-	 */
-	controlsOnlyAvailableForOllama: () => LocalizedString
-	/**
 	 * Copy
 	 */
 	copy: () => LocalizedString
@@ -4310,10 +4286,6 @@ export type TranslationFunctions = {
 	 */
 	modelNotFound: () => LocalizedString
 	/**
-	 * Model options
-	 */
-	modelOptions: () => LocalizedString
-	/**
 	 * {model} was downloaded
 	 */
 	modelWasDownloaded: (arg: { model: string }) => LocalizedString
@@ -4513,10 +4485,6 @@ export type TranslationFunctions = {
 	 * Run
 	 */
 	run: () => LocalizedString
-	/**
-	 * Runtime options
-	 */
-	runtimeOptions: () => LocalizedString
 	/**
 	 * Sampling
 	 */

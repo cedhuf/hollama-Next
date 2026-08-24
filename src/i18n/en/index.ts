@@ -75,9 +75,6 @@ const en = {
 	connectionFailedToVerify:
 		'Connection failed to verify, check the connection settings and try again',
 	content: 'Content',
-	controls: 'Controls',
-	controlsOnlyAvailableForOllama:
-		'Advanced controls are currently only available for Ollama models',
 	copy: 'Copy',
 	couldntReachServer: 'Server unreachable',
 	couldntReachReleases: 'GitHub unreachable',
@@ -183,7 +180,6 @@ const en = {
 	mirostatEta: 'Mirostat ETA',
 	mirostatTau: 'Mirostat Tau',
 	modelNotFound: 'Model not found',
-	modelOptions: 'Model options',
 	modelWasDownloaded: '{model:string} was downloaded',
 	modelsFilter: 'Model names filter',
 	name: 'Name',
@@ -234,7 +230,6 @@ const en = {
 	repeatPenalty: 'Repeat penalty',
 	retry: 'Retry',
 	run: 'Run',
-	runtimeOptions: 'Runtime options',
 	sampling: 'Sampling',
 	samplingAdminDescription:
 		'Sampling is set in Chat, by you like everyone else. This only decides who else gets your values.',

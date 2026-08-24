@@ -161,7 +161,6 @@ export interface Session {
 
 export interface Editor {
 	prompt: string;
-	view: 'messages' | 'controls';
 	messageIndexToEdit: number | null;
 	isExpanded: boolean;
 	isCompletionInProgress: boolean;

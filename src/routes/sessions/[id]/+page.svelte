@@ -24,7 +24,6 @@
 
 	import type { PageData } from './$types';
 	import ButtonCopyConversation from './ButtonCopyConversation.svelte';
-	import Controls from './Controls.svelte';
 	import Messages from './Messages.svelte';
 	import Prompt from './Prompt.svelte';
 	import SessionModal from './SessionModal.svelte';
@@ -57,7 +56,7 @@
 	 * Where the composer is drawn: sticky at the foot of the conversation while you
 	 * are reading it, in the column's own footer once the editor takes the screen.
 	 */
-	const floatingComposer = $derived(chat.editor.view === 'messages' && !chat.editor.isExpanded);
+	const floatingComposer = $derived(!chat.editor.isExpanded);
 
 	/**
 	 * The bar floats on the same terms, plus the setting.
@@ -491,97 +490,90 @@
 		{@render topBar(false)}
 	{/if}
 
-	<!-- Under the bar rather than beneath it, so neither owes the other any room. -->
-	{#if chat.editor.view === 'controls'}
-		<div class="surface-pane flex min-h-0 flex-grow flex-col">
-			<Controls bind:session={chat.session} />
-		</div>
-	{:else}
-		<!-- The transcript and the button that returns to its foot, in one box: the
-		     button then anchors to the conversation rather than to the column, and
-		     stops needing to be told how tall the composer happens to be.
+	<!-- The transcript and the button that returns to its foot, in one box: the
+	     button then anchors to the conversation rather than to the column, and
+	     stops needing to be told how tall the composer happens to be.
 
-		     Its scrollbar gutter is reserved whether or not there is a scrollbar to
-		     put in it, because the two floating bars live inside this box: otherwise
-		     they would be a scrollbar narrower on a long conversation than on a short
-		     one, and would shift sideways the moment a reply made the page overflow.
-		     A no-op where scrollbars are drawn over the content and take no room, which
-		     is the case this now asks for.
+	     Its scrollbar gutter is reserved whether or not there is a scrollbar to
+	     put in it, because the two floating bars live inside this box: otherwise
+	     they would be a scrollbar narrower on a long conversation than on a short
+	     one, and would shift sideways the moment a reply made the page overflow.
+	     A no-op where scrollbars are drawn over the content and take no room, which
+	     is the case this now asks for.
 
-		     The scrollbar itself is the platform's, deliberately, where the rest of the
-		     app styles its own. Styling one at all is what opts an element out of the
-		     overlay behaviour macOS and iOS give it: any width, any colour, and the bar
-		     stops fading away and sits there for the length of the conversation. That
-		     trade is worth it on a code block, where a bar is how you learn the line
-		     runs past the edge. It is not worth it down the side of the thing you are
-		     reading. -->
-		<div class="relative flex min-h-0 flex-grow flex-col">
-			<div
-				class="session__history surface-pane flex flex-grow flex-col overflow-auto px-4 lg:px-6 xl:px-8"
-				style="scrollbar-gutter: stable"
-				bind:this={messagesWindow}
-			>
-				{#if floatingHeader}
-					<!-- The mirror image of the composer below: sticky rather than laid on
-					     top, so it reserves its own room at the head of the conversation and
-					     never covers the first message, while everything after it passes
-					     behind on the way up. -->
-					<div class="sticky top-0 z-20 -mx-4 lg:-mx-6 xl:-mx-8">
-						{@render topBar(true)}
-					</div>
-				{/if}
-				<!-- Grows to fill whatever the conversation does not, which is what puts the
-				     composer at the foot of a short exchange instead of halfway up the page.
-				     A sticky element only sticks once there is something to scroll; below
-				     that it simply sits where the flow leaves it, and the flow is what this
-				     corrects. -->
-				<div class="grow">
-					<Messages
-						bind:session={chat.session}
-						bind:editor={chat.editor}
-						handleRetry={chat.retry}
-						chooseAnswer={chat.answerChoice}
-						pendingChoice={chat.pendingChoice}
-						assistantLabel={persona?.name}
-						isCompacting={chat.isCompacting}
-						onCancelCompaction={chat.cancelCompaction}
-						onAddMention={chat.addMention}
-						onTogglePlaybook={chat.togglePlaybook}
-					/>
+	     The scrollbar itself is the platform's, deliberately, where the rest of the
+	     app styles its own. Styling one at all is what opts an element out of the
+	     overlay behaviour macOS and iOS give it: any width, any colour, and the bar
+	     stops fading away and sits there for the length of the conversation. That
+	     trade is worth it on a code block, where a bar is how you learn the line
+	     runs past the edge. It is not worth it down the side of the thing you are
+	     reading. -->
+	<div class="relative flex min-h-0 flex-grow flex-col">
+		<div
+			class="session__history surface-pane flex flex-grow flex-col overflow-auto px-4 lg:px-6 xl:px-8"
+			style="scrollbar-gutter: stable"
+			bind:this={messagesWindow}
+		>
+			{#if floatingHeader}
+				<!-- The mirror image of the composer below: sticky rather than laid on
+				     top, so it reserves its own room at the head of the conversation and
+				     never covers the first message, while everything after it passes
+				     behind on the way up. -->
+				<div class="sticky top-0 z-20 -mx-4 lg:-mx-6 xl:-mx-8">
+					{@render topBar(true)}
 				</div>
-
-				{#if floatingComposer}
-					<!-- Sticky rather than laid on top, which is the whole of the difference:
-					     it stays in the flow, so it reserves its own room at the end of the
-					     conversation and never covers the last message, while everything above
-					     passes behind it on the way there. Nothing measures it, nothing pads
-					     for it. The negative margins undo the transcript's side gutter so it
-					     spans the column rather than the text; there is no vertical one left to
-					     undo, because a stuck element anchors to the inside of the scrollport
-					     and a padding there would have pushed it back down. -->
-					<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
-						<!-- Scrolling up during a reply silently opts you out of auto-follow;
-						     without this there is nothing to say content is still arriving below,
-						     nor any way back short of dragging. Carried by the composer, so it
-						     stands above it without anyone having to know how tall it is. -->
-						{#if userScrolledUp}
-							<button
-								type="button"
-								transition:fly={{ y: 8, duration: 150 }}
-								onclick={() => scrollToBottom(true, true)}
-								aria-label={$LL.scrollToBottom()}
-								title={$LL.scrollToBottom()}
-								class="scroll-to-bottom border-shade-3 bg-shade-0 text-muted hover:text-active absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors"
-							>
-								<ArrowDown class="base-icon" />
-							</button>
-						{/if}
-						{@render composer()}
-					</div>
-				{/if}
+			{/if}
+			<!-- Grows to fill whatever the conversation does not, which is what puts the
+			     composer at the foot of a short exchange instead of halfway up the page.
+			     A sticky element only sticks once there is something to scroll; below
+			     that it simply sits where the flow leaves it, and the flow is what this
+			     corrects. -->
+			<div class="grow">
+				<Messages
+					bind:session={chat.session}
+					bind:editor={chat.editor}
+					handleRetry={chat.retry}
+					chooseAnswer={chat.answerChoice}
+					pendingChoice={chat.pendingChoice}
+					assistantLabel={persona?.name}
+					isCompacting={chat.isCompacting}
+					onCancelCompaction={chat.cancelCompaction}
+					onAddMention={chat.addMention}
+					onTogglePlaybook={chat.togglePlaybook}
+				/>
 			</div>
+
+			{#if floatingComposer}
+				<!-- Sticky rather than laid on top, which is the whole of the difference:
+				     it stays in the flow, so it reserves its own room at the end of the
+				     conversation and never covers the last message, while everything above
+				     passes behind it on the way there. Nothing measures it, nothing pads
+				     for it. The negative margins undo the transcript's side gutter so it
+				     spans the column rather than the text; there is no vertical one left to
+				     undo, because a stuck element anchors to the inside of the scrollport
+				     and a padding there would have pushed it back down. -->
+				<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
+					<!-- Scrolling up during a reply silently opts you out of auto-follow;
+					     without this there is nothing to say content is still arriving below,
+					     nor any way back short of dragging. Carried by the composer, so it
+					     stands above it without anyone having to know how tall it is. -->
+					{#if userScrolledUp}
+						<button
+							type="button"
+							transition:fly={{ y: 8, duration: 150 }}
+							onclick={() => scrollToBottom(true, true)}
+							aria-label={$LL.scrollToBottom()}
+							title={$LL.scrollToBottom()}
+							class="scroll-to-bottom border-shade-3 bg-shade-0 text-muted hover:text-active absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors"
+						>
+							<ArrowDown class="base-icon" />
+						</button>
+					{/if}
+					{@render composer()}
+				</div>
+			{/if}
 		</div>
-	{/if}
+	</div>
 
 	<!-- Drawn in one of two places, never both, which is why it is written once and
 	     rendered where it belongs. -->

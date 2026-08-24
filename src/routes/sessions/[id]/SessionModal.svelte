@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { X } from '@lucide/svelte';
 
+	import LL from '$i18n/i18n-svelte';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
+	import Collapsible from '$lib/components/Collapsible.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
+	import { ConnectionType } from '$lib/connections';
+	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { resolveSessionTitle, saveSession, type Session } from '$lib/sessions';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 
+	import SamplingFields from '../../settings/SamplingFields.svelte';
 	import SettingsBadge from '../../settings/SettingsBadge.svelte';
 	import SettingsField from '../../settings/SettingsField.svelte';
+	import SettingsHint from '../../settings/SettingsHint.svelte';
 	import SettingsSection from '../../settings/SettingsSection.svelte';
 
 	/**
@@ -47,6 +54,42 @@
 	function resetSystemPromptToDefault() {
 		session.systemPrompt = { ...session.systemPrompt, content: resolvedDefault };
 		session.systemPromptEdited = false;
+		saveSession(session);
+	}
+
+	// --- sampling --------------------------------------------------------------
+
+	const samplingCfg = $derived($chatDefaultsConfig.sampling);
+	const overrideCount = $derived(Object.keys(session.options ?? {}).length);
+
+	/**
+	 * Whether the second group of fields will actually reach anything.
+	 *
+	 * Read from the connection the chosen model sits on rather than from the
+	 * conversation's stored model, so switching model in the picker above relabels
+	 * the panel straight away instead of at the next reload.
+	 */
+	const isOllama = $derived.by(() => {
+		const serverId =
+			$settingsStore.models?.find((model) => model.name === modelName)?.serverId ??
+			session.model?.serverId;
+		return (
+			$serversStore.find((server) => server.id === serverId)?.connectionType ===
+			ConnectionType.Ollama
+		);
+	});
+
+	/** Folded shut, it still says whether this conversation disagrees with anything. */
+	const samplingSummary = $derived(
+		overrideCount ? $LL.samplingFieldCount({ count: overrideCount }) : $LL.samplingNothingSet()
+	);
+
+	function onSamplingChange() {
+		saveSession(session);
+	}
+
+	function clearSampling() {
+		session.options = {};
 		saveSession(session);
 	}
 </script>
@@ -114,6 +157,39 @@
 						</button>
 					{/if}
 				</SettingsSection>
+
+				<!-- Folded, because a dozen numeric fields would swamp the three things
+				     people open this dialog for. The summary on the closed row is what
+				     makes that safe: it already says whether this conversation departs
+				     from the settings, so opening it is a decision rather than a search. -->
+				<Collapsible title={$LL.sampling()} summary={samplingSummary}>
+					<SettingsHint>{$LL.samplingSessionDescription()}</SettingsHint>
+
+					{#if samplingCfg.editable}
+						<SamplingFields
+							bind:values={session.options}
+							inherited={samplingCfg.value}
+							ollama={isOllama}
+							onChange={onSamplingChange}
+						/>
+
+						{#if overrideCount}
+							<button
+								type="button"
+								class="text-link self-start text-xs hover:underline"
+								onclick={clearSampling}
+							>
+								{$LL.samplingSessionReset()}
+							</button>
+						{/if}
+					{:else}
+						<!-- Locked means locked everywhere, not only in Settings: a
+						     conversation that could still override would be the same policy
+						     with a hole in it. -->
+						<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
+						<SamplingFields values={samplingCfg.value} ollama={isOllama} disabled />
+					{/if}
+				</Collapsible>
 			</div>
 		</div>
 	</div>
