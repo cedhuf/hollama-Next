@@ -20,6 +20,7 @@
 	import { env } from '$env/dynamic/public';
 	import Modal from '$lib/components/Modal.svelte';
 	import { currentUser } from '$lib/stores/auth';
+	import { hasAccounts } from '$lib/stores/instance';
 	import { settingsBack, settingsModalOpen } from '$lib/stores/modal';
 
 	import Admin from './Admin.svelte';
@@ -52,7 +53,9 @@
 			{ id: 'admin', label: 'Admin', icon: Shield, visible: serverMode && isAdmin },
 			// Beside Admin and gated the same way, because it is the other half of
 			// running an instance: Admin is how it behaves, this is who is on it.
-			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: serverMode && isAdmin },
+			// Unlike Admin, this one goes away where nobody signs in: a list of
+			// accounts on an instance that has none is a page about nothing.
+			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: $hasAccounts && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
 			// Its own tab rather than a section of Tools: twenty prompts folded into
@@ -130,7 +133,7 @@
 					</button>
 				{/each}
 
-				{#if serverMode}
+				{#if $hasAccounts}
 					<form method="POST" action="/auth/signout" class="shrink-0 sm:mt-auto">
 						<input type="hidden" name="callbackUrl" value="/login" />
 						<button

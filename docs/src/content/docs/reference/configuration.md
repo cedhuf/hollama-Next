@@ -40,29 +40,37 @@ roughly 30 MB for the engine and 3 to 11 MB per language.
 
 Only read when `PUBLIC_MODE=server`.
 
-| Variable                                | Default                | Description                                                                         |
-| --------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------- |
-| `PUBLIC_MODE`                           | `local`                | Set `server` for multi-user mode                                                    |
-| `DATA_DIR`                              | `./data`               | Directory for the SQLite database and server state. Bind-mount this                 |
-| `AUTH_SECRET`                           | _(none)_               | **Required.** Signs sessions and encrypts provider keys (`openssl rand -base64 32`) |
-| `ADMIN_EMAIL`                           | _(none)_               | Bootstraps the first admin; also marks this email as admin for OIDC                 |
-| `ADMIN_PASSWORD`                        | _(none)_               | Initial admin password (omit for an OIDC-only admin)                                |
-| `AUTH_CREDENTIALS`                      | _(none)_               | `true` to enable email and password login                                           |
-| `OIDC_ISSUER`                           | _(none)_               | OIDC provider URL (e.g. PocketID); its presence enables OIDC login                  |
-| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | _(none)_               | OIDC client credentials                                                             |
-| `OIDC_NAME`                             | `SSO`                  | Label for the OIDC sign-in button                                                   |
-| `OIDC_SCOPE`                            | `openid profile email` | Requested scopes (add your groups scope to expose roles)                            |
-| `OIDC_ROLE_CLAIM` / `OIDC_ADMIN_VALUE`  | _(none)_               | Claim and value that grant the admin role                                           |
-| `OIDC_AUTO_PROVISION`                   | `true`                 | Create a user on first OIDC login (`false` requires a pre-created account)          |
-| `OIDC_AUTO_REDIRECT`                    | _(none)_               | `true` skips the login page and goes straight to the identity provider (OIDC only)  |
+Server mode with nothing else configured is a personal instance: no login screen, one implicit
+owner created on first run, everything kept in SQLite. Setting `AUTH_CREDENTIALS` or `OIDC_ISSUER`
+turns it into a shared one, with accounts and a login page. Whether an instance has accounts is read
+from those two variables rather than from a switch of its own, so the two can never disagree.
+
+| Variable                                | Default                | Description                                                                                                                       |
+| --------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_MODE`                           | `local`                | Set `server` for multi-user mode                                                                                                  |
+| `DATA_DIR`                              | `./data`               | Directory for the SQLite database and server state. Bind-mount this                                                               |
+| `AUTH_SECRET`                           | _(generated)_          | Signs sessions and encrypts provider keys. Generated on first run and stored in the database if unset (`openssl rand -base64 32`) |
+| `ADMIN_EMAIL`                           | _(none)_               | Bootstraps the first admin; also marks this email as admin for OIDC                                                               |
+| `ADMIN_PASSWORD`                        | _(none)_               | Initial admin password (omit for an OIDC-only admin)                                                                              |
+| `AUTH_CREDENTIALS`                      | _(none)_               | `true` to enable email and password login                                                                                         |
+| `OIDC_ISSUER`                           | _(none)_               | OIDC provider URL (e.g. PocketID); its presence enables OIDC login                                                                |
+| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | _(none)_               | OIDC client credentials                                                                                                           |
+| `OIDC_NAME`                             | `SSO`                  | Label for the OIDC sign-in button                                                                                                 |
+| `OIDC_SCOPE`                            | `openid profile email` | Requested scopes (add your groups scope to expose roles)                                                                          |
+| `OIDC_ROLE_CLAIM` / `OIDC_ADMIN_VALUE`  | _(none)_               | Claim and value that grant the admin role                                                                                         |
+| `OIDC_AUTO_PROVISION`                   | `true`                 | Create a user on first OIDC login (`false` requires a pre-created account)                                                        |
+| `OIDC_AUTO_REDIRECT`                    | _(none)_               | `true` skips the login page and goes straight to the identity provider (OIDC only)                                                |
 
 :::note[OIDC redirect URI]
 Register `https://your-llooma-domain/auth/callback/oidc` with your provider.
 :::
 
-:::caution[Keep `AUTH_SECRET`]
-It encrypts the stored provider keys. Lose it and they cannot be decrypted. Back it up as carefully
-as the database itself.
+:::caution[Keep the secret]
+It encrypts the stored provider keys. Lose it and they cannot be decrypted. If you set `AUTH_SECRET`
+yourself, back it up as carefully as the database. If you let the instance generate one, it lives in
+the database, so backing up the database is enough. Setting `AUTH_SECRET` afterwards changes nothing:
+a generated secret keeps precedence, precisely so that adding one later cannot orphan the keys it
+already encrypted.
 :::
 
 ## Analytics

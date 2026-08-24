@@ -1,19 +1,19 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 
-import { env } from '$env/dynamic/private';
+import { instanceSecret } from './secret';
 
 /**
  * Server-side encryption for provider API keys, so they're never stored in
- * plaintext and never leave the server. AES-256-GCM with a key derived from
- * `AUTH_SECRET` (the same secret Auth.js uses). Format: `iv.tag.ciphertext`,
+ * plaintext and never leave the server. AES-256-GCM with a key derived from the
+ * instance secret (the same one Auth.js signs with). Format: `iv.tag.ciphertext`,
  * all base64.
+ *
+ * Encryption is not conditional on there being accounts to sign into: an
+ * instance with a single implicit owner holds exactly the same provider keys as
+ * a shared one, so it gets exactly the same treatment.
  */
 function encryptionKey(): Buffer {
-	const secret = env.AUTH_SECRET?.trim() || env.DATA_ENCRYPTION_KEY?.trim();
-	if (!secret) {
-		throw new Error('AUTH_SECRET (or DATA_ENCRYPTION_KEY) is required to encrypt provider keys');
-	}
-	return createHash('sha256').update(secret).digest();
+	return createHash('sha256').update(instanceSecret()).digest();
 }
 
 export function encrypt(plaintext: string): string {

@@ -126,8 +126,19 @@ export function deleteUser(id: string): void {
  * write to, not a list to publish, and it is shown to every signed-in user.
  */
 export function adminContact(): string | null {
-	const row = getDb()
-		.prepare("SELECT email FROM users WHERE role = 'admin' ORDER BY created_at LIMIT 1")
-		.get() as { email: string } | undefined;
-	return row?.email ?? null;
+	return getFirstAdmin()?.email ?? null;
+}
+
+/**
+ * The account an instance was bootstrapped with, by creation date.
+ *
+ * Also the account an instance with no accounts runs as, which is why it is a
+ * whole row here rather than the address `adminContact` needs: turning a login
+ * method off has to hand the owner their own data back, not open an empty
+ * account beside it.
+ */
+export function getFirstAdmin(): UserRow | undefined {
+	return getDb()
+		.prepare("SELECT * FROM users WHERE role = 'admin' ORDER BY created_at LIMIT 1")
+		.get() as UserRow | undefined;
 }

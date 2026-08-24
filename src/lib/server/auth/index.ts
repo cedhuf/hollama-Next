@@ -12,6 +12,7 @@ import {
 	type Role,
 	type UserRow
 } from '$lib/server/db/users';
+import { instanceSecret } from '$lib/server/secret';
 import { DEFAULT_SETTINGS } from '$lib/settings';
 
 import { hashPassword, verifyPassword } from './password';
@@ -208,8 +209,12 @@ const config: SvelteKitAuthConfig = {
 	}
 };
 
-/** Build the Auth.js request handle. Only called in `server` mode. */
+/** Build the Auth.js request handle. Only called when the instance has accounts. */
 export function createAuthHandle() {
 	bootstrapAdmin();
-	return SvelteKitAuth(config).handle;
+	// The secret is folded in here rather than into the literal above, because it
+	// is read from the database: importing this module must not open one. An admin
+	// who turns on a login method therefore gets working sessions without having
+	// to think about key material at all.
+	return SvelteKitAuth({ ...config, secret: instanceSecret() }).handle;
 }

@@ -1,6 +1,8 @@
 import { env as publicEnv } from '$env/dynamic/public';
+import { accountsEnabled } from '$lib/server/authMode';
 import { getConfig, themeSharing } from '$lib/server/db/config';
 import { adminContact } from '$lib/server/db/users';
+import { implicitOwner } from '$lib/server/session';
 
 import type { LayoutServerLoad } from './$types';
 
@@ -13,12 +15,23 @@ import type { LayoutServerLoad } from './$types';
  */
 export const load: LayoutServerLoad = async ({ locals }) => {
 	const isServer = publicEnv.PUBLIC_MODE === 'server';
-	const session = isServer ? await locals.auth() : null;
+	const accounts = isServer && accountsEnabled();
+	const session = accounts ? await locals.auth() : null;
+
+	/**
+	 * With no accounts there is nobody to sign in, but the page still needs a user
+	 * to be: this is where the owner is created on first run. Their email is left
+	 * blank on purpose, because the address the row is filed under is bookkeeping
+	 * rather than an identity anybody was given.
+	 */
+	const owner = isServer && !accounts ? implicitOwner() : null;
 
 	return {
-		user: session?.user ?? null,
+		user: owner ? { id: owner.id, email: '', role: owner.role } : (session?.user ?? null),
 		instance: isServer
 			? {
+					/** Whether anyone signs in here, which decides what the account UI offers. */
+					accounts,
 					themeSharing: themeSharing(),
 					themeMode: getConfig('themeMode') ?? 'system',
 					themeStyle: getConfig('themeStyle') ?? 'classic',
@@ -39,7 +52,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 					 * address is advice nobody can act on. The instance knows the address;
 					 * it is the account it was bootstrapped with.
 					 */
-					adminEmail: adminContact()
+					adminEmail: accounts ? adminContact() : null
 				}
 			: null
 	};

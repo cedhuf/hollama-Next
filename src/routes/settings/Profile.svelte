@@ -1,9 +1,9 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { isServerMode } from '$lib/chat/endpoint';
 	import AvatarEditor from '$lib/components/AvatarEditor.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { currentRole, currentUser } from '$lib/stores/auth';
+	import { hasAccounts } from '$lib/stores/instance';
 
 	import SettingsField from './SettingsField.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
@@ -43,12 +43,15 @@
 			.join(' ') || 'Your name'
 	);
 
-	const email = $derived(isServerMode ? ($currentUser?.email ?? '') : $settingsStore.profileEmail);
+	// An account email is the account's, so it is read back from the session. With
+	// no accounts there is no such thing, and the address goes back to being a
+	// field of the profile like any other.
+	const email = $derived($hasAccounts ? ($currentUser?.email ?? '') : $settingsStore.profileEmail);
 
 	// An OIDC-provisioned identity is owned by the provider: name and avatar are
 	// re-read from its claims, so editing them here would silently diverge. The
 	// panel stays visible: the fields simply become read-only.
-	const oidcManaged = $derived(isServerMode && !!$currentUser?.oidc);
+	const oidcManaged = $derived(!!$currentUser?.oidc);
 </script>
 
 <SettingsPanel>
@@ -112,9 +115,9 @@
 			</SettingsField>
 		</div>
 
-		<!-- Email: editable in local mode; in server mode it's the account email,
-		     owned by the IdP/admin and read-only. -->
-		{#if isServerMode}
+		<!-- Email: the account's when there are accounts, owned by the IdP or the
+		     admin and read-only; the person's own field otherwise. -->
+		{#if $hasAccounts}
 			<SettingsField
 				label="Email"
 				hint={$currentUser?.oidc

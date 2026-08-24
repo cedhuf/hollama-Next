@@ -12,6 +12,15 @@ import { derived, writable } from 'svelte/store';
  * `null` in local mode, where there is one person and nobody to decide for them.
  */
 export interface InstanceConfig {
+	/**
+	 * Whether anyone signs in here.
+	 *
+	 * False on an instance that configured no login method: one owner, no
+	 * password, and an interface with nothing to say about accounts. Everything
+	 * else about the instance is unchanged, which is why this is a field here
+	 * rather than a mode of its own.
+	 */
+	accounts: boolean;
 	themeSharing: 'off' | 'locked' | 'overridable';
 	themeMode: string;
 	themeStyle: string;
@@ -37,3 +46,11 @@ export function setInstanceConfig(config: InstanceConfig | null): void {
  * only invites someone to wonder why they cannot have them.
  */
 export const themeLocked = derived(state, ($config) => $config?.themeSharing === 'locked');
+
+/**
+ * Whether this deployment has accounts, as far as the interface is concerned.
+ *
+ * False until the server says otherwise, so anything about signing in and out is
+ * drawn only where it means something.
+ */
+export const hasAccounts = derived(state, ($config) => $config?.accounts === true);
