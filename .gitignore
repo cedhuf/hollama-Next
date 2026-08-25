@@ -22,3 +22,4 @@ tests/*-snapshots/
 
 # Local-only, kept out of the repo (editor configs, personal infra, wrangler cache)
 /_local
+/.playwright-data

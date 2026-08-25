@@ -1,7 +1,5 @@
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
 
-import { browser } from '$app/environment';
-
 /**
  * A device driven by a finger, which is also a device with a soft keyboard.
  *
@@ -9,9 +7,15 @@ import { browser } from '$app/environment';
  * composer on its own behalf (rather than because someone tapped it) has to
  * check first. On a mouse-and-keyboard machine focus is free, and taking it is
  * the friendly thing to do.
+ *
+ * The guard is a plain `typeof` rather than `browser` from `$app/environment`,
+ * and that is the whole of why this file is testable. `$app/*` are Vite's
+ * virtual modules: anything importing them can only ever run through Vite, and
+ * this one is a handful of pure helpers that half the app and every end-to-end
+ * test pulls in. One import made the entire suite unloadable in Node.
  */
 export function isTouchPrimary() {
-	return browser && window.matchMedia('(pointer: coarse)').matches;
+	return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 }
 
 export function generateRandomId() {

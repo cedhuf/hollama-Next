@@ -1,510 +1,75 @@
-import { expect, type Locator, type Page, type Route } from '@playwright/test';
-import type { ChatResponse, ListResponse } from 'ollama/browser';
-import type OpenAI from 'openai';
+import type { Page } from '@playwright/test';
 
-import { ConnectionType, getDefaultServer } from '$lib/connections';
-import type { Knowledge } from '$lib/knowledge';
+import type { FakeProvider } from './fake-provider';
 
-export const MOCK_API_TAGS_RESPONSE: ListResponse = {
-	models: [
-		{
-			model: 'TheBloke/CodeLlama-70B-Python-AWQ',
-			name: 'TheBloke/CodeLlama-70B-Python-AWQ',
-			modified_at: new Date('2023-12-01T10:06:18.679361519-05:00'),
-			size: 4108928240,
-			digest: 'ca4cd4e8a562465d7cf0512fc4d4dff3407f07800b01c9a6ee9dd107001704b9',
-			details: {
-				parent_model: '',
-				format: 'gguf',
-				family: 'llama',
-				families: [],
-				parameter_size: '70B',
-				quantization_level: 'Q4_0'
-			},
-			expires_at: new Date(),
-			size_vram: 4108928240
-		},
-		{
-			model: 'gemma:7b',
-			name: 'gemma:7b',
-			modified_at: new Date('2024-04-08T21:41:35.217983842-04:00'),
-			size: 5011853225,
-			digest: 'a72c7f4d0a15522df81486d13ce432c79e191bda2558d024fbad4362c4f7cbf8',
-			details: {
-				parent_model: '',
-				format: 'gguf',
-				family: 'gemma',
-				families: ['gemma'],
-				parameter_size: '9B',
-				quantization_level: 'Q4_0'
-			},
-			expires_at: new Date(),
-			size_vram: 5011853225
-		},
-		{
-			model: 'openhermes2.5-mistral:latest',
-			name: 'openhermes2.5-mistral:latest',
-			modified_at: new Date('2023-12-01T10:06:18.679361519-05:00'),
-			size: 4108928240,
-			digest: 'ca4cd4e8a562465d7cf0512fc4d4dff3407f07800b01c9a6ee9dd107001704b9',
-			details: {
-				parent_model: '',
-				format: 'gguf',
-				family: 'llama',
-				families: [],
-				parameter_size: '7B',
-				quantization_level: 'Q4_0'
-			},
-			expires_at: new Date(),
-			size_vram: 4108928240
+/**
+ * What every test here needs and nothing else.
+ *
+ * The suite this replaced grew helpers for an app that no longer exists: local
+ * mode, a browser that called the provider itself, and a dozen test ids that
+ * have since been renamed or removed. What is left is the shape of a test now:
+ * stand up a provider, tell the instance about it, and drive the app.
+ */
+export { startFakeProvider, FAKE_MODEL, type FakeProvider } from './fake-provider';
+
+/**
+ * Give the instance a connection to the fake provider.
+ *
+ * Through the app's own API rather than by seeding a database: the endpoint is
+ * what a person's click reaches, so a connection made this way is a connection
+ * the app agrees exists, catalogue and all.
+ */
+export async function connectFakeProvider(page: Page, provider: FakeProvider): Promise<string> {
+	// The admin endpoint, which is the one that matters: a lone owner is an
+	// administrator, and personal connections are off unless an administrator turns
+	// them on. A test that used the other one would be testing a path most
+	// instances never take.
+	const created = await page.request.post('/api/admin/servers', {
+		data: {
+			connectionType: 'openai-compatible',
+			baseUrl: provider.url,
+			label: 'Fake',
+			isEnabled: true
 		}
-	]
-};
-
-export const MOCK_SESSION_1_RESPONSE_1: ChatResponse = {
-	model: 'gemma:7b',
-	created_at: new Date('2024-04-10T22:54:40.310905Z'),
-	message: {
-		role: 'assistant',
-		content:
-			'I am unable to provide subjective or speculative information, including fight outcomes between individuals.'
-	},
-	done: true,
-	done_reason: 'stop',
-	total_duration: 564546083,
-	load_duration: 419166,
-	prompt_eval_count: 18,
-	prompt_eval_duration: 267210000,
-	eval_count: 17,
-	eval_duration: 296374000
-};
-
-export const MOCK_SESSION_1_RESPONSE_2: ChatResponse = {
-	model: 'gemma:7b',
-	created_at: new Date('2024-04-10T23:08:33.419483Z'),
-	message: {
-		role: 'assistant',
-		content:
-			'No problem! If you have any other questions or would like to discuss something else, feel free to ask.'
-	},
-	done: true,
-	done_reason: 'stop',
-	total_duration: 1574338000,
-	load_duration: 1044484792,
-	prompt_eval_count: 55,
-	prompt_eval_duration: 130165000,
-	eval_count: 23,
-	eval_duration: 399362000
-};
-
-export const MOCK_SESSION_1_RESPONSE_3: ChatResponse = {
-	model: 'gemma:7b',
-	created_at: new Date('2024-04-10T23:08:33.419483Z'),
-	message: {
-		role: 'assistant',
-		content:
-			"Here's a basic function that takes the age, height, weight, and fighting experience of both individuals as input and returns the difference between their ages, heights, and weights.\n\n```python\ndef calculate_odds(emma_age, emma_height, emma_weight, emma_experience, jessica_age, jessica_height, jessica_weight, jessica_experience):\n    emma_stats = {'age': emma_age,\n                 'height': emma_height,\n                 'weight': emma_weight,\n                 'experience': emma_experience}\n    jessica_stats = {'age': jessica_age,\n                     'height': jessica_height,\n                     'weight': jessica_weight,\n                     'experience': jessica_experience}\n\n    # Calculate the differences between their stats\n    age_difference = abs(emma_stats['age'] - jessica_stats['age'])\n    height_difference = abs(emma_stats['height'] - jessica_stats['height'])\n    weight_difference = abs(emma_stats['weight'] - jessica_stats['weight'])\n\n    # Return the differences as a tuple\n    return (age_difference, height_difference, weight_difference)\n```\nYou can use this function to compare Emma Watson and Jessica Alba by providing their respective statistics as inputs."
-	},
-	done: true,
-	done_reason: 'stop',
-	total_duration: 1574338000,
-	load_duration: 1044484792,
-	prompt_eval_count: 55,
-	prompt_eval_duration: 130165000,
-	eval_count: 23,
-	eval_duration: 399362000
-};
-
-export const MOCK_SESSION_2_RESPONSE_1: ChatResponse = {
-	model: 'openhermes2.5-mistral:latest',
-	created_at: new Date('2024-04-11T12:50:18.826017Z'),
-	message: {
-		role: 'assistant',
-		content:
-			'The fox says various things, such as "ring-a-ding-ding," "bada bing-bing" and "higglety-pigglety pop.'
-	},
-	done: true,
-	done_reason: 'stop',
-	total_duration: 8048965583,
-	load_duration: 5793693500,
-	prompt_eval_count: 22,
-	prompt_eval_duration: 73410000,
-	eval_count: 142,
-	eval_duration: 2181595000
-};
-
-export const MOCK_RESPONSE_WITH_REASONING: ChatResponse = {
-	...MOCK_SESSION_1_RESPONSE_1,
-	message: {
-		role: 'assistant',
-		content:
-			'<think>Let me analyze this request carefully. The user is asking about code testing, which requires a structured response.</think>Here is how you can test your code effectively:\n\n1. Write unit tests\n2. Use integration tests\n3. Implement end-to-end testing'
-	}
-};
-
-// For testing streaming tag parsing
-export const MOCK_STREAMED_THINK_TAGS = [
-	'<',
-	't',
-	'h',
-	'i',
-	'n',
-	'k',
-	'>',
-	'This is in a thinking tag',
-	'<',
-	'/',
-	't',
-	'h',
-	'i',
-	'n',
-	'k',
-	'>',
-	'This is outside a tag'
-];
-
-export const MOCK_STREAMED_THOUGHT_TAGS = [
-	'<',
-	't',
-	'h',
-	'o',
-	'u',
-	'g',
-	'h',
-	't',
-	'>',
-	'This is in a thought tag',
-	'<',
-	'/',
-	't',
-	'h',
-	'o',
-	'u',
-	'g',
-	'h',
-	't',
-	'>',
-	'This is outside a tag'
-];
-
-export const MOCK_OPENAI_COMPLETION_RESPONSE_1: OpenAI.Chat.Completions.ChatCompletionChunk = {
-	model: 'gpt-3.5-turbo',
-	created: 1677610602,
-	id: 'chatcmpl-78901234567890123456789012345678',
-	object: 'chat.completion.chunk',
-	choices: [
-		{
-			index: 0,
-			delta: { role: 'assistant', content: MOCK_SESSION_1_RESPONSE_1.message.content },
-			finish_reason: null
-		}
-	]
-};
-
-export const MOCK_OPENAI_MODELS: OpenAI.Models.Model[] = [
-	{ id: 'gpt-3.5-turbo', object: 'model', created: 1677610602, owned_by: 'openai' },
-	{ id: 'gpt-4', object: 'model', created: 1687882411, owned_by: 'openai' },
-	{ id: 'text-davinci-003', object: 'model', created: 1669599635, owned_by: 'openai-internal' }
-];
-
-export async function chooseFromCombobox(
-	page: Page,
-	label: string | RegExp,
-	option: string | RegExp,
-	// If true, use the placeholder instead of the label
-	usePlaceholder: boolean = false
-) {
-	// The <label> stays in the DOM even when visually hidden, so label association
-	// resolves the trigger in both cases; `usePlaceholder` is kept for call sites.
-	void usePlaceholder;
-	await page.getByLabel(label, { exact: true }).click();
-	await page.getByText(option, { exact: true }).click();
-}
-
-export async function chooseModel(page: Page, modelName: string) {
-	await chooseFromCombobox(page, 'Available models', modelName);
-}
-
-export async function mockOllamaModelsResponse(page: Page) {
-	await page.goto('/');
-
-	// Add the default server to the servers list
-	await page.evaluate(
-		(data) => window.localStorage.setItem('llooma-servers', JSON.stringify(data)),
-		[{ ...getDefaultServer(ConnectionType.Ollama) }]
-	);
-
-	// Mock the tags response
-	await page.route('**/api/tags', async (route: Route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: 'application/json',
-			body: JSON.stringify(MOCK_API_TAGS_RESPONSE)
-		});
 	});
+	const { id } = (await created.json()) as { id: string };
 
-	// Settings live in a modal now, so reaching the connection means opening it.
-	await openServersSettings(page);
-
-	await expect(
-		page.getByText('Connection has been verified and is ready to use')
-	).not.toBeVisible();
-	const useModelsFromThisServerCheckbox = page.getByLabel('Use models from this server');
-	await expect(useModelsFromThisServerCheckbox).not.toBeChecked();
-
-	// "Verify" and "Refresh models" were merged into a single "Sync" action.
-	await page.getByLabel('Sync').click();
-	await expect(page.getByText('Connection has been verified and is ready to use')).toBeVisible();
-	await expect(useModelsFromThisServerCheckbox).toBeChecked();
+	// The catalogue is read at boot in the browser, so a connection added after
+	// that is invisible until the page is loaded again. Which is what the caller
+	// does next, and this only makes the ordering explicit.
+	await page.request.get('/api/providers');
+	return id;
 }
 
 /**
- * Opens Settings → Servers.
+ * Ask for the phone interface, or stop asking.
  *
- * Settings is a modal now, opened from the sidebar — `/settings` only exists to
- * flip the store and redirect, which is not a reliable thing to drive a test with.
- * The modal always mounts on the Profile tab, hence the explicit tab click.
+ * Read, merge, write: the endpoint stores the settings blob whole, so putting one
+ * key would replace every other and the app would boot into a state no person
+ * could have produced.
  */
-export async function openServersSettings(page: Page) {
-	await page.goto('/sessions');
-	await page.getByLabel('Settings', { exact: true }).click();
-	await page.getByRole('tab', { name: 'Servers' }).click();
-	await expect(page.getByTestId('server').first()).toBeVisible();
-}
-
-export async function mockCompletionResponse(page: Page, response: ChatResponse) {
-	await page.route('**/api/chat', async (route: Route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: 'application/json',
-			body: JSON.stringify(response)
-		});
+export async function preferMobileInterface(page: Page, wanted: boolean): Promise<void> {
+	const current = await page.request.get('/api/data/settings');
+	const settings = current.ok() ? ((await current.json()) ?? {}) : {};
+	await page.request.put('/api/data/settings', {
+		data: { ...settings, simplifiedMobileUI: wanted }
 	});
 }
 
 /**
- * Sets up a streaming mock server for LLM completion responses, allowing either automatic or manual control over chunked responses in Playwright tests.
+ * Open the settings dialog, from the sidebar where the app puts it.
  *
- * Usage:
- *   // Automatic streaming mode (like mockStreamedCompletionResponse)
- *   await setupStreamedCompletionMock(page, { chunks: ['foo', 'bar'], delayMs: 100 });
- *
- *   // Manual streaming mode (like createManualStreamedCompletionMock)
- *   const stream = await setupStreamedCompletionMock(page, { manual: true });
- *   await stream.sendChunk('<think>Reasoning</think>', false);
- *   // ...assertions...
- *   await stream.sendChunk('Main content', true);
- *   // ...assertions...
- *   stream.close();
- *
- * This is especially useful for testing UI logic that depends on the timing and order of streamed content, such as dynamic reasoning blocks that open and close as the LLM responds.
+ * Not by visiting `/settings`: that route asks for the dialog and immediately
+ * navigates away, which is right for a link somebody typed and useless for a
+ * test that wants the dialog on screen.
  */
-export async function setupStreamedCompletionMock(
-	page: Page,
-	options: { chunks?: string[]; delayMs?: number; manual?: boolean }
-) {
-	const http = await import('http');
-
-	let resRef: import('http').ServerResponse | null = null;
-	let isClosed = false;
-	let interval: NodeJS.Timeout | null = null;
-
-	const server = http.createServer((req, res) => {
-		// Set CORS headers
-		const corsHeaders = {
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-			'Access-Control-Max-Age': '3600'
-		};
-
-		if (req.method === 'OPTIONS') {
-			res.writeHead(204, corsHeaders);
-			res.end();
-			return;
-		}
-
-		res.writeHead(200, {
-			'Content-Type': 'application/json',
-			'Cache-Control': 'no-cache',
-			Connection: 'keep-alive',
-			'Transfer-Encoding': 'chunked',
-			...corsHeaders
-		});
-
-		// Initial empty response
-		const initialResponse = {
-			...MOCK_SESSION_1_RESPONSE_1,
-			message: { role: 'assistant', content: '' },
-			done: false
-		};
-		res.write(JSON.stringify(initialResponse) + '\n');
-
-		resRef = res;
-
-		if (options.chunks) {
-			// Automatic streaming mode
-			let index = 0;
-			interval = setInterval(() => {
-				if (index < options.chunks!.length) {
-					const response = {
-						...MOCK_SESSION_1_RESPONSE_1,
-						message: { role: 'assistant', content: options.chunks![index] },
-						done: index === options.chunks!.length - 1
-					};
-					res.write(JSON.stringify(response) + '\n');
-					index++;
-					if (index === options.chunks!.length) {
-						clearInterval(interval!);
-						res.end();
-						isClosed = true;
-					}
-				}
-			}, options.delayMs ?? 100);
-			req.on('close', () => interval && clearInterval(interval));
-		}
-
-		req.on('close', () => {
-			isClosed = true;
-		});
-	});
-
-	const serverStartPromise = new Promise<number>((resolve) => {
-		server.listen(0, () => {
-			const address = server.address() as { port: number };
-			resolve(address.port);
-		});
-	});
-
-	const port = await serverStartPromise;
-	const mockStreamUrl = `http://localhost:${port}`;
-
-	await page.route('**/api/chat', (route) => {
-		route.continue({ url: mockStreamUrl });
-	});
-
-	page.once('close', () => {
-		server.close();
-	});
-
-	if (options.chunks) {
-		// Automatic mode: return nothing
-		return;
-	} else if (options.manual) {
-		// Manual mode: return sendChunk/close
-		return {
-			sendChunk: (content: string, done = false) => {
-				if (resRef && !isClosed) {
-					const response = {
-						...MOCK_SESSION_1_RESPONSE_1,
-						message: { role: 'assistant', content },
-						done
-					};
-					resRef.write(JSON.stringify(response) + '\n');
-					if (done) {
-						resRef.end();
-						isClosed = true;
-					}
-				}
-			},
-			close: () => {
-				if (resRef && !isClosed) {
-					resRef.end();
-					isClosed = true;
-				}
-			}
-		};
-	}
+export async function openSettings(page: Page, tab: string): Promise<void> {
+	await page
+		.getByRole('button', { name: /settings/i })
+		.first()
+		.click();
+	await page.getByRole('tab', { name: tab, exact: true }).click();
 }
 
-// OpenAI mock functions
-
-export async function mockOpenAIModelsResponse(page: Page, models: OpenAI.Models.Model[]) {
-	await page.goto('/settings');
-	await chooseFromCombobox(page, 'Connection type', 'OpenAI: Official API');
-	await page.getByText('Add connection').click();
-	await page.getByLabel('API Key').fill('sk-validapikey');
-	await page.route('https://api.openai.com/v1/models', async (route: Route) => {
-		await route.fulfill({ json: { data: models } });
-	});
-	await page.getByRole('button', { name: 'Verify', exact: true }).click();
-	await expect(page.getByText('Connection has been verified and is ready to use')).toBeVisible();
-}
-
-export async function mockOpenAICompletionResponse(
-	page: Page,
-	responseChunks: OpenAI.Chat.Completions.ChatCompletionChunk
-) {
-	await page.route('**/v1/chat/completions', async (route: Route) => {
-		const encoder = new TextEncoder();
-		const chunks = encoder.encode(`data: ${JSON.stringify(responseChunks)}\n\n`);
-		const buffer = Buffer.from(chunks);
-
-		await route.fulfill({
-			status: 200,
-			contentType: 'text/event-stream;charset=UTF-8',
-			body: buffer
-		});
-	});
-}
-
-// Knowledge mock functions
-
-export const MOCK_SESSION_WITH_KNOWLEDGE_RESPONSE_1: ChatResponse = {
-	model: 'gemma:7b',
-	created_at: new Date('2024-04-11T12:50:18.826017Z'),
-	message: {
-		role: 'assistant',
-		content:
-			'Wally has been approved to work from home and plans to have a chatbot answer his emails and text messages. However, Dilbert expresses concern that the automated responses may not sound like him, rendering them useless.'
-	},
-	done: true,
-	done_reason: 'stop',
-	total_duration: 8048965583,
-	load_duration: 5793693500,
-	prompt_eval_count: 22,
-	prompt_eval_duration: 73410000,
-	eval_count: 142,
-	eval_duration: 2181595000
-};
-
-export const MOCK_KNOWLEDGE: Knowledge[] = [
-	{
-		id: 'aaz70i',
-		name: 'Slack transcript',
-		content:
-			"9:31am - wally: I got approval to work from home\n9:32am - wally: my chatbot will answer all of my emails and text messages\n9:32am - dilbert: chatbot answers would be useless\n9:33am - wally: I hope so, otherwise it won't sound like me",
-		updatedAt: '2024-07-01T17:19:40.789Z'
-	},
-	{
-		id: 'uv96i4',
-		name: 'Hollama: Directory tree',
-		content:
-			'```\n.\n├── Dockerfile\n├── LICENSE\n├── README.md\n├── build\n├── docs\n├── node_modules\n├── package-lock.json\n├── package.json\n├── playwright.config.ts\n├── postcss.config.cjs\n├── src\n├── static\n├── svelte.config.js\n├── tailwind.config.js\n├── test-results\n├── tests\n├── tsconfig.json\n└── vite.config.ts\n```',
-		updatedAt: '2024-07-01T17:17:40.789Z'
-	}
-];
-
-export async function seedKnowledgeAndReload(page: Page) {
-	// To generate the knowledge we need to pass the mocked data to the browser context
-	await page.evaluate(
-		(data) => window.localStorage.setItem('llooma-knowledge', JSON.stringify(data)),
-		MOCK_KNOWLEDGE
-	);
-
-	// Reload the page for changes to take effect
-	await page.reload();
-}
-
-export function textEditorLocator(page: Page, label: string | RegExp | undefined): Locator {
-	return page
-		.locator('.field')
-		.filter({ hasText: label })
-		.locator('.text-editor')
-		.getByRole('textbox');
-}
-
-export async function submitWithKeyboardShortcut(page: Page) {
-	const modKey = process.platform === 'darwin' ? 'Meta' : 'Control';
-	await page.keyboard.press(`${modKey}+Enter`);
-}
+/** A phone, for the interface that is only ever offered to one. */
+export const PHONE = { width: 390, height: 844 };
