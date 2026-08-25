@@ -94,6 +94,14 @@ ramps on the top row, dark on the bottom._
 | ![A conversation](static/screenshots/framed/mobile_conversation.png) | ![Your conversations](static/screenshots/framed/mobile_sidebar.png) | ![The home screen](static/screenshots/framed/mobile_home.png) |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
 
+### A lighter interface for the phone
+
+I'm building a second interface, made for the phone rather than squeezed onto it. Voice first, less
+on screen. Nothing is released yet and it will still move around a lot, this is just where it stands
+today.
+
+<img src="static/screenshots/framed/preview_phone.png" alt="The phone interface in progress" width="300" />
+
 ## Similar projects
 
 Llooma is not trying to be the biggest of these. It is meant to be small enough to read, to run in

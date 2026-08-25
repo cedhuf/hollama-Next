@@ -489,19 +489,19 @@ const FRAME_CSS = `
 
 	.phone {
 		position: absolute;
-		width: ${PHONE_SIZE.width}px;
-		height: ${PHONE_SIZE.height}px;
-		padding: ${PHONE.bezel}px;
+		width: calc(var(--screen-w) + var(--bezel) * 2);
+		height: calc(var(--screen-h) + var(--bezel) * 2);
+		padding: var(--bezel);
 		box-sizing: border-box;
-		border-radius: ${PHONE.corner}px;
+		border-radius: var(--corner);
 		background: linear-gradient(145deg, #7c7c82 0%, #33333a 22%, #1c1c1f 52%, #5e5e66 78%, #232327 100%);
 		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 30px 70px rgba(0, 0, 0, .35);
 		transform-origin: top left;
 	}
 	.phone .screen {
-		width: ${MOBILE.width}px;
-		height: ${MOBILE.height + PHONE.statusBar + PHONE.homeBar}px;
-		border-radius: ${PHONE.screen}px;
+		width: var(--screen-w);
+		height: var(--screen-h);
+		border-radius: var(--screen-corner);
 		overflow: hidden;
 		background: var(--top);
 	}
@@ -537,7 +537,7 @@ const FRAME_CSS = `
 		justify-content: center;
 	}
 	.phone .home i { width: 143px; height: 5px; border-radius: 3px; background: var(--ink-home); }
-	.phone img { display: block; width: ${MOBILE.width}px; height: ${MOBILE.height}px; }
+	.phone img { display: block; width: var(--screen-w); height: var(--shot-h); }
 
 	/* The side buttons, sitting on the band's edge rather than through it. */
 	.phone b {
@@ -546,6 +546,10 @@ const FRAME_CSS = `
 		border-radius: 2px;
 		background: linear-gradient(180deg, #6a6a70, #3a3a40);
 	}
+	.phone .action { top: 11%; height: 3%; }
+	.phone .louder { top: 16.8%; height: 5.8%; }
+	.phone .quieter { top: 23.9%; height: 5.8%; }
+	.phone .side { top: 19.8%; height: 9.3%; }
 `;
 
 /**
@@ -571,6 +575,21 @@ function windowHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`)
 	`;
 }
 
+/** The side buttons, placed as fractions of the chassis so a shorter phone keeps them. */
+const BUTTONS = `
+			<b class="action" style="left:-2px"></b>
+			<b class="louder" style="left:-2px"></b>
+			<b class="quieter" style="left:-2px"></b>
+			<b class="side" style="right:-2px"></b>`;
+
+/** Everything the chassis needs to be a given phone rather than one particular phone. */
+function chassis(screenW: number, screenH: number, shotH: number, bezel: number, corner: number) {
+	return (
+		`--screen-w:${screenW}px;--screen-h:${screenH}px;--shot-h:${shotH}px;` +
+		`--bezel:${bezel}px;--corner:${corner + bezel}px;--screen-corner:${corner}px;`
+	);
+}
+
 /**
  * A phone around a mobile shot.
  *
@@ -583,12 +602,17 @@ function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) 
 	const ink = e.darkTop ? '#fff' : '#000';
 	const inkHome = e.darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
 
+	const size = chassis(
+		MOBILE.width,
+		MOBILE.height + PHONE.statusBar + PHONE.homeBar,
+		MOBILE.height,
+		PHONE.bezel,
+		PHONE.screen
+	);
+
 	return `
-		<div class="phone" style="--top:${e.top};--bottom:${e.bottom};--ink:${ink};--ink-home:${inkHome};${place}">
-			<b style="left:-2px;top:118px;height:32px"></b>
-			<b style="left:-2px;top:180px;height:62px"></b>
-			<b style="left:-2px;top:256px;height:62px"></b>
-			<b style="right:-2px;top:212px;height:100px"></b>
+		<div class="phone" style="${size}--top:${e.top};--bottom:${e.bottom};--ink:${ink};--ink-home:${inkHome};${place}">
+${BUTTONS}
 			<div class="screen">
 				<div class="status">
 					<span>9:41</span>
@@ -659,6 +683,47 @@ async function framePhone(page: Page, name: string) {
 		width: PHONE_SIZE.width + PAD * 2,
 		height: PHONE_SIZE.height + PAD * 2,
 		body: phoneHtml(src, e),
+		out: `${FRAMED_OUT}/${name}.png`
+	});
+}
+
+/**
+ * A phone around a capture taken on a device rather than in a viewport.
+ *
+ * The simulator hands back the whole screen, its own status bar and island
+ * included, so this draws the chassis and nothing else: adding a second status
+ * bar over the real one is how a mock starts looking fake. Its size is the
+ * device's, at twice the points, which is what the capture arrives at.
+ *
+ * The shot itself is the one thing here nobody's suite produces: it comes from
+ * a simulator, by hand, and is committed rather than generated. Framing it from
+ * disk anyway keeps it in the same pipeline as the rest, so it is dressed the
+ * same way and nothing about the frame has to be maintained twice.
+ */
+const DEVICE = { width: 804, height: 1748, bezel: 24, corner: 110 };
+
+const DEVICE_SHOTS = ['preview_phone'] as const;
+
+function deviceHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
+	const size = chassis(DEVICE.width, DEVICE.height, DEVICE.height, DEVICE.bezel, DEVICE.corner);
+
+	return `
+		<div class="phone" style="${size}--top:${e.top};${place}">
+			${BUTTONS}
+			<div class="screen"><img src="${src}"></div>
+		</div>
+	`;
+}
+
+async function frameDevice(page: Page, name: string) {
+	const src = await readShot(name);
+	await page.setContent('<body></body>');
+	const e = await edges(page, src);
+
+	await draw(page, {
+		width: DEVICE.width + DEVICE.bezel * 2 + PAD * 2,
+		height: DEVICE.height + DEVICE.bezel * 2 + PAD * 2,
+		body: deviceHtml(src, e),
 		out: `${FRAMED_OUT}/${name}.png`
 	});
 }
@@ -876,6 +941,7 @@ test.describe('screenshots', () => {
 	test('frames', async ({ page }) => {
 		for (const name of WINDOW_SHOTS) await frameWindow(page, name);
 		for (const name of PHONE_SHOTS) await framePhone(page, name);
+		for (const name of DEVICE_SHOTS) await frameDevice(page, name);
 		await composeHero(page);
 	});
 });
