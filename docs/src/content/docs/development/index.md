@@ -62,11 +62,37 @@ pnpm run i18n:status
 node scripts/check-api-docs.mjs
 ```
 
-:::caution[The end-to-end suite is broken upstream]
-`pnpm test` (Playwright) has pre-existing failures inherited from the fork. New work is currently
-verified by type-checking, linting, the build, and targeted scripts, not by the suite. Fixing it is
-on the [roadmap](/roadmap/) and would be a genuinely valuable contribution.
-:::
+## The end-to-end suite
+
+```shell
+pnpm test
+```
+
+Five tests, half a minute. They cover a turn from the composer to the answer on screen, a
+conversation surviving a reload, the phone interface being offered to a phone and taken back from a
+wider window, and an administrator publishing a setting to everyone.
+
+It is small on purpose. The suite it replaced had a hundred tests written against the browser-only
+app, and thirteen of its eighteen test ids no longer existed: it was not broken, it was obsolete.
+
+Two things are worth knowing before adding to it.
+
+The turn runs in the server now, so `page.route()` intercepts nothing: the request the app makes
+never passes through the page. Tests start a real OpenAI-compatible endpoint instead
+(`tests/fake-provider.ts`) and hand the instance a connection to it.
+
+The run gets an instance of its own, configured in `playwright.config.ts`: no way to sign in, so
+nothing is asked at the door, a throwaway `DATA_DIR`, and the welcome tour switched off. A lone
+owner is an administrator, which is why connections are created through `/api/admin/servers`.
+
+Screenshots are not tests and never run with the suite:
+
+```shell
+pnpm run screenshots
+```
+
+It drives the app to known states and photographs them into `static/screenshots`, the documentation
+and the manifest. It writes into source, which is why it only runs when asked.
 
 ## Adding an API endpoint
 

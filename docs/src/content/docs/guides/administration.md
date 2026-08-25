@@ -62,6 +62,15 @@ Two switches under _User permissions_:
   data on the instance should not be a side effect of a switch. Each memory belongs to one account
   and is never visible to anyone else, you included.
 
+## Voice
+
+Sharing only, and the same three states: which model transcribes, and whether speaking is offered at
+all. Worth publishing on a shared instance, because you are usually the only person who could have
+set a transcription model up: without it, the microphone exists for you and for nobody else.
+
+Only models marked as audio are offered. Mark one under _Models and pricing_ on its connection, and
+price it while you are there: transcription is billed per minute of audio.
+
 ## Images
 
 Sharing only, like every other feature on this tab: a default image model and a prompt writer, with

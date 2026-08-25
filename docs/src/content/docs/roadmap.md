@@ -13,19 +13,21 @@ For the full list of everything this fork changed from
 
 ## Done
 
-| Feature                             | What it means                                                                                                                                                                    |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Personal or shared](/guides/running-modes/)                                                      |
-| **Sharing enforced server-side**    | Shared tools, model allow-lists and locked prompts are applied in the endpoints, so a hand-crafted request is policed too                                                        |
-| **Locked prompts survive personas** | A locked instance prompt is prepended in the proxy, so a persona's own prompt adds to it instead of replacing it                                                                 |
-| **Translations reworked**           | English and French are complete, and adding a locale no longer means auditing every key. See [Translations](/development/translations/)                                          |
-| **Conversation compaction**         | `/compact` summarises a long conversation so it keeps fitting, `/clear` sets one aside entirely, and `/context` says what is being sent. See [Compaction](/features/compaction/) |
-| **Documentation site**              | This site, published from `docs/`, with the HTTP API kept in step with the routes by CI                                                                                          |
-| **Generation on the server**        | A reply survives a reload, a navigation or a backgrounded tab, and the conversation picks it back up. See [Generation](/features/generation/)                                    |
-| **Calling a persona**               | Mention one with `@` in any conversation and it answers that turn, with its own model and everything else it carries. See [Personas](/features/personas/)                        |
-| **Wallpapers**                      | A picture behind the app, on a phone as well as a desktop, with the translucency of every surface following it                                                                   |
-| **A store for personas**            | Personas are read from a store over the network rather than shipped in the app, so one is added by a pull request. See [Personas](/features/personas/)                           |
-| **Reusable playbooks**              | A procedure written once in Markdown and switched on in any conversation with `/playbooks`, installed from the same store. See [Playbooks](/features/playbooks/)                 |
+| Feature                             | What it means                                                                                                                                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Multi-user support**              | Sign in with email and password, OIDC, or both, with data stored per user. See [Personal or shared](/guides/running-modes/)                                                                       |
+| **Sharing enforced server-side**    | Shared tools, model allow-lists and locked prompts are applied in the endpoints, so a hand-crafted request is policed too                                                                         |
+| **Locked prompts survive personas** | A locked instance prompt is prepended in the proxy, so a persona's own prompt adds to it instead of replacing it                                                                                  |
+| **Translations reworked**           | English and French are complete, and adding a locale no longer means auditing every key. See [Translations](/development/translations/)                                                           |
+| **Conversation compaction**         | `/compact` summarises a long conversation so it keeps fitting, `/clear` sets one aside entirely, and `/context` says what is being sent. See [Compaction](/features/compaction/)                  |
+| **Documentation site**              | This site, published from `docs/`, with the HTTP API kept in step with the routes by CI                                                                                                           |
+| **Generation on the server**        | A reply survives a reload, a navigation or a backgrounded tab, and the conversation picks it back up. See [Generation](/features/generation/)                                                     |
+| **Calling a persona**               | Mention one with `@` in any conversation and it answers that turn, with its own model and everything else it carries. See [Personas](/features/personas/)                                         |
+| **Wallpapers**                      | A picture behind the app, on a phone as well as a desktop, with the translucency of every surface following it                                                                                    |
+| **A store for personas**            | Personas are read from a store over the network rather than shipped in the app, so one is added by a pull request. See [Personas](/features/personas/)                                            |
+| **A phone interface**               | A second interface, not a second skin: one column, a tab bar, the voice on the left. Offered to phones and only where it is asked for, from Settings, Chat. See [Interface](/features/interface/) |
+| **Speaking instead of typing**      | A microphone in the composer and a screen of its own on a phone. The recording goes to a transcription model on one of your connections; nothing is kept. See [Interface](/features/interface/)   |
+| **Reusable playbooks**              | A procedure written once in Markdown and switched on in any conversation with `/playbooks`, installed from the same store. See [Playbooks](/features/playbooks/)                                  |
 
 ## Next
 
@@ -52,12 +54,12 @@ built there, so the work may be as much reading as writing.
 
 ## Known problems
 
-| Problem                                    | Detail                                                                                                                                         |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **The end-to-end suite is broken**         | The Playwright tests carry failures inherited from the fork, so nothing built since has automated regression cover. Fixing it would help a lot |
-| **The Svelte 5 migration is not finished** | A few legacy `on:` directives remain                                                                                                           |
-| **Rename migrations still ship**           | One-shot carry-overs from the rename to Llooma. The release that drops them must name the version to pin first                                 |
-| **Local mode has just been retired**       | The browser-only mode is gone and a personal instance is now a server nobody signs into. Anything that assumed the old shape may still bite    |
+| Problem                                    | Detail                                                                                                                                                                                 |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The end-to-end suite is thin**           | Rewritten around what the app is now, but five tests: a turn, a reload, the phone redirect, one shared setting. Attachments, tools, compaction and the image path have no cover at all |
+| **The Svelte 5 migration is not finished** | A few legacy `on:` directives remain                                                                                                                                                   |
+| **Rename migrations still ship**           | One-shot carry-overs from the rename to Llooma. The release that drops them must name the version to pin first                                                                         |
+| **Local mode has just been retired**       | The browser-only mode is gone and a personal instance is now a server nobody signs into. Anything that assumed the old shape may still bite                                            |
 
 ## Asking for something
 

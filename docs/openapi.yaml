@@ -139,12 +139,16 @@ paths:
         in: path
         required: true
         schema: { type: string }
+    put:
+      tags: [admin]
+      summary: Change a user's role or password
+      responses:
+        '200': { description: Saved. }
     delete:
       tags: [admin]
-      summary: TODO
-      x-status: todo
+      summary: Remove a user and everything they wrote
       responses:
-        '200': { description: TODO }
+        '204': { description: Deleted. }
   /api/chat-defaults/config:
     get:
       tags: [chat-defaults]
@@ -255,7 +259,7 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
-  /api/personas/catalog/{path}:
+  /api/store/{path}:
     parameters:
       - name: path
         in: path
@@ -263,21 +267,148 @@ paths:
         schema: { type: string }
         description: Catch-all segment; may contain slashes.
     get:
-      tags: [personas]
-      summary: Read the persona store on the instance's behalf
+      tags: [store]
+      summary: Read the persona and playbook store on the instance's behalf
       description: >
-        Pass-through to the persona store (`PERSONA_STORE_URL`, defaulting to the
-        public one), so an instance fetches once for all its users and browsers
-        with no way out still get a catalogue. Responses are held briefly, and a
-        held copy is served when the store is unreachable.
+        Pass-through to the store (`PERSONA_STORE_URL`, defaulting to the public
+        one), so an instance fetches once for all its users and a browser with no
+        way out still gets a catalogue. Responses are held briefly, and a held
+        copy is served when the store is unreachable.
       responses:
         '200':
-          description: The store's listing or one persona bundle, verbatim.
+          description: The store's listing, or one persona or playbook bundle, verbatim.
           content:
-            application/json: {}
-        '400': { description: The path escapes the store's address. }
-        '404': { description: No such file in the store. }
-        '502': { description: The store could not be reached. }
+            application/json: { schema: { type: object } }
+  /api/playbooks/config:
+    get:
+      tags: [playbooks]
+      summary: The playbooks this instance publishes
+      responses:
+        '200':
+          description: The instance's playbooks and whether they are locked.
+          content:
+            application/json: { schema: { type: object } }
+  /api/admin/playbooks:
+    put:
+      tags: [admin]
+      summary: Replace the instance's playbooks
+      responses:
+        '200': { description: Saved. }
+  /api/admin/playbooks/store/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [admin]
+      summary: Install a playbook from the store
+      responses:
+        '200': { description: Installed. }
+    delete:
+      tags: [admin]
+      summary: Remove an installed playbook
+      responses:
+        '204': { description: Removed. }
+  /api/images:
+    get:
+      tags: [images]
+      summary: Everything this account has drawn
+      description: Metadata only, newest first. The pictures themselves are fetched one at a time.
+      responses:
+        '200':
+          description: The gallery index.
+          content:
+            application/json: { schema: { type: object } }
+    post:
+      tags: [images]
+      summary: Draw something
+      description: >
+        Long, and deliberately not a job queue: the work happens in the server and
+        what it produces is written to the gallery before this answers, so a tab
+        that closes halfway through loses the response and nothing else.
+      responses:
+        '200': { description: The pictures that were made. }
+        '400': { description: Missing or unusable parameters. }
+        '403': { description: The connection is not this account's, or is disabled. }
+  /api/images/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [images]
+      summary: Rename a picture
+      responses:
+        '200': { description: Saved. }
+    delete:
+      tags: [images]
+      summary: Forget one picture
+      responses:
+        '204': { description: Deleted. }
+  /api/images/{id}/blob:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [images]
+      summary: The picture itself
+      description: >
+        Authenticated, like everything else: the file is not served from a public
+        path.
+      responses:
+        '200': { description: The image bytes. }
+        '404': { description: No such picture for this account. }
+  /api/images/export:
+    get:
+      tags: [images]
+      summary: Every picture, as one archive
+      responses:
+        '200': { description: A zip of the gallery. }
+  /api/transcribe:
+    post:
+      tags: [voice]
+      summary: What was just said, as words
+      description: >
+        Multipart in, one line of text out. Nothing is kept: the recording exists
+        for the length of this request and the text goes into a composer the
+        person reads before sending it. The connection is resolved and the key
+        injected here, so the browser never learns either.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [serverId, model, audio]
+              properties:
+                serverId: { type: string }
+                model: { type: string }
+                audio: { type: string, format: binary }
+      responses:
+        '200':
+          description: The transcript.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { text: { type: string } }
+        '400': { description: Missing parameters, or nothing was recorded. }
+        '413': { description: The recording is larger than the provider accepts. }
+        '415': { description: An audio type this app does not send. }
+        '504': { description: The provider took longer than this app is willing to wait. }
+  /api/usage:
+    get:
+      tags: [usage]
+      summary: What this account has spent, and what it is allowed
+      responses:
+        '200':
+          description: The period, the spend, the ceiling and thirty days of history.
+          content:
+            application/json: { schema: { type: object } }
   /api/personas/config:
     get:
       tags: [personas]

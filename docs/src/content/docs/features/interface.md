@@ -156,8 +156,36 @@ OIDC is read-only: the identity provider owns those fields.
 
 ## On a phone
 
-The app is responsive rather than a separate mobile build. Dialogs go full screen below a certain
-width, the sidebar collapses, and the composer's menus become sheets.
+The app is responsive: dialogs go full screen below a certain width, the sidebar collapses, and the
+composer's menus become sheets. That is the default, and it is unchanged.
+
+There is also a second interface, built for a phone rather than folded down to fit one. Switch it on
+in _Settings, Chat, Simplified mobile interface_. It is marked alpha and it means it.
+
+One column, a tab bar at the foot where a thumb already is, and the microphone set apart on the left
+because talking is what it is for rather than one destination among four. The conversation rises as
+a sheet from the bottom of the screen with the model and the way back on the page above it.
+
+It is offered to phones and to nothing else. A tablet or a desktop gets the responsive interface
+whatever the setting says, and a window widened past a phone hands you back to it: one column with a
+floating bar on a wide screen is the wrong product, not a smaller one.
+
+Nothing is duplicated underneath. The same conversation engine, the same message rendering, the same
+settings and the same account: what the second interface adds is an arrangement.
+
+## Speaking instead of typing
+
+Switch on _Settings, Chat, Voice input_ and choose a model to transcribe with. Only models marked as
+audio are offered; if the list is empty, mark one in _Models and prices_ on its connection.
+
+A microphone then appears in the composer, on a desktop as much as on a phone. It writes into the
+field rather than sending, so what was heard is read before it goes. The phone interface gives it a
+screen of its own, where the whole display is the recording.
+
+The sound never touches disk. It exists for the length of one request to your own transcription
+model, on your own connection, and what comes back is text. On a shared instance an administrator
+can publish the setup, which is usually the difference between a feature everybody has and one only
+they have.
 
 It installs as a PWA. On iOS, _Share → Add to Home Screen_; on Android, the install prompt in
 Chrome's menu. Installed, it runs without browser chrome and keeps its own theme colour.

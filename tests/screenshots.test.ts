@@ -651,7 +651,13 @@ async function settle(page: Page) {
 /** Lays out a page of frames and photographs it onto a transparent ground. */
 async function draw(
 	page: Page,
-	{ width, height, body, out }: { width: number; height: number; body: string; out: string }
+	{
+		width,
+		height,
+		body,
+		out,
+		alsoOut
+	}: { width: number; height: number; body: string; out: string; alsoOut?: string }
 ) {
 	await page.setViewportSize({ width, height });
 	await page.setContent(`<style>${FRAME_CSS}</style>${body}`);
@@ -659,6 +665,9 @@ async function draw(
 
 	const png = await page.screenshot({ animations: 'disabled', omitBackground: true });
 	await writeFile(out, png);
+	// A second copy where Astro's image pipeline can reach it: it reads from its
+	// own folder, not from `static/`.
+	if (alsoOut) await writeFile(alsoOut, png);
 }
 
 async function frameWindow(page: Page, name: string) {
@@ -777,7 +786,10 @@ async function composeHero(page: Page) {
 				`top:${phoneTop}px;left:${phoneLeft}px;transform:scale(${HERO.scale});` +
 					`box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 40px 90px rgba(0,0,0,.45)`
 			),
-		out: `${OUT}/hero.png`
+		out: `${OUT}/hero.png`,
+		// The documentation's home opens on this one too, and Astro's image
+		// pipeline reads from its own folder rather than from `static/`.
+		alsoOut: `${DOCS_OUT}/hero.png`
 	});
 }
 

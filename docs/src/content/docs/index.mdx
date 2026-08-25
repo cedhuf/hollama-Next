@@ -26,7 +26,7 @@ hero:
 import { Image } from 'astro:assets';
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import Credits from '../../components/Credits.astro';
-import sections from '../../assets/screenshots/sections.png';
+import hero from '../../assets/screenshots/hero.png';
 import themes from '../../assets/screenshots/themes.png';
 
 {/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid: browsers split it and the pill loses its content. */}
@@ -43,8 +43,8 @@ rough edges of its own.
 :::
 
 <figure class="shot shot--bleed">
-	<Image src={sections} alt="The sidebar, the Library, the Interface settings, and a conversation over a wallpaper" loading="eager" />
-	<figcaption>Your conversations, your Library, your servers. Nothing of it leaves the machine unless you send it.</figcaption>
+	<Image src={hero} alt="Llooma on a desktop, with the phone interface beside it" loading="eager" />
+	<figcaption>The same conversations on a desktop and in your hand. Nothing of it leaves the machine unless you send it.</figcaption>
 </figure>
 
 <CardGrid>
