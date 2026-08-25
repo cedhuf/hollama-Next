@@ -125,6 +125,9 @@
 	 */
 	let onPhone = $state(false);
 
+	/** Which shell to draw: the mobile tree brings its own. */
+	const onMobileUi = $derived($page.url.pathname === '/m' || $page.url.pathname.startsWith('/m/'));
+
 	$effect(() => {
 		if (!browser) return;
 		// A phone, not a small screen. 640 keeps tablets out, including the small
@@ -142,7 +145,6 @@
 		if (!booted) return;
 		const path = $page.url.pathname;
 		if (path === '/login') return;
-		const onMobileUi = path === '/m' || path.startsWith('/m/');
 		const belongsThere = $settingsStore.simplifiedMobileUI && onPhone;
 
 		if (belongsThere && !onMobileUi) void goto(resolve('/m'));
@@ -434,6 +436,9 @@
 		<LoaderCircle class="text-muted h-6 w-6 animate-spin" />
 	</div>
 {:else}
+	<!-- The dialogs belong to the account, not to a frame: both interfaces open the
+	     same settings, the same search and the same library, so they are mounted
+	     once, above the choice of shell. -->
 	<SettingsModal />
 	<SearchModal bind:open={$searchModalOpen} initialQuery={$searchModalQuery} />
 	<KnowledgeModal />
@@ -452,18 +457,27 @@
 		></pwa-install>
 	{/if}
 
-	<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
+	{#if onMobileUi}
+		<!-- The mobile interface brings its own frame, so it gets none of this one.
+		     Nested inside it, as it was, the page carried a hidden sidebar, a chrome
+		     header and the page card underneath itself: three layers with their own
+		     heights, their own `overflow-hidden` and, in the installed app, their own
+		     idea of what `100vh` means. A second interface is a second shell or it is
+		     a skin, and this one is not a skin. -->
+		{@render children()}
+	{:else}
+		<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
 	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
-	<!-- The wallpaper, when there is one, is painted by this box's own backdrop layer
+		<!-- The wallpaper, when there is one, is painted by this box's own backdrop layer
 	     and handed over as a custom property: a `filter` set here would blur the
 	     application along with the picture. It shows through the margin this padding
 	     leaves and the gap between the two columns. -->
-	<div
-		class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden lg:p-4 lg:pt-4 lg:pb-4"
-		style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
-	>
-		<CollapsibleSidebar />
-		<!-- The card runs the full height of the display, so its corners round on the
+		<div
+			class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden lg:p-4 lg:pt-4 lg:pb-4"
+			style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
+		>
+			<CollapsibleSidebar />
+			<!-- The card runs the full height of the display, so its corners round on the
 		     corners of the screen rather than somewhere below them.
 
 		     It owes the safe areas nothing at either end. Content is meant to reach both
@@ -471,7 +485,7 @@
 		     makes an app read as native rather than as a page in a frame. What has to
 		     stay legible are the bars over it, and each of those holds itself off the
 		     edge on its own account. -->
-		<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
+			<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
 		     that slides right to uncover the stationary sidebar underneath; left-rounded
 		     corners (matching the phone's screen radius) + a left-edge shadow make it read
 		     as a sheet lifted above the menu. The rounding and the shadow are painted only
@@ -485,29 +499,30 @@
 		     own material and the notch cannot land past its edge. The shadow falls on
 		     that same material, exactly as it does along the rest of the edge.
 		     A no-op on desktop, where the sidebar lives in flow. -->
-		<div
-			class="app-card max-lg:bg-shade-1 relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden {$mobileDrawerOpen
-				? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
-				: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
-		>
-			<!-- Each route now owns the single sidebar toggle at its top-left (inside its
+			<div
+				class="app-card max-lg:bg-shade-1 relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden {$mobileDrawerOpen
+					? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
+					: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
+			>
+				<!-- Each route now owns the single sidebar toggle at its top-left (inside its
 			     header bar, or a blank MobileMenuBar on headerless pages), so there's no
 			     extra top strip here. -->
-			<div class="relative min-h-0 min-w-0 flex-1">
-				{@render children()}
-			</div>
-			<!-- Scrim lives inside the sliding card, so it only dims the page (never the
+				<div class="relative min-h-0 min-w-0 flex-1">
+					{@render children()}
+				</div>
+				<!-- Scrim lives inside the sliding card, so it only dims the page (never the
 			     revealed sidebar) and travels with it; tap anywhere on the page to close. -->
-			{#if $mobileDrawerOpen}
-				<div
-					class="absolute inset-0 z-20 bg-black/30 lg:hidden"
-					transition:fade={{ duration: 150 }}
-					onclick={() => mobileDrawerOpen.set(false)}
-					role="presentation"
-				></div>
-			{/if}
+				{#if $mobileDrawerOpen}
+					<div
+						class="absolute inset-0 z-20 bg-black/30 lg:hidden"
+						transition:fade={{ duration: 150 }}
+						onclick={() => mobileDrawerOpen.set(false)}
+						role="presentation"
+					></div>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 {/if}
 
 <style lang="postcss">
