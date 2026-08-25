@@ -383,6 +383,13 @@ const TITLE_BAR = 30;
 /** An iPhone 17 Pro Max, in the CSS pixels its 440pt screen is captured at. */
 const PHONE = { bezel: 13, corner: 66, screen: 53, statusBar: 54, homeBar: 34 };
 
+/** A framed window and a framed phone, outer edge to outer edge. */
+const WINDOW_SIZE = { width: DESKTOP.width, height: DESKTOP.height + TITLE_BAR };
+const PHONE_SIZE = {
+	width: MOBILE.width + PHONE.bezel * 2,
+	height: MOBILE.height + PHONE.statusBar + PHONE.homeBar + PHONE.bezel * 2
+};
+
 const WINDOW_SHOTS = [
 	'desktop_conversation',
 	'desktop_conversation_dark',
@@ -404,6 +411,8 @@ async function readShot(name: string) {
 	return `data:image/png;base64,${png.toString('base64')}`;
 }
 
+type Edges = { top: string; bottom: string; darkTop: boolean; darkBottom: boolean };
+
 /**
  * The colour a screenshot ends on, top and bottom.
  *
@@ -411,47 +420,133 @@ async function readShot(name: string) {
  * painting them a guessed grey would put a seam across the picture. Reading the
  * shot's own edge instead lets the frame continue it, so the theme, the palette
  * and a wallpaper all come out right without being told which one is in force.
+ * The same reading decides the window's chrome: a light title bar over a dark
+ * interface looks like a screenshot of a different program.
  */
-async function edges(page: Page, src: string) {
+async function edges(page: Page, src: string): Promise<Edges> {
 	return page.evaluate(
 		(s) =>
-			new Promise<{ top: string; bottom: string; darkTop: boolean; darkBottom: boolean }>(
-				(resolve) => {
-					const img = new Image();
-					img.onload = () => {
-						const canvas = document.createElement('canvas');
-						canvas.width = img.width;
-						canvas.height = img.height;
-						const ctx = canvas.getContext('2d')!;
-						ctx.drawImage(img, 0, 0);
-						const at = (y: number) => {
-							const [r, g, b] = ctx.getImageData(2, y, 1, 1).data;
-							return {
-								css: `rgb(${r},${g},${b})`,
-								dark: 0.2126 * r + 0.7152 * g + 0.0722 * b < 140
-							};
+			new Promise<Edges>((resolve) => {
+				const img = new Image();
+				img.onload = () => {
+					const canvas = document.createElement('canvas');
+					canvas.width = img.width;
+					canvas.height = img.height;
+					const ctx = canvas.getContext('2d')!;
+					ctx.drawImage(img, 0, 0);
+					const at = (y: number) => {
+						const [r, g, b] = ctx.getImageData(2, y, 1, 1).data;
+						return {
+							css: `rgb(${r},${g},${b})`,
+							dark: 0.2126 * r + 0.7152 * g + 0.0722 * b < 140
 						};
-						const top = at(2);
-						const bottom = at(img.height - 3);
-						resolve({
-							top: top.css,
-							bottom: bottom.css,
-							darkTop: top.dark,
-							darkBottom: bottom.dark
-						});
 					};
-					img.src = s;
-				}
-			),
+					const top = at(2);
+					const bottom = at(img.height - 3);
+					resolve({ top: top.css, bottom: bottom.css, darkTop: top.dark, darkBottom: bottom.dark });
+				};
+				img.src = s;
+			}),
 		src
 	);
 }
 
-/** Waits for the layers to decode: a frame photographed too early is an empty frame. */
-async function settle(page: Page) {
-	await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
-	await page.waitForTimeout(120);
-}
+/**
+ * The frames themselves, as one stylesheet.
+ *
+ * Written once and shared, because a frame is needed twice: alone, for the
+ * README's tables, and beside another one in the composite at the top of the
+ * page. Everything a single shot decides for itself travels as a custom
+ * property on the element rather than as its own rule.
+ */
+const FRAME_CSS = `
+	html, body { margin: 0; background: transparent; }
+
+	.window {
+		position: absolute;
+		width: ${WINDOW_SIZE.width}px;
+		border-radius: 11px;
+		overflow: hidden;
+		background: var(--bar);
+		box-shadow: 0 2px 5px rgba(0, 0, 0, .16), 0 26px 64px rgba(0, 0, 0, .3), 0 0 0 1px var(--ring);
+		transform-origin: top left;
+	}
+	.window .bar {
+		height: ${TITLE_BAR}px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding-left: 14px;
+		border-bottom: 1px solid var(--line);
+	}
+	.window .bar span {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .16);
+	}
+	.window img { display: block; width: ${DESKTOP.width}px; height: ${DESKTOP.height}px; }
+
+	.phone {
+		position: absolute;
+		width: ${PHONE_SIZE.width}px;
+		height: ${PHONE_SIZE.height}px;
+		padding: ${PHONE.bezel}px;
+		box-sizing: border-box;
+		border-radius: ${PHONE.corner}px;
+		background: linear-gradient(145deg, #7c7c82 0%, #33333a 22%, #1c1c1f 52%, #5e5e66 78%, #232327 100%);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 30px 70px rgba(0, 0, 0, .35);
+		transform-origin: top left;
+	}
+	.phone .screen {
+		width: ${MOBILE.width}px;
+		height: ${MOBILE.height + PHONE.statusBar + PHONE.homeBar}px;
+		border-radius: ${PHONE.screen}px;
+		overflow: hidden;
+		background: var(--top);
+	}
+	.phone .status {
+		position: relative;
+		height: ${PHONE.statusBar}px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 32px 0 36px;
+		box-sizing: border-box;
+		background: var(--top);
+		color: var(--ink);
+		font: 600 17px/1 -apple-system, "SF Pro Text", system-ui, sans-serif;
+		letter-spacing: .2px;
+	}
+	.phone .glyphs { display: flex; align-items: center; gap: 6px; }
+	.phone .island {
+		position: absolute;
+		top: 11px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 125px;
+		height: 37px;
+		border-radius: 19px;
+		background: #000;
+	}
+	.phone .home {
+		height: ${PHONE.homeBar}px;
+		background: var(--bottom);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.phone .home i { width: 143px; height: 5px; border-radius: 3px; background: var(--ink-home); }
+	.phone img { display: block; width: ${MOBILE.width}px; height: ${MOBILE.height}px; }
+
+	/* The side buttons, sitting on the band's edge rather than through it. */
+	.phone b {
+		position: absolute;
+		width: 3px;
+		border-radius: 2px;
+		background: linear-gradient(180deg, #6a6a70, #3a3a40);
+	}
+`;
 
 /**
  * A minimal macOS window: rounded corners, one bar, three lights.
@@ -459,51 +554,13 @@ async function settle(page: Page) {
  * No toolbar, no address bar, no title. The point is to say "this is an
  * application window" and then get out of the way of the application.
  */
-async function frameWindow(page: Page, name: string) {
-	const src = await readShot(name);
-	await page.setContent('<body></body>');
-	const { darkTop } = await edges(page, src);
+function windowHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
+	const bar = e.darkTop ? '#37373b' : '#f0efee';
+	const line = e.darkTop ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.10)';
+	const ring = e.darkTop ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.14)';
 
-	// The chrome follows the shot: a light bar over a dark interface looks like a
-	// screenshot of a different program.
-	const bar = darkTop ? '#37373b' : '#f0efee';
-	const line = darkTop ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.10)';
-	const ring = darkTop ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.14)';
-
-	await page.setViewportSize({
-		width: DESKTOP.width + PAD * 2,
-		height: DESKTOP.height + TITLE_BAR + PAD * 2
-	});
-	await page.setContent(`
-		<style>
-			html, body { margin: 0; background: transparent; }
-			.window {
-				position: absolute;
-				top: ${PAD}px;
-				left: ${PAD}px;
-				width: ${DESKTOP.width}px;
-				border-radius: 11px;
-				overflow: hidden;
-				background: ${bar};
-				box-shadow: 0 2px 5px rgba(0, 0, 0, .16), 0 26px 64px rgba(0, 0, 0, .3), 0 0 0 1px ${ring};
-			}
-			.bar {
-				height: ${TITLE_BAR}px;
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				padding-left: 14px;
-				border-bottom: 1px solid ${line};
-			}
-			.bar span {
-				width: 12px;
-				height: 12px;
-				border-radius: 50%;
-				box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .16);
-			}
-			img { display: block; width: ${DESKTOP.width}px; height: ${DESKTOP.height}px; }
-		</style>
-		<div class="window">
+	return `
+		<div class="window" style="--bar:${bar};--line:${line};--ring:${ring};${place}">
 			<div class="bar">
 				<span style="background:#ff5f57"></span>
 				<span style="background:#febc2e"></span>
@@ -511,11 +568,7 @@ async function frameWindow(page: Page, name: string) {
 			</div>
 			<img src="${src}">
 		</div>
-	`);
-	await settle(page);
-
-	const png = await page.screenshot({ animations: 'disabled', omitBackground: true });
-	await writeFile(`${FRAMED_OUT}/${name}.png`, png);
+	`;
 }
 
 /**
@@ -526,83 +579,12 @@ async function frameWindow(page: Page, name: string) {
  * with no safe area, so an island painted on top would cover the header it
  * would sit beside on a real device.
  */
-async function framePhone(page: Page, name: string) {
-	const src = await readShot(name);
-	await page.setContent('<body></body>');
-	const { top, bottom, darkTop, darkBottom } = await edges(page, src);
+function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
+	const ink = e.darkTop ? '#fff' : '#000';
+	const inkHome = e.darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
 
-	const inkTop = darkTop ? '#fff' : '#000';
-	const inkBottom = darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
-
-	const { bezel, corner, screen, statusBar, homeBar } = PHONE;
-	const width = MOBILE.width + bezel * 2;
-	const height = MOBILE.height + statusBar + homeBar + bezel * 2;
-
-	await page.setViewportSize({ width: width + PAD * 2, height: height + PAD * 2 });
-	await page.setContent(`
-		<style>
-			html, body { margin: 0; background: transparent; }
-			.phone {
-				position: absolute;
-				top: ${PAD}px;
-				left: ${PAD}px;
-				width: ${width}px;
-				height: ${height}px;
-				padding: ${bezel}px;
-				box-sizing: border-box;
-				border-radius: ${corner}px;
-				background: linear-gradient(145deg, #7c7c82 0%, #33333a 22%, #1c1c1f 52%, #5e5e66 78%, #232327 100%);
-				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 30px 70px rgba(0, 0, 0, .35);
-			}
-			.screen {
-				width: ${MOBILE.width}px;
-				height: ${MOBILE.height + statusBar + homeBar}px;
-				border-radius: ${screen}px;
-				overflow: hidden;
-				background: ${top};
-			}
-			.status {
-				position: relative;
-				height: ${statusBar}px;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				padding: 0 32px 0 36px;
-				box-sizing: border-box;
-				background: ${top};
-				color: ${inkTop};
-				font: 600 17px/1 -apple-system, "SF Pro Text", system-ui, sans-serif;
-				letter-spacing: .2px;
-			}
-			.status .glyphs { display: flex; align-items: center; gap: 6px; }
-			.island {
-				position: absolute;
-				top: 11px;
-				left: 50%;
-				transform: translateX(-50%);
-				width: 125px;
-				height: 37px;
-				border-radius: 19px;
-				background: #000;
-			}
-			.home {
-				height: ${homeBar}px;
-				background: ${bottom};
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-			.home i { width: 143px; height: 5px; border-radius: 3px; background: ${inkBottom}; }
-			img { display: block; width: ${MOBILE.width}px; height: ${MOBILE.height}px; }
-			/* The side buttons, sitting on the band's edge rather than through it. */
-			b {
-				position: absolute;
-				width: 3px;
-				border-radius: 2px;
-				background: linear-gradient(180deg, #6a6a70, #3a3a40);
-			}
-		</style>
-		<div class="phone">
+	return `
+		<div class="phone" style="--top:${e.top};--bottom:${e.bottom};--ink:${ink};--ink-home:${inkHome};${place}">
 			<b style="left:-2px;top:118px;height:32px"></b>
 			<b style="left:-2px;top:180px;height:62px"></b>
 			<b style="left:-2px;top:256px;height:62px"></b>
@@ -633,11 +615,101 @@ async function framePhone(page: Page, name: string) {
 				<div class="home"><i></i></div>
 			</div>
 		</div>
-	`);
+	`;
+}
+
+/** Waits for the layers to decode: a frame photographed too early is an empty frame. */
+async function settle(page: Page) {
+	await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode())));
+	await page.waitForTimeout(120);
+}
+
+/** Lays out a page of frames and photographs it onto a transparent ground. */
+async function draw(
+	page: Page,
+	{ width, height, body, out }: { width: number; height: number; body: string; out: string }
+) {
+	await page.setViewportSize({ width, height });
+	await page.setContent(`<style>${FRAME_CSS}</style>${body}`);
 	await settle(page);
 
 	const png = await page.screenshot({ animations: 'disabled', omitBackground: true });
-	await writeFile(`${FRAMED_OUT}/${name}.png`, png);
+	await writeFile(out, png);
+}
+
+async function frameWindow(page: Page, name: string) {
+	const src = await readShot(name);
+	await page.setContent('<body></body>');
+	const e = await edges(page, src);
+
+	await draw(page, {
+		width: WINDOW_SIZE.width + PAD * 2,
+		height: WINDOW_SIZE.height + PAD * 2,
+		body: windowHtml(src, e),
+		out: `${FRAMED_OUT}/${name}.png`
+	});
+}
+
+async function framePhone(page: Page, name: string) {
+	const src = await readShot(name);
+	await page.setContent('<body></body>');
+	const e = await edges(page, src);
+
+	await draw(page, {
+		width: PHONE_SIZE.width + PAD * 2,
+		height: PHONE_SIZE.height + PAD * 2,
+		body: phoneHtml(src, e),
+		out: `${FRAMED_OUT}/${name}.png`
+	});
+}
+
+/**
+ * The picture at the top of the README: a window, and a phone leaning on it.
+ *
+ * It replaces a strip of four diagonal slices, which was handsome from a
+ * distance and told a visitor nothing: every band cut through a word or a
+ * control, so the app was never shown once in one piece. Here both formats are
+ * whole, and the transparent ground leaves a silhouette rather than a
+ * rectangle, which is what stops the top of a README looking like a table.
+ *
+ * A light window under a dark phone, on purpose: it says the app has themes
+ * without spending a second picture saying it.
+ */
+const HERO = {
+	/** How much smaller the phone is, so it reads as nearer rather than as huge. */
+	scale: 0.62,
+	/** How far the phone hangs past the window, right and below. */
+	overhangX: 150,
+	overhangY: 70
+};
+
+async function composeHero(page: Page) {
+	const windowSrc = await readShot('desktop_conversation');
+	const phoneSrc = await readShot('mobile_home');
+	await page.setContent('<body></body>');
+	const windowEdges = await edges(page, windowSrc);
+	const phoneEdges = await edges(page, phoneSrc);
+
+	const phoneWidth = PHONE_SIZE.width * HERO.scale;
+	const phoneHeight = PHONE_SIZE.height * HERO.scale;
+	const phoneLeft = PAD + WINDOW_SIZE.width + HERO.overhangX - phoneWidth;
+	const phoneTop = PAD + WINDOW_SIZE.height + HERO.overhangY - phoneHeight;
+
+	await draw(page, {
+		width: WINDOW_SIZE.width + HERO.overhangX + PAD * 2,
+		height: WINDOW_SIZE.height + HERO.overhangY + PAD * 2,
+		body:
+			windowHtml(windowSrc, windowEdges) +
+			phoneHtml(
+				phoneSrc,
+				phoneEdges,
+				// A darker, wider shadow than the frame carries on its own: the phone
+				// sits on top of the window, and without it the two look pasted.
+				`top:${phoneTop}px;left:${phoneLeft}px;transform:scale(${HERO.scale});` +
+					`box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 40px 90px rgba(0,0,0,.45)`
+			),
+		out: `${OUT}/hero.png`
+	});
 }
 
 test.beforeAll(async () => {
@@ -800,5 +872,6 @@ test.describe('screenshots', () => {
 	test('frames', async ({ page }) => {
 		for (const name of WINDOW_SHOTS) await frameWindow(page, name);
 		for (const name of PHONE_SHOTS) await framePhone(page, name);
+		await composeHero(page);
 	});
 });

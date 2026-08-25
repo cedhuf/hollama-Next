@@ -20,7 +20,7 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 >
 > More details on why in [Discussions](https://github.com/cedhuf/llooma/discussions).
 
-![The sidebar, the Library, the Interface settings, and a conversation over a wallpaper](static/screenshots/sections.png)
+![Llooma on a desktop, with the phone interface beside it](static/screenshots/hero.png)
 
 > [!WARNING]
 > This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges. You are warned 😅
