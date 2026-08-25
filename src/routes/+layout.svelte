@@ -13,7 +13,8 @@
 
 	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
-	import { onNavigate } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page, updated } from '$app/stores';
 	import { loadServerChatDefaults } from '$lib/chatDefaults';
 	import CollapsibleSidebar from '$lib/components/CollapsibleSidebar.svelte';
@@ -30,26 +31,13 @@
 		shouldOfferInstall,
 		type PwaInstallDialog
 	} from '$lib/install';
-	import {
-		hydrateStores,
-		knowledgeStore,
-		refreshStores,
-		serversStore,
-		sessionsStore,
-		settingsStore
-	} from '$lib/localStorage';
+	import { hydrateStores, refreshStores, settingsStore } from '$lib/localStorage';
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerPlaybooks } from '$lib/playbooksConfig';
 	import { loadServerSearch } from '$lib/search';
 	import { currentRole, currentUser } from '$lib/stores/auth';
 	import { setInstanceConfig } from '$lib/stores/instance';
-	import {
-		onboardingOpen,
-		openSearch,
-		searchModalOpen,
-		searchModalQuery,
-		welcomeOpen
-	} from '$lib/stores/modal';
+	import { openSearch, searchModalOpen, searchModalQuery, welcomeOpen } from '$lib/stores/modal';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 	import { loadServerPrompts } from '$lib/systemPrompts';
 	import { toast } from '$lib/toast';
@@ -58,7 +46,6 @@
 	import { loadWebFetchConfig } from '$lib/webFetch';
 
 	import type { LayoutData } from './$types';
-	import Onboarding from './Onboarding.svelte';
 	import SettingsModal from './settings/SettingsModal.svelte';
 	import Welcome from './Welcome.svelte';
 
@@ -117,6 +104,49 @@
 				onClick: () => location.reload()
 			}
 		});
+	});
+
+	/**
+	 * Which of the two interfaces this account is on.
+	 *
+	 * The redirect lives here, at the one place both trees pass through, and it
+	 * runs in both directions on the same rule: this interface is for a phone, so
+	 * a phone with the setting on goes there and anything wider comes back. Not
+	 * only when the setting changes, but whenever the window stops being a phone,
+	 * which is what a dragged corner does.
+	 *
+	 * Nothing under `/m` reads any of this: an interface that has to check whether
+	 * it is allowed on screen is one that will one day be on screen wrongly.
+	 *
+	 * And nothing here touches the OS chrome. The tint follows the theme, once,
+	 * where it always did: a version of this that repainted it on every navigation
+	 * cost the app its safe area on both interfaces, and it is not worth a second
+	 * attempt for a strip four percent off.
+	 */
+	let onPhone = $state(false);
+
+	$effect(() => {
+		if (!browser) return;
+		// A phone, not a small screen. 640 keeps tablets out, including the small
+		// ones: an iPad mini is 744 points across and has room for the sidebar and a
+		// conversation beside it, which is the whole argument for the other
+		// interface.
+		const query = window.matchMedia('(max-width: 640px)');
+		onPhone = query.matches;
+		const update = (event: MediaQueryListEvent) => (onPhone = event.matches);
+		query.addEventListener('change', update);
+		return () => query.removeEventListener('change', update);
+	});
+
+	$effect(() => {
+		if (!booted) return;
+		const path = $page.url.pathname;
+		if (path === '/login') return;
+		const onMobileUi = path === '/m' || path.startsWith('/m/');
+		const belongsThere = $settingsStore.simplifiedMobileUI && onPhone;
+
+		if (belongsThere && !onMobileUi) void goto(resolve('/m'));
+		else if (!belongsThere && onMobileUi) void goto(resolve('/sessions'));
 	});
 
 	onNavigate(async () => {
@@ -324,22 +354,12 @@
 			$settingsStore.themeMode = 'system';
 		}
 
-		// Two first runs, and which one you get depends on whether the instance is
-		// already somebody's. Nothing at all means this install has just been stood
-		// up, and the wizard is the one that asks for the connection it cannot work
-		// without. An account on an instance that already has connections needs none
-		// of that, so it gets the tour instead.
+		// One first run, composed for whoever is in front of it: the tour asks for a
+		// connection and a name only where they are missing and the person is
+		// allowed to give them, and skips straight to the introduction otherwise.
+		// Two flows used to answer the same question, and a new arrival walked
+		// through setup did not then need to be shown around it.
 		//
-		// Exclusive on purpose: they answer the same question, and a new arrival
-		// walked through setup does not then need to be shown around it.
-		const nothingYet =
-			!$settingsStore.onboardingComplete &&
-			$serversStore.length === 0 &&
-			$sessionsStore.length === 0 &&
-			$knowledgeStore.length === 0 &&
-			!$settingsStore.profileFirstName &&
-			!$settingsStore.profileLastName;
-
 		// Shown again when an administrator says so, which is what the epoch is for:
 		// each browser remembers the stamp it acknowledged, so a newer one plays the
 		// tour once for everybody and then stops, with nothing tracking who saw what.
@@ -347,8 +367,7 @@
 		const seen = $settingsStore.onboardingEpochSeen ?? 0;
 
 		if (env.PUBLIC_DISABLE_ONBOARDING !== 'true') {
-			if (nothingYet) $onboardingOpen = true;
-			else if (!$settingsStore.welcomeComplete || epoch > seen) $welcomeOpen = true;
+			if (!$settingsStore.welcomeComplete || epoch > seen) $welcomeOpen = true;
 		}
 
 		// The web component is only ever loaded in the browser: it registers a custom
@@ -378,7 +397,7 @@
 		if (!dialog) return;
 
 		const offer = () => {
-			if (get(onboardingOpen) || get(welcomeOpen)) return;
+			if (get(welcomeOpen)) return;
 			if (!shouldOfferInstall(get(settingsStore).offerInstall !== false)) return;
 
 			markInstallOffered();
@@ -418,7 +437,6 @@
 	<SettingsModal />
 	<SearchModal bind:open={$searchModalOpen} initialQuery={$searchModalQuery} />
 	<KnowledgeModal />
-	<Onboarding />
 	<Welcome />
 
 	<!-- Held in manual mode, so it shows nothing of its own accord: when to ask is

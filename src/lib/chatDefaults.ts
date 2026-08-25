@@ -46,6 +46,14 @@ export interface ChatDefaultsView {
 		source: 'admin' | 'user';
 		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
+	/** Speaking instead of typing, and what transcribes it. */
+	voice: {
+		voiceInput: boolean;
+		voiceModel: string;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: { voiceInput: boolean; voiceModel: string };
+	};
 	/** See `ResolvedChatDefaults['sampling']`; this is the same shape client-side. */
 	sampling: {
 		value: SamplingOptions;
@@ -117,6 +125,13 @@ export const chatDefaultsConfig = derived(
 				source: 'user',
 				admin: { defaultImageModel: '', imagePromptWriter: true, imagePromptModel: '' }
 			},
+			voice: {
+				voiceInput: $s.voiceInput,
+				voiceModel: $s.voiceModel ?? '',
+				editable: true,
+				source: 'user',
+				admin: { voiceInput: false, voiceModel: '' }
+			},
 			sampling: { value: ownSampling, editable: true, source: 'user', adminValue: {} }
 		};
 
@@ -175,6 +190,20 @@ export const chatDefaultsConfig = derived(
 					}
 				: { ...$srv.images, ...$srv.images.admin };
 
+		// Voice: the same three states, with the model as the sentinel. Somebody who
+		// has chosen one has an opinion about which; somebody who has not takes the
+		// instance's, including whether it is switched on at all.
+		const v = !$srv.voice.editable
+			? $srv.voice
+			: $s.voiceModel
+				? {
+						...$srv.voice,
+						voiceInput: $s.voiceInput,
+						voiceModel: $s.voiceModel,
+						source: 'user' as const
+					}
+				: { ...$srv.voice, ...$srv.voice.admin };
+
 		// Sampling: the same three states again, and the same sentinel. Read live
 		// from the store once this account has a set of its own, so a number typed in
 		// Settings reaches an open conversation without a round trip.
@@ -184,6 +213,6 @@ export const chatDefaultsConfig = derived(
 				? { ...$srv.sampling, value: ownSampling, source: 'user' as const }
 				: { ...$srv.sampling, value: $srv.sampling.adminValue };
 
-		return { defaultModel: dm, title: t, compact: c, images: i, sampling };
+		return { defaultModel: dm, title: t, compact: c, images: i, voice: v, sampling };
 	}
 );

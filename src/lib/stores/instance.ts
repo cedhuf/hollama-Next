@@ -26,6 +26,8 @@ export interface InstanceConfig {
 	onboardingEpoch: number;
 	/** Who to write to when the instance refuses something. Null if nobody qualifies. */
 	adminEmail: string | null;
+	/** Whether a plain user may add a connection of their own. */
+	allowUserKeys: boolean;
 }
 
 const state = writable<InstanceConfig | null>(null);

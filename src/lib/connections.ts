@@ -360,6 +360,11 @@ export function getProvider(connectionType: ConnectionType): ProviderInfo {
 	return toProviderInfo(describeProvider(connectionType));
 }
 
+/** How this connection transcribes, when it does not do it the usual way. */
+export function transcriptionFor(connectionType: ConnectionType) {
+	return describeProvider(connectionType).transcription;
+}
+
 /** Whether a connection talks to an OpenAI-compatible endpoint. */
 export function isOpenAiCompatible(connectionType: ConnectionType): boolean {
 	return describeProvider(connectionType).family === 'openai';

@@ -10,6 +10,13 @@
 	import SettingsSection from './SettingsSection.svelte';
 	import UsageCard from './UsageCard.svelte';
 
+	interface Props {
+		/** Off in the welcome tour: see the note beside the card. */
+		showUsage?: boolean;
+	}
+
+	let { showUsage = true }: Props = $props();
+
 	const PRESET_COLORS = [
 		'#6366f1',
 		'#8b5cf6',
@@ -23,10 +30,10 @@
 		'#3b82f6'
 	];
 
-	const roleLabels: Record<'admin' | 'user', string> = {
-		admin: 'Administrator',
-		user: 'User'
-	};
+	const roleLabels = $derived<Record<'admin' | 'user', string>>({
+		admin: $LL.administrator(),
+		user: $LL.user()
+	});
 
 	const initials = $derived(
 		(
@@ -40,7 +47,7 @@
 	const displayName = $derived(
 		[$settingsStore.profileFirstName.trim(), $settingsStore.profileLastName.trim()]
 			.filter(Boolean)
-			.join(' ') || 'Your name'
+			.join(' ') || $LL.yourName()
 	);
 
 	// An account email is the account's, so it is read back from the session. With
@@ -79,15 +86,22 @@
 
 	<!-- What this account has spent, between who you are and what you may change:
 	     it is a fact about you rather than a setting of yours. Drawn whether or not
-	     there is a limit: the question is the same either way, what did this cost. -->
-	<UsageCard />
+	     there is a limit: the question is the same either way, what did this cost.
+
+	     Not in the welcome tour, where the account is minutes old: every figure is
+	     zero, the thirty-day chart is a flat line, and it takes a third of the
+	     dialog to say so. The tour shows the allowance instead, which is the part
+	     that is actually news on the first day. -->
+	{#if showUsage}
+		<UsageCard />
+	{/if}
 
 	<!-- Identity -->
 	<SettingsSection title={$LL.profile()} card>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
 			<SettingsField
 				label={$LL.firstName()}
-				hint={oidcManaged ? 'Managed by your identity provider.' : undefined}
+				hint={oidcManaged ? $LL.managedByIdentityProvider() : undefined}
 			>
 				{#if oidcManaged}
 					<input class="settings-field" value={$settingsStore.profileFirstName} disabled />
@@ -101,7 +115,7 @@
 			</SettingsField>
 			<SettingsField
 				label={$LL.lastName()}
-				hint={oidcManaged ? 'Managed by your identity provider.' : undefined}
+				hint={oidcManaged ? $LL.managedByIdentityProvider() : undefined}
 			>
 				{#if oidcManaged}
 					<input class="settings-field" value={$settingsStore.profileLastName} disabled />
@@ -120,9 +134,7 @@
 		{#if $hasAccounts}
 			<SettingsField
 				label="Email"
-				hint={$currentUser?.oidc
-					? 'Managed by your identity provider.'
-					: 'Set by your administrator.'}
+				hint={$currentUser?.oidc ? $LL.managedByIdentityProvider() : 'Set by your administrator.'}
 			>
 				<input class="settings-field" value={$currentUser?.email ?? ''} disabled />
 			</SettingsField>

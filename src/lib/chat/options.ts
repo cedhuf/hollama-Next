@@ -43,7 +43,6 @@ export const OLLAMA_SAMPLING_KEYS = [
 	'num_keep',
 	'top_k',
 	'min_p',
-	'tfs_z',
 	'typical_p',
 	'repeat_last_n',
 	'repeat_penalty',

@@ -58,6 +58,22 @@ export interface ResolvedChatDefaults {
 		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
 	/**
+	 * Speaking instead of typing, and what transcribes it.
+	 *
+	 * Here rather than in a corner of its own for the reason the images group is:
+	 * the question is which model an account uses for a job, and who gets to
+	 * decide. An administrator who has set up a transcription model is usually the
+	 * only person on the instance who could have, so sharing it is the difference
+	 * between a feature that works for everybody and one that works for them.
+	 */
+	voice: {
+		voiceInput: boolean;
+		voiceModel: string;
+		editable: boolean;
+		source: 'admin' | 'user';
+		admin: { voiceInput: boolean; voiceModel: string };
+	};
+	/**
 	 * The sampling settings every conversation on this account starts from.
 	 *
 	 * Shared the same three ways as everything else here, and for the same reason
@@ -195,6 +211,30 @@ export function resolveChatDefaults(
 			: { ...adminImages, editable: true, source: 'admin', admin: adminImages };
 	}
 
+	// --- voice ---
+	const ownVoice = {
+		voiceInput: userSettings?.voiceInput ?? DEFAULT_SETTINGS.voiceInput,
+		voiceModel: userSettings?.voiceModel ?? ''
+	};
+	const adminVoice = {
+		voiceInput: getConfig('voiceInput') === 'true',
+		voiceModel: getConfig('voiceModel') ?? ''
+	};
+	const voiceSharing = (getConfig('voiceSharing') as Sharing) || 'off';
+
+	let voice: ResolvedChatDefaults['voice'];
+	if (isAdmin || voiceSharing === 'off') {
+		voice = { ...ownVoice, editable: true, source: 'user', admin: adminVoice };
+	} else if (voiceSharing === 'locked') {
+		voice = { ...adminVoice, editable: false, source: 'admin', admin: adminVoice };
+	} else {
+		// The sentinel is the model, as everywhere else: an account that has chosen
+		// one has an opinion, one that has not takes the instance's.
+		voice = ownVoice.voiceModel
+			? { ...ownVoice, editable: true, source: 'user', admin: adminVoice }
+			: { ...adminVoice, editable: true, source: 'admin', admin: adminVoice };
+	}
+
 	// --- sampling ---
 	//
 	// The same three states as the groups above, with the same sentinel: an
@@ -222,5 +262,5 @@ export function resolveChatDefaults(
 			: { value: adminSampling, editable: true, source: 'admin', adminValue: adminSampling };
 	}
 
-	return { defaultModel, title, compact, images, sampling };
+	return { defaultModel, title, compact, images, voice, sampling };
 }

@@ -41,7 +41,6 @@ export interface OllamaOptions {
 	top_k: number;
 	top_p: number;
 	min_p: number; // REF https://github.com/ollama/ollama-js/issues/145
-	tfs_z: number;
 	typical_p: number;
 	repeat_last_n: number;
 	temperature: number;

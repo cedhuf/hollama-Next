@@ -136,7 +136,7 @@ async function withThinkingField<T>(
  * a conversation, or carried by a persona, silently did nothing the moment the
  * model was not local. That was an omission rather than a decision.
  *
- * Only what this API actually defines. `top_k`, `min_p`, `tfs_z`, `typical_p`,
+ * Only what this API actually defines. `top_k`, `min_p`, `typical_p`,
  * `repeat_penalty` and the mirostat trio are llama.cpp's, and an endpoint that
  * does not know a field answers 400 rather than ignoring it, which is a whole
  * turn lost to a setting nobody asked to be strict about.

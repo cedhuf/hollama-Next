@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleStop, FoldVertical, LoaderCircle, UnfoldVertical } from '@lucide/svelte';
+	import { CircleStop, FoldVertical, LoaderCircle, Mic, UnfoldVertical } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -11,6 +11,7 @@
 		type SlashCommand
 	} from '$lib/chat/commands';
 	import { mentionPrefix, splitMentions } from '$lib/chat/mentions';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
@@ -23,6 +24,7 @@
 	import { searchConfig } from '$lib/search';
 	import type { Editor, Message, Session } from '$lib/sessions';
 	import { isTouchPrimary } from '$lib/utils';
+	import { VoiceRecorder } from '$lib/voice.svelte';
 	import { webFetchConfig } from '$lib/webFetch';
 
 	import AskChoicesCard from './AskChoicesCard.svelte';
@@ -32,6 +34,30 @@
 	import SlashMenu from './SlashMenu.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
+
+	/**
+	 * Dictation, offered only where it can work.
+	 *
+	 * Both halves have to be true: the account (or the instance) has switched it on
+	 * and a model has been chosen to transcribe with. A microphone that fails the
+	 * first time it is pressed is worse than no microphone.
+	 */
+	const voiceCfg = $derived($chatDefaultsConfig.voice);
+	const voiceReady = $derived(voiceCfg.voiceInput && !!voiceCfg.voiceModel);
+	const voice = new VoiceRecorder();
+
+	/**
+	 * Dictated words join what is already typed rather than replacing it: somebody
+	 * who wrote half a sentence and then spoke the rest meant both halves.
+	 */
+	function dictate() {
+		if (voice.state === 'recording') return voice.stop();
+		if (voice.state === 'transcribing') return;
+		void voice.start((text) => {
+			const current = editor.prompt?.trim() ?? '';
+			editor.prompt = current ? `${current} ${text}` : text;
+		});
+	}
 
 	interface Props {
 		editor: Editor;
@@ -509,6 +535,31 @@
 									}}
 								>
 									{$LL.cancel()}
+								</Button>
+							{/if}
+
+							{#if voiceReady}
+								<!-- Dictation, beside the controls that act on what is in the field
+								     rather than out in the row with the attachments: it writes into the
+								     composer, it does not send. It turns the accent while listening and
+								     spins while the words are on their way, which are the two states
+								     that have to be legible from across the desk. -->
+								<Button
+									variant="icon"
+									class={voice.state === 'recording' ? 'text-accent' : ''}
+									title={voice.state === 'transcribing'
+										? $LL.voiceTranscribing()
+										: $LL.voiceInput()}
+									aria-label={$LL.voiceInput()}
+									aria-pressed={voice.state === 'recording'}
+									disabled={voice.state === 'transcribing'}
+									onclick={dictate}
+								>
+									{#if voice.state === 'transcribing'}
+										<LoaderCircle class="base-icon animate-spin" />
+									{:else}
+										<Mic class="base-icon {voice.state === 'recording' ? 'animate-pulse' : ''}" />
+									{/if}
 								</Button>
 							{/if}
 

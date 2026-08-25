@@ -12,9 +12,20 @@ export const settingsModalOpen = writable(false);
  * remember to tidy up when a tab changes.
  */
 export const settingsBack = writable<{ label: string; onBack: () => void } | null>(null);
-export const onboardingOpen = writable(false);
+
 /** Server-mode welcome tour, shown once on a user's first connection. */
 export const welcomeOpen = writable(false);
+
+/**
+ * Play the tour with every step in it, whatever this account already has.
+ *
+ * The tour composes itself: the connection step is absent once there is a
+ * connection, the profile step once there is a name. Which is right, and which
+ * means nobody can look at the whole thing without emptying their account first.
+ * This is the developer-options way in, and it changes nothing else: the steps
+ * shown are the real ones, in the real order.
+ */
+export const welcomeShowAll = writable(false);
 
 /**
  * Conversation search. Global because it answers to ⌘K from anywhere, and the

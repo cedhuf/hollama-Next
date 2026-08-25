@@ -1,6 +1,10 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	interface Props {
 		label: string;
+		/** Small element shown after the label, e.g. an "alpha" tag. */
+		badge?: Snippet;
 		checked?: boolean;
 		name?: string;
 		disabled?: boolean;
@@ -8,7 +12,14 @@
 		onChange?: (checked: boolean) => void;
 	}
 
-	let { label, checked = $bindable(), name = '', disabled = false, onChange }: Props = $props();
+	let {
+		label,
+		badge,
+		checked = $bindable(),
+		name = '',
+		disabled = false,
+		onChange
+	}: Props = $props();
 </script>
 
 <label
@@ -16,7 +27,10 @@
 		? 'cursor-not-allowed opacity-60'
 		: ''}"
 >
-	<span>{label}</span>
+	<span class="flex items-center gap-2">
+		{label}
+		{@render badge?.()}
+	</span>
 	<input
 		type="checkbox"
 		bind:checked

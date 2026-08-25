@@ -255,6 +255,9 @@ const en = {
 		'For this conversation only. An empty field uses your value from Settings.',
 	samplingFieldCount: '{count:number} field{{s}} set',
 	samplingNothingSet: 'nothing set: each provider keeps its own defaults',
+	shareVoice: 'Share the transcription setup',
+	voiceAdminDescription:
+		'Which model transcribes, and whether speaking is offered at all. Usually the only person who could have set one up is the one reading this.',
 	shareSampling: 'Share your sampling settings',
 	save: 'Save',
 	search: 'Search',
@@ -285,7 +288,6 @@ const en = {
 	fromMySettings: 'from my settings',
 	systemPrompt: 'System prompt',
 	temperature: 'Temperature',
-	tfsZ: 'TFS Z',
 	topK: 'Top K',
 	topP: 'Top P',
 	tryingToConnectNotLocalhost:
@@ -441,6 +443,41 @@ const en = {
 	offerInstall: 'Offer to install the app now and then',
 	offerInstallHelp:
 		'Installed, it runs without browser chrome, keeps its own icon and starts on its own screen. The offer appears on the first visit and then only occasionally; it can also be opened from About at any time.',
+	yourName: 'Your name',
+	managedByIdentityProvider: 'Managed by your identity provider.',
+	alpha: 'alpha',
+	mobileTabHome: 'Home',
+	mobileTabProfile: 'You',
+	mobileNoSessions: 'Nothing yet. Say something.',
+	mobileTabChats: 'Chats',
+	mobileVoice: 'Talk',
+	mobileHeroTitle: 'Talk, do not type',
+	mobileHeroBody:
+		'Say it out loud and it writes it down. Hands free, on the move, or when the keyboard is the slow part.',
+	mobileHello: 'Hello',
+	mobileHelloName: 'Hello, {name:string}',
+	mobileHelloBody: 'What are we doing today?',
+	mobileStartVoice: 'Talk to it',
+	mobileStartVoiceBody: 'Hands free, out loud.',
+	mobileStartChat: 'New conversation',
+	mobileStartImage: 'Draw something',
+	mobileRecent: 'Recent',
+	voiceInput: 'Voice input',
+	voiceInputHelp:
+		'Speak instead of typing. What you say is sent to a transcription model, and the words land in the composer for you to check before they go.',
+	voiceModel: 'Transcription model',
+	voiceModelHelp:
+		'Only models marked as audio appear here. If the list is empty, mark one in Models and prices on its connection.',
+	voiceNoModel: 'No transcription model is set up.',
+	voiceNoMicrophone: 'No microphone, or permission refused.',
+	voiceFailed: 'Could not transcribe that',
+	voiceHeardNothing: 'Nothing was heard.',
+	voiceTranscribing: 'Transcribing',
+	voiceIdle: 'Tap to speak.',
+	voiceListening: 'Listening.',
+	simplifiedMobileUI: 'Simplified mobile interface',
+	simplifiedMobileUIHelp:
+		'A second interface, built for a phone and for the voice: one thing at a time, a tab bar, and no sidebar. Being built in the open, and this one is unchanged.',
 	administrator: 'Administrator',
 	user: 'User',
 
@@ -662,6 +699,14 @@ const en = {
 	tourImagesTitle: 'And it draws, too',
 	tourImagesBody:
 		'Describe a picture and it appears in a gallery of your own. A text model can rewrite your description into a fuller prompt first, and you always see what it wrote before anything is drawn.',
+	tourAllowanceTitle: 'Your allowance',
+	tourServersTitle: 'Somewhere to think',
+	tourServersBody:
+		'Llooma talks to models, it does not run them. Connect one provider now and everything else in this tour has something to answer it.',
+	tourProfileTitle: 'Your name',
+	tourProfileBody:
+		'It is how the app addresses you, and how a persona does. Nothing leaves this instance.',
+	tourRestoreBackup: 'I have a backup to restore',
 	tourStart: 'Start chatting',
 	tourLineNova: 'Ask me anything. I keep it short.',
 	tourLineLou: 'Rough day? I am listening.',
@@ -671,11 +716,6 @@ const en = {
 	tourAsk: 'what do I eat after training?',
 	tourSaysMaite: 'Protein and a proper carb. Eggs, rice, whatever is open. Ten minutes, no more.',
 	tourSaysMax: 'Within the hour if you can, and drink more than you think you need.',
-	onboardingWelcome: 'Welcome to {app:string}',
-	onboardingWelcomeBody: "Let's set things up. It only takes a minute.",
-	onboardingDone: "You're all set",
-	onboardingDoneBody: 'You can change any of this later in Settings.',
-	onboardingEnter: 'Enter {app:string}',
 	tourLibraryTitle: 'Your library',
 	tourLibraryBody:
 		'Personas are not alone in there. Two more things you write once and reuse everywhere.',
@@ -877,6 +917,11 @@ const en = {
 	usageNothingYet: 'Nothing spent yet',
 	usageToday: 'Today',
 	usageTokens: '{tokens:string} tokens',
+	allowanceUnlimited: 'No ceiling here',
+	allowanceUnlimitedBody: 'Help yourself.',
+	allowancePerMonth: 'every month',
+	allowancePerWeek: 'every week',
+	allowancePerDay: 'every day',
 	usageTitle: 'Usage',
 	usageOfLimit: '{spent:string} of {limit:string}',
 	usageUnlimited: 'No limit',
@@ -913,6 +958,9 @@ const en = {
 	toastPreviewLoading: 'Pulling a model',
 	developerOptions: 'Developer options',
 	developerOptionsDescription: 'Tools for checking flows a user normally only sees once.',
+	tourEveryStep: 'Welcome tour, every step',
+	tourEveryStepHelp:
+		'Plays it with the connection and profile steps forced in, which a filled-in account never sees.',
 	newUserOnboarding: 'New-user onboarding',
 	newUserOnboardingDescription:
 		'Replay the welcome tour. Closes this dialog; finishing it marks the tour as seen again.',

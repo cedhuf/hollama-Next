@@ -131,7 +131,7 @@ export class Conversation implements RunSurface {
 
 	/**
 	 * Tracks the last system prompt we auto-resolved, so a model switch can update
-	 * it, but we never overwrite a hand-edited or knowledge-based prompt.
+	 * it, but we never overwrite one somebody wrote themselves.
 	 */
 	#lastAutoSystemPrompt = '';
 
@@ -349,7 +349,7 @@ export class Conversation implements RunSurface {
 		if (this.session.systemPromptEdited) return;
 		if (this.session.messages.some((m) => m.role === 'assistant')) return; // conversation already started
 		const current = this.session.systemPrompt.content;
-		if (current && current !== this.#lastAutoSystemPrompt) return; // manual / knowledge content: leave it
+		if (current && current !== this.#lastAutoSystemPrompt) return; // written by hand: leave it
 		const resolved = effectiveSystemPrompt(this.modelName, get(systemPromptsConfig).prompts);
 		if (resolved === current) return;
 		this.session.systemPrompt = { ...this.session.systemPrompt, content: resolved };

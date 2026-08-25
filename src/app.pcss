@@ -324,6 +324,32 @@
 	}
 }
 
+/* The toast stack recedes rather than stopping dead.
+ *
+ * The library shows a fixed number of notifications and hides the rest outright,
+ * so an open stack looked complete when it was not, and the older ones only
+ * reappeared as the newer ones went. Fading the far end says there is more above
+ * without inventing a counter nobody would trust.
+ *
+ * `data-visible` and `:not([data-removed])` keep this out of the way of the
+ * library's own entrance and exit, which own the opacity the rest of the time.
+ *
+ * Here rather than in `Toasts.svelte`: that component's template is a single
+ * component tag, so Svelte has no element to scope a style block to and says so.
+ * These are global rules about a library's markup, which is what this file is
+ * for. */
+[data-sonner-toast][data-expanded='true'][data-visible='true'][data-index='3']:not(
+		[data-removed='true']
+	) {
+	opacity: 0.66;
+}
+
+[data-sonner-toast][data-expanded='true'][data-visible='true'][data-index='4']:not(
+		[data-removed='true']
+	) {
+	opacity: 0.36;
+}
+
 .modal-overlay[data-state='open'] {
 	animation: modal-overlay-in 160ms ease-out;
 }

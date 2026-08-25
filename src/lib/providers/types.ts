@@ -85,6 +85,47 @@ export interface ModelRule {
  * URL instead of base64 would have the app fetch a host the provider named, from
  * inside its own network. A descriptor may describe. It may never weaken a rule.
  */
+/**
+ * How a provider turns speech into words.
+ *
+ * Absent, the OpenAI contract is assumed: multipart to `/audio/transcriptions`
+ * on the connection's own root, and the text comes back in the answer. That is
+ * what every compatible endpoint does and it needs saying nowhere.
+ *
+ * Present, a provider is departing from it, and there are two ways they do. The
+ * route may hang off a different root than chat does, which is Infomaniak's case
+ * for the second time (their catalogue is on one API version and half their
+ * routes on another). Or the route may be asynchronous: it answers with a handle
+ * and the words arrive later, from somewhere else.
+ *
+ * What is deliberately *not* here: the size ceiling, the accepted audio types,
+ * how long the app is willing to wait and how often it asks. Those are the
+ * defences, and they are the app's. A descriptor says where to knock and how to
+ * read the answer. It may never say how patient to be.
+ */
+export interface Transcription {
+	/** Where the audio goes, built from the connection's roots. */
+	url: (roots: { baseUrl: string }) => string;
+	/**
+	 * For a provider that hands back a receipt instead of the words.
+	 *
+	 * `url` reads the accepted response and says where to ask again. `read` is
+	 * given each answer and says whether it is finished, and with what. Neither
+	 * decides when to stop asking: that is a defence, and it lives in the app.
+	 */
+	poll?: {
+		url: (roots: { baseUrl: string }, accepted: unknown) => string;
+		/**
+		 * `done` with the words when they are there, `failed` when the job says it
+		 * will never produce any, and neither while it is still running. A shape
+		 * nobody recognises reads as "still running", because the alternative is
+		 * calling an unfamiliar answer a failure and throwing away what somebody
+		 * said. That is what the app's ceiling is for.
+		 */
+		read: (body: unknown) => { done: boolean; text?: string; failed?: string };
+	};
+}
+
 export interface ReferenceImages {
 	/** At most this many pictures, from the provider's own documentation. */
 	max: number;
@@ -166,6 +207,8 @@ export interface ProviderDescriptor {
 	images?: ImageOptions;
 	/** Reference pictures, for a provider where every image model agrees. */
 	references?: ReferenceImages;
+	/** How this provider transcribes, when it does not do it the usual way. */
+	transcription?: Transcription;
 	/**
 	 * Models this provider serves that its catalogue does not list.
 	 *

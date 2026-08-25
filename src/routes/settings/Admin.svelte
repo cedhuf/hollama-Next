@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Bell, PlayCircle, RotateCcw } from '@lucide/svelte';
+	import { Bell, ListChecks, PlayCircle, RotateCcw } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -10,7 +10,7 @@
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import { GITHUB_RELEASES_URL } from '$lib/github';
 	import { settingsStore } from '$lib/localStorage';
-	import { settingsModalOpen, welcomeOpen } from '$lib/stores/modal';
+	import { settingsModalOpen, welcomeOpen, welcomeShowAll } from '$lib/stores/modal';
 	import { toast } from '$lib/toast';
 
 	import SettingsField from './SettingsField.svelte';
@@ -88,6 +88,8 @@
 	let imagesSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let imagesShareEnabled = $state(false);
 	let compactShareEnabled = $state(false);
+	let voiceSharing = $state<'off' | 'locked' | 'overridable'>('off');
+	let voiceShareEnabled = $state(false);
 	let samplingSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let samplingShareEnabled = $state(false);
 	/**
@@ -157,6 +159,27 @@
 		});
 	}
 
+	/**
+	 * Sharing the transcription setup.
+	 *
+	 * The model is chosen in Settings, by everyone including whoever is looking at
+	 * this tab, and what is published is their choice. On most instances the
+	 * administrator is the only person who could have set one up at all, so this is
+	 * the difference between a feature everybody has and one only they have.
+	 */
+	function syncVoiceShare() {
+		voiceSharing = voiceShareEnabled ? (voiceSharing === 'off' ? 'locked' : voiceSharing) : 'off';
+		saveVoice();
+	}
+
+	async function saveVoice() {
+		await api('/api/admin/config', 'PUT', {
+			voiceSharing,
+			voiceInput: $settingsStore.voiceInput,
+			voiceModel: $settingsStore.voiceModel ?? ''
+		});
+	}
+
 	function syncCompactShare() {
 		compactSharing = compactShareEnabled
 			? compactSharing === 'off'
@@ -209,6 +232,8 @@
 			imagesSharing = config.imagesSharing ?? 'off';
 			imagesShareEnabled = imagesSharing !== 'off';
 			compactShareEnabled = compactSharing !== 'off';
+			voiceSharing = config.voiceSharing ?? 'off';
+			voiceShareEnabled = voiceSharing !== 'off';
 			samplingSharing = config.samplingSharing ?? 'off';
 			samplingShareEnabled = samplingSharing !== 'off';
 			servers = serverList as SystemServer[];
@@ -458,6 +483,22 @@
 	}
 
 	function replayWelcome() {
+		$welcomeShowAll = false;
+		$settingsStore.welcomeComplete = false;
+		$settingsModalOpen = false;
+		$welcomeOpen = true;
+	}
+
+	/**
+	 * The same tour with nothing left out.
+	 *
+	 * It composes itself for whoever opens it, so an account that already has a
+	 * connection and a name never sees those two steps again. This forces them all
+	 * in, for checking the wording and the layout without emptying an account to
+	 * get at them.
+	 */
+	function replayEveryStep() {
+		$welcomeShowAll = true;
 		$settingsStore.welcomeComplete = false;
 		$settingsModalOpen = false;
 		$welcomeOpen = true;
@@ -648,6 +689,24 @@
 		{/if}
 	</SettingsSection>
 
+	<!-- Voice sharing. Same shape as the rest: the model is chosen in Settings, and
+	     the only decision here is who else gets it. -->
+	<SettingsSection title={$LL.voiceInput()} description={$LL.voiceAdminDescription()} card>
+		<FieldCheckbox
+			label={$LL.shareVoice()}
+			bind:checked={voiceShareEnabled}
+			onChange={syncVoiceShare}
+		/>
+		{#if voiceShareEnabled}
+			<Select bind:value={voiceSharing} options={sharingOptions} onChange={saveVoice} />
+			<span class="text-muted text-xs">
+				{$LL.sharingLabel()}: {$settingsStore.voiceInput
+					? ($settingsStore.voiceModel ?? $LL.none())
+					: $LL.off()}
+			</span>
+		{/if}
+	</SettingsSection>
+
 	<!-- Sampling sharing. No fields: the numbers live in Settings, the same ones
 	     this administrator uses, and the only decision here is who else gets them. -->
 	<SettingsSection title={$LL.sampling()} description={$LL.samplingAdminDescription()} card>
@@ -797,6 +856,21 @@
 			</div>
 			<Button variant="outline" disabled={resettingOnboarding} onclick={askForOnboarding}>
 				<RotateCcw class="base-icon" />
+				{$LL.launch()}
+			</Button>
+		</div>
+
+		<!-- The tour as it composes itself is the row above; this is the whole of it,
+		     for looking at what a first arrival would never see twice. -->
+		<div
+			class="border-shade-3 mt-2 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+		>
+			<div class="flex min-w-0 flex-col">
+				<span class="text-active font-medium">{$LL.tourEveryStep()}</span>
+				<span class="text-muted text-xs">{$LL.tourEveryStepHelp()}</span>
+			</div>
+			<Button variant="outline" onclick={replayEveryStep}>
+				<ListChecks class="base-icon" />
 				{$LL.launch()}
 			</Button>
 		</div>

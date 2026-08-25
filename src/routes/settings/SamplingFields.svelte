@@ -136,7 +136,6 @@
 			max: 1,
 			step: 0.01
 		},
-		{ key: 'tfs_z', label: $LL.tfsZ(), kind: 'number', min: 1, step: 0.1 },
 		{
 			key: 'typical_p',
 			label: $LL.typicalP(),

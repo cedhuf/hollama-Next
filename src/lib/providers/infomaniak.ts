@@ -25,6 +25,7 @@ import type { ProviderDescriptor } from './types';
 /** Everything but the product id, which the connection form asks for. */
 export const INFOMANIAK_URL_TEMPLATE = 'https://api.infomaniak.com/2/ai/{productId}/openai/v1';
 const IMAGE_URL_TEMPLATE = 'https://api.infomaniak.com/1/ai/{productId}/openai';
+const RESULTS_URL_TEMPLATE = 'https://api.infomaniak.com/1/ai/{productId}/results';
 const PHOTO_MAKER_URL_TEMPLATE =
 	'https://api.infomaniak.com/1/ai/{productId}/images/generations/photo_maker';
 
@@ -63,6 +64,12 @@ export function infomaniakPhotoMakerUrl(productId: string): string {
 	return id ? PHOTO_MAKER_URL_TEMPLATE.replace('{productId}', id) : '';
 }
 
+/** Where an asynchronous job's answer is collected, from the same product id. */
+export function infomaniakResultsUrl(productId: string): string {
+	const id = productId.trim();
+	return id ? RESULTS_URL_TEMPLATE.replace('{productId}', id) : '';
+}
+
 export const infomaniak: ProviderDescriptor = {
 	id: 'infomaniak',
 	name: 'Infomaniak',
@@ -93,6 +100,57 @@ export const infomaniak: ProviderDescriptor = {
 	// it shows up in Models and pricing, it is priced per minute, it is shared or
 	// not, and the credit limit refuses it unpriced exactly like everything else.
 	extraModels: [INFOMANIAK_PHOTO_MAKER],
+	/**
+	 * Transcription, which departs from the usual contract twice over.
+	 *
+	 * It is on version 1 under `/openai`, like drawing and unlike chat, so the
+	 * connection's own root does not reach it. And it is asynchronous: the POST
+	 * answers with a batch id, and the words are collected from `/results` once
+	 * the job is done. Their catalogue lists the model on version 2 all the same,
+	 * which is why one shows up in the picker and the obvious address 404s.
+	 */
+	transcription: {
+		url: ({ baseUrl }) =>
+			`${infomaniakImageBaseUrl(infomaniakProductId(baseUrl))}/audio/transcriptions`,
+		poll: {
+			url: ({ baseUrl }, accepted) => {
+				const batch = (accepted as { batch_id?: string })?.batch_id ?? '';
+				return `${infomaniakResultsUrl(infomaniakProductId(baseUrl))}/${batch}`;
+			},
+			/**
+			 * Their job envelope.
+			 *
+			 * `status` is at the root, and `data` is a *string* holding the JSON with
+			 * the words in it, rather than the object it looks like. There is also a
+			 * `url` to download the same thing, which is a second round trip for a
+			 * payload already in hand.
+			 *
+			 * Their transcription arrives with a leading space. The app trims.
+			 */
+			read: (body) => {
+				const job = body as { status?: unknown; data?: unknown };
+				const status = String(job?.status ?? '').toLowerCase();
+				if (['error', 'failed', 'failure', 'canceled', 'cancelled'].includes(status)) {
+					return { done: false, failed: status };
+				}
+				if (status && !['success', 'succeeded', 'done', 'completed'].includes(status)) {
+					return { done: false };
+				}
+
+				let payload: unknown = job?.data;
+				if (typeof payload === 'string') {
+					try {
+						payload = JSON.parse(payload);
+					} catch {
+						// Not JSON: then it is the transcript itself, which some formats are.
+						return { done: true, text: payload as string };
+					}
+				}
+				const text = (payload as { text?: unknown })?.text;
+				return typeof text === 'string' ? { done: true, text } : { done: false };
+			}
+		}
+	},
 	modelRules: [
 		{
 			matches: [INFOMANIAK_PHOTO_MAKER],

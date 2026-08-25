@@ -260,6 +260,9 @@ const fr = extendDictionary(en, {
 		'Pour cette conversation uniquement. Un champ vide utilise votre valeur des réglages.',
 	samplingFieldCount: '{count:number} champ{{s}} défini{{s}}',
 	samplingNothingSet: 'rien de défini : chaque fournisseur garde les siennes',
+	shareVoice: 'Partager la configuration de transcription',
+	voiceAdminDescription:
+		'Quel modèle transcrit, et si la parole est proposée. En général, la seule personne qui a pu en configurer un est celle qui lit ceci.',
 	shareSampling: "Partager vos réglages d'échantillonnage",
 	save: 'Enregistrer',
 	search: 'Rechercher',
@@ -290,7 +293,6 @@ const fr = extendDictionary(en, {
 	fromMySettings: 'selon mes réglages',
 	systemPrompt: 'Invite système',
 	temperature: 'Température',
-	tfsZ: 'TFS Z',
 	topK: 'Top K',
 	topP: 'Top P',
 	tryingToConnectNotLocalhost:
@@ -438,6 +440,41 @@ const fr = extendDictionary(en, {
 	offerInstall: 'Proposer d’installer l’application de temps en temps',
 	offerInstallHelp:
 		'Installée, elle s’ouvre sans l’habillage du navigateur, garde sa propre icône et démarre sur son écran. La proposition apparaît à la première visite puis seulement de loin en loin ; elle est aussi accessible depuis À propos à tout moment.',
+	yourName: 'Votre nom',
+	managedByIdentityProvider: "Géré par votre fournisseur d'identité.",
+	alpha: 'alpha',
+	mobileTabHome: 'Accueil',
+	mobileTabProfile: 'Vous',
+	mobileNoSessions: 'Rien encore. Dites quelque chose.',
+	mobileTabChats: 'Discussions',
+	mobileVoice: 'Parler',
+	mobileHeroTitle: 'Parlez, ne tapez pas',
+	mobileHeroBody:
+		"Dites-le à voix haute, il l'écrit. Mains libres, en marchant, ou quand le clavier est ce qui vous ralentit.",
+	mobileHello: 'Bonjour',
+	mobileHelloName: 'Bonjour, {name:string}',
+	mobileHelloBody: "On fait quoi aujourd'hui ?",
+	mobileStartVoice: 'Lui parler',
+	mobileStartVoiceBody: 'Mains libres, à voix haute.',
+	mobileStartChat: 'Nouvelle conversation',
+	mobileStartImage: 'Dessiner',
+	mobileRecent: 'Récent',
+	voiceInput: 'Saisie vocale',
+	voiceInputHelp:
+		"Parlez au lieu de taper. Ce que vous dites part vers un modèle de transcription, et le texte arrive dans le champ pour que vous le relisiez avant l'envoi.",
+	voiceModel: 'Modèle de transcription',
+	voiceModelHelp:
+		'Seuls les modèles marqués comme audio apparaissent ici. Si la liste est vide, marquez-en un dans Modèles et tarifs, sur sa connexion.',
+	voiceNoModel: 'Aucun modèle de transcription configuré.',
+	voiceNoMicrophone: 'Pas de micro, ou permission refusée.',
+	voiceFailed: "La transcription n'a pas abouti",
+	voiceHeardNothing: 'Rien entendu.',
+	voiceTranscribing: 'Transcription',
+	voiceIdle: 'Touchez pour parler.',
+	voiceListening: "J'écoute.",
+	simplifiedMobileUI: 'Interface mobile simplifiée',
+	simplifiedMobileUIHelp:
+		"Une seconde interface, pensée pour le téléphone et pour la voix : une chose à la fois, une barre d'onglets, pas de barre latérale. En construction au grand jour, et celle-ci ne change pas.",
 	administrator: 'Administrateur',
 	user: 'Utilisateur',
 
@@ -685,6 +722,14 @@ const fr = extendDictionary(en, {
 	tourImagesTitle: 'Et il dessine, aussi',
 	tourImagesBody:
 		"Décrivez une image et elle apparaît dans une galerie qui n'appartient qu'à vous. Un modèle de texte peut d'abord réécrire votre description en un prompt plus riche, et vous voyez toujours ce qu'il a écrit avant que quoi que ce soit soit dessiné.",
+	tourAllowanceTitle: 'Votre enveloppe',
+	tourServersTitle: 'De quoi réfléchir',
+	tourServersBody:
+		'Llooma parle à des modèles, il ne les fait pas tourner. Connectez un fournisseur maintenant et tout le reste de cette visite aura de quoi répondre.',
+	tourProfileTitle: 'Votre nom',
+	tourProfileBody:
+		"C'est ainsi que l'app vous appelle, et une persona aussi. Rien ne quitte cette instance.",
+	tourRestoreBackup: "J'ai une sauvegarde à restaurer",
 	tourStart: 'Commencer à discuter',
 	tourLineNova: 'Demandez-moi ce que vous voulez. Je fais court.',
 	tourLineLou: 'Journée difficile ? Je vous écoute.',
@@ -695,11 +740,6 @@ const fr = extendDictionary(en, {
 	tourSaysMaite:
 		'Des protéines et un vrai féculent. Œufs, riz, ce qui est ouvert. Dix minutes, pas plus.',
 	tourSaysMax: "Dans l'heure si vous pouvez, et buvez plus que vous ne le pensez.",
-	onboardingWelcome: 'Bienvenue dans {app}',
-	onboardingWelcomeBody: 'Configurons tout ça. Ça prend une minute.',
-	onboardingDone: 'Tout est prêt',
-	onboardingDoneBody: 'Vous pourrez changer tout cela plus tard dans les Réglages.',
-	onboardingEnter: 'Entrer dans {app}',
 	tourLibraryTitle: 'Votre bibliothèque',
 	tourLibraryBody:
 		"Les personas n'y sont pas seuls. Deux autres choses que vous écrivez une fois et réutilisez partout.",
@@ -904,6 +944,11 @@ const fr = extendDictionary(en, {
 	usageNothingYet: 'Rien de dépensé pour l’instant',
 	usageToday: 'Aujourd’hui',
 	usageTokens: '{tokens} jetons',
+	allowanceUnlimited: 'Aucun plafond',
+	allowanceUnlimitedBody: 'Servez-vous.',
+	allowancePerMonth: 'chaque mois',
+	allowancePerWeek: 'chaque semaine',
+	allowancePerDay: 'chaque jour',
 	usageTitle: 'Consommation',
 	usageOfLimit: '{spent} sur {limit}',
 	usageUnlimited: 'Sans limite',
@@ -942,6 +987,9 @@ const fr = extendDictionary(en, {
 	developerOptions: 'Options développeur',
 	developerOptionsDescription:
 		"Outils pour vérifier des parcours qu'un utilisateur ne voit normalement qu'une fois.",
+	tourEveryStep: 'Visite guidée, toutes les étapes',
+	tourEveryStepHelp:
+		"La joue avec les étapes connexion et profil forcées, qu'un compte déjà rempli ne voit jamais.",
 	newUserOnboarding: 'Accueil des nouveaux utilisateurs',
 	newUserOnboardingDescription:
 		"Rejoue la visite de bienvenue. Ferme cette fenêtre ; la terminer remet la visite à l'état « vue ».",

@@ -997,6 +997,14 @@ type RootTranslation = {
 	 */
 	samplingNothingSet: string
 	/**
+	 * S​h​a​r​e​ ​t​h​e​ ​t​r​a​n​s​c​r​i​p​t​i​o​n​ ​s​e​t​u​p
+	 */
+	shareVoice: string
+	/**
+	 * W​h​i​c​h​ ​m​o​d​e​l​ ​t​r​a​n​s​c​r​i​b​e​s​,​ ​a​n​d​ ​w​h​e​t​h​e​r​ ​s​p​e​a​k​i​n​g​ ​i​s​ ​o​f​f​e​r​e​d​ ​a​t​ ​a​l​l​.​ ​U​s​u​a​l​l​y​ ​t​h​e​ ​o​n​l​y​ ​p​e​r​s​o​n​ ​w​h​o​ ​c​o​u​l​d​ ​h​a​v​e​ ​s​e​t​ ​o​n​e​ ​u​p​ ​i​s​ ​t​h​e​ ​o​n​e​ ​r​e​a​d​i​n​g​ ​t​h​i​s​.
+	 */
+	voiceAdminDescription: string
+	/**
 	 * S​h​a​r​e​ ​y​o​u​r​ ​s​a​m​p​l​i​n​g​ ​s​e​t​t​i​n​g​s
 	 */
 	shareSampling: string
@@ -1108,10 +1116,6 @@ type RootTranslation = {
 	 * T​e​m​p​e​r​a​t​u​r​e
 	 */
 	temperature: string
-	/**
-	 * T​F​S​ ​Z
-	 */
-	tfsZ: string
 	/**
 	 * T​o​p​ ​K
 	 */
@@ -1682,6 +1686,131 @@ type RootTranslation = {
 	 * I​n​s​t​a​l​l​e​d​,​ ​i​t​ ​r​u​n​s​ ​w​i​t​h​o​u​t​ ​b​r​o​w​s​e​r​ ​c​h​r​o​m​e​,​ ​k​e​e​p​s​ ​i​t​s​ ​o​w​n​ ​i​c​o​n​ ​a​n​d​ ​s​t​a​r​t​s​ ​o​n​ ​i​t​s​ ​o​w​n​ ​s​c​r​e​e​n​.​ ​T​h​e​ ​o​f​f​e​r​ ​a​p​p​e​a​r​s​ ​o​n​ ​t​h​e​ ​f​i​r​s​t​ ​v​i​s​i​t​ ​a​n​d​ ​t​h​e​n​ ​o​n​l​y​ ​o​c​c​a​s​i​o​n​a​l​l​y​;​ ​i​t​ ​c​a​n​ ​a​l​s​o​ ​b​e​ ​o​p​e​n​e​d​ ​f​r​o​m​ ​A​b​o​u​t​ ​a​t​ ​a​n​y​ ​t​i​m​e​.
 	 */
 	offerInstallHelp: string
+	/**
+	 * Y​o​u​r​ ​n​a​m​e
+	 */
+	yourName: string
+	/**
+	 * M​a​n​a​g​e​d​ ​b​y​ ​y​o​u​r​ ​i​d​e​n​t​i​t​y​ ​p​r​o​v​i​d​e​r​.
+	 */
+	managedByIdentityProvider: string
+	/**
+	 * a​l​p​h​a
+	 */
+	alpha: string
+	/**
+	 * H​o​m​e
+	 */
+	mobileTabHome: string
+	/**
+	 * Y​o​u
+	 */
+	mobileTabProfile: string
+	/**
+	 * N​o​t​h​i​n​g​ ​y​e​t​.​ ​S​a​y​ ​s​o​m​e​t​h​i​n​g​.
+	 */
+	mobileNoSessions: string
+	/**
+	 * C​h​a​t​s
+	 */
+	mobileTabChats: string
+	/**
+	 * T​a​l​k
+	 */
+	mobileVoice: string
+	/**
+	 * T​a​l​k​,​ ​d​o​ ​n​o​t​ ​t​y​p​e
+	 */
+	mobileHeroTitle: string
+	/**
+	 * S​a​y​ ​i​t​ ​o​u​t​ ​l​o​u​d​ ​a​n​d​ ​i​t​ ​w​r​i​t​e​s​ ​i​t​ ​d​o​w​n​.​ ​H​a​n​d​s​ ​f​r​e​e​,​ ​o​n​ ​t​h​e​ ​m​o​v​e​,​ ​o​r​ ​w​h​e​n​ ​t​h​e​ ​k​e​y​b​o​a​r​d​ ​i​s​ ​t​h​e​ ​s​l​o​w​ ​p​a​r​t​.
+	 */
+	mobileHeroBody: string
+	/**
+	 * H​e​l​l​o
+	 */
+	mobileHello: string
+	/**
+	 * H​e​l​l​o​,​ ​{​n​a​m​e​}
+	 * @param {string} name
+	 */
+	mobileHelloName: RequiredParams<'name'>
+	/**
+	 * W​h​a​t​ ​a​r​e​ ​w​e​ ​d​o​i​n​g​ ​t​o​d​a​y​?
+	 */
+	mobileHelloBody: string
+	/**
+	 * T​a​l​k​ ​t​o​ ​i​t
+	 */
+	mobileStartVoice: string
+	/**
+	 * H​a​n​d​s​ ​f​r​e​e​,​ ​o​u​t​ ​l​o​u​d​.
+	 */
+	mobileStartVoiceBody: string
+	/**
+	 * N​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n
+	 */
+	mobileStartChat: string
+	/**
+	 * D​r​a​w​ ​s​o​m​e​t​h​i​n​g
+	 */
+	mobileStartImage: string
+	/**
+	 * R​e​c​e​n​t
+	 */
+	mobileRecent: string
+	/**
+	 * V​o​i​c​e​ ​i​n​p​u​t
+	 */
+	voiceInput: string
+	/**
+	 * S​p​e​a​k​ ​i​n​s​t​e​a​d​ ​o​f​ ​t​y​p​i​n​g​.​ ​W​h​a​t​ ​y​o​u​ ​s​a​y​ ​i​s​ ​s​e​n​t​ ​t​o​ ​a​ ​t​r​a​n​s​c​r​i​p​t​i​o​n​ ​m​o​d​e​l​,​ ​a​n​d​ ​t​h​e​ ​w​o​r​d​s​ ​l​a​n​d​ ​i​n​ ​t​h​e​ ​c​o​m​p​o​s​e​r​ ​f​o​r​ ​y​o​u​ ​t​o​ ​c​h​e​c​k​ ​b​e​f​o​r​e​ ​t​h​e​y​ ​g​o​.
+	 */
+	voiceInputHelp: string
+	/**
+	 * T​r​a​n​s​c​r​i​p​t​i​o​n​ ​m​o​d​e​l
+	 */
+	voiceModel: string
+	/**
+	 * O​n​l​y​ ​m​o​d​e​l​s​ ​m​a​r​k​e​d​ ​a​s​ ​a​u​d​i​o​ ​a​p​p​e​a​r​ ​h​e​r​e​.​ ​I​f​ ​t​h​e​ ​l​i​s​t​ ​i​s​ ​e​m​p​t​y​,​ ​m​a​r​k​ ​o​n​e​ ​i​n​ ​M​o​d​e​l​s​ ​a​n​d​ ​p​r​i​c​e​s​ ​o​n​ ​i​t​s​ ​c​o​n​n​e​c​t​i​o​n​.
+	 */
+	voiceModelHelp: string
+	/**
+	 * N​o​ ​t​r​a​n​s​c​r​i​p​t​i​o​n​ ​m​o​d​e​l​ ​i​s​ ​s​e​t​ ​u​p​.
+	 */
+	voiceNoModel: string
+	/**
+	 * N​o​ ​m​i​c​r​o​p​h​o​n​e​,​ ​o​r​ ​p​e​r​m​i​s​s​i​o​n​ ​r​e​f​u​s​e​d​.
+	 */
+	voiceNoMicrophone: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​t​r​a​n​s​c​r​i​b​e​ ​t​h​a​t
+	 */
+	voiceFailed: string
+	/**
+	 * N​o​t​h​i​n​g​ ​w​a​s​ ​h​e​a​r​d​.
+	 */
+	voiceHeardNothing: string
+	/**
+	 * T​r​a​n​s​c​r​i​b​i​n​g
+	 */
+	voiceTranscribing: string
+	/**
+	 * T​a​p​ ​t​o​ ​s​p​e​a​k​.
+	 */
+	voiceIdle: string
+	/**
+	 * L​i​s​t​e​n​i​n​g​.
+	 */
+	voiceListening: string
+	/**
+	 * S​i​m​p​l​i​f​i​e​d​ ​m​o​b​i​l​e​ ​i​n​t​e​r​f​a​c​e
+	 */
+	simplifiedMobileUI: string
+	/**
+	 * A​ ​s​e​c​o​n​d​ ​i​n​t​e​r​f​a​c​e​,​ ​b​u​i​l​t​ ​f​o​r​ ​a​ ​p​h​o​n​e​ ​a​n​d​ ​f​o​r​ ​t​h​e​ ​v​o​i​c​e​:​ ​o​n​e​ ​t​h​i​n​g​ ​a​t​ ​a​ ​t​i​m​e​,​ ​a​ ​t​a​b​ ​b​a​r​,​ ​a​n​d​ ​n​o​ ​s​i​d​e​b​a​r​.​ ​B​e​i​n​g​ ​b​u​i​l​t​ ​i​n​ ​t​h​e​ ​o​p​e​n​,​ ​a​n​d​ ​t​h​i​s​ ​o​n​e​ ​i​s​ ​u​n​c​h​a​n​g​e​d​.
+	 */
+	simplifiedMobileUIHelp: string
 	/**
 	 * A​d​m​i​n​i​s​t​r​a​t​o​r
 	 */
@@ -2451,6 +2580,30 @@ type RootTranslation = {
 	 */
 	tourImagesBody: string
 	/**
+	 * Y​o​u​r​ ​a​l​l​o​w​a​n​c​e
+	 */
+	tourAllowanceTitle: string
+	/**
+	 * S​o​m​e​w​h​e​r​e​ ​t​o​ ​t​h​i​n​k
+	 */
+	tourServersTitle: string
+	/**
+	 * L​l​o​o​m​a​ ​t​a​l​k​s​ ​t​o​ ​m​o​d​e​l​s​,​ ​i​t​ ​d​o​e​s​ ​n​o​t​ ​r​u​n​ ​t​h​e​m​.​ ​C​o​n​n​e​c​t​ ​o​n​e​ ​p​r​o​v​i​d​e​r​ ​n​o​w​ ​a​n​d​ ​e​v​e​r​y​t​h​i​n​g​ ​e​l​s​e​ ​i​n​ ​t​h​i​s​ ​t​o​u​r​ ​h​a​s​ ​s​o​m​e​t​h​i​n​g​ ​t​o​ ​a​n​s​w​e​r​ ​i​t​.
+	 */
+	tourServersBody: string
+	/**
+	 * Y​o​u​r​ ​n​a​m​e
+	 */
+	tourProfileTitle: string
+	/**
+	 * I​t​ ​i​s​ ​h​o​w​ ​t​h​e​ ​a​p​p​ ​a​d​d​r​e​s​s​e​s​ ​y​o​u​,​ ​a​n​d​ ​h​o​w​ ​a​ ​p​e​r​s​o​n​a​ ​d​o​e​s​.​ ​N​o​t​h​i​n​g​ ​l​e​a​v​e​s​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	tourProfileBody: string
+	/**
+	 * I​ ​h​a​v​e​ ​a​ ​b​a​c​k​u​p​ ​t​o​ ​r​e​s​t​o​r​e
+	 */
+	tourRestoreBackup: string
+	/**
 	 * S​t​a​r​t​ ​c​h​a​t​t​i​n​g
 	 */
 	tourStart: string
@@ -2486,28 +2639,6 @@ type RootTranslation = {
 	 * W​i​t​h​i​n​ ​t​h​e​ ​h​o​u​r​ ​i​f​ ​y​o​u​ ​c​a​n​,​ ​a​n​d​ ​d​r​i​n​k​ ​m​o​r​e​ ​t​h​a​n​ ​y​o​u​ ​t​h​i​n​k​ ​y​o​u​ ​n​e​e​d​.
 	 */
 	tourSaysMax: string
-	/**
-	 * W​e​l​c​o​m​e​ ​t​o​ ​{​a​p​p​}
-	 * @param {string} app
-	 */
-	onboardingWelcome: RequiredParams<'app'>
-	/**
-	 * L​e​t​'​s​ ​s​e​t​ ​t​h​i​n​g​s​ ​u​p​.​ ​I​t​ ​o​n​l​y​ ​t​a​k​e​s​ ​a​ ​m​i​n​u​t​e​.
-	 */
-	onboardingWelcomeBody: string
-	/**
-	 * Y​o​u​'​r​e​ ​a​l​l​ ​s​e​t
-	 */
-	onboardingDone: string
-	/**
-	 * Y​o​u​ ​c​a​n​ ​c​h​a​n​g​e​ ​a​n​y​ ​o​f​ ​t​h​i​s​ ​l​a​t​e​r​ ​i​n​ ​S​e​t​t​i​n​g​s​.
-	 */
-	onboardingDoneBody: string
-	/**
-	 * E​n​t​e​r​ ​{​a​p​p​}
-	 * @param {string} app
-	 */
-	onboardingEnter: RequiredParams<'app'>
 	/**
 	 * Y​o​u​r​ ​l​i​b​r​a​r​y
 	 */
@@ -3175,6 +3306,26 @@ type RootTranslation = {
 	 */
 	usageTokens: RequiredParams<'tokens'>
 	/**
+	 * N​o​ ​c​e​i​l​i​n​g​ ​h​e​r​e
+	 */
+	allowanceUnlimited: string
+	/**
+	 * H​e​l​p​ ​y​o​u​r​s​e​l​f​.
+	 */
+	allowanceUnlimitedBody: string
+	/**
+	 * e​v​e​r​y​ ​m​o​n​t​h
+	 */
+	allowancePerMonth: string
+	/**
+	 * e​v​e​r​y​ ​w​e​e​k
+	 */
+	allowancePerWeek: string
+	/**
+	 * e​v​e​r​y​ ​d​a​y
+	 */
+	allowancePerDay: string
+	/**
 	 * U​s​a​g​e
 	 */
 	usageTitle: string
@@ -3316,6 +3467,14 @@ type RootTranslation = {
 	 * T​o​o​l​s​ ​f​o​r​ ​c​h​e​c​k​i​n​g​ ​f​l​o​w​s​ ​a​ ​u​s​e​r​ ​n​o​r​m​a​l​l​y​ ​o​n​l​y​ ​s​e​e​s​ ​o​n​c​e​.
 	 */
 	developerOptionsDescription: string
+	/**
+	 * W​e​l​c​o​m​e​ ​t​o​u​r​,​ ​e​v​e​r​y​ ​s​t​e​p
+	 */
+	tourEveryStep: string
+	/**
+	 * P​l​a​y​s​ ​i​t​ ​w​i​t​h​ ​t​h​e​ ​c​o​n​n​e​c​t​i​o​n​ ​a​n​d​ ​p​r​o​f​i​l​e​ ​s​t​e​p​s​ ​f​o​r​c​e​d​ ​i​n​,​ ​w​h​i​c​h​ ​a​ ​f​i​l​l​e​d​-​i​n​ ​a​c​c​o​u​n​t​ ​n​e​v​e​r​ ​s​e​e​s​.
+	 */
+	tourEveryStepHelp: string
 	/**
 	 * N​e​w​-​u​s​e​r​ ​o​n​b​o​a​r​d​i​n​g
 	 */
@@ -4631,6 +4790,14 @@ export type TranslationFunctions = {
 	 */
 	samplingNothingSet: () => LocalizedString
 	/**
+	 * Share the transcription setup
+	 */
+	shareVoice: () => LocalizedString
+	/**
+	 * Which model transcribes, and whether speaking is offered at all. Usually the only person who could have set one up is the one reading this.
+	 */
+	voiceAdminDescription: () => LocalizedString
+	/**
 	 * Share your sampling settings
 	 */
 	shareSampling: () => LocalizedString
@@ -4742,10 +4909,6 @@ export type TranslationFunctions = {
 	 * Temperature
 	 */
 	temperature: () => LocalizedString
-	/**
-	 * TFS Z
-	 */
-	tfsZ: () => LocalizedString
 	/**
 	 * Top K
 	 */
@@ -5304,6 +5467,130 @@ export type TranslationFunctions = {
 	 * Installed, it runs without browser chrome, keeps its own icon and starts on its own screen. The offer appears on the first visit and then only occasionally; it can also be opened from About at any time.
 	 */
 	offerInstallHelp: () => LocalizedString
+	/**
+	 * Your name
+	 */
+	yourName: () => LocalizedString
+	/**
+	 * Managed by your identity provider.
+	 */
+	managedByIdentityProvider: () => LocalizedString
+	/**
+	 * alpha
+	 */
+	alpha: () => LocalizedString
+	/**
+	 * Home
+	 */
+	mobileTabHome: () => LocalizedString
+	/**
+	 * You
+	 */
+	mobileTabProfile: () => LocalizedString
+	/**
+	 * Nothing yet. Say something.
+	 */
+	mobileNoSessions: () => LocalizedString
+	/**
+	 * Chats
+	 */
+	mobileTabChats: () => LocalizedString
+	/**
+	 * Talk
+	 */
+	mobileVoice: () => LocalizedString
+	/**
+	 * Talk, do not type
+	 */
+	mobileHeroTitle: () => LocalizedString
+	/**
+	 * Say it out loud and it writes it down. Hands free, on the move, or when the keyboard is the slow part.
+	 */
+	mobileHeroBody: () => LocalizedString
+	/**
+	 * Hello
+	 */
+	mobileHello: () => LocalizedString
+	/**
+	 * Hello, {name}
+	 */
+	mobileHelloName: (arg: { name: string }) => LocalizedString
+	/**
+	 * What are we doing today?
+	 */
+	mobileHelloBody: () => LocalizedString
+	/**
+	 * Talk to it
+	 */
+	mobileStartVoice: () => LocalizedString
+	/**
+	 * Hands free, out loud.
+	 */
+	mobileStartVoiceBody: () => LocalizedString
+	/**
+	 * New conversation
+	 */
+	mobileStartChat: () => LocalizedString
+	/**
+	 * Draw something
+	 */
+	mobileStartImage: () => LocalizedString
+	/**
+	 * Recent
+	 */
+	mobileRecent: () => LocalizedString
+	/**
+	 * Voice input
+	 */
+	voiceInput: () => LocalizedString
+	/**
+	 * Speak instead of typing. What you say is sent to a transcription model, and the words land in the composer for you to check before they go.
+	 */
+	voiceInputHelp: () => LocalizedString
+	/**
+	 * Transcription model
+	 */
+	voiceModel: () => LocalizedString
+	/**
+	 * Only models marked as audio appear here. If the list is empty, mark one in Models and prices on its connection.
+	 */
+	voiceModelHelp: () => LocalizedString
+	/**
+	 * No transcription model is set up.
+	 */
+	voiceNoModel: () => LocalizedString
+	/**
+	 * No microphone, or permission refused.
+	 */
+	voiceNoMicrophone: () => LocalizedString
+	/**
+	 * Could not transcribe that
+	 */
+	voiceFailed: () => LocalizedString
+	/**
+	 * Nothing was heard.
+	 */
+	voiceHeardNothing: () => LocalizedString
+	/**
+	 * Transcribing
+	 */
+	voiceTranscribing: () => LocalizedString
+	/**
+	 * Tap to speak.
+	 */
+	voiceIdle: () => LocalizedString
+	/**
+	 * Listening.
+	 */
+	voiceListening: () => LocalizedString
+	/**
+	 * Simplified mobile interface
+	 */
+	simplifiedMobileUI: () => LocalizedString
+	/**
+	 * A second interface, built for a phone and for the voice: one thing at a time, a tab bar, and no sidebar. Being built in the open, and this one is unchanged.
+	 */
+	simplifiedMobileUIHelp: () => LocalizedString
 	/**
 	 * Administrator
 	 */
@@ -6057,6 +6344,30 @@ export type TranslationFunctions = {
 	 */
 	tourImagesBody: () => LocalizedString
 	/**
+	 * Your allowance
+	 */
+	tourAllowanceTitle: () => LocalizedString
+	/**
+	 * Somewhere to think
+	 */
+	tourServersTitle: () => LocalizedString
+	/**
+	 * Llooma talks to models, it does not run them. Connect one provider now and everything else in this tour has something to answer it.
+	 */
+	tourServersBody: () => LocalizedString
+	/**
+	 * Your name
+	 */
+	tourProfileTitle: () => LocalizedString
+	/**
+	 * It is how the app addresses you, and how a persona does. Nothing leaves this instance.
+	 */
+	tourProfileBody: () => LocalizedString
+	/**
+	 * I have a backup to restore
+	 */
+	tourRestoreBackup: () => LocalizedString
+	/**
 	 * Start chatting
 	 */
 	tourStart: () => LocalizedString
@@ -6092,26 +6403,6 @@ export type TranslationFunctions = {
 	 * Within the hour if you can, and drink more than you think you need.
 	 */
 	tourSaysMax: () => LocalizedString
-	/**
-	 * Welcome to {app}
-	 */
-	onboardingWelcome: (arg: { app: string }) => LocalizedString
-	/**
-	 * Let's set things up. It only takes a minute.
-	 */
-	onboardingWelcomeBody: () => LocalizedString
-	/**
-	 * You're all set
-	 */
-	onboardingDone: () => LocalizedString
-	/**
-	 * You can change any of this later in Settings.
-	 */
-	onboardingDoneBody: () => LocalizedString
-	/**
-	 * Enter {app}
-	 */
-	onboardingEnter: (arg: { app: string }) => LocalizedString
 	/**
 	 * Your library
 	 */
@@ -6765,6 +7056,26 @@ export type TranslationFunctions = {
 	 */
 	usageTokens: (arg: { tokens: string }) => LocalizedString
 	/**
+	 * No ceiling here
+	 */
+	allowanceUnlimited: () => LocalizedString
+	/**
+	 * Help yourself.
+	 */
+	allowanceUnlimitedBody: () => LocalizedString
+	/**
+	 * every month
+	 */
+	allowancePerMonth: () => LocalizedString
+	/**
+	 * every week
+	 */
+	allowancePerWeek: () => LocalizedString
+	/**
+	 * every day
+	 */
+	allowancePerDay: () => LocalizedString
+	/**
 	 * Usage
 	 */
 	usageTitle: () => LocalizedString
@@ -6900,6 +7211,14 @@ export type TranslationFunctions = {
 	 * Tools for checking flows a user normally only sees once.
 	 */
 	developerOptionsDescription: () => LocalizedString
+	/**
+	 * Welcome tour, every step
+	 */
+	tourEveryStep: () => LocalizedString
+	/**
+	 * Plays it with the connection and profile steps forced in, which a filled-in account never sees.
+	 */
+	tourEveryStepHelp: () => LocalizedString
 	/**
 	 * New-user onboarding
 	 */

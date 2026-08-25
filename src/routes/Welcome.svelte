@@ -4,28 +4,39 @@
 		ArrowRight,
 		AtSign,
 		FileText,
+		Gauge,
 		ImageIcon,
 		Library,
 		ListChecks,
 		Palette,
-		Sparkles
+		Plug,
+		Sparkles,
+		Upload,
+		UserRound
 	} from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import { APP_NAME } from '$lib/brand';
+	import Allowance from '$lib/components/Allowance.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import OnboardingDialog from '$lib/components/OnboardingDialog.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
+	import { applyBackupToStores } from '$lib/data/applyBackup';
 	import { canDrawImages } from '$lib/images';
-	import { settingsStore } from '$lib/localStorage';
+	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { catalogState, loadCatalog } from '$lib/personaCatalog';
+	import { currentRole } from '$lib/stores/auth';
 	import { instanceConfig } from '$lib/stores/instance';
-	import { welcomeOpen } from '$lib/stores/modal';
+	import { welcomeOpen, welcomeShowAll } from '$lib/stores/modal';
+	import { toast } from '$lib/toast';
 	import { TOUR_CAST, TOUR_TURN, tourAvatar, tourPersona } from '$lib/tourCast';
+
+	import Profile from './settings/Profile.svelte';
+	import ServerConnections from './settings/ServerConnections.svelte';
 
 	/**
 	 * The welcome tour shown once on a user's first connection (server mode). Unlike
@@ -36,14 +47,58 @@
 	let step = $state(0);
 
 	/**
-	 * Six steps where this instance draws, five where it does not.
+	 * The tour is a list of named steps, composed for the person in front of it.
 	 *
-	 * Counted rather than fixed, because the step it adds is about a feature an
-	 * administrator may never have switched on, and introducing somebody to
-	 * something they cannot reach is worse than saying less. The dots at the foot
-	 * of the dialog read from the same number, so they stay honest too.
+	 * Named rather than numbered, and that is what makes the composing safe: two
+	 * of these steps run animations keyed on which step is showing, and with plain
+	 * indices, inserting the setup steps ahead of them would have started the
+	 * wrong one. The dots at the foot of the dialog count this list, so they stay
+	 * honest whichever way it comes out.
+	 *
+	 * What varies, and why:
+	 *
+	 * - **servers**, only where the person can actually add one and none is
+	 *   reachable yet. On a shared instance the connections are the
+	 *   administrator's, and a step telling somebody to add one they are not
+	 *   allowed to add is worse than no step.
+	 * - **profile**, only while there is no name on it. The name is the account's
+	 *   own, not the identity provider's, so it is always fillable; what varies is
+	 *   whether there is anything left to ask. The email is the one field that
+	 *   comes from elsewhere when the instance has accounts, and the panel already
+	 *   reads it back rather than offering to change it.
+	 * - **images**, only where the instance draws.
 	 */
-	const TOTAL_STEPS = $derived($canDrawImages ? 6 : 5);
+	const canManageServers = $derived($currentRole === 'admin' || !!$instanceConfig?.allowUserKeys);
+	const needsServer = $derived($welcomeShowAll || (canManageServers && $serversStore.length === 0));
+	/**
+	 * Whether the money is anybody's business here.
+	 *
+	 * On a shared instance it is: somebody else pays for the models, and what that
+	 * buys you is a fact you would rather learn on the first day than on the day it
+	 * stops you. On a personal install there is nobody to be allowanced by, and a
+	 * step about a ceiling that does not exist is a step about nothing.
+	 */
+	const hasAllowance = $derived($welcomeShowAll || !!$instanceConfig?.accounts);
+
+	const needsProfile = $derived(
+		$welcomeShowAll ||
+			(!$settingsStore.profileFirstName.trim() && !$settingsStore.profileLastName.trim())
+	);
+
+	const steps = $derived([
+		'intro' as const,
+		...(needsServer ? (['servers'] as const) : []),
+		...(needsProfile ? (['profile'] as const) : []),
+		...(hasAllowance ? (['allowance'] as const) : []),
+		'theme' as const,
+		'personas' as const,
+		'mention' as const,
+		'library' as const,
+		...($canDrawImages || $welcomeShowAll ? (['images'] as const) : [])
+	]);
+
+	const current = $derived(steps[step] ?? 'intro');
+	const TOTAL_STEPS = $derived(steps.length);
 
 	/**
 	 * Pictures the app drew, on the step that says it can.
@@ -177,7 +232,7 @@
 	 * slightly less.
 	 */
 	$effect(() => {
-		if (step === 2) void loadCatalog();
+		if (current === 'personas') void loadCatalog();
 	});
 
 	const storeCount = $derived(
@@ -200,7 +255,7 @@
 	const finalStage = $derived(1 + replies.length * 2);
 
 	$effect(() => {
-		if (step !== 3) return;
+		if (current !== 'mention') return;
 
 		// Someone who asked for less motion asked for less motion, not for a slower
 		// version of it: the whole thread is simply already there.
@@ -222,7 +277,41 @@
 		return () => timers.forEach(clearTimeout);
 	});
 
+	/**
+	 * Restoring instead of starting.
+	 *
+	 * Backups carry the profile, the connections and the conversations, so a
+	 * restored instance has nothing left for the tour to ask: it ends there rather
+	 * than walking somebody through settings they have just brought with them.
+	 */
+	let fileInput: HTMLInputElement | undefined = $state();
+
+	const isFreshInstall = $derived(
+		$welcomeShowAll || ($serversStore.length === 0 && !$settingsStore.profileFirstName.trim())
+	);
+
+	function restoreFromBackup(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (!input.files || input.files.length === 0) return;
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				applyBackupToStores(JSON.parse(e.target?.result as string));
+				toast.success($LL.importSuccess());
+				finish();
+			} catch (error) {
+				console.error(error);
+				toast.error($LL.importError(), {
+					description: error instanceof Error ? error.message : 'Unknown error'
+				});
+			}
+		};
+		reader.readAsText(input.files[0]);
+	}
+
 	function finish() {
+		$welcomeShowAll = false;
 		$settingsStore.welcomeComplete = true;
 		// Acknowledge the instance's current stamp, so this replay does not repeat.
 		$settingsStore.onboardingEpochSeen = $instanceConfig?.onboardingEpoch ?? 0;
@@ -253,7 +342,7 @@
 	onDismiss={finish}
 	footer={step < TOTAL_STEPS - 1 ? navFooter : undefined}
 >
-	{#if step === 0}
+	{#if current === 'intro'}
 		<!-- 1. Who we are -->
 		<div class="flex flex-col items-center gap-4 py-6 text-center">
 			<Logo class="h-16 w-16" />
@@ -263,8 +352,73 @@
 					{$LL.tourIntro()}
 				</p>
 			</div>
+
+			{#if isFreshInstall}
+				<!-- The way past the whole tour, for somebody who has already been
+				     through it once somewhere else. Offered only on an install with
+				     nothing in it: anywhere else it is a button that overwrites what is
+				     already there. -->
+				<button
+					type="button"
+					onclick={() => fileInput?.click()}
+					class="text-muted hover:bg-shade-2 hover:text-active flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors"
+				>
+					<Upload class="h-4 w-4" />
+					{$LL.tourRestoreBackup()}
+				</button>
+				<input
+					bind:this={fileInput}
+					type="file"
+					accept="application/json"
+					class="hidden"
+					onchange={restoreFromBackup}
+				/>
+			{/if}
 		</div>
-	{:else if step === 1}
+	{:else if current === 'servers'}
+		<!-- The one step that configures rather than introduces. It is here because
+		     without a connection nothing else in the tour can be tried, and it is
+		     absent for everybody who has one or cannot add one. -->
+		<div class="flex flex-col gap-3">
+			<div class="flex flex-col items-center gap-2 text-center">
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<Plug class="text-accent h-5 w-5" />
+				</div>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourServersTitle()}</h2>
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
+					{$LL.tourServersBody()}
+				</p>
+			</div>
+			<ServerConnections />
+		</div>
+	{:else if current === 'profile'}
+		<div class="flex flex-col gap-3">
+			<div class="flex flex-col items-center gap-2 text-center">
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<UserRound class="text-accent h-5 w-5" />
+				</div>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourProfileTitle()}</h2>
+				<p class="text-muted mx-auto max-w-sm text-sm leading-relaxed">
+					{$LL.tourProfileBody()}
+				</p>
+			</div>
+			<Profile showUsage={false} />
+		</div>
+	{:else if current === 'allowance'}
+		<!-- The one step about money, and it says it in a number. On a shared instance
+		     somebody else is paying for the models, and what that buys is the sort of
+		     thing people otherwise discover the day it runs out. -->
+		<div class="flex flex-col gap-4">
+			<div class="flex flex-col items-center gap-2 text-center">
+				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
+					<Gauge class="text-accent h-5 w-5" />
+				</div>
+				<h2 class="text-lg font-semibold tracking-tight">{$LL.tourAllowanceTitle()}</h2>
+			</div>
+
+			<Allowance />
+		</div>
+	{:else if current === 'theme'}
 		<!-- 2. Make it yours: applies live, saved as you click -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 pb-1 text-center">
@@ -276,7 +430,7 @@
 			</div>
 			<ThemePicker />
 		</div>
-	{:else if step === 2}
+	{:else if current === 'personas'}
 		<!-- 3. Who you can talk to -->
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col items-center gap-2 text-center">
@@ -330,7 +484,7 @@
 				</p>
 			{/if}
 		</div>
-	{:else if step === 3}
+	{:else if current === 'mention'}
 		<!-- 4. Calling one into a conversation -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
@@ -392,7 +546,7 @@
 				{/each}
 			</div>
 		</div>
-	{:else if step === 4}
+	{:else if current === 'library'}
 		<!-- 5. The rest of the library -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
@@ -454,7 +608,7 @@
 				</div>
 			</div>
 		</div>
-	{:else if step === 5}
+	{:else if current === 'images'}
 		<!-- 6. Drawing, where the instance allows it -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">

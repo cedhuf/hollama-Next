@@ -260,7 +260,26 @@ export interface Settings {
 	backgroundImage: string;
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
-	onboardingComplete: boolean;
+	/**
+	 * Send this account to the mobile-first interface under `/m`.
+	 *
+	 * A setting rather than a breakpoint: the two interfaces are two products, not
+	 * one product at two widths, and which one somebody wants is not a thing a
+	 * media query can know. The responsive interface is unchanged and remains the
+	 * default everywhere.
+	 */
+	simplifiedMobileUI: boolean;
+	/**
+	 * Speak instead of typing: the composer offers a microphone and what is said is
+	 * transcribed before it is sent.
+	 *
+	 * Off by default, and it has to be: transcription is a second model, on a
+	 * connection somebody has to have set up, and a microphone button that fails
+	 * the first time it is pressed is worse than no microphone button.
+	 */
+	voiceInput: boolean;
+	/** Which model transcribes. Null means none has been chosen, and the feature waits. */
+	voiceModel: string | null;
 	/** Server mode: the new-user welcome tour (app intro, theme, personas) has been seen. */
 	welcomeComplete: boolean;
 	/**
@@ -350,7 +369,9 @@ export const DEFAULT_SETTINGS: Settings = {
 	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,
-	onboardingComplete: false,
+	simplifiedMobileUI: false,
+	voiceInput: false,
+	voiceModel: null,
 	welcomeComplete: false,
 	onboardingEpochSeen: 0,
 	lloomaMetadata: { currentVersion: version },

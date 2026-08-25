@@ -30,30 +30,3 @@
 		<X class="h-3.5 w-3.5" />
 	{/snippet}
 </Toaster>
-
-<style>
-	/* The stack recedes rather than stopping dead.
-	 *
-	 * The library shows a fixed number of notifications and hides the rest
-	 * outright, so an open stack looked complete when it was not, and the older
-	 * ones only reappeared as the newer ones went. Fading the far end says there
-	 * is more above without inventing a counter nobody would trust.
-	 *
-	 * `data-visible` and `:not([data-removed])` keep this out of the way of the
-	 * library's own entrance and exit, which own the opacity the rest of the time. */
-	:global(
-		[data-sonner-toast][data-expanded='true'][data-visible='true'][data-index='3']:not(
-				[data-removed='true']
-			)
-	) {
-		opacity: 0.66;
-	}
-
-	:global(
-		[data-sonner-toast][data-expanded='true'][data-visible='true'][data-index='4']:not(
-				[data-removed='true']
-			)
-	) {
-		opacity: 0.36;
-	}
-</style>

@@ -24,6 +24,7 @@
 	const compactCfg = $derived($chatDefaultsConfig.compact);
 	const compactModelValue = $derived(compactCfg.compactModel || undefined);
 
+	const voiceCfg = $derived($chatDefaultsConfig.voice);
 	const samplingCfg = $derived($chatDefaultsConfig.sampling);
 	/**
 	 * Nothing to clear once the administrator has locked the values, and nothing
@@ -121,6 +122,59 @@
 				/>
 			</SettingsField>
 		{/if}
+		<!-- Alpha, and labelled as such: it is a second interface rather than a
+		     variation on this one, and it is being built in the open. -->
+		<FieldCheckbox
+			label={$LL.simplifiedMobileUI()}
+			bind:checked={$settingsStore.simplifiedMobileUI}
+		>
+			{#snippet badge()}
+				<SettingsBadge>{$LL.alpha()}</SettingsBadge>
+			{/snippet}
+		</FieldCheckbox>
+		<SettingsHint>{$LL.simplifiedMobileUIHelp()}</SettingsHint>
+
+		<!-- Beside the interface it was built for, though it is not tied to it: a
+		     microphone in the composer is worth having on a desktop too.
+
+		     Locked, it shows what the instance publishes and offers nothing to
+		     change: on most instances the administrator is the only person who could
+		     have set a transcription model up at all. -->
+		{#if voiceCfg.editable}
+			<FieldCheckbox label={$LL.voiceInput()} bind:checked={$settingsStore.voiceInput}>
+				{#snippet badge()}
+					<SettingsBadge>{$LL.alpha()}</SettingsBadge>
+				{/snippet}
+			</FieldCheckbox>
+			<SettingsHint>{$LL.voiceInputHelp()}</SettingsHint>
+
+			{#if $settingsStore.voiceInput}
+				<!-- Audio models only. The picker reads the kind from the catalogue, which
+				     guesses `whisper` and the rest by name and lets an administrator correct
+				     it in Models and prices. An empty list is the honest answer here: it
+				     means this account can reach no model that transcribes. -->
+				<SettingsField label={$LL.voiceModel()}>
+					<ModelSelect
+						kinds={['audio']}
+						value={$settingsStore.voiceModel ?? undefined}
+						onSelect={(name) => ($settingsStore.voiceModel = name || null)}
+					/>
+				</SettingsField>
+				<SettingsHint>{$LL.voiceModelHelp()}</SettingsHint>
+			{/if}
+		{:else}
+			<SettingsField label={$LL.voiceInput()}>
+				{#snippet badge()}
+					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
+				{/snippet}
+				<input
+					class="settings-field"
+					disabled
+					value={voiceCfg.voiceInput ? voiceCfg.voiceModel || $LL.none() : $LL.off()}
+				/>
+			</SettingsField>
+		{/if}
+
 		<FieldCheckbox
 			label={$LL.autoExpandReasoningBlocks()}
 			bind:checked={$settingsStore.autoExpandReasoningBlocks}

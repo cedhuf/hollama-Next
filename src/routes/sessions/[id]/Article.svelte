@@ -483,7 +483,7 @@
 				     when scanning back through a long conversation; Interface can turn it
 				     off for a plainer, lower-contrast thread. -->
 				<div
-					class="max-w-[85%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 {$settingsStore.accentUserMessages
+					class="article__bubble max-w-[85%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 {$settingsStore.accentUserMessages
 						? 'bg-accent/10'
 						: 'bg-shade-2'}"
 				>

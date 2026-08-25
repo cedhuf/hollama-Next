@@ -1,5 +1,5 @@
 import { accountsEnabled } from '$lib/server/authMode';
-import { getConfig, themeSharing } from '$lib/server/db/config';
+import { allowUserKeys, getConfig, themeSharing } from '$lib/server/db/config';
 import { adminContact } from '$lib/server/db/users';
 import { implicitOwner } from '$lib/server/session';
 
@@ -49,7 +49,17 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 			 * address is advice nobody can act on. The instance knows the address;
 			 * it is the account it was bootstrapped with.
 			 */
-			adminEmail: accounts ? adminContact() : null
+			adminEmail: accounts ? adminContact() : null,
+			/**
+			 * Whether a plain user may add a connection of their own.
+			 *
+			 * Delivered with the page because the welcome tour has to decide whether
+			 * to offer that step before it draws anything: a step that says "add a
+			 * server" to somebody who cannot is worse than one that is not there, and
+			 * asking `/api/providers` for it would settle the question a frame after
+			 * the tour has already been composed.
+			 */
+			allowUserKeys: allowUserKeys()
 		}
 	};
 };

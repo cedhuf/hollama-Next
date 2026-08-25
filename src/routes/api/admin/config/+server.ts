@@ -55,6 +55,9 @@ export async function GET(event) {
 		compactSharing: getConfig('compactSharing') ?? 'off',
 		samplingSharing: getConfig('samplingSharing') ?? 'off',
 		imagesSharing: getConfig('imagesSharing') ?? 'off',
+		voiceSharing: getConfig('voiceSharing') ?? 'off',
+		voiceInput: getConfig('voiceInput') === 'true',
+		voiceModel: getConfig('voiceModel') ?? '',
 		defaultImageModel: getConfig('defaultImageModel') ?? '',
 		imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
 		imagePromptModel: getConfig('imagePromptModel') ?? '',
@@ -153,6 +156,13 @@ export async function PUT(event) {
 	if (['off', 'locked', 'overridable'].includes(body?.imagesSharing)) {
 		setConfig('imagesSharing', body.imagesSharing);
 	}
+
+	if (['off', 'locked', 'overridable'].includes(body?.voiceSharing)) {
+		setConfig('voiceSharing', body.voiceSharing);
+	}
+
+	if (typeof body?.voiceInput === 'boolean') setConfig('voiceInput', String(body.voiceInput));
+	if (typeof body?.voiceModel === 'string') setConfig('voiceModel', body.voiceModel);
 	if (typeof body?.defaultImageModel === 'string') {
 		setConfig('defaultImageModel', body.defaultImageModel);
 	}
