@@ -672,10 +672,14 @@ async function framePhone(page: Page, name: string) {
  * whole, and the transparent ground leaves a silhouette rather than a
  * rectangle, which is what stops the top of a README looking like a table.
  *
- * A light window under a dark phone, on purpose: it says the app has themes
- * without spending a second picture saying it.
+ * Dark, over a wallpaper, because a white window at the top of a page reads as
+ * a document from ten years ago rather than as something anyone would want to
+ * open.
  */
 const HERO = {
+	/** The shot in the window, and the one in the phone. */
+	window: 'desktop_wallpaper',
+	phone: 'mobile_home',
 	/** How much smaller the phone is, so it reads as nearer rather than as huge. */
 	scale: 0.62,
 	/** How far the phone hangs past the window, right and below. */
@@ -684,8 +688,8 @@ const HERO = {
 };
 
 async function composeHero(page: Page) {
-	const windowSrc = await readShot('desktop_conversation');
-	const phoneSrc = await readShot('mobile_home');
+	const windowSrc = await readShot(HERO.window);
+	const phoneSrc = await readShot(HERO.phone);
 	await page.setContent('<body></body>');
 	const windowEdges = await edges(page, windowSrc);
 	const phoneEdges = await edges(page, phoneSrc);
