@@ -447,6 +447,8 @@ const en = {
 	managedByIdentityProvider: 'Managed by your identity provider.',
 	alpha: 'alpha',
 	mobileTabHome: 'Home',
+	mobileLeave: 'Full interface',
+	mobileSignOut: 'Sign out',
 	mobileTabProfile: 'You',
 	mobileNoSessions: 'Nothing yet. Say something.',
 	mobileTabChats: 'Chats',

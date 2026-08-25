@@ -444,6 +444,8 @@ const fr = extendDictionary(en, {
 	managedByIdentityProvider: "Géré par votre fournisseur d'identité.",
 	alpha: 'alpha',
 	mobileTabHome: 'Accueil',
+	mobileLeave: 'Interface complète',
+	mobileSignOut: 'Se déconnecter',
 	mobileTabProfile: 'Vous',
 	mobileNoSessions: 'Rien encore. Dites quelque chose.',
 	mobileTabChats: 'Discussions',

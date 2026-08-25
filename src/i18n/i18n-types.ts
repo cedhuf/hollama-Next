@@ -1703,6 +1703,14 @@ type RootTranslation = {
 	 */
 	mobileTabHome: string
 	/**
+	 * F​u​l​l​ ​i​n​t​e​r​f​a​c​e
+	 */
+	mobileLeave: string
+	/**
+	 * S​i​g​n​ ​o​u​t
+	 */
+	mobileSignOut: string
+	/**
 	 * Y​o​u
 	 */
 	mobileTabProfile: string
@@ -5483,6 +5491,14 @@ export type TranslationFunctions = {
 	 * Home
 	 */
 	mobileTabHome: () => LocalizedString
+	/**
+	 * Full interface
+	 */
+	mobileLeave: () => LocalizedString
+	/**
+	 * Sign out
+	 */
+	mobileSignOut: () => LocalizedString
 	/**
 	 * You
 	 */
