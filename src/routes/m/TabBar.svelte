@@ -108,14 +108,18 @@
 	 * over an opaque bar, which is the thing this replaces.
 	 */
 	/*
-	 * Deliberately not given a `view-transition-name`.
+	 * A note for whoever adds page transitions, because it has been tried and undone.
 	 *
-	 * It would be the obvious way to hold the bar still while the page behind it
-	 * moves, and it breaks this. A named element is snapshotted apart from the rest
-	 * of the document, which makes it a stacking context and a containing block, and
-	 * a `backdrop-filter` inside one has no backdrop left to filter: on iOS the glass
-	 * simply vanished and the bar went clear. A tab bar fading with the page for a
-	 * tenth of a second is a smaller price than losing the material it is made of.
+	 * `backdrop-filter` and the View Transitions API do not coexist. During a
+	 * transition the whole document is replaced by snapshots, so an element that
+	 * blurs what is behind it has nothing behind it, and this bar went clear for the
+	 * length of every navigation. Giving it a `view-transition-name` to hold it out
+	 * of the snapshot is worse: a named element is its own stacking context and
+	 * containing block, and on iOS the glass then vanished permanently rather than
+	 * for a moment.
+	 *
+	 * There is no third setting. Either the transitions go, which is what happened,
+	 * or this stops being glass.
 	 */
 	.glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 38%, transparent);
