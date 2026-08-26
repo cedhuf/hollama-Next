@@ -188,7 +188,10 @@
 
 			// The body: soft, wide, and reaching less than the rim, so the edge always
 			// runs outside the mass rather than cutting through it.
-			const glow = context.createRadialGradient(
+			// Named for what it is. A property called `glow` once shadowed this and
+			// turned every alpha into NaN, which drew the orb at full opacity
+			// everywhere and looked like a colour change.
+			const body = context.createRadialGradient(
 				cx - base * 0.3,
 				cy - base * 0.3,
 				base * 0.1,
@@ -196,14 +199,14 @@
 				cy,
 				base * 1.7
 			);
-			glow.addColorStop(0, accent);
-			glow.addColorStop(0.55, accent);
-			glow.addColorStop(1, 'transparent');
+			body.addColorStop(0, accent);
+			body.addColorStop(0.55, accent);
+			body.addColorStop(1, 'transparent');
 
 			context.save();
 			context.globalAlpha = phase === 'idle' ? 0.24 : 0.4;
 			context.filter = quiet ? 'none' : `blur(${Math.max(6, base * 0.16)}px)`;
-			context.fillStyle = glow;
+			context.fillStyle = body;
 			trace(speaking ? 0.22 : 0.14);
 			context.fill();
 			context.restore();

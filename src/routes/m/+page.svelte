@@ -92,7 +92,18 @@
 			</span>
 		</div>
 
-		<Orb class="h-24 w-24 shrink-0 text-[6rem]" />
+		<!-- A light behind it, and only here. On the voice screen the orb fills the
+		     display and needs no help; on a card among other cards, at the app's usual
+		     restraint, it read as something switched off rather than as the one thing
+		     on the page meant to be pressed.
+
+		     Behind rather than brighter, deliberately: turning the orb itself up would
+		     have made it a different object on this page from the one it is on the
+		     next, where the whole point is that they are the same body. -->
+		<span class="relative flex shrink-0 items-center justify-center">
+			<span class="halo" aria-hidden="true"></span>
+			<Orb class="relative h-24 w-24 shrink-0" />
+		</span>
 	</button>
 
 	<div class="grid grid-cols-2 gap-3">
@@ -187,5 +198,86 @@
 			color-mix(in srgb, var(--color-accent) 6%, transparent) 55%,
 			color-mix(in srgb, var(--color-accent) 14%, transparent)
 		);
+	}
+
+	/*
+	 * The light the orb sits in, on this card and nowhere else.
+	 *
+	 * Its own element behind the shape rather than a change to the shape, so the orb
+	 * is the same object here as on the voice screen. The card already clips, so it
+	 * is free to reach the edges and be cut by the rounding, which is what makes it
+	 * read as light in the card rather than as a circle drawn on it.
+	 *
+	 * One colour throughout. It swells and dims, it never shifts hue: the orb's own
+	 * colour is what says which state the app is in, and a halo that changed with it
+	 * would be a second voice saying the same thing less clearly.
+	 *
+	 * Nearly nothing in the middle, brightest against the orb's own edge, and then a
+	 * long way down to nothing. Two things follow from that shape.
+	 *
+	 * The orb is translucent, so anything bright behind its centre shines through and
+	 * tints its inside, which reads as the orb having changed colour. Starting from
+	 * almost transparent avoids that without leaving a hole.
+	 *
+	 * And there is no edge anywhere. An earlier version had a bright band between two
+	 * stops twelve per cent apart, which is a ring drawn around the orb rather than
+	 * light coming off it: the eye finds both boundaries and sees jewellery. A long
+	 * ramp up and a longer one down has no boundary to find. That is also why the
+	 * blur is almost nothing now, where it used to be doing the softening that the
+	 * stops should have been doing all along.
+	 */
+	.halo {
+		position: absolute;
+		/* Close in. The light belongs against the shape, not around the card. */
+		inset: -45%;
+		border-radius: 9999px;
+		pointer-events: none;
+		background: radial-gradient(
+			circle,
+			transparent 0%,
+			color-mix(in srgb, var(--color-accent) 7%, transparent) 30%,
+			color-mix(in srgb, var(--color-accent) 46%, transparent) 46%,
+			color-mix(in srgb, var(--color-accent) 27%, transparent) 58%,
+			color-mix(in srgb, var(--color-accent) 12%, transparent) 72%,
+			color-mix(in srgb, var(--color-accent) 4%, transparent) 86%,
+			transparent 100%
+		);
+		filter: blur(6px);
+		/*
+		 * Two motions on two properties, at lengths that do not divide into each
+		 * other, so the pair never lands twice in the same place. The same reason the
+		 * orb is made of several slow drifts rather than one: a single period, however
+		 * slow, is a rhythm the eye finds and then stops seeing.
+		 */
+		animation:
+			halo-swell 6.7s ease-in-out infinite alternate,
+			halo-fade 9.3s ease-in-out infinite alternate;
+	}
+
+	/* The peak sits on the orb's own edge, so swelling walks the brightest part
+	   across the rim and back. That is what makes it read as light breathing off the
+	   shape rather than as a circle changing size. */
+	@keyframes halo-swell {
+		from {
+			scale: 0.94;
+		}
+		to {
+			scale: 1.18;
+		}
+	}
+
+	@keyframes halo-fade {
+		from {
+			opacity: 0.7;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.halo {
+			animation: none;
+		}
 	}
 </style>

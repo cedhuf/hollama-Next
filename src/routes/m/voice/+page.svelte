@@ -380,10 +380,13 @@
 		class="flex h-40 w-full shrink-0 flex-col items-center justify-start gap-3 overflow-y-auto pt-2"
 	>
 		{#if heard}
-			<p class="text-muted text-center text-sm leading-relaxed">{heard}</p>
+			<LivingText text={heard} class="text-muted text-center text-sm leading-relaxed" />
 		{/if}
 		{#if answer}
-			<p class="text-active text-center text-base leading-relaxed">{answer}</p>
+			<!-- An answer runs long, and past the component's ceiling it settles and is
+			     simply read. Which is the right way round: a paragraph you are reading
+			     should hold still, and the short lines are where this belongs. -->
+			<LivingText text={answer} class="text-active text-center text-base leading-relaxed" />
 		{/if}
 	</div>
 </div>
