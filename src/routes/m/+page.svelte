@@ -7,8 +7,10 @@
 	import { APP_NAME } from '$lib/brand';
 	import Head from '$lib/components/Head.svelte';
 	import Logo from '$lib/components/Logo.svelte';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { canDrawImages } from '$lib/images';
-	import { sessionsStore, settingsStore } from '$lib/localStorage';
+	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { launchPersona, type Persona } from '$lib/personas';
 	import { resolveSessionTitle } from '$lib/sessions';
 	import { searchModalOpen, settingsModalOpen } from '$lib/stores/modal';
 	import { generateRandomId } from '$lib/utils';
@@ -29,8 +31,45 @@
 	 */
 	const firstName = $derived($settingsStore.profileFirstName.trim());
 
-	/** The last few. The whole list is one tab away, which is what that tab is for. */
-	const recent = $derived(($sessionsStore ?? []).slice(0, 4));
+	/**
+	 * The last few, personas excluded.
+	 *
+	 * A persona's conversation is reachable from the persona itself, one row up, and
+	 * showing it here as well listed the same thing twice under two different names:
+	 * once as somebody you talk to and once as a chat with a generated title. The
+	 * list tab still has everything, which is what a complete list is for.
+	 */
+	const recent = $derived(($sessionsStore ?? []).filter((s) => !s.personaId).slice(0, 4));
+
+	/**
+	 * Everybody there is to talk to.
+	 *
+	 * All of them, not only the ones already spoken to. `conversedPersonas` answers a
+	 * different question, the one the sidebar asks, and here it would hide every
+	 * persona somebody has just written until they had found another way to start.
+	 */
+	const personas = $derived($personasStore ?? []);
+
+	/**
+	 * Straight into the voice screen, carrying who is being talked to.
+	 *
+	 * `launchPersona` reopens the conversation this persona already has, or makes one
+	 * with their prompt, their greeting and their model. Either way the voice screen
+	 * is handed an id rather than making a blank one, which is the whole difference
+	 * between talking to somebody and talking into the air.
+	 */
+	async function talkTo(persona: Persona) {
+		const id = await launchPersona(persona, $settingsStore.models ?? []);
+		// The id rides in the query rather than the path: the voice screen is one screen
+		// whichever conversation it is holding, and a route parameter would have made
+		// it two. In the URL rather than in a store so a reload lands back on the same
+		// conversation instead of a blank one.
+		//
+		// The rule below is watching for unresolved paths, and this path is resolved.
+		// `resolve` has nowhere to put a query, which is the whole of the mismatch.
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto(`${resolve('/m/voice')}?session=${encodeURIComponent(id)}`);
+	}
 </script>
 
 <Head title={APP_NAME} />
@@ -147,6 +186,32 @@
 			</button>
 		{/if}
 	</div>
+
+	{#if personas.length}
+		<!-- People rather than destinations, so the row is faces and names and nothing
+		     else. Scrolled sideways because the number of them is somebody's business
+		     and not the layout's: a grid would either wrap into a wall or cap the
+		     library at whatever fits.
+
+		     Straight into the voice screen, because that is what a persona is for here.
+		     Reading their prompt in a text box is the Library's job. -->
+		<section class="flex flex-col gap-2">
+			<h2 class="text-active text-lg font-semibold tracking-tight">{$LL.mobilePersonas()}</h2>
+
+			<div class="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+				{#each personas as persona (persona.id)}
+					<button
+						type="button"
+						onclick={() => talkTo(persona)}
+						class="flex w-20 shrink-0 flex-col items-center gap-2 transition-transform active:scale-95"
+					>
+						<PersonaAvatar {persona} size={56} />
+						<span class="text-muted w-full truncate text-center text-xs">{persona.name}</span>
+					</button>
+				{/each}
+			</div>
+		</section>
+	{/if}
 
 	{#if recent.length}
 		<section class="flex flex-col gap-2">

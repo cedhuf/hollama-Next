@@ -469,6 +469,7 @@ const en = {
 	mobileStartVoiceBody: 'Hands free, out loud.',
 	mobileStartChat: 'New conversation',
 	mobileStartImage: 'Draw something',
+	mobilePersonas: 'Talk to',
 	mobileRecent: 'Recent',
 	voiceInput: 'Voice input',
 	voiceInputHelp:
@@ -509,6 +510,10 @@ const en = {
 	voiceHeardNothing: 'Nothing was heard.',
 	voiceTranscribing: 'Transcribing',
 	voiceIdle: 'Tap to wake me.',
+	voiceSetupBoth: 'No model is set up to hear you or to answer out loud.',
+	voiceSetupHearing: 'No model is set up to hear you.',
+	voiceSetupSpeaking: 'No model is set up to answer out loud.',
+	voiceSetupOpen: 'Set it up',
 	voiceStart: 'Start talking',
 	voiceInterrupt: 'Take the floor',
 	voiceSend: 'Done speaking',

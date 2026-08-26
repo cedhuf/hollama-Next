@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { X } from '@lucide/svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { SILENCE } from '$lib/audioReading';
 	import { Conversation } from '$lib/chat/conversation.svelte';
+	import { repository } from '$lib/data';
 	import { settingsStore } from '$lib/localStorage';
 	import { newSession } from '$lib/sessions';
 	import { Speaker } from '$lib/speech.svelte';
+	import { settingsModalOpen } from '$lib/stores/modal';
 	import { generateRandomId } from '$lib/utils';
 	import { VoiceRecorder } from '$lib/voice.svelte';
 
@@ -52,6 +55,31 @@
 	 * conversation in the list every time somebody looked in.
 	 */
 	let chat = $state<Conversation | null>(null);
+
+	/**
+	 * The conversation to hold, when the screen was opened to hold a particular one.
+	 *
+	 * A persona on the home screen is a person to talk to, so tapping one arrives
+	 * here with their conversation already made: their prompt, their greeting, their
+	 * model and whatever was said last time. Without it the screen would start blank
+	 * and the persona would be a label on a stranger.
+	 *
+	 * Read once, on arrival. The screen holds one conversation for as long as it is
+	 * open, and swapping it underneath somebody mid-sentence is not a feature.
+	 */
+	const given = page.url.searchParams.get('session');
+
+	onMount(async () => {
+		if (!given) return;
+		const stored = await repository.loadSession(given).catch(() => null);
+		if (!stored) return;
+		chat = new Conversation(stored, { scrollToBottom: () => {} });
+		await chat.open(stored, { atBottom: true });
+		// What was said last, so arriving on a conversation already under way shows
+		// where it got to rather than an empty screen with a history behind it.
+		const last = stored.messages.at(-1);
+		if (last?.role === 'assistant') answer = last.content ?? '';
+	});
 
 	/** Whether the loop is running, as opposed to waiting to be started. */
 	let live = $state(false);
@@ -217,6 +245,10 @@
 	 * Which is exactly what taking the floor back means.
 	 */
 	function press() {
+		// Nothing starts until both halves exist. The control is disabled in that case,
+		// so this is the belt to that brace.
+		if (!ready) return;
+
 		// Inside the gesture, always, and cheap enough to do on every press. A browser
 		// only lets sound out of an audio context a person's own tap created or
 		// resumed, and by the time there is an answer to read the tap is long gone.
@@ -293,6 +325,31 @@
 		phase === 'transcribing' ? 'thinking' : phase
 	);
 
+	/**
+	 * Whether this screen can do its job, asked before it offers to.
+	 *
+	 * Both halves, and both up front. Finding out by trying is how somebody speaks a
+	 * whole sentence to a microphone that was never going to be heard, or worse, gets
+	 * an answer and only then learns that nothing was ever going to read it out. A
+	 * screen whose entire purpose is a spoken exchange should say so before the
+	 * exchange rather than during it.
+	 *
+	 * Recomputed rather than captured: the settings live in a store, so somebody who
+	 * goes and fixes this comes back to a screen that has noticed.
+	 */
+	const hears = $derived(!!$settingsStore && VoiceRecorder.available());
+	const speaks = $derived(!!$settingsStore && Speaker.available());
+	const ready = $derived(hears && speaks);
+
+	/** What is missing, said plainly. */
+	const missing = $derived(
+		!hears && !speaks
+			? $LL.voiceSetupBoth()
+			: !hears
+				? $LL.voiceSetupHearing()
+				: $LL.voiceSetupSpeaking()
+	);
+
 	/** No sound to read while a model is working, and none before anything starts. */
 	const sample = $derived(() =>
 		phase === 'speaking' ? speaker.reading() : phase === 'listening' ? voice.reading() : SILENCE
@@ -334,8 +391,9 @@
 		<button
 			type="button"
 			onclick={press}
-			aria-label={action}
+			aria-label={ready ? action : missing}
 			aria-pressed={live}
+			disabled={!ready}
 			class="group relative flex items-center justify-center rounded-full outline-none"
 		>
 			<!-- No icon over it. The line below already says what a press does, and a
@@ -364,7 +422,7 @@
 			     element, which is read aloud as letters. The button around it already
 			     carries the sentence. -->
 			<LivingText
-				text={status}
+				text={ready ? status : missing}
 				class="text-active/50 pointer-events-none absolute max-w-[62%] text-center text-[0.95rem] leading-snug text-balance"
 			/>
 		</button>
@@ -379,6 +437,17 @@
 	<div
 		class="flex h-40 w-full shrink-0 flex-col items-center justify-start gap-3 overflow-y-auto pt-2"
 	>
+		{#if !ready}
+			<!-- Naming what is missing without offering the door to it is a dead end with
+			     a caption. -->
+			<button
+				type="button"
+				onclick={() => settingsModalOpen.set(true)}
+				class="border-shade-3 text-active hover:border-shade-4 rounded-full border px-4 py-2 text-sm transition-colors"
+			>
+				{$LL.voiceSetupOpen()}
+			</button>
+		{/if}
 		{#if heard}
 			<LivingText text={heard} class="text-muted text-center text-sm leading-relaxed" />
 		{/if}

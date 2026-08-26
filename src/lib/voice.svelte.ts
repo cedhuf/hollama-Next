@@ -66,6 +66,27 @@ interface Options {
  */
 const FLOOR = 0.015;
 
+/**
+ * The connection and model that will do the transcribing, if there is one.
+ *
+ * A function rather than a method because the answer is wanted before anybody
+ * has a recorder: a screen built around speaking has to know whether speaking is
+ * possible before it offers to listen, and finding out by trying is how somebody
+ * ends up talking to a microphone that was never going to be heard.
+ *
+ * Read at the moment of asking. Settings change, a connection is removed, and a
+ * value captured at construction would outlive both.
+ */
+function transcriber(): { serverId: string; model: string; language: string } | null {
+	const settings = get(settingsStore);
+	const model = settings.voiceModel;
+	if (!settings.voiceInput || !model) return null;
+	const known = (settings.models ?? []).find((entry) => entry.name === model);
+	return known?.serverId
+		? { serverId: known.serverId, model, language: settings.voiceLanguage?.trim() ?? '' }
+		: null;
+}
+
 export class VoiceRecorder {
 	state = $state<VoiceState>('idle');
 
@@ -97,14 +118,13 @@ export class VoiceRecorder {
 	#watching: number | null = null;
 
 	/** Where the sound goes. Read at the moment of asking, not at construction. */
-	#target(): { serverId: string; model: string; language: string } | null {
-		const settings = get(settingsStore);
-		const model = settings.voiceModel;
-		if (!model) return null;
-		const known = (settings.models ?? []).find((entry) => entry.name === model);
-		return known?.serverId
-			? { serverId: known.serverId, model, language: settings.voiceLanguage?.trim() ?? '' }
-			: null;
+	#target() {
+		return transcriber();
+	}
+
+	/** Whether anything can be transcribed at all: a model, on a connection. */
+	static available(): boolean {
+		return !!transcriber();
 	}
 
 	/**

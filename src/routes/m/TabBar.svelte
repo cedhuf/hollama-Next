@@ -31,13 +31,8 @@
 		href === '/m' ? page.url.pathname === '/m' : page.url.pathname.startsWith(href);
 </script>
 
-<!-- Named for the view transitions, and that is the whole reason it has a class of
-     its own: an element with a `view-transition-name` is snapshotted apart from the
-     page, so the bar holds still while the content behind it moves. Without it the
-     bar is part of the page image and slides or fades along with it, which no
-     native tab bar has ever done. -->
 <nav
-	class="tabbar pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+	class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
 	aria-label={$LL.mobileTabChats()}
 >
 	<!-- Two objects, not one, and the left one never moves.
@@ -112,9 +107,19 @@
 	 * The tint is deliberately low. Anything heavier and the blur is decoration
 	 * over an opaque bar, which is the thing this replaces.
 	 */
+	/*
+	 * Deliberately not given a `view-transition-name`.
+	 *
+	 * It would be the obvious way to hold the bar still while the page behind it
+	 * moves, and it breaks this. A named element is snapshotted apart from the rest
+	 * of the document, which makes it a stacking context and a containing block, and
+	 * a `backdrop-filter` inside one has no backdrop left to filter: on iOS the glass
+	 * simply vanished and the bar went clear. A tab bar fading with the page for a
+	 * tenth of a second is a smaller price than losing the material it is made of.
+	 */
 	.glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 55%, transparent);
-		backdrop-filter: blur(24px) saturate(180%);
+		background-color: color-mix(in srgb, var(--color-shade-1) 38%, transparent);
+		backdrop-filter: blur(28px) saturate(190%);
 		-webkit-backdrop-filter: blur(24px) saturate(180%);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 45%, transparent),
@@ -125,14 +130,10 @@
 	/* Dark themes take a firmer tint and a fainter highlight: the same 45% of white
 	   along the top edge reads as a chrome strip against a dark backdrop. */
 	:global([data-color-theme='dark']) .glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 62%, transparent);
+		background-color: color-mix(in srgb, var(--color-shade-1) 44%, transparent);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
 			0 0 0 1px color-mix(in srgb, white 8%, transparent),
 			0 8px 28px -10px rgb(0 0 0 / 0.6);
-	}
-
-	.tabbar {
-		view-transition-name: mobile-tabbar;
 	}
 </style>

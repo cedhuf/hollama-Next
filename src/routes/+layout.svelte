@@ -151,9 +151,20 @@
 		else if (!belongsThere && onMobileUi) void goto(resolve('/sessions'));
 	});
 
-	onNavigate(async () => {
-		// Check for updates whenever the user follows a link (if auto-check is enabled)
-		if (!($settingsStore.autoCheckForUpdates === false)) await checkForUpdates();
+	onNavigate(() => {
+		/**
+		 * Started, not awaited.
+		 *
+		 * `onNavigate` holds the navigation open until whatever it returns settles, so
+		 * awaiting a network call here made every page change wait on a version check
+		 * nobody asked for. On a slow connection that is a tap that appears to do
+		 * nothing, and with the phone interface's page transitions on top of it, the
+		 * old screen stayed frozen on screen for the duration: indistinguishable from
+		 * the navigation having failed.
+		 *
+		 * Whether there is a new version is worth knowing and worth nobody's wait.
+		 */
+		if (!($settingsStore.autoCheckForUpdates === false)) void checkForUpdates();
 
 		// Close the mobile drawer on every navigation (standard drawer behaviour).
 		mobileDrawerOpen.set(false);

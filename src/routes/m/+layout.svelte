@@ -40,6 +40,8 @@
 	 */
 	type Move = 'fade' | 'push' | 'pop' | 'sheet-in' | 'sheet-out';
 
+	const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
 	/** How deep a path sits. Only the conversation is below the top level. */
 	const depth = (path: string) => (/^\/m\/sessions\/.+/.test(path) ? 1 : 0);
 
@@ -77,11 +79,27 @@
 
 		document.documentElement.dataset.move = moveFor(from, to);
 
-		return new Promise((resolve) => {
-			start.call(document, async () => {
+		return new Promise<void>((resolve) => {
+			/**
+			 * Three ways out, and all three are needed.
+			 *
+			 * The callback is the ordinary one. `finished` rejecting covers a transition
+			 * the browser abandons, which it does whenever another one is already
+			 * running. And the timer covers everything else, because the one thing this
+			 * promise must never do is fail to settle: `onNavigate` holds the navigation
+			 * open until it does, so a transition that quietly never starts is a tap
+			 * that quietly does nothing.
+			 */
+			const transition = start.call(document, async () => {
 				resolve();
-				await navigation.complete;
-			});
+				// Bounded, because the navigation waits on every other hook too and the
+				// old page is frozen on screen for as long as this is held. Better a
+				// transition that ends early than a screen that stops responding.
+				await Promise.race([navigation.complete, wait(400)]);
+			}) as { finished?: Promise<unknown> } | undefined;
+
+			transition?.finished?.catch(() => resolve());
+			setTimeout(resolve, 500);
 		});
 	});
 </script>

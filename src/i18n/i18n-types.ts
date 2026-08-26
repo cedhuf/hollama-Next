@@ -1784,6 +1784,10 @@ type RootTranslation = {
 	 */
 	mobileStartImage: string
 	/**
+	 * T​a​l​k​ ​t​o
+	 */
+	mobilePersonas: string
+	/**
 	 * R​e​c​e​n​t
 	 */
 	mobileRecent: string
@@ -1908,6 +1912,22 @@ type RootTranslation = {
 	 * T​a​p​ ​t​o​ ​w​a​k​e​ ​m​e​.
 	 */
 	voiceIdle: string
+	/**
+	 * N​o​ ​m​o​d​e​l​ ​i​s​ ​s​e​t​ ​u​p​ ​t​o​ ​h​e​a​r​ ​y​o​u​ ​o​r​ ​t​o​ ​a​n​s​w​e​r​ ​o​u​t​ ​l​o​u​d​.
+	 */
+	voiceSetupBoth: string
+	/**
+	 * N​o​ ​m​o​d​e​l​ ​i​s​ ​s​e​t​ ​u​p​ ​t​o​ ​h​e​a​r​ ​y​o​u​.
+	 */
+	voiceSetupHearing: string
+	/**
+	 * N​o​ ​m​o​d​e​l​ ​i​s​ ​s​e​t​ ​u​p​ ​t​o​ ​a​n​s​w​e​r​ ​o​u​t​ ​l​o​u​d​.
+	 */
+	voiceSetupSpeaking: string
+	/**
+	 * S​e​t​ ​i​t​ ​u​p
+	 */
+	voiceSetupOpen: string
 	/**
 	 * S​t​a​r​t​ ​t​a​l​k​i​n​g
 	 */
@@ -5706,6 +5726,10 @@ export type TranslationFunctions = {
 	 */
 	mobileStartImage: () => LocalizedString
 	/**
+	 * Talk to
+	 */
+	mobilePersonas: () => LocalizedString
+	/**
 	 * Recent
 	 */
 	mobileRecent: () => LocalizedString
@@ -5829,6 +5853,22 @@ export type TranslationFunctions = {
 	 * Tap to wake me.
 	 */
 	voiceIdle: () => LocalizedString
+	/**
+	 * No model is set up to hear you or to answer out loud.
+	 */
+	voiceSetupBoth: () => LocalizedString
+	/**
+	 * No model is set up to hear you.
+	 */
+	voiceSetupHearing: () => LocalizedString
+	/**
+	 * No model is set up to answer out loud.
+	 */
+	voiceSetupSpeaking: () => LocalizedString
+	/**
+	 * Set it up
+	 */
+	voiceSetupOpen: () => LocalizedString
 	/**
 	 * Start talking
 	 */

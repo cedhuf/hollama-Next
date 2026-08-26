@@ -466,6 +466,7 @@ const fr = extendDictionary(en, {
 	mobileStartVoiceBody: 'Mains libres, à voix haute.',
 	mobileStartChat: 'Nouvelle conversation',
 	mobileStartImage: 'Dessiner',
+	mobilePersonas: 'Parler à',
 	mobileRecent: 'Récent',
 	voiceInput: 'Saisie vocale',
 	voiceInputHelp:
@@ -506,6 +507,10 @@ const fr = extendDictionary(en, {
 	voiceHeardNothing: 'Rien entendu.',
 	voiceTranscribing: 'Transcription',
 	voiceIdle: 'Touchez pour me réveiller.',
+	voiceSetupBoth: "Aucun modèle n'est configuré pour vous entendre ni pour répondre à voix haute.",
+	voiceSetupHearing: "Aucun modèle n'est configuré pour vous entendre.",
+	voiceSetupSpeaking: "Aucun modèle n'est configuré pour répondre à voix haute.",
+	voiceSetupOpen: 'Configurer',
 	voiceStart: 'Commencer à parler',
 	voiceInterrupt: 'Reprendre la parole',
 	voiceSend: "J'ai fini de parler",
