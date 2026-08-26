@@ -58,7 +58,7 @@
 	<!-- What this instance gives you. The same card the welcome tour shows on its
 	     own step, which is where somebody sees it once; this is where they come back
 	     to check. -->
-	<Allowance />
+	<Allowance spend />
 
 	<section class="flex flex-col gap-2">
 		<h2 class="text-muted px-1 text-xs font-semibold tracking-wider uppercase">
