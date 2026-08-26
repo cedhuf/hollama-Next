@@ -10,5 +10,5 @@ export async function GET(event) {
 	await requireAdmin(event);
 	const server = getServer(event.params.id);
 	if (!server || server.owner_user_id !== null) throw error(404, 'System server not found');
-	return json(await listProviderModels(server));
+	return json((await listProviderModels(server)).names);
 }

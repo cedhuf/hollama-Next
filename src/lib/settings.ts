@@ -280,6 +280,60 @@ export interface Settings {
 	voiceInput: boolean;
 	/** Which model transcribes. Null means none has been chosen, and the feature waits. */
 	voiceModel: string | null;
+	/**
+	 * Answers read back out loud, which is the other half of speaking to it.
+	 *
+	 * Its own switch rather than a consequence of `voiceInput`, because the two are
+	 * different feelings and different bills. Dictating into a field is a
+	 * convenience anybody might want on a desktop; being talked at is a mode, and
+	 * on most connections it is a second model again, so it waits to be asked for.
+	 */
+	speechOutput: boolean;
+	/** Which model reads aloud. Null means none has been chosen. */
+	speechModel: string | null;
+	/**
+	 * Which voice it reads in.
+	 *
+	 * A name the provider knows, and required by every endpoint that does this, so
+	 * an empty one is a request that fails rather than one that picks something
+	 * sensible. Where the provider publishes its names the picker offers them; where
+	 * it does not, this is typed.
+	 */
+	speechVoice: string;
+	/**
+	 * How long a silence ends the recording, in milliseconds, on the voice screen.
+	 *
+	 * A setting rather than a constant because the right value is a fact about the
+	 * person and the room, not about the app. Somebody who thinks mid-sentence needs
+	 * three seconds; somebody dictating a list is cut off by anything over one. A
+	 * number chosen here once was always going to be wrong for half of them.
+	 *
+	 * The composer's microphone ignores it entirely. It stops when you say so, and a
+	 * field that submitted itself because you paused would be a field that fights
+	 * you.
+	 */
+	/**
+	 * The language being spoken, as an ISO 639-1 code. Empty means let it work out.
+	 *
+	 * Dictation only, and that is not an omission. Reading aloud has nowhere to put
+	 * it: on Kokoro, Aura and Voxtral the language is part of the voice's own name,
+	 * so choosing the voice has already chosen it, and on Gemini and Grok the voices
+	 * are timbres rather than languages and the model takes the language from the
+	 * text with no field to override it. A setting that reached none of them would
+	 * be a control that does nothing on every model anybody uses.
+	 */
+	voiceLanguage: string;
+	voiceSilenceMs: number;
+	/**
+	 * Whether the voice screen listens again once it has finished answering.
+	 *
+	 * On, it is a conversation you can hold with the phone on the table. Off, it
+	 * reads the answer and stops, and the next question needs a press. Worth being a
+	 * choice rather than the design: a microphone that reopens by itself is a
+	 * reasonable thing to want switched off, and wanting it off is not the same as
+	 * not wanting the feature.
+	 */
+	voiceAutoContinue: boolean;
 	/** Server mode: the new-user welcome tour (app intro, theme, personas) has been seen. */
 	welcomeComplete: boolean;
 	/**
@@ -372,6 +426,12 @@ export const DEFAULT_SETTINGS: Settings = {
 	simplifiedMobileUI: false,
 	voiceInput: false,
 	voiceModel: null,
+	speechOutput: false,
+	speechModel: null,
+	speechVoice: '',
+	voiceLanguage: '',
+	voiceSilenceMs: 1_500,
+	voiceAutoContinue: true,
 	welcomeComplete: false,
 	onboardingEpochSeen: 0,
 	lloomaMetadata: { currentVersion: version },

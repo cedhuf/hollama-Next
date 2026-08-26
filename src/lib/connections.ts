@@ -1,11 +1,17 @@
 import type { LoadOptions } from '$lib/chat/options';
-import { describeProvider, PROVIDER_DESCRIPTORS, type ProviderDescriptor } from '$lib/providers';
+import {
+	describeProvider,
+	PROVIDER_DESCRIPTORS,
+	type ModelKind,
+	type ProviderDescriptor
+} from '$lib/providers';
 
 import { generateRandomId } from './utils';
 
 export enum ConnectionType {
 	Ollama = 'ollama',
 	OpenAI = 'openai',
+	OpenRouter = 'openrouter',
 	OpenAICompatible = 'openai-compatible',
 	Anthropic = 'anthropic',
 	Infomaniak = 'infomaniak'
@@ -84,26 +90,6 @@ export interface Server {
 	 */
 	loadOptions?: LoadOptions;
 }
-
-/**
- * What a model does, which is the question every picker in the app is really
- * asking.
- *
- * Four, because a provider's catalogue holds four sorts of thing and only the
- * first two are offered anywhere: something you hold a conversation with,
- * something that draws, something that returns a vector, and something that
- * turns speech into text. The last two are here to be recognised and left out.
- * An embedding model in the chat picker is not a cosmetic problem, it is a 400
- * with no explanation, and the same is true of a transcription model.
- *
- * Infomaniak's own catalogue declares `llm`, `image`, `embedding`, `reranker`
- * and `stt`. Rerankers fold in with embeddings here: both are retrieval-side,
- * neither is ever offered, and inventing a section for a category the app will
- * never call would be describing the provider rather than the app.
- */
-export type ModelKind = 'text' | 'image' | 'embedding' | 'audio';
-
-export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding', 'audio'];
 
 /** Default badge colour and short id per provider, dark-mode safe. */
 export const PROVIDER_BADGES: Record<string, { id: string; color: string }> = Object.fromEntries(
@@ -224,8 +210,38 @@ const EMBEDDING_HINTS = [
 	'rerank'
 ];
 
-/** Speech, which is neither something to talk to nor something that draws. */
-const AUDIO_HINTS = ['whisper', 'wav2vec', 'parakeet', 'distil-whisper', 'transcribe', 'tts-'];
+/**
+ * Sound, in the two directions it runs.
+ *
+ * The words the industry uses for a model that hears or speaks, not a list of
+ * the models themselves. `asr` and `stt` on one side, `tts` on the other;
+ * `whisper`, `voxtral`, `parakeet` and `chirp` name themselves as listeners,
+ * `kokoro` and `orpheus` as talkers.
+ *
+ * Speaking is checked first, and that order is load-bearing rather than
+ * arbitrary: `mistralai/voxtral-mini-tts-2603` carries the name of a
+ * transcription family and is a voice, and reading it the other way is exactly
+ * the mistake this order exists to stop.
+ *
+ * It is deliberately not exhaustive, and it cannot be. `fish-audio/transcribe-1`
+ * listens while `fish-audio/s1` talks, and no substring tells them apart, which
+ * is why a provider that will answer the question outright is asked instead: see
+ * `catalogues` in the descriptors. This is what is left for the ones that will
+ * not, and it stays correctable in Models and prices either way.
+ */
+const SPEECH_HINTS = ['tts', 'kokoro', 'orpheus', 'text-to-speech'];
+
+const AUDIO_HINTS = [
+	'whisper',
+	'wav2vec',
+	'parakeet',
+	'transcribe',
+	'voxtral',
+	'chirp',
+	'asr',
+	'stt',
+	'speech-to-text'
+];
 
 const IMAGE_HINTS = [
 	'dall-e',
@@ -262,6 +278,7 @@ const IMAGE_HINTS = [
 export function guessModelKind(name: string): ModelKind {
 	const id = name.toLowerCase();
 	if (EMBEDDING_HINTS.some((hint) => id.includes(hint))) return 'embedding';
+	if (SPEECH_HINTS.some((hint) => id.includes(hint))) return 'speech';
 	if (AUDIO_HINTS.some((hint) => id.includes(hint))) return 'audio';
 	if (IMAGE_HINTS.some((hint) => id.includes(hint))) return 'image';
 	return 'text';
@@ -365,6 +382,47 @@ export function transcriptionFor(connectionType: ConnectionType) {
 	return describeProvider(connectionType).transcription;
 }
 
+/**
+ * How this connection reads aloud, when it does that at all.
+ *
+ * Nothing is assumed in its absence, unlike transcription. Every compatible
+ * endpoint serves `/audio/transcriptions`; hardly any serve `/audio/speech`, and
+ * a speaker button that answers 404 on every press is worse than none.
+ */
+export function speechFor(connectionType: ConnectionType) {
+	return describeProvider(connectionType).speech;
+}
+
+/**
+ * Whether this connection will say what a call cost, if asked in its own way.
+ *
+ * Only the asking is gated. Reading a `usage.cost` that turns up in an answer
+ * needs nobody's permission and is done everywhere.
+ */
+export function reportsCost(connectionType: ConnectionType): boolean {
+	return !!describeProvider(connectionType).reportsCost;
+}
+
+/**
+ * What a reporting connection reports in.
+ *
+ * Nothing for a connection that reports nothing, which is not the same as an
+ * unknown currency: there is simply no figure of its own to label.
+ */
+export function reportedCurrency(connectionType: ConnectionType): string | undefined {
+	return describeProvider(connectionType).reportsCost?.currency;
+}
+
+/** Where to go back and ask what a call cost, for a route that answers with bytes. */
+export function costLookupFor(connectionType: ConnectionType) {
+	return describeProvider(connectionType).costLookup;
+}
+
+/** Whether reading aloud is offered on this kind of connection at all. */
+export function supportsSpeech(connectionType: ConnectionType): boolean {
+	return !!describeProvider(connectionType).speech;
+}
+
 /** Whether a connection talks to an OpenAI-compatible endpoint. */
 export function isOpenAiCompatible(connectionType: ConnectionType): boolean {
 	return describeProvider(connectionType).family === 'openai';
@@ -430,7 +488,9 @@ export function getDefaultServer(
  * particular provider's facts happen to live in.
  */
 export {
+	type Catalogue,
 	declaredModels,
+	extraCatalogues,
 	IMAGE_QUALITIES,
 	IMAGE_RATIOS,
 	type ImageOptions,
@@ -438,6 +498,8 @@ export {
 	type ImageQuality,
 	type ImageRatio,
 	INFOMANIAK_URL_TEMPLATE,
+	MODEL_KINDS,
+	type ModelKind,
 	infomaniakBaseUrl,
 	infomaniakImageBaseUrl,
 	infomaniakProductId,

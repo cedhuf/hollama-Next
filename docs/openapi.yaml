@@ -388,6 +388,14 @@ paths:
                 serverId: { type: string }
                 model: { type: string }
                 audio: { type: string, format: binary }
+                language:
+                  type: string
+                  description: >
+                    ISO 639-1, optional. Sent on to the provider only where its
+                    endpoint is known to take one. Absent means the model works
+                    it out, which it does well on a sentence and badly on three
+                    words.
+
       responses:
         '200':
           description: The transcript.
@@ -397,9 +405,62 @@ paths:
                 type: object
                 properties: { text: { type: string } }
         '400': { description: Missing parameters, or nothing was recorded. }
+        '402': { description: Over the credit ceiling, or an unpriced model while one is in force. }
         '413': { description: The recording is larger than the provider accepts. }
         '415': { description: An audio type this app does not send. }
         '504': { description: The provider took longer than this app is willing to wait. }
+  /api/speak:
+    post:
+      tags: [voice]
+      summary: A sentence, as sound
+      description: >
+        JSON in, audio bytes out, and nothing kept at either end. The sound exists
+        for the length of the response and is played from a blob the page drops
+        when it is done; there is deliberately no cache, since caching would mean
+        writing down what somebody was told. The connection is resolved and the
+        key injected here, so the browser never learns either.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serverId, model, voice, text]
+              properties:
+                serverId: { type: string }
+                model: { type: string }
+                voice: { type: string, description: A voice name the provider knows. }
+                text: { type: string, description: One piece, within the app's own ceiling. }
+      responses:
+        '200':
+          description: The audio, in whatever playable type the provider answered with.
+          content:
+            audio/mpeg:
+              schema: { type: string, format: binary }
+        '400': { description: Missing parameters, no voice, or a model that does not read aloud. }
+        '402': { description: Over the credit ceiling, or an unpriced model while one is in force. }
+        '413': { description: More text than this app will send in one piece. }
+        '502':
+          { description: The provider could not be reached, or answered with something unplayable. }
+        '504': { description: The provider took longer than this app is willing to wait. }
+    get:
+      tags: [voice]
+      summary: The voices one model offers
+      description: >
+        An empty list is a real answer: it means this connection publishes no
+        names, and the setting asks for one to be typed instead.
+      parameters:
+        - { name: serverId, in: query, required: true, schema: { type: string } }
+        - { name: model, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The voice names, possibly none.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voices: { type: array, items: { type: string } }
   /api/usage:
     get:
       tags: [usage]

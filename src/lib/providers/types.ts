@@ -23,6 +23,37 @@
  * a lockout, and what makes this folder safe to accept changes to.
  */
 
+/**
+ * What a model does, which is the question every picker in the app is really
+ * asking.
+ *
+ * Five, because a provider's catalogue holds five sorts of thing and only three
+ * are offered anywhere: something you hold a conversation with, something that
+ * draws, something that returns a vector, something that turns speech into text
+ * and something that turns text into speech. The embeddings are here to be
+ * recognised and left out. An embedding model in the chat picker is not a
+ * cosmetic problem, it is a 400 with no explanation.
+ *
+ * `audio` and `speech` are two kinds and not one on purpose, and the distinction
+ * is the whole reason there are five. Both are sound, and they run in opposite
+ * directions: `audio` hears, `speech` talks. One list would put Kokoro in the
+ * dictation picker, where it answers 400 to a recording, and Whisper in the
+ * reading-aloud picker, where it answers 400 to a sentence. Naming the direction
+ * is what stops both.
+ *
+ * Infomaniak's own catalogue declares `llm`, `image`, `embedding`, `reranker`
+ * and `stt`. Rerankers fold in with embeddings here: both are retrieval-side,
+ * neither is ever offered, and inventing a section for a category the app will
+ * never call would be describing the provider rather than the app.
+ *
+ * It lives here rather than beside the connections because a catalogue can
+ * declare it. A provider that will say what it serves is worth more than any
+ * guess made from a name, and saying it means naming one of these.
+ */
+export type ModelKind = 'text' | 'image' | 'embedding' | 'audio' | 'speech';
+
+export const MODEL_KINDS: ModelKind[] = ['text', 'image', 'embedding', 'audio', 'speech'];
+
 /** How a picture is asked for, in the app's words rather than any provider's. */
 export type ImageRatio = 'square' | 'portrait' | 'landscape';
 export const IMAGE_RATIOS: ImageRatio[] = ['square', 'portrait', 'landscape'];
@@ -92,11 +123,12 @@ export interface ModelRule {
  * on the connection's own root, and the text comes back in the answer. That is
  * what every compatible endpoint does and it needs saying nowhere.
  *
- * Present, a provider is departing from it, and there are two ways they do. The
- * route may hang off a different root than chat does, which is Infomaniak's case
- * for the second time (their catalogue is on one API version and half their
- * routes on another). Or the route may be asynchronous: it answers with a handle
- * and the words arrive later, from somewhere else.
+ * Present, a provider is saying something the default does not cover, and there
+ * are three things it can be. The route may hang off a different root than chat
+ * does, which is Infomaniak's case for the second time (their catalogue is on one
+ * API version and half their routes on another). The route may be asynchronous:
+ * it answers with a handle and the words arrive later, from somewhere else. Or
+ * the endpoint may take more than the audio, which is what `language` is for.
  *
  * What is deliberately *not* here: the size ceiling, the accepted audio types,
  * how long the app is willing to wait and how often it asks. Those are the
@@ -104,8 +136,29 @@ export interface ModelRule {
  * read the answer. It may never say how patient to be.
  */
 export interface Transcription {
-	/** Where the audio goes, built from the connection's roots. */
-	url: (roots: { baseUrl: string }) => string;
+	/**
+	 * Where the audio goes, built from the connection's roots.
+	 *
+	 * Absent means the usual place, `/audio/transcriptions` off the connection's
+	 * own root. That is what makes this block sayable by a provider that follows
+	 * the contract in every respect but one, rather than only by a provider that
+	 * departs from it wholesale.
+	 */
+	url?: (roots: { baseUrl: string }) => string;
+	/**
+	 * The form field carrying the spoken language, where the endpoint takes one.
+	 *
+	 * Named rather than assumed, and opt-in rather than universal, because it is
+	 * sent as an extra multipart field and an endpoint that does not know it is
+	 * within its rights to refuse the whole upload. Every implementation of the
+	 * OpenAI contract calls it `language` and takes an ISO 639-1 code.
+	 *
+	 * It is worth the trouble. Left to detect on its own, a recogniser is reliable
+	 * on a full sentence and guesses on three words, and three words is most of
+	 * what anybody says to a phone. Saying the language outright also gets the
+	 * answer back sooner, since detection is a pass of its own.
+	 */
+	language?: string;
 	/**
 	 * For a provider that hands back a receipt instead of the words.
 	 *
@@ -152,6 +205,76 @@ export interface ReferenceImages {
 	trigger?: string;
 	/** The endpoint, built from whichever of the connection's two roots it needs. */
 	url: (roots: { baseUrl: string; imageBaseUrl: string }) => string;
+}
+
+/**
+ * One more list of models, and what asking for it establishes.
+ *
+ * `kind` is the reason this is a shape rather than a bare URL. Sorting a model
+ * by its name is a guess the app makes because nothing better is on offer, and
+ * here something better is: a provider asked what it serves that speaks has
+ * answered, and that answer should not then be second-guessed by a substring.
+ * Leave it off for a list that establishes nothing, and the names decide as
+ * usual.
+ *
+ * Never above somebody's correction, though. Whoever runs the instance still has
+ * the last word, in Models and prices, over the provider as much as over the
+ * guess.
+ */
+export interface Catalogue {
+	url: string;
+	/** What everything in this list is, when the question settles it. */
+	kind?: ModelKind;
+}
+
+/**
+ * How a provider reads a sentence out loud.
+ *
+ * Absent means it does not, and reading aloud is simply not offered on that
+ * connection. There is no assumed contract here, unlike transcription: an
+ * endpoint that does not synthesise answers 404 to a route the app invented, and
+ * a speaker button that fails on every press is worse than no speaker button.
+ *
+ * `voices` is what makes the choice a list rather than a spelling test. Every
+ * one of these endpoints requires a voice by name and refuses the request
+ * without one, so a provider that publishes its own names should be asked for
+ * them rather than have them typed from its documentation.
+ *
+ * What is deliberately *not* here: how much text may be sent at once, how long
+ * the app waits, and what it will play. Those are the defences, and they are the
+ * app's.
+ */
+export interface Speech {
+	/** Where the sentence goes, built from the connection's roots. */
+	url: (roots: { baseUrl: string }) => string;
+	/**
+	 * What this provider will return, in the order the app should prefer.
+	 *
+	 * It matters more than it looks. These routes do not agree on a default, and
+	 * OpenRouter's is `pcm`: raw samples, with no sample rate in the answer to
+	 * assemble them by, which a browser cannot play from a blob. Asking for
+	 * something playable is therefore not a preference, it is the difference
+	 * between sound and a failure.
+	 *
+	 * Absent means `mp3`, which is what the OpenAI contract specifies and what
+	 * every implementation of it produces. A provider that serves something else
+	 * says so here, first choice first, and the app takes the first one it can
+	 * play rather than the first one listed: a descriptor may describe what is on
+	 * offer, it may not tell the app to accept bytes it has no way to render.
+	 */
+	formats?: string[];
+	/**
+	 * The voices one model offers, when the provider will say.
+	 *
+	 * `url` is asked with the connection's key, and `read` pulls the names for
+	 * the model out of whatever comes back. Absent, the app has no list to offer
+	 * and asks for a name instead, which is the honest fallback rather than a
+	 * short list of guesses that happen to work on one provider.
+	 */
+	voices?: {
+		url: (roots: { baseUrl: string }) => string;
+		read: (body: unknown, model: string) => string[];
+	};
 }
 
 export interface ProviderDescriptor {
@@ -202,6 +325,54 @@ export interface ProviderDescriptor {
 	nativeThinking?: boolean;
 	/** Serves an image endpoint at all. */
 	imageGeneration?: boolean;
+	/**
+	 * Says what each call actually cost, in the answer.
+	 *
+	 * Nothing has to be asked for it: the figure rides in the `usage` block the
+	 * app already requests for its token counts, on a stream as much as off one.
+	 * Reading it needs no declaration either, and none is made: a body carrying
+	 * `usage.cost` is believed whoever sent it.
+	 *
+	 * What this flag is for is everything the app decides *before* a call. It stops
+	 * Models and prices offering a form for a figure that would never be read, and
+	 * it exempts the connection from the rule that refuses an unpriced model while
+	 * an allowance is in force, since that rule exists because uncounted means
+	 * unlimited and nothing here goes uncounted.
+	 *
+	 * It matters most where the app is least able to guess. A gateway routes each
+	 * request to whichever upstream provider it picks, at that provider's rate, so
+	 * one model genuinely has several prices, and the table the app keeps per
+	 * connection is not approximately wrong there, it is structurally wrong. Two
+	 * measured calls make the point: on OpenRouter, Kokoro is billed per character
+	 * and Whisper per second of audio, and the catalogue calls the figure `prompt`
+	 * in both cases without ever saying which.
+	 *
+	 * The currency is not decoration. Once a connection needs no prices in the
+	 * table, the table is empty, and the only other place the app ever learned what
+	 * currency it was counting in was that table. Without this, an allowance renders
+	 * as a bare `20`, which is worse than no figure: a ceiling whose unit is a guess
+	 * is a ceiling nobody can act on.
+	 */
+	reportsCost?: { currency: string };
+	/**
+	 * Where to ask afterwards what one call cost, for a route that answers with
+	 * bytes.
+	 *
+	 * Synthesis has nowhere to put a usage block: the answer is the audio. What it
+	 * does carry is an identifier in a header, and the provider will say what that
+	 * generation cost if asked again. So the app asks, in the background, once the
+	 * sound is already on its way to whoever is waiting for it.
+	 *
+	 * Absent means a route of that shape goes uncounted unless the price table
+	 * covers it, which is the honest outcome rather than an invented figure.
+	 */
+	costLookup?: {
+		/** The response header carrying the identifier. */
+		header: string;
+		url: (roots: { baseUrl: string }, id: string) => string;
+		/** The figure, in the provider's own currency, or nothing if it is not there. */
+		read: (body: unknown) => number | undefined;
+	};
 
 	/** What this provider calls a shape and a quality, before any model rule. */
 	images?: ImageOptions;
@@ -209,6 +380,8 @@ export interface ProviderDescriptor {
 	references?: ReferenceImages;
 	/** How this provider transcribes, when it does not do it the usual way. */
 	transcription?: Transcription;
+	/** How this provider reads aloud, when it does that at all. */
+	speech?: Speech;
 	/**
 	 * Models this provider serves that its catalogue does not list.
 	 *
@@ -218,6 +391,32 @@ export interface ProviderDescriptor {
 	 * other model goes through, rather than by a second path written beside it.
 	 */
 	extraModels?: string[];
+	/**
+	 * Further catalogues to ask for, when one list is not the whole list.
+	 *
+	 * Not the same problem as `extraModels`, though it looks adjacent. There, a
+	 * route is not a model anywhere and has to be named by hand. Here the provider
+	 * knows perfectly well what it serves and will say so, but only if asked the
+	 * right question: OpenRouter's `/models` returns four hundred entries with not
+	 * one transcription model among them, and the nineteen that do exist come back
+	 * only from `?output_modalities=transcription`.
+	 *
+	 * A URL each rather than a list of names, so the answer stays the provider's.
+	 * A hand-written list of speech models would be stale by the end of the month,
+	 * which is the thing this folder keeps saying and the reason it is worth one
+	 * more field.
+	 *
+	 * Each is read exactly like the main one: the OpenAI `{ data: [{ id }] }`
+	 * shape, the connection's key, the connection's filter, and the results merged
+	 * into one catalogue.
+	 *
+	 * Unlike the main one, a list asked this narrowly can say what it holds. A
+	 * question of the form "what transcribes" comes back with things that
+	 * transcribe, and that is the provider's own answer rather than the app's guess
+	 * at one. Where it is given, it beats the name: no reading of `fish-audio/s1`
+	 * will ever reveal that it talks.
+	 */
+	catalogues?: (roots: { baseUrl: string }) => Catalogue[];
 	/** Refinements for the model families that disagree with the line above. */
 	modelRules?: ModelRule[];
 

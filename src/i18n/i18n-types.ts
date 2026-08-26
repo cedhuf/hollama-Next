@@ -217,9 +217,29 @@ type RootTranslation = {
 	 */
 	modelKindEmbedding: string
 	/**
-	 * S​p​e​e​c​h
+	 * T​r​a​n​s​c​r​i​p​t​i​o​n
 	 */
 	modelKindAudio: string
+	/**
+	 * R​e​a​d​i​n​g​ ​a​l​o​u​d
+	 */
+	modelKindSpeech: string
+	/**
+	 * A​u​t​o
+	 */
+	priceAuto: string
+	/**
+	 * t​h​i​s​ ​p​r​o​v​i​d​e​r​ ​b​i​l​l​s​ ​e​a​c​h​ ​c​a​l​l​ ​a​n​d​ ​s​a​y​s​ ​w​h​a​t​ ​i​t​ ​b​i​l​l​e​d
+	 */
+	priceAutoHelp: string
+	/**
+	 * B​i​l​l​ ​m​y​ ​o​w​n​ ​r​a​t​e
+	 */
+	priceFallbackSet: string
+	/**
+	 * Y​o​u​r​ ​r​a​t​e​,​ ​u​s​e​d​ ​i​n​s​t​e​a​d​ ​o​f​ ​w​h​a​t​ ​t​h​e​ ​p​r​o​v​i​d​e​r​ ​r​e​p​o​r​t​s​.​ ​C​l​e​a​r​ ​i​t​ ​t​o​ ​g​o​ ​b​a​c​k​ ​t​o​ ​w​h​a​t​ ​t​h​e​y​ ​c​h​a​r​g​e​.
+	 */
+	priceFallbackHelp: string
 	/**
 	 * C​l​e​a​r
 	 */
@@ -1776,6 +1796,87 @@ type RootTranslation = {
 	 */
 	voiceInputHelp: string
 	/**
+	 * V​o​i​c​e
+	 */
+	voiceTab: string
+	/**
+	 * V​o​i​c​e​ ​m​o​d​e
+	 */
+	voiceLoop: string
+	/**
+	 * H​o​w​ ​t​h​e​ ​p​h​o​n​e​'​s​ ​v​o​i​c​e​ ​s​c​r​e​e​n​ ​b​e​h​a​v​e​s​ ​b​e​t​w​e​e​n​ ​o​n​e​ ​q​u​e​s​t​i​o​n​ ​a​n​d​ ​t​h​e​ ​n​e​x​t​.​ ​I​t​ ​d​o​e​s​ ​n​o​t​ ​a​f​f​e​c​t​ ​t​h​e​ ​m​i​c​r​o​p​h​o​n​e​ ​i​n​ ​t​h​e​ ​c​o​m​p​o​s​e​r​,​ ​w​h​i​c​h​ ​s​t​o​p​s​ ​w​h​e​n​ ​y​o​u​ ​s​a​y​ ​s​o​.
+	 */
+	voiceLoopHelp: string
+	/**
+	 * S​t​o​p​ ​l​i​s​t​e​n​i​n​g​ ​a​f​t​e​r
+	 */
+	voiceSilence: string
+	/**
+	 * {​s​e​c​o​n​d​s​}​ ​s​ ​o​f​ ​s​i​l​e​n​c​e
+	 * @param {unknown} seconds
+	 */
+	voiceSilenceValue: RequiredParams<'seconds'>
+	/**
+	 * L​o​n​g​ ​e​n​o​u​g​h​ ​t​o​ ​t​h​i​n​k​ ​m​i​d​-​s​e​n​t​e​n​c​e​,​ ​s​h​o​r​t​ ​e​n​o​u​g​h​ ​n​o​t​ ​t​o​ ​w​a​i​t​ ​a​r​o​u​n​d​.​ ​R​a​i​s​e​ ​i​t​ ​i​f​ ​i​t​ ​c​u​t​s​ ​y​o​u​ ​o​f​f​;​ ​l​o​w​e​r​ ​i​t​ ​i​f​ ​t​h​e​ ​a​n​s​w​e​r​ ​i​s​ ​s​l​o​w​ ​t​o​ ​s​t​a​r​t​.
+	 */
+	voiceSilenceHelp: string
+	/**
+	 * L​i​s​t​e​n​ ​a​g​a​i​n​ ​a​f​t​e​r​ ​a​n​s​w​e​r​i​n​g
+	 */
+	voiceAutoContinue: string
+	/**
+	 * O​n​,​ ​i​t​ ​i​s​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​y​o​u​ ​c​a​n​ ​h​o​l​d​ ​w​i​t​h​ ​t​h​e​ ​p​h​o​n​e​ ​o​n​ ​t​h​e​ ​t​a​b​l​e​.​ ​O​f​f​,​ ​i​t​ ​r​e​a​d​s​ ​t​h​e​ ​a​n​s​w​e​r​ ​a​n​d​ ​w​a​i​t​s​ ​t​o​ ​b​e​ ​a​s​k​e​d​ ​a​g​a​i​n​.
+	 */
+	voiceAutoContinueHelp: string
+	/**
+	 * R​e​a​d​ ​a​n​s​w​e​r​s​ ​a​l​o​u​d
+	 */
+	speechOutput: string
+	/**
+	 * I​n​ ​v​o​i​c​e​ ​m​o​d​e​ ​o​n​ ​a​ ​p​h​o​n​e​,​ ​t​h​e​ ​a​n​s​w​e​r​ ​i​s​ ​s​p​o​k​e​n​ ​b​a​c​k​ ​i​n​s​t​e​a​d​ ​o​f​ ​o​n​l​y​ ​a​p​p​e​a​r​i​n​g​.​ ​I​t​ ​u​s​e​s​ ​a​ ​s​e​c​o​n​d​ ​m​o​d​e​l​,​ ​o​n​ ​o​n​e​ ​o​f​ ​y​o​u​r​ ​c​o​n​n​e​c​t​i​o​n​s​,​ ​a​n​d​ ​i​t​ ​i​s​ ​b​i​l​l​e​d​ ​l​i​k​e​ ​a​n​y​ ​o​t​h​e​r​.
+	 */
+	speechOutputHelp: string
+	/**
+	 * V​o​i​c​e​ ​m​o​d​e​l
+	 */
+	speechModel: string
+	/**
+	 * O​n​l​y​ ​m​o​d​e​l​s​ ​m​a​r​k​e​d​ ​a​s​ ​r​e​a​d​i​n​g​ ​a​l​o​u​d​ ​a​r​e​ ​o​f​f​e​r​e​d​.​ ​I​f​ ​t​h​e​ ​l​i​s​t​ ​i​s​ ​e​m​p​t​y​,​ ​m​a​r​k​ ​o​n​e​ ​i​n​ ​M​o​d​e​l​s​ ​a​n​d​ ​p​r​i​c​e​s​ ​o​n​ ​i​t​s​ ​c​o​n​n​e​c​t​i​o​n​.
+	 */
+	speechModelHelp: string
+	/**
+	 * V​o​i​c​e
+	 */
+	speechVoice: string
+	/**
+	 * T​h​e​ ​p​r​o​v​i​d​e​r​ ​k​n​o​w​s​ ​i​t​s​ ​v​o​i​c​e​s​ ​b​y​ ​n​a​m​e​.​ ​W​h​e​r​e​ ​i​t​ ​p​u​b​l​i​s​h​e​s​ ​t​h​e​m​ ​t​h​e​ ​l​i​s​t​ ​i​s​ ​f​i​l​l​e​d​ ​i​n​ ​f​o​r​ ​y​o​u​;​ ​w​h​e​r​e​ ​i​t​ ​d​o​e​s​ ​n​o​t​,​ ​t​y​p​e​ ​t​h​e​ ​n​a​m​e​ ​f​r​o​m​ ​i​t​s​ ​d​o​c​u​m​e​n​t​a​t​i​o​n​.
+	 */
+	speechVoiceHelp: string
+	/**
+	 * T​h​i​s​ ​c​o​n​n​e​c​t​i​o​n​ ​p​u​b​l​i​s​h​e​s​ ​n​o​ ​v​o​i​c​e​ ​n​a​m​e​s​.​ ​T​y​p​e​ ​o​n​e​.
+	 */
+	speechVoiceNone: string
+	/**
+	 * N​o​ ​v​o​i​c​e​ ​m​o​d​e​l​ ​i​s​ ​s​e​t​ ​u​p
+	 */
+	speechNoModel: string
+	/**
+	 * C​o​u​l​d​ ​n​o​t​ ​r​e​a​d​ ​t​h​a​t​ ​o​u​t
+	 */
+	speechFailed: string
+	/**
+	 * S​p​o​k​e​n​ ​l​a​n​g​u​a​g​e
+	 */
+	voiceLanguage: string
+	/**
+	 * A​ ​t​w​o​-​l​e​t​t​e​r​ ​c​o​d​e​,​ ​s​u​c​h​ ​a​s​ ​f​r​ ​o​r​ ​e​n​.​ ​L​e​a​v​e​ ​i​t​ ​e​m​p​t​y​ ​t​o​ ​l​e​t​ ​t​h​e​ ​m​o​d​e​l​ ​w​o​r​k​ ​i​t​ ​o​u​t​,​ ​w​h​i​c​h​ ​i​t​ ​d​o​e​s​ ​w​e​l​l​ ​o​n​ ​a​ ​f​u​l​l​ ​s​e​n​t​e​n​c​e​ ​a​n​d​ ​b​a​d​l​y​ ​o​n​ ​t​h​r​e​e​ ​w​o​r​d​s​.​ ​S​e​n​t​ ​o​n​l​y​ ​t​o​ ​p​r​o​v​i​d​e​r​s​ ​w​h​o​s​e​ ​e​n​d​p​o​i​n​t​ ​t​a​k​e​s​ ​i​t​.
+	 */
+	voiceLanguageHelp: string
+	/**
+	 * D​e​t​e​c​t
+	 */
+	voiceLanguageAuto: string
+	/**
 	 * T​r​a​n​s​c​r​i​p​t​i​o​n​ ​m​o​d​e​l
 	 */
 	voiceModel: string
@@ -1808,9 +1909,33 @@ type RootTranslation = {
 	 */
 	voiceIdle: string
 	/**
+	 * S​t​a​r​t​ ​t​a​l​k​i​n​g
+	 */
+	voiceStart: string
+	/**
+	 * T​a​k​e​ ​t​h​e​ ​f​l​o​o​r
+	 */
+	voiceInterrupt: string
+	/**
+	 * D​o​n​e​ ​s​p​e​a​k​i​n​g
+	 */
+	voiceSend: string
+	/**
+	 * S​t​o​p
+	 */
+	voiceStop: string
+	/**
 	 * L​i​s​t​e​n​i​n​g​.
 	 */
 	voiceListening: string
+	/**
+	 * T​h​i​n​k​i​n​g​.
+	 */
+	voiceThinking: string
+	/**
+	 * A​n​s​w​e​r​i​n​g​.
+	 */
+	voiceAnswering: string
 	/**
 	 * S​i​m​p​l​i​f​i​e​d​ ​m​o​b​i​l​e​ ​i​n​t​e​r​f​a​c​e
 	 */
@@ -3322,6 +3447,15 @@ type RootTranslation = {
 	 */
 	allowanceUnlimitedBody: string
 	/**
+	 * c​r​e​d​i​t​s
+	 */
+	usageCredits: string
+	/**
+	 * b​a​c​k​ ​t​o​ ​z​e​r​o​ ​o​n​ ​{​d​a​t​e​}
+	 * @param {string} date
+	 */
+	allowanceResets: RequiredParams<'date'>
+	/**
 	 * e​v​e​r​y​ ​m​o​n​t​h
 	 */
 	allowancePerMonth: string
@@ -4038,9 +4172,29 @@ export type TranslationFunctions = {
 	 */
 	modelKindEmbedding: () => LocalizedString
 	/**
-	 * Speech
+	 * Transcription
 	 */
 	modelKindAudio: () => LocalizedString
+	/**
+	 * Reading aloud
+	 */
+	modelKindSpeech: () => LocalizedString
+	/**
+	 * Auto
+	 */
+	priceAuto: () => LocalizedString
+	/**
+	 * this provider bills each call and says what it billed
+	 */
+	priceAutoHelp: () => LocalizedString
+	/**
+	 * Bill my own rate
+	 */
+	priceFallbackSet: () => LocalizedString
+	/**
+	 * Your rate, used instead of what the provider reports. Clear it to go back to what they charge.
+	 */
+	priceFallbackHelp: () => LocalizedString
 	/**
 	 * Clear
 	 */
@@ -5564,6 +5718,86 @@ export type TranslationFunctions = {
 	 */
 	voiceInputHelp: () => LocalizedString
 	/**
+	 * Voice
+	 */
+	voiceTab: () => LocalizedString
+	/**
+	 * Voice mode
+	 */
+	voiceLoop: () => LocalizedString
+	/**
+	 * How the phone's voice screen behaves between one question and the next. It does not affect the microphone in the composer, which stops when you say so.
+	 */
+	voiceLoopHelp: () => LocalizedString
+	/**
+	 * Stop listening after
+	 */
+	voiceSilence: () => LocalizedString
+	/**
+	 * {seconds} s of silence
+	 */
+	voiceSilenceValue: (arg: { seconds: unknown }) => LocalizedString
+	/**
+	 * Long enough to think mid-sentence, short enough not to wait around. Raise it if it cuts you off; lower it if the answer is slow to start.
+	 */
+	voiceSilenceHelp: () => LocalizedString
+	/**
+	 * Listen again after answering
+	 */
+	voiceAutoContinue: () => LocalizedString
+	/**
+	 * On, it is a conversation you can hold with the phone on the table. Off, it reads the answer and waits to be asked again.
+	 */
+	voiceAutoContinueHelp: () => LocalizedString
+	/**
+	 * Read answers aloud
+	 */
+	speechOutput: () => LocalizedString
+	/**
+	 * In voice mode on a phone, the answer is spoken back instead of only appearing. It uses a second model, on one of your connections, and it is billed like any other.
+	 */
+	speechOutputHelp: () => LocalizedString
+	/**
+	 * Voice model
+	 */
+	speechModel: () => LocalizedString
+	/**
+	 * Only models marked as reading aloud are offered. If the list is empty, mark one in Models and prices on its connection.
+	 */
+	speechModelHelp: () => LocalizedString
+	/**
+	 * Voice
+	 */
+	speechVoice: () => LocalizedString
+	/**
+	 * The provider knows its voices by name. Where it publishes them the list is filled in for you; where it does not, type the name from its documentation.
+	 */
+	speechVoiceHelp: () => LocalizedString
+	/**
+	 * This connection publishes no voice names. Type one.
+	 */
+	speechVoiceNone: () => LocalizedString
+	/**
+	 * No voice model is set up
+	 */
+	speechNoModel: () => LocalizedString
+	/**
+	 * Could not read that out
+	 */
+	speechFailed: () => LocalizedString
+	/**
+	 * Spoken language
+	 */
+	voiceLanguage: () => LocalizedString
+	/**
+	 * A two-letter code, such as fr or en. Leave it empty to let the model work it out, which it does well on a full sentence and badly on three words. Sent only to providers whose endpoint takes it.
+	 */
+	voiceLanguageHelp: () => LocalizedString
+	/**
+	 * Detect
+	 */
+	voiceLanguageAuto: () => LocalizedString
+	/**
 	 * Transcription model
 	 */
 	voiceModel: () => LocalizedString
@@ -5596,9 +5830,33 @@ export type TranslationFunctions = {
 	 */
 	voiceIdle: () => LocalizedString
 	/**
+	 * Start talking
+	 */
+	voiceStart: () => LocalizedString
+	/**
+	 * Take the floor
+	 */
+	voiceInterrupt: () => LocalizedString
+	/**
+	 * Done speaking
+	 */
+	voiceSend: () => LocalizedString
+	/**
+	 * Stop
+	 */
+	voiceStop: () => LocalizedString
+	/**
 	 * Listening.
 	 */
 	voiceListening: () => LocalizedString
+	/**
+	 * Thinking.
+	 */
+	voiceThinking: () => LocalizedString
+	/**
+	 * Answering.
+	 */
+	voiceAnswering: () => LocalizedString
 	/**
 	 * Simplified mobile interface
 	 */
@@ -7079,6 +7337,14 @@ export type TranslationFunctions = {
 	 * Help yourself.
 	 */
 	allowanceUnlimitedBody: () => LocalizedString
+	/**
+	 * credits
+	 */
+	usageCredits: () => LocalizedString
+	/**
+	 * back to zero on {date}
+	 */
+	allowanceResets: (arg: { date: string }) => LocalizedString
 	/**
 	 * every month
 	 */

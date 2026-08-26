@@ -23,6 +23,7 @@
 		modelPrice,
 		PRICE_UNITS,
 		priceUnit,
+		reportsCost,
 		serverBadge,
 		type ModelKind,
 		type ModelPrice,
@@ -66,6 +67,21 @@
 
 	const isShared = $derived((name: string) => shared.includes(name));
 
+	/**
+	 * Models whose fallback price has been asked for on a connection that reports
+	 * its own.
+	 *
+	 * The same shape as the stored API key one screen away: rather than an empty
+	 * field that reads as "nobody has set this", the state says what is actually
+	 * happening, and typing over it is a thing you choose. Here the state is that
+	 * the provider bills each call and says what it billed, so a figure is not
+	 * missing, it is not wanted.
+	 *
+	 * A model that already carries a figure is open on sight. Something is set, so
+	 * hiding it would be hiding a value that is in play.
+	 */
+	const overriding = new SvelteSet<string>();
+
 	// Hand the way out to the modal header for as long as this view is mounted.
 	// Leaving by any route (back, another tab, closing the dialog) unmounts it,
 	// which clears it.
@@ -91,6 +107,18 @@
 	const DEFAULT_CURRENCY = 'USD';
 
 	const badge = $derived(serverBadge(server));
+	/**
+	 * Whether this connection says what each call actually cost.
+	 *
+	 * It changes what the prices below *are*. Where the provider reports, the
+	 * reported figure is what gets charged and a figure typed here is only ever a
+	 * fallback for a call that came back without one. Saying so is not decoration:
+	 * a field that looks like the price and is not the price is worse than no field.
+	 *
+	 * Per connection rather than per model, because that is how it is true: a
+	 * gateway reports on everything it serves or on nothing.
+	 */
+	const reported = $derived(reportsCost(server.connectionType));
 	// The catalogue is already loaded for the model picker; just take this server's.
 	const models = $derived(
 		($settingsStore.models ?? [])
@@ -106,7 +134,8 @@
 		text: $LL.modelKindText(),
 		image: $LL.modelKindImage(),
 		embedding: $LL.modelKindEmbedding(),
-		audio: $LL.modelKindAudio()
+		audio: $LL.modelKindAudio(),
+		speech: $LL.modelKindSpeech()
 	});
 
 	/** What each unit is called, and what it reads as beside a figure. */
@@ -395,10 +424,16 @@
 						<!-- Green when a shared model has a price, red when it has none: while
 						     an allowance is in force an unpriced shared model is refused, so the
 						     colour is the state of something that works rather than decoration.
-						     A model nobody is offered is left alone. -->
+						     A model nobody is offered is left alone.
+
+						     And nothing is red on a connection that reports its own costs, because
+						     nothing is refused there: the rule exists because uncounted means
+						     unlimited, and a provider that reports every call leaves nothing
+						     uncounted. An alarm about a figure nobody needs to enter is an alarm
+						     that teaches people to ignore alarms. -->
 						<div
 							class="flex flex-col gap-1 rounded-lg border p-2 transition-colors {isShared(name)
-								? hasPrice
+								? hasPrice || reported
 									? 'border-positive/50 bg-positive/5'
 									: 'border-negative/50 bg-negative/5'
 								: 'border-shade-3'}"
@@ -484,6 +519,11 @@
 													     to check rather than a thing to read past. -->
 													<span class="opacity-70">{UNIT_SUFFIX[unit]}</span>
 												</span>
+											{:else if reported}
+												<!-- Not "unset", which would read as something left undone. There
+												     is nothing to do here: the provider bills the call and says
+												     what it billed. -->
+												{$LL.priceAuto()}
 											{:else}
 												{$LL.priceUnset()}
 											{/if}
@@ -499,6 +539,11 @@
 							</div>
 
 							{#if priced.has(name)}
+								<!-- Whether this model shows a state instead of a form.
+								     Only on a connection that reports its own costs, only while nothing
+								     has been typed, and only until somebody asks for the fields. A figure
+								     already set is a figure in play, so it is never hidden. -->
+								{@const auto = reported && !hasPrice && !overriding.has(name)}
 								<!-- Everything a model is worth saying, in two lines that are two
 								     lines on purpose: what it is and how it is billed, then what it
 								     costs. The kind lives here rather than on the row above because
@@ -531,95 +576,139 @@
 										     and two token fields for it would be asking two questions the
 										     invoice does not answer. It also says "per million tokens" once,
 										     for the whole block: the figures below carry no suffix, where
-										     the same words used to be printed twice. -->
-										<span class="min-w-0 flex-1 basis-40">
-											<Select
-												value={unit}
-												options={PRICE_UNITS.map((code) => ({
-													value: code,
-													label: UNIT_LABELS[code]
-												}))}
-												onChange={(option) => setUnit(name, option.value as PriceUnit)}
-											/>
-										</span>
+										     the same words used to be printed twice.
 
-										<!-- Zero is a price: free, and counted as such. Clearing is the
-										     other answer (nobody has said) and a field cannot be walked
-										     back to it. -->
-										<button
-											type="button"
-											onclick={() => clearPrice(name)}
-											title={$LL.clearPrice()}
-											aria-label="{name} · {$LL.clearPrice()}"
-											class="border-shade-3 text-muted hover:border-shade-4 hover:text-active ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors"
-										>
-											<RotateCcw class="h-3.5 w-3.5" />
-										</button>
+										     Gone in the auto state along with the figures: how something is
+										     billed is only worth asking of somebody who is about to say what
+										     it costs. The kind beside it stays, because that is what a model
+										     *is* and it decides which picker offers it. -->
+										{#if !auto}
+											<span class="min-w-0 flex-1 basis-40">
+												<Select
+													value={unit}
+													options={PRICE_UNITS.map((code) => ({
+														value: code,
+														label: UNIT_LABELS[code]
+													}))}
+													onChange={(option) => setUnit(name, option.value as PriceUnit)}
+												/>
+											</span>
+
+											<!-- Zero is a price: free, and counted as such. Clearing is the
+											     other answer (nobody has said) and a field cannot be walked
+											     back to it. On a reporting connection it is also the way back
+											     to auto, which is why it clears the reveal as well. -->
+											<button
+												type="button"
+												onclick={() => {
+													clearPrice(name);
+													overriding.delete(name);
+												}}
+												title={$LL.clearPrice()}
+												aria-label="{name} · {$LL.clearPrice()}"
+												class="border-shade-3 text-muted hover:border-shade-4 hover:text-active ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors"
+											>
+												<RotateCcw class="h-3.5 w-3.5" />
+											</button>
+										{/if}
 									</div>
 
-									<!-- One line, always: two figures and their currency fit on a
-									     phone, and wrapping the currency underneath left it alone on a
-									     row of its own with the width beside it unused. -->
-									<div class="flex items-center gap-2">
-										{#if unit === 'token'}
-											{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownRight, label: $LL.pricePerMillionOut() }] as field (field.side)}
-												{@const Icon = field.icon}
-												<!-- The arrow is the whole label: up for what you send, down for
+									{#if auto}
+										<!-- The state, not an empty form. This connection bills each call and
+										     reports what it billed, so there is no figure to enter and a row
+										     of blank fields would be inviting somebody to enter one that
+										     would never be read.
+
+										     Setting one brings the fields back, the way typing over a stored
+										     key does: reachable, deliberate, and not the default posture. What
+										     it means there is not "in case they forget to tell us" but "bill
+										     this at my rate rather than theirs". -->
+										<div class="flex items-center gap-2">
+											<Coins class="text-muted h-4 w-4 shrink-0" />
+											<p class="text-muted min-w-0 flex-1 text-xs leading-snug">
+												<span class="text-active font-medium">{$LL.priceAuto()}</span>
+												· {$LL.priceAutoHelp()}
+											</p>
+											<button
+												type="button"
+												onclick={() => overriding.add(name)}
+												class="border-shade-3 text-muted hover:border-shade-4 hover:text-active shrink-0 rounded-md border px-2 py-1 text-xs transition-colors"
+											>
+												{$LL.priceFallbackSet()}
+											</button>
+										</div>
+									{:else}
+										{#if reported}
+											<!-- Said plainly, because this is the one place the two figures
+											     could be confused: the provider will still report what it
+											     charged, and this is the number that gets counted instead. -->
+											<p class="text-muted text-xs leading-snug">{$LL.priceFallbackHelp()}</p>
+										{/if}
+
+										<!-- One line, always: two figures and their currency fit on a
+										     phone, and wrapping the currency underneath left it alone on a
+										     row of its own with the width beside it unused. -->
+										<div class="flex items-center gap-2">
+											{#if unit === 'token'}
+												{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownRight, label: $LL.pricePerMillionOut() }] as field (field.side)}
+													{@const Icon = field.icon}
+													<!-- The arrow is the whole label: up for what you send, down for
 												     what comes back, both leaning the same way so the pair reads
 												     as one movement rather than two opposed ones. The words are on
 												     the tooltip and the accessible name, where they cost no width. -->
+													<label
+														class="flex min-w-0 flex-1 items-center gap-1.5"
+														title="{field.label} · {UNIT_LABELS[unit]}"
+													>
+														<Icon class="text-muted h-4 w-4 shrink-0" />
+														<span class="min-w-0 flex-1">
+															<NumberField
+																decimal
+																min={0}
+																step={0.1}
+																class="text-right text-xs tabular-nums"
+																value={price?.[field.side] ?? ''}
+																placeholder={$LL.priceUnset()}
+																label="{name} · {field.label} · {UNIT_LABELS[unit]}"
+																onChange={(raw) => setPrice(name, field.side, raw)}
+															/>
+														</span>
+													</label>
+												{/each}
+											{:else}
+												<!-- One figure, because nothing billed per image or per second
+											     charges the way in differently from the way out. -->
 												<label
 													class="flex min-w-0 flex-1 items-center gap-1.5"
-													title="{field.label} · {UNIT_LABELS[unit]}"
+													title={UNIT_LABELS[unit]}
 												>
-													<Icon class="text-muted h-4 w-4 shrink-0" />
+													<Coins class="text-muted h-4 w-4 shrink-0" />
 													<span class="min-w-0 flex-1">
 														<NumberField
 															decimal
 															min={0}
 															step={0.1}
 															class="text-right text-xs tabular-nums"
-															value={price?.[field.side] ?? ''}
+															value={price?.rate ?? ''}
 															placeholder={$LL.priceUnset()}
-															label="{name} · {field.label} · {UNIT_LABELS[unit]}"
-															onChange={(raw) => setPrice(name, field.side, raw)}
+															label="{name} · {UNIT_LABELS[unit]}"
+															onChange={(raw) => setRate(name, raw)}
 														/>
 													</span>
 												</label>
-											{/each}
-										{:else}
-											<!-- One figure, because nothing billed per image or per second
-											     charges the way in differently from the way out. -->
-											<label
-												class="flex min-w-0 flex-1 items-center gap-1.5"
-												title={UNIT_LABELS[unit]}
-											>
-												<Coins class="text-muted h-4 w-4 shrink-0" />
-												<span class="min-w-0 flex-1">
-													<NumberField
-														decimal
-														min={0}
-														step={0.1}
-														class="text-right text-xs tabular-nums"
-														value={price?.rate ?? ''}
-														placeholder={$LL.priceUnset()}
-														label="{name} · {UNIT_LABELS[unit]}"
-														onChange={(raw) => setRate(name, raw)}
-													/>
-												</span>
-											</label>
-										{/if}
+											{/if}
 
-										<!-- No empty option: a price without a currency is a number nobody
+											<!-- No empty option: a price without a currency is a number nobody
 										     can add up, and USD is what providers publish in. -->
-										<span class="w-20 shrink-0">
-											<Select
-												value={price?.currency ?? DEFAULT_CURRENCY}
-												options={CURRENCIES.map((code) => ({ value: code, label: code }))}
-												onChange={(option) => setCurrency(name, option.value)}
-											/>
-										</span>
-									</div>
+											<span class="w-20 shrink-0">
+												<Select
+													value={price?.currency ?? DEFAULT_CURRENCY}
+													options={CURRENCIES.map((code) => ({ value: code, label: code }))}
+													onChange={(option) => setCurrency(name, option.value)}
+												/>
+											</span>
+										</div>
+									{/if}
 								</div>
 							{/if}
 						</div>

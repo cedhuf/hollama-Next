@@ -12,6 +12,13 @@ import { hasPriceFigure, priceUnit, type ModelPrice } from '$lib/connections';
  * to colour a ring; using it to charge somebody would be inventing a number and
  * then acting on it. The provider reports, or nothing is counted.
  *
+ * And where the provider reports the *cost* rather than only the counts, that is
+ * what is used. A price stored against a connection is an assumption that one
+ * model has one price there, and on a gateway it is simply false: OpenRouter
+ * routes to whichever upstream provider it likes, and `openai/whisper-large-v3`
+ * is 0.0000075 on one and 0.0015 on another. No table filled in by hand can be
+ * right about that, and the answer that is right arrives in the response.
+ *
  * Two shapes cover every endpoint the app talks to. OpenAI-compatible responses
  * carry `usage.prompt_tokens` / `usage.completion_tokens`, on the last chunk when
  * streaming; Ollama carries `prompt_eval_count` / `eval_count` on its final
@@ -22,6 +29,20 @@ import { hasPriceFigure, priceUnit, type ModelPrice } from '$lib/connections';
 export interface TokenCount {
 	input: number;
 	output: number;
+	/**
+	 * What the provider says this actually cost, when it says.
+	 *
+	 * Absent is not zero. Absent means nobody reported, and the price table answers
+	 * instead; zero means a free model, reported as free, and is charged as zero.
+	 *
+	 * In whatever currency the provider bills in, which for the one gateway that
+	 * reports this is dollars. Nothing is converted, here or anywhere else in the
+	 * app, and a total that mixes two currencies is a known limit rather than a
+	 * surprise.
+	 */
+	cost?: number;
+	/** Seconds of audio, where the provider reports them. */
+	seconds?: number;
 }
 
 /** The counts in one parsed JSON object, if it carries any. */
@@ -33,7 +54,17 @@ function countsIn(value: unknown): TokenCount | undefined {
 	if (usage) {
 		const input = Number(usage.prompt_tokens ?? usage.input_tokens ?? 0);
 		const output = Number(usage.completion_tokens ?? usage.output_tokens ?? 0);
-		if (input || output) return { input, output };
+		// Only when it is actually there. A zero that was reported is a free model
+		// and must be honoured as zero; a zero this invented would silently replace
+		// a price somebody had entered.
+		const cost = typeof usage.cost === 'number' ? usage.cost : undefined;
+		// Audio, where a provider bills the length rather than the tokens. Reported
+		// on the transcription route and nowhere else, which is why it is read here
+		// and not measured with a clock.
+		const seconds = typeof usage.seconds === 'number' ? usage.seconds : undefined;
+		if (input || output || cost !== undefined || seconds !== undefined) {
+			return { input, output, cost, seconds };
+		}
 	}
 
 	const input = Number(o.prompt_eval_count ?? 0);
@@ -82,8 +113,6 @@ export function countsInBody(text: string): TokenCount | undefined {
 export interface RunUsage extends TokenCount {
 	/** Images returned. */
 	images?: number;
-	/** Wall-clock seconds the provider took, measured around the request. */
-	seconds?: number;
 }
 
 /**
@@ -113,4 +142,32 @@ export function costOf(used: RunUsage, price: ModelPrice | undefined): number | 
 			return input + output;
 		}
 	}
+}
+
+/**
+ * What to charge for one call: your figure if you set one, otherwise theirs.
+ *
+ * One function so there is one answer, and so the order of authority is written
+ * once rather than repeated at each of the four places that record something.
+ *
+ * A price entered against a model wins outright. That is what entering one now
+ * means: not a spare figure kept in case the provider forgets to mention theirs,
+ * but a decision to bill this model at your own rate whatever they say. Anyone
+ * rebilling a team, or working to a negotiated rate, is doing arithmetic the
+ * provider knows nothing about. Nobody types a number for a case that never
+ * happens, so a number that is typed is a number that is meant.
+ *
+ * Where nothing has been entered, the provider's own figure is used, and on a
+ * gateway it is the only one that can be right: it routes each request to
+ * whichever upstream provider it likes, at that provider's rate, and says so
+ * afterwards. A reported zero is a figure like any other. Free models exist, they
+ * report zero, and they cost zero.
+ *
+ * Nothing from either side means the call goes uncounted. That is a real hole and
+ * it is named rather than papered over: an uncounted call is one an allowance
+ * never sees. Entering a price is what closes it, which is the second thing
+ * entering one is for.
+ */
+export function resolveCost(used: RunUsage, price: ModelPrice | undefined): number | undefined {
+	return costOf(used, price) ?? used.cost;
 }

@@ -1,8 +1,13 @@
-import type { ModelPrice } from '$lib/connections';
-import { costOf, countsInBody, type RunUsage } from '$lib/usageCounts';
+import {
+	hasPriceFigure,
+	reportsCost,
+	type ConnectionType,
+	type ModelPrice
+} from '$lib/connections';
+import { countsInBody, resolveCost, type RunUsage } from '$lib/usageCounts';
 
-import { getModelPricing, getServer } from './db/servers';
-import { addUsage } from './db/usage';
+import { getModelPricing, getServer, type ServerRow } from './db/servers';
+import { addUsage, creditLimitFor, isOverLimit } from './db/usage';
 
 /**
  * Writing down what a turn consumed, as it goes past.
@@ -58,8 +63,10 @@ export function meter(
 					return;
 				}
 
-				const cost = costOf(counts, priceFor(model));
-				// An unpriced model is not counted at all: see `costOf`.
+				// What the provider said it cost, and the table only where it said
+				// nothing. An unpriced model with nothing reported is not counted at
+				// all: see `costOf`.
+				const cost = resolveCost(counts, priceFor(model));
 				if (cost === undefined) {
 					console.warn(`[usage] ${model} has no price on this connection; nothing recorded`);
 					return;
@@ -68,6 +75,7 @@ export function meter(
 				addUsage(userId, {
 					inputTokens: counts.input,
 					outputTokens: counts.output,
+					seconds: counts.seconds,
 					cost
 				});
 			} catch {
@@ -106,7 +114,7 @@ export function meterImages(
 		flush() {
 			try {
 				const seconds = (Date.now() - startedAt) / 1000;
-				const cost = costOf({ input: 0, output: 0, images, seconds }, price);
+				const cost = resolveCost({ input: 0, output: 0, images, seconds }, price);
 				// An unpriced model is not counted at all: see `costOf`.
 				if (cost === undefined) {
 					console.warn('[usage] image model has no price on this connection; nothing recorded');
@@ -139,14 +147,18 @@ export function recordRunUsage(
 	model: string | undefined,
 	used: RunUsage
 ): void {
-	if (!serverId || !model || (!used.input && !used.output && !used.images && !used.seconds)) {
+	if (
+		!serverId ||
+		!model ||
+		(!used.input && !used.output && !used.images && !used.seconds && used.cost === undefined)
+	) {
 		return;
 	}
 
 	const row = getServer(serverId);
 	if (!row || row.owner_user_id !== null) return;
 
-	const cost = costOf(used, getModelPricing(serverId)[model]);
+	const cost = resolveCost(used, getModelPricing(serverId)[model]);
 	if (cost === undefined) {
 		console.warn(`[usage] ${model} has no price on this connection; nothing recorded`);
 		return;
@@ -159,4 +171,91 @@ export function recordRunUsage(
 		seconds: used.seconds,
 		cost
 	});
+}
+
+/**
+ * Whether a call on this connection counts against an allowance at all.
+ *
+ * Only the instance's own connections. A personal server is somebody's own key
+ * and their own bill, and neither counting it against an instance allowance nor
+ * refusing it in the name of one would be defensible.
+ */
+export function isMetered(server: ServerRow): boolean {
+	return server.owner_user_id === null;
+}
+
+/**
+ * Why this account may not start another billable call, if it may not.
+ *
+ * The same two questions the chat relay asks, in one place so the voice routes
+ * ask them the same way rather than approximately the same way. Both were
+ * unguarded until now: somebody at the end of their credit could still dictate
+ * and still be read to, indefinitely.
+ *
+ * The unpriced rule has an exception it did not used to need. Refusing an
+ * unpriced model exists because uncounted means unlimited, and one forgotten
+ * model would be an unlimited allowance for everybody. That reasoning stops
+ * applying to a provider that reports what its calls cost: nothing there goes
+ * uncounted, so nothing needs refusing, and insisting on a figure in the table
+ * would block the one provider whose figures are exact.
+ */
+export function refuseForCredit(
+	userId: string,
+	server: ServerRow,
+	model: string
+): 'credit-limit' | 'unpriced-model' | null {
+	if (!isMetered(server)) return null;
+	if (creditLimitFor(userId) <= 0) return null;
+	if (isOverLimit(userId)) return 'credit-limit';
+
+	if (reportsCost(server.connection_type as ConnectionType)) return null;
+	return hasPriceFigure(getModelPricing(server.id)[model]) ? null : 'unpriced-model';
+}
+
+/**
+ * Record what one voice call consumed.
+ *
+ * Its own entry point rather than `recordRunUsage`, because that one is about a
+ * turn: it re-reads the connection from an id it was given, and refuses a
+ * personal one. Here the connection is already in hand and already checked, and
+ * what is being recorded is a length of audio or a handful of tokens rather than
+ * a conversation.
+ *
+ * Silent on failure, deliberately. Somebody has already been given their words
+ * or their sound; a meter that threw at this point would turn a successful call
+ * into an error after the fact.
+ */
+export function recordVoiceUsage(
+	userId: string,
+	server: ServerRow,
+	model: string,
+	used: RunUsage
+): void {
+	if (!isMetered(server)) return;
+
+	// Nothing reported and nothing to count against a price. It happens on a
+	// synthesis whose provider names no way to ask what it cost: the answer is
+	// sound, the characters that produced it are not a reading anybody bills on,
+	// and the app does not estimate in order to charge. Said out loud, because the
+	// alternative is a spend of zero that looks like a quiet month.
+	if (used.cost === undefined && !used.input && !used.output && !used.seconds) {
+		console.warn(`[usage] ${model} reported nothing countable; nothing recorded`);
+		return;
+	}
+
+	try {
+		const cost = resolveCost(used, getModelPricing(server.id)[model]);
+		if (cost === undefined) {
+			console.warn(`[usage] ${model} reported no cost and has no price; nothing recorded`);
+			return;
+		}
+		addUsage(userId, {
+			inputTokens: used.input,
+			outputTokens: used.output,
+			seconds: used.seconds,
+			cost
+		});
+	} catch {
+		// A meter must never be the reason a call that worked looks like a failure.
+	}
 }

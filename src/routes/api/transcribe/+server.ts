@@ -1,8 +1,10 @@
 import { error, json } from '@sveltejs/kit';
 
+import { refusal } from '$lib/chat/refusal';
 import { requireUser } from '$lib/server/api';
 import { getServer } from '$lib/server/db/servers';
 import { transcribe, TranscriptionError } from '$lib/server/transcription';
+import { recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
 
 /**
  * What was just said, as words.
@@ -19,6 +21,7 @@ export async function POST(event) {
 	const audio = form?.get('audio');
 	const serverId = form?.get('serverId');
 	const model = form?.get('model');
+	const language = form?.get('language');
 
 	if (!(audio instanceof File) || typeof serverId !== 'string' || typeof model !== 'string') {
 		throw error(400, 'serverId, model and audio are required');
@@ -33,8 +36,20 @@ export async function POST(event) {
 	}
 	if (!server.is_enabled) throw error(403, 'Server is disabled');
 
+	// The same two questions the chat relay asks before a billable call: is this
+	// account within its allowance, and can this call be counted at all. Neither
+	// was asked here until reading and speaking were metered.
+	const refused = refuseForCredit(user.id, server, model);
+	if (refused) throw error(402, refusal(refused, model));
+
 	try {
-		return json(await transcribe(server, model, audio));
+		// A code, or nothing. Validated to the shape rather than to a list: there are
+		// ninety-nine of them, they are the provider's business, and a list here would
+		// be one more thing to be out of date about.
+		const spoken = typeof language === 'string' && /^[a-z]{2}$/i.test(language) ? language : '';
+		const { text, used } = await transcribe(server, model, audio, spoken);
+		recordVoiceUsage(user.id, server, model, used);
+		return json({ text });
 	} catch (cause) {
 		if (cause instanceof TranscriptionError) throw error(cause.status, cause.message);
 		throw cause;

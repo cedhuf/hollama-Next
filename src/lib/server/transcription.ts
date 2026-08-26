@@ -1,5 +1,6 @@
 import { modelKind, transcriptionFor, type ConnectionType } from '$lib/connections';
 import { getModelKinds, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
+import type { RunUsage } from '$lib/usageCounts';
 
 /**
  * Turning what somebody said into what they meant to type.
@@ -13,9 +14,9 @@ import { getModelKinds, getServerApiKey, type ServerRow } from '$lib/server/db/s
  * ones. A connection that cannot do this simply has no audio model to choose,
  * which is where the question is settled rather than here.
  *
- * Where a provider departs from that contract, its own file says how: which root
- * the route hangs off, and whether the answer is the words or a receipt to come
- * back for. What stays here is everything that is a defence rather than an
+ * Where a provider says more than the contract does, its own file carries it:
+ * which root the route hangs off, whether the answer is the words or a receipt to
+ * come back for, and whether the form takes the language of what was said. What stays here is everything that is a defence rather than an
  * address: what may be uploaded, how large, how long this is willing to wait, and
  * how often it is willing to ask.
  */
@@ -56,8 +57,16 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function transcribe(
 	server: ServerRow,
 	model: string,
-	audio: File
-): Promise<{ text: string }> {
+	audio: File,
+	/**
+	 * The language being spoken, as an ISO 639-1 code, when somebody has said.
+	 *
+	 * Empty means letting the model work it out, which is what it did before this
+	 * existed. It is reliable on a full sentence and a guess on three words, and
+	 * three words is most of what gets said to a phone.
+	 */
+	language = ''
+): Promise<{ text: string; used: RunUsage }> {
 	if (modelKind({ modelKinds: getModelKinds(server.id) }, model) !== 'audio') {
 		throw new TranscriptionError(400, 'That model does not transcribe');
 	}
@@ -77,7 +86,12 @@ export async function transcribe(
 	const auth: Record<string, string> = key ? { authorization: `Bearer ${key}` } : {};
 	const rules = transcriptionFor(server.connection_type as ConnectionType);
 	const roots = { baseUrl: server.base_url };
-	const target = rules ? rules.url(roots) : `${server.base_url}/audio/transcriptions`;
+	const target = rules?.url ? rules.url(roots) : `${server.base_url}/audio/transcriptions`;
+
+	// Only where the provider has said its endpoint takes one. An extra multipart
+	// field is not free: a server that does not know it may refuse the whole upload
+	// rather than ignore it, and losing a recording to a courtesy is a bad trade.
+	if (rules?.language && language) form.set(rules.language, language);
 
 	let response: Response;
 	try {
@@ -95,7 +109,7 @@ export async function transcribe(
 	if (!response.ok) throw providerError(response, await response.text().catch(() => ''));
 
 	const accepted = await readBody(response);
-	if (!rules?.poll) return { text: readText(accepted) };
+	if (!rules?.poll) return { text: readText(accepted), used: readUsage(accepted) };
 
 	// Asynchronous: what came back is a receipt, and the words are collected from
 	// somewhere else once the job is done.
@@ -123,7 +137,7 @@ export async function transcribe(
 			// about for another eighty seconds.
 			throw new TranscriptionError(502, `Transcription failed: ${state.failed}`);
 		}
-		if (state.done) return { text: (state.text ?? '').trim() };
+		if (state.done) return { text: (state.text ?? '').trim(), used: readUsage(body) };
 	}
 
 	// The last thing the provider said, trimmed, because a shape nobody expected is
@@ -153,6 +167,28 @@ async function readBody(response: Response): Promise<unknown> {
 	} catch {
 		return raw;
 	}
+}
+
+/**
+ * What the provider says this cost, and what it counted.
+ *
+ * Every field is optional and an absent one is not a zero: the route that records
+ * this falls back to the connection's own price table when nothing was reported,
+ * and a zero invented here would be recorded as a call that was free.
+ *
+ * `seconds` is the length of the audio rather than of the request, which is what
+ * makes it the right reading for a provider billing by the minute. Infomaniak is
+ * the one that does.
+ */
+function readUsage(body: unknown): RunUsage {
+	const usage = (body as { usage?: Record<string, unknown> })?.usage;
+	const number = (value: unknown) => (typeof value === 'number' ? value : undefined);
+	return {
+		input: number(usage?.input_tokens ?? usage?.prompt_tokens) ?? 0,
+		output: number(usage?.output_tokens ?? usage?.completion_tokens) ?? 0,
+		seconds: number(usage?.seconds),
+		cost: number(usage?.cost)
+	};
 }
 
 /**

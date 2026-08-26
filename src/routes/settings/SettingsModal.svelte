@@ -6,6 +6,7 @@
 		LogOut,
 		MessageSquare,
 		MessageSquareQuote,
+		Mic,
 		Server,
 		Settings2,
 		Shield,
@@ -32,6 +33,7 @@
 	import Tools from './Tools.svelte';
 	import Users from './Users.svelte';
 	import Version from './Version.svelte';
+	import Voice from './Voice.svelte';
 
 	const isAdmin = $derived($currentUser?.role === 'admin');
 
@@ -56,6 +58,11 @@
 			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: $hasAccounts && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
+			// Its own tab for the same reason Prompts has one: two models, each with a
+			// switch and a voice, the language and the per-provider parameters still to
+			// come, and the loop's own behaviour underneath. It had already outgrown
+			// being a corner of a tab about sampling.
+			{ id: 'voice', label: $LL.voiceTab(), icon: Mic },
 			// Its own tab rather than a section of Tools: twenty prompts folded into
 			// one dropdown at the bottom of a long scroll is a feature nobody finds.
 			{ id: 'prompts', label: $LL.promptsTab(), icon: MessageSquareQuote },
@@ -193,6 +200,8 @@
 					<Chat />
 				{:else if activeTab === 'tools'}
 					<Tools />
+				{:else if activeTab === 'voice'}
+					<Voice />
 				{:else if activeTab === 'prompts'}
 					<Prompts />
 				{:else if activeTab === 'interface'}

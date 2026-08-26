@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
-import { hasPriceFigure } from '$lib/connections';
+import { hasPriceFigure, reportsCost, type ConnectionType } from '$lib/connections';
 import { requireUser } from '$lib/server/api';
 import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
@@ -106,7 +106,15 @@ const proxy: RequestHandler = async (event) => {
 		 * notices. The message names the cause so the user asks their
 		 * administrator rather than concluding the app is broken.
 		 */
-		if (model && !hasPriceFigure(getModelPricing(server.id)[model])) {
+		if (
+			model &&
+			!hasPriceFigure(getModelPricing(server.id)[model]) &&
+			// Unless the provider will say what the call cost. The rule exists because
+			// uncounted means unlimited; a provider that reports every call leaves
+			// nothing uncounted, and insisting on a figure in the table would refuse
+			// the one provider whose figures are exact.
+			!reportsCost(server.connection_type as ConnectionType)
+		) {
 			throw error(402, refusal('unpriced-model', model));
 		}
 	}
@@ -201,6 +209,12 @@ function modelIn(body: string | undefined): string | undefined {
  * Without `stream_options.include_usage` there is no `usage` block on a stream
  * at all, so every streamed turn (which is every turn) would go uncounted.
  * Ollama reports its counts unasked, and ignores the field.
+ *
+ * It is also the whole of what a gateway needs to be asked. OpenRouter puts its
+ * `cost` inside that same block, on a stream as much as off one, so a second
+ * field asking for the cost specifically was written here and then deleted: it
+ * changed nothing, and an extra body field is only ever another chance for a
+ * provider to answer 400.
  *
  * Left alone if the body is not JSON or already says otherwise: this is a meter,
  * and a meter that rewrites a request it did not understand is a bug waiting for

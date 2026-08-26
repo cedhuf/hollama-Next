@@ -19,15 +19,20 @@ export async function GET(event) {
 		listSystemServers()
 			.filter((server) => server.is_enabled)
 			.map(async (server) => {
-				const models =
-					user.role === 'admin' ? await listProviderModels(server) : getSharedModels(server.id);
+				const listed = user.role === 'admin' ? await listProviderModels(server) : null;
+				const models = listed ? listed.names : getSharedModels(server.id);
 				// Display names and kinds ride along with the catalogue, so every model
 				// dropdown can render and filter without a second round-trip.
+				//
+				// Two sources for the kinds, in order of authority: what the provider
+				// declared when asked a narrow question, then what somebody stored
+				// against this connection. A person's correction is always the last
+				// word, over a provider as much as over a guessed name.
 				return {
 					...toProviderView(server),
 					models,
 					modelLabels: pickModelLabels(server.id, models),
-					modelKinds: pickModelKinds(server.id, models)
+					modelKinds: { ...(listed?.kinds ?? {}), ...pickModelKinds(server.id, models) }
 				};
 			})
 	);
@@ -35,12 +40,12 @@ export async function GET(event) {
 		listUserServers(user.id)
 			.filter((server) => server.is_enabled)
 			.map(async (server) => {
-				const models = await listProviderModels(server);
+				const { names: models, kinds } = await listProviderModels(server);
 				return {
 					...toProviderView(server),
 					models,
 					modelLabels: pickModelLabels(server.id, models),
-					modelKinds: pickModelKinds(server.id, models)
+					modelKinds: { ...kinds, ...pickModelKinds(server.id, models) }
 				};
 			})
 	);

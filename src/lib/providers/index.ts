@@ -3,7 +3,9 @@ import { compatible } from './compatible';
 import { infomaniak } from './infomaniak';
 import { ollama } from './ollama';
 import { openai } from './openai';
+import { openrouter } from './openrouter';
 import type {
+	Catalogue,
 	ImageOptions,
 	ImageQuality,
 	ImageRatio,
@@ -29,6 +31,7 @@ export const PROVIDER_DESCRIPTORS: ProviderDescriptor[] = [
 	openai,
 	anthropic,
 	infomaniak,
+	openrouter,
 	compatible
 ];
 
@@ -76,6 +79,16 @@ export function declaredModels(connectionType: string): string[] {
 	return describeProvider(connectionType).extraModels ?? [];
 }
 
+/**
+ * The other lists this provider keeps, beside the one at `/models`.
+ *
+ * Empty for almost everyone, which is the point: a provider whose catalogue is
+ * its catalogue says nothing and nothing extra is fetched.
+ */
+export function extraCatalogues(connectionType: string, roots: { baseUrl: string }): Catalogue[] {
+	return describeProvider(connectionType).catalogues?.(roots) ?? [];
+}
+
 /** The size to send, or nothing when the app cannot say. */
 export function sizeFor(options: ImageOptions, ratio: ImageRatio): string | undefined {
 	return options.sizes?.[ratio];
@@ -93,11 +106,15 @@ export {
 	infomaniakProductId
 } from './infomaniak';
 export {
+	type Catalogue,
 	IMAGE_QUALITIES,
 	IMAGE_RATIOS,
 	type ImageOptions,
 	type ImageQuality,
 	type ImageRatio,
+	MODEL_KINDS,
+	type ModelKind,
 	type ProviderDescriptor,
-	type ReferenceImages
+	type ReferenceImages,
+	type Speech
 } from './types';

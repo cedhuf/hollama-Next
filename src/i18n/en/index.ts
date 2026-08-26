@@ -53,7 +53,13 @@ const en = {
 	modelKindText: 'Chat',
 	modelKindImage: 'Images',
 	modelKindEmbedding: 'Embeddings',
-	modelKindAudio: 'Speech',
+	modelKindAudio: 'Transcription',
+	modelKindSpeech: 'Reading aloud',
+	priceAuto: 'Auto',
+	priceAutoHelp: 'this provider bills each call and says what it billed',
+	priceFallbackSet: 'Bill my own rate',
+	priceFallbackHelp:
+		'Your rate, used instead of what the provider reports. Clear it to go back to what they charge.',
 	clearPrice: 'Clear',
 	pricingIntro:
 		'Open a model to price it. Say what each model does, so it is only offered where it works.',
@@ -467,6 +473,33 @@ const en = {
 	voiceInput: 'Voice input',
 	voiceInputHelp:
 		'Speak instead of typing. What you say is sent to a transcription model, and the words land in the composer for you to check before they go.',
+	voiceTab: 'Voice',
+	voiceLoop: 'Voice mode',
+	voiceLoopHelp:
+		"How the phone's voice screen behaves between one question and the next. It does not affect the microphone in the composer, which stops when you say so.",
+	voiceSilence: 'Stop listening after',
+	voiceSilenceValue: '{seconds} s of silence',
+	voiceSilenceHelp:
+		'Long enough to think mid-sentence, short enough not to wait around. Raise it if it cuts you off; lower it if the answer is slow to start.',
+	voiceAutoContinue: 'Listen again after answering',
+	voiceAutoContinueHelp:
+		'On, it is a conversation you can hold with the phone on the table. Off, it reads the answer and waits to be asked again.',
+	speechOutput: 'Read answers aloud',
+	speechOutputHelp:
+		'In voice mode on a phone, the answer is spoken back instead of only appearing. It uses a second model, on one of your connections, and it is billed like any other.',
+	speechModel: 'Voice model',
+	speechModelHelp:
+		'Only models marked as reading aloud are offered. If the list is empty, mark one in Models and prices on its connection.',
+	speechVoice: 'Voice',
+	speechVoiceHelp:
+		'The provider knows its voices by name. Where it publishes them the list is filled in for you; where it does not, type the name from its documentation.',
+	speechVoiceNone: 'This connection publishes no voice names. Type one.',
+	speechNoModel: 'No voice model is set up',
+	speechFailed: 'Could not read that out',
+	voiceLanguage: 'Spoken language',
+	voiceLanguageHelp:
+		'A two-letter code, such as fr or en. Leave it empty to let the model work it out, which it does well on a full sentence and badly on three words. Sent only to providers whose endpoint takes it.',
+	voiceLanguageAuto: 'Detect',
 	voiceModel: 'Transcription model',
 	voiceModelHelp:
 		'Only models marked as audio appear here. If the list is empty, mark one in Models and prices on its connection.',
@@ -476,7 +509,13 @@ const en = {
 	voiceHeardNothing: 'Nothing was heard.',
 	voiceTranscribing: 'Transcribing',
 	voiceIdle: 'Tap to speak.',
+	voiceStart: 'Start talking',
+	voiceInterrupt: 'Take the floor',
+	voiceSend: 'Done speaking',
+	voiceStop: 'Stop',
 	voiceListening: 'Listening.',
+	voiceThinking: 'Thinking.',
+	voiceAnswering: 'Answering.',
 	simplifiedMobileUI: 'Simplified mobile interface',
 	simplifiedMobileUIHelp:
 		'A second interface, built for a phone and for the voice: one thing at a time, a tab bar, and no sidebar. Being built in the open, and this one is unchanged.',
@@ -921,6 +960,8 @@ const en = {
 	usageTokens: '{tokens:string} tokens',
 	allowanceUnlimited: 'No ceiling here',
 	allowanceUnlimitedBody: 'Help yourself.',
+	usageCredits: 'credits',
+	allowanceResets: 'back to zero on {date:string}',
 	allowancePerMonth: 'every month',
 	allowancePerWeek: 'every week',
 	allowancePerDay: 'every day',

@@ -31,6 +31,9 @@ export const openai: ProviderDescriptor = {
 	badge: { id: 'openai', color: '#378ADD' },
 	nativeTools: true,
 	imageGeneration: true,
+	// The one thing worth saying about their transcription: the form takes a
+	// language, and `whisper-1` is markedly better for being told.
+	transcription: { language: 'language' },
 	modelRules: [
 		{
 			matches: ['gpt-image'],

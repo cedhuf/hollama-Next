@@ -5,6 +5,8 @@ import {
 	guessModelKind,
 	hasPriceFigure,
 	MODEL_KINDS,
+	reportedCurrency,
+	type ConnectionType,
 	type ModelKind,
 	type ModelPrice
 } from '$lib/connections';
@@ -291,6 +293,36 @@ export function getModelKinds(serverId: string): Record<string, ModelKind> {
 }
 
 /**
+ * Keep what a provider said about its own models, without touching what a person
+ * said about them.
+ *
+ * A guess read from a name is the app's answer of last resort, and for some
+ * models it is simply wrong with no way to be right: nothing about
+ * `fish-audio/s1` reveals that it talks, and nothing about
+ * `fish-audio/transcribe-1` reveals that it listens, yet the provider will say
+ * both outright when asked. Once it has, that answer should survive the request
+ * that learned it, because the next thing to need it is the server checking that
+ * the model somebody chose can do what they are asking of it.
+ *
+ * Written on read, which is the one place it can be: the answer arrives with the
+ * catalogue. Kept honest by two rules. A row that already exists is never
+ * touched, so a correction made in Models and prices always wins. And a
+ * declaration the guess would have reached anyway is not written at all, so the
+ * table stays a list of what is *not* obvious.
+ */
+export function rememberModelKinds(serverId: string, kinds: Record<string, ModelKind>): void {
+	const entries = Object.entries(kinds).filter(
+		([name, kind]) => MODEL_KINDS.includes(kind) && kind !== guessModelKind(name)
+	);
+	if (!entries.length) return;
+
+	const insert = getDb().prepare(
+		'INSERT OR IGNORE INTO model_kinds (server_id, model_name, kind) VALUES (?, ?, ?)'
+	);
+	for (const [name, kind] of entries) insert.run(serverId, name, kind);
+}
+
+/**
  * Replaces the whole set, keeping only what the guess would not already say.
  *
  * A row that agrees with `guessModelKind` is a row that says nothing, and it
@@ -358,14 +390,28 @@ export function unpricedSharedModels(): { serverId: string; label: string; model
 }
 
 /**
- * The currencies this instance's prices are written in.
+ * The currencies this instance's spending can be counted in.
  *
  * One is the answer a figure can be labelled with; several is the answer that
- * has to be admitted to, since nothing is converted. Empty means nothing is
- * priced, and then no figure is worth labelling at all.
+ * has to be admitted to, since nothing is converted anywhere. Empty means there
+ * is genuinely nothing to label, and then no figure is worth a unit.
+ *
+ * Two sources, because there are now two ways a call gets a cost. The table is
+ * the older one, and it used to be the only one, which is why this function used
+ * to read nothing else. Then a connection that reports its own costs stopped
+ * needing any prices at all, and an instance whose only connection is one of
+ * those has an empty table by design. Reading the table alone would answer
+ * "no currency" and render a twenty pound ceiling as a bare `20`, which is worse
+ * than no figure: a ceiling whose unit is a guess cannot be acted on.
+ *
+ * Only enabled system connections count towards the second source. A disabled one
+ * bills nothing, and a personal one is somebody's own key and own bill, neither
+ * counted here nor limited.
  */
-export function pricedCurrencies(): string[] {
-	const rows = getDb()
+export function spendCurrencies(): string[] {
+	const db = getDb();
+
+	const priced = db
 		.prepare(
 			`SELECT DISTINCT COALESCE(p.currency, 'USD') AS currency
 			 FROM model_pricing p JOIN servers s ON s.id = p.server_id
@@ -373,7 +419,21 @@ export function pricedCurrencies(): string[] {
 			   AND (p.input IS NOT NULL OR p.output IS NOT NULL OR p.rate IS NOT NULL)`
 		)
 		.all() as { currency: string }[];
-	return rows.map((row) => row.currency).sort();
+
+	const reporting = db
+		.prepare(
+			`SELECT DISTINCT connection_type FROM servers
+			 WHERE owner_user_id IS NULL AND is_enabled = 1`
+		)
+		.all() as { connection_type: string }[];
+
+	const found = new Set(priced.map((row) => row.currency));
+	for (const row of reporting) {
+		const currency = reportedCurrency(row.connection_type as ConnectionType);
+		if (currency) found.add(currency);
+	}
+
+	return [...found].sort();
 }
 
 export function setSharedModels(serverId: string, models: string[]): void {

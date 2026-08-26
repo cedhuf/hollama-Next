@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 
 import { requireUser } from '$lib/server/api';
-import { pricedCurrencies } from '$lib/server/db/servers';
+import { spendCurrencies } from '$lib/server/db/servers';
 import {
 	creditLimitFor,
 	creditPeriodFor,
@@ -33,7 +33,7 @@ export async function GET(event) {
 		spend: spendSince(user.id, from),
 		// One currency can label a figure; several have to be admitted to, since
 		// nothing is converted anywhere.
-		currencies: pricedCurrencies(),
+		currencies: spendCurrencies(),
 		// Always the last thirty days, whatever the period: a month of history
 		// beside a weekly allowance is what says whether this week is unusual.
 		history: dailySpend(user.id, daysAgo(29))

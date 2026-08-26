@@ -48,6 +48,23 @@ Read `infomaniak.ts` first if you are writing one. It exercises most of the shap
 - **`extraModels`**, for a route the provider's own catalogue cannot list, because at the provider it
   is not a model at all. Naming it here gives it one. From that point it is priced, shared, refused
   and metered by the same machinery as everything else.
+- **`catalogues`**, for a provider that will list something only when asked a narrower question. Not
+  the same case: here the provider knows what it serves and will say so, but `/models` does not
+  mention it. OpenRouter's speech models are the example, invisible until you ask with
+  `?output_modalities=transcription`. Return a URL per extra list, never a list of names, so what
+  comes back stays the provider's answer and not a snapshot of it. Each is read like the main one,
+  with the connection's key and filter, and merged in. A call that fails costs only itself. Give a
+  list a `kind` when the question settles what came back: an answer to "what speaks" beats any guess
+  made from a name, and for some models it is the only thing that can be right. It never beats a
+  correction somebody made themselves.
+- **`transcription`**, for a provider that departs from `/audio/transcriptions` answering with the
+  text: a different root, or a job to poll. Say where to knock and how to read the answer. How long
+  to wait, how often to ask, what may be uploaded and how large are the app's, not yours.
+- **`speech`**, for a provider that reads text aloud. Unlike transcription there is no assumed
+  contract, so leaving it off means the feature is not offered on that connection at all, which is
+  the right answer for the endpoints that would 404. Add `voices` where the provider publishes its
+  own voice names: every one of these endpoints requires a voice and refuses without one, and a list
+  is better than asking somebody to copy a name out of a documentation page.
 
 ## Sizes and quality, and why they are rules
 

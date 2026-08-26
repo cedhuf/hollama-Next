@@ -62,7 +62,13 @@ const fr = extendDictionary(en, {
 	modelKindText: 'Conversation',
 	modelKindImage: 'Images',
 	modelKindEmbedding: 'Embeddings',
-	modelKindAudio: 'Audio',
+	modelKindAudio: 'Transcription',
+	modelKindSpeech: 'Lecture à voix haute',
+	priceAuto: 'Auto',
+	priceAutoHelp: 'ce fournisseur facture chaque appel et indique le montant',
+	priceFallbackSet: 'Fixer mon tarif',
+	priceFallbackHelp:
+		'Votre tarif, compté à la place de ce que rapporte le fournisseur. Effacez-le pour revenir au sien.',
 	clearPrice: 'Effacer',
 	pricingIntro:
 		"Ouvrez un modèle pour le tarifer. Indiquez ce que fait chacun, pour qu'il ne soit proposé que là où il fonctionne.",
@@ -464,6 +470,33 @@ const fr = extendDictionary(en, {
 	voiceInput: 'Saisie vocale',
 	voiceInputHelp:
 		"Parlez au lieu de taper. Ce que vous dites part vers un modèle de transcription, et le texte arrive dans le champ pour que vous le relisiez avant l'envoi.",
+	voiceTab: 'Voix',
+	voiceLoop: 'Mode vocal',
+	voiceLoopHelp:
+		"Le comportement de l'écran vocal du téléphone entre une question et la suivante. Sans effet sur le micro du composer, qui s'arrête quand vous le dites.",
+	voiceSilence: "Arrêter d'écouter après",
+	voiceSilenceValue: '{seconds} s de silence',
+	voiceSilenceHelp:
+		'Assez long pour réfléchir en milieu de phrase, assez court pour ne pas attendre. Augmentez si ça vous coupe la parole, baissez si la réponse tarde à venir.',
+	voiceAutoContinue: 'Réécouter après avoir répondu',
+	voiceAutoContinueHelp:
+		"Activé, c'est une conversation qu'on tient avec le téléphone posé sur la table. Désactivé, la réponse est lue puis il attend qu'on le relance.",
+	speechOutput: 'Lire les réponses à voix haute',
+	speechOutputHelp:
+		"En mode vocal sur un téléphone, la réponse est dite au lieu d'être seulement affichée. Cela passe par un second modèle, sur une de vos connexions, et c'est facturé comme le reste.",
+	speechModel: 'Modèle de voix',
+	speechModelHelp:
+		'Seuls les modèles marqués comme lisant à voix haute sont proposés. Si la liste est vide, marquez-en un dans Modèles et prix, sur sa connexion.',
+	speechVoice: 'Voix',
+	speechVoiceHelp:
+		'Le fournisseur connaît ses voix par leur nom. Quand il les publie, la liste est remplie pour vous ; sinon, saisissez le nom depuis sa documentation.',
+	speechVoiceNone: 'Cette connexion ne publie aucun nom de voix. Saisissez-en un.',
+	speechNoModel: "Aucun modèle de voix n'est configuré",
+	speechFailed: 'Lecture impossible',
+	voiceLanguage: 'Langue parlée',
+	voiceLanguageHelp:
+		"Un code à deux lettres, fr ou en par exemple. Laissez vide pour laisser le modèle deviner, ce qu'il fait bien sur une phrase entière et mal sur trois mots. Envoyé aux seuls fournisseurs dont l'endpoint l'accepte.",
+	voiceLanguageAuto: 'Détecter',
 	voiceModel: 'Modèle de transcription',
 	voiceModelHelp:
 		'Seuls les modèles marqués comme audio apparaissent ici. Si la liste est vide, marquez-en un dans Modèles et tarifs, sur sa connexion.',
@@ -473,7 +506,13 @@ const fr = extendDictionary(en, {
 	voiceHeardNothing: 'Rien entendu.',
 	voiceTranscribing: 'Transcription',
 	voiceIdle: 'Touchez pour parler.',
+	voiceStart: 'Commencer à parler',
+	voiceInterrupt: 'Reprendre la parole',
+	voiceSend: "J'ai fini de parler",
+	voiceStop: 'Arrêter',
 	voiceListening: "J'écoute.",
+	voiceThinking: 'Je réfléchis.',
+	voiceAnswering: 'Je réponds.',
 	simplifiedMobileUI: 'Interface mobile simplifiée',
 	simplifiedMobileUIHelp:
 		"Une seconde interface, pensée pour le téléphone et pour la voix : une chose à la fois, une barre d'onglets, pas de barre latérale. En construction au grand jour, et celle-ci ne change pas.",
@@ -948,6 +987,8 @@ const fr = extendDictionary(en, {
 	usageTokens: '{tokens} jetons',
 	allowanceUnlimited: 'Aucun plafond',
 	allowanceUnlimitedBody: 'Servez-vous.',
+	usageCredits: 'crédits',
+	allowanceResets: 'remis à zéro le {date}',
 	allowancePerMonth: 'chaque mois',
 	allowancePerWeek: 'chaque semaine',
 	allowancePerDay: 'chaque jour',
