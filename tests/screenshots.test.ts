@@ -47,14 +47,22 @@ const DOCS_OUT = 'docs/src/assets/screenshots';
 /**
  * An iPhone 17 Pro Max's screen, in points.
  *
- * The viewport the app is given is shorter than this: see `SHOT_HEIGHT`. What
- * this is, is the size of the glass, which is what the frame has to match for the
- * picture to be the shape of a phone.
+ * The size of the glass, which the app fills and the frame matches. The system's
+ * share of it is reserved by the app itself, from the insets a shot hands it.
  */
 const MOBILE = { width: 440, height: 956 };
 
-/** What a phone actually leaves the app, once the system has taken its share. */
-const MOBILE_VIEWPORT = { width: 440, height: 956 - 54 - 34 };
+/**
+ * The app gets the whole glass, and reserves the system's share itself.
+ *
+ * Which is what a device does. The insets are handed to it as CSS variables in
+ * `shootPhone`, so it pads its own header and its own tab bar exactly as it would
+ * on the phone, its background runs under both bars, and the frame paints nothing.
+ */
+const MOBILE_VIEWPORT = { width: MOBILE.width, height: MOBILE.height };
+
+/** What an iPhone 17 Pro Max keeps for the clock and the home indicator. */
+const INSETS = { top: 54, bottom: 34 };
 const DESKTOP = { width: 1440, height: 900 };
 
 /** A banner rather than a window: slices of a 1440px viewport are too narrow. */
@@ -463,6 +471,20 @@ function expandSidebar(page: Page) {
 	return page.locator('button[aria-label="Expand sidebar"]:visible').first();
 }
 
+/**
+ * A phone shot: the device's insets, then the picture.
+ *
+ * Injected rather than emulated, because no browser will pretend to have a notch.
+ * The app reads its safe areas from these variables and pads itself, which is the
+ * whole reason the frame no longer has to paint anything behind the clock.
+ */
+async function shootPhone(page: Page, name: string) {
+	await page.addStyleTag({
+		content: `:root{--safe-top:${INSETS.top}px;--safe-bottom:${INSETS.bottom}px}`
+	});
+	await shoot(page, name);
+}
+
 async function shoot(page: Page, name: string) {
 	// Fonts and the wallpaper layer settle a frame or two after the route does,
 	// and a picture taken before they do is a picture of the app loading.
@@ -583,21 +605,20 @@ const TITLE_BAR = 30;
 const PHONE = { bezel: 13, corner: 66, screen: 53, statusBar: 54, homeBar: 34 };
 
 /**
- * The whole screen is 956, furniture included.
+ * The whole screen is 956, furniture included, and so is the capture.
  *
- * Which is why the app is captured shorter than that. The status bar and the home
- * indicator used to be added above and below the capture, so a framed phone came
- * out 1044 tall and was not the shape of any iPhone: the proportions were wrong by
- * exactly the height of the two bars.
+ * Two earlier constructions were wrong in opposite directions. Adding the bars
+ * around the capture made a framed phone 1044 tall, the shape of nothing, and
+ * painted a strip above the app in a flat colour it never used: the band. Cutting
+ * the capture short fixed the shape and kept the band.
  *
- * The alternative would be to capture the full height and lay the bars over it,
- * which is what a device does. It is not available here: the app is photographed
- * in a plain viewport where `env(safe-area-inset-top)` is nought, so its header
- * sits at the very top and an island painted on top would cover it. Giving the
- * capture the height a real device leaves the app costs nothing and is true.
+ * What a device does is neither. The app is given the whole glass and told what
+ * the system is keeping, it pads itself, and its own background runs behind the
+ * clock and the home indicator. That is now what happens here, because the insets
+ * are variables the shot can set rather than an `env()` that is always nought in a
+ * plain viewport.
  */
 const PHONE_SCREEN = { width: MOBILE.width, height: MOBILE.height };
-const SHOT_HEIGHT = PHONE_SCREEN.height - PHONE.statusBar - PHONE.homeBar;
 
 /** A framed window and a framed phone, outer edge to outer edge. */
 const WINDOW_SIZE = { width: DESKTOP.width, height: DESKTOP.height + TITLE_BAR };
@@ -718,21 +739,25 @@ const FRAME_CSS = `
 		transform-origin: top left;
 	}
 	.phone .screen {
+		position: relative;
 		width: var(--screen-w);
 		height: var(--screen-h);
 		border-radius: var(--screen-corner);
 		overflow: hidden;
 		background: var(--top);
 	}
+	/* Over the capture, not above it, and with no background of its own. On a
+	   device the app runs under the status bar and its own colour is what shows
+	   behind the clock; a strip painted here was the band across the top. */
 	.phone .status {
-		position: relative;
+		position: absolute;
+		top: 0; left: 0; right: 0;
 		height: ${PHONE.statusBar}px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		padding: 0 32px 0 36px;
 		box-sizing: border-box;
-		background: var(--top);
 		color: var(--ink);
 		font: 600 17px/1 -apple-system, "SF Pro Text", system-ui, sans-serif;
 		letter-spacing: .2px;
@@ -749,8 +774,9 @@ const FRAME_CSS = `
 		background: #000;
 	}
 	.phone .home {
+		position: absolute;
+		bottom: 0; left: 0; right: 0;
 		height: ${PHONE.homeBar}px;
-		background: var(--bottom);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -825,7 +851,7 @@ function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) 
 	const size = chassis(
 		PHONE_SCREEN.width,
 		PHONE_SCREEN.height,
-		SHOT_HEIGHT,
+		PHONE_SCREEN.height,
 		PHONE.bezel,
 		PHONE.screen
 	);
@@ -1001,20 +1027,20 @@ test.describe('screenshots', () => {
 
 		await page.goto('/sessions/ab12cd');
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
-		await shoot(page, 'mobile_conversation');
+		await shootPhone(page, 'mobile_conversation');
 
 		await expandSidebar(page).click();
 		await expect(page.getByText('Reading a sourdough starter')).toBeVisible();
-		await shoot(page, 'mobile_sidebar');
+		await shootPhone(page, 'mobile_sidebar');
 
 		await configure(page, { themeMode: 'dark' });
 		await page.goto('/sessions');
 		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
-		await shoot(page, 'mobile_home');
+		await shootPhone(page, 'mobile_home');
 
 		await page.goto('/library');
 		await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
-		await shoot(page, 'mobile_library');
+		await shootPhone(page, 'mobile_library');
 	});
 
 	/**
@@ -1035,12 +1061,12 @@ test.describe('screenshots', () => {
 		// The orb draws from a frame loop and the card's light drifts on its own
 		// clock, so this waits for a shape rather than for a paint.
 		await page.waitForTimeout(900);
-		await shoot(page, 'phone_home');
+		await shootPhone(page, 'phone_home');
 
 		await page.goto('/m/sessions/ab12cd');
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
 		await page.waitForTimeout(600);
-		await shoot(page, 'phone_conversation');
+		await shootPhone(page, 'phone_conversation');
 
 		// Opened on somebody, so the screen has a face, a name and a greeting rather
 		// than an orb alone on an empty page.
@@ -1050,7 +1076,7 @@ test.describe('screenshots', () => {
 		// content has no spaces in it and no text query will ever match it.
 		await expect(page.getByRole('link', { name: /Nova/ })).toBeVisible();
 		await page.waitForTimeout(900);
-		await shoot(page, 'phone_voice');
+		await shootPhone(page, 'phone_voice');
 	});
 
 	test('desktop', async ({ page }) => {

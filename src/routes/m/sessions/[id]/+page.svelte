@@ -104,7 +104,7 @@
 
 		<!-- Inside the sheet, above the tab bar, in the flow: it reserves its own
 		     room, so the thread scrolls to a foot it can actually reach. -->
-		<div class="shrink-0 px-3 pb-[calc(env(safe-area-inset-bottom)+5.5rem)]">
+		<div class="shrink-0 px-3 pb-[calc(var(--safe-bottom)+5.5rem)]">
 			<Composer
 				bind:editor={chat.editor}
 				onSubmit={chat.submit}

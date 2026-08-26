@@ -43,7 +43,7 @@
 
 	<!-- The safe area is the page's business, not the tab bar's: the content
 	     scrolls under the notch, and only the bar below reserves room. -->
-	<main class="min-h-0 flex-1 overflow-y-auto pt-[env(safe-area-inset-top)]">
+	<main class="min-h-0 flex-1 overflow-y-auto pt-[var(--safe-top)]">
 		{@render children()}
 	</main>
 

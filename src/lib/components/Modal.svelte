@@ -39,13 +39,13 @@
 		     height in viewport units can disagree with it, which on iOS is exactly the
 		     kind of disagreement that leaves a band along the bottom. -->
 		<Dialog.Content
-			class="modal-content bg-shade-1 sm:modal-panel fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[env(safe-area-inset-top)] max-sm:pb-[env(safe-area-inset-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl"
+			class="modal-content bg-shade-1 sm:modal-panel fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[var(--safe-top)] max-sm:pb-[var(--safe-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl"
 		>
 			{#if closeButton}
 				<!-- An absolutely positioned box is laid out against the padding box, which
 				     the padding above does not move, so this one pays its own way. -->
 				<Dialog.Close
-					class="text-muted hover:bg-shade-2 hover:text-active absolute top-3 right-3 z-10 rounded-md p-1.5 transition-colors max-sm:top-[calc(0.75rem+env(safe-area-inset-top))]"
+					class="text-muted hover:bg-shade-2 hover:text-active absolute top-3 right-3 z-10 rounded-md p-1.5 transition-colors max-sm:top-[calc(0.75rem+var(--safe-top))]"
 					aria-label="Close"
 				>
 					<X class="h-4 w-4" />

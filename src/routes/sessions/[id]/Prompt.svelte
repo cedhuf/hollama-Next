@@ -409,7 +409,7 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] lg:px-6 lg:pb-4 xl:px-8 {editor.isExpanded
+	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,var(--safe-bottom))] lg:px-6 lg:pb-4 xl:px-8 {editor.isExpanded
 		? 'prompt-editor--fullscreen'
 		: ''}"
 >

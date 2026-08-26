@@ -32,7 +32,7 @@
 </script>
 
 <nav
-	class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+	class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,var(--safe-bottom))]"
 	aria-label={$LL.mobileTabChats()}
 >
 	<!-- Two objects, not one, and the left one never moves.

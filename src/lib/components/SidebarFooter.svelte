@@ -79,7 +79,7 @@
 <div class="surface-chrome flex shrink-0 border-t">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div
-		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,env(safe-area-inset-bottom))] {rail
+		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,var(--safe-bottom))] {rail
 			? 'lg:w-16'
 			: 'lg:w-96'}"
 	>

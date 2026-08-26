@@ -41,6 +41,26 @@
 	}
 
 	:root {
+		/*
+		 * What the device keeps for itself, as variables rather than as `env()` at
+		 * each of the eleven places that reserve room for it.
+		 *
+		 * The value is the same: these default to the insets the browser reports, so
+		 * nothing about a real device changes. What they add is a way to say
+		 * otherwise, and the screenshots are why. An app photographed in a plain
+		 * viewport is told the insets are nought, so it draws its header hard against
+		 * the top edge, and a phone frame then either covers that header with a status
+		 * bar or paints a strip of its own above it. The strip is what made every
+		 * framed phone show a band across the top in a colour the app never used.
+		 *
+		 * Given real numbers, the app pads itself exactly as it would on the device,
+		 * its own background runs under the status bar, and the frame has nothing left
+		 * to paint.
+		 */
+		--safe-top: env(safe-area-inset-top);
+		--safe-bottom: env(safe-area-inset-bottom);
+		--safe-left: env(safe-area-inset-left);
+
 		/* Single source of truth for the top-bar height, shared by the sidebar
 		   header and every chat/persona Header so they line up exactly. */
 		--app-header-h: 4rem;
@@ -936,7 +956,7 @@
 	 */
 	.floating-band {
 		padding-inline: 1rem;
-		padding-top: calc(1rem + env(safe-area-inset-top));
+		padding-top: calc(1rem + var(--safe-top));
 		padding-bottom: 0.5rem;
 	}
 

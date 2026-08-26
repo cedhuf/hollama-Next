@@ -19,7 +19,7 @@
 <!-- The top edge of the column, and the densest of its materials along with the
      footer: edges read as edges by being more solid than what they enclose. -->
 <div
-	class="surface-chrome flex h-[var(--app-header-h)] shrink-0 border-b max-lg:h-[calc(var(--app-header-h)+env(safe-area-inset-top))]"
+	class="surface-chrome flex h-[var(--app-header-h)] shrink-0 border-b max-lg:h-[calc(var(--app-header-h)+var(--safe-top))]"
 >
 	<!-- The block paints out to the frame's edge; its contents stop at the width the
 	     column is going to. Two jobs that used to be one and had to be separated: laid
@@ -27,7 +27,7 @@
 	     is still narrowing; laid out at the frame's width, it re-wraps itself sixty
 	     times a second on the way there. -->
 	<div
-		class="flex h-full w-full shrink-0 items-center px-4 max-lg:w-[var(--drawer-w)] max-lg:pt-[env(safe-area-inset-top)] {rail
+		class="flex h-full w-full shrink-0 items-center px-4 max-lg:w-[var(--drawer-w)] max-lg:pt-[var(--safe-top)] {rail
 			? 'lg:w-16'
 			: 'lg:w-96'}"
 	>
