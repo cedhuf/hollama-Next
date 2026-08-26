@@ -47,9 +47,61 @@ function normalizeQuestions(raw: unknown): AskQuestion[] {
 }
 
 /**
+ * The whole objects out of a broken one.
+ *
+ * A small model that gets the shape right can still get the punctuation wrong: a
+ * bracket in the wrong place at the end of the block makes the entire thing
+ * unparseable, questions that were perfectly well formed included. Rather than
+ * throw all of it away, this walks the text and collects every balanced `{…}`
+ * that parses on its own.
+ *
+ * Deliberately not a repair. Counting brackets and appending the missing ones
+ * guesses at what the model meant, and a guess about a question somebody is
+ * about to be asked is worse than one question fewer.
+ */
+function salvageQuestions(json: string): unknown[] {
+	const found: unknown[] = [];
+	const starts: number[] = [];
+	let inString = false;
+	let escaped = false;
+
+	for (let i = 0; i < json.length; i++) {
+		const character = json[i];
+
+		if (inString) {
+			if (escaped) escaped = false;
+			else if (character === '\\') escaped = true;
+			else if (character === '"') inString = false;
+			continue;
+		}
+
+		if (character === '"') inString = true;
+		else if (character === '{') starts.push(i);
+		else if (character === '}') {
+			// Every closer, at every depth: the questions are nested inside an object
+			// that the break usually leaves open, so waiting for the outer one to
+			// close would collect nothing at all.
+			const from = starts.pop();
+			if (from === undefined) continue;
+			try {
+				const value = JSON.parse(json.slice(from, i + 1));
+				if (value && typeof (value as { question?: unknown }).question === 'string') {
+					found.push(value);
+				}
+			} catch {
+				// One malformed object among several is not a reason to stop reading.
+			}
+		}
+	}
+
+	return found;
+}
+
+/**
  * Split a finished assistant reply into the visible text and, if present, the
  * structured quick-choice questions. Tolerant of an optional code fence inside
- * the block and of malformed JSON (falls back to plain text).
+ * the block, and of malformed JSON: what can be read is read, and what cannot is
+ * dropped rather than shown.
  */
 export function parseAskBlock(raw: string): { content: string; choices?: AskChoices } {
 	const match = raw.match(/<ask>\s*([\s\S]*?)<\/ask>/i);
@@ -62,14 +114,20 @@ export function parseAskBlock(raw: string): { content: string; choices?: AskChoi
 		.replace(/```$/, '')
 		.trim();
 
+	let questions: AskQuestion[];
 	try {
 		const parsed = JSON.parse(json) as { questions?: unknown };
-		const questions = normalizeQuestions(parsed?.questions);
-		if (!questions.length) return { content: before || raw };
-		return { content: before, choices: { questions } };
+		questions = normalizeQuestions(parsed?.questions);
 	} catch {
-		return { content: before || raw };
+		// Broken, but not necessarily worthless: keep the questions that are whole.
+		questions = normalizeQuestions(salvageQuestions(json));
 	}
+
+	// Never the raw block. It used to fall back to the whole reply when nothing
+	// could be parsed, which put a page of JSON in front of somebody who had asked
+	// for a quiz. A turn that produced nothing readable produced nothing, and the
+	// retry button is right there.
+	return questions.length ? { content: before, choices: { questions } } : { content: before };
 }
 
 /**
