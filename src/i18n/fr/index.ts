@@ -462,7 +462,7 @@ const fr = extendDictionary(en, {
 	mobileHello: 'Bonjour',
 	mobileHelloName: 'Bonjour, {name:string}',
 	mobileHelloBody: "On fait quoi aujourd'hui ?",
-	mobileStartVoice: 'Lui parler',
+	mobileStartVoice: 'Me parler',
 	mobileStartVoiceBody: 'Mains libres, à voix haute.',
 	mobileStartChat: 'Nouvelle conversation',
 	mobileStartImage: 'Dessiner',
@@ -518,6 +518,9 @@ const fr = extendDictionary(en, {
 	voiceListening: "J'écoute.",
 	voiceThinking: 'Je réfléchis.',
 	voiceAnswering: 'Je réponds.',
+	classicMobileUI: "Utiliser l'interface classique sur téléphone",
+	classicMobileUIHelp:
+		"L'interface téléphone est celle qu'un téléphone obtient par défaut. Activez ceci pour être envoyé vers l'interface responsive à la place, la même mise en page que sur ordinateur, en plus étroit.",
 	simplifiedMobileUI: 'Interface mobile simplifiée',
 	simplifiedMobileUIHelp:
 		"Une seconde interface, pensée pour le téléphone et pour la voix : une chose à la fois, une barre d'onglets, pas de barre latérale. En construction au grand jour, et celle-ci ne change pas.",

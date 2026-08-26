@@ -121,17 +121,22 @@
 				/>
 			</SettingsField>
 		{/if}
-		<!-- Alpha, and labelled as such: it is a second interface rather than a
-		     variation on this one, and it is being built in the open. -->
+		<!-- Stated as switching it off, because it is on by default on a phone now.
+		     Nobody turns on the thing they were going to get anyway, and a checkbox
+		     that is ticked from the start reads as a feature somebody else enabled.
+
+		     The stored setting still means what it always did. Only the question does
+		     the inverting, which keeps every account that had already chosen. -->
 		<FieldCheckbox
-			label={$LL.simplifiedMobileUI()}
-			bind:checked={$settingsStore.simplifiedMobileUI}
+			label={$LL.classicMobileUI()}
+			checked={!$settingsStore.simplifiedMobileUI}
+			onChange={(off) => ($settingsStore.simplifiedMobileUI = !off)}
 		>
 			{#snippet badge()}
 				<SettingsBadge>{$LL.alpha()}</SettingsBadge>
 			{/snippet}
 		</FieldCheckbox>
-		<SettingsHint>{$LL.simplifiedMobileUIHelp()}</SettingsHint>
+		<SettingsHint>{$LL.classicMobileUIHelp()}</SettingsHint>
 
 		<FieldCheckbox
 			label={$LL.autoExpandReasoningBlocks()}

@@ -224,6 +224,15 @@ const BASE_SETTINGS = {
 	userLanguage: 'en',
 	themeStyle: 'classic',
 	themeMode: 'light',
+	/**
+	 * The responsive interface, explicitly.
+	 *
+	 * A phone gets the `/m` interface by default now, so every shot taken at a phone
+	 * viewport would be redirected out of the route it asked for. The classic
+	 * pictures still want the responsive layout, and the ones that want `/m` say so
+	 * by turning this back off.
+	 */
+	simplifiedMobileUI: false,
 	models: [MODEL, MODEL_B]
 };
 
@@ -403,7 +412,9 @@ const PHONE_SHOTS = [
 	'mobile_conversation',
 	'mobile_sidebar',
 	'mobile_home',
-	'mobile_library'
+	'mobile_library',
+	'phone_home',
+	'phone_voice'
 ] as const;
 
 async function readShot(name: string) {
@@ -753,7 +764,14 @@ async function frameDevice(page: Page, name: string) {
 const HERO = {
 	/** The shot in the window, and the one in the phone. */
 	window: 'desktop_wallpaper',
-	phone: 'mobile_home',
+	/**
+	 * The phone interface, not the responsive one at a phone's width.
+	 *
+	 * The picture at the top of the README is the first thing anybody sees of this
+	 * app, and what it should say is that there are two interfaces rather than one
+	 * that shrinks. A narrow copy of the window beside it says the opposite.
+	 */
+	phone: 'phone_home',
 	/** How much smaller the phone is, so it reads as nearer rather than as huge. */
 	scale: 0.62,
 	/** How far the phone hangs past the window, right and below. */
@@ -825,6 +843,32 @@ test.describe('screenshots', () => {
 		await page.goto('/library');
 		await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
 		await shoot(page, 'mobile_library');
+	});
+
+	/**
+	 * The phone interface, which is a different product rather than a narrower one.
+	 *
+	 * Its own test because it needs the setting the others turn off, and because it
+	 * is what the README opens on: the picture at the top of the page is a desktop
+	 * window with one of these leaning on it.
+	 */
+	test('phone interface', async ({ page }) => {
+		await page.setViewportSize(MOBILE);
+		await seed(page);
+		await configure(page, { simplifiedMobileUI: true, themeMode: 'dark' });
+
+		await page.goto('/m');
+		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
+		await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();
+		// The orb draws from a frame loop and the card's light drifts on its own
+		// clock, so this waits for a shape rather than for a paint.
+		await page.waitForTimeout(900);
+		await shoot(page, 'phone_home');
+
+		await page.goto('/m/voice');
+		await expect(page.getByRole('button', { name: /talk|wake|set it up/i })).toBeVisible();
+		await page.waitForTimeout(900);
+		await shoot(page, 'phone_voice');
 	});
 
 	test('desktop', async ({ page }) => {

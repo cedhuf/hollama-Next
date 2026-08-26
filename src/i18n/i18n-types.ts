@@ -1768,7 +1768,7 @@ type RootTranslation = {
 	 */
 	mobileHelloBody: string
 	/**
-	 * T​a​l​k​ ​t​o​ ​i​t
+	 * T​a​l​k​ ​t​o​ ​m​e
 	 */
 	mobileStartVoice: string
 	/**
@@ -1956,6 +1956,14 @@ type RootTranslation = {
 	 * A​n​s​w​e​r​i​n​g​.
 	 */
 	voiceAnswering: string
+	/**
+	 * U​s​e​ ​t​h​e​ ​c​l​a​s​s​i​c​ ​i​n​t​e​r​f​a​c​e​ ​o​n​ ​a​ ​p​h​o​n​e
+	 */
+	classicMobileUI: string
+	/**
+	 * T​h​e​ ​p​h​o​n​e​ ​i​n​t​e​r​f​a​c​e​ ​i​s​ ​w​h​a​t​ ​a​ ​p​h​o​n​e​ ​g​e​t​s​ ​b​y​ ​d​e​f​a​u​l​t​.​ ​S​w​i​t​c​h​ ​t​h​i​s​ ​o​n​ ​t​o​ ​b​e​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​r​e​s​p​o​n​s​i​v​e​ ​o​n​e​ ​i​n​s​t​e​a​d​,​ ​t​h​e​ ​s​a​m​e​ ​l​a​y​o​u​t​ ​a​ ​d​e​s​k​t​o​p​ ​s​e​e​s​,​ ​n​a​r​r​o​w​e​r​.
+	 */
+	classicMobileUIHelp: string
 	/**
 	 * S​i​m​p​l​i​f​i​e​d​ ​m​o​b​i​l​e​ ​i​n​t​e​r​f​a​c​e
 	 */
@@ -5710,7 +5718,7 @@ export type TranslationFunctions = {
 	 */
 	mobileHelloBody: () => LocalizedString
 	/**
-	 * Talk to it
+	 * Talk to me
 	 */
 	mobileStartVoice: () => LocalizedString
 	/**
@@ -5897,6 +5905,14 @@ export type TranslationFunctions = {
 	 * Answering.
 	 */
 	voiceAnswering: () => LocalizedString
+	/**
+	 * Use the classic interface on a phone
+	 */
+	classicMobileUI: () => LocalizedString
+	/**
+	 * The phone interface is what a phone gets by default. Switch this on to be sent to the responsive one instead, the same layout a desktop sees, narrower.
+	 */
+	classicMobileUIHelp: () => LocalizedString
 	/**
 	 * Simplified mobile interface
 	 */

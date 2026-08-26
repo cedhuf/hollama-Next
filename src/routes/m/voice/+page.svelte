@@ -8,8 +8,9 @@
 	import { page } from '$app/state';
 	import { SILENCE } from '$lib/audioReading';
 	import { Conversation } from '$lib/chat/conversation.svelte';
+	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import { repository } from '$lib/data';
-	import { settingsStore } from '$lib/localStorage';
+	import { personasStore, settingsStore } from '$lib/localStorage';
 	import { newSession } from '$lib/sessions';
 	import { Speaker } from '$lib/speech.svelte';
 	import { settingsModalOpen } from '$lib/stores/modal';
@@ -75,10 +76,21 @@
 		if (!stored) return;
 		chat = new Conversation(stored, { scrollToBottom: () => {} });
 		await chat.open(stored, { atBottom: true });
-		// What was said last, so arriving on a conversation already under way shows
-		// where it got to rather than an empty screen with a history behind it.
-		const last = stored.messages.at(-1);
-		if (last?.role === 'assistant') answer = last.content ?? '';
+		/**
+		 * Their greeting, not their last answer.
+		 *
+		 * Somebody opening a spoken conversation with a character is starting one, and
+		 * being met with the tail of the previous exchange is being handed a page you
+		 * are in the middle of. The greeting is what that character says when you walk
+		 * in, which is exactly the moment this is.
+		 *
+		 * Nothing at all when they have no greeting. An empty screen invites a first
+		 * word, and the last thing they said three days ago does not.
+		 */
+		const greeting = ($personasStore ?? []).find(
+			(entry) => entry.id === stored.personaId
+		)?.greeting;
+		answer = greeting?.trim() ?? '';
 	});
 
 	/** Whether the loop is running, as opposed to waiting to be started. */
@@ -326,6 +338,20 @@
 	);
 
 	/**
+	 * Whose voice this is, when it belongs to somebody.
+	 *
+	 * A screen with no name on it is a screen where every persona sounds like the
+	 * app. The face in the corner is the shortest way to say who answered, and
+	 * tapping it opens the same conversation in writing, which is where you go when
+	 * you want to read back rather than listen.
+	 */
+	const persona = $derived(
+		chat?.session.personaId
+			? ($personasStore ?? []).find((entry) => entry.id === chat?.session.personaId)
+			: undefined
+	);
+
+	/**
 	 * Whether this screen can do its job, asked before it offers to.
 	 *
 	 * Both halves, and both up front. Finding out by trying is how somebody speaks a
@@ -359,7 +385,22 @@
 <div class="relative flex h-full flex-col overflow-hidden px-6 py-8">
 	<!-- The way out, top right, away from everything else: a screen you talk to
 	     needs its exit somewhere the hand is not. -->
-	<div class="flex w-full justify-end">
+	<div class="flex w-full items-center justify-between">
+		<!-- Who is answering, and the way to read them instead of hearing them. Nothing
+		     at all when the conversation belongs to nobody in particular, rather than a
+		     placeholder face: an empty corner says "this is the app" perfectly well. -->
+		{#if persona && chat}
+			<a
+				href={resolve('/m/sessions/[id]', { id: chat.session.id })}
+				class="flex items-center gap-2 rounded-full transition-opacity active:opacity-70"
+			>
+				<PersonaAvatar {persona} size={36} />
+				<span class="text-muted max-w-32 truncate text-sm">{persona.name}</span>
+			</a>
+		{:else}
+			<span></span>
+		{/if}
+
 		<button
 			type="button"
 			onclick={leave}
@@ -434,9 +475,7 @@
 
 	     A fixed height, empty or not. Letting it size itself is what pushed the orb
 	     up and down a turn at a time. -->
-	<div
-		class="flex h-40 w-full shrink-0 flex-col items-center justify-start gap-3 overflow-y-auto pt-2"
-	>
+	<div class="transcript flex h-40 w-full shrink-0 flex-col items-center justify-end gap-3 pb-1">
 		{#if !ready}
 			<!-- Naming what is missing without offering the door to it is a dead end with
 			     a caption. -->
@@ -459,3 +498,24 @@
 		{/if}
 	</div>
 </div>
+
+<style lang="postcss">
+	/*
+	 * A fixed window on the last thing said, not a scroller.
+	 *
+	 * Nobody scrolls back through a conversation they are having out loud, and a bar
+	 * appearing beside a spoken answer is an invitation to do the one thing this
+	 * screen is not for. So the height is fixed, the content sits at the bottom, and
+	 * anything older than the window simply leaves the top.
+	 *
+	 * Faded rather than cut. A hard edge reads as a layout mistake; a line dissolving
+	 * upwards reads as something passing out of view, which is what it is doing. The
+	 * mask is the whole of it: no gradient overlay to keep in step with the
+	 * background, and nothing to get wrong when the theme changes.
+	 */
+	.transcript {
+		overflow: hidden;
+		mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
+		-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
+	}
+</style>

@@ -264,11 +264,39 @@ export interface Settings {
 	 * Send this account to the mobile-first interface under `/m`.
 	 *
 	 * A setting rather than a breakpoint: the two interfaces are two products, not
-	 * one product at two widths, and which one somebody wants is not a thing a
-	 * media query can know. The responsive interface is unchanged and remains the
-	 * default everywhere.
+	 * one product at two widths, and which one somebody wants is not a thing a media
+	 * query can know. It still takes a phone to have any effect at all, so a desktop
+	 * never sees `/m` whatever this says.
+	 *
+	 * On by default now that the phone interface is the better one there. The
+	 * setting is stated the other way round in Settings, as switching it off, which
+	 * is what a default worth having looks like from the outside: nobody turns on
+	 * the thing they were going to get anyway.
+	 *
+	 * A default only reaches somebody who has never touched it. An account that
+	 * explicitly turned this off keeps it off, which is correct and worth knowing
+	 * when the change does not appear to have happened.
 	 */
 	simplifiedMobileUI: boolean;
+	/**
+	 * Whether the one-time switch to the phone interface has already happened.
+	 *
+	 * A default only ever reaches somebody who has stored nothing, and this app
+	 * persists the whole settings object, so every account that has ever opened it
+	 * carries an explicit `simplifiedMobileUI: false` from back when that was the
+	 * default. Changing the default alone would therefore have changed it for nobody
+	 * who actually uses the app, which is the one group it was meant for.
+	 *
+	 * Turning a stored `false` into a `true` is normally indefensible: it overrides a
+	 * choice. It is defensible exactly once here, because until now the setting was
+	 * off by default and buried in Settings, so a stored `false` cannot be somebody
+	 * who turned it off. Nobody switches off what they never had. An account that had
+	 * switched it *on* is left alone, having actually chosen.
+	 *
+	 * This flag is what makes it once. Without it the flip would run on every load
+	 * and there would be no way to go back to the classic interface at all.
+	 */
+	mobileDefaultApplied: boolean;
 	/**
 	 * Speak instead of typing: the composer offers a microphone and what is said is
 	 * transcribed before it is sent.
@@ -423,7 +451,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,
-	simplifiedMobileUI: false,
+	simplifiedMobileUI: true,
+	mobileDefaultApplied: false,
 	voiceInput: false,
 	voiceModel: null,
 	speechOutput: false,

@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { ChevronRight, ImageIcon, MessagesSquare, Mic, Search, Settings2 } from '@lucide/svelte';
 
-	import LL from '$i18n/i18n-svelte';
+	import LL, { locale } from '$i18n/i18n-svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { APP_NAME } from '$lib/brand';
 	import Head from '$lib/components/Head.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
+	import { heroLine } from '$lib/heroLines';
 	import { canDrawImages } from '$lib/images';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { launchPersona, type Persona } from '$lib/personas';
@@ -30,6 +31,16 @@
 	 * their time from the second visit onwards.
 	 */
 	const firstName = $derived($settingsStore.profileFirstName.trim());
+
+	/**
+	 * The card's line, rolled once when the screen is built.
+	 *
+	 * Not derived. A reactive expression would re-roll on every update the page
+	 * makes around it, and the line would flicker between phrases while somebody
+	 * read it. Once per arrival is also the right rhythm for a joke: it is new when
+	 * you come back, and it holds still while you are here.
+	 */
+	const line = heroLine($locale);
 
 	/**
 	 * The last few, personas excluded.
@@ -120,7 +131,7 @@
 	>
 		<div class="flex min-w-0 flex-1 flex-col gap-1">
 			<span class="text-active text-xl leading-tight font-semibold tracking-tight">
-				{$LL.mobileHeroTitle()}
+				{line}
 			</span>
 			<span class="text-muted text-xs leading-relaxed">{$LL.mobileHeroBody()}</span>
 			<span

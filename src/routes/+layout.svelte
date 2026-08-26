@@ -141,10 +141,26 @@
 		return () => query.removeEventListener('change', update);
 	});
 
+	/**
+	 * Pages the phone interface deliberately sends people out to.
+	 *
+	 * It does not have everything. The Library is where personas are made and
+	 * edited, there is no phone version of it, and the row in Profile that points at
+	 * it is somebody asking to go there. Without this the redirect below caught that
+	 * link on arrival and threw them straight back, which read as the Library being
+	 * broken: you tapped it and you were home again.
+	 *
+	 * An allow-list rather than a flag somebody has to remember to set. Going deeper
+	 * from there is not bounced either, which is right: they are in the other
+	 * interface now, on purpose, and it has its own way back.
+	 */
+	const ESCAPES = ['/library'];
+
 	$effect(() => {
 		if (!booted) return;
 		const path = $page.url.pathname;
 		if (path === '/login') return;
+		if (ESCAPES.some((escape) => path === escape || path.startsWith(`${escape}/`))) return;
 		const belongsThere = $settingsStore.simplifiedMobileUI && onPhone;
 
 		if (belongsThere && !onMobileUi) void goto(resolve('/m'));
@@ -351,6 +367,25 @@
 		// whether you wanted them or not, and they went out in your backup as if you
 		// had written them. They now live in the store the Library browses, and
 		// nothing arrives until you install it.
+		/**
+		 * The phone interface, switched on once for accounts that predate it.
+		 *
+		 * Here rather than in the defaults because a default reaches only a browser
+		 * that has stored nothing, and by now every account has stored everything. See
+		 * `mobileDefaultApplied` for why overriding a stored `false` is defensible this
+		 * one time and would not be a second.
+		 *
+		 * After boot, so it writes to a hydrated store rather than to the defaults it
+		 * is about to be overwritten by.
+		 */
+		if (!$settingsStore.mobileDefaultApplied) {
+			$settingsStore = {
+				...$settingsStore,
+				simplifiedMobileUI: true,
+				mobileDefaultApplied: true
+			};
+		}
+
 		booted = true;
 
 		// Language

@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { PHONE, preferMobileInterface } from './utils';
 
 /**
- * The phone interface is offered to phones and to nothing else.
+ * The phone interface is what a phone gets, and nothing else does.
  *
  * Which is its whole contract with the rest of the app, and the part that broke
  * twice while it was being built: sent one way and not the other, a widened
@@ -17,8 +17,15 @@ import { PHONE, preferMobileInterface } from './utils';
 test.describe('the simplified mobile interface', () => {
 	test.use({ viewport: PHONE });
 
-	test('is not offered until it is asked for', async ({ page }) => {
+	test('is what a phone gets, without being asked', async ({ page }) => {
+		await preferMobileInterface(page, true);
 		await page.goto('/sessions');
+		await expect(page).toHaveURL(/\/m$/);
+	});
+
+	test('gives the classic one back to whoever asks for it', async ({ page }) => {
+		await preferMobileInterface(page, false);
+		await page.goto('/m');
 		await expect(page).toHaveURL(/\/sessions/);
 	});
 

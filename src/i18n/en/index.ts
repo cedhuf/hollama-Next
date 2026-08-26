@@ -465,7 +465,7 @@ const en = {
 	mobileHello: 'Hello',
 	mobileHelloName: 'Hello, {name:string}',
 	mobileHelloBody: 'What are we doing today?',
-	mobileStartVoice: 'Talk to it',
+	mobileStartVoice: 'Talk to me',
 	mobileStartVoiceBody: 'Hands free, out loud.',
 	mobileStartChat: 'New conversation',
 	mobileStartImage: 'Draw something',
@@ -521,6 +521,9 @@ const en = {
 	voiceListening: 'Listening.',
 	voiceThinking: 'Thinking.',
 	voiceAnswering: 'Answering.',
+	classicMobileUI: 'Use the classic interface on a phone',
+	classicMobileUIHelp:
+		'The phone interface is what a phone gets by default. Switch this on to be sent to the responsive one instead, the same layout a desktop sees, narrower.',
 	simplifiedMobileUI: 'Simplified mobile interface',
 	simplifiedMobileUIHelp:
 		'A second interface, built for a phone and for the voice: one thing at a time, a tab bar, and no sidebar. Being built in the open, and this one is unchanged.',
