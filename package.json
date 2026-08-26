@@ -8,6 +8,7 @@
 	"scripts": {
 		"prepare": "svelte-kit sync && node scripts/copy-pdf-worker.mjs",
 		"dev": "concurrently \"typesafe-i18n\" \"vite dev --host\"",
+		"dev:mobile": "HTTPS=1 concurrently \"typesafe-i18n\" \"vite dev --host\"",
 		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
 		"test": "playwright test --trace on --ignore-snapshots ",
@@ -48,6 +49,7 @@
 		"@types/markdown-it": "^14.2.0",
 		"@types/node": "^25.9.5",
 		"@types/semver": "^7.8.0",
+		"@vitejs/plugin-basic-ssl": "^2.3.0",
 		"bits-ui": "^2.19.0",
 		"codemirror": "^6.0.2",
 		"concurrently": "^10.0.5",
