@@ -508,7 +508,7 @@ const en = {
 	voiceFailed: 'Could not transcribe that',
 	voiceHeardNothing: 'Nothing was heard.',
 	voiceTranscribing: 'Transcribing',
-	voiceIdle: 'Tap to speak.',
+	voiceIdle: 'Tap to wake me.',
 	voiceStart: 'Start talking',
 	voiceInterrupt: 'Take the floor',
 	voiceSend: 'Done speaking',

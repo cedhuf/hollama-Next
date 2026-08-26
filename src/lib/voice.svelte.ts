@@ -41,6 +41,23 @@ interface Listening {
 	minimumMs: number;
 }
 
+interface Options {
+	/** Stop on a silence rather than waiting to be told. Only the voice screen asks. */
+	listen?: Listening;
+	/**
+	 * Nothing was said, or nothing came back as words.
+	 *
+	 * Its own way out, because the ordinary one never fires: `onText` is only called
+	 * when there is text, so a recording of a quiet room ends the turn by simply not
+	 * continuing it. On a screen that is a loop, that leaves it lit and deaf, and the
+	 * only way back is two presses, one to give up and one to start again.
+	 *
+	 * Every other caller ignores it. In a composer, nothing heard means nothing
+	 * typed, which needs no announcement beyond the one the recorder already makes.
+	 */
+	onNothing?: () => void;
+}
+
 /**
  * Where speech stops and a room starts, as a share of full scale.
  *
@@ -97,17 +114,18 @@ export class VoiceRecorder {
 	 * this resolves: the caller presses once to start and once to stop, and it is
 	 * the second press that produces anything.
 	 */
-	async start(onText: (text: string) => void, listening?: Listening): Promise<void> {
+	async start(onText: (text: string) => void, options: Options = {}): Promise<void> {
 		if (this.state !== 'idle' || this.#starting) return;
 		this.#starting = true;
 		try {
-			await this.#begin(onText, listening);
+			await this.#begin(onText, options);
 		} finally {
 			this.#starting = false;
 		}
 	}
 
-	async #begin(onText: (text: string) => void, listening?: Listening): Promise<void> {
+	async #begin(onText: (text: string) => void, options: Options): Promise<void> {
+		const listening = options.listen;
 		// `$LL` is a reserved prefix in a `.svelte.ts` module: the runes compiler
 		// refuses it outright, so the dictionary is a plain binding here.
 		const strings = get(LL);
@@ -134,7 +152,7 @@ export class VoiceRecorder {
 		this.#recorder.ondataavailable = (event) => {
 			if (event.data.size) this.#chunks.push(event.data);
 		};
-		this.#recorder.onstop = () => void this.#send(onText);
+		this.#recorder.onstop = () => void this.#send(onText, options.onNothing);
 		this.#recorder.start();
 		this.state = 'recording';
 		if (listening) this.#watch(stream, listening);
@@ -206,7 +224,7 @@ export class VoiceRecorder {
 		this.state = 'idle';
 	}
 
-	async #send(onText: (text: string) => void): Promise<void> {
+	async #send(onText: (text: string) => void, onNothing?: () => void): Promise<void> {
 		const strings = get(LL);
 		const target = this.#target();
 		const type = this.#recorder?.mimeType?.split(';')[0] || 'audio/webm';
@@ -216,6 +234,7 @@ export class VoiceRecorder {
 
 		if (!target || !audio.size) {
 			this.state = 'idle';
+			onNothing?.();
 			return;
 		}
 
@@ -232,13 +251,18 @@ export class VoiceRecorder {
 			if (!response.ok) {
 				const detail = await response.text().catch(() => '');
 				toast.error(strings.voiceFailed(), { description: detail.slice(0, 200) || undefined });
+				onNothing?.();
 				return;
 			}
 			const { text } = (await response.json()) as { text: string };
 			if (text) onText(text);
-			else toast.info(strings.voiceHeardNothing());
+			else {
+				toast.info(strings.voiceHeardNothing());
+				onNothing?.();
+			}
 		} catch {
 			toast.error(strings.voiceFailed());
+			onNothing?.();
 		} finally {
 			this.state = 'idle';
 		}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Mic, X } from '@lucide/svelte';
+	import { X } from '@lucide/svelte';
 	import { onDestroy } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -13,6 +13,7 @@
 	import { generateRandomId } from '$lib/utils';
 	import { VoiceRecorder } from '$lib/voice.svelte';
 
+	import LivingText from '../LivingText.svelte';
 	import Orb from '../Orb.svelte';
 
 	/**
@@ -101,7 +102,15 @@
 				heard = text;
 				void ask(text);
 			},
-			{ silenceMs: $settingsStore.voiceSilenceMs, minimumMs: 750 }
+			{
+				listen: { silenceMs: $settingsStore.voiceSilenceMs, minimumMs: 750 },
+				// A room that said nothing ends the session rather than leaving the screen
+				// lit and deaf. Without this the only way back was two presses, one to give
+				// up on a turn that had already given up, and one to start again.
+				onNothing: () => {
+					live = false;
+				}
+			}
 		);
 	}
 
@@ -194,6 +203,19 @@
 	 * off and take the floor, so it stops and listens in the same press rather than
 	 * merely falling silent.
 	 */
+	/**
+	 * One control, and one meaning: stop whatever is happening.
+	 *
+	 * Pressing while it listens throws the recording away rather than sending it.
+	 * A second press on the thing you just pressed is somebody changing their mind,
+	 * and the old behaviour read it as "I have finished speaking", which is the one
+	 * interpretation that costs a transcription and an answer nobody wanted. Ending
+	 * a turn is the silence gate's job, and it does it without being asked.
+	 *
+	 * While it reads aloud, stopping is all a press does here, and the loop takes it
+	 * from there: `ask` is waiting on the reading, so it resumes and listens again.
+	 * Which is exactly what taking the floor back means.
+	 */
 	function press() {
 		// Inside the gesture, always, and cheap enough to do on every press. A browser
 		// only lets sound out of an audio context a person's own tap created or
@@ -204,12 +226,14 @@
 			live = true;
 			return listen();
 		}
-		if (phase === 'listening') return voice.stop();
-		if (phase === 'speaking') {
-			speaker.stop();
-			return listen();
+		if (phase === 'speaking') return speaker.stop();
+		if (phase === 'listening') {
+			voice.cancel();
+			live = false;
+			heard = '';
+			return;
 		}
-		// Thinking or transcribing: the only useful thing a press can mean is stop.
+		// Thinking or transcribing: nothing to keep, and nothing else a press can mean.
 		halt();
 	}
 
@@ -233,13 +257,29 @@
 	 * what it is showing. Those are different sentences in three of the four states.
 	 */
 	const action = $derived(
+		!live ? $LL.voiceStart() : phase === 'speaking' ? $LL.voiceInterrupt() : $LL.voiceStop()
+	);
+
+	/**
+	 * The colour of each state, derived from the accent rather than chosen.
+	 *
+	 * A hue turned right round for speaking, so listening and answering are not two
+	 * shades of one colour but two colours, which is the only difference legible
+	 * from across a room. Turned rather than picked, so it holds whatever accent
+	 * somebody set and stays inside the palette instead of beside it.
+	 *
+	 * Thinking keeps the hue and loses most of its chroma. Working is not a third
+	 * voice in the conversation, and giving it one would make three colours compete
+	 * to mean "your turn".
+	 */
+	const tint = $derived(
 		!live
-			? $LL.voiceStart()
+			? 'var(--color-muted)'
 			: phase === 'speaking'
-				? $LL.voiceInterrupt()
+				? 'oklch(from var(--color-accent) l c calc(h + 150))'
 				: phase === 'listening'
-					? $LL.voiceSend()
-					: $LL.voiceStop()
+					? 'var(--color-accent)'
+					: 'oklch(from var(--color-accent) l calc(c * 0.3) h)'
 	);
 
 	/**
@@ -259,7 +299,7 @@
 	);
 </script>
 
-<div class="relative flex h-full flex-col items-center justify-between overflow-hidden px-6 py-8">
+<div class="relative flex h-full flex-col overflow-hidden px-6 py-8">
 	<!-- The way out, top right, away from everything else: a screen you talk to
 	     needs its exit somewhere the hand is not. -->
 	<div class="flex w-full justify-end">
@@ -286,35 +326,59 @@
 		open again by itself when the answer finishes, which is worth saying plainly
 		and continuously rather than in a word that scrolls past.
 	-->
-	<button
-		type="button"
-		onclick={press}
-		aria-label={action}
-		aria-pressed={live}
-		class="group flex flex-col items-center gap-8 rounded-full outline-none"
-	>
-		<span class="relative flex items-center justify-center">
+	<!-- The orb takes the room that is left and sits in the middle of it, so it stays
+	     where it was whatever the transcript below is doing. It used to share a
+	     `justify-between` with a block that grows and shrinks by three lines, which
+	     moved the one fixed point on the screen every time somebody spoke. -->
+	<div class="flex flex-1 items-center justify-center">
+		<button
+			type="button"
+			onclick={press}
+			aria-label={action}
+			aria-pressed={live}
+			class="group relative flex items-center justify-center rounded-full outline-none"
+		>
+			<!-- No icon over it. The line below already says what a press does, and a
+			     glyph laid on a shape that is moving is a second thing to read in the
+			     one place the screen was meant to have only one.
+
+			     The colour transition is not decoration either. The drawing reads the
+			     computed colour back every frame, so easing it here makes the orb cross
+			     from one hue to the other rather than snap, which is the difference
+			     between a state changing and a light being switched. -->
 			<Orb
-				class="h-60 w-60 transition-transform duration-300 group-active:scale-95 {live
-					? 'text-accent'
-					: 'text-muted'}"
+				class="aspect-square w-[min(78vw,22rem)] transition-[color,transform] duration-300 group-active:scale-95"
+				style="color: {tint}"
 				phase={shape}
 				{sample}
 			/>
-			{#if !live}
-				<!-- One mark, and only until something starts: an icon laid over a shape
-				     that is already moving is a second thing to read. -->
-				<Mic class="text-muted pointer-events-none absolute h-7 w-7" />
-			{/if}
-		</span>
 
-		<span class="text-muted text-sm">{status}</span>
-	</button>
+			<!-- Inside the shape rather than under it, which is what let the shape grow:
+			     the two were sharing a column and each was making the other smaller.
+
+			     One colour, always, and a light one. It sits on a body that is already
+			     changing hue underneath it, and a line that changed with it would be two
+			     things saying the same thing while neither stayed readable.
+
+			     Hidden from assistive tech because it is spelled out one letter per
+			     element, which is read aloud as letters. The button around it already
+			     carries the sentence. -->
+			<LivingText
+				text={status}
+				class="text-active/50 pointer-events-none absolute max-w-[62%] text-center text-[0.95rem] leading-snug text-balance"
+			/>
+		</button>
+	</div>
 
 	<!-- What was said and what came back, both readable, because speech recognition
 	     is wrong often enough that hearing only the answer leaves you no way to tell
-	     a bad reply from a misheard question. -->
-	<div class="flex max-h-48 w-full max-w-sm flex-col items-center gap-3 overflow-y-auto">
+	     a bad reply from a misheard question.
+
+	     A fixed height, empty or not. Letting it size itself is what pushed the orb
+	     up and down a turn at a time. -->
+	<div
+		class="flex h-40 w-full shrink-0 flex-col items-center justify-start gap-3 overflow-y-auto pt-2"
+	>
 		{#if heard}
 			<p class="text-muted text-center text-sm leading-relaxed">{heard}</p>
 		{/if}

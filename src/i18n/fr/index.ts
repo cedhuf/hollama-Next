@@ -505,7 +505,7 @@ const fr = extendDictionary(en, {
 	voiceFailed: "La transcription n'a pas abouti",
 	voiceHeardNothing: 'Rien entendu.',
 	voiceTranscribing: 'Transcription',
-	voiceIdle: 'Touchez pour parler.',
+	voiceIdle: 'Touchez pour me réveiller.',
 	voiceStart: 'Commencer à parler',
 	voiceInterrupt: 'Reprendre la parole',
 	voiceSend: "J'ai fini de parler",

@@ -1905,7 +1905,7 @@ type RootTranslation = {
 	 */
 	voiceTranscribing: string
 	/**
-	 * T​a​p​ ​t​o​ ​s​p​e​a​k​.
+	 * T​a​p​ ​t​o​ ​w​a​k​e​ ​m​e​.
 	 */
 	voiceIdle: string
 	/**
@@ -5826,7 +5826,7 @@ export type TranslationFunctions = {
 	 */
 	voiceTranscribing: () => LocalizedString
 	/**
-	 * Tap to speak.
+	 * Tap to wake me.
 	 */
 	voiceIdle: () => LocalizedString
 	/**

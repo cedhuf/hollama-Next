@@ -40,11 +40,20 @@
 		 */
 		phase?: 'idle' | 'listening' | 'thinking' | 'speaking';
 		class?: string;
+		/**
+		 * Anything the caller wants on the element, which in practice is its colour.
+		 *
+		 * The drawing reads `color` back off this element every frame, so a caller
+		 * that wants a different hue sets one here and needs no property of its own.
+		 * That is also what lets a colour be computed rather than named: a state on
+		 * the voice screen turns the accent's hue instead of picking a second token.
+		 */
+		style?: string;
 	}
 
 	// `phase` rather than `state`: a local binding by that name makes every `$state`
 	// in the file read as a store subscription, which the compiler rightly refuses.
-	let { sample, phase = 'idle', class: className = '' }: Props = $props();
+	let { sample, phase = 'idle', class: className = '', style = '' }: Props = $props();
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 
@@ -245,8 +254,4 @@
 <!-- The text colour is not decoration here, it is the input: the drawing reads it
      back off this element every frame. That is how the orb follows the theme, and
      how a caller says "engaged" by handing it a different colour class. -->
-<canvas
-	bind:this={canvas}
-	class="block transition-colors duration-300 {className}"
-	aria-hidden="true"
-></canvas>
+<canvas bind:this={canvas} class="block {className}" {style} aria-hidden="true"></canvas>
