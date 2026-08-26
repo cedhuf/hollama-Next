@@ -23,3 +23,6 @@ tests/*-snapshots/
 # Local-only, kept out of the repo (editor configs, personal infra, wrangler cache)
 /_local
 /.playwright-data
+
+# Working captures. Only the framed pictures and the composites are kept.
+.screenshots

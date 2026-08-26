@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
 /**
@@ -20,6 +20,19 @@ import { expect, test, type Page } from '@playwright/test';
  * as a side effect of `pnpm test` would be a trap.
  */
 
+/**
+ * Where the pictures live, and where the working ones do not.
+ *
+ * `RAW` is every single-screen capture, and none of them is a deliverable: each
+ * exists to be read back and dressed in a frame. They used to be written into
+ * `static/screenshots` beside the finished ones, so the repository carried two of
+ * everything and it was never obvious which of the two the README was using.
+ * Gitignored, and wiped at the start of a run.
+ *
+ * `OUT` keeps only what something actually points at: the composites, which are
+ * finished as they are, and the framed folder beneath it.
+ */
+const RAW = '.screenshots';
 const OUT = 'static/screenshots';
 /** Astro's image pipeline needs its own copy, beside the page that imports it. */
 const DOCS_OUT = 'docs/src/assets/screenshots';
@@ -31,7 +44,17 @@ const DOCS_OUT = 'docs/src/assets/screenshots';
  * picture of one form factor has to share an aspect ratio, none may be under
  * 320px or over 3840, and the ratio must stay below 2.3:1.
  */
+/**
+ * An iPhone 17 Pro Max's screen, in points.
+ *
+ * The viewport the app is given is shorter than this: see `SHOT_HEIGHT`. What
+ * this is, is the size of the glass, which is what the frame has to match for the
+ * picture to be the shape of a phone.
+ */
 const MOBILE = { width: 440, height: 956 };
+
+/** What a phone actually leaves the app, once the system has taken its share. */
+const MOBILE_VIEWPORT = { width: 440, height: 956 - 54 - 34 };
 const DESKTOP = { width: 1440, height: 900 };
 
 /** A banner rather than a window: slices of a 1440px viewport are too narrow. */
@@ -45,8 +68,15 @@ const SLICE_ANGLE = 7;
 const NOW = Date.now();
 const ago = (hours: number) => new Date(NOW - hours * 3600 * 1000).toISOString();
 
-const MODEL = { name: 'llama3.1:8b', serverId: 'seed-ollama' };
-const MODEL_B = { name: 'gpt-4o-mini', serverId: 'seed-openai' };
+/**
+ * The two models the fixtures name, with a stand-in connection.
+ *
+ * The real id is not known until the instance has made the connection, so these
+ * carry a placeholder and `sessionsFor` swaps in the true one by name just before
+ * the sessions are written.
+ */
+const MODEL = { name: 'llama3.1:8b', serverId: 'pending' };
+const MODEL_B = { name: 'gpt-4o-mini', serverId: 'pending' };
 
 /**
  * Enough of a life to photograph.
@@ -192,25 +222,96 @@ The float test is popular and unreliable: a starter can float on gas it made yes
 	}
 ];
 
-const SERVERS = [
+/**
+ * Three to talk to, for the phone interface's home row.
+ *
+ * Enough to show that the row is a row and that the faces differ, and no more:
+ * these exist to be photographed, not to demonstrate the persona system. Each
+ * carries a tagline because the Library draws one under the name, and three cards
+ * with a blank second line is a picture of an app with nothing in it.
+ */
+/**
+ * One conversation that belongs to a persona.
+ *
+ * Apart from the others because it is what the voice screen is photographed on:
+ * opened with a `?session=`, that screen shows whose voice it is in the corner
+ * and their greeting in the transcript, where an unbound one shows an orb on an
+ * empty screen. A picture of a feature should have the feature in it.
+ */
+const PERSONA_SESSION = {
+	id: 'nova01',
+	title: 'Nova',
+	personaId: 'seed-persona-nova',
+	updatedAt: ago(2),
+	model: MODEL,
+	options: {},
+	systemPrompt: { role: 'system', content: 'You are Nova, a patient explainer.' },
+	systemPromptEdited: true,
+	messages: [{ role: 'assistant', content: 'Nova here. What are we untangling?' }]
+};
+
+const PERSONAS = [
 	{
-		id: 'seed-ollama',
-		connectionType: 'ollama',
-		baseUrl: 'http://localhost:11434',
-		label: 'Ollama',
-		color: '#C8553D',
-		isVerified: new Date(NOW).toISOString(),
-		isEnabled: true
+		id: 'seed-persona-nova',
+		name: 'Nova',
+		tagline: 'Explains things twice, without sighing',
+		systemPrompt: 'You are Nova, a patient explainer.',
+		greeting: 'Nova here. What are we untangling?',
+		avatarColor: '#6366f1',
+		params: {}
 	},
 	{
-		id: 'seed-openai',
-		connectionType: 'openai',
-		baseUrl: 'https://api.openai.com/v1',
-		label: 'OpenAI',
-		modelFilter: 'gpt',
-		color: '#378ADD',
-		isVerified: null,
-		isEnabled: false
+		id: 'seed-persona-atlas',
+		name: 'Atlas',
+		tagline: 'Short answers, no preamble',
+		systemPrompt: 'You are Atlas, blunt and quick.',
+		greeting: 'Atlas. Keep it short and I will too.',
+		avatarColor: '#1D9E75',
+		params: {}
+	},
+	{
+		id: 'seed-persona-wren',
+		name: 'Wren',
+		tagline: 'Reads a draft properly before saying anything',
+		systemPrompt: 'You are Wren, careful with words.',
+		greeting: 'Wren speaking. Take your time.',
+		avatarColor: '#D85A30',
+		params: {}
+	}
+];
+
+/**
+ * Two connections, and what each one serves.
+ *
+ * Paired here rather than listed apart, because a model without its connection is
+ * a name with no badge and no colour. Neither endpoint is ever called: nothing in
+ * these pictures sends a turn, so an address that does not answer is enough.
+ */
+const SERVERS = [
+	{
+		connection: {
+			connectionType: 'ollama',
+			baseUrl: 'http://localhost:11434',
+			label: 'Ollama',
+			color: '#C8553D',
+			isEnabled: true
+		},
+		// Named so `guessModelKind` sorts them without anybody storing a correction:
+		// the drawing tab and the voice screen both check what a model is before they
+		// offer themselves, and a catalogue of chat models leaves both of them saying
+		// there is nothing set up.
+		models: ['llama3.1:8b', 'flux.1-schnell', 'whisper-large-v3', 'kokoro-82m']
+	},
+	{
+		connection: {
+			connectionType: 'openai',
+			baseUrl: 'https://api.openai.com/v1',
+			label: 'OpenAI',
+			modelFilter: 'gpt',
+			color: '#378ADD',
+			isEnabled: false
+		},
+		models: ['gpt-4o-mini']
 	}
 ];
 
@@ -233,51 +334,140 @@ const BASE_SETTINGS = {
 	 * by turning this back off.
 	 */
 	simplifiedMobileUI: false,
-	models: [MODEL, MODEL_B]
+	/**
+	 * Already migrated, as far as the app is concerned.
+	 *
+	 * The one-time switch to the phone interface fires for any account that has not
+	 * been through it, and it overrode the line above on a fresh database: the
+	 * classic mobile shots were redirected to `/m` on the first run of a clean
+	 * checkout and photographed the wrong interface. Saying it has already happened
+	 * is what makes these fixtures an account that chose, rather than one waiting to
+	 * be moved.
+	 */
+	mobileDefaultApplied: true,
+	/**
+	 * Voice, set up.
+	 *
+	 * Not to use it: nothing in these pictures records or speaks. It is so the voice
+	 * screen photographs as itself rather than as the notice it shows when there is
+	 * no model to hear or answer with, which is a picture of an unconfigured
+	 * instance rather than of the feature.
+	 */
+	voiceInput: true,
+	voiceModel: 'whisper-large-v3',
+	speechOutput: true,
+	speechModel: 'kokoro-82m',
+	speechVoice: 'ff_siwis'
 };
 
 /**
- * Seeds the stores before the page's first script runs.
+ * A life to photograph, written where the app actually keeps one.
  *
- * Only if they are empty, which matters: this runs again on every navigation,
- * and writing unconditionally would put the base settings back each time and
- * undo whatever `configure` had just asked for.
+ * Through the API, not `localStorage`. That is the whole of what broke this file:
+ * the instance under test runs in server mode, every store hydrates from
+ * `/api/data`, and seeding the browser's own storage wrote into a place nothing
+ * reads any more. Four of these five tests had been failing on a clean checkout
+ * for that one reason, each of them at the first line that expected to see any of
+ * the seeded content.
+ *
+ * The connection goes through the admin route for the same reason it does in the
+ * functional suite: a lone owner is an administrator, and that is the endpoint a
+ * click reaches.
+ *
+ * Everything is written before the first navigation. The stores read once at boot,
+ * so anything written after it is invisible until the page loads again.
  */
-async function seed(page: Page) {
-	await page.addInitScript(
-		([sessions, servers, settings]) => {
-			if (window.localStorage.getItem('llooma-settings')) return;
-			window.localStorage.setItem('llooma-settings', JSON.stringify(settings));
-			window.localStorage.setItem('llooma-sessions', JSON.stringify(sessions));
-			window.localStorage.setItem('llooma-servers', JSON.stringify(servers));
-			window.localStorage.setItem('llooma-install-offered-at', String(Date.now()));
-		},
-		[SESSIONS, SERVERS, BASE_SETTINGS] as const
-	);
+/** Cleared once per run, so a picture never inherits the last run's leftovers. */
+let wiped = false;
+
+async function seed(page: Page, patch: Record<string, unknown> = {}) {
+	if (!wiped) {
+		wiped = true;
+		// The database outlives a run. Without this the sessions of a previous one
+		// stack up behind the seeded ones and the sidebar fills with history nobody
+		// wrote, which is only ever noticed once it is in a published picture.
+		await page.request.post('/api/data/reset');
+	}
+
+	/**
+	 * The connections first, because everything else is keyed to them.
+	 *
+	 * Their ids are the instance's to give, not this file's: `POST` generates one
+	 * and there is no way to ask for a particular one. So the models are built from
+	 * what comes back rather than from a constant, which is what keeps a model's
+	 * badge the colour of the connection it actually belongs to.
+	 *
+	 * Created once per run. The database outlives a test, so a second call would
+	 * hang a duplicate connection off the same instance and put two badges where
+	 * the picture wants one.
+	 */
+	if (!models.length) {
+		for (const server of SERVERS) {
+			const made = await page.request.post('/api/admin/servers', { data: server.connection });
+			const { id } = (await made.json()) as { id: string };
+			models.push(...server.models.map((name) => ({ name, serverId: id })));
+		}
+	}
+
+	await page.request.put('/api/data/sessions', { data: sessionsFor(models) });
+	await page.request.put('/api/data/personas', { data: PERSONAS });
+	await configure(page, patch);
+}
+
+/** Filled by the first `seed`, and the same for every shot after it. */
+const models: { name: string; serverId: string }[] = [];
+
+/** The fixtures, pointed at the connections this instance actually made. */
+function sessionsFor(resolved: { name: string; serverId: string }[]) {
+	return [...SESSIONS, PERSONA_SESSION].map((session) => ({
+		...session,
+		model: resolved.find((model) => model.name === session.model.name) ?? session.model
+	}));
 }
 
 /**
- * Changes settings for the next navigation.
+ * Settings, merged rather than replaced.
  *
- * Needs a real page under it: `localStorage` on `about:blank` belongs to no
- * origin and reading it throws, which is what happens when this is the first
- * thing a run does.
+ * The endpoint stores the blob whole, so putting one key would drop every other
+ * and boot the app into a state no person could have produced.
  */
 async function configure(page: Page, patch: Record<string, unknown>) {
-	if (!page.url().startsWith('http')) await page.goto('/sessions');
+	/**
+	 * Nothing live while this writes.
+	 *
+	 * A page that is still open owns a hydrated settings store, and that store
+	 * flushes its own copy as it is torn down. Written straight after this, the
+	 * flush lands last and puts the previous shot's settings back: the theme strip
+	 * photographed six dark palettes in light, because each configure was undone by
+	 * the page it was about to replace.
+	 */
+	if (page.url().startsWith('http')) await page.goto('about:blank');
 
-	await page.evaluate((p) => {
-		const key = 'llooma-settings';
-		const settings = JSON.parse(window.localStorage.getItem(key) ?? '{}');
-		window.localStorage.setItem(key, JSON.stringify({ ...settings, ...p }));
-	}, patch);
+	const current = await page.request.get('/api/data/settings');
+	const stored = current.ok() ? ((await current.json()) ?? {}) : {};
+	await page.request.put('/api/data/settings', {
+		data: { ...stored, ...BASE_SETTINGS, models, ...patch }
+	});
+}
+
+/**
+ * The expand control that is actually on screen.
+ *
+ * Two buttons carry that label: one for the drawer on a narrow window and one on
+ * the rail for a wide one, each hidden at the other's width. Taking the first
+ * match found the mobile one on a desktop, where it is permanently hidden, and
+ * the desktop shots waited five seconds for something that was never going to
+ * appear.
+ */
+function expandSidebar(page: Page) {
+	return page.locator('button[aria-label="Expand sidebar"]:visible').first();
 }
 
 async function shoot(page: Page, name: string) {
 	// Fonts and the wallpaper layer settle a frame or two after the route does,
 	// and a picture taken before they do is a picture of the app loading.
 	await page.waitForTimeout(500);
-	await page.screenshot({ path: `${OUT}/${name}.png`, animations: 'disabled' });
+	await page.screenshot({ path: `${RAW}/${name}.png`, animations: 'disabled' });
 }
 
 /** One full screenshot, as a data URL, for the composites to layer. */
@@ -389,14 +579,31 @@ const PAD = 60;
 /** The Mac window's title bar: tall enough for three lights and nothing else. */
 const TITLE_BAR = 30;
 
-/** An iPhone 17 Pro Max, in the CSS pixels its 440pt screen is captured at. */
+/** An iPhone 17 Pro Max, in the CSS pixels its 440x956pt screen is captured at. */
 const PHONE = { bezel: 13, corner: 66, screen: 53, statusBar: 54, homeBar: 34 };
+
+/**
+ * The whole screen is 956, furniture included.
+ *
+ * Which is why the app is captured shorter than that. The status bar and the home
+ * indicator used to be added above and below the capture, so a framed phone came
+ * out 1044 tall and was not the shape of any iPhone: the proportions were wrong by
+ * exactly the height of the two bars.
+ *
+ * The alternative would be to capture the full height and lay the bars over it,
+ * which is what a device does. It is not available here: the app is photographed
+ * in a plain viewport where `env(safe-area-inset-top)` is nought, so its header
+ * sits at the very top and an island painted on top would cover it. Giving the
+ * capture the height a real device leaves the app costs nothing and is true.
+ */
+const PHONE_SCREEN = { width: MOBILE.width, height: MOBILE.height };
+const SHOT_HEIGHT = PHONE_SCREEN.height - PHONE.statusBar - PHONE.homeBar;
 
 /** A framed window and a framed phone, outer edge to outer edge. */
 const WINDOW_SIZE = { width: DESKTOP.width, height: DESKTOP.height + TITLE_BAR };
 const PHONE_SIZE = {
-	width: MOBILE.width + PHONE.bezel * 2,
-	height: MOBILE.height + PHONE.statusBar + PHONE.homeBar + PHONE.bezel * 2
+	width: PHONE_SCREEN.width + PHONE.bezel * 2,
+	height: PHONE_SCREEN.height + PHONE.bezel * 2
 };
 
 const WINDOW_SHOTS = [
@@ -414,11 +621,12 @@ const PHONE_SHOTS = [
 	'mobile_home',
 	'mobile_library',
 	'phone_home',
+	'phone_conversation',
 	'phone_voice'
 ] as const;
 
 async function readShot(name: string) {
-	const png = await readFile(`${OUT}/${name}.png`);
+	const png = await readFile(`${RAW}/${name}.png`);
 	return `data:image/png;base64,${png.toString('base64')}`;
 }
 
@@ -604,19 +812,20 @@ function chassis(screenW: number, screenH: number, shotH: number, bezel: number,
 /**
  * A phone around a mobile shot.
  *
- * The status bar and the home indicator are added above and below the
- * screenshot rather than laid over it: the app is captured in a plain viewport
- * with no safe area, so an island painted on top would cover the header it
- * would sit beside on a real device.
+ * The status bar and the home indicator sit above and below the screenshot rather
+ * than over it: the app is captured in a plain viewport where the safe area is
+ * nought, so its header is at the very top and an island painted on top would
+ * cover it. The capture is taken short by exactly their height, so the screen
+ * inside the chassis is a real 440 by 956 rather than that plus furniture.
  */
 function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
 	const ink = e.darkTop ? '#fff' : '#000';
 	const inkHome = e.darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
 
 	const size = chassis(
-		MOBILE.width,
-		MOBILE.height + PHONE.statusBar + PHONE.homeBar,
-		MOBILE.height,
+		PHONE_SCREEN.width,
+		PHONE_SCREEN.height,
+		SHOT_HEIGHT,
 		PHONE.bezel,
 		PHONE.screen
 	);
@@ -708,47 +917,6 @@ async function framePhone(page: Page, name: string) {
 }
 
 /**
- * A phone around a capture taken on a device rather than in a viewport.
- *
- * The simulator hands back the whole screen, its own status bar and island
- * included, so this draws the chassis and nothing else: adding a second status
- * bar over the real one is how a mock starts looking fake. Its size is the
- * device's, at twice the points, which is what the capture arrives at.
- *
- * The shot itself is the one thing here nobody's suite produces: it comes from
- * a simulator, by hand, and is committed rather than generated. Framing it from
- * disk anyway keeps it in the same pipeline as the rest, so it is dressed the
- * same way and nothing about the frame has to be maintained twice.
- */
-const DEVICE = { width: 804, height: 1748, bezel: 24, corner: 110 };
-
-const DEVICE_SHOTS = ['preview_phone'] as const;
-
-function deviceHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
-	const size = chassis(DEVICE.width, DEVICE.height, DEVICE.height, DEVICE.bezel, DEVICE.corner);
-
-	return `
-		<div class="phone" style="${size}--top:${e.top};${place}">
-			${BUTTONS}
-			<div class="screen"><img src="${src}"></div>
-		</div>
-	`;
-}
-
-async function frameDevice(page: Page, name: string) {
-	const src = await readShot(name);
-	await page.setContent('<body></body>');
-	const e = await edges(page, src);
-
-	await draw(page, {
-		width: DEVICE.width + DEVICE.bezel * 2 + PAD * 2,
-		height: DEVICE.height + DEVICE.bezel * 2 + PAD * 2,
-		body: deviceHtml(src, e),
-		out: `${FRAMED_OUT}/${name}.png`
-	});
-}
-
-/**
  * The picture at the top of the README: a window, and a phone leaning on it.
  *
  * It replaces a strip of four diagonal slices, which was handsome from a
@@ -812,6 +980,10 @@ async function composeHero(page: Page) {
 }
 
 test.beforeAll(async () => {
+	// The working captures, gone before anything reads one. A stale file from a
+	// previous run is worse than a missing one: it frames cleanly and ships.
+	await rm(RAW, { recursive: true, force: true });
+	await mkdir(RAW, { recursive: true });
 	await mkdir(OUT, { recursive: true });
 	await mkdir(DOCS_OUT, { recursive: true });
 	await mkdir(FRAMED_OUT, { recursive: true });
@@ -824,14 +996,14 @@ test.describe('screenshots', () => {
 	test.describe.configure({ timeout: 120_000 });
 
 	test('mobile', async ({ page }) => {
-		await page.setViewportSize(MOBILE);
+		await page.setViewportSize(MOBILE_VIEWPORT);
 		await seed(page);
 
 		await page.goto('/sessions/ab12cd');
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
 		await shoot(page, 'mobile_conversation');
 
-		await page.getByLabel('Expand sidebar').first().click();
+		await expandSidebar(page).click();
 		await expect(page.getByText('Reading a sourdough starter')).toBeVisible();
 		await shoot(page, 'mobile_sidebar');
 
@@ -853,9 +1025,9 @@ test.describe('screenshots', () => {
 	 * window with one of these leaning on it.
 	 */
 	test('phone interface', async ({ page }) => {
-		await page.setViewportSize(MOBILE);
+		await page.setViewportSize(MOBILE_VIEWPORT);
 		await seed(page);
-		await configure(page, { simplifiedMobileUI: true, themeMode: 'dark' });
+		await configure(page, { simplifiedMobileUI: true, themeStyle: 'dracula', themeMode: 'dark' });
 
 		await page.goto('/m');
 		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
@@ -865,8 +1037,18 @@ test.describe('screenshots', () => {
 		await page.waitForTimeout(900);
 		await shoot(page, 'phone_home');
 
-		await page.goto('/m/voice');
-		await expect(page.getByRole('button', { name: /talk|wake|set it up/i })).toBeVisible();
+		await page.goto('/m/sessions/ab12cd');
+		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
+		await page.waitForTimeout(600);
+		await shoot(page, 'phone_conversation');
+
+		// Opened on somebody, so the screen has a face, a name and a greeting rather
+		// than an orb alone on an empty page.
+		await page.goto(`/m/voice?session=${PERSONA_SESSION.id}`);
+		// The name in the corner, not the greeting. The greeting is drawn one letter
+		// per element with the spaces as widths rather than characters, so its text
+		// content has no spaces in it and no text query will ever match it.
+		await expect(page.getByRole('link', { name: /Nova/ })).toBeVisible();
 		await page.waitForTimeout(900);
 		await shoot(page, 'phone_voice');
 	});
@@ -883,7 +1065,11 @@ test.describe('screenshots', () => {
 		// the same one made narrower.
 		await configure(page, { sidebarExpanded: false });
 		await page.goto('/sessions/ab12cd');
-		await expect(page.getByLabel('Expand sidebar').first()).toBeVisible();
+		// The state, not the control that undoes it. Asserting on the expand button was
+		// asserting on a detail of how the rail is escaped, and it broke the moment two
+		// buttons carried that label; what the picture needs is that the conversation
+		// list is no longer showing its conversations.
+		await expect(page.getByText('Reading a sourdough starter')).toBeHidden();
 		await shoot(page, 'desktop_rail');
 
 		await configure(page, { sidebarExpanded: true, themeMode: 'dark' });
@@ -997,7 +1183,6 @@ test.describe('screenshots', () => {
 	test('frames', async ({ page }) => {
 		for (const name of WINDOW_SHOTS) await frameWindow(page, name);
 		for (const name of PHONE_SHOTS) await framePhone(page, name);
-		for (const name of DEVICE_SHOTS) await frameDevice(page, name);
 		await composeHero(page);
 	});
 });

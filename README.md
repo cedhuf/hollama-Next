@@ -89,18 +89,22 @@ ramps on the top row, dark on the bottom._
 | --------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | ![Library](static/screenshots/framed/desktop_library.png)             | ![Interface settings](static/screenshots/framed/desktop_settings.png) | ![The collapsed rail](static/screenshots/framed/desktop_rail.png) |
 
-### On a phone
+### The phone interface
+
+What a phone gets by default: one column, a tab bar where a thumb already is, and a screen given
+over to talking rather than typing. It is a different product from the one above, not the same one
+narrower.
+
+| ![The home screen](static/screenshots/framed/phone_home.png) | ![A conversation](static/screenshots/framed/phone_conversation.png) | ![Talking to a persona](static/screenshots/framed/phone_voice.png) |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+
+### The responsive interface, on a phone
+
+The same layout a desktop gets, narrower. Still there for anyone who prefers it, one switch away in
+_Settings, Chat_.
 
 | ![A conversation](static/screenshots/framed/mobile_conversation.png) | ![Your conversations](static/screenshots/framed/mobile_sidebar.png) | ![The home screen](static/screenshots/framed/mobile_home.png) |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
-
-### A lighter interface for the phone
-
-I'm building a second interface, made for the phone rather than squeezed onto it. Voice first, less
-on screen. Nothing is released yet and it will still move around a lot, this is just where it stands
-today.
-
-<img src="static/screenshots/framed/preview_phone.png" alt="The phone interface in progress" width="300" />
 
 ## Similar projects
 
