@@ -31,7 +31,7 @@ import {
 	type ServerRow
 } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
-import { writeImage } from '$lib/server/imageStore';
+import { ImageStoreError, writeImage } from '$lib/server/imageStore';
 import { recordRunUsage } from '$lib/server/usageMeter';
 import { costOf } from '$lib/usageCounts';
 
@@ -375,8 +375,23 @@ export async function generateImages(
 			updatedAt: now
 		};
 
-		writeImage(userId, image.id, contentType, bytes);
-		insertImage(userId, image);
+		try {
+			writeImage(userId, image.id, contentType, bytes);
+			insertImage(userId, image);
+		} catch (cause) {
+			// A picture that was drawn and paid for and cannot be kept. Reported as
+			// what it is rather than as an unhandled exception: the provider did its
+			// part, the instance could not do its own, and the person who pressed the
+			// button needs to hear the difference before they try again.
+			//
+			// Whatever landed before this stays. A half-written batch is not tidy, but
+			// deleting pictures somebody has already been billed for, to make a failure
+			// look neater, is worse than keeping them.
+			throw new ImageError(
+				500,
+				cause instanceof ImageStoreError ? cause.message : 'The image could not be stored'
+			);
+		}
 		stored.push(image);
 	}
 

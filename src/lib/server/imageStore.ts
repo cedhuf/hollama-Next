@@ -17,6 +17,9 @@ import { extensionFor } from '$lib/generatedImages';
  * person holding" and "delete this person" answerable with a path.
  */
 
+/** A storage failure, as opposed to anything else that can go wrong drawing. */
+export class ImageStoreError extends Error {}
+
 function imagesDir(): string {
 	return join(env.DATA_DIR?.trim() || './data', 'images');
 }
@@ -35,6 +38,29 @@ function pathFor(userId: string, id: string, contentType: string): string {
 	return join(imagesDir(), userId, `${id}.${extensionFor(contentType)}`);
 }
 
+/**
+ * Why a write failed, in words somebody can act on.
+ *
+ * Kept apart from the errno because the two audiences are different. Whoever
+ * pressed the button needs to know this is the instance and not their prompt;
+ * whoever runs the instance needs the path and the code, and gets them in the
+ * log. So one sentence goes back, the detail stays on the server, and the two
+ * are never the same string.
+ *
+ * The reasons are the three that actually happen to a directory somebody
+ * bind-mounted: it is not theirs to write in, it is mounted read only, or it is
+ * out of room. Everything else is honestly unknown rather than guessed at.
+ */
+function whyWriteFailed(cause: unknown): string {
+	const code = (cause as { code?: string })?.code;
+	if (code === 'EACCES' || code === 'EPERM') {
+		return 'The server cannot write to its image directory. Check who owns it.';
+	}
+	if (code === 'EROFS') return 'The server image directory is mounted read only.';
+	if (code === 'ENOSPC') return 'The server has no disk space left for images.';
+	return 'The server could not store the image.';
+}
+
 export function writeImage(
 	userId: string,
 	id: string,
@@ -42,8 +68,17 @@ export function writeImage(
 	bytes: Uint8Array
 ): void {
 	const path = pathFor(userId, id, contentType);
-	mkdirSync(join(imagesDir(), userId), { recursive: true });
-	writeFileSync(path, bytes);
+	const dir = join(imagesDir(), userId);
+	try {
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(path, bytes);
+	} catch (cause) {
+		// Loud, and with the path in it. This used to surface as `Internal Error`
+		// and nothing else, which sent somebody reading a stack trace to find out
+		// that a directory had the wrong owner.
+		console.error(`[images] cannot write ${dir}:`, cause);
+		throw new ImageStoreError(whyWriteFailed(cause));
+	}
 }
 
 /**
@@ -53,12 +88,20 @@ export function writeImage(
  * a missing file would come back as the same answer, and "no such image" is
  * exactly the wrong way to report an id that should never have reached here:
  * a malformed one is a bug or an attempt, and either deserves to be loud.
+ *
+ * A missing file stays quiet, because it is an ordinary thing: a row can outlive
+ * its bytes. Anything else is said out loud. A directory the server may not read
+ * makes every picture in the gallery vanish, one silent `undefined` at a time,
+ * and looks exactly like an empty gallery. That is the failure that hides longest.
  */
 export function readImage(userId: string, id: string, contentType: string): Buffer | undefined {
 	const path = pathFor(userId, id, contentType);
 	try {
 		return readFileSync(path);
-	} catch {
+	} catch (cause) {
+		if ((cause as { code?: string })?.code !== 'ENOENT') {
+			console.error(`[images] cannot read ${path}:`, cause);
+		}
 		return undefined;
 	}
 }
