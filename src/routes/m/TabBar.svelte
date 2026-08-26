@@ -31,8 +31,13 @@
 		href === '/m' ? page.url.pathname === '/m' : page.url.pathname.startsWith(href);
 </script>
 
+<!-- Named for the view transitions, and that is the whole reason it has a class of
+     its own: an element with a `view-transition-name` is snapshotted apart from the
+     page, so the bar holds still while the content behind it moves. Without it the
+     bar is part of the page image and slides or fades along with it, which no
+     native tab bar has ever done. -->
 <nav
-	class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+	class="tabbar pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
 	aria-label={$LL.mobileTabChats()}
 >
 	<!-- Two objects, not one, and the left one never moves.
@@ -125,5 +130,9 @@
 			inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
 			0 0 0 1px color-mix(in srgb, white 8%, transparent),
 			0 8px 28px -10px rgb(0 0 0 / 0.6);
+	}
+
+	.tabbar {
+		view-transition-name: mobile-tabbar;
 	}
 </style>
