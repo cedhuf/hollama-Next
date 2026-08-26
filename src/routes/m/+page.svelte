@@ -102,7 +102,15 @@
 		     next, where the whole point is that they are the same body. -->
 		<span class="relative flex shrink-0 items-center justify-center">
 			<span class="halo" aria-hidden="true"></span>
-			<Orb class="relative h-24 w-24 shrink-0" />
+			<!-- In the accent, which it was quietly not: without a colour of its own the
+			     canvas reads back whatever the card's text colour is, and drew itself in
+			     grey.
+
+			     The rim is halved rather than removed. At nothing the shape had no
+			     boundary at all and dissolved into the card, which reads as a blur
+			     nobody meant rather than as light; at full it is a circle drawn round a
+			     disc. Half of it gives an edge you can find without one you can trace. -->
+			<Orb class="text-accent relative h-32 w-32 shrink-0" edge={0.45} />
 		</span>
 	</button>
 
@@ -212,37 +220,34 @@
 	 * colour is what says which state the app is in, and a halo that changed with it
 	 * would be a second voice saying the same thing less clearly.
 	 *
-	 * Nearly nothing in the middle, brightest against the orb's own edge, and then a
-	 * long way down to nothing. Two things follow from that shape.
+	 * Brightest at the middle and fading the whole way out, with no boundary
+	 * anywhere. The orb is translucent and drawn in the same accent, so the light
+	 * passes through it and the two read as one luminous mass rather than as a shape
+	 * with a lamp behind it.
 	 *
-	 * The orb is translucent, so anything bright behind its centre shines through and
-	 * tints its inside, which reads as the orb having changed colour. Starting from
-	 * almost transparent avoids that without leaving a hole.
-	 *
-	 * And there is no edge anywhere. An earlier version had a bright band between two
-	 * stops twelve per cent apart, which is a ring drawn around the orb rather than
-	 * light coming off it: the eye finds both boundaries and sees jewellery. A long
-	 * ramp up and a longer one down has no boundary to find. That is also why the
-	 * blur is almost nothing now, where it used to be doing the softening that the
-	 * stops should have been doing all along.
+	 * An earlier version was hollow, to keep the light off the orb's inside. That was
+	 * solving the wrong problem: the orb was drawing itself grey, because it had no
+	 * colour of its own and inherited the card's text colour, and pink light behind a
+	 * grey disc is what looked wrong. With both in the accent there is nothing to
+	 * protect it from, and the hole was the thing making a ring of it.
 	 */
 	.halo {
 		position: absolute;
-		/* Close in. The light belongs against the shape, not around the card. */
-		inset: -45%;
+		inset: -55%;
 		border-radius: 9999px;
 		pointer-events: none;
 		background: radial-gradient(
 			circle,
-			transparent 0%,
-			color-mix(in srgb, var(--color-accent) 7%, transparent) 30%,
-			color-mix(in srgb, var(--color-accent) 46%, transparent) 46%,
-			color-mix(in srgb, var(--color-accent) 27%, transparent) 58%,
-			color-mix(in srgb, var(--color-accent) 12%, transparent) 72%,
-			color-mix(in srgb, var(--color-accent) 4%, transparent) 86%,
-			transparent 100%
+			color-mix(in srgb, var(--color-accent) 62%, transparent) 0%,
+			color-mix(in srgb, var(--color-accent) 46%, transparent) 24%,
+			color-mix(in srgb, var(--color-accent) 24%, transparent) 46%,
+			color-mix(in srgb, var(--color-accent) 9%, transparent) 66%,
+			transparent 88%
 		);
-		filter: blur(6px);
+		/* Held back from the centre and blurred less than it was. The light is meant to
+		   surround the shape, and a bright core washed straight over it: past a point,
+		   more glow stops adding presence and starts removing the object. */
+		filter: blur(9px);
 		/*
 		 * Two motions on two properties, at lengths that do not divide into each
 		 * other, so the pair never lands twice in the same place. The same reason the
@@ -254,9 +259,8 @@
 			halo-fade 9.3s ease-in-out infinite alternate;
 	}
 
-	/* The peak sits on the orb's own edge, so swelling walks the brightest part
-	   across the rim and back. That is what makes it read as light breathing off the
-	   shape rather than as a circle changing size. */
+	/* Swelling and dimming together, on two clocks, so the light never settles. The
+	   floor is high: this is the brightest thing on the page and it is meant to be. */
 	@keyframes halo-swell {
 		from {
 			scale: 0.94;

@@ -1747,7 +1747,7 @@ type RootTranslation = {
 	 */
 	mobileVoice: string
 	/**
-	 * T​a​l​k​,​ ​d​o​ ​n​o​t​ ​t​y​p​e
+	 * G​o​ ​o​n​,​ ​I​ ​d​o​ ​n​o​t​ ​b​i​t​e
 	 */
 	mobileHeroTitle: string
 	/**
@@ -5670,7 +5670,7 @@ export type TranslationFunctions = {
 	 */
 	mobileVoice: () => LocalizedString
 	/**
-	 * Talk, do not type
+	 * Go on, I do not bite
 	 */
 	mobileHeroTitle: () => LocalizedString
 	/**

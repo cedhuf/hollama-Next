@@ -456,7 +456,7 @@ const fr = extendDictionary(en, {
 	mobileNoSessions: 'Rien encore. Dites quelque chose.',
 	mobileTabChats: 'Discussions',
 	mobileVoice: 'Parler',
-	mobileHeroTitle: 'Parlez, ne tapez pas',
+	mobileHeroTitle: 'Allez-y, je ne mords pas',
 	mobileHeroBody:
 		"Dites-le à voix haute, il l'écrit. Mains libres, en marchant, ou quand le clavier est ce qui vous ralentit.",
 	mobileHello: 'Bonjour',

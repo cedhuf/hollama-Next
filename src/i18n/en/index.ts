@@ -459,7 +459,7 @@ const en = {
 	mobileNoSessions: 'Nothing yet. Say something.',
 	mobileTabChats: 'Chats',
 	mobileVoice: 'Talk',
-	mobileHeroTitle: 'Talk, do not type',
+	mobileHeroTitle: 'Go on, I do not bite',
 	mobileHeroBody:
 		'Say it out loud and it writes it down. Hands free, on the move, or when the keyboard is the slow part.',
 	mobileHello: 'Hello',

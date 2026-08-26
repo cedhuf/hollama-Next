@@ -39,6 +39,18 @@
 		 * that has crashed.
 		 */
 		phase?: 'idle' | 'listening' | 'thinking' | 'speaking';
+		/**
+		 * How much of the crisp outline to draw, where one is the full rim.
+		 *
+		 * The rim is what gives the shape an edge, and on a screen it fills that is
+		 * exactly right: a soft body with a sharp line on it reads as something with
+		 * a surface. Small, on a card, the same line reads as a circle drawn round a
+		 * disc, and two hard curves in ninety pixels is a diagram.
+		 *
+		 * Turned right down it becomes pure light with no boundary anywhere, which is
+		 * what a small orb wants and what a large one would look shapeless with.
+		 */
+		edge?: number;
 		class?: string;
 		/**
 		 * Anything the caller wants on the element, which in practice is its colour.
@@ -53,7 +65,7 @@
 
 	// `phase` rather than `state`: a local binding by that name makes every `$state`
 	// in the file read as a store subscription, which the compiler rightly refuses.
-	let { sample, phase = 'idle', class: className = '', style = '' }: Props = $props();
+	let { sample, phase = 'idle', edge = 1, class: className = '', style = '' }: Props = $props();
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 
@@ -213,15 +225,19 @@
 
 			// The rim: thin, bright, and the only thing on screen with a fast attack.
 			context.save();
-			context.globalAlpha = speaking ? 0.95 : 0.6;
+			context.globalAlpha = (speaking ? 0.95 : 0.6) * edge;
 			context.lineWidth = speaking ? 2 : 1.25;
 			context.strokeStyle = accent;
 			if (!quiet) {
 				context.shadowBlur = speaking ? 18 : 8;
 				context.shadowColor = accent;
 			}
-			trace(speaking ? 0.42 : 0.18);
-			context.stroke();
+			// Skipped outright rather than stroked at nothing: a hairline at two per
+			// cent alpha is still a hairline on a high-density screen.
+			if (edge > 0.02) {
+				trace(speaking ? 0.42 : 0.18);
+				context.stroke();
+			}
 			context.restore();
 
 			// Thinking has no sound to read, so it gets the one thing the others do not:
