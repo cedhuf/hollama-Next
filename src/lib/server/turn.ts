@@ -13,6 +13,7 @@ import { serverDeps, type RunPrincipal } from './runDeps';
 import { resolveSearch } from './searchResolver';
 import { resolveSystemPrompts } from './systemPromptsResolver';
 import { resolveTools } from './toolsResolver';
+import { recordRunUsage } from './usageMeter';
 
 /**
  * One question, one answer, nothing kept.
@@ -128,8 +129,18 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 		// The finished message rather than the fragments: a turn can produce more
 		// than one round, and only the messages are what a reader would have seen.
 		if (event.type === 'message') text += (text ? '\n\n' : '') + event.message.content;
-		else if (event.type === 'usage') usage = event.used;
-		else if (event.type === 'error' && !event.aborted) failure = event.message;
+		else if (event.type === 'usage') {
+			usage = event.used;
+			// Counted here rather than by the caller, so a turn started from anywhere
+			// lands in the same meter as one started from the browser. The bot spends
+			// real money on somebody's account, and it was spending it invisibly.
+			recordRunUsage(
+				user.id,
+				event.serverId ?? request.serverId,
+				event.model ?? request.model,
+				event.used
+			);
+		} else if (event.type === 'error' && !event.aborted) failure = event.message;
 	};
 
 	const controller = new AbortController();

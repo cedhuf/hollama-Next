@@ -23,6 +23,15 @@ export interface ChattoUser {
 	isBot?: boolean;
 }
 
+/** A file on a message. Only the fields it takes to decide and to fetch. */
+export interface ChattoAttachment {
+	id: string;
+	filename?: string;
+	contentType?: string;
+	/** Signed, short-lived, and absent when the server has none to offer. */
+	assetUrl?: { url?: string; expiresAt?: string };
+}
+
 export interface ChattoMessage {
 	id: string;
 	roomId: string;
@@ -30,6 +39,7 @@ export interface ChattoMessage {
 	actorId: string;
 	body?: string;
 	threadRootEventId?: string;
+	attachments?: ChattoAttachment[];
 }
 
 export interface ChattoTimelineEvent {
@@ -211,6 +221,55 @@ export class ChattoClient {
 	async batchGetUsers(userIds: string[], signal?: AbortSignal): Promise<{ users?: ChattoUser[] }> {
 		if (!userIds.length) return { users: [] };
 		return this.#call('chatto.api.v1.UserService/BatchGetUsers', { userIds }, signal);
+	}
+
+	/**
+	 * Fetch an attachment's bytes from the signed URL the message carried.
+	 *
+	 * The credential goes along even though the URL is signed: it is the bot's own
+	 * server either way, and a deployment that checks both is one that works here
+	 * rather than one that needs finding out about.
+	 */
+	async fetchAsset(url: string, signal?: AbortSignal): Promise<{ bytes: ArrayBuffer } | null> {
+		const response = await fetch(url, {
+			headers: { authorization: `Bearer ${this.#token}` },
+			signal
+		});
+		if (!response.ok) return null;
+		return { bytes: await response.arrayBuffer() };
+	}
+
+	/** Put an emoji on a message, which is how the bot says it has been heard. */
+	async addReaction(
+		roomId: string,
+		messageEventId: string,
+		emoji: string,
+		signal?: AbortSignal
+	): Promise<unknown> {
+		return this.#call(
+			'chatto.api.v1.ReactionService/AddReaction',
+			{ roomId, messageEventId, emoji },
+			signal
+		);
+	}
+
+	/**
+	 * Say that the bot is composing, in a room or in a thread.
+	 *
+	 * Live-only and short-lived on Chatto's side, so it is a refresh rather than a
+	 * switch: it has to be called again every few seconds for as long as it should
+	 * show. Membership is all it asks for, not permission to post.
+	 */
+	async updateTypingIndicator(
+		roomId: string,
+		threadRootEventId: string | undefined,
+		signal?: AbortSignal
+	): Promise<unknown> {
+		return this.#call(
+			'chatto.api.v1.RoomService/UpdateTypingIndicator',
+			{ roomId, threadRootEventId },
+			signal
+		);
 	}
 
 	/**

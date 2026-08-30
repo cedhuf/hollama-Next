@@ -126,3 +126,15 @@ export function ensureIntegrationsStarted(): void {
 export function runningIntegrationIds(): string[] {
 	return [...running.keys()];
 }
+
+/**
+ * Vite replaces this module when it is edited, and the replacement starts with
+ * an empty map while the previous copy's timers keep firing. The result looks
+ * exactly like a broken switch: a bot answering twice from one instance, and a
+ * worker no button can reach because nothing holds a reference to it any more.
+ */
+if (import.meta.hot) {
+	import.meta.hot.dispose(() => {
+		for (const id of [...running.keys()]) stop(id);
+	});
+}

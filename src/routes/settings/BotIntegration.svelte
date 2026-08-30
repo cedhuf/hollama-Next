@@ -195,7 +195,9 @@
 		<div class="border-shade-3 flex flex-col gap-3 border-t p-4">
 			<!-- The key and the button that proves it, on one line: "is this right?"
 			     is a question about the field it sits next to. -->
-			<SettingsField label={$LL.botApiKey()} hint={$LL.botApiKeyHint()}>
+			<!-- No hint here, unlike the form that adds one: where to find the key is
+			     something you need once, and a bot that already answers has answered it. -->
+			<SettingsField label={$LL.botApiKey()}>
 				<div class="flex items-center gap-2">
 					{#if keyIsStored}
 						<div

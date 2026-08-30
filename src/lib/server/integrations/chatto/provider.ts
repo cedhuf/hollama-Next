@@ -4,8 +4,15 @@ import { claimSeen, hasSeen, sweepSeen, type IntegrationRecord } from '$lib/serv
 import { defaultSystemPrompt, runTurnOnce } from '$lib/server/turn';
 
 import type { IntegrationProvider, IntegrationRuntime, TestResult } from '../types';
-import { activatingCause, ChattoClient, referenceOf, type ChattoOccurrence } from './client';
+import {
+	activatingCause,
+	ChattoClient,
+	referenceOf,
+	type ChattoMessageReference,
+	type ChattoOccurrence
+} from './client';
 import { buildContext } from './context';
+import { defuseMentions, split } from './text';
 
 /**
  * The bot itself: watch, answer, post.
@@ -29,11 +36,20 @@ const PAGE = 25;
  */
 const MAX_AGE_MS = 10 * 60 * 1000;
 
+/**
+ * How often to say the bot is still writing.
+ *
+ * Chatto's typing indicator is live-only and expires on its own, so this is a
+ * refresh rate rather than a duration. Comfortably under any plausible expiry,
+ * and cheap: one small call while a model is spending seconds on an answer.
+ */
+const TYPING_REFRESH_MS = 3_000;
+
+/** What the bot puts on a message to say it has been picked up. Chatto wants a shortcode. */
+const ACK_EMOJI = 'eyes';
+
 /** A ceiling on answers per hour, so a loop between two bots costs an hour and not a month. */
 const MAX_REPLIES_PER_HOUR = 60;
-
-/** Chatto's own limit on a message body, minus room for the continuation marker. */
-const MAX_BODY = 9_500;
 
 class ChattoRuntime implements IntegrationRuntime {
 	readonly #record: IntegrationRecord;
@@ -189,6 +205,16 @@ class ChattoRuntime implements IntegrationRuntime {
 		if (!this.#claim(occurrence)) return;
 		this.#log(`answering ${cause} in room ${reference.roomId}`);
 
+		// Seen, and said so before the thinking starts. The typing indicator says
+		// "in progress" and vanishes with it; this stays, so a turn that fails
+		// still leaves a trace that the bot was listening.
+		void this.#client
+			.addReaction(reference.roomId, reference.eventId, ACK_EMOJI, this.#signal)
+			.catch(() => {
+				// The bot may not have message.react, which is a permission and not a
+				// fault. The answer is what matters.
+			});
+
 		if (!this.#allowance()) {
 			console.warn(`[integration ${this.#record.id}] hourly reply limit reached, skipping`);
 			return;
@@ -213,9 +239,30 @@ class ChattoRuntime implements IntegrationRuntime {
 		return true;
 	}
 
+	/**
+	 * Show that the bot is writing, for as long as it is.
+	 *
+	 * Without it a mention lands in silence for however long the model takes, and
+	 * the room has no way to tell a slow answer from a bot that is not listening.
+	 * Returns the way to stop it, so the caller cannot forget which timer it
+	 * started.
+	 */
+	#typing(reference: ChattoMessageReference): () => void {
+		const thread = threadFor(this.#record.config.placement, reference);
+		const ping = () =>
+			void this.#client.updateTypingIndicator(reference.roomId, thread, this.#signal).catch(() => {
+				// Decoration. A room that never sees it still gets the answer.
+			});
+
+		ping();
+		const timer = setInterval(ping, TYPING_REFRESH_MS);
+		return () => clearInterval(timer);
+	}
+
 	async #answer(occurrence: ChattoOccurrence): Promise<void> {
 		const reference = referenceOf(occurrence)!;
 		const config = this.#record.config;
+		let stopTyping = () => {};
 
 		try {
 			const messages = await buildContext(
@@ -229,6 +276,8 @@ class ChattoRuntime implements IntegrationRuntime {
 				this.#log('nothing readable around the call, staying quiet');
 				return;
 			}
+
+			stopTyping = this.#typing(reference);
 
 			const { text } = await runTurnOnce({
 				userId: this.#record.ownerUserId,
@@ -251,30 +300,19 @@ class ChattoRuntime implements IntegrationRuntime {
 			// Said in the log, not in the room. A bot that posts its own stack traces
 			// into a family channel is worse than a bot that stays quiet.
 			console.error(`[integration ${this.#record.id}] could not answer:`, describe(error));
+		} finally {
+			// Before the message lands rather than after, so the room never shows a
+			// bot still typing underneath an answer it has already read.
+			stopTyping();
 		}
 	}
 
-	async #post(
-		reference: { roomId: string; eventId: string; threadRootEventId?: string },
-		text: string
-	): Promise<void> {
-		const placement = this.#record.config.placement;
+	async #post(reference: ChattoMessageReference, text: string): Promise<void> {
+		const threadRootEventId = threadFor(this.#record.config.placement, reference);
 
-		/**
-		 * Where the answer lands.
-		 *
-		 * `auto` answers where it was asked. `thread` takes a question asked at
-		 * room level and roots a thread on it, which is what keeps a busy channel
-		 * readable. `room` does the opposite and always answers in the open, and
-		 * has to keep the reply attribution or a threaded question would come back
-		 * with no visible link to what it answers.
-		 */
-		let threadRootEventId: string | undefined;
-		if (placement === 'thread')
-			threadRootEventId = reference.threadRootEventId ?? reference.eventId;
-		else if (placement === 'auto') threadRootEventId = reference.threadRootEventId;
-
-		for (const [index, chunk] of split(text).entries()) {
+		// Defused here rather than at the model: what is unsafe is posting it, and
+		// this is the only place that posts.
+		for (const [index, chunk] of split(defuseMentions(text)).entries()) {
 			await this.#client.createMessage(
 				{
 					roomId: reference.roomId,
@@ -288,6 +326,25 @@ class ChattoRuntime implements IntegrationRuntime {
 			);
 		}
 	}
+}
+
+/**
+ * Which thread the bot speaks into, if any.
+ *
+ * `auto` answers where it was asked. `thread` takes a question asked at room
+ * level and roots a thread on it, which is what keeps a busy channel readable.
+ * `room` does the opposite and always answers in the open.
+ *
+ * Shared by the answer and by the typing indicator, so the room cannot show the
+ * bot writing in one place and then hear from it in another.
+ */
+function threadFor(
+	placement: IntegrationRecord['config']['placement'],
+	reference: ChattoMessageReference
+): string | undefined {
+	if (placement === 'thread') return reference.threadRootEventId ?? reference.eventId;
+	if (placement === 'auto') return reference.threadRootEventId;
+	return undefined;
 }
 
 /**
@@ -315,22 +372,6 @@ function instructionsFor(record: IntegrationRecord): string {
 }
 
 /** Long answers, cut on paragraph boundaries where there is one to cut on. */
-function split(text: string): string[] {
-	if (text.length <= MAX_BODY) return [text];
-
-	const chunks: string[] = [];
-	let rest = text;
-	while (rest.length > MAX_BODY) {
-		const window = rest.slice(0, MAX_BODY);
-		const cut = Math.max(window.lastIndexOf('\n\n'), window.lastIndexOf('\n'));
-		const at = cut > MAX_BODY / 2 ? cut : MAX_BODY;
-		chunks.push(rest.slice(0, at).trim());
-		rest = rest.slice(at).trim();
-	}
-	if (rest) chunks.push(rest);
-	return chunks;
-}
-
 function describe(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
 }

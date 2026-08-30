@@ -2,6 +2,7 @@ import type { ChattoConfig } from '$lib/integrations';
 import type { Message } from '$lib/sessions';
 
 import {
+	type ChattoAttachment,
 	type ChattoClient,
 	type ChattoMessage,
 	type ChattoMessageReference,
@@ -26,6 +27,17 @@ import {
 
 /** A ceiling on a thread read, so a long one cannot blow up a request. */
 const THREAD_LIMIT = 60;
+
+/**
+ * How many images to carry, and how large one may be.
+ *
+ * Images are read from the end of the context backwards, because the useful
+ * case is somebody posting a picture and asking about it in the next breath.
+ * The caps are here because a room is not a form: nothing stops ten photographs
+ * in a row, and each one is base64 in a request body.
+ */
+const MAX_IMAGES = 4;
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 interface Author {
 	name: string;
@@ -53,7 +65,59 @@ async function authorsOf(
 function messagesOf(events: ChattoTimelineEvent[] | undefined): ChattoMessage[] {
 	return (events ?? [])
 		.map((event) => event.messagePosted?.message)
-		.filter((message): message is ChattoMessage => !!message?.body?.trim());
+		.filter(
+			(message): message is ChattoMessage =>
+				!!message?.body?.trim() || !!imageAttachments(message).length
+		);
+}
+
+/** The attachments a vision model could do something with, and only those. */
+function imageAttachments(message: ChattoMessage | undefined): ChattoAttachment[] {
+	return (message?.attachments ?? []).filter(
+		(attachment) => attachment.contentType?.startsWith('image/') && attachment.assetUrl?.url
+	);
+}
+
+/**
+ * Bring the pictures down and hang them on the messages they came with.
+ *
+ * Newest first and capped, then written back in place: the model reads them as
+ * part of the message that carried them, which is the only reading that makes
+ * "what is this?" answerable.
+ *
+ * A download that fails is skipped rather than raised. An image nobody can
+ * fetch is worth less than the answer, and the room asked a question either way.
+ */
+async function attachImages(
+	client: ChattoClient,
+	sources: ChattoMessage[],
+	built: Message[],
+	signal: AbortSignal
+): Promise<void> {
+	let budget = MAX_IMAGES;
+
+	for (let index = sources.length - 1; index >= 0 && budget > 0; index--) {
+		const attachments = imageAttachments(sources[index]).slice(0, budget);
+		if (!attachments.length) continue;
+
+		const images: { data: string; filename: string }[] = [];
+		for (const attachment of attachments) {
+			try {
+				const asset = await client.fetchAsset(attachment.assetUrl!.url!, signal);
+				if (!asset || asset.bytes.byteLength > MAX_IMAGE_BYTES) continue;
+				images.push({
+					data: Buffer.from(asset.bytes).toString('base64'),
+					filename: attachment.filename || attachment.id
+				});
+			} catch {
+				// A signed URL that has expired, or a store that is briefly away.
+			}
+		}
+
+		if (!images.length) continue;
+		built[index] = { ...built[index], images };
+		budget -= images.length;
+	}
 }
 
 /**
@@ -63,17 +127,18 @@ function messagesOf(events: ChattoTimelineEvent[] | undefined): ChattoMessage[] 
  * on an event carries what came after it too, and answering a question with the
  * replies to it already in hand is answering a different question.
  */
+function visibleUpTo(history: ChattoMessage[], upToEventId: string): ChattoMessage[] {
+	const cut = history.findIndex((message) => message.id === upToEventId);
+	return cut === -1 ? history : history.slice(0, cut + 1);
+}
+
 function transcript(
-	history: ChattoMessage[],
-	upToEventId: string,
+	visible: ChattoMessage[],
 	selfId: string,
 	authors: Map<string, Author>
 ): Message[] {
-	const cut = history.findIndex((message) => message.id === upToEventId);
-	const visible = cut === -1 ? history : history.slice(0, cut + 1);
-
 	return visible.map((message) => {
-		const body = message.body!.trim();
+		const body = message.body?.trim() ?? '';
 		if (message.actorId === selfId) {
 			return { role: 'assistant' as const, content: body };
 		}
@@ -96,7 +161,9 @@ export async function buildContext(
 
 	if (config.context === 'mention') {
 		const authors = await authorsOf(client, [called.actorId], signal);
-		return transcript([called], called.id, selfId, authors);
+		const built = transcript([called], selfId, authors);
+		await attachImages(client, [called], built, signal);
+		return built;
 	}
 
 	// A thread is its own context, whichever of the two wider modes is set: what
@@ -134,9 +201,16 @@ export async function buildContext(
 		history.map((message) => message.actorId),
 		signal
 	);
-	const full = transcript(history, called.id, selfId, authors);
+	const visible = visibleUpTo(history, called.id);
+	const full = transcript(visible, selfId, authors);
 
 	// The cut is the last N of the conversation, not the first: the message that
 	// called the bot has to be in what is sent, and it is at the end.
-	return config.context === 'thread' ? full : full.slice(-config.contextCount);
+	const keep = config.context === 'thread' ? full.length : config.contextCount;
+	const sent = full.slice(-keep);
+
+	// After the cut, so nothing is downloaded for a message that will not be
+	// sent, and so the budget is spent on what the model actually sees.
+	await attachImages(client, visible.slice(-keep), sent, signal);
+	return sent;
 }
