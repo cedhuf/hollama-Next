@@ -1,6 +1,7 @@
 <script lang="ts">
 	import {
 		ArrowLeft,
+		Bot,
 		Database,
 		Info,
 		LogOut,
@@ -24,6 +25,7 @@
 	import { settingsBack, settingsModalOpen } from '$lib/stores/modal';
 
 	import Admin from './Admin.svelte';
+	import BotIntegrations from './BotIntegrations.svelte';
 	import Chat from './Chat.svelte';
 	import DataManagement from './DataManagement.svelte';
 	import Interface from './Interface.svelte';
@@ -58,6 +60,10 @@
 			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: $hasAccounts && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
+			// Beside Tools rather than inside it: a bot answering on another server is
+			// not a capability of a conversation here, it is a place this instance
+			// answers from, and it is configured once and then left alone.
+			{ id: 'bots', label: $LL.botIntegrations(), icon: Bot },
 			// Its own tab for the same reason Prompts has one: two models, each with a
 			// switch and a voice, the language and the per-provider parameters still to
 			// come, and the loop's own behaviour underneath. It had already outgrown
@@ -198,6 +204,8 @@
 					<Users />
 				{:else if activeTab === 'chat'}
 					<Chat />
+				{:else if activeTab === 'bots'}
+					<BotIntegrations />
 				{:else if activeTab === 'tools'}
 					<Tools />
 				{:else if activeTab === 'voice'}

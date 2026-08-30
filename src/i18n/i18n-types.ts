@@ -87,6 +87,139 @@ type RootTranslation = {
 	 */
 	baseUrl: string
 	/**
+	 * B​o​t​ ​i​n​t​e​g​r​a​t​i​o​n​s
+	 */
+	botIntegrations: string
+	/**
+	 * A​n​s​w​e​r​ ​a​s​ ​a​ ​b​o​t​ ​o​n​ ​a​n​o​t​h​e​r​ ​c​h​a​t​ ​s​e​r​v​e​r​.​ ​T​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​t​a​y​s​ ​t​h​e​r​e​:​ ​n​o​t​h​i​n​g​ ​i​s​ ​s​t​o​r​e​d​ ​h​e​r​e​.
+	 */
+	botIntegrationsDescription: string
+	/**
+	 * A​d​d​ ​a​n​ ​i​n​t​e​g​r​a​t​i​o​n
+	 */
+	addAnIntegration: string
+	/**
+	 * N​o​ ​i​n​t​e​g​r​a​t​i​o​n​ ​y​e​t​.
+	 */
+	noIntegrations: string
+	/**
+	 * E​n​a​b​l​e​d
+	 */
+	integrationEnabled: string
+	/**
+	 * D​e​l​e​t​e​ ​t​h​i​s​ ​i​n​t​e​g​r​a​t​i​o​n
+	 */
+	deleteIntegration: string
+	/**
+	 * C​h​a​t​t​o​ ​s​e​r​v​e​r
+	 */
+	chattoServer: string
+	/**
+	 * T​h​e​ ​a​d​d​r​e​s​s​ ​o​f​ ​y​o​u​r​ ​C​h​a​t​t​o​ ​s​e​r​v​e​r​,​ ​f​o​r​ ​e​x​a​m​p​l​e​ ​h​t​t​p​s​:​/​/​c​h​a​t​.​e​x​a​m​p​l​e​.​c​o​m
+	 */
+	chattoServerHint: string
+	/**
+	 * B​o​t​ ​A​P​I​ ​k​e​y
+	 */
+	botApiKey: string
+	/**
+	 * C​r​e​a​t​e​d​ ​i​n​ ​C​h​a​t​t​o​ ​u​n​d​e​r​ ​S​e​r​v​e​r​ ​A​d​m​i​n​ ​t​h​e​n​ ​B​o​t​s​.​ ​S​h​o​w​n​ ​o​n​c​e​,​ ​s​o​ ​k​e​e​p​ ​i​t​ ​b​e​f​o​r​e​ ​c​l​o​s​i​n​g​ ​t​h​e​ ​d​i​a​l​o​g​.
+	 */
+	botApiKeyHint: string
+	/**
+	 * C​h​e​c​k​ ​c​o​n​n​e​c​t​i​o​n
+	 */
+	checkConnection: string
+	/**
+	 * C​o​n​n​e​c​t​e​d​ ​a​s​ ​{​n​a​m​e​}
+	 * @param {string} name
+	 */
+	connectedAsBot: RequiredParams<'name'>
+	/**
+	 * A​ ​b​o​t​ ​A​P​I​ ​k​e​y​ ​i​s​ ​r​e​q​u​i​r​e​d
+	 */
+	botKeyRequired: string
+	/**
+	 * W​h​o​ ​t​h​e​ ​b​o​t​ ​i​s
+	 */
+	whoTheBotIs: string
+	/**
+	 * C​u​s​t​o​m​ ​i​n​s​t​r​u​c​t​i​o​n​s
+	 */
+	customInstructions: string
+	/**
+	 * Y​o​u​r​ ​u​s​u​a​l​ ​s​y​s​t​e​m​ ​p​r​o​m​p​t
+	 */
+	instructionsDefault: string
+	/**
+	 * A​ ​p​e​r​s​o​n​a​ ​p​r​o​m​p​t
+	 */
+	instructionsPersona: string
+	/**
+	 * W​r​i​t​t​e​n​ ​h​e​r​e
+	 */
+	instructionsCustom: string
+	/**
+	 * T​h​e​ ​s​a​m​e​ ​i​n​s​t​r​u​c​t​i​o​n​s​ ​a​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​s​t​a​r​t​s​ ​w​i​t​h​.
+	 */
+	instructionsDefaultHint: string
+	/**
+	 * O​n​l​y​ ​t​h​e​ ​p​e​r​s​o​n​a​ ​p​r​o​m​p​t​ ​i​s​ ​u​s​e​d​.​ ​N​o​ ​m​e​m​o​r​y​,​ ​n​o​ ​l​i​b​r​a​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​,​ ​n​o​ ​k​n​o​w​l​e​d​g​e​.
+	 */
+	usePersonaPromptHint: string
+	/**
+	 * C​h​o​o​s​e​ ​a​ ​m​o​d​e​l​:​ ​t​h​i​s​ ​b​o​t​ ​c​a​n​n​o​t​ ​r​u​n​ ​w​i​t​h​o​u​t​ ​o​n​e​.
+	 */
+	botNeedsAModel: string
+	/**
+	 * O​p​t​i​o​n​s
+	 */
+	botOptions: string
+	/**
+	 * W​h​e​r​e​ ​t​o​ ​a​n​s​w​e​r
+	 */
+	whereToAnswer: string
+	/**
+	 * W​h​e​r​e​ ​i​t​ ​w​a​s​ ​a​s​k​e​d
+	 */
+	placementAuto: string
+	/**
+	 * A​l​w​a​y​s​ ​i​n​ ​a​ ​t​h​r​e​a​d
+	 */
+	placementThread: string
+	/**
+	 * A​l​w​a​y​s​ ​i​n​ ​t​h​e​ ​r​o​o​m
+	 */
+	placementRoom: string
+	/**
+	 * C​o​n​t​e​x​t​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​m​o​d​e​l
+	 */
+	contextSent: string
+	/**
+	 * O​n​l​y​ ​t​h​e​ ​m​e​s​s​a​g​e​ ​c​a​l​l​i​n​g​ ​t​h​e​ ​b​o​t
+	 */
+	contextMention: string
+	/**
+	 * T​h​e​ ​m​e​s​s​a​g​e​s​ ​j​u​s​t​ ​b​e​f​o​r​e​ ​i​t
+	 */
+	contextRecent: string
+	/**
+	 * T​h​e​ ​w​h​o​l​e​ ​t​h​r​e​a​d
+	 */
+	contextThread: string
+	/**
+	 * W​h​a​t​ ​t​h​e​ ​b​o​t​ ​r​e​a​d​s​ ​a​r​o​u​n​d​ ​t​h​e​ ​c​a​l​l​.​ ​T​h​e​ ​n​a​r​r​o​w​e​s​t​ ​s​e​t​t​i​n​g​ ​s​e​n​d​s​ ​n​o​t​h​i​n​g​ ​e​l​s​e​ ​f​r​o​m​ ​t​h​e​ ​r​o​o​m​.
+	 */
+	contextSentHint: string
+	/**
+	 * H​o​w​ ​m​a​n​y​ ​m​e​s​s​a​g​e​s​ ​b​e​f​o​r​e
+	 */
+	howManyMessagesBefore: string
+	/**
+	 * C​h​e​c​k​ ​e​v​e​r​y​ ​(​s​e​c​o​n​d​s​)
+	 */
+	checkEverySeconds: string
+	/**
 	 * I​m​a​g​e​ ​e​n​d​p​o​i​n​t
 	 */
 	imageEndpoint: string
@@ -1132,6 +1265,10 @@ type RootTranslation = {
 	 * S​y​s​t​e​m​ ​p​r​o​m​p​t
 	 */
 	systemPrompt: string
+	/**
+	 * T​o​o​l​s
+	 */
+	tools: string
 	/**
 	 * T​e​m​p​e​r​a​t​u​r​e
 	 */
@@ -4072,6 +4209,138 @@ export type TranslationFunctions = {
 	 */
 	baseUrl: () => LocalizedString
 	/**
+	 * Bot integrations
+	 */
+	botIntegrations: () => LocalizedString
+	/**
+	 * Answer as a bot on another chat server. The conversation stays there: nothing is stored here.
+	 */
+	botIntegrationsDescription: () => LocalizedString
+	/**
+	 * Add an integration
+	 */
+	addAnIntegration: () => LocalizedString
+	/**
+	 * No integration yet.
+	 */
+	noIntegrations: () => LocalizedString
+	/**
+	 * Enabled
+	 */
+	integrationEnabled: () => LocalizedString
+	/**
+	 * Delete this integration
+	 */
+	deleteIntegration: () => LocalizedString
+	/**
+	 * Chatto server
+	 */
+	chattoServer: () => LocalizedString
+	/**
+	 * The address of your Chatto server, for example https://chat.example.com
+	 */
+	chattoServerHint: () => LocalizedString
+	/**
+	 * Bot API key
+	 */
+	botApiKey: () => LocalizedString
+	/**
+	 * Created in Chatto under Server Admin then Bots. Shown once, so keep it before closing the dialog.
+	 */
+	botApiKeyHint: () => LocalizedString
+	/**
+	 * Check connection
+	 */
+	checkConnection: () => LocalizedString
+	/**
+	 * Connected as {name}
+	 */
+	connectedAsBot: (arg: { name: string }) => LocalizedString
+	/**
+	 * A bot API key is required
+	 */
+	botKeyRequired: () => LocalizedString
+	/**
+	 * Who the bot is
+	 */
+	whoTheBotIs: () => LocalizedString
+	/**
+	 * Custom instructions
+	 */
+	customInstructions: () => LocalizedString
+	/**
+	 * Your usual system prompt
+	 */
+	instructionsDefault: () => LocalizedString
+	/**
+	 * A persona prompt
+	 */
+	instructionsPersona: () => LocalizedString
+	/**
+	 * Written here
+	 */
+	instructionsCustom: () => LocalizedString
+	/**
+	 * The same instructions a new conversation starts with.
+	 */
+	instructionsDefaultHint: () => LocalizedString
+	/**
+	 * Only the persona prompt is used. No memory, no library conversation, no knowledge.
+	 */
+	usePersonaPromptHint: () => LocalizedString
+	/**
+	 * Choose a model: this bot cannot run without one.
+	 */
+	botNeedsAModel: () => LocalizedString
+	/**
+	 * Options
+	 */
+	botOptions: () => LocalizedString
+	/**
+	 * Where to answer
+	 */
+	whereToAnswer: () => LocalizedString
+	/**
+	 * Where it was asked
+	 */
+	placementAuto: () => LocalizedString
+	/**
+	 * Always in a thread
+	 */
+	placementThread: () => LocalizedString
+	/**
+	 * Always in the room
+	 */
+	placementRoom: () => LocalizedString
+	/**
+	 * Context sent to the model
+	 */
+	contextSent: () => LocalizedString
+	/**
+	 * Only the message calling the bot
+	 */
+	contextMention: () => LocalizedString
+	/**
+	 * The messages just before it
+	 */
+	contextRecent: () => LocalizedString
+	/**
+	 * The whole thread
+	 */
+	contextThread: () => LocalizedString
+	/**
+	 * What the bot reads around the call. The narrowest setting sends nothing else from the room.
+	 */
+	contextSentHint: () => LocalizedString
+	/**
+	 * How many messages before
+	 */
+	howManyMessagesBefore: () => LocalizedString
+	/**
+	 * Check every (seconds)
+	 */
+	checkEverySeconds: () => LocalizedString
+	/**
 	 * Image endpoint
 	 */
 	imageEndpoint: () => LocalizedString
@@ -5095,6 +5364,10 @@ export type TranslationFunctions = {
 	 * System prompt
 	 */
 	systemPrompt: () => LocalizedString
+	/**
+	 * Tools
+	 */
+	tools: () => LocalizedString
 	/**
 	 * Temperature
 	 */

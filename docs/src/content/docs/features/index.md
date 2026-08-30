@@ -37,6 +37,7 @@ Conversations name themselves after the first reply, using whichever model you p
 | [Images](/features/images/)         | Generating pictures, and the gallery that keeps them               |
 | [Interface](/features/interface/)   | Themes, the sidebar, the home screen, languages, the PWA           |
 | [Data](/features/data/)             | Export, import, backup, and moving from local to server            |
+| [Bot integrations](/features/bots/) | Answering in a chat server as a bot, with your model and prompt    |
 
 Two more sit slightly apart: the [commands and shortcuts](/reference/shortcuts/) reference,
 and the list of [providers](/reference/providers/) you can connect to.

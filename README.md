@@ -47,6 +47,9 @@ chat with them from an app that is yours.
   where it was. Switch it off in one click if you would rather nothing left the tab.
 - **Compaction.** When a conversation gets too long, `/compact` replaces what was said with a
   structured summary so it keeps fitting. Nothing is deleted, and one click puts it all back.
+- **Bot integrations.** Connect a bot account on a [Chatto](https://chatto.run/) server and
+  mention it in a room: your model answers, with your prompt and your tools. Nothing is stored on
+  the Llooma side, and nothing has to reach your instance from the outside.
 - **Full-text search** across every conversation, answering with the passage itself.
 - **Six themes**, each with a light and a dark ramp, English and French, installable as a PWA.
 

@@ -454,6 +454,50 @@ const migrations: Migration[] = [
 			-- for it is exactly what the old per-conversation panel got wrong.
 			ALTER TABLE servers ADD COLUMN load_options TEXT;
 		`
+	},
+	{
+		version: 20,
+		up: `
+			-- Bots that live on another chat server and answer with a model from here.
+			--
+			-- One table for every kind rather than one per service: what an integration
+			-- is made of is a credential, an address and a handful of choices, and the
+			-- part that differs between two services is the handful of choices. Those
+			-- go in a JSON column, read through the normaliser in $lib/integrations, so
+			-- adding a second service is a folder and a form rather than a migration.
+			--
+			-- The credential is encrypted with the instance secret, exactly like a
+			-- provider key, and is never returned to a browser.
+			CREATE TABLE integrations (
+				id            TEXT PRIMARY KEY,
+				owner_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				kind          TEXT NOT NULL,
+				label         TEXT,
+				config        TEXT NOT NULL,        -- JSON, shaped by kind
+				secret_enc    TEXT,
+				is_enabled    INTEGER NOT NULL DEFAULT 1,
+				created_at    TEXT NOT NULL
+			);
+			CREATE INDEX idx_integrations_owner ON integrations(owner_user_id, created_at);
+
+			-- What has already been answered, so a restart does not answer it again.
+			--
+			-- The remote server hands out a latest-value list rather than a queue: the
+			-- same activation can arrive on every poll, and it keeps arriving until it
+			-- ages out. Nothing but a written record of what was handled stops the bot
+			-- from replying to the same message for as long as it is running, and the
+			-- record has to survive the process for the same reason.
+			--
+			-- Two keys per activation in practice, one for the occurrence and one for
+			-- the message it points at, because one message can raise several causes.
+			CREATE TABLE integration_seen (
+				integration_id TEXT NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+				key            TEXT NOT NULL,
+				seen_at        TEXT NOT NULL,
+				PRIMARY KEY (integration_id, key)
+			);
+			CREATE INDEX idx_integration_seen_age ON integration_seen(integration_id, seen_at);
+		`
 	}
 ];
 

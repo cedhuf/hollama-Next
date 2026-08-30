@@ -75,21 +75,11 @@ export const systemPromptsConfig = derived(
 );
 
 /**
- * The effective system prompt for a model, combining the global prompt with the
- * model-specific one (if any):
- *   - 'replace' → the model prompt takes over entirely
- *   - 'extend'  → the model prompt is appended to the global one
- * Returns '' when nothing is configured (the feature stays inert).
+ * Re-exported from where the type it reads lives.
+ *
+ * It moved because it is a pure function and this module is not: everything
+ * else here is a store, and a turn running in the Node process needs the
+ * function without the browser plumbing around it. The call sites that already
+ * import it from here keep working.
  */
-export function effectiveSystemPrompt(
-	modelName: string | undefined,
-	prompts: SystemPrompts | undefined
-): string {
-	const global = prompts?.global?.trim() ?? '';
-	const model = modelName ? prompts?.perModel?.[modelName] : undefined;
-	const modelPrompt = model?.prompt?.trim() ?? '';
-
-	if (!modelPrompt) return global;
-	if (model?.mode === 'replace') return modelPrompt;
-	return [global, modelPrompt].filter(Boolean).join('\n\n');
-}
+export { effectiveSystemPrompt } from './settings';

@@ -30,12 +30,26 @@ const guard: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+/**
+ * Bots on other chat servers start with the process, not with a page.
+ *
+ * Here rather than at import time because this module is loaded during the
+ * build as well, and a build has no business opening the database and polling
+ * somebody's chat server. The first request is the earliest moment this
+ * instance is certainly running, and the supervisor only acts once.
+ */
+const bootIntegrations: Handle = async ({ event, resolve }) => {
+	const { ensureIntegrationsStarted } = await import('$lib/server/integrations/supervisor');
+	ensureIntegrationsStarted();
+	return resolve(event);
+};
+
 async function resolveHandle(): Promise<Handle> {
 	const { accountsEnabled } = await import('$lib/server/authMode');
-	if (!accountsEnabled()) return passthrough;
+	if (!accountsEnabled()) return sequence(bootIntegrations, passthrough);
 
 	const { createAuthHandle } = await import('$lib/server/auth');
-	return sequence(createAuthHandle(), guard);
+	return sequence(bootIntegrations, createAuthHandle(), guard);
 }
 
 const handlePromise = resolveHandle();

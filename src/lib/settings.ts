@@ -25,6 +25,26 @@ export interface SystemPrompts {
 	perModel: Record<string, ModelSystemPrompt>;
 }
 
+/**
+ * The effective system prompt for a model, combining the global prompt with the
+ * model-specific one (if any):
+ *   - 'replace' → the model prompt takes over entirely
+ *   - 'extend'  → the model prompt is appended to the global one
+ * Returns '' when nothing is configured (the feature stays inert).
+ */
+export function effectiveSystemPrompt(
+	modelName: string | undefined,
+	prompts: SystemPrompts | undefined
+): string {
+	const global = prompts?.global?.trim() ?? '';
+	const model = modelName ? prompts?.perModel?.[modelName] : undefined;
+	const modelPrompt = model?.prompt?.trim() ?? '';
+
+	if (!modelPrompt) return global;
+	if (model?.mode === 'replace') return modelPrompt;
+	return [global, modelPrompt].filter(Boolean).join('\n\n');
+}
+
 export interface Settings {
 	models: Model[];
 	lastUsedModels: Model[];
