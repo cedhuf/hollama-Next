@@ -20,6 +20,7 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import { integrationsConfig } from '$lib/integrationsConfig';
 	import { currentUser } from '$lib/stores/auth';
 	import { hasAccounts } from '$lib/stores/instance';
 	import { settingsBack, settingsModalOpen } from '$lib/stores/modal';
@@ -63,7 +64,15 @@
 			// Beside Tools rather than inside it: a bot answering on another server is
 			// not a capability of a conversation here, it is a place this instance
 			// answers from, and it is configured once and then left alone.
-			{ id: 'bots', label: $LL.botIntegrations(), icon: Bot },
+			// Only where the instance has granted it. A bot answers on its own and
+			// spends on every message it is sent, so an account that may not run one
+			// is not shown a tab explaining what it cannot have.
+			{
+				id: 'bots',
+				label: $LL.botIntegrations(),
+				icon: Bot,
+				visible: $integrationsConfig.canManage
+			},
 			// Its own tab for the same reason Prompts has one: two models, each with a
 			// switch and a voice, the language and the per-provider parameters still to
 			// come, and the loop's own behaviour underneath. It had already outgrown

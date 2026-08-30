@@ -172,6 +172,42 @@ type RootTranslation = {
 	 */
 	botNeedsAModel: string
 	/**
+	 * U​s​e​r​s​ ​c​a​n​ ​r​u​n​ ​t​h​e​i​r​ ​o​w​n​ ​b​o​t​s
+	 */
+	allowUserIntegrations: string
+	/**
+	 * L​i​m​i​t​s
+	 */
+	botLimits: string
+	/**
+	 * T​h​e​y​ ​a​p​p​l​y​ ​t​o​ ​e​v​e​r​y​ ​a​c​c​o​u​n​t​,​ ​y​o​u​r​s​ ​i​n​c​l​u​d​e​d​:​ ​w​h​a​t​ ​t​h​e​y​ ​p​r​o​t​e​c​t​ ​i​s​ ​t​h​e​ ​m​a​c​h​i​n​e​ ​a​n​d​ ​t​h​e​ ​b​i​l​l​,​ ​n​o​t​ ​a​ ​l​e​v​e​l​ ​o​f​ ​t​r​u​s​t​.
+	 */
+	botLimitsHint: string
+	/**
+	 * B​o​t​s​ ​p​e​r​ ​a​c​c​o​u​n​t
+	 */
+	botsPerUser: string
+	/**
+	 * A​n​s​w​e​r​s​ ​p​e​r​ ​a​c​c​o​u​n​t​ ​p​e​r​ ​h​o​u​r
+	 */
+	botRepliesPerHour: string
+	/**
+	 * A​l​l​ ​b​o​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	allInstanceBots: string
+	/**
+	 * E​v​e​r​y​ ​b​o​t​ ​c​o​n​f​i​g​u​r​e​d​ ​h​e​r​e​,​ ​w​h​o​e​v​e​r​ ​o​w​n​s​ ​i​t​.​ ​Y​o​u​ ​c​a​n​ ​s​w​i​t​c​h​ ​o​n​e​ ​o​f​f​ ​o​r​ ​r​e​m​o​v​e​ ​i​t​;​ ​h​o​w​ ​i​t​ ​a​n​s​w​e​r​s​ ​s​t​a​y​s​ ​w​i​t​h​ ​i​t​s​ ​o​w​n​e​r​.
+	 */
+	allInstanceBotsHint: string
+	/**
+	 * N​o​b​o​d​y​ ​h​a​s​ ​c​o​n​f​i​g​u​r​e​d​ ​a​ ​b​o​t​ ​y​e​t​.
+	 */
+	noInstanceBots: string
+	/**
+	 * T​h​i​s​ ​a​c​c​o​u​n​t​ ​h​a​s​ ​r​e​a​c​h​e​d​ ​i​t​s​ ​l​i​m​i​t​ ​o​f​ ​b​o​t​s​.
+	 */
+	botLimitReached: string
+	/**
 	 * O​p​t​i​o​n​s
 	 */
 	botOptions: string
@@ -4292,6 +4328,42 @@ export type TranslationFunctions = {
 	 * Choose a model: this bot cannot run without one.
 	 */
 	botNeedsAModel: () => LocalizedString
+	/**
+	 * Users can run their own bots
+	 */
+	allowUserIntegrations: () => LocalizedString
+	/**
+	 * Limits
+	 */
+	botLimits: () => LocalizedString
+	/**
+	 * They apply to every account, yours included: what they protect is the machine and the bill, not a level of trust.
+	 */
+	botLimitsHint: () => LocalizedString
+	/**
+	 * Bots per account
+	 */
+	botsPerUser: () => LocalizedString
+	/**
+	 * Answers per account per hour
+	 */
+	botRepliesPerHour: () => LocalizedString
+	/**
+	 * All bots on this instance
+	 */
+	allInstanceBots: () => LocalizedString
+	/**
+	 * Every bot configured here, whoever owns it. You can switch one off or remove it; how it answers stays with its owner.
+	 */
+	allInstanceBotsHint: () => LocalizedString
+	/**
+	 * Nobody has configured a bot yet.
+	 */
+	noInstanceBots: () => LocalizedString
+	/**
+	 * This account has reached its limit of bots.
+	 */
+	botLimitReached: () => LocalizedString
 	/**
 	 * Options
 	 */

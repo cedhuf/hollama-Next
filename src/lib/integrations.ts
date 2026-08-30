@@ -63,6 +63,23 @@ export const BOT_TOOLS = ['webSearch', 'webFetch', 'sendCurrentDate', 'thinking'
 
 export type BotTool = (typeof BOT_TOOLS)[number];
 
+/**
+ * How many bots one account may run, and how many answers an hour it may
+ * produce across all of them, before an administrator says otherwise.
+ *
+ * Defaults rather than laws. The first is a physical bound: each bot is a timer
+ * and an open conversation with a chat server, held in this process for as long
+ * as it is switched on. The second is what a runaway costs before somebody
+ * notices, and it is counted per account because a per-bot ceiling is walked
+ * around by making a second bot.
+ */
+export const DEFAULT_BOTS_PER_USER = 5;
+export const DEFAULT_BOT_REPLIES_PER_HOUR = 60;
+
+/** What the form and the API agree an administrator may set them to. */
+export const BOTS_PER_USER_MAX = 50;
+export const BOT_REPLIES_PER_HOUR_MAX = 1000;
+
 /** How many messages `recent` sends, and the bounds the form and the API agree on. */
 export const CONTEXT_COUNT_DEFAULT = 6;
 export const CONTEXT_COUNT_MIN = 1;

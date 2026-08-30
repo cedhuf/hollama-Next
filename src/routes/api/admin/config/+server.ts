@@ -4,15 +4,21 @@ import { parseSamplingOptions } from '$lib/chat/options';
 import { requireAdmin } from '$lib/server/api';
 import { appPromptsSharing, setAdminAppPrompts } from '$lib/server/appPromptsResolver';
 import {
+	allowUserIntegrations,
 	allowUserKeys,
 	allowUserPersonas,
+	botRepliesPerHour,
+	botsPerUser,
 	getConfig,
 	personaAutoUpdateForced,
 	personaMemoryEnabled,
 	personaStoreMode,
 	resetOnboarding,
+	setAllowUserIntegrations,
 	setAllowUserKeys,
 	setAllowUserPersonas,
+	setBotRepliesPerHour,
+	setBotsPerUser,
 	setConfig,
 	setPersonaAutoUpdateForced,
 	setPersonaMemoryEnabled,
@@ -33,6 +39,9 @@ export async function GET(event) {
 	await requireAdmin(event);
 	return json({
 		allowUserKeys: allowUserKeys(),
+		allowUserIntegrations: allowUserIntegrations(),
+		botsPerUser: botsPerUser(),
+		botRepliesPerHour: botRepliesPerHour(),
 		creditLimit: instanceCreditLimit(),
 		creditPeriod: creditPeriod(),
 		allowUserPersonas: allowUserPersonas(),
@@ -73,6 +82,12 @@ export async function PUT(event) {
 	const body = await event.request.json();
 
 	if (typeof body?.allowUserKeys === 'boolean') setAllowUserKeys(body.allowUserKeys);
+	if (typeof body?.allowUserIntegrations === 'boolean') {
+		setAllowUserIntegrations(body.allowUserIntegrations);
+	}
+	if (Number.isFinite(body?.botsPerUser)) setBotsPerUser(Number(body.botsPerUser));
+	if (Number.isFinite(body?.botRepliesPerHour))
+		setBotRepliesPerHour(Number(body.botRepliesPerHour));
 
 	// The allowance everybody gets unless their own account says otherwise. Zero
 	// is no limit, and is what an instance nobody has configured has.

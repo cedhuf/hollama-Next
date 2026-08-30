@@ -1,3 +1,10 @@
+import {
+	BOT_REPLIES_PER_HOUR_MAX,
+	BOTS_PER_USER_MAX,
+	DEFAULT_BOT_REPLIES_PER_HOUR,
+	DEFAULT_BOTS_PER_USER
+} from '$lib/integrations';
+
 import { getDb } from './index';
 
 /** Global admin flags, stored in the `app_config` KV table. */
@@ -23,6 +30,55 @@ export function allowUserKeys(): boolean {
 
 export function setAllowUserKeys(value: boolean): void {
 	setConfig('allowUserKeys', value ? 'true' : 'false');
+}
+
+/**
+ * Whether users may run bots of their own (default: false).
+ *
+ * Off by default, unlike personas and like provider keys: a bot answers on its
+ * own initiative, spends on every message it is sent, and reaches a chat server
+ * the instance does not own. That is a thing an administrator grants, not a
+ * thing everybody starts with.
+ */
+export function allowUserIntegrations(): boolean {
+	return getConfig('allowUserIntegrations') === 'true';
+}
+
+export function setAllowUserIntegrations(value: boolean): void {
+	setConfig('allowUserIntegrations', value ? 'true' : 'false');
+}
+
+/** How many bots one account may run. */
+export function botsPerUser(): number {
+	return readCount('botsPerUser', DEFAULT_BOTS_PER_USER, BOTS_PER_USER_MAX);
+}
+
+export function setBotsPerUser(value: number): void {
+	setConfig('botsPerUser', String(clampCount(value, BOTS_PER_USER_MAX)));
+}
+
+/** How many answers an account's bots may produce in an hour, all of them together. */
+export function botRepliesPerHour(): number {
+	return readCount('botRepliesPerHour', DEFAULT_BOT_REPLIES_PER_HOUR, BOT_REPLIES_PER_HOUR_MAX);
+}
+
+export function setBotRepliesPerHour(value: number): void {
+	setConfig('botRepliesPerHour', String(clampCount(value, BOT_REPLIES_PER_HOUR_MAX)));
+}
+
+/**
+ * A stored count, or the default when there is none or it is nonsense.
+ *
+ * Clamped on the way out as well as on the way in: a figure edited straight in
+ * the database is still a figure this process has to survive.
+ */
+function readCount(key: string, fallback: number, max: number): number {
+	const raw = Number(getConfig(key));
+	return Number.isFinite(raw) && raw > 0 ? clampCount(raw, max) : fallback;
+}
+
+function clampCount(value: number, max: number): number {
+	return Math.min(Math.max(Math.round(value), 1), max);
 }
 
 /** Whether users may create their own personas (default: true). */

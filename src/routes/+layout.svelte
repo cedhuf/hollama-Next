@@ -31,6 +31,7 @@
 		shouldOfferInstall,
 		type PwaInstallDialog
 	} from '$lib/install';
+	import { loadIntegrationsConfig } from '$lib/integrationsConfig';
 	import { hydrateStores, refreshStores, settingsStore } from '$lib/localStorage';
 	import { loadServerPersonas } from '$lib/personasConfig';
 	import { loadServerPlaybooks } from '$lib/playbooksConfig';
@@ -356,6 +357,7 @@
 		await loadServerPrompts();
 		await loadServerChatDefaults();
 		await loadServerPersonas();
+		await loadIntegrationsConfig();
 		await loadServerPlaybooks();
 		// The gallery's index, which is small by construction: the pictures
 		// themselves are fetched one at a time by the page that shows them.

@@ -44,6 +44,17 @@ const en = {
 	usePersonaPromptHint:
 		'Only the persona prompt is used. No memory, no library conversation, no knowledge.',
 	botNeedsAModel: 'Choose a model: this bot cannot run without one.',
+	allowUserIntegrations: 'Users can run their own bots',
+	botLimits: 'Limits',
+	botLimitsHint:
+		'They apply to every account, yours included: what they protect is the machine and the bill, not a level of trust.',
+	botsPerUser: 'Bots per account',
+	botRepliesPerHour: 'Answers per account per hour',
+	allInstanceBots: 'All bots on this instance',
+	allInstanceBotsHint:
+		'Every bot configured here, whoever owns it. You can switch one off or remove it; how it answers stays with its owner.',
+	noInstanceBots: 'Nobody has configured a bot yet.',
+	botLimitReached: 'This account has reached its limit of bots.',
 	botOptions: 'Options',
 	whereToAnswer: 'Where to answer',
 	placementAuto: 'Where it was asked',

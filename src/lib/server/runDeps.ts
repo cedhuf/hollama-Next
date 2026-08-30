@@ -6,6 +6,7 @@ import { stripThinkTags } from '$lib/chat/index';
 import { OllamaStrategy } from '$lib/chat/ollama';
 import { OpenAIStrategy } from '$lib/chat/openai';
 import { parseLoadOptions } from '$lib/chat/options';
+import { refusal } from '$lib/chat/refusal';
 import type { RunDeps } from '$lib/chat/run/orchestrator';
 import type { RunInput } from '$lib/chat/run/types';
 import { stripTitleMarkdown } from '$lib/chat/titleText';
@@ -15,11 +16,17 @@ import { resolvePrompt } from '$lib/defaultPrompts';
 import { getSettings } from '$lib/server/db/collections';
 import { getServer, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
 import { allowedFetchOrigins, fetchPage } from '$lib/server/fetchPage';
-import { policeChatBody, PolicyError, type ChatBody } from '$lib/server/llmPolicy';
+import {
+	policeChatBody,
+	PolicyError,
+	reachableServer,
+	type ChatBody
+} from '$lib/server/llmPolicy';
 import { serverMemory } from '$lib/server/personaMemoryAccess';
 import { webSearch, type SearchTarget } from '$lib/server/search';
 import { resolveSearch } from '$lib/server/searchResolver';
 import { resolveTools } from '$lib/server/toolsResolver';
+import { refuseForCredit } from '$lib/server/usageMeter';
 import type { Message } from '$lib/sessions';
 
 /**
@@ -42,14 +49,16 @@ export interface RunPrincipal {
 	isAdmin: boolean;
 }
 
-/** The connection a run names, resolved by the only party allowed to resolve it. */
+/**
+ * The connection a run names, resolved by the only party allowed to resolve it.
+ *
+ * The same three questions `requireServer` asks of a request: does it exist, is
+ * it this account's, and is it switched on. The last one was missing here, which
+ * meant a connection an administrator had switched off still answered a turn
+ * started on this side, while refusing the identical turn typed in the browser.
+ */
 export function resolveRunServer(input: RunInput, principal: RunPrincipal): Server {
-	const row = getServer(input.serverId);
-	if (!row) throw new PolicyError(404, 'Server not found');
-	if (row.owner_user_id !== null && row.owner_user_id !== principal.userId) {
-		throw new PolicyError(403, 'Not your server');
-	}
-	return fromRow(row);
+	return fromRow(reachableServer(principal.userId, input.serverId));
 }
 
 function fromRow(row: ServerRow): Server {
@@ -126,9 +135,28 @@ function fetchLimits(
 	return { maxPages: tools.maxPages, maxChars: tools.maxChars };
 }
 
+/**
+ * The credit limit, applied on this path too.
+ *
+ * It used to live only in `/api/llm`, which is the browser's way out and is not
+ * the only one any more: a turn running in this process talks to the provider
+ * itself, so an account over its allowance kept spending as long as the turn
+ * started server-side. The same oversight the policy above was written to
+ * close, on the one rule that was left behind.
+ *
+ * Asked before the turn starts and never during one, exactly as the proxy asks
+ * it: a conversation already under way always finishes.
+ */
+function policeCredit(row: ServerRow | null, model: string, principal: RunPrincipal): void {
+	if (!row) return;
+	const refused = refuseForCredit(principal.userId, row, model);
+	if (refused) throw new PolicyError(402, refusal(refused));
+}
+
 export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 	const server = resolveRunServer(input, principal);
 	const row = getServer(input.serverId) ?? null;
+	policeCredit(row, input.model, principal);
 	const strategy = policed(strategyFor(server), row, principal.isAdmin);
 
 	const target = searchTarget(input, principal);
@@ -268,9 +296,17 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 	};
 }
 
+/**
+ * A connection for one of the small jobs around a turn: a title, a compaction.
+ *
+ * Nothing rather than a refusal, because none of these is the answer somebody is
+ * waiting for: a title that cannot be written is a conversation without one, not
+ * a turn that failed. The three questions are the same ones as everywhere else.
+ */
 function helper(serverId: string, principal: RunPrincipal): Server | null {
-	const row = getServer(serverId);
-	if (!row) return null;
-	if (row.owner_user_id !== null && row.owner_user_id !== principal.userId) return null;
-	return fromRow(row);
+	try {
+		return fromRow(reachableServer(principal.userId, serverId));
+	} catch {
+		return null;
+	}
 }

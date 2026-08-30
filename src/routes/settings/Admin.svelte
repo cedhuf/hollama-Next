@@ -52,6 +52,7 @@
 	 */
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
+	let allowUserIntegrations = $state(false);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
 
 	let personaAutoUpdateForced = $state(false);
@@ -210,6 +211,7 @@
 			]);
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
+			allowUserIntegrations = config.allowUserIntegrations ?? false;
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
 			personaMemoryEnabled = config.personaMemoryEnabled ?? true;
@@ -391,6 +393,10 @@
 		await api('/api/admin/config', 'PUT', { allowUserKeys });
 	}
 
+	async function toggleAllowUserIntegrations() {
+		await api('/api/admin/config', 'PUT', { allowUserIntegrations });
+	}
+
 	async function toggleAllowUserPersonas() {
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
 	}
@@ -521,6 +527,14 @@
 			label={$LL.allowUserPersonas()}
 			bind:checked={allowUserPersonas}
 			onChange={toggleAllowUserPersonas}
+		/>
+		<!-- The grant lives here with the other grants. What it grants, and the
+		     ceilings that apply to everybody including an administrator, live in the
+		     Bots tab: a limit on how many bots exist is not a permission. -->
+		<FieldCheckbox
+			label={$LL.allowUserIntegrations()}
+			bind:checked={allowUserIntegrations}
+			onChange={toggleAllowUserIntegrations}
 		/>
 		<!-- Not a permission but a composition, which is why it is a choice of two
 		     rather than a switch. A store is the door people already know; what an

@@ -4,14 +4,21 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
+	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
+	import NumberField from '$lib/components/NumberField.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
+		BOT_REPLIES_PER_HOUR_MAX,
+		BOTS_PER_USER_MAX,
+		DEFAULT_BOT_REPLIES_PER_HOUR,
+		DEFAULT_BOTS_PER_USER,
 		defaultConfig,
 		INTEGRATION_KINDS,
 		type IntegrationKind,
 		type IntegrationView
 	} from '$lib/integrations';
+	import { integrationsConfig, loadIntegrationsConfig } from '$lib/integrationsConfig';
 	import { toast } from '$lib/toast';
 
 	import BotIntegration from './BotIntegration.svelte';
@@ -35,6 +42,24 @@
 
 	let integrations = $state<IntegrationView[]>([]);
 	let loading = $state(true);
+
+	/**
+	 * Everybody's bots, for an administrator, and only as a roster.
+	 *
+	 * The counterpart of letting people run their own: two questions answered,
+	 * what is running and on whose account, and two actions, switch it off and
+	 * remove it. Not a second editor, because how a bot answers belongs to the
+	 * person who configured it.
+	 */
+	let allBots = $state<(IntegrationView & { owner: string })[]>([]);
+
+	/**
+	 * The instance's ceilings, which an administrator sets here rather than in
+	 * Admin: they are not a permission. They apply to every account including the
+	 * one reading them, and what they protect is the machine and the bill.
+	 */
+	let botsPerUser = $state(DEFAULT_BOTS_PER_USER);
+	let botRepliesPerHour = $state(DEFAULT_BOT_REPLIES_PER_HOUR);
 
 	/** Keys typed but not yet stored, by integration id. Never filled from the server. */
 	let secrets = $state<Record<string, string>>({});
@@ -63,8 +88,55 @@
 		try {
 			integrations = (await api<IntegrationView[]>('/api/integrations', 'GET')) ?? [];
 		} finally {
+			if ($integrationsConfig.isAdmin) {
+				await loadLimits();
+				await loadAllBots();
+			}
 			loading = false;
 		}
+	}
+
+	async function loadLimits() {
+		try {
+			const response = await fetch('/api/admin/config');
+			if (!response.ok) return;
+			const config = await response.json();
+			botsPerUser = config.botsPerUser ?? DEFAULT_BOTS_PER_USER;
+			botRepliesPerHour = config.botRepliesPerHour ?? DEFAULT_BOT_REPLIES_PER_HOUR;
+		} catch {
+			// The defaults are already on screen and are what the server would apply.
+		}
+	}
+
+	async function saveLimits() {
+		await api('/api/admin/config', 'PUT', { botsPerUser, botRepliesPerHour });
+		// The add form appears and disappears on this figure, and it is read from
+		// the boot-time answer rather than from here.
+		await loadIntegrationsConfig();
+	}
+
+	async function loadAllBots() {
+		try {
+			const response = await fetch('/api/admin/integrations');
+			if (response.ok) allBots = await response.json();
+		} catch {
+			// A roster that will not load is not worth an error over the tab that
+			// works: the administrator's own bots above are unaffected.
+		}
+	}
+
+	async function setBotEnabled(bot: IntegrationView, enabled: boolean) {
+		await api(`/api/admin/integrations/${bot.id}`, 'PUT', { enabled });
+		await loadAllBots();
+		// An administrator's own bot appears in both lists, and the card above
+		// would otherwise keep showing the switch it no longer reflects.
+		integrations = integrations.map((own) => (own.id === bot.id ? { ...own, enabled } : own));
+	}
+
+	async function removeBot(bot: IntegrationView) {
+		await api(`/api/admin/integrations/${bot.id}`, 'DELETE');
+		allBots = allBots.filter((entry) => entry.id !== bot.id);
+		integrations = integrations.filter((own) => own.id !== bot.id);
 	}
 
 	onMount(load);
@@ -187,7 +259,7 @@
 		{/if}
 	</SettingsSection>
 
-	{#if !loading}
+	{#if !loading && integrations.length < $integrationsConfig.limit}
 		<SettingsSection title={$LL.addAnIntegration()}>
 			{#if !adding}
 				<button
@@ -283,6 +355,73 @@
 					{/if}
 				</div>
 			{/if}
+		</SettingsSection>
+	{:else if !loading}
+		<p class="text-muted text-xs">{$LL.botLimitReached()}</p>
+	{/if}
+
+	<!-- The rest of the tab is an administrator's, and it is two things: what
+	     everybody may have, and what everybody is running. -->
+	{#if !loading && $integrationsConfig.isAdmin}
+		<SettingsSection title={$LL.botLimits()} description={$LL.botLimitsHint()} card>
+			<div class="flex flex-wrap items-end gap-3">
+				<div class="min-w-32 flex-1">
+					<SettingsField label={$LL.botsPerUser()}>
+						<NumberField
+							value={botsPerUser}
+							min={1}
+							max={BOTS_PER_USER_MAX}
+							onChange={(raw) => {
+								botsPerUser = Number(raw) || DEFAULT_BOTS_PER_USER;
+								saveLimits();
+							}}
+						/>
+					</SettingsField>
+				</div>
+				<div class="min-w-32 flex-1">
+					<SettingsField label={$LL.botRepliesPerHour()}>
+						<NumberField
+							value={botRepliesPerHour}
+							min={1}
+							max={BOT_REPLIES_PER_HOUR_MAX}
+							onChange={(raw) => {
+								botRepliesPerHour = Number(raw) || DEFAULT_BOT_REPLIES_PER_HOUR;
+								saveLimits();
+							}}
+						/>
+					</SettingsField>
+				</div>
+			</div>
+		</SettingsSection>
+	{/if}
+
+	{#if !loading && $integrationsConfig.isAdmin && allBots.length}
+		<SettingsSection title={$LL.allInstanceBots()} description={$LL.allInstanceBotsHint()}>
+			{#each allBots as bot (bot.id)}
+				<div class="border-shade-3 bg-shade-0 flex items-center gap-3 rounded-xl border px-3 py-2">
+					<span class="min-w-0 flex-1">
+						<span class="text-active block truncate text-sm">{bot.label || bot.kind}</span>
+						<span class="text-muted block truncate text-xs">
+							{bot.owner} · {bot.config.model || $LL.botNeedsAModel()}
+						</span>
+					</span>
+
+					<label class="flex shrink-0 cursor-pointer items-center" title={$LL.integrationEnabled()}>
+						<input
+							type="checkbox"
+							checked={bot.enabled}
+							onchange={(e) => setBotEnabled(bot, e.currentTarget.checked)}
+							aria-label={$LL.integrationEnabled()}
+							class="peer sr-only"
+						/>
+						<span
+							class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
+						></span>
+					</label>
+
+					<ButtonConfirm compact label={$LL.deleteIntegration()} onConfirm={() => removeBot(bot)} />
+				</div>
+			{/each}
 		</SettingsSection>
 	{/if}
 </SettingsPanel>

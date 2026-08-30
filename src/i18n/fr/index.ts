@@ -52,6 +52,17 @@ const fr = extendDictionary(en, {
 	usePersonaPromptHint:
 		'Seul le prompt du persona est utilisé. Ni mémoire, ni conversation de bibliothèque, ni connaissances.',
 	botNeedsAModel: 'Choisissez un modèle : ce bot ne peut pas tourner sans.',
+	allowUserIntegrations: 'Les utilisateurs peuvent avoir leurs propres bots',
+	botLimits: 'Limites',
+	botLimitsHint:
+		"Elles s'appliquent à tous les comptes, le vôtre compris : ce qu'elles protègent est la machine et la facture, pas un niveau de confiance.",
+	botsPerUser: 'Bots par compte',
+	botRepliesPerHour: 'Réponses par compte et par heure',
+	allInstanceBots: 'Tous les bots de cette instance',
+	allInstanceBotsHint:
+		"Chaque bot configuré ici, quel qu'en soit le propriétaire. Vous pouvez en désactiver un ou le supprimer ; sa façon de répondre reste à son propriétaire.",
+	noInstanceBots: "Personne n'a encore configuré de bot.",
+	botLimitReached: 'Ce compte a atteint sa limite de bots.',
 	botOptions: 'Options',
 	whereToAnswer: 'Où répondre',
 	placementAuto: "Là où on l'appelle",

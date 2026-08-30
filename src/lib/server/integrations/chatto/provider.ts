@@ -1,5 +1,6 @@
 import type { Persona } from '$lib/personas';
 import { getPersonas } from '$lib/server/db/collections';
+import { botRepliesPerHour } from '$lib/server/db/config';
 import { claimSeen, hasSeen, sweepSeen, type IntegrationRecord } from '$lib/server/db/integrations';
 import { defaultSystemPrompt, runTurnOnce } from '$lib/server/turn';
 
@@ -48,8 +49,16 @@ const TYPING_REFRESH_MS = 3_000;
 /** What the bot puts on a message to say it has been picked up. Chatto wants a shortcode. */
 const ACK_EMOJI = 'eyes';
 
-/** A ceiling on answers per hour, so a loop between two bots costs an hour and not a month. */
-const MAX_REPLIES_PER_HOUR = 60;
+/**
+ * When each account's bots last answered, for the hourly ceiling.
+ *
+ * Per account rather than per bot. It used to be per runtime, which a second
+ * bot walked straight around, and the thing being protected is the account's
+ * bill and the provider at the other end: neither of them cares how many bots
+ * the traffic was split across. The figure itself is the instance's, read each
+ * time so that lowering it takes effect without restarting anything.
+ */
+const repliesByOwner = new Map<string, number[]>();
 
 class ChattoRuntime implements IntegrationRuntime {
 	readonly #record: IntegrationRecord;
@@ -61,7 +70,6 @@ class ChattoRuntime implements IntegrationRuntime {
 	#selfId = '';
 	#timer: ReturnType<typeof setTimeout> | null = null;
 	#stopped = false;
-	#replies: number[] = [];
 
 	constructor(record: IntegrationRecord, token: string) {
 		this.#record = record;
@@ -232,10 +240,16 @@ class ChattoRuntime implements IntegrationRuntime {
 
 	/** True when there is room under the hourly ceiling, and counts the reply if so. */
 	#allowance(): boolean {
+		const owner = this.#record.ownerUserId;
 		const cutoff = Date.now() - 3_600_000;
-		this.#replies = this.#replies.filter((at) => at > cutoff);
-		if (this.#replies.length >= MAX_REPLIES_PER_HOUR) return false;
-		this.#replies.push(Date.now());
+		const recent = (repliesByOwner.get(owner) ?? []).filter((at) => at > cutoff);
+
+		if (recent.length >= botRepliesPerHour()) {
+			repliesByOwner.set(owner, recent);
+			return false;
+		}
+		recent.push(Date.now());
+		repliesByOwner.set(owner, recent);
 		return true;
 	}
 
