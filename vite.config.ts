@@ -69,7 +69,25 @@ export default defineConfig(({ command }) => ({
 		 * that has none, which is a `ReferenceError` on the first request that
 		 * touches it. Left external, Node resolves it itself and it simply works.
 		 */
-		noExternal: command === 'build' ? ['ws'] : []
+		noExternal:
+			command === 'build'
+				? [
+						'ws',
+						// The MCP client and everything under it. Named one by one rather
+						// than by a pattern, because inlining a package does not inline what
+						// it imports: leaving `zod` or `eventsource` external puts the same
+						// missing module back, one level down, and the failure looks
+						// identical.
+						'@modelcontextprotocol/client',
+						'@modelcontextprotocol/core',
+						'zod',
+						'jose',
+						'cross-spawn',
+						'eventsource',
+						'eventsource-parser',
+						'pkce-challenge'
+					]
+				: []
 	},
 	preview: {
 		// Allow all hosts in preview mode
