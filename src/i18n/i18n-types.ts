@@ -3370,11 +3370,6 @@ type RootTranslation = {
 	 */
 	mcpToolsFound: RequiredParams<'count'>
 	/**
-	 * O​n​l​y​ ​t​h​e​ ​f​i​r​s​t​ ​{​c​o​u​n​t​}​ ​a​r​e​ ​o​f​f​e​r​e​d​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​.​ ​T​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
-	 * @param {number} count
-	 */
-	mcpToolsCapped: RequiredParams<'count'>
-	/**
 	 * A​t​ ​m​o​s​t​ ​{​c​o​u​n​t​}​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​p​e​r​ ​a​c​c​o​u​n​t​.
 	 * @param {number} count
 	 */
@@ -3384,13 +3379,13 @@ type RootTranslation = {
 	 */
 	mcpAllowed: string
 	/**
-	 * M​C​P​ ​s​e​r​v​e​r​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
-	 */
-	allInstanceMcpServers: string
-	/**
 	 * E​v​e​r​y​b​o​d​y​’​s​,​ ​w​i​t​h​ ​w​h​o​s​e​ ​t​h​e​y​ ​a​r​e​.​ ​S​u​s​p​e​n​d​ ​o​n​e​ ​o​r​ ​r​e​m​o​v​e​ ​i​t​;​ ​h​o​w​ ​i​t​ ​i​s​ ​c​o​n​f​i​g​u​r​e​d​ ​s​t​a​y​s​ ​w​i​t​h​ ​i​t​s​ ​o​w​n​e​r​.
 	 */
 	allInstanceMcpServersHint: string
+	/**
+	 * W​h​o​ ​m​a​y​ ​p​o​i​n​t​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​a​t​ ​a​ ​c​a​t​a​l​o​g​u​e​ ​o​f​ ​t​o​o​l​s​ ​r​u​n​n​i​n​g​ ​e​l​s​e​w​h​e​r​e​,​ ​a​n​d​ ​w​h​a​t​ ​h​a​s​ ​b​e​e​n​ ​p​o​i​n​t​e​d​ ​a​t​ ​s​o​ ​f​a​r​.
+	 */
+	adminMcpDescription: string
 	/**
 	 * U​s​e​r​s​ ​c​a​n​ ​a​d​d​ ​t​h​e​i​r​ ​o​w​n​ ​M​C​P​ ​s​e​r​v​e​r​s
 	 */
@@ -7648,10 +7643,6 @@ export type TranslationFunctions = {
 	 */
 	mcpToolsFound: (arg: { count: number }) => LocalizedString
 	/**
-	 * Only the first {count} are offered to the model. The rest of the catalogue is left out.
-	 */
-	mcpToolsCapped: (arg: { count: number }) => LocalizedString
-	/**
 	 * At most {count} MCP servers per account.
 	 */
 	mcpLimitReached: (arg: { count: number }) => LocalizedString
@@ -7660,13 +7651,13 @@ export type TranslationFunctions = {
 	 */
 	mcpAllowed: () => LocalizedString
 	/**
-	 * MCP servers on this instance
-	 */
-	allInstanceMcpServers: () => LocalizedString
-	/**
 	 * Everybody’s, with whose they are. Suspend one or remove it; how it is configured stays with its owner.
 	 */
 	allInstanceMcpServersHint: () => LocalizedString
+	/**
+	 * Who may point this instance at a catalogue of tools running elsewhere, and what has been pointed at so far.
+	 */
+	adminMcpDescription: () => LocalizedString
 	/**
 	 * Users can add their own MCP servers
 	 */

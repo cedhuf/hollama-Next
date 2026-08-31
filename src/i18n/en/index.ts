@@ -932,13 +932,12 @@ const en = {
 	mcpToolPrefix: 'Its tools are named {prefix:string}\u2026 in front of the model',
 	mcpConnected: 'Connected. {count:number} tool{{s}} found.',
 	mcpToolsFound: '{count:number} tool{{s}}',
-	mcpToolsCapped:
-		'Only the first {count:number} are offered to the model. The rest of the catalogue is left out.',
 	mcpLimitReached: 'At most {count:number} MCP servers per account.',
 	mcpAllowed: 'Allowed on this instance',
-	allInstanceMcpServers: 'MCP servers on this instance',
 	allInstanceMcpServersHint:
 		'Everybody\u2019s, with whose they are. Suspend one or remove it; how it is configured stays with its owner.',
+	adminMcpDescription:
+		'Who may point this instance at a catalogue of tools running elsewhere, and what has been pointed at so far.',
 	allowUserMcp: 'Users can add their own MCP servers',
 	callingExternalTool: 'Calling an external tool',
 	mcpStepCalled: 'Called an external tool',

@@ -143,11 +143,11 @@ question.
 
 ## For an administrator
 
-The permission is in _Settings → Admin → User permissions_: **users can add their own MCP servers**,
-off by default. Administrators always may.
+_Settings → Admin_ has an **MCP servers** section of its own. The permission lives there, **users can
+add their own MCP servers**, off by default, and administrators always may.
 
-_Settings → Tools_ then lists every server on the instance, with whose it is. Two actions: suspend
-one, or remove it. Suspending is kept apart from the owner's own switch, because a switch the owner
+Under that same checkbox sits every server configured on the instance, with whose it is. Two actions:
+suspend one, or remove it. Suspending is kept apart from the owner's own switch, because a switch the owner
 flips back is a suggestion rather than a decision, and they keep being told why theirs changes
 nothing for now.
 

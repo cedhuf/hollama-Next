@@ -13,6 +13,7 @@
 	import { settingsModalOpen, welcomeOpen, welcomeShowAll } from '$lib/stores/modal';
 	import { toast } from '$lib/toast';
 
+	import McpInstanceServers from './McpInstanceServers.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
@@ -542,15 +543,6 @@
 			bind:checked={allowUserIntegrations}
 			onChange={toggleAllowUserIntegrations}
 		/>
-		<!-- One switch and no sharing modes: there is no administrator's value to
-		     hand down here, only a permission. The servers themselves are each
-		     account's own, and one that has to stop is suspended in the Tools tab
-		     rather than by revoking the permission for everybody. -->
-		<FieldCheckbox
-			label={$LL.allowUserMcp()}
-			bind:checked={allowUserMcp}
-			onChange={toggleAllowUserMcp}
-		/>
 		<!-- Not a permission but a composition, which is why it is a choice of two
 		     rather than a switch. A store is the door people already know; what an
 		     instance decides is what is behind it. -->
@@ -588,6 +580,23 @@
 			onChange={savePersonaMemory}
 		/>
 		<SettingsHint>{$LL.personaMemoryAllowHelp()}</SettingsHint>
+	</SettingsSection>
+
+	<!-- Its own section rather than a line among the permissions: what an
+	     administrator decides here is a permission *and* a roster of what other
+	     people have configured, and the second one is not something to stumble on
+	     while ticking boxes about personas. -->
+	<SettingsSection title={$LL.mcpServers()} description={$LL.adminMcpDescription()} card>
+		<!-- One switch and no sharing modes: there is no administrator's value to hand
+		     down here, only a permission. The servers themselves are each account's
+		     own, and one that has to stop is suspended below rather than by revoking
+		     the permission for everybody. -->
+		<FieldCheckbox
+			label={$LL.allowUserMcp()}
+			bind:checked={allowUserMcp}
+			onChange={toggleAllowUserMcp}
+		/>
+		<McpInstanceServers />
 	</SettingsSection>
 
 	<!-- Web search sharing -->

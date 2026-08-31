@@ -4,7 +4,6 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -31,11 +30,7 @@
 	let servers = $state<McpServerView[]>([]);
 	let loading = $state(true);
 	let canManage = $state(false);
-	let isAdmin = $state(false);
 	let limit = $state<number>(MCP_LIMITS.perUser);
-
-	/** Everybody's servers, for an administrator. A roster, not a second editor. */
-	let all = $state<(McpServerView & { owner: string })[]>([]);
 
 	/** Tokens typed but not yet stored, by server id. Never filled from the server. */
 	let secrets = $state<Record<string, string>>({});
@@ -69,31 +64,16 @@
 
 	async function load() {
 		try {
-			const config = await api<{ canManage: boolean; isAdmin: boolean; limit: number }>(
-				'/api/mcp/config',
-				'GET'
-			);
+			const config = await api<{ canManage: boolean; limit: number }>('/api/mcp/config', 'GET');
 			canManage = config?.canManage ?? false;
-			isAdmin = config?.isAdmin ?? false;
 			limit = config?.limit ?? MCP_LIMITS.perUser;
 
 			servers = (await api<McpServerView[]>('/api/mcp', 'GET')) ?? [];
-			if (isAdmin) await loadAll();
 		} catch {
 			// `api()` has already said what went wrong. An empty list is the honest
 			// thing to show when the instance would not answer.
 		} finally {
 			loading = false;
-		}
-	}
-
-	async function loadAll() {
-		try {
-			const response = await fetch('/api/admin/mcp');
-			if (response.ok) all = await response.json();
-		} catch {
-			// A roster that will not load is not worth an error over the section
-			// above it, which works.
 		}
 	}
 
@@ -180,20 +160,6 @@
 	async function remove(id: string) {
 		await api(`/api/mcp/${id}`, 'DELETE');
 		servers = servers.filter((entry) => entry.id !== id);
-		all = all.filter((entry) => entry.id !== id);
-	}
-
-	/**
-	 * Suspend somebody's server, or lift the suspension.
-	 *
-	 * The switch reads as "allowed", so it is on when nothing is blocking it. What
-	 * it writes is the instance's decision, never the owner's: their own switch
-	 * stays exactly where they left it.
-	 */
-	async function setAllowed(server: McpServerView, allowed: boolean) {
-		await api(`/api/admin/mcp/${server.id}`, 'PUT', { blocked: !allowed });
-		await loadAll();
-		servers = servers.map((own) => (own.id === server.id ? { ...own, blocked: !allowed } : own));
 	}
 </script>
 
@@ -309,39 +275,3 @@
 		{/if}
 	{/if}
 </SettingsSection>
-
-<!-- An administrator's half: what is running on the instance, and on whose
-     account. Two actions, suspend and remove. Never a second editor, because an
-     address and a token belong to whoever configured them. -->
-{#if !loading && isAdmin && all.length}
-	<SettingsSection
-		title={$LL.allInstanceMcpServers()}
-		description={$LL.allInstanceMcpServersHint()}
-	>
-		{#each all as server (server.id)}
-			<div class="border-shade-3 bg-shade-0 flex items-center gap-3 rounded-xl border px-3 py-2">
-				<span class="min-w-0 flex-1">
-					<span class="text-active block truncate text-sm">{server.label}</span>
-					<span class="text-muted block truncate text-xs">
-						{server.owner} · {server.url}
-						{#if !server.enabled}· {$LL.offByItsOwner()}{/if}
-					</span>
-				</span>
-
-				<label class="flex shrink-0 cursor-pointer items-center" title={$LL.mcpAllowed()}>
-					<input
-						type="checkbox"
-						class="peer sr-only"
-						checked={!server.blocked}
-						onchange={(e) => setAllowed(server, e.currentTarget.checked)}
-					/>
-					<span
-						class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
-					></span>
-				</label>
-
-				<ButtonConfirm label={$LL.delete()} onConfirm={() => remove(server.id)} compact />
-			</div>
-		{/each}
-	</SettingsSection>
-{/if}

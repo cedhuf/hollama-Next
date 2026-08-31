@@ -962,13 +962,12 @@ const fr = extendDictionary(en, {
 	mcpToolPrefix: 'Ses outils s\u2019appellent {prefix:string}\u2026 devant le modèle',
 	mcpConnected: 'Connecté. {count:number} outil{{s}} trouvé{{s}}.',
 	mcpToolsFound: '{count:number} outil{{s}}',
-	mcpToolsCapped:
-		'Seuls les {count:number} premiers sont proposés au modèle. Le reste du catalogue est laissé de côté.',
 	mcpLimitReached: 'Au maximum {count:number} serveurs MCP par compte.',
 	mcpAllowed: 'Autorisé sur cette instance',
-	allInstanceMcpServers: 'Serveurs MCP de cette instance',
 	allInstanceMcpServersHint:
 		'Ceux de tout le monde, et à qui ils sont. Suspendez-en un ou supprimez-le ; sa configuration reste à son propriétaire.',
+	adminMcpDescription:
+		'Qui peut brancher cette instance sur un catalogue d\u2019outils tournant ailleurs, et ce qui y est branché aujourd\u2019hui.',
 	allowUserMcp: 'Les utilisateurs peuvent ajouter leurs propres serveurs MCP',
 	callingExternalTool: 'Appel d\u2019un outil externe',
 	mcpStepCalled: 'A appelé un outil externe',
