@@ -220,6 +220,12 @@ function hold(ws: WebSocket): void {
 			// which is what keeps a visit that said nothing from leaving a record.
 			send({ type: 'ready', sessionId: grant.sessionId ?? '' });
 			send({ type: 'state', value: 'idle' });
+
+			// And the persona's opening line, out loud, if this conversation has one
+			// and nothing has happened in it yet. Not awaited, for the same reason a
+			// turn is not: it holds the floor for as long as it takes to read, and the
+			// socket has to keep reading while it does.
+			void exchange.greet();
 			return;
 		}
 

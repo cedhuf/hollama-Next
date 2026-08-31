@@ -65,6 +65,12 @@ const MINIMUM_MS = 350;
 const BARGE = 6.0;
 const BARGE_MS = 200;
 
+/** One thing somebody said, whichever of the two of them said it. */
+export interface Line {
+	role: 'user' | 'assistant';
+	text: string;
+}
+
 export class VoiceSession {
 	/** Where the exchange is, as the server sees it. */
 	state = $state<VoiceState>('idle');
@@ -84,9 +90,26 @@ export class VoiceSession {
 	 */
 	talking = $state(false);
 
-	/** What was understood, and what is being said back. */
-	heard = $state('');
-	answer = $state('');
+	/**
+	 * The conversation, as lines to read back.
+	 *
+	 * A list rather than the last question and the last answer, which is what this
+	 * held before. Two strings can only ever show the exchange in progress, and a
+	 * spoken conversation is exactly the kind nobody can scroll back through in
+	 * their head: a misheard word four turns ago is the thing you want to go and
+	 * look at. Seeded from the stored conversation when the screen was opened on
+	 * one, so what is on screen is the conversation and not the visit.
+	 */
+	lines = $state<Line[]>([]);
+
+	/**
+	 * Whether the answer being spoken already has a line of its own.
+	 *
+	 * The answer arrives in pieces, one per sentence synthesised, and they belong
+	 * on one line. Reset at the start of every turn, which is the only thing that
+	 * separates one answer from the next.
+	 */
+	#answering = false;
 
 	/** The conversation this is being written into, once there is one. */
 	sessionId = $state('');
@@ -215,6 +238,21 @@ export class VoiceSession {
 		this.muted = false;
 		this.talking = false;
 		this.state = 'idle';
+	}
+
+	/**
+	 * What was already said in this conversation, before the screen opened.
+	 *
+	 * Handed in rather than fetched, because the screen has already read the
+	 * conversation to find out whose it is and reading it twice would be a second
+	 * request for the same bytes. Only what can be read back out loud: a system
+	 * prompt is not part of the exchange, and an empty message is not a line.
+	 */
+	seed(messages: { role: string; content: string }[]): void {
+		this.lines = messages
+			.filter((message) => message.role === 'user' || message.role === 'assistant')
+			.filter((message) => message.content.trim())
+			.map((message) => ({ role: message.role as Line['role'], text: message.content.trim() }));
 	}
 
 	/** Shut the microphone without ending the conversation. */
@@ -537,17 +575,24 @@ export class VoiceSession {
 				this.sessionId = message.sessionId;
 				return;
 			case 'state':
-				// A new turn clears the last one, so the screen is never showing an
-				// answer beside a question it does not belong to.
-				if (message.value === 'transcribing') this.answer = '';
+				// A turn beginning closes whatever line the last answer was writing on.
+				if (message.value === 'transcribing') this.#answering = false;
 				this.state = message.value;
 				return;
 			case 'heard':
-				this.heard = message.text;
+				this.#answering = false;
+				this.lines.push({ role: 'user', text: message.text });
 				return;
-			case 'answer':
-				this.answer = this.answer ? `${this.answer} ${message.text}` : message.text;
+			case 'answer': {
+				const last = this.lines.at(-1);
+				if (this.#answering && last?.role === 'assistant') {
+					last.text = `${last.text} ${message.text}`;
+				} else {
+					this.lines.push({ role: 'assistant', text: message.text });
+					this.#answering = true;
+				}
 				return;
+			}
 			case 'speech-begin':
 				this.#mime = message.mime;
 				return;

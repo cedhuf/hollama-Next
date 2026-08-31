@@ -78,6 +78,53 @@ export class VoiceExchange {
 		return this.#sessionId;
 	}
 
+	/**
+	 * Whether what is being spoken is the greeting rather than an answer.
+	 *
+	 * It changes what an interruption means. Talking over an answer should cut the
+	 * stored answer back to what was heard; talking over a greeting must not touch
+	 * it, because that text is the persona's, written once and reread at the top of
+	 * every conversation. Truncating it would edit the character.
+	 */
+	#greeting = false;
+
+	/**
+	 * The persona's opening line, read out on arrival.
+	 *
+	 * Only when the conversation is that line and nothing else, which is exactly a
+	 * persona's conversation that has never been used. Anything with a history is
+	 * somebody coming back, and rereading the last answer they already heard is not
+	 * a greeting, it is a machine that has lost its place.
+	 *
+	 * Spoken without being announced: the text is already stored, so the screen has
+	 * it from the conversation it read on the way in. What is missing is the sound.
+	 */
+	async greet(): Promise<void> {
+		if (!this.#sessionId) return;
+
+		const stored = getItem<Session>('sessions', this.#grant.userId, this.#sessionId);
+		const only = stored?.messages ?? [];
+		if (only.length !== 1 || only[0].role !== 'assistant' || !only[0].content.trim()) return;
+
+		const turn = ++this.#turn;
+		this.#greeting = true;
+		try {
+			this.#at('speaking');
+			const speech = new SpeechQueue(this.#grant, this.#io, () => this.#turn === turn, false);
+			speech.feed(only[0].content);
+			speech.flush();
+			await speech.drain();
+		} catch (cause) {
+			if (this.#turn !== turn) return;
+			this.#io.say({ type: 'error', message: reason(cause) });
+		} finally {
+			if (this.#turn === turn) {
+				this.#greeting = false;
+				this.#at('idle');
+			}
+		}
+	}
+
 	/** Samples from the microphone, while somebody is speaking. */
 	push(frame: Buffer): void {
 		// Only while listening. Frames that arrive during an answer are the tail of
@@ -133,8 +180,12 @@ export class VoiceExchange {
 	 */
 	interrupt(heard: number): void {
 		if (this.#state !== 'speaking') return;
+		const greeting = this.#greeting;
 		this.#stop();
-		this.#truncate(heard);
+		// Read before stopping, and honoured after: a greeting is stored text that
+		// belongs to the persona rather than a record of this exchange, so cutting it
+		// short here would rewrite the character for every conversation after.
+		if (!greeting) this.#truncate(heard);
 		this.#at('idle');
 	}
 
@@ -161,6 +212,7 @@ export class VoiceExchange {
 	 */
 	#stop(): void {
 		this.#turn++;
+		this.#greeting = false;
 		this.#abort?.abort();
 		this.#abort = null;
 	}
@@ -411,10 +463,21 @@ class SpeechQueue {
 	#work: Promise<void> = Promise.resolve();
 	#announced = false;
 
-	constructor(grant: VoiceGrant, io: ExchangeIO, current: () => boolean) {
+	/**
+	 * Whether the text being spoken is also news.
+	 *
+	 * On for an answer, which the screen learns about only through these messages.
+	 * Off for a greeting, which is already stored and already on screen: sending it
+	 * again would put the persona's opening line up twice, once from the
+	 * conversation and once from the reading of it.
+	 */
+	#echo: boolean;
+
+	constructor(grant: VoiceGrant, io: ExchangeIO, current: () => boolean, echo = true) {
 		this.#grant = grant;
 		this.#io = io;
 		this.#current = current;
+		this.#echo = echo;
 	}
 
 	/** More of the answer. Whatever is now a whole piece leaves; the rest waits. */
@@ -508,7 +571,7 @@ class SpeechQueue {
 			this.#announced = true;
 			this.#io.say({ type: 'speech-begin', mime: type });
 		}
-		this.#io.say({ type: 'answer', text: piece });
+		if (this.#echo) this.#io.say({ type: 'answer', text: piece });
 		this.#io.play(Buffer.from(audio));
 	}
 }

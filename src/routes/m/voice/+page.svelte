@@ -58,8 +58,15 @@
 	onMount(async () => {
 		if (!given) return;
 		const stored = await repository.loadSession(given).catch(() => null);
-		if (!stored?.personaId) return;
-		persona = ($personasStore ?? []).find((entry) => entry.id === stored.personaId);
+		if (!stored) return;
+
+		// What has already been said, so the screen opens on the conversation rather
+		// than on the visit. It is also how a persona's greeting appears: it is the
+		// first message of their conversation, written when it was created.
+		voice.seed(stored.messages ?? []);
+		if (stored.personaId) {
+			persona = ($personasStore ?? []).find((entry) => entry.id === stored.personaId);
+		}
 	});
 
 	/** The conversation being written into, which is the one to go and read. */
@@ -197,6 +204,30 @@
 		if (ready) void voice.start(given ?? undefined);
 	});
 
+	/**
+	 * The transcript, and whether it should keep up on its own.
+	 *
+	 * It follows the conversation until somebody scrolls back, and then stops: an
+	 * answer arriving should not yank the line somebody is reading off the screen.
+	 * Going back to the bottom hands it over again, which is the same bargain every
+	 * chat log makes and the only one nobody has to be told about.
+	 */
+	let log = $state<HTMLDivElement | null>(null);
+	let following = $state(true);
+
+	function follow() {
+		if (!log) return;
+		following = log.scrollHeight - log.scrollTop - log.clientHeight < 24;
+	}
+
+	$effect(() => {
+		// One number covering both ways the transcript grows: another line, or another
+		// sentence on the line being written. Nought only when there is nothing to
+		// scroll to.
+		const written = voice.lines.length + (voice.lines.at(-1)?.text.length ?? 0);
+		if (written && following && log) log.scrollTop = log.scrollHeight;
+	});
+
 	onDestroy(() => voice.stop());
 
 	function leave() {
@@ -322,15 +353,28 @@
 		     often enough that hearing only the answer leaves no way to tell a bad
 		     reply from a misheard question.
 
-		     A fixed height, empty or not. Letting it size itself is what pushed the
-		     shape above it up and down a turn at a time. -->
-		<div class="transcript flex h-32 w-full shrink-0 flex-col justify-end gap-2 pt-3">
-			{#if voice.heard}
-				<p class="text-muted text-center text-sm leading-relaxed">{voice.heard}</p>
-			{/if}
-			{#if voice.answer}
-				<p class="text-active text-center text-base leading-relaxed">{voice.answer}</p>
-			{/if}
+		     The whole conversation rather than the last exchange, and it scrolls. A
+		     spoken conversation is the one nobody can reread in their head: the word
+		     you want to check is four turns back, and it used to be gone the moment
+		     the next question started.
+
+		     A fixed height, empty or not, and the scrolling happens inside it.
+		     Letting it size itself is what pushed the shape above it up and down a
+		     turn at a time. -->
+		<div
+			bind:this={log}
+			onscroll={follow}
+			class="transcript h-32 w-full shrink-0 space-y-2 overflow-y-auto pt-3"
+		>
+			{#each voice.lines as line, index (index)}
+				<p
+					class="text-center leading-relaxed {line.role === 'user'
+						? 'text-muted text-sm'
+						: 'text-active text-base'}"
+				>
+					{line.text}
+				</p>
+			{/each}
 		</div>
 	{/if}
 
@@ -416,8 +460,20 @@
 	}
 
 	.transcript {
-		overflow: hidden;
 		mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
 		-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
+
+		/*
+		 * Scrollable, with nothing to say so. A bar down the side of a spoken
+		 * conversation is a piece of furniture on a screen that has one object on
+		 * it, and the fade above already says there is more up there.
+		 */
+		scrollbar-width: none;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.transcript::-webkit-scrollbar {
+		display: none;
 	}
 </style>
