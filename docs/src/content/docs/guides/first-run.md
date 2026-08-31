@@ -14,7 +14,7 @@ A fresh install opens a four-step wizard: a welcome, your profile, your first se
 be skipped, and everything in it is reachable later from Settings.
 
 The welcome screen also offers **restore from a backup**, which is the right answer if you are
-setting up a second machine or replacing one. See [Data](/features/data/).
+setting up a second machine or replacing one. See [Data](/operating/data/).
 
 An instance can suppress the wizard entirely with `PUBLIC_DISABLE_ONBOARDING=true`, for deployments
 that arrive pre-configured.
@@ -25,7 +25,7 @@ Nothing works until Llooma can reach a model. _Settings → Servers → Add a se
 providers: Ollama, OpenAI, Claude, Infomaniak, or anything OpenAI-compatible.
 
 Pick one, paste an API key if it needs one, and the model list fills in. The details per provider,
-including where to get a key, are on the [providers](/reference/providers/) page.
+including where to get a key, are on the [providers](/connect/providers/) page.
 
 You can add several. Each connection gets a colour, assigned from the unused ones, and that colour
 follows its models everywhere they appear, so you always know which endpoint is about to be billed.
@@ -44,20 +44,20 @@ The home screen is a composer. Type, pick a model from the control in the header
 
 Three things to know from the first message:
 
-- **_Add context_** attaches [knowledge](/features/knowledge/), images and
-  [documents](/features/documents/). Each becomes a removable pill.
-- The **toggles next to the composer** arm [web search and web fetch](/features/tools/) for
+- **_Add context_** attaches [knowledge](/context/knowledge/), images and
+  [documents](/context/documents/). Each becomes a removable pill.
+- The **toggles next to the composer** arm [web search and web fetch](/behaviour/tools/) for
   that message only.
 - The **ring in the composer** fills as the conversation does. Grey until 60%, then amber, then red.
   Tap or hover it for the figures. When it worries you, that is what
-  [compaction](/features/compaction/) is for.
+  [compaction](/chat/compaction/) is for.
 
 The conversation names itself after the first reply.
 
 ## Worth doing next
 
-- Pick a theme, and decide what the home screen shows: [Interface](/features/interface/).
+- Pick a theme, and decide what the home screen shows: [Interface](/guides/interface/).
 - Write down the instructions you keep repeating, once:
-  [Knowledge](/features/knowledge/).
-- Build a character around them: [Personas](/features/personas/).
-- Export a backup before you have anything to lose: [Data](/features/data/).
+  [Knowledge](/context/knowledge/).
+- Build a character around them: [Personas](/behaviour/personas/).
+- Export a backup before you have anything to lose: [Data](/operating/data/).

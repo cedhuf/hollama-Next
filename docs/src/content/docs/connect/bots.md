@@ -2,7 +2,7 @@
 title: Bot integrations
 description: Answer in a chat server as a bot, using your models, your prompt and your tools.
 sidebar:
-  order: 11
+  order: 2
 ---
 
 Llooma can answer somewhere other than Llooma. Point it at a chat server, give it a bot account, and

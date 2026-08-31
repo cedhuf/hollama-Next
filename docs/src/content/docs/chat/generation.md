@@ -2,7 +2,7 @@
 title: Generation
 description: Where a reply is written, and why that decides whether a reload costs you one.
 sidebar:
-  order: 9
+  order: 4
 ---
 
 A reply used to be written by the page you were looking at. That works right up until the page

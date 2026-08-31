@@ -44,7 +44,7 @@ export default defineConfig({
 			plugins: [
 				starlightOpenAPI([
 					{
-						base: 'reference/api',
+						base: 'connect/api',
 						label: 'HTTP API',
 						schema: './openapi.yaml'
 					}
@@ -54,20 +54,40 @@ export default defineConfig({
 			// inside `items`. The shorthand that put `autogenerate` next to `label`
 			// was removed in Starlight 0.39. Page order within a group comes from each
 			// page's `sidebar.order` frontmatter.
+			//
+			// One directory per group, so a page's URL says where it belongs and a new
+			// page has an obvious home. That is what the single `features` directory
+			// stopped providing once it held fourteen pages.
 			sidebar: [
 				{
 					label: 'Start here',
 					items: [{ autogenerate: { directory: 'guides' } }]
 				},
 				{
-					label: 'Features',
-					items: [{ autogenerate: { directory: 'features' } }]
+					label: 'The conversation',
+					items: [{ autogenerate: { directory: 'chat' } }]
 				},
 				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }]
+					label: 'Context you provide',
+					items: [{ autogenerate: { directory: 'context' } }]
+				},
+				{
+					label: 'How the model behaves',
+					items: [{ autogenerate: { directory: 'behaviour' } }]
+				},
+				{
+					label: 'Beyond text',
+					items: [{ autogenerate: { directory: 'media' } }]
+				},
+				{
+					label: 'Connecting it up',
+					items: [{ autogenerate: { directory: 'connect' } }]
 				},
 				...openAPISidebarGroups,
+				{
+					label: 'Running an instance',
+					items: [{ autogenerate: { directory: 'operating' } }]
+				},
 				{
 					label: 'Development',
 					items: [{ autogenerate: { directory: 'development' } }]

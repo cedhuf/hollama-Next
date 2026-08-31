@@ -58,7 +58,7 @@ the data it protects. Set it yourself, before first run, if you would rather hol
 openssl rand -base64 32
 ```
 
-Every variable is listed in [Configuration](/reference/configuration/). See
+Every variable is listed in [Configuration](/operating/configuration/). See
 [Personal or shared](/guides/running-modes/) for what changes.
 
 The repository also ships a `docker-compose.yml` and a `.env.example` if you would rather start from

@@ -2,7 +2,7 @@
 title: Security
 description: What leaves your server, who can make it happen, and how to restrict it.
 sidebar:
-  order: 4
+  order: 1
 ---
 
 Your server acts as a network client on someone else's behalf in two places. Both are useful, both

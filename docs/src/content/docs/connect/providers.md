@@ -73,7 +73,7 @@ subsection and says so. It is not sent elsewhere on purpose: a provider that doe
 answers 400 rather than ignoring it.
 
 `num_ctx` is worth setting: it is the one case where Llooma knows the model's real context window,
-which makes the [load meter](/features/compaction/) exact instead of measuring against the threshold
+which makes the [load meter](/chat/compaction/) exact instead of measuring against the threshold
 you guessed.
 
 ## Ollama specifics
@@ -170,7 +170,7 @@ Currencies are not converted. A total that mixes two is a known limitation.
 
 The browser calls `/api/llm/{id}`, naming a connection rather than describing one, and the server
 resolves its address and injects the key. Keys never reach a browser, and there is no unauthenticated
-relay to go around it. See [Security](/guides/security/).
+relay to go around it. See [Security](/operating/security/).
 
 ## Yours is not in the list
 

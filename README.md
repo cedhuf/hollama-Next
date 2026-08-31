@@ -53,7 +53,7 @@ chat with them from an app that is yours.
 - **Full-text search** across every conversation, answering with the passage itself.
 - **Six themes**, each with a light and a dark ramp, English and French, installable as a PWA.
 
-The [documentation](https://llooma.eu/features/) covers each of these properly.
+The [documentation](https://llooma.eu) covers each of these properly.
 
 ## Get started
 
@@ -70,8 +70,8 @@ that matter before exposing an instance:
 - [Installation](https://llooma.eu/guides/installation/)
 - [Personal or shared](https://llooma.eu/guides/running-modes/)
 - [First run](https://llooma.eu/guides/first-run/)
-- [Configuration](https://llooma.eu/reference/configuration/)
-- [Security](https://llooma.eu/guides/security/)
+- [Configuration](https://llooma.eu/operating/configuration/)
+- [Security](https://llooma.eu/operating/security/)
 
 ## Contributing
 

@@ -2,7 +2,7 @@
 title: Compaction
 description: Summarise a long conversation so it keeps fitting in the context window.
 sidebar:
-  order: 5
+  order: 3
 ---
 
 Every message you send carries the whole conversation with it. Past a certain length that becomes
@@ -25,7 +25,7 @@ Type `/compact` in the composer. A command menu appears as soon as you type `/`.
 The command is recognised only when the whole message is a single line naming it. A message that
 merely starts with a slash (a path, a date, a regular expression) is sent as typed. To send a
 message that really does begin with a slash, start it with `//`. The full rule is on the
-[commands](/reference/shortcuts/) page.
+[commands](/chat/shortcuts/) page.
 
 If the conversation is too short to be worth compacting, `/compact` stays listed but greyed out,
 with the reason.
@@ -118,7 +118,7 @@ the sentence it looks like.
 
 An admin can share the compaction model, the automatic toggle and the threshold with everyone on
 the instance, as `locked` or `overridable`, the same three states as title generation. See
-[Administration](/guides/administration/).
+[Administration](/operating/administration/).
 
 ## Clearing instead
 
@@ -140,7 +140,7 @@ box with its own scrollbar, and any single line opens where it sits. Two hundred
 back into the page would be the wall you cleared them to get away from. To read it properly, restore
 it: the conversation is what the page is for.
 
-Cleared messages are also left out of [search](/features/search/) by default, and come back with the
+Cleared messages are also left out of [search](/chat/search/) by default, and come back with the
 same switch that brings back compaction summaries.
 
 ## Looking before deciding

@@ -2,27 +2,27 @@
 title: Configuration
 description: Every environment variable Llooma reads, in both modes.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 Copy `.env.example` to `.env` and adjust. Everything here is read at startup.
 
 ## General
 
-| Variable                    | Default     | Description                                                                                                                                                                   |
-| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                                      |
-| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                                               |
-| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                                     |
-| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard and the welcome tour                                                                                                                        |
-| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI                  |
-| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                                         |
-| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                                    |
-| `PERSONA_STORE_URL`         | _(public)_  | Starting address of the [persona store](/features/personas/). The instance fetches it, so browsers with no way out still get a catalogue; an admin can change it in the panel |
+| Variable                    | Default     | Description                                                                                                                                                                    |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `HOST_PORT`                 | `4173`      | Port exposed on the host                                                                                                                                                       |
+| `VITE_ALLOWED_HOSTS`        | `localhost` | Comma-separated allowed domains (useful behind a reverse proxy)                                                                                                                |
+| `FETCH_ALLOWED_ORIGINS`     | _(empty)_   | Allowlist of origins the web fetch tool may read; empty = any public host                                                                                                      |
+| `PUBLIC_DISABLE_ONBOARDING` | _(unset)_   | `true` skips the first-run wizard and the welcome tour                                                                                                                         |
+| `PUBLIC_SEARCH_URL`         | _(unset)_   | Web search backend ([degoog](https://github.com/degoog-org/degoog) / SearXNG). When set it is locked instance-wide; if unset it is configurable from the GUI                   |
+| `PUBLIC_SEARCH_BACKEND`     | `degoog`    | `degoog` or `searxng`                                                                                                                                                          |
+| `SEARCH_TOKEN`              | _(unset)_   | Bearer token for a protected search instance. Kept server-side and never sent to a browser                                                                                     |
+| `PERSONA_STORE_URL`         | _(public)_  | Starting address of the [persona store](/behaviour/personas/). The instance fetches it, so browsers with no way out still get a catalogue; an admin can change it in the panel |
 
 ## Documents and OCR
 
-[Documents](/features/documents/) has the full story.
+[Documents](/context/documents/) has the full story.
 
 | Variable                   | Default   | Description                                                                                                         |
 | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -83,7 +83,7 @@ otherwise.
 
 Most of what an instance does is configured from the interface: shared providers, model allow-lists,
 system prompts, the tools users may use, title generation and compaction. Those live in the database
-and are edited under _Settings → Admin_. See [Administration](/guides/administration/).
+and are edited under _Settings → Admin_. See [Administration](/operating/administration/).
 
 The rule of thumb: `.env` is for what must be true before the app starts, the admin panel is for
 everything else.

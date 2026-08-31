@@ -26,7 +26,7 @@ what your backup contains.
 | Reply language | What it answers in, whatever language it was written in                    |
 | Temperature    | Optional, applied to the conversation                                      |
 | Suggestions    | Starter prompts offered on the home screen                                 |
-| Knowledge      | Pieces of [knowledge](/features/knowledge/) attached to every chat         |
+| Knowledge      | Pieces of [knowledge](/context/knowledge/) attached to every chat          |
 | Web search     | Whether the conversation starts with search on                             |
 
 ### The reply language
@@ -88,7 +88,7 @@ yours to change. A persona is a starting point, not a layer that keeps overridin
 That also means the persona's system prompt is marked as edited on the conversation, so the global
 and per-model prompts do not resolve on top of it. The one exception is a locked instance prompt in
 server mode, which is prepended server-side and cannot be displaced. See
-[Security](/guides/security/).
+[Security](/operating/security/).
 
 ## What it remembers
 

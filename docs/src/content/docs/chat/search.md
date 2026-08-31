@@ -2,7 +2,7 @@
 title: Search
 description: Full-text search across every conversation, answering with the passage itself.
 sidebar:
-  order: 6
+  order: 2
 ---
 
 Two different things are called search here, and the difference matters.
@@ -48,7 +48,7 @@ containing markup a way into the page.
 The live conversation, by default: what the model would read if you sent a message now.
 
 Two things are left out for the same reason, that they are not where you would look for what you
-are looking for. A [compaction](/features/compaction/) summary repeats what is said elsewhere in
+are looking for. A [compaction](/chat/compaction/) summary repeats what is said elsewhere in
 the conversation, so including it returned the same passage twice, once from the message and once
 from the summary standing in for it. And a conversation you have `/clear`ed is one you deliberately
 set aside.

@@ -2,7 +2,7 @@
 title: Data
 description: Export, import, backup, and moving from one installation to another.
 sidebar:
-  order: 8
+  order: 4
 ---
 
 Under _Settings → Data_. Everything is plain JSON, downloaded by your browser, with nothing sent

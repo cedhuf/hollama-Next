@@ -113,5 +113,5 @@ patch.
 
 `$lib/connections` answers every question about a connection and reads the descriptors underneath, so
 call sites import from there. The descriptors are compiled in, not fetched. If they ever need to
-change without a release, the [store](/features/personas/) already has the plumbing for catalogues
+change without a release, the [store](/behaviour/personas/) already has the plumbing for catalogues
 that live outside the app, and that is the door to use rather than a second one.

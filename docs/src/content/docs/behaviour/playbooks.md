@@ -1,10 +1,12 @@
 ---
 title: Playbooks
 description: Procedures written once and switched on in any conversation.
+sidebar:
+  order: 2
 ---
 
 A playbook is a way of doing something, written once and reused. Where a
-[persona](/features/personas/) is **who** is answering, a playbook is **how** the job gets done: a
+[persona](/behaviour/personas/) is **who** is answering, a playbook is **how** the job gets done: a
 procedure the model follows, with no voice, no model and no conversation of its own. You do not talk
 to a playbook; you switch one on and it changes how the answer is produced.
 
@@ -46,7 +48,7 @@ different objects and a name never says which one you are about to switch on.
 ## The store
 
 Playbooks are not shipped inside Llooma. The app reads them from the store over the network, the
-same one the personas come from: [one address](/guides/administration/), with a folder per kind
+same one the personas come from: [one address](/operating/administration/), with a folder per kind
 under it. The public listing is at [llooma.eu/playbooks](/playbooks/).
 
 Installing makes a **copy**. It lands in your library and is yours from that moment: editing it is

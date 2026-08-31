@@ -10,7 +10,7 @@ the brief you keep re-explaining. Write it once, attach it to a conversation or 
 travels with the message as a context block.
 
 It is not indexed and not searched. The whole text goes into the context, exactly as written. That
-is the same deal [documents](/features/documents/) get, and for the same reason: nothing
+is the same deal [documents](/context/documents/) get, and for the same reason: nothing
 guesses which part you meant.
 
 ## Writing one
@@ -25,7 +25,7 @@ highlighting and indentation, and is only loaded if you ask for it, so nobody do
 write four lines of prose.
 
 The footer counts tokens as you type, on the same estimated scale as the
-[load meter](/features/compaction/).
+[load meter](/chat/compaction/).
 
 ## Keeping a conversation
 
@@ -66,7 +66,7 @@ From the composer's _Add context_ menu, in a conversation or on the home screen.
 filterable, and _New knowledge_ there opens the same editor.
 
 A persona carries its own knowledge, attached in its editor and applied to every conversation it
-opens. See [Personas](/features/personas/).
+opens. See [Personas](/behaviour/personas/).
 
 ## Import and export
 
@@ -74,4 +74,4 @@ _Library → Import → Knowledge_ reads a JSON file: one object or an array of 
 read loosely, `name` or `title` for the name and `content` or `text` for the body, so files written
 for something else usually import as they are. Anything with neither is skipped.
 
-Export goes through [Data](/features/data/), by category or inside a full backup.
+Export goes through [Data](/operating/data/), by category or inside a full backup.

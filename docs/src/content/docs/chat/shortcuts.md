@@ -2,7 +2,7 @@
 title: Commands and shortcuts
 description: What the composer understands, and what the keyboard does.
 sidebar:
-  order: 3
+  order: 1
 ---
 
 The same list lives in the app under _Settings → Shortcuts_, generated from what the code actually
@@ -12,9 +12,9 @@ listens for, so it cannot drift from this page without both being wrong.
 
 Type `/` at the start of an empty message and the command menu appears.
 
-| Command    | What it does                                                                   |
-| ---------- | ------------------------------------------------------------------------------ |
-| `/compact` | [Summarises the conversation so far](/features/compaction/) to free up context |
+| Command    | What it does                                                               |
+| ---------- | -------------------------------------------------------------------------- |
+| `/compact` | [Summarises the conversation so far](/chat/compaction/) to free up context |
 
 That is the whole list today. User-defined commands are on the [roadmap](/roadmap/); the menu
 and the parser exist, what is missing is entries you write yourself.

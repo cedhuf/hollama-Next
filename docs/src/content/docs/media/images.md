@@ -2,7 +2,7 @@
 title: Images
 description: Generate pictures from a description, and keep them in a gallery of your own.
 sidebar:
-  order: 10
+  order: 1
 ---
 
 Llooma can draw. A dedicated page holds everything you have generated, newest first, with the
@@ -194,7 +194,7 @@ with it off, simply show their prompt.
 
 An administrator can hand the whole instance a default image model and a prompt writer, using the
 same three states as everything else shared here: off, locked, or overridable. See
-[Administration](/guides/administration/).
+[Administration](/operating/administration/).
 
 Note what this shares: the _defaults_, not the permission. What makes a model reachable at all is
 still the shared-models list on its connection.

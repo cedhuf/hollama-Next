@@ -1,6 +1,8 @@
 ---
 title: Prompts
 description: Everything said to a model before your message, and who is allowed to change it.
+sidebar:
+  order: 1
 ---
 
 A conversation never starts empty. Before your first word the model has already been told today's
@@ -55,7 +57,7 @@ next one.
 
 ## What is not here
 
-A [persona](/features/personas/)'s prompt and a [playbook](/features/playbooks/)'s instructions.
+A [persona](/behaviour/personas/)'s prompt and a [playbook](/behaviour/playbooks/)'s instructions.
 Those belong to something you wrote and stay with it, in the library. The tab is for what the
 instance says, not for what you built.
 
@@ -70,4 +72,4 @@ admin's version of every other one, because twenty prompts are twenty settings t
 a screen.
 
 Locked is enforced when a turn starts, not only in the interface. See
-[Administration](/guides/administration/).
+[Administration](/operating/administration/).

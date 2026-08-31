@@ -49,7 +49,7 @@ something, and closing that gap is the more useful patch. See
 | `src/lib/data/`       | The repository seam: the local and API implementations                                     |
 | `src/lib/server/`     | Everything that only ever runs on the server: database, migrations, auth, resolvers        |
 | `src/lib/components/` | Shared components, provider-agnostic and route-agnostic                                    |
-| `src/routes/api/`     | The HTTP API, see the [reference](/reference/api/)                                         |
+| `src/routes/api/`     | The HTTP API, see the [reference](/connect/api/)                                           |
 | `src/i18n/`           | typesafe-i18n dictionaries, see [Translations](/development/translations/)                 |
 
 ## Checks

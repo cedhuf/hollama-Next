@@ -2,7 +2,7 @@
 title: Tools
 description: Web search, web fetch, interactive choices, and the instructions behind them.
 sidebar:
-  order: 4
+  order: 3
 ---
 
 Everything on this page lives under _Settings → Tools_. None of it is an agent framework: each one
@@ -50,7 +50,7 @@ to improvise rather than fail cleanly.
 **Where the configuration comes from** decides whether you can edit it. `PUBLIC_SEARCH_URL` in the
 environment locks it instance-wide and the fields go read-only with an `env` badge. In server mode
 an admin can share theirs instead, either locked or overridable. See
-[Administration](/guides/administration/).
+[Administration](/operating/administration/).
 
 ## Web fetch
 
@@ -63,7 +63,7 @@ preferable to a request refused by the provider.
 
 The tool refuses private, loopback and link-local addresses, including the cloud metadata endpoint,
 and re-checks every redirect hop. An instance open to people you do not know still deserves
-`FETCH_ALLOWED_ORIGINS`. See [Security](/guides/security/).
+`FETCH_ALLOWED_ORIGINS`. See [Security](/operating/security/).
 
 An admin can turn it off for everyone, and the turn enforces that itself rather than the
 interface merely hiding the button.
@@ -88,10 +88,10 @@ because they postdate its training. With it, it weighs them.
 ## Documents
 
 Covered on its own page, including OCR and the instance-wide off switch. See
-[Documents](/features/documents/).
+[Documents](/context/documents/).
 
 ## The instructions behind them
 
 Every one of these features works by adding text to what the model receives, and all of that text is
 yours to rewrite, in _Settings → Prompts_. It has its own page: see
-[Prompts](/features/prompts/).
+[Prompts](/context/prompts/).
