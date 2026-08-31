@@ -71,7 +71,7 @@
 
 	<section class="flex flex-col gap-2">
 		<a
-			href={resolve('/library')}
+			href={resolve('/m/library')}
 			class="border-shade-3 bg-shade-0 flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-opacity active:opacity-80"
 		>
 			<Library class="text-muted h-4 w-4 shrink-0" />

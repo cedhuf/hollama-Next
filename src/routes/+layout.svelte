@@ -144,25 +144,24 @@
 	});
 
 	/**
-	 * Pages the phone interface deliberately sends people out to.
+	 * Nothing escapes any more, and that is the point.
 	 *
-	 * It does not have everything. The Library is where personas are made and
-	 * edited, there is no phone version of it, and the row in Profile that points at
-	 * it is somebody asking to go there. Without this the redirect below caught that
-	 * link on arrival and threw them straight back, which read as the Library being
-	 * broken: you tapped it and you were home again.
+	 * There used to be an allow-list here, holding `/library`, because the phone
+	 * interface had no Library and the row in Profile had to be let out. It worked
+	 * once and then not at all: you arrived in the full interface, which has a
+	 * sidebar this one does not, and the next tap anywhere was caught by the
+	 * redirect and threw you back here. A door that only opened outwards and closed
+	 * by accident.
 	 *
-	 * An allow-list rather than a flag somebody has to remember to set. Going deeper
-	 * from there is not bounced either, which is right: they are in the other
-	 * interface now, on purpose, and it has its own way back.
+	 * `/m/library` is that page now, so the exception has nothing left to except.
+	 * Leaving is still possible and is now only ever deliberate: the row under it in
+	 * Profile turns the phone interface off, which is a decision rather than a link
+	 * that happens to land somewhere else.
 	 */
-	const ESCAPES = ['/library'];
-
 	$effect(() => {
 		if (!booted) return;
 		const path = $page.url.pathname;
 		if (path === '/login') return;
-		if (ESCAPES.some((escape) => path === escape || path.startsWith(`${escape}/`))) return;
 		const belongsThere = $settingsStore.simplifiedMobileUI && onPhone;
 
 		if (belongsThere && !onMobileUi) void goto(resolve('/m'));

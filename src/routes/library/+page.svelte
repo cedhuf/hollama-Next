@@ -19,7 +19,6 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
-	import { confirmAction } from '$lib/components/ConfirmDialog.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import LibraryCard from '$lib/components/LibraryCard.svelte';
 	import MobileMenuBar from '$lib/components/MobileMenuBar.svelte';
@@ -27,34 +26,18 @@
 		createCollection,
 		deleteCollection,
 		knowledgeInCollection,
-		parseKnowledgeImport,
 		renameCollection,
-		saveKnowledge,
 		type Knowledge
 	} from '$lib/knowledge';
+	import { importLibraryFiles, restorePersonaFromStore } from '$lib/libraryActions';
 	import { knowledgeStore, personasStore, playbooksStore, settingsStore } from '$lib/localStorage';
-	import {
-		applyBundleToPersona,
-		installPersonaBundle,
-		parsePersonaBundle
-	} from '$lib/personaBundle';
-	import { catalogState, fetchBundle, loadCatalog } from '$lib/personaCatalog';
-	import {
-		launchPersona,
-		newPersona,
-		parsePersonasImport,
-		personaOrigin,
-		savePersona,
-		type Persona
-	} from '$lib/personas';
+	import { catalogState, loadCatalog } from '$lib/personaCatalog';
+	import { launchPersona, newPersona, personaOrigin, type Persona } from '$lib/personas';
 	import { personasConfig } from '$lib/personasConfig';
 	import { personaState } from '$lib/personaState';
-	import { installPlaybookBundle } from '$lib/playbookCatalog';
 	import { newPlaybook, playbookSteps, type Playbook } from '$lib/playbooks';
-	import { parsePlaybookBundle } from '$lib/playbookStore';
 	import { openKnowledge } from '$lib/stores/modal';
-	import { toast } from '$lib/toast';
-	import { formatTimestampToNow, generateRandomId } from '$lib/utils';
+	import { formatTimestampToNow } from '$lib/utils';
 
 	import LibraryStore from './LibraryStore.svelte';
 	import PersonaModal from './PersonaModal.svelte';
@@ -153,42 +136,15 @@
 
 	const publishedDigest = (persona: Persona) => entryFor(persona)?.contentDigest;
 
-	/**
-	 * Take the published version back, from the card that owns the copy.
-	 *
-	 * Here as well as in the store, and not by duplication: a user who is not an
-	 * administrator has no "my personas" view, so this is the only place their own
-	 * copy is drawn. An action that lives on an object has to be reachable wherever
-	 * that object is.
-	 */
+	/** Which persona is being taken back, so its own button can say so. */
 	let restoring = $state<string | null>(null);
 
 	async function restore(persona: Persona) {
 		const entry = entryFor(persona);
 		if (!entry) return;
-		if (
-			personaState(persona, entry.contentDigest) !== 'outdated' &&
-			!(await confirmAction({
-				title: $LL.personaStoreUpdateConfirm({ name: persona.name }),
-				action: $LL.personaStoreUpdate()
-			}))
-		) {
-			return;
-		}
-
 		restoring = persona.id;
 		try {
-			const bundle = await fetchBundle(entry);
-			applyBundleToPersona(persona, bundle, {
-				origin: entry.origin,
-				id: entry.id,
-				revision: entry.revision
-			});
-			toast.success($LL.personaStoreUpdated({ name: entry.name }));
-		} catch (error) {
-			toast.error($LL.personaStoreInstallFailed(), {
-				description: error instanceof Error ? error.message : undefined
-			});
+			await restorePersonaFromStore(persona, entry);
 		} finally {
 			restoring = null;
 		}
@@ -230,98 +186,15 @@
 	/**
 	 * One Import, which reads the files rather than asking what is in them.
 	 *
-	 * Three menu entries all opened the same picker and then failed if you chose
-	 * the wrong kind, which is a quiz about a format nobody memorises. Every one of
-	 * these announces itself: a bundle says `llooma.persona` or `llooma.playbook`,
-	 * an OpenWebUI export has its own shape, a knowledge file is a name and some
-	 * text, so the file is asked instead.
-	 *
-	 * Anything that is not JSON at all is a document: a Markdown note dropped here
-	 * becomes knowledge under its own file name, which is what somebody handing a
-	 * `.md` to a library means by it. Guessing would be shaky over formats that had
-	 * to be inferred; these say what they are, and what was shaky was the version
-	 * where the right answer depended on having picked the right menu item first.
+	 * The reading itself is `$lib/libraryActions`, shared with the phone interface's
+	 * Library: both of them accept the same files and say the same thing about what
+	 * arrived, and the day one learns a new format the other has already learnt it.
 	 */
 	async function onImport(event: Event) {
 		const input = event.target as HTMLInputElement;
 		const files = [...(input.files ?? [])];
 		input.value = '';
-		if (!files.length) return;
-
-		let personas = 0;
-		let playbooks = 0;
-		let documents = 0;
-		let failed = 0;
-
-		for (const file of files) {
-			const text = await file.text();
-			const json = parseJson(text);
-
-			if (json === undefined) {
-				// Not JSON, so it is what it looks like: a document.
-				saveKnowledge({
-					id: generateRandomId(),
-					name: file.name.replace(/\.[^.]+$/, ''),
-					content: text,
-					updatedAt: new Date().toISOString()
-				});
-				documents += 1;
-				continue;
-			}
-
-			for (const item of Array.isArray(json) ? json : [json]) {
-				const personaBundle = parsePersonaBundle(item);
-				if (personaBundle) {
-					installPersonaBundle(personaBundle, { origin: 'file' });
-					personas += 1;
-					continue;
-				}
-
-				const playbookBundle = parsePlaybookBundle(item);
-				if (playbookBundle) {
-					installPlaybookBundle(playbookBundle, { origin: 'file' });
-					playbooks += 1;
-					continue;
-				}
-
-				// Native and OpenWebUI personas, recognised by their fields rather than
-				// by a format line.
-				const native = parsePersonasImport(item);
-				if (native.length) {
-					for (const persona of native) savePersona(persona);
-					personas += native.length;
-					continue;
-				}
-
-				const knowledge = parseKnowledgeImport(item);
-				if (!knowledge.length) {
-					failed += 1;
-					continue;
-				}
-				for (const document of knowledge) saveKnowledge(document);
-				documents += knowledge.length;
-			}
-		}
-
-		const summary = [
-			personas ? $LL.importedPersonas({ count: personas }) : '',
-			playbooks ? $LL.importedPlaybooks({ count: playbooks }) : '',
-			documents ? $LL.importedCollections({ count: documents }) : ''
-		].filter(Boolean);
-
-		if (!summary.length) return toast.error($LL.nothingImportable());
-		toast.success(summary.join(' · '), {
-			description: failed ? $LL.importSkipped({ count: failed }) : undefined
-		});
-	}
-
-	/** `undefined` rather than a throw, so "is this JSON" is a question with an answer. */
-	function parseJson(text: string): unknown {
-		try {
-			return JSON.parse(text);
-		} catch {
-			return undefined;
-		}
+		await importLibraryFiles(files);
 	}
 
 	let playbookModalOpen = $state(false);
