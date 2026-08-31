@@ -56,9 +56,8 @@ the network" is not a setting to leave lying around.
 
 Tools are renamed before they are offered: `mcp_<server>_<tool>`. The `mcp_` half means nothing an
 external server offers can be mistaken for `web_search`, `read_page` or the memory tools; the server
-half means two servers offering `search` are two different tools. The name is derived from the label
-you gave the server, and the card shows the prefix so a suffixed one is not a surprise you find in a
-trace.
+half means two servers offering `search` are two different tools. The server half comes from the
+label you gave it, so two servers you named the same are told apart by a numeric suffix.
 
 Descriptions come from the server, so unlike the app's own tool wording in _Settings → Prompts_ they
 are not yours to rewrite. Worth knowing rather than discovering.
@@ -76,7 +75,8 @@ one click away on each card.
 A gateway hands over one flat catalogue, so llooma reads the grouping off the tool names: a hub keeps
 its own servers apart by prefixing them, `Chatto-`, `home-assistant-`, `Infomaniak_Mail-`, and each
 of those prefixes is a server. Every group gets a switch, which is the choice people actually make:
-all of the house, none of the mail. Tools added to a group later follow its switch.
+all of the house, none of the mail. Tools added to a group later follow its switch. The groups sit
+behind each card's **advanced settings**, where a connection and a bot keep their rarer options.
 
 It is a reading habit rather than a fact, and it decides nothing on its own: it arranges the list and
 carries the switch. A server whose names follow no such pattern falls into one unnamed group, which

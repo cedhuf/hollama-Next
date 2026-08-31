@@ -3367,11 +3367,6 @@ type RootTranslation = {
 	 */
 	mcpBlockedByAdmin: string
 	/**
-	 * I​t​s​ ​t​o​o​l​s​ ​a​r​e​ ​n​a​m​e​d​ ​{​p​r​e​f​i​x​}​…​ ​i​n​ ​f​r​o​n​t​ ​o​f​ ​t​h​e​ ​m​o​d​e​l
-	 * @param {string} prefix
-	 */
-	mcpToolPrefix: RequiredParams<'prefix'>
-	/**
 	 * C​o​n​n​e​c​t​e​d​.​ ​{​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}​ ​f​o​u​n​d​.
 	 * @param {number} count
 	 */
@@ -3380,15 +3375,6 @@ type RootTranslation = {
 	 * U​p​d​a​t​e​ ​t​o​o​l​s
 	 */
 	mcpUpdateTools: string
-	/**
-	 * S​h​o​w​ ​t​h​e​ ​{​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}
-	 * @param {number} count
-	 */
-	showTools: RequiredParams<'count'>
-	/**
-	 * H​i​d​e​ ​t​h​e​ ​t​o​o​l​s
-	 */
-	hideTools: string
 	/**
 	 * O​t​h​e​r​ ​t​o​o​l​s
 	 */
@@ -7677,10 +7663,6 @@ export type TranslationFunctions = {
 	 */
 	mcpBlockedByAdmin: () => LocalizedString
 	/**
-	 * Its tools are named {prefix}… in front of the model
-	 */
-	mcpToolPrefix: (arg: { prefix: string }) => LocalizedString
-	/**
 	 * Connected. {count} tool{{s}} found.
 	 */
 	mcpConnected: (arg: { count: number }) => LocalizedString
@@ -7688,14 +7670,6 @@ export type TranslationFunctions = {
 	 * Update tools
 	 */
 	mcpUpdateTools: () => LocalizedString
-	/**
-	 * Show the {count} tool{{s}}
-	 */
-	showTools: (arg: { count: number }) => LocalizedString
-	/**
-	 * Hide the tools
-	 */
-	hideTools: () => LocalizedString
 	/**
 	 * Other tools
 	 */

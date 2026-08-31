@@ -5,7 +5,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
-	import { groupMcpTools, MCP_TOOL_PREFIX, type McpServerView } from '$lib/mcp';
+	import { groupMcpTools, type McpServerView } from '$lib/mcp';
 
 	import SettingsCard from './SettingsCard.svelte';
 	import SettingsField from './SettingsField.svelte';
@@ -46,7 +46,7 @@
 
 	// svelte-ignore state_referenced_locally
 	let open = $state(startOpen);
-	let showTools = $state(false);
+	let showAdvanced = $state(false);
 	let refreshing = $state(false);
 	let failure = $state<string | null>(null);
 	let replacingKey = $state(false);
@@ -224,62 +224,58 @@
 		{/if}
 	</SettingsField>
 
-	<!-- Folded, because the interesting figure is the count and the list is what you
-	     open when you want to choose. Kept from the last refresh rather than fetched
-	     on sight: opening a settings tab should not reach out to somebody's machine.
+	{#if server.blocked}
+		<span class="text-muted text-xs leading-snug">{$LL.mcpBlockedByAdmin()}</span>
+	{/if}
+
+	<!-- Behind the same disclosure a connection and a bot put their rarer settings
+	     behind, in the same place and with the same wording: what is on a card by
+	     default should be what you came for, and thirty tool names is not that. The
+	     count itself is already on the closed card.
 
 	     Grouped by the prefix a gateway puts on its tools, which is the only thing
 	     saying that these three came from the mail and those thirty from the house.
-	     A reading habit, not a fact: it arranges the list and decides nothing. -->
-	{#if server.toolsAt}
-		<div class="flex flex-col gap-2">
-			<button
-				type="button"
-				onclick={() => (showTools = !showTools)}
-				class="text-muted hover:text-active self-start text-xs transition-colors"
-			>
-				{showTools ? $LL.hideTools() : $LL.showTools({ count: enabledCount })}
-			</button>
+	     A reading habit, not a fact: it arranges the list and carries the switch. -->
+	{#if showAdvanced && server.toolsAt}
+		<div
+			class="border-shade-3 flex flex-col gap-3 border-t pt-3"
+			transition:slide={{ duration: 150 }}
+		>
+			{#each groups as { group, tools } (group)}
+				<div class="flex flex-col gap-1.5">
+					<label class="flex cursor-pointer items-center justify-between gap-2">
+						<span class="text-active min-w-0 truncate text-xs font-medium">
+							{group || $LL.mcpUngrouped()}
+							<span class="text-muted font-normal">· {tools.length}</span>
+						</span>
+						<input
+							type="checkbox"
+							checked={isOn(group)}
+							onchange={(e) => setGroup(group, e.currentTarget.checked)}
+							aria-label={group || $LL.mcpUngrouped()}
+							class="peer sr-only"
+						/>
+						<span
+							class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
+						></span>
+					</label>
 
-			{#if showTools}
-				<div class="flex flex-col gap-3" transition:slide={{ duration: 150 }}>
-					{#each groups as { group, tools } (group)}
-						<div class="flex flex-col gap-1.5">
-							<label class="flex cursor-pointer items-center justify-between gap-2">
-								<span class="text-active min-w-0 truncate text-xs font-medium">
-									{group || $LL.mcpUngrouped()}
-									<span class="text-muted font-normal">· {tools.length}</span>
-								</span>
-								<input
-									type="checkbox"
-									checked={isOn(group)}
-									onchange={(e) => setGroup(group, e.currentTarget.checked)}
-									aria-label={group || $LL.mcpUngrouped()}
-									class="peer sr-only"
-								/>
-								<span
-									class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
-								></span>
-							</label>
-
-							<!-- The names, for reading rather than for choosing: what the switch
-							     above actually covers. Faded when it is off, since none of them
-							     is being offered to anything. -->
-							<div class="flex flex-wrap gap-1.5 {isOn(group) ? '' : 'opacity-40'}">
-								{#each tools as tool (tool)}
-									<span
-										class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
-									>
-										{group ? tool.slice(group.length + 1) : tool}
-									</span>
-								{/each}
-							</div>
-						</div>
-					{:else}
-						<span class="text-muted text-xs">{$LL.mcpNoTools()}</span>
-					{/each}
+					<!-- The names, for reading rather than for choosing: what the switch
+					     above actually covers. Faded when it is off, since none of them is
+					     being offered to anything. -->
+					<div class="flex flex-wrap gap-1.5 {isOn(group) ? '' : 'opacity-40'}">
+						{#each tools as tool (tool)}
+							<span
+								class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
+							>
+								{group ? tool.slice(group.length + 1) : tool}
+							</span>
+						{/each}
+					</div>
 				</div>
-			{/if}
+			{:else}
+				<span class="text-muted text-xs">{$LL.mcpNoTools()}</span>
+			{/each}
 
 			<span class="text-muted text-xs leading-snug">
 				{$LL.mcpToolsAsOf({ date: new Date(server.toolsAt).toLocaleString() })}
@@ -287,17 +283,17 @@
 		</div>
 	{/if}
 
-	{#if server.blocked}
-		<span class="text-muted text-xs leading-snug">{$LL.mcpBlockedByAdmin()}</span>
-	{/if}
-
+	<!-- Footer: the occasional actions, kept out of the way of the fields. -->
 	<div class="border-shade-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
-		<!-- What the model will see these tools called. Shown because the name is
-		     derived, and because a suffixed slug is otherwise a surprise found in a
-		     trace. -->
-		<span class="text-muted min-w-0 truncate text-xs">
-			{$LL.mcpToolPrefix({ prefix: `${MCP_TOOL_PREFIX}_${server.slug}_` })}
-		</span>
+		{#if server.toolsAt}
+			<button
+				type="button"
+				onclick={() => (showAdvanced = !showAdvanced)}
+				class="text-muted hover:text-active text-xs transition-colors"
+			>
+				{$LL.advancedSettings()}
+			</button>
+		{/if}
 
 		<div class="ml-auto flex items-center gap-2">
 			<ButtonConfirm onConfirm={onDelete} label={$LL.deleteMcpServer()} />
