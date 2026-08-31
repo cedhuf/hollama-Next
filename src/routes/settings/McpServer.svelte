@@ -122,7 +122,7 @@
 
 	{#snippet title()}
 		<input
-			class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 field-sizing-content max-w-full rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
+			class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 box-content field-sizing-content max-w-full rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
 			size={(server.label || 'MCP').length + 1}
 			bind:value={server.label}
 			oninput={onChange}

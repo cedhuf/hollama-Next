@@ -160,7 +160,7 @@
 			     field is the one that gives way and the name is cut off at a width that
 			     has nothing to do with the name. -->
 			<input
-				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 field-sizing-content max-w-full shrink-0 rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
+				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 box-content field-sizing-content max-w-full shrink-0 rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
 				size={name.length + 1}
 				bind:value={server.label}
 				oninput={persist}

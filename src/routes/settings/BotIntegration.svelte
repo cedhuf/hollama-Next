@@ -150,9 +150,14 @@
 		     text and is exactly that wide. `size` stays as the fallback for a browser
 		     that does not know the property yet, and it counts in the width of a zero,
 		     which is wider than an average letter: that slack on the right is what the
-		     property removes. -->
+		     property removes.
+
+		     `box-content` is what makes either of them honest. Both measure the text and
+		     then hand that figure to `width`, and under Tailwind's `border-box` the
+		     padding is taken out of it rather than added to it: the field ends up two
+		     characters short of its own name, and the last of them are cut off. -->
 		<input
-			class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 field-sizing-content max-w-full rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
+			class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 box-content field-sizing-content max-w-full rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
 			size={(integration.label || 'Chatto').length + 1}
 			bind:value={integration.label}
 			oninput={onChange}
