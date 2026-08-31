@@ -935,6 +935,7 @@ const en = {
 	mcpUpdateTools: 'Update tools',
 	showTools: 'Show the {count:number} tool{{s}}',
 	hideTools: 'Hide the tools',
+	mcpUngrouped: 'Other tools',
 	mcpNoTools: 'This server offers no tools.',
 	mcpToolsAsOf: 'As this server answered on {date:string}.',
 	mcpToolsFound: '{count:number} tool{{s}}',

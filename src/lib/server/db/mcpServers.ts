@@ -27,6 +27,7 @@ export interface McpServerRow {
 	created_at: string;
 	tools: string | null;
 	tools_at: string | null;
+	disabled_groups: string | null;
 }
 
 export interface McpServerRecord {
@@ -43,6 +44,8 @@ export interface McpServerRecord {
 	tools: string[];
 	/** When it said so. Null for a server nobody has asked yet. */
 	toolsAt: string | null;
+	/** Groups this account has switched off, by name. A group is a server behind a gateway. */
+	disabledGroups: string[];
 }
 
 function toRecord(row: McpServerRow): McpServerRecord {
@@ -57,7 +60,8 @@ function toRecord(row: McpServerRow): McpServerRecord {
 		blocked: !!row.blocked,
 		createdAt: row.created_at,
 		tools: parseTools(row.tools),
-		toolsAt: row.tools_at
+		toolsAt: row.tools_at,
+		disabledGroups: parseTools(row.disabled_groups)
 	};
 }
 
@@ -86,7 +90,8 @@ export function toMcpServerView(record: McpServerRecord): McpServerView {
 		hasSecret: record.hasSecret,
 		createdAt: record.createdAt,
 		tools: record.tools,
-		toolsAt: record.toolsAt
+		toolsAt: record.toolsAt,
+		disabledGroups: record.disabledGroups
 	};
 }
 
@@ -187,6 +192,7 @@ export function updateMcpServer(
 		url?: string;
 		secret?: string | null;
 		enabled?: boolean;
+		disabledGroups?: string[];
 	}
 ): McpServerRecord | null {
 	const current = getMcpServer(id);
@@ -213,6 +219,10 @@ export function updateMcpServer(
 	if (input.enabled !== undefined) {
 		sets.push('is_enabled = ?');
 		values.push(input.enabled ? 1 : 0);
+	}
+	if (input.disabledGroups !== undefined) {
+		sets.push('disabled_groups = ?');
+		values.push(JSON.stringify(input.disabledGroups.filter((name) => typeof name === 'string')));
 	}
 	if (!sets.length) return current;
 

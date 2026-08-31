@@ -3382,6 +3382,10 @@ type RootTranslation = {
 	 */
 	hideTools: string
 	/**
+	 * O​t​h​e​r​ ​t​o​o​l​s
+	 */
+	mcpUngrouped: string
+	/**
 	 * T​h​i​s​ ​s​e​r​v​e​r​ ​o​f​f​e​r​s​ ​n​o​ ​t​o​o​l​s​.
 	 */
 	mcpNoTools: string
@@ -7680,6 +7684,10 @@ export type TranslationFunctions = {
 	 * Hide the tools
 	 */
 	hideTools: () => LocalizedString
+	/**
+	 * Other tools
+	 */
+	mcpUngrouped: () => LocalizedString
 	/**
 	 * This server offers no tools.
 	 */

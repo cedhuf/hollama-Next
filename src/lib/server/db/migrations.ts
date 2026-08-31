@@ -563,6 +563,22 @@ const migrations: Migration[] = [
 			ALTER TABLE mcp_servers ADD COLUMN tools TEXT;
 			ALTER TABLE mcp_servers ADD COLUMN tools_at TEXT;
 		`
+	},
+	{
+		version: 24,
+		up: `
+			-- The groups this account has switched off, by name.
+			--
+			-- Groups rather than tools, because behind a gateway a group *is* a server:
+			-- all of the house or none of it is the choice people actually make, and
+			-- thirty checkboxes to express it is a worse way of saying the same thing.
+			--
+			-- The refused ones rather than the kept ones, and the difference is what
+			-- happens to a tool that appears afterwards: added to a group that is on it
+			-- is offered, added to one that is off it is not. A list of kept tools would
+			-- have let every addition a gateway makes in, silently.
+			ALTER TABLE mcp_servers ADD COLUMN disabled_groups TEXT;
+		`
 	}
 ];
 

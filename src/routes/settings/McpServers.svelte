@@ -103,6 +103,7 @@
 					label: server.label,
 					url: server.url,
 					enabled: server.enabled,
+					disabledGroups: server.disabledGroups,
 					// Omitted keeps the stored one. Sent only when somebody typed.
 					...(secret ? { secret } : {})
 				});

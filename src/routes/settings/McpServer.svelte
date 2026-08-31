@@ -5,7 +5,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
-	import { MCP_TOOL_PREFIX, type McpServerView } from '$lib/mcp';
+	import { groupMcpTools, MCP_TOOL_PREFIX, type McpServerView } from '$lib/mcp';
 
 	import SettingsCard from './SettingsCard.svelte';
 	import SettingsField from './SettingsField.svelte';
@@ -64,7 +64,7 @@
 	 */
 	const summary = $derived.by(() => {
 		if (server.blocked) return $LL.mcpBlockedByAdmin();
-		if (server.toolsAt) return $LL.mcpToolsFound({ count: server.tools.length });
+		if (server.toolsAt) return $LL.mcpToolsFound({ count: enabledCount });
 		try {
 			return new URL(server.url).host;
 		} catch {
@@ -73,6 +73,30 @@
 	});
 
 	const keyIsStored = $derived(server.hasSecret && !replacingKey && !secret);
+
+	const groups = $derived(groupMcpTools(server.tools));
+
+	/** Whether a group's tools are offered to a turn at all. */
+	const isOn = (group: string) => !server.disabledGroups.includes(group);
+
+	/** How many tools a turn would actually be given, once the off groups are out. */
+	const enabledCount = $derived(
+		groups.reduce((total, { group, tools }) => total + (isOn(group) ? tools.length : 0), 0)
+	);
+
+	/**
+	 * Switch a whole group on or off.
+	 *
+	 * The group is the unit, because behind a gateway a group is a server: all of
+	 * the house or none of it is the choice people make, and thirty checkboxes to
+	 * say it is a worse way of saying the same thing.
+	 */
+	function setGroup(group: string, on: boolean) {
+		server.disabledGroups = on
+			? server.disabledGroups.filter((name) => name !== group)
+			: [...new Set([...server.disabledGroups, group])];
+		onChange();
+	}
 
 	/**
 	 * Ask the server what it offers now.
@@ -201,9 +225,12 @@
 	</SettingsField>
 
 	<!-- Folded, because the interesting figure is the count and the list is what you
-	     open when you want to know exactly what a turn is being offered. Kept from
-	     the last refresh rather than fetched on sight: opening a settings tab should
-	     not reach out to somebody's machine. -->
+	     open when you want to choose. Kept from the last refresh rather than fetched
+	     on sight: opening a settings tab should not reach out to somebody's machine.
+
+	     Grouped by the prefix a gateway puts on its tools, which is the only thing
+	     saying that these three came from the mail and those thirty from the house.
+	     A reading habit, not a fact: it arranges the list and decides nothing. -->
 	{#if server.toolsAt}
 		<div class="flex flex-col gap-2">
 			<button
@@ -211,17 +238,43 @@
 				onclick={() => (showTools = !showTools)}
 				class="text-muted hover:text-active self-start text-xs transition-colors"
 			>
-				{showTools ? $LL.hideTools() : $LL.showTools({ count: server.tools.length })}
+				{showTools ? $LL.hideTools() : $LL.showTools({ count: enabledCount })}
 			</button>
 
 			{#if showTools}
-				<div class="flex flex-wrap gap-1.5" transition:slide={{ duration: 150 }}>
-					{#each server.tools as tool (tool)}
-						<span
-							class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
-						>
-							{tool}
-						</span>
+				<div class="flex flex-col gap-3" transition:slide={{ duration: 150 }}>
+					{#each groups as { group, tools } (group)}
+						<div class="flex flex-col gap-1.5">
+							<label class="flex cursor-pointer items-center justify-between gap-2">
+								<span class="text-active min-w-0 truncate text-xs font-medium">
+									{group || $LL.mcpUngrouped()}
+									<span class="text-muted font-normal">· {tools.length}</span>
+								</span>
+								<input
+									type="checkbox"
+									checked={isOn(group)}
+									onchange={(e) => setGroup(group, e.currentTarget.checked)}
+									aria-label={group || $LL.mcpUngrouped()}
+									class="peer sr-only"
+								/>
+								<span
+									class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
+								></span>
+							</label>
+
+							<!-- The names, for reading rather than for choosing: what the switch
+							     above actually covers. Faded when it is off, since none of them
+							     is being offered to anything. -->
+							<div class="flex flex-wrap gap-1.5 {isOn(group) ? '' : 'opacity-40'}">
+								{#each tools as tool (tool)}
+									<span
+										class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
+									>
+										{group ? tool.slice(group.length + 1) : tool}
+									</span>
+								{/each}
+							</div>
+						</div>
 					{:else}
 						<span class="text-muted text-xs">{$LL.mcpNoTools()}</span>
 					{/each}

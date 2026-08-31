@@ -40,6 +40,15 @@ export interface McpServerView {
 	tools: string[];
 	/** When it said so, ISO. Null for a server nobody has asked yet. */
 	toolsAt: string | null;
+	/**
+	 * Groups this account has switched off, by name.
+	 *
+	 * Behind a gateway a group is a server, so this is how "all of the house, none
+	 * of the mail" is said. The refused ones rather than the kept ones, so a tool
+	 * that appears later is offered when its group is on and left out when it is
+	 * off, which is what the switch was set to mean.
+	 */
+	disabledGroups: string[];
 }
 
 /**
@@ -182,6 +191,59 @@ export function parseMcpToolName(
 		best = { slug, tool: name.slice(head.length) };
 	}
 	return best;
+}
+
+/**
+ * The tools of one catalogue, gathered into the servers they came from.
+ *
+ * A gateway is one address in front of many servers, so its catalogue arrives
+ * flat: sixty-five tools in a heap, with nothing saying which three belong to the
+ * mail and which thirty to the house. What it does carry is a naming habit, since
+ * a hub has to keep its own names apart: `Chatto-post_message`,
+ * `home-assistant-HassTurnOn`, `Infomaniak_Mail-mail_list_emails`.
+ *
+ * So the grouping is read off the names, by taking for each tool the longest
+ * prefix ending in `-` that at least one other tool shares. Longest, because
+ * `home-` and `home-assistant-` are both shared and only the second is a server.
+ * Hyphen only, because underscores are how a tool names itself: splitting on them
+ * would break `mail_list_emails` into a group of its own.
+ *
+ * This is a reading habit, not a fact. It arranges a list on screen and nothing
+ * else: no call, no permission and no limit is ever decided from it. A server
+ * that names its tools differently simply falls into one unnamed group, which is
+ * exactly what a flat list looks like today.
+ */
+export function groupMcpTools(names: string[]): { group: string; tools: string[] }[] {
+	const candidates = new Map<string, number>();
+	for (const name of names) {
+		// Every prefix ending in a hyphen, counted across the catalogue.
+		for (let i = 0; i < name.length; i++) {
+			if (name[i] === '-')
+				candidates.set(name.slice(0, i + 1), (candidates.get(name.slice(0, i + 1)) ?? 0) + 1);
+		}
+	}
+
+	const groups = new Map<string, string[]>();
+	for (const name of names) {
+		let best = '';
+		for (const [prefix, count] of candidates) {
+			if (count < 2 || !name.startsWith(prefix)) continue;
+			if (prefix.length > best.length) best = prefix;
+		}
+		const group = best.slice(0, -1);
+		const bucket = groups.get(group);
+		if (bucket) bucket.push(name);
+		else groups.set(group, [name]);
+	}
+
+	// Named groups first, alphabetically; whatever could not be grouped last, since
+	// it is a remainder rather than a server.
+	return [...groups.entries()]
+		.map(([group, tools]) => ({ group, tools }))
+		.sort((a, b) => {
+			if (!a.group !== !b.group) return a.group ? -1 : 1;
+			return a.group.localeCompare(b.group);
+		});
 }
 
 /**

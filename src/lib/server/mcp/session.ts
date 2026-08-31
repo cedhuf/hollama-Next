@@ -2,7 +2,7 @@ import type { Client } from '@modelcontextprotocol/client';
 
 import type { ToolSpec } from '$lib/chat';
 import type { McpAccess, McpCallOutcome } from '$lib/chat/run/orchestrator';
-import { MCP_LIMITS, mcpToolName, parseMcpToolName } from '$lib/mcp';
+import { groupMcpTools, MCP_LIMITS, mcpToolName, parseMcpToolName } from '$lib/mcp';
 import { getSettings } from '$lib/server/db/collections';
 import { allowUserMcp } from '$lib/server/db/config';
 import {
@@ -95,7 +95,18 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 			let client: Client | null = null;
 			try {
 				client = await connectMcp(record.url, getMcpServerSecret(record.id));
-				const tools = await listMcpTools(client);
+				const all = await listMcpTools(client);
+				// Groups switched off never reach a request, so they cannot be called
+				// either: a tool the model was never shown is not a tool it can reach for.
+				// The grouping is recomputed from what the server answers now rather than
+				// read from the stored catalogue, so a tool added to a group that is off
+				// stays off without anybody having to press refresh first.
+				const refused = new Set(record.disabledGroups);
+				const groups = groupMcpTools(all.map((tool) => tool.name));
+				const dropped = new Set(
+					groups.filter(({ group }) => refused.has(group)).flatMap(({ tools }) => tools)
+				);
+				const tools = all.filter((tool) => !dropped.has(tool.name));
 				connected.push({
 					slug: record.slug,
 					label: record.label,

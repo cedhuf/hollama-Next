@@ -71,6 +71,17 @@ each one brings without reaching out to your machines every time you open the ta
 retakes that snapshot, which is what you press after adding something to a gateway. The full list is
 one click away on each card.
 
+### Groups, behind a gateway
+
+A gateway hands over one flat catalogue, so llooma reads the grouping off the tool names: a hub keeps
+its own servers apart by prefixing them, `Chatto-`, `home-assistant-`, `Infomaniak_Mail-`, and each
+of those prefixes is a server. Every group gets a switch, which is the choice people actually make:
+all of the house, none of the mail. Tools added to a group later follow its switch.
+
+It is a reading habit rather than a fact, and it decides nothing on its own: it arranges the list and
+carries the switch. A server whose names follow no such pattern falls into one unnamed group, which
+is what a flat list already looked like.
+
 How many tools reach the model is yours to set, in the same section, and it counts across every
 server switched on rather than per server: what costs is the size of a request, and a request carries
 the lot. Two hundred by default. Past a hundred the setting warns that all of it rides along in every request

@@ -35,7 +35,8 @@ export async function PUT(event) {
 			// token back, so it needs a way to say "leave it alone" that is not
 			// "no token".
 			secret: body.secret,
-			enabled: body.enabled
+			enabled: body.enabled,
+			disabledGroups: Array.isArray(body.disabledGroups) ? body.disabledGroups : undefined
 		});
 	} catch (cause) {
 		throw error(400, cause instanceof Error ? cause.message : 'Could not be saved');
