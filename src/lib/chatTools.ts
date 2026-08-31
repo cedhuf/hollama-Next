@@ -16,6 +16,8 @@ export interface ChatToolValues {
 	interactiveChoices: boolean;
 	sendCurrentDate: boolean;
 	thinking: boolean;
+	/** The account's MCP servers, all of them together rather than one by one. */
+	mcp: boolean;
 }
 
 /** What this conversation can actually offer: an absent tool is not listed. */
@@ -23,6 +25,8 @@ export interface ChatToolAvailability {
 	webSearch: boolean;
 	webFetch: boolean;
 	reasoning: boolean;
+	/** Whether this account has any MCP server switched on at all. */
+	mcp: boolean;
 }
 
 export type ChatToolLabels = Record<keyof ChatToolValues, string>;
@@ -37,7 +41,8 @@ export function toolLabels(LL: TranslationFunctions): ChatToolLabels {
 		webFetch: LL.webFetchToggle(),
 		interactiveChoices: LL.interactiveChoicesTitle(),
 		sendCurrentDate: LL.currentDateTitle(),
-		thinking: LL.reasoning()
+		thinking: LL.reasoning(),
+		mcp: LL.mcpTools()
 	};
 }
 
@@ -70,6 +75,10 @@ export function buildChatTools(
 		toggle('interactiveChoices'),
 		toggle('sendCurrentDate'),
 		// On = auto: Ollama only enables thinking when the model supports it.
-		...(available.reasoning ? [toggle('thinking')] : [])
+		...(available.reasoning ? [toggle('thinking')] : []),
+		// One switch for the lot, not one per server. What this decides is whether
+		// the catalogues are sent at all; which of them may run is decided call by
+		// call, when the call is about to be made.
+		...(available.mcp ? [toggle('mcp')] : [])
 	];
 }

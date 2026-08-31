@@ -922,6 +922,17 @@ const fr = extendDictionary(en, {
 	memoryForgetAll: 'Tout oublier',
 	memoryForgetAllConfirm:
 		'Supprimer tout ce que {name} retient de vous ? Le persona lui-même n’est pas touché.',
+	botMcpWarning:
+		'Ce bot appelle vos serveurs MCP sans demander. Dans une conversation chaque appel vous est soumis d\u2019abord ; ici il n\u2019y a personne à qui demander, donc n\u2019importe qui dans le salon peut en déclencher un.',
+	mcpTools: 'Outils MCP',
+	mcpApprovalTitle: 'Autoriser cet appel d\u2019outil ?',
+	mcpApprovalAllow: 'Autoriser',
+	mcpApprovalAllowing: 'Autorisation\u2026',
+	mcpApprovalRefuse: 'Refuser',
+	mcpApprovalNoArguments: 'Appelé sans argument.',
+	mcpApprovalTimeoutHint:
+		'Le tour attend. Sans réponse pendant deux minutes, l\u2019appel est refusé.',
+	mcpStepRefused: 'Vous avez refusé un appel d\u2019outil externe',
 	mcpServers: 'Serveurs MCP',
 	mcpServersDescription:
 		'Des catalogues d\u2019outils qui tournent ailleurs. Leurs outils sont proposés au modèle à côté de ceux de l\u2019app, et leurs réponses viennent d\u2019une machine que cette instance ne possède pas.',

@@ -55,11 +55,18 @@ export type Placement =
 /**
  * The tools a bot may use, out of the ones the composer offers.
  *
- * Four of the five, and the missing one is deliberate: interactive choices draw
+ * All but one, and the missing one is deliberate: interactive choices draw
  * buttons, and a chat server that renders a message as text has nothing to draw
  * them with. Offering it would be offering something that cannot work.
+ *
+ * `mcp` is here on the owner's say-so and behaves differently from everywhere
+ * else in the app. In a conversation, every MCP call is put to the person before
+ * it is made; a bot has no person to put it to, so ticking this box is accepting
+ * that the bot's calls run unasked, on the owner's servers, at the prompting of
+ * whoever is in the room. Off by default, and it should stay a decision somebody
+ * took rather than one they inherited.
  */
-export const BOT_TOOLS = ['webSearch', 'webFetch', 'sendCurrentDate', 'thinking'] as const;
+export const BOT_TOOLS = ['webSearch', 'webFetch', 'sendCurrentDate', 'thinking', 'mcp'] as const;
 
 export type BotTool = (typeof BOT_TOOLS)[number];
 

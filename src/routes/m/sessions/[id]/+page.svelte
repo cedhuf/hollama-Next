@@ -94,6 +94,7 @@
 				handleRetry={chat.retry}
 				chooseAnswer={chat.answerChoice}
 				pendingChoice={chat.pendingChoice}
+				onApproveTool={chat.approveTool}
 				isCompacting={chat.isCompacting}
 				onCancelCompaction={chat.cancelCompaction}
 				onAddMention={chat.addMention}

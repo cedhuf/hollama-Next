@@ -2,12 +2,13 @@ import { error, json } from '@sveltejs/kit';
 
 import { runSpeakers } from '$lib/chat/run/speakers';
 import type { RunInput } from '$lib/chat/run/types';
+import { MCP_LIMITS, type McpApprovalRequest } from '$lib/mcp';
 import { requireUser } from '$lib/server/api';
 import { resolveClaimedAppPrompts } from '$lib/server/appPromptsResolver';
 import { getItem } from '$lib/server/db/collections';
 import { PolicyError } from '$lib/server/llmPolicy';
 import { serverDeps, type RunPrincipal } from '$lib/server/runDeps';
-import { createRun, emitTo, findRunForSession, summarise } from '$lib/server/runs';
+import { awaitApproval, createRun, emitTo, findRunForSession, summarise } from '$lib/server/runs';
 import { sessionWriter } from '$lib/server/runSession';
 import { recordRunUsage } from '$lib/server/usageMeter';
 
@@ -66,9 +67,16 @@ export async function POST(event) {
 
 	// Deliberately not awaited: this is the handover. Failures inside become
 	// `error` events on the run, which is where a client will look for them.
+	// The turn asks, the person answers, and the answer comes back on
+	// `/api/runs/{id}/approve`. Bound to this run because that is the name both
+	// sides have: the tab that started it may be gone by the time the question is
+	// asked, and any tab of this account's may be the one that answers.
+	const approve = (request: McpApprovalRequest) =>
+		awaitApproval(run, request.id, MCP_LIMITS.approvalTimeoutMs);
+
 	void runSpeakers(
 		input,
-		(pass) => serverDeps(pass, principal),
+		(pass) => serverDeps(pass, principal, { approve }),
 		(ev) => {
 			// Counted here, where the turn actually happens.
 			//

@@ -46,8 +46,42 @@ export const MCP_LIMITS = {
 	/** Listing a catalogue, which happens once per turn per server. */
 	listTimeoutMs: 10_000,
 	/** One call. Generous: an MCP tool may be doing real work at the other end. */
-	callTimeoutMs: 30_000
+	callTimeoutMs: 30_000,
+	/**
+	 * How long a call waits for a person to allow or refuse it.
+	 *
+	 * It has to end somewhere: a turn parked on a question nobody is there to
+	 * answer would hold its connections, its run and its place in the conversation
+	 * until the process restarts. Running out counts as a refusal, never as
+	 * consent, and the model is told which of the two happened.
+	 */
+	approvalTimeoutMs: 120_000
 } as const;
+
+/**
+ * One call, put to the person before it is made.
+ *
+ * Every MCP call is asked for. Not the risky-looking ones, not the first one of a
+ * turn: every one. The alternative is a rule about which tools are dangerous,
+ * written by us, about tools we have never seen, on servers we do not run. The
+ * description comes from the server too, so it cannot be the basis of the
+ * decision either.
+ *
+ * What it carries is what a person needs to answer: which machine, which tool,
+ * what that tool says it does, and the exact arguments it would be called with.
+ */
+export interface McpApprovalRequest {
+	/** The provider's id for the call, and what the answer is addressed to. */
+	id: string;
+	/** The server's label, as its owner named it. */
+	server: string;
+	/** The tool's own name, without the prefix the model sees. */
+	tool: string;
+	/** What the server says the tool does. Empty when it says nothing. */
+	purpose: string;
+	/** The arguments, formatted for reading. */
+	arguments: string;
+}
 
 /** The prefix every MCP tool name carries, so nothing can collide with our own. */
 export const MCP_TOOL_PREFIX = 'mcp';

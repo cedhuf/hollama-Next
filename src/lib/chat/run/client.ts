@@ -30,6 +30,25 @@ export async function runForSession(sessionId: string): Promise<RunSummary | nul
 	return (await response.json()) as RunSummary | null;
 }
 
+/**
+ * Allow or refuse one MCP call the turn is stopped on.
+ *
+ * Best effort by design: the question may already have been answered in another
+ * tab, or have run out of time, and the turn carries on either way. What the
+ * page does about it comes from the run's own `approvalResolved` event, never
+ * from this call's answer, so two tabs pressing at once cannot disagree.
+ */
+export async function decideApproval(runId: string, callId: string, allow: boolean): Promise<void> {
+	await fetch(`/api/runs/${runId}/approve`, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ callId, allow })
+	}).catch(() => {
+		// A run that cannot be reached is a run that has ended, and an unanswered
+		// question is a refused one. Nothing to say here that the stream will not.
+	});
+}
+
 export async function cancelRun(runId: string): Promise<void> {
 	await fetch(`/api/runs/${runId}/cancel`, { method: 'POST' }).catch(() => {
 		// A run that cannot be reached is a run that is already over as far as this

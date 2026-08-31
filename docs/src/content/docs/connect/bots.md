@@ -15,6 +15,14 @@ sits in one folder, so a second one is a new folder rather than a new architectu
 Under _Settings → Bot integrations_. You can configure several: two rooms on two servers, answered
 by two different models with two different characters, are two integrations.
 
+## MCP tools, and what ticking them means
+
+A bot's tools include **MCP tools**, and that one is unlike the others. In a
+conversation, every call to an [MCP server](/connect/mcp/) is put to you before
+it is made. A bot has nobody to ask, so ticking the box is accepting that its
+calls run unasked, on your servers, prompted by whoever is in the room. It is off
+until you tick it.
+
 ## What it does not do
 
 No conversation is created in Llooma. The bot reads the room when it is called, answers, and forgets.

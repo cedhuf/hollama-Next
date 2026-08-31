@@ -15,7 +15,7 @@ import {
 } from '$lib/chat/tools';
 import { formatCurrentDateTime } from '$lib/currentDate';
 import { resolvePrompt } from '$lib/defaultPrompts';
-import { isMcpToolName } from '$lib/mcp';
+import { isMcpToolName, type McpApprovalRequest } from '$lib/mcp';
 import {
 	indexLine,
 	MEMORY_LIMITS,
@@ -91,6 +91,16 @@ export interface RunDeps {
 	 * below, so the connections do not outlive the turn that opened them.
 	 */
 	openMcp?(): Promise<McpAccess | null>;
+	/**
+	 * Put one call to the person, and wait for their answer.
+	 *
+	 * Absent means nobody can be asked, and that is not a reason to proceed: it is
+	 * the reason MCP is not offered at all on the paths that have no one watching,
+	 * which is decided where the dependencies are built. False from here is a
+	 * refusal whatever produced it, a person saying no and a question that ran out
+	 * of time alike.
+	 */
+	approve?(request: McpApprovalRequest): Promise<boolean>;
 }
 
 /**
@@ -105,6 +115,15 @@ export interface McpAccess {
 	tools(): ToolSpec[];
 	/** Servers that could not be listed, named so the turn can say so. */
 	unavailable(): { server: string; error: string }[];
+	/**
+	 * What a prefixed name actually is, for the question put to the person.
+	 *
+	 * Asked before the call rather than derived from the name, because what the
+	 * person needs is the server as they labelled it and the tool as its own
+	 * catalogue describes it, neither of which survives the flattening into
+	 * `mcp_thing_do_it`.
+	 */
+	describe(name: string): { server: string; tool: string; purpose: string } | null;
 	call(name: string, args: Record<string, unknown>): Promise<McpCallOutcome>;
 	close(): Promise<void>;
 }
@@ -153,6 +172,24 @@ export type Emit = (event: RunEvent) => void;
  * reattaching client has to be able to read, so they leave as events. It throws
  * only for a caller's mistake, such as a run with no model.
  */
+/**
+ * The arguments a call would be made with, laid out for a person to read.
+ *
+ * Pretty-printed rather than compact, and capped: this is the part somebody
+ * actually has to look at before saying yes, and a wall of minified JSON is a
+ * button people learn to press without reading.
+ */
+function formatArguments(args: Record<string, unknown>): string {
+	let text: string;
+	try {
+		text = JSON.stringify(args, null, 2);
+	} catch {
+		return '(the arguments could not be read)';
+	}
+	if (!text || text === '{}') return '';
+	return text.length > 2000 ? `${text.slice(0, 2000)}\n…` : text;
+}
+
 export async function runTurn(
 	input: RunInput,
 	deps: RunDeps,
@@ -355,7 +392,10 @@ export async function runTurn(
 		// `carriesTools()` on purpose: asking the endpoint what it supports costs a
 		// request on Ollama, and an account with no MCP servers should not pay it
 		// once a turn for a feature it is not using.
-		mcp = deps.openMcp && (await carriesTools()) ? await deps.openMcp() : null;
+		mcp =
+			deps.openMcp && input.flags.mcp !== false && (await carriesTools())
+				? await deps.openMcp()
+				: null;
 		const mcpTools = mcp?.tools() ?? [];
 		nativeTools.push(...mcpTools);
 
@@ -622,6 +662,16 @@ export async function runTurn(
 		 * throws takes down a turn the user is waiting on; a tool that explains what
 		 * went wrong lets the model apologise, try differently, or answer without it.
 		 */
+		/**
+		 * How many MCP calls this turn has put to the person.
+		 *
+		 * Only to name a call the provider did not give an id to. The id is what the
+		 * answer is addressed to, so two questions must never share one, and a
+		 * provider that omits them is a provider where the tool name alone would
+		 * collide the second time the model calls the same tool.
+		 */
+		let mcpCalls = 0;
+
 		const runToolCall = async (call: ToolCall): Promise<string> => {
 			let args: Record<string, unknown>;
 			try {
@@ -704,6 +754,44 @@ export async function runTurn(
 			}
 
 			if (mcp && isMcpToolName(call.name)) {
+				const known = mcp.describe(call.name);
+
+				/**
+				 * Asked every time, before anything leaves this process.
+				 *
+				 * Every call, not the ones that look dangerous: deciding which MCP tools
+				 * are safe would mean us ruling on tools we have never seen, described by
+				 * the very servers whose calls are in question. The person who configured
+				 * the server is the one who can answer, so they are the one asked, with
+				 * the exact arguments in front of them.
+				 *
+				 * A refusal is not an error. It comes back as text saying what happened,
+				 * and the turn carries on: the model can answer without the tool, try
+				 * something else, or say it could not. The one thing it must not do is
+				 * present the call as having been made.
+				 */
+				const request: McpApprovalRequest = {
+					id: call.id || `${call.name}-${++mcpCalls}`,
+					server: known?.server ?? '',
+					tool: known?.tool ?? call.name,
+					purpose: known?.purpose ?? '',
+					arguments: formatArguments(args)
+				};
+
+				emit({ type: 'approval', request });
+				const allowed = (await deps.approve?.(request)) ?? false;
+
+				if (!allowed) {
+					emit({
+						type: 'trace',
+						step: {
+							type: 'mcp',
+							mcp: { server: request.server, tool: request.tool, refused: true }
+						}
+					});
+					return `The person you are talking to did not allow this call, so it was not made. Nothing was sent to ${request.server || 'that server'}. Carry on without it: answer with what you have, or ask them what they would rather you do. Do not call it again unless they ask you to.`;
+				}
+
 				emit({ type: 'searching', active: true, activity: 'tool' });
 				const outcome = await mcp.call(call.name, args);
 				emit({ type: 'searching', active: false });

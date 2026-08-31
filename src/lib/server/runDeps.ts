@@ -13,6 +13,7 @@ import { stripTitleMarkdown } from '$lib/chat/titleText';
 import { canCarryTools, useNativeTools } from '$lib/chat/tools';
 import { ConnectionType, type Server } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
+import type { McpApprovalRequest } from '$lib/mcp';
 import { getSettings } from '$lib/server/db/collections';
 import { getServer, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
 import { allowedFetchOrigins, fetchPage } from '$lib/server/fetchPage';
@@ -150,16 +151,29 @@ function policeCredit(row: ServerRow | null, model: string, principal: RunPrinci
 }
 
 /**
- * What a caller may switch off, for the paths that are not a person typing.
+ * What the caller supplies that the turn cannot get for itself.
  *
- * Only MCP so far, and it is off for exactly one caller. A bot answers to people
- * who are not the account holder: letting a room reach the owner's MCP servers
- * by asking the bot nicely is an escalation the owner never granted, and the
- * grant it would need is a per-bot choice beside the other four in `BOT_TOOLS`,
- * not a default.
+ * One entry, and it is what decides whether MCP happens at all. Every MCP call
+ * is put to a person before it is made, so a path with nobody to ask has no
+ * business making them: `approve` absent means the catalogues are never opened.
+ *
+ * That is why bots have none. A bot answers to people who are not the account
+ * holder, in a room the account holder may not be reading: there is no one to put
+ * the question to, and letting the room through by asking the bot nicely is an
+ * escalation nobody granted. The same goes for a spoken turn, where the answer
+ * would have to be a dialog nobody is looking at.
  */
 export interface DepsOptions {
-	mcp?: boolean;
+	approve?: (request: McpApprovalRequest) => Promise<boolean>;
+	/**
+	 * MCP with nobody to ask, every call allowed.
+	 *
+	 * The one deliberate hole in the rule above, and it is the owner's to open: a
+	 * bot with `mcp` ticked runs its calls unasked, because there is no one at the
+	 * other end of its turn. Written as its own option rather than as an absent
+	 * `approve`, so that no path acquires it by forgetting something.
+	 */
+	mcpUnattended?: boolean;
 }
 
 export function serverDeps(
@@ -213,8 +227,11 @@ export function serverDeps(
 		 * memory is: the servers belong to the signed-in account, and a client is
 		 * not entitled to say which addresses a turn may reach out to.
 		 */
+		approve: options.approve ?? (options.mcpUnattended ? async () => true : undefined),
+
 		openMcp:
-			options.mcp !== false && hasMcpServers(principal.userId, principal.isAdmin)
+			(options.approve || options.mcpUnattended) &&
+			hasMcpServers(principal.userId, principal.isAdmin)
 				? () => openMcpSession(principal.userId, principal.isAdmin)
 				: undefined,
 

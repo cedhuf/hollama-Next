@@ -69,6 +69,25 @@ a page read; a real chain against your own tools is longer than that.
 At most forty tools are taken from one server. Past that the catalogue is cut, and the test button
 says so.
 
+## Every call is put to you first
+
+A turn that wants to call an MCP tool stops and asks. The card shows which
+server, which tool, what that tool says it does, and the exact arguments it would
+be called with. Allow it and the call goes out; refuse it and nothing leaves the
+machine, the model is told so, and it carries on without the result.
+
+Every call, not the ones that look dangerous. Judging that would mean us ruling
+on tools we have never seen, described by the very servers whose calls are in
+question. The person who added the server is the one who can answer.
+
+The question stands for two minutes. Unanswered, the call is refused: silence is
+never consent, and a turn parked on a question nobody is there to answer would
+hold its place in the conversation until the process restarts.
+
+Because the turn runs in the server rather than in the tab, the question survives
+a reload, and it can be answered from a different tab or a different device. The
+first answer counts.
+
 ## What you can see afterwards
 
 Every call leaves a step in the reply's timeline, naming the server and the tool. That is deliberate
@@ -91,11 +110,27 @@ model learned externally can still be remembered on a later turn, one a person s
 Refusals are traced like any other memory step, so how often the rule actually fires is a question
 the timeline answers rather than a guess.
 
-## Bots do not get MCP
+## Switching them off for a conversation
 
-A [bot integration](/connect/bots/) answers to people who are not you. Letting a room reach your MCP
-servers by asking the bot nicely is an escalation you never granted, so bots run without them,
-whatever you have configured here.
+The composer's lightning menu carries an **MCP tools** switch, on by default. It
+is one switch for all your servers rather than one per server, and what it
+decides is whether the catalogues are sent at all: a conversation with no use for
+forty tool definitions should not be paying for them in every request it makes.
+
+Which of them may actually run is never decided there. That is decided call by
+call, when the call is about to be made.
+
+## Bots, and the one place there is nobody to ask
+
+A [bot integration](/connect/bots/) answers to people who are not you, in a room
+you may not be reading. There is no one to put a call to, so MCP is off unless
+you tick it in that bot's own tools.
+
+Ticking it is the whole of the consent. From then on the bot's calls run unasked,
+on your servers, at the prompting of whoever is in the room, and the settings say
+so where the box is. A spoken turn is refused MCP outright for the same reason
+and with no box to tick: an approval card nobody is looking at is not a
+question.
 
 ## For an administrator
 

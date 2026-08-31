@@ -6,6 +6,7 @@ import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { modelLabel, type Server } from '$lib/connections';
 import { repository } from '$lib/data';
 import { sessionsStore, settingsStore } from '$lib/localStorage';
+import type { McpApprovalRequest } from '$lib/mcp';
 
 import type { AskChoices } from './askChoice';
 import { getLastUsedModels } from './chat';
@@ -71,7 +72,15 @@ export interface ReasoningStep {
 	 * to tell which they are looking at. An empty `tool` is the server itself
 	 * having failed, before any call was made.
 	 */
-	mcp?: { server: string; tool: string; failed?: boolean; error?: string };
+	mcp?: {
+		server: string;
+		tool: string;
+		/** The call was made and went wrong. */
+		failed?: boolean;
+		/** The call was never made: the person did not allow it. Not the same thing. */
+		refused?: boolean;
+		error?: string;
+	};
 }
 
 export interface Message {
@@ -184,6 +193,14 @@ export interface Editor {
 	sendCurrentDate?: boolean;
 	/** Allow native model reasoning (Ollama). Default on (auto-detected); off never requests it. */
 	thinking?: boolean;
+	/**
+	 * Whether this conversation offers the account's MCP tools. Default on.
+	 *
+	 * Off does not refuse the calls, it stops sending the catalogues: a
+	 * conversation that has no use for somebody's forty tools should not carry
+	 * their definitions in every request it makes.
+	 */
+	mcp?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
 	/** Which of the two the live status is about. They read very differently. */
 	searchActivity?: 'search' | 'read' | 'tool';
@@ -206,6 +223,15 @@ export interface Editor {
 	reasoningTrace?: ReasoningStep[];
 	/** Live reasoning-panel toggle on the streaming article; stamped onto the message at completion. */
 	streamingReasoningExpanded?: boolean;
+	/**
+	 * The MCP call this turn is stopped on, waiting to be allowed or refused.
+	 *
+	 * Lives on the editor rather than on a message, because it is not part of the
+	 * conversation: it is a question about a turn in flight, and it disappears
+	 * whichever way it is answered. Set from the run's own events, so a tab that
+	 * reloads mid-question finds it again.
+	 */
+	pendingApproval?: McpApprovalRequest;
 	promptTextarea?: HTMLTextAreaElement;
 	abortController?: AbortController;
 }

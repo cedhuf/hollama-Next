@@ -26,6 +26,7 @@
 	import type { GeneratedImage } from '$lib/generatedImages';
 	import { canDrawImages, imagesStore, imageUrl } from '$lib/images';
 	import { personasStore, serversStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { mcpConfig } from '$lib/mcpConfig';
 	import { conversedPersonas, launchPersona, type Persona } from '$lib/personas';
 	import type { Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
@@ -43,6 +44,7 @@
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
 	let webFetch = $state($webFetchConfig.available && $settingsStore.webFetchByDefault);
 	let interactiveChoices = $state($settingsStore.interactiveChoices);
+	let mcp = $state(true);
 	let sendCurrentDate = $state($settingsStore.sendCurrentDate);
 	let thinking = $state(true);
 	let attachments = $state<Attachment[]>([]);
@@ -69,18 +71,20 @@
 
 	const tools = $derived(
 		buildChatTools(
-			{ webSearch, webFetch, interactiveChoices, sendCurrentDate, thinking },
+			{ webSearch, webFetch, interactiveChoices, sendCurrentDate, thinking, mcp },
 			(key, value) => {
 				if (key === 'webSearch') webSearch = value;
 				else if (key === 'webFetch') webFetch = value;
 				else if (key === 'interactiveChoices') interactiveChoices = value;
 				else if (key === 'sendCurrentDate') sendCurrentDate = value;
+				else if (key === 'mcp') mcp = value;
 				else thinking = value;
 			},
 			{
 				webSearch: searchAvailable,
 				webFetch: $webFetchConfig.available,
-				reasoning: supportsReasoning
+				reasoning: supportsReasoning,
+				mcp: $mcpConfig.hasServers
 			},
 			toolLabels($LL)
 		)
@@ -176,6 +180,7 @@
 			interactiveChoices,
 			sendCurrentDate,
 			thinking,
+			mcp,
 			attachments
 		});
 		goto(resolve('/sessions/[id]', { id }));

@@ -293,7 +293,10 @@ export class VoiceExchange {
 				interactiveChoices: false,
 				sendCurrentDate: true,
 				nativeTools: 'auto',
-				webSearchAuto: false
+				webSearchAuto: false,
+				// A spoken turn has no way to ask. Every MCP call is put to the person
+				// before it is made, and a card nobody is looking at is not a question.
+				mcp: false
 			},
 			capabilities: { search: false, fetch: false }
 		};

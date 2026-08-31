@@ -113,6 +113,20 @@ export function applyRunEvent(
 			}
 			return;
 
+		case 'approval':
+			// The turn is stopped until this is answered. Replayed as readily as it is
+			// received: a tab that reloads mid-question has to find the question, and
+			// the `approvalResolved` that follows is what takes it away.
+			editor.pendingApproval = event.request;
+			progress();
+			return;
+
+		case 'approvalResolved':
+			// Only if it is still the one on screen. Two questions in a row, answered
+			// out of order, must not have the first one's answer clear the second.
+			if (editor.pendingApproval?.id === event.id) editor.pendingApproval = undefined;
+			return;
+
 		case 'sources':
 			editor.webSearchInfo = event.info;
 			return;
@@ -174,6 +188,7 @@ export function applyRunEvent(
 
 		case 'done':
 			editor.isCompletionInProgress = false;
+			editor.pendingApproval = undefined;
 			editor.speakerPersonaId = undefined;
 			editor.speakerName = undefined;
 			editor.shouldFocusTextarea = true;
@@ -187,6 +202,7 @@ export function applyRunEvent(
 
 		case 'error':
 			editor.isCompletionInProgress = false;
+			editor.pendingApproval = undefined;
 			// Whatever the turn had written by the time it stopped arrived as a
 			// `message` of its own, just before this. Rebuilding it from the
 			// half-written bubble is what this used to do, and it was the reason a

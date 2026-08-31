@@ -896,6 +896,17 @@ const en = {
 	memoryForgetAll: 'Forget everything',
 	memoryForgetAllConfirm:
 		'Delete everything {name:string} remembers about you? The persona itself is untouched.',
+	botMcpWarning:
+		'This bot calls your MCP servers without asking. In a conversation every call is put to you first; here there is nobody to ask, so anyone in the room can set one off.',
+	mcpTools: 'MCP tools',
+	mcpApprovalTitle: 'Allow this tool call?',
+	mcpApprovalAllow: 'Allow',
+	mcpApprovalAllowing: 'Allowing\u2026',
+	mcpApprovalRefuse: 'Refuse',
+	mcpApprovalNoArguments: 'Called with no arguments.',
+	mcpApprovalTimeoutHint:
+		'The turn is waiting. Left unanswered for two minutes, the call is refused.',
+	mcpStepRefused: 'You refused an external tool call',
 	mcpServers: 'MCP servers',
 	mcpServersDescription:
 		'Catalogues of tools running elsewhere. Their tools are offered to the model beside this app\u2019s own, and their answers come from a machine this instance does not own.',

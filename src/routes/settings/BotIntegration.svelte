@@ -70,7 +70,16 @@
 
 	/** Named from the same list the composer's menu uses, so a tool reads the same everywhere. */
 	const toolOptions = $derived(
-		BOT_TOOLS.map((tool) => ({ value: tool, label: toolLabels($LL)[tool] }))
+		BOT_TOOLS.map((tool) => ({
+			value: tool,
+			label: toolLabels($LL)[tool],
+			// MCP is the one entry here whose consequence is not like the others':
+			// everywhere else in the app a call is put to a person first, and a bot
+			// has nobody to ask. Marked in the list itself, because that is where the
+			// choice is made.
+			danger: tool === 'mcp',
+			hint: tool === 'mcp' ? $LL.botMcpWarning() : undefined
+		}))
 	);
 
 	const personaOptions = $derived(
@@ -400,6 +409,13 @@
 					}}
 				/>
 			</SettingsField>
+
+			<!-- Said where it is decided, not in the documentation. MCP behaves
+			     differently here than anywhere else in the app, and somebody ticking
+			     it in a list of five ordinary tools has no way to know that. -->
+			{#if integration.config.tools.includes('mcp')}
+				<p class="text-muted text-xs leading-snug">{$LL.botMcpWarning()}</p>
+			{/if}
 
 			<!-- Enabled and running are not the same thing, and the difference is
 			     invisible otherwise. Two reasons a switched-on bot stays quiet, and

@@ -516,6 +516,25 @@ paths:
         '201': { description: The run that was started. }
         '404': { description: No such conversation. }
         '409': { description: That conversation is already generating. }
+  /api/runs/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [runs]
+      summary: Allow or refuse one MCP call the turn is stopped on.
+      description: >
+        Takes `{ callId, allow }`. The call id comes from the run's `approval`
+        event. Answers `{ answered }`, false when the question has already been
+        settled, has timed out, or was never asked: two clients answering at once
+        is ordinary, and the first answer is the one that counts. Unanswered for
+        two minutes, a call is refused.
+      responses:
+        '200': { description: The decision was recorded, or there was none to record. }
+        '400': { description: Expected a call id and a boolean. }
+        '404': { description: No such run, or not the caller's. }
   /api/runs/{id}/cancel:
     parameters:
       - name: id

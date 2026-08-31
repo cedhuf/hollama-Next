@@ -3246,6 +3246,42 @@ type RootTranslation = {
 	 */
 	memoryForgetAllConfirm: RequiredParams<'name'>
 	/**
+	 * T​h​i​s​ ​b​o​t​ ​c​a​l​l​s​ ​y​o​u​r​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​w​i​t​h​o​u​t​ ​a​s​k​i​n​g​.​ ​I​n​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​e​v​e​r​y​ ​c​a​l​l​ ​i​s​ ​p​u​t​ ​t​o​ ​y​o​u​ ​f​i​r​s​t​;​ ​h​e​r​e​ ​t​h​e​r​e​ ​i​s​ ​n​o​b​o​d​y​ ​t​o​ ​a​s​k​,​ ​s​o​ ​a​n​y​o​n​e​ ​i​n​ ​t​h​e​ ​r​o​o​m​ ​c​a​n​ ​s​e​t​ ​o​n​e​ ​o​f​f​.
+	 */
+	botMcpWarning: string
+	/**
+	 * M​C​P​ ​t​o​o​l​s
+	 */
+	mcpTools: string
+	/**
+	 * A​l​l​o​w​ ​t​h​i​s​ ​t​o​o​l​ ​c​a​l​l​?
+	 */
+	mcpApprovalTitle: string
+	/**
+	 * A​l​l​o​w
+	 */
+	mcpApprovalAllow: string
+	/**
+	 * A​l​l​o​w​i​n​g​…
+	 */
+	mcpApprovalAllowing: string
+	/**
+	 * R​e​f​u​s​e
+	 */
+	mcpApprovalRefuse: string
+	/**
+	 * C​a​l​l​e​d​ ​w​i​t​h​ ​n​o​ ​a​r​g​u​m​e​n​t​s​.
+	 */
+	mcpApprovalNoArguments: string
+	/**
+	 * T​h​e​ ​t​u​r​n​ ​i​s​ ​w​a​i​t​i​n​g​.​ ​L​e​f​t​ ​u​n​a​n​s​w​e​r​e​d​ ​f​o​r​ ​t​w​o​ ​m​i​n​u​t​e​s​,​ ​t​h​e​ ​c​a​l​l​ ​i​s​ ​r​e​f​u​s​e​d​.
+	 */
+	mcpApprovalTimeoutHint: string
+	/**
+	 * Y​o​u​ ​r​e​f​u​s​e​d​ ​a​n​ ​e​x​t​e​r​n​a​l​ ​t​o​o​l​ ​c​a​l​l
+	 */
+	mcpStepRefused: string
+	/**
 	 * M​C​P​ ​s​e​r​v​e​r​s
 	 */
 	mcpServers: string
@@ -7462,6 +7498,42 @@ export type TranslationFunctions = {
 	 * Delete everything {name} remembers about you? The persona itself is untouched.
 	 */
 	memoryForgetAllConfirm: (arg: { name: string }) => LocalizedString
+	/**
+	 * This bot calls your MCP servers without asking. In a conversation every call is put to you first; here there is nobody to ask, so anyone in the room can set one off.
+	 */
+	botMcpWarning: () => LocalizedString
+	/**
+	 * MCP tools
+	 */
+	mcpTools: () => LocalizedString
+	/**
+	 * Allow this tool call?
+	 */
+	mcpApprovalTitle: () => LocalizedString
+	/**
+	 * Allow
+	 */
+	mcpApprovalAllow: () => LocalizedString
+	/**
+	 * Allowing…
+	 */
+	mcpApprovalAllowing: () => LocalizedString
+	/**
+	 * Refuse
+	 */
+	mcpApprovalRefuse: () => LocalizedString
+	/**
+	 * Called with no arguments.
+	 */
+	mcpApprovalNoArguments: () => LocalizedString
+	/**
+	 * The turn is waiting. Left unanswered for two minutes, the call is refused.
+	 */
+	mcpApprovalTimeoutHint: () => LocalizedString
+	/**
+	 * You refused an external tool call
+	 */
+	mcpStepRefused: () => LocalizedString
 	/**
 	 * MCP servers
 	 */

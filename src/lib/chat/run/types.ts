@@ -1,4 +1,5 @@
 import type { OllamaOptions } from '$lib/chat/ollama';
+import type { McpApprovalRequest } from '$lib/mcp';
 import type { Message, ReasoningStep, WebSearchInfo } from '$lib/sessions';
 
 /**
@@ -57,6 +58,15 @@ export interface RunFlags {
 	interactiveChoices: boolean;
 	sendCurrentDate: boolean;
 	nativeTools: NativeToolsPreference;
+	/**
+	 * Whether the MCP servers this account has switched on are offered this turn.
+	 *
+	 * On by default and per conversation, like the web toggles beside it. Off is
+	 * not a refusal of the calls, it is not sending the catalogues at all: a turn
+	 * that will never need somebody's forty tools should not be paying for their
+	 * definitions in every request it makes.
+	 */
+	mcp: boolean;
 	/** Let the model decide whether a search is worth it, in the text protocol. */
 	webSearchAuto: boolean;
 }
@@ -166,6 +176,22 @@ export type RunEvent =
 	| { type: 'trace'; step: ReasoningStep }
 	/** Whether a lookup is in flight, and which kind, for the live indicator. */
 	| { type: 'searching'; active: boolean; activity?: 'search' | 'read' | 'tool'; query?: string }
+	/**
+	 * The turn is stopped, waiting to be told whether it may make this call.
+	 *
+	 * An event rather than a question asked of whoever started the turn, because
+	 * by now there may be nobody there: the run outlives the tab. A client that
+	 * arrives late replays this and finds the question still standing, and the
+	 * answer goes back over its own route rather than up the stream.
+	 */
+	| { type: 'approval'; request: McpApprovalRequest }
+	/** How that question ended, so every watching client stops asking it. */
+	| {
+			type: 'approvalResolved';
+			id: string;
+			allowed: boolean;
+			by: 'user' | 'timeout' | 'aborted';
+	  }
 	/** What the turn has put in front of the model so far. */
 	| { type: 'sources'; info: WebSearchInfo }
 	/** The turn's answer, complete and ready to be appended to the conversation. */

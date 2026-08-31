@@ -28,7 +28,7 @@ import { mentionedPersonas } from './mentions';
 import { messagesInContext } from './notes';
 import { refusalIn } from './refusal';
 import { applyRunEvent, type RunSurface } from './run/apply';
-import { cancelRun, followRun, runForSession, startRun } from './run/client';
+import { cancelRun, decideApproval, followRun, runForSession, startRun } from './run/client';
 import type { RunInput, RunSpeaker } from './run/types';
 
 /* eslint-disable svelte/prefer-svelte-reactivity -- the rule guards against a
@@ -150,6 +150,9 @@ export class Conversation implements RunSurface {
 			interactiveChoices: this.#settings.current.interactiveChoices,
 			sendCurrentDate: this.#settings.current.sendCurrentDate,
 			thinking: true,
+			// On, like every other tool switch: what makes MCP safe is the question
+			// asked before each call, not a switch somebody has to find first.
+			mcp: true,
 			// Declared here rather than left undefined: it is bound into the streaming
 			// article, and Svelte refuses `bind:` against a prop that has a fallback when
 			// the bound value is undefined. Reattaching to a run in progress hit that
@@ -245,6 +248,8 @@ export class Conversation implements RunSurface {
 		this.editor.interactiveChoices = this.#settings.current.interactiveChoices;
 		this.editor.sendCurrentDate = this.#settings.current.sendCurrentDate;
 		this.editor.thinking = true;
+		this.editor.mcp = true;
+		this.editor.pendingApproval = undefined;
 		if (entry.atBottom !== false) void this.#view.scrollToBottom();
 
 		// A persona conversation carries its own web-search preference.
@@ -298,6 +303,7 @@ export class Conversation implements RunSurface {
 			this.editor.interactiveChoices = pending.interactiveChoices;
 		if (pending.sendCurrentDate !== undefined)
 			this.editor.sendCurrentDate = pending.sendCurrentDate;
+		if (pending.mcp !== undefined) this.editor.mcp = pending.mcp;
 
 		const context = contextMessages(pending.attachments);
 		if (context.length) this.session.messages = [...this.session.messages, ...context];
@@ -436,6 +442,20 @@ export class Conversation implements RunSurface {
 		this.choose(text);
 	};
 
+	/**
+	 * Allow or refuse the MCP call the turn is stopped on.
+	 *
+	 * The card disappears when the run says the question is over, not when the
+	 * button is pressed: the answer that counts is the one the server recorded, and
+	 * a second tab may have got there first. Clearing it here as well would be this
+	 * tab believing itself.
+	 */
+	approveTool = (allow: boolean): void => {
+		const request = this.editor.pendingApproval;
+		if (!request || !this.activeRun) return;
+		void decideApproval(this.activeRun, request.id, allow);
+	};
+
 	retry = async (index: number): Promise<void> => {
 		// Remove all the messages after the index
 		this.session.messages = this.session.messages.slice(0, index);
@@ -500,7 +520,8 @@ export class Conversation implements RunSurface {
 					interactiveChoices: !!this.editor.interactiveChoices,
 					sendCurrentDate: !!this.editor.sendCurrentDate,
 					nativeTools: this.#settings.current.nativeTools,
-					webSearchAuto: this.#settings.current.webSearchAuto
+					webSearchAuto: this.#settings.current.webSearchAuto,
+					mcp: this.editor.mcp !== false
 				},
 				capabilities: { search: this.searchAvailable, fetch: this.#webFetch.current.available }
 			});
@@ -633,7 +654,8 @@ export class Conversation implements RunSurface {
 				interactiveChoices: !!this.editor.interactiveChoices,
 				sendCurrentDate: !!this.editor.sendCurrentDate,
 				nativeTools: settings.nativeTools,
-				webSearchAuto: settings.webSearchAuto
+				webSearchAuto: settings.webSearchAuto,
+				mcp: this.editor.mcp !== false
 			},
 			capabilities: {
 				search: this.searchAvailable,

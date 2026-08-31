@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, ChevronsUpDown, Search } from '@lucide/svelte';
+	import { Check, ChevronsUpDown, Search, TriangleAlert } from '@lucide/svelte';
 	import { Select } from 'bits-ui';
 
 	/**
@@ -11,7 +11,13 @@
 	 */
 	interface Props {
 		value?: string[];
-		options: { value: string; label: string }[];
+		/**
+		 * `danger` marks an entry whose consequence is not the same kind as its
+		 * neighbours': it is drawn in the warning colour and carries `hint` as its
+		 * tooltip. A row that behaves differently from the four beside it has to say
+		 * so where it is picked, not in the documentation.
+		 */
+		options: { value: string; label: string; danger?: boolean; hint?: string }[];
 		placeholder?: string;
 		disabled?: boolean;
 		searchable?: boolean;
@@ -36,6 +42,10 @@
 			? options.filter((o) => o.label.toLowerCase().includes(query.trim().toLowerCase()))
 			: options
 	);
+
+	/** Whether the current selection includes something marked `danger`. */
+	const picked = $derived(options.filter((option) => value.includes(option.value)));
+	const warning = $derived(picked.find((option) => option.danger));
 
 	const summary = $derived(
 		value.length === 0
@@ -65,6 +75,15 @@
 		<span class="min-w-0 truncate text-left {value.length ? 'text-active' : 'text-muted'}">
 			{summary}
 		</span>
+		<!-- Visible without opening the list: something picked here does not behave
+		     like the rest, and the summary line is where anybody looking at this
+		     integration afterwards will be looking. -->
+		{#if warning}
+			<TriangleAlert
+				class="text-negative ml-auto h-4 w-4 shrink-0"
+				aria-label={warning.hint || warning.label}
+			/>
+		{/if}
 		<ChevronsUpDown class="text-muted h-4 w-4 shrink-0" />
 	</Select.Trigger>
 
@@ -100,12 +119,22 @@
 					{#snippet children({ selected })}
 						<span
 							class="flex h-4 w-4 shrink-0 items-center justify-center rounded border {selected
-								? 'border-accent bg-accent text-shade-0'
+								? option.danger
+									? 'border-negative bg-negative text-shade-0'
+									: 'border-accent bg-accent text-shade-0'
 								: 'border-shade-4'}"
 						>
 							{#if selected}<Check class="h-3 w-3" />{/if}
 						</span>
-						<span class="min-w-0 flex-1 truncate" title={option.label}>{option.label}</span>
+						<span
+							class="min-w-0 flex-1 truncate {option.danger ? 'text-negative' : ''}"
+							title={option.hint || option.label}
+						>
+							{option.label}
+						</span>
+						{#if option.danger}
+							<TriangleAlert class="text-negative h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+						{/if}
 					{/snippet}
 				</Select.Item>
 			{:else}

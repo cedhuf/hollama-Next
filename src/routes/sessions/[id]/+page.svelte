@@ -545,6 +545,7 @@
 					handleRetry={chat.retry}
 					chooseAnswer={chat.answerChoice}
 					pendingChoice={chat.pendingChoice}
+					onApproveTool={chat.approveTool}
 					assistantLabel={persona?.name}
 					isCompacting={chat.isCompacting}
 					onCancelCompaction={chat.cancelCompaction}

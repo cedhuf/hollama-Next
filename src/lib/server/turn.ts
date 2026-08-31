@@ -109,7 +109,8 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 			interactiveChoices: false,
 			sendCurrentDate: wanted.has('sendCurrentDate'),
 			nativeTools: getSettings(user.id)?.nativeTools ?? 'auto',
-			webSearchAuto: canSearch
+			webSearchAuto: canSearch,
+			mcp: wanted.has('mcp')
 		},
 		capabilities: { search: canSearch, fetch: canFetch },
 		// The account's own rewrites, resolved by the instance rather than claimed
@@ -119,9 +120,10 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 
 	// Resolved before anything starts, so a refused model is an error the caller
 	// can report rather than an empty answer it has to explain.
-	// No MCP on this path: see `DepsOptions`. A bot's tools are the four its owner
-	// ticked, and reaching their MCP servers is not one of them.
-	const deps = serverDeps(input, principal, { mcp: false });
+	// MCP without anybody to ask, if and only if the owner ticked it. Everywhere
+	// else a call is put to a person first; here there is no person, so the box in
+	// the bot's own settings is the whole of the consent. See `DepsOptions`.
+	const deps = serverDeps(input, principal, { mcpUnattended: wanted.has('mcp') });
 
 	let text = '';
 	let usage: TurnResult['usage'];

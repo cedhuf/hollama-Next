@@ -209,6 +209,9 @@
 	 */
 	function mcpLabel(mcp: ReasoningStep['mcp']): string {
 		if (!mcp) return $LL.mcpStepCalled();
+		// A refusal first: it is the only one of these where nothing left the
+		// machine, and reading it as a failure would be reading it backwards.
+		if (mcp.refused) return $LL.mcpStepRefused();
 		if (!mcp.tool) return $LL.mcpStepUnavailable();
 		return mcp.failed ? $LL.mcpStepFailed() : $LL.mcpStepCalled();
 	}

@@ -26,6 +26,8 @@ interface Connected {
 	label: string;
 	client: Client;
 	specs: ToolSpec[];
+	/** What each tool says it does, by its own name, for the question put to the person. */
+	purposes: Map<string, string>;
 }
 
 /**
@@ -70,6 +72,7 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 					slug: record.slug,
 					label: record.label,
 					client,
+					purposes: new Map(tools.map((tool) => [tool.name, tool.description])),
 					specs: tools.map((tool) => ({
 						name: mcpToolName(record.slug, tool.name),
 						description: tool.description || `A tool offered by ${record.label}.`,
@@ -93,6 +96,18 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 	return {
 		tools: () => connected.flatMap((server) => server.specs),
 		unavailable: () => unavailable,
+
+		describe(name: string) {
+			const parsed = parseMcpToolName(name, slugs);
+			const server = parsed && connected.find((entry) => entry.slug === parsed.slug);
+			if (!parsed || !server) return null;
+			return {
+				server: server.label,
+				tool: parsed.tool,
+				purpose: server.purposes.get(parsed.tool) ?? ''
+			};
+		},
+
 		close: async () => {
 			await Promise.all(connected.map((server) => server.client.close().catch(() => {})));
 		},

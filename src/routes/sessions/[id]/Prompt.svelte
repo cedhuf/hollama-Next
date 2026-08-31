@@ -19,6 +19,7 @@
 	import { supportsReasoningToggle } from '$lib/connections';
 	import { readPastedImages, warnRejected } from '$lib/imageFiles';
 	import { personasStore, serversStore } from '$lib/localStorage';
+	import { mcpConfig } from '$lib/mcpConfig';
 	import type { Persona } from '$lib/personas';
 	import { contextMessages, imagesPayload, type Attachment } from '$lib/promptAttachments';
 	import { searchConfig } from '$lib/search';
@@ -272,13 +273,15 @@
 				interactiveChoices: !!editor.interactiveChoices,
 				sendCurrentDate: !!editor.sendCurrentDate,
 				// Off = never request reasoning; on = auto.
-				thinking: editor.thinking !== false
+				thinking: editor.thinking !== false,
+				mcp: editor.mcp !== false
 			},
 			(key, value) => (editor[key] = value),
 			{
 				webSearch: searchAvailable,
 				webFetch: $webFetchConfig.available,
-				reasoning: supportsReasoning
+				reasoning: supportsReasoning,
+				mcp: $mcpConfig.hasServers
 			},
 			toolLabels($LL)
 		)

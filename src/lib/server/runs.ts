@@ -35,6 +35,14 @@ interface Run {
 	events: SequencedRunEvent[];
 	controller: AbortController;
 	listeners: Set<(event: SequencedRunEvent) => void>;
+	/**
+	 * MCP calls this run is stopped on, by call id.
+	 *
+	 * Held here rather than in the turn because the answer arrives on a different
+	 * request, from a tab that may not be the one that started it. The run is what
+	 * both sides can name.
+	 */
+	pending: Map<string, (allowed: boolean) => void>;
 }
 
 const runs = new Map<string, Run>();
@@ -70,7 +78,8 @@ export function createRun(sessionId: string, userId: string | null): Run {
 		startedAt: new Date().toISOString(),
 		events: [],
 		controller: new AbortController(),
-		listeners: new Set()
+		listeners: new Set(),
+		pending: new Map()
 	};
 	runs.set(run.id, run);
 	return run;
@@ -101,6 +110,53 @@ export function emitTo(run: Run, event: RunEvent): void {
 function finish(run: Run, status: RunStatus): void {
 	run.status = status;
 	run.finishedAt = Date.now();
+	// A run that has ended cannot make the call it was asking about, so every
+	// question still standing is answered no. Silence is never consent here, and
+	// a promise nobody will ever settle is a turn that never returns.
+	for (const settle of run.pending.values()) settle(false);
+	run.pending.clear();
+}
+
+/**
+ * Wait for a person to allow or refuse one call.
+ *
+ * Returns false when the wait runs out, when the run is cancelled, and when
+ * anybody says no. The only way to true is somebody saying yes.
+ */
+export function awaitApproval(run: Run, callId: string, timeoutMs: number): Promise<boolean> {
+	return new Promise((resolve) => {
+		let settled = false;
+		const settle = (allowed: boolean) => {
+			if (settled) return;
+			settled = true;
+			clearTimeout(timer);
+			run.pending.delete(callId);
+			resolve(allowed);
+		};
+
+		const timer = setTimeout(() => {
+			if (run.pending.has(callId)) {
+				emitTo(run, { type: 'approvalResolved', id: callId, allowed: false, by: 'timeout' });
+			}
+			settle(false);
+		}, timeoutMs);
+
+		run.pending.set(callId, settle);
+	});
+}
+
+/**
+ * Answer one of those questions. True when there was one to answer.
+ *
+ * Records the answer as an event before settling, so every client watching the
+ * run stops asking, including the ones that never sent anything.
+ */
+export function decideApproval(run: Run, callId: string, allowed: boolean): boolean {
+	const settle = run.pending.get(callId);
+	if (!settle) return false;
+	emitTo(run, { type: 'approvalResolved', id: callId, allowed, by: 'user' });
+	settle(allowed);
+	return true;
 }
 
 export function getRun(id: string, userId: string | null): Run | undefined {
@@ -138,6 +194,11 @@ export function findRunForSession(sessionId: string, userId: string | null): Run
 
 export function cancelRun(run: Run): void {
 	if (run.status !== 'running') return;
+	// Said before the abort lands, so a client that is looking at the question
+	// sees it withdrawn rather than left hanging until the error arrives.
+	for (const callId of run.pending.keys()) {
+		emitTo(run, { type: 'approvalResolved', id: callId, allowed: false, by: 'aborted' });
+	}
 	run.controller.abort();
 }
 

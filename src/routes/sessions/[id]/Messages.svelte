@@ -14,6 +14,7 @@
 	import ContextDivider from './ContextDivider.svelte';
 	import MentionDivider from './MentionDivider.svelte';
 	import PlaybooksDivider from './PlaybooksDivider.svelte';
+	import ToolApproval from './ToolApproval.svelte';
 
 	interface Props {
 		session: Session;
@@ -23,6 +24,15 @@
 		chooseAnswer: (message: Message, selected: string[][]) => void;
 		/** The pending quick-choice (shown docked above the composer, so it's skipped inline). */
 		pendingChoice?: Message | null;
+		/**
+		 * Allow or refuse the MCP call the turn is stopped on.
+		 *
+		 * Here rather than in either composer, and that is the point: the question
+		 * belongs at the foot of the thread, which on a phone and on a desktop is
+		 * the same place. One implementation, both surfaces, and neither can end up
+		 * with a version of a security prompt the other does not have.
+		 */
+		onApproveTool?: (allow: boolean) => void;
 		assistantLabel?: string;
 		/** A summary is being written right now: the boundary is drawn before it lands. */
 		isCompacting?: boolean;
@@ -39,6 +49,7 @@
 		editor = $bindable(),
 		handleRetry,
 		chooseAnswer,
+		onApproveTool = undefined,
 		pendingChoice = null,
 		assistantLabel = undefined,
 		isCompacting = false,
@@ -227,6 +238,16 @@
 	<!-- The boundary, drawn where it will settle: the marker is appended, so the
 	     pill that waits is already standing in the pill that reports. -->
 	<CompactionDivider pending onCancel={onCancelCompaction} />
+{/if}
+
+{#if editor.pendingApproval && onApproveTool}
+	<!-- The turn is stopped here, waiting. Below the half-written answer, because
+	     what the model said on its way to the call is what the decision is about. -->
+	{#key editor.pendingApproval.id}
+		<div class="mt-3">
+			<ToolApproval request={editor.pendingApproval} onDecide={onApproveTool} />
+		</div>
+	{/key}
 {/if}
 
 {#if editor.isCompletionInProgress}

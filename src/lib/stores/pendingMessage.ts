@@ -16,6 +16,7 @@ export interface PendingMessage {
 	thinking?: boolean;
 	interactiveChoices?: boolean;
 	sendCurrentDate?: boolean;
+	mcp?: boolean;
 }
 
 export const pendingMessage = writable<PendingMessage | null>(null);
