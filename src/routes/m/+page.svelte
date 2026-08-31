@@ -209,7 +209,7 @@
 		<section class="flex flex-col gap-2">
 			<h2 class="text-active text-lg font-semibold tracking-tight">{$LL.mobilePersonas()}</h2>
 
-			<div class="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+			<div class="faces -mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
 				{#each personas as persona (persona.id)}
 					<button
 						type="button"
@@ -253,20 +253,34 @@
 </div>
 
 <style lang="postcss">
-	/* The same glass as the bar at the foot of the screen. Local to this file
-	   rather than shared: two screens are not a pattern, and the day a third wants
-	   it, it moves to `$lib` with a name. */
+	/* The row of faces scrolls, and says nothing about it. A bar under a row of
+	   portraits is a piece of furniture: the faces cut off at the edge already say
+	   there are more of them, which is the only thing it would have told anybody. */
+	.faces {
+		scrollbar-width: none;
+	}
+
+	.faces::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* The same glass as the bar at the foot of the screen, and it now genuinely is:
+	   the two had drifted to different tints, which showed on this very screen,
+	   these buttons sitting a shade denser than the bar directly under them.
+
+	   Still local to this file, and that is now the weak part. Four screens repeat
+	   this block, which is what let them diverge in the first place. */
 	.glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 55%, transparent);
-		backdrop-filter: blur(24px) saturate(180%);
-		-webkit-backdrop-filter: blur(24px) saturate(180%);
+		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);
+		backdrop-filter: blur(32px) saturate(190%);
+		-webkit-backdrop-filter: blur(32px) saturate(190%);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 45%, transparent),
 			0 0 0 1px color-mix(in srgb, var(--color-shade-4) 45%, transparent);
 	}
 
 	:global([data-color-theme='dark']) .glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 62%, transparent);
+		background-color: color-mix(in srgb, var(--color-shade-1) 48%, transparent);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
 			0 0 0 1px color-mix(in srgb, white 8%, transparent);

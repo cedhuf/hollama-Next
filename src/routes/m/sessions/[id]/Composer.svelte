@@ -111,9 +111,9 @@
 
 <style lang="postcss">
 	.glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 55%, transparent);
-		backdrop-filter: blur(24px) saturate(180%);
-		-webkit-backdrop-filter: blur(24px) saturate(180%);
+		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);
+		backdrop-filter: blur(32px) saturate(190%);
+		-webkit-backdrop-filter: blur(32px) saturate(190%);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 45%, transparent),
 			0 0 0 1px color-mix(in srgb, var(--color-shade-4) 45%, transparent),
@@ -121,7 +121,7 @@
 	}
 
 	:global([data-color-theme='dark']) .glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 62%, transparent);
+		background-color: color-mix(in srgb, var(--color-shade-1) 48%, transparent);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
 			0 0 0 1px color-mix(in srgb, white 8%, transparent),
