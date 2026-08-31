@@ -558,6 +558,19 @@
 	margin-bottom: 0;
 }
 
+/* An aside rather than a section: no heading, quieter type, and enough padding
+   to sit apart without claiming a chapter of its own. */
+.band--note {
+	padding: 1.75rem clamp(1rem, 3vw, 2rem);
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-sm);
+	line-height: 1.7;
+}
+
+.band--note p:last-child {
+	margin-bottom: 0;
+}
+
 /*
  * The theme picker.
  *
