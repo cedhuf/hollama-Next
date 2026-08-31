@@ -936,6 +936,11 @@ const fr = extendDictionary(en, {
 	mcpServers: 'Serveurs MCP',
 	mcpServersDescription:
 		'Des catalogues d\u2019outils qui tournent ailleurs. Leurs outils sont proposés au modèle à côté de ceux de l\u2019app, et leurs réponses viennent d\u2019une machine que cette instance ne possède pas.',
+	mcpMaxTools: 'Outils envoyés au modèle',
+	mcpMaxToolsHint:
+		'Tous serveurs actifs confondus. Au-delà, le reste du catalogue est laissé de côté.',
+	mcpMaxToolsWarning:
+		'{count:number} définitions d\u2019outils partent dans chaque requête de chaque tour où MCP est actif. Exposer un groupe de votre passerelle plutôt que sa totalité coûte en général moins cher.',
 	mcpNotAllowed:
 		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
 	noMcpServers: 'Aucun serveur MCP pour le moment',

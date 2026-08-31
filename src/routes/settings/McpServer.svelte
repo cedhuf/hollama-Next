@@ -20,13 +20,7 @@
 	 * exception, because it is never read back: an untouched field means "keep what
 	 * is stored", and only a typed value replaces it.
 	 */
-	export type Verdict = {
-		ok: boolean;
-		tools?: string[];
-		total?: number;
-		cap?: number | null;
-		error?: string;
-	};
+	export type Verdict = { ok: boolean; tools?: string[]; total?: number; error?: string };
 
 	interface Props {
 		server: McpServerView;
@@ -243,11 +237,6 @@
 				</span>
 			{/each}
 		</div>
-		{#if verdict.cap}
-			<span class="text-muted text-xs leading-snug">
-				{$LL.mcpToolsCapped({ count: verdict.cap })}
-			</span>
-		{/if}
 	{/if}
 
 	{#if server.blocked}

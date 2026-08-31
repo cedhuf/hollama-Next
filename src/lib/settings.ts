@@ -5,6 +5,7 @@ import { SYSTEM_SAMPLING_DEFAULTS, type SamplingOptions } from '$lib/chat/option
 import type { LloomaMetadata } from '../routes/api/metadata/+server';
 import type { PromptKey } from './defaultPrompts';
 import type { KnowledgeCollection } from './knowledge';
+import { MCP_LIMITS } from './mcp';
 
 export interface Model {
 	serverId: string;
@@ -138,6 +139,8 @@ export interface Settings {
 	webFetchByDefault: boolean;
 	webFetchMaxPages: number;
 	webFetchMaxChars: number;
+	/** How many MCP tools may be sent to the model at once, across every server. */
+	mcpMaxTools: number;
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
@@ -442,6 +445,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	webFetchByDefault: true,
 	webFetchMaxPages: 3,
 	webFetchMaxChars: 20000,
+	mcpMaxTools: MCP_LIMITS.defaultTools,
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',

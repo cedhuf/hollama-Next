@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 
-import { MCP_LIMITS, normaliseMcpUrl } from '$lib/mcp';
+import { normaliseMcpUrl } from '$lib/mcp';
 import { requireUser } from '$lib/server/api';
 import { getMcpServer, getMcpServerSecret } from '$lib/server/db/mcpServers';
 import { connectMcp, listMcpTools, McpError } from '$lib/server/mcp/client';
@@ -36,16 +36,12 @@ export async function POST(event) {
 	let client: Awaited<ReturnType<typeof connectMcp>> | null = null;
 	try {
 		client = await connectMcp(url, secret || null);
-		const { tools, total } = await listMcpTools(client);
-		return json({
-			ok: true,
-			tools: tools.map((tool) => tool.name),
-			total,
-			// Said rather than left to be noticed: past the cap the tail of the
-			// catalogue never reaches a model, and the only place that can be
-			// explained is here.
-			cap: total > tools.length ? MCP_LIMITS.toolsPerServer : null
-		});
+		const tools = await listMcpTools(client);
+		// The whole catalogue, uncut. What a turn actually sends depends on every
+		// other server switched on and on the ceiling this account set, which is a
+		// question about the account rather than about this address: the settings
+		// answer it beside the field that holds the number.
+		return json({ ok: true, tools: tools.map((tool) => tool.name), total: tools.length });
 	} catch (cause) {
 		return json({ ok: false, error: message(cause) });
 	} finally {

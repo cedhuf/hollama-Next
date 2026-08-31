@@ -910,6 +910,11 @@ const en = {
 	mcpServers: 'MCP servers',
 	mcpServersDescription:
 		'Catalogues of tools running elsewhere. Their tools are offered to the model beside this app\u2019s own, and their answers come from a machine this instance does not own.',
+	mcpMaxTools: 'Tools sent to the model',
+	mcpMaxToolsHint:
+		'Across every server switched on. Past this many, the rest of the catalogue is left out.',
+	mcpMaxToolsWarning:
+		'{count:number} tool definitions ride along in every request of every turn where MCP is on. Serving a group from your gateway rather than the whole of it is usually the cheaper answer.',
 	mcpNotAllowed: 'Your administrator has not opened MCP servers to accounts on this instance.',
 	noMcpServers: 'No MCP server yet',
 	addMcpServer: 'Add an MCP server',

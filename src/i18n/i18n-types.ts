@@ -3290,6 +3290,19 @@ type RootTranslation = {
 	 */
 	mcpServersDescription: string
 	/**
+	 * T​o​o​l​s​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​m​o​d​e​l
+	 */
+	mcpMaxTools: string
+	/**
+	 * A​c​r​o​s​s​ ​e​v​e​r​y​ ​s​e​r​v​e​r​ ​s​w​i​t​c​h​e​d​ ​o​n​.​ ​P​a​s​t​ ​t​h​i​s​ ​m​a​n​y​,​ ​t​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
+	 */
+	mcpMaxToolsHint: string
+	/**
+	 * {​c​o​u​n​t​}​ ​t​o​o​l​ ​d​e​f​i​n​i​t​i​o​n​s​ ​r​i​d​e​ ​a​l​o​n​g​ ​i​n​ ​e​v​e​r​y​ ​r​e​q​u​e​s​t​ ​o​f​ ​e​v​e​r​y​ ​t​u​r​n​ ​w​h​e​r​e​ ​M​C​P​ ​i​s​ ​o​n​.​ ​S​e​r​v​i​n​g​ ​a​ ​g​r​o​u​p​ ​f​r​o​m​ ​y​o​u​r​ ​g​a​t​e​w​a​y​ ​r​a​t​h​e​r​ ​t​h​a​n​ ​t​h​e​ ​w​h​o​l​e​ ​o​f​ ​i​t​ ​i​s​ ​u​s​u​a​l​l​y​ ​t​h​e​ ​c​h​e​a​p​e​r​ ​a​n​s​w​e​r​.
+	 * @param {number} count
+	 */
+	mcpMaxToolsWarning: RequiredParams<'count'>
+	/**
 	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​n​o​t​ ​o​p​e​n​e​d​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​t​o​ ​a​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
 	 */
 	mcpNotAllowed: string
@@ -7550,6 +7563,18 @@ export type TranslationFunctions = {
 	 * Catalogues of tools running elsewhere. Their tools are offered to the model beside this app’s own, and their answers come from a machine this instance does not own.
 	 */
 	mcpServersDescription: () => LocalizedString
+	/**
+	 * Tools sent to the model
+	 */
+	mcpMaxTools: () => LocalizedString
+	/**
+	 * Across every server switched on. Past this many, the rest of the catalogue is left out.
+	 */
+	mcpMaxToolsHint: () => LocalizedString
+	/**
+	 * {count} tool definitions ride along in every request of every turn where MCP is on. Serving a group from your gateway rather than the whole of it is usually the cheaper answer.
+	 */
+	mcpMaxToolsWarning: (arg: { count: number }) => LocalizedString
 	/**
 	 * Your administrator has not opened MCP servers to accounts on this instance.
 	 */

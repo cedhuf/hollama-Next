@@ -100,14 +100,15 @@ export async function connectMcp(url: string, secret: string | null): Promise<Cl
 }
 
 /**
- * What the server offers, capped.
+ * What the server offers, all of it.
  *
- * A catalogue is sent to the model on every round of every turn it is enabled
- * for, so its size is a cost paid repeatedly rather than once. Past the cap the
- * rest is dropped, and the caller says so in the settings tab rather than the
- * model silently never seeing the tail of somebody's server.
+ * Nothing is dropped here. A catalogue is sent to the model on every round of
+ * every turn it is enabled for, so its size is a cost paid repeatedly, but what
+ * costs is the total across every server and not this one's share of it. The
+ * ceiling therefore lives where the total is known, in the session, and this
+ * answers the plainer question: what does this server have.
  */
-export async function listMcpTools(client: Client): Promise<{ tools: McpTool[]; total: number }> {
+export async function listMcpTools(client: Client): Promise<McpTool[]> {
 	let listed: { tools?: unknown[] };
 	try {
 		listed = await client.listTools(undefined, { timeout: MCP_LIMITS.listTimeoutMs });
@@ -134,7 +135,7 @@ export async function listMcpTools(client: Client): Promise<{ tools: McpTool[]; 
 					: { type: 'object', properties: {} }
 		}));
 
-	return { tools: tools.slice(0, MCP_LIMITS.toolsPerServer), total: tools.length };
+	return tools;
 }
 
 /** One call, and what the model should read back from it. */

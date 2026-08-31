@@ -7,6 +7,7 @@
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { settingsStore } from '$lib/localStorage';
 	import { MCP_LIMITS, type McpServerView } from '$lib/mcp';
 	import { toast } from '$lib/toast';
 
@@ -15,6 +16,7 @@
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
 	import SettingsSection from './SettingsSection.svelte';
+	import SettingsSlider from './SettingsSlider.svelte';
 
 	/**
 	 * The MCP servers this account calls out to.
@@ -212,6 +214,27 @@
 			<div class="border-shade-3 rounded-xl border">
 				<EmptyMessage>{$LL.noMcpServers()}</EmptyMessage>
 			</div>
+		{/if}
+
+		<!-- One number for every server together, because what costs is the size of a
+		     request and a request carries the lot. Above the list rather than on each
+		     card, where it would read as a per-server share it is not. -->
+		<SettingsField label={$LL.mcpMaxTools()} hint={$LL.mcpMaxToolsHint()}>
+			<SettingsSlider
+				label={$LL.mcpMaxTools()}
+				min={MCP_LIMITS.minTools}
+				max={MCP_LIMITS.maxTools}
+				step={10}
+				bind:value={$settingsStore.mcpMaxTools}
+			/>
+		</SettingsField>
+		{#if ($settingsStore.mcpMaxTools ?? MCP_LIMITS.defaultTools) > MCP_LIMITS.warnAboveTools}
+			<!-- Said where the number is set, not in the documentation. Not a refusal:
+			     a catalogue that size is a legitimate thing to want, and it is also
+			     paid for on every round of every turn. -->
+			<p class="text-negative text-xs leading-snug">
+				{$LL.mcpMaxToolsWarning({ count: $settingsStore.mcpMaxTools ?? MCP_LIMITS.defaultTools })}
+			</p>
 		{/if}
 
 		{#each servers as server, index (server.id)}

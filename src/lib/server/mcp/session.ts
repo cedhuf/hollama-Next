@@ -2,7 +2,8 @@ import type { Client } from '@modelcontextprotocol/client';
 
 import type { ToolSpec } from '$lib/chat';
 import type { McpAccess, McpCallOutcome } from '$lib/chat/run/orchestrator';
-import { mcpToolName, parseMcpToolName } from '$lib/mcp';
+import { MCP_LIMITS, mcpToolName, parseMcpToolName } from '$lib/mcp';
+import { getSettings } from '$lib/server/db/collections';
 import { allowUserMcp } from '$lib/server/db/config';
 import { getMcpServerSecret, listMcpServers } from '$lib/server/db/mcpServers';
 
@@ -67,7 +68,7 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 			let client: Client | null = null;
 			try {
 				client = await connectMcp(record.url, getMcpServerSecret(record.id));
-				const { tools } = await listMcpTools(client);
+				const tools = await listMcpTools(client);
 				connected.push({
 					slug: record.slug,
 					label: record.label,
@@ -93,8 +94,30 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 
 	const slugs = connected.map((server) => server.slug);
 
+	/**
+	 * How many tools this account allows in one request, across every server.
+	 *
+	 * Clamped rather than trusted: it reaches here from a browser, and a request
+	 * carrying ten thousand tool definitions is a request nobody meant to make.
+	 */
+	const ceiling = Math.min(
+		Math.max(
+			Math.trunc(getSettings(userId)?.mcpMaxTools ?? MCP_LIMITS.defaultTools) || 0,
+			MCP_LIMITS.minTools
+		),
+		MCP_LIMITS.maxTools
+	);
+
 	return {
-		tools: () => connected.flatMap((server) => server.specs),
+		/**
+		 * Every tool on offer, up to what the account allows.
+		 *
+		 * Server by server in the order they were configured, so what is left out
+		 * when the ceiling bites is the tail of the list rather than an arbitrary
+		 * slice of each: a person who has to lose tools can at least see which by
+		 * looking at the order of their servers.
+		 */
+		tools: () => connected.flatMap((server) => server.specs).slice(0, ceiling),
 		unavailable: () => unavailable,
 
 		describe(name: string) {

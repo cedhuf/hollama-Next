@@ -39,8 +39,31 @@ export interface McpServerView {
 export const MCP_LIMITS = {
 	/** Servers one account may configure. */
 	perUser: 10,
-	/** Tools taken from one server's catalogue. The rest are dropped, and said so. */
-	toolsPerServer: 40,
+	/**
+	 * How many tools reach the model, across every server switched on.
+	 *
+	 * A ceiling on the total rather than per server, because what costs is the
+	 * size of a request and a request carries the lot. It was forty per server,
+	 * chosen for a server that offers a handful of tools, which is not what a
+	 * gateway is: a hub standing in front of a mail server, a calendar and a house
+	 * presents the sum of their catalogues, and forty cut a third of it off with no
+	 * criterion but the order they arrived in.
+	 *
+	 * So the number is the account's own, this is only its default, and the app
+	 * says what it costs rather than deciding quietly.
+	 */
+	defaultTools: 200,
+	/** What a person may set that number to, whatever the browser sends. */
+	minTools: 1,
+	maxTools: 500,
+	/**
+	 * Past this, the settings say plainly that every request carries all of it.
+	 *
+	 * Not a limit and not a refusal: a catalogue this size is a legitimate thing to
+	 * want, and it is also a cost paid on every round of every turn. The number is
+	 * where "you would notice this on your bill" begins.
+	 */
+	warnAboveTools: 100,
 	/** How much of one result reaches the model, in characters. */
 	resultChars: 20_000,
 	/** Listing a catalogue, which happens once per turn per server. */
