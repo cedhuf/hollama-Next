@@ -38,6 +38,11 @@ export default defineConfig({
 				baseUrl: 'https://github.com/cedhuf/llooma/edit/main/docs/'
 			},
 			customCss: ['./src/styles/custom.css'],
+			// The home page hero is a piece of the app rather than a logo, which
+			// Starlight's own hero has no room for. Nothing else is overridden.
+			components: {
+				Hero: './src/components/Hero.astro'
+			},
 			// English only. The app's interface is translated, its documentation is
 			// not: a second copy of every page is a standing maintenance cost, and a
 			// half-translated site tells readers less than a complete English one.

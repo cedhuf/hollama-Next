@@ -23,25 +23,10 @@ hero:
 
 import { Image } from 'astro:assets';
 import Credits from '../../components/Credits.astro';
-import hero from '../../assets/screenshots/hero.png';
+import wallpaper from '../../assets/screenshots/desktop_wallpaper.png';
 import library from '../../assets/screenshots/desktop_library.png';
 import conversation from '../../assets/screenshots/desktop_conversation.png';
 import phone from '../../assets/screenshots/phone_home.png';
-
-{/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid, so browsers split it and the line loses its content. */}
-
-<div class="meta">
-	<div class="meta__note">
-		A fork of [Hollama](https://github.com/fmaclen/hollama) by
-		[fmaclen](https://github.com/fmaclen)
-	</div>
-	<div class="tag tag--warn">Early preview, not for production</div>
-</div>
-
-<figure class="shot shot--bleed">
-	<Image src={hero} alt="Llooma on a desktop, with the phone interface beside it" loading="eager" />
-	<figcaption>The same conversations on a desktop and in your hand. Nothing of it leaves the machine unless you send it.</figcaption>
-</figure>
 
 <section class="start">
 
@@ -74,6 +59,11 @@ services:
 </div>
 
 </section>
+
+<figure class="shot shot--bleed reveal">
+	<Image src={wallpaper} alt="A conversation on a desktop, over a wallpaper, with every surface translucent" />
+	<figcaption>Your own picture behind the app, and the translucency of every surface following it.</figcaption>
+</figure>
 
 <section class="panels">
 

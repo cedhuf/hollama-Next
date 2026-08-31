@@ -15,6 +15,29 @@
  */
 
 /*
+ * The accent, taken from the app rather than left at Starlight's blue.
+ *
+ * `hsl(14 80% 60%)` is the Classic theme's primary, the orange on the New chat
+ * button in every screenshot on this page. A documentation site wearing a
+ * different colour from the product it documents reads as somebody else's site.
+ *
+ * Starlight's dark ramp is the bare `:root`; the light one is on the attribute
+ * it sets when the reader picks light. Lightness on the light ramp is chosen for
+ * white text on the accent, which is what its buttons do.
+ */
+:root {
+	--sl-color-accent-low: hsl(14 45% 18%);
+	--sl-color-accent: hsl(14 80% 60%);
+	--sl-color-accent-high: hsl(14 90% 82%);
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-high: hsl(14 72% 30%);
+	--sl-color-accent: hsl(14 78% 42%);
+	--sl-color-accent-low: hsl(14 85% 92%);
+}
+
+/*
  * A visually hidden label, still read aloud and still focusable. Used for the
  * two fieldset legends in the theme picker, which say what a group of controls
  * is for to someone who cannot see that it is a row of swatches.
@@ -31,80 +54,199 @@
 /*
  * The hero.
  *
- * Starlight reserves a second column for an image and left-aligns the text once
- * there is one. There is no image here on purpose: the screenshot underneath is
- * a desktop and a phone side by side, which is unreadable at a third of the page
- * width, so it goes full width below instead and the hero keeps the whole line.
+ * Two columns, the argument and the product. The art is a phone rather than the
+ * desktop composite that used to open the page: at hero size a desktop
+ * screenshot is a grey rectangle with unreadable text in it, where a phone is
+ * recognisable at a glance and leaves room for the words beside it.
  */
 .hero {
-	grid-template-columns: 100%;
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	gap: 2.5rem;
+	align-items: center;
+	padding-block: 2rem 1rem;
 }
 
-.hero h1 {
-	max-width: 20ch;
-	font-weight: 650;
-	letter-spacing: -0.02em;
-	text-wrap: balance;
-}
-
-.hero .tagline {
-	max-width: 58ch;
-	text-wrap: pretty;
+/* The light behind it all. Two tints, the accent and the violet the phone shot
+   is wearing, far enough apart to read as a room rather than a gradient. */
+.hero::before {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	inset: -40% -20% -10%;
+	background:
+		radial-gradient(40% 50% at 78% 38%, hsl(326 100% 74% / 0.28), transparent 70%),
+		radial-gradient(45% 55% at 18% 20%, var(--sl-color-accent-low), transparent 72%);
+	filter: blur(20px);
+	pointer-events: none;
 }
 
 @media (min-width: 50rem) {
 	.hero {
-		padding-block: clamp(3rem, 9vmin, 6rem) 1.5rem;
+		grid-template-columns: 7fr 5fr;
+		gap: 3rem;
+		padding-block: clamp(2rem, 7vmin, 4.5rem) 2rem;
 	}
+}
 
-	/* Starlight switches all three to `start` when it thinks there is an image
-	   beside them. */
-	.hero .stack {
-		text-align: center;
+.hero__copy {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+@media (min-width: 50rem) {
+	.hero__copy {
+		align-items: flex-start;
+		text-align: start;
 	}
+}
 
-	.hero .copy {
-		align-items: center;
-	}
+.hero h1 {
+	max-width: 18ch;
+	margin: 0.75rem 0 0;
+	font-size: clamp(var(--sl-text-3xl), calc(0.5rem + 4.5vw), var(--sl-text-6xl));
+	font-weight: 650;
+	letter-spacing: -0.02em;
+	line-height: 1.08;
+	color: var(--sl-color-white);
+	text-wrap: balance;
+}
 
-	.hero .actions {
-		justify-content: center;
+.hero__tagline {
+	max-width: 52ch;
+	margin: 1rem 0 0;
+	color: var(--sl-color-gray-2);
+	font-size: clamp(var(--sl-text-base), calc(0.5rem + 0.8vw), var(--sl-text-lg));
+	line-height: 1.6;
+	text-wrap: pretty;
+}
+
+.hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1rem;
+	justify-content: center;
+	margin-top: 2rem;
+}
+
+@media (min-width: 50rem) {
+	.hero__actions {
+		justify-content: flex-start;
 	}
 }
 
 /*
- * The line under the buttons: what this is a fork of, and how finished it is.
- *
- * Both were blocks of their own before, a pill and a yellow caution box, which
- * meant the first two things anyone read were a credit and a warning. On one
- * quiet line they are still the first thing after the buttons, which is where a
- * disclosure belongs, without being the loudest thing on the page.
+ * The art, lifted off the page rather than laid on it: a soft ground behind the
+ * phone and a shadow under it, so the transparent PNG reads as an object.
  */
-.meta {
+.hero__art {
+	position: relative;
 	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
 	justify-content: center;
-	gap: 0.5rem 1rem;
-	margin: 0 auto 1rem;
-	color: var(--sl-color-gray-3);
-	font-size: var(--sl-text-sm);
-	text-align: center;
 }
 
-/* MDX wraps the block's children in a paragraph of its own. */
-.meta__note p {
+.hero__art img {
+	width: min(100%, 20rem);
+	height: auto;
+	filter: drop-shadow(0 24px 45px rgb(0 0 0 / 0.45));
+}
+
+/*
+ * How finished this is, said once and above the title.
+ *
+ * It was a yellow caution box, then a grey pill sharing a line with the
+ * attribution, where neither had any weight. Above the headline it is read
+ * first, in a colour that means status rather than danger, and the dot is the
+ * shape a status indicator already has everywhere else.
+ */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
 	margin: 0;
+	padding: 0.3rem 0.85rem;
+	border: 1px solid color-mix(in oklab, var(--sl-color-accent) 45%, transparent);
+	border-radius: 999px;
+	background: color-mix(in oklab, var(--sl-color-accent) 14%, transparent);
+	color: var(--sl-color-text-accent);
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.02em;
 }
 
-.meta__note a {
-	color: var(--sl-color-gray-2);
-	text-decoration-color: var(--sl-color-gray-4);
+.badge__dot {
+	width: 0.45rem;
+	height: 0.45rem;
+	border-radius: 50%;
+	background: var(--sl-color-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.badge__dot {
+		animation: badge-pulse 2.8s ease-in-out infinite;
+	}
+}
+
+@keyframes badge-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		box-shadow: 0 0 0 0 color-mix(in oklab, var(--sl-color-accent) 55%, transparent);
+	}
+
+	50% {
+		opacity: 0.75;
+		box-shadow: 0 0 0 0.3rem transparent;
+	}
+}
+
+/*
+ * What this is a fork of.
+ *
+ * Being a fork is not a footnote, so it is not set in footnote type on the end
+ * of another line. Its own block, a rule in the accent colour beside it, and the
+ * name at full size: the shape of an attribution rather than a disclaimer.
+ */
+.lineage {
+	margin: 2.25rem 0 0;
+	padding: 0.35rem 0 0.35rem 0.9rem;
+	border-inline-start: 2px solid color-mix(in oklab, var(--sl-color-accent) 60%, transparent);
+	font-size: var(--sl-text-sm);
+	line-height: 1.5;
+	text-align: start;
+}
+
+.lineage__label {
+	display: block;
+	color: var(--sl-color-text-accent);
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.lineage a {
+	color: var(--sl-color-white);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.lineage a:hover {
+	color: var(--sl-color-text-accent);
+	text-decoration: underline;
 	text-underline-offset: 0.2em;
 }
 
-.meta__note a:hover {
-	color: var(--sl-color-text-accent);
+.lineage__by {
+	color: var(--sl-color-gray-3);
+}
+
+.lineage__by a {
+	font-weight: 400;
+	color: var(--sl-color-gray-2);
 }
 
 /*
@@ -138,14 +280,6 @@
 	letter-spacing: 0.02em;
 	line-height: 1.6;
 	white-space: nowrap;
-}
-
-/* The one warning on the page, in the colour Starlight already uses for a
-   caution aside, so it reads as the same kind of statement. */
-.tag--warn {
-	border-color: var(--sl-color-orange);
-	background: var(--sl-color-orange-low);
-	color: var(--sl-color-orange-high);
 }
 
 /* In a band it sits beside the heading, not above it: two words on a line of
@@ -208,6 +342,56 @@
 	.shot--bleed {
 		width: min(76rem, 100vw - 6rem);
 		margin-inline: calc(50% - min(38rem, 50vw - 3rem));
+	}
+}
+
+/*
+ * The big screenshot settles as it arrives.
+ *
+ * It used to open the page, where it pushed everything worth reading below the
+ * fold. Lower down it has to earn a stop instead, which is what the scroll does:
+ * the image comes up from under, slightly small and dim, and lands as it enters.
+ *
+ * `animation-timeline` needs no JavaScript, no observer and no layout reads, so
+ * there is nothing to run on a browser that does not have it. Both guards matter:
+ * without support the image is simply there, and someone who has asked for less
+ * motion gets exactly that.
+ */
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.reveal img {
+			animation: settle linear both;
+			animation-timeline: view();
+			animation-range: entry 5% cover 32%;
+		}
+
+		.reveal figcaption {
+			animation: fade linear both;
+			animation-timeline: view();
+			animation-range: entry 20% cover 40%;
+		}
+	}
+}
+
+@keyframes settle {
+	from {
+		opacity: 0.35;
+		transform: translateY(3rem) scale(0.93);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes fade {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
 	}
 }
 
@@ -355,9 +539,15 @@
 .band {
 	margin: 4rem 0;
 	padding: 2.5rem clamp(1rem, 4vw, 3rem);
-	border: 1px solid var(--sl-color-gray-6);
+	border: 1px solid color-mix(in oklab, var(--sl-color-accent) 22%, var(--sl-color-gray-6));
 	border-radius: 1rem;
-	background: linear-gradient(180deg, var(--sl-color-gray-7, var(--sl-color-gray-6)), transparent);
+	background:
+		radial-gradient(
+			70% 120% at 12% 0%,
+			color-mix(in oklab, var(--sl-color-accent) 12%, transparent),
+			transparent 70%
+		),
+		linear-gradient(180deg, var(--sl-color-gray-7, var(--sl-color-gray-6)), transparent);
 }
 
 .band > :first-child {

@@ -1,0 +1,57 @@
+---
+/**
+ * The home page hero, replacing Starlight's own.
+ *
+ * Starlight's version puts an image in a column beside the text, which is the
+ * right shape, but it draws it as an illustration: contained, capped at 400px,
+ * nothing behind it. What belongs there is a piece of the product, lit, so the
+ * first thing anyone sees is the app rather than a logo.
+ *
+ * The badge and the attribution are written here rather than in frontmatter
+ * because this site has exactly one splash page. If a second one ever appears,
+ * both have to move into the schema before this component is reused.
+ *
+ * Registered in `astro.config.mjs` under `components.Hero`.
+ */
+import { Image } from 'astro:assets';
+import { LinkButton } from '@astrojs/starlight/components';
+
+import phone from '../assets/screenshots/phone_home.png';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+---
+
+<div class="hero">
+	<div class="hero__copy">
+		<p class="badge"><span class="badge__dot"></span>Early preview, not for production</p>
+		<h1 id="_top" data-page-title set:html={title} />
+		{tagline && <p class="hero__tagline" set:html={tagline} />}
+		{
+			actions.length > 0 && (
+				<div class="hero__actions">
+					{actions.map(({ icon, link: href, text, variant }) => (
+						<LinkButton {href} {variant} icon={icon?.name}>
+							{text}
+						</LinkButton>
+					))}
+				</div>
+			)
+		}
+		<p class="lineage">
+			<span class="lineage__label">Forked from</span>
+			<a href="https://github.com/fmaclen/hollama">Hollama</a>
+			<span class="lineage__by">by <a href="https://github.com/fmaclen">fmaclen</a></span>
+		</p>
+	</div>
+
+	<div class="hero__art">
+		<Image
+			src={phone}
+			alt="The home screen of the phone interface, with a persona ready to talk"
+			loading="eager"
+			widths={[320, 480, 640]}
+			sizes="(min-width: 50rem) 20rem, min(60vw, 18rem)"
+		/>
+	</div>
+</div>
