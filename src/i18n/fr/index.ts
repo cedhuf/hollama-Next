@@ -930,40 +930,31 @@ const fr = extendDictionary(en, {
 	mcpApprovalAllowing: 'Autorisation\u2026',
 	mcpApprovalRefuse: 'Refuser',
 	mcpApprovalNoArguments: 'Appelé sans argument.',
-	mcpApprovalTimeoutHint:
-		'Le tour attend. Sans réponse pendant deux minutes, l\u2019appel est refusé.',
+	mcpApprovalTimeoutHint: 'Sans réponse, l’appel est refusé.',
 	mcpStepRefused: 'Vous avez refusé un appel d\u2019outil externe',
 	mcpServers: 'Serveurs MCP',
 	mcpServersDescription:
-		'Des catalogues d\u2019outils qui tournent ailleurs. Leurs outils sont proposés au modèle à côté de ceux de l\u2019app, et leurs réponses viennent d\u2019une machine que cette instance ne possède pas.',
+		'Des catalogues d’outils qui tournent ailleurs, appelés depuis vos conversations.',
 	mcpByDefault: 'Proposer ces outils dans les nouvelles conversations',
-	mcpByDefaultHint:
-		'Désactivé par défaut. L\u2019interrupteur du composer les active pour une conversation qui en a besoin, ce qui évite à tous les autres tours d\u2019emporter leurs définitions.',
 	mcpMaxTools: 'Outils envoyés au modèle',
 	mcpMaxToolsWarningTitle: 'Un gros catalogue à chaque requête',
 	mcpMaxToolsWarning:
-		'{count:number} définitions d\u2019outils partent dans chaque requête de chaque tour où MCP est actif. Exposer un groupe de votre passerelle plutôt que sa totalité coûte en général moins cher.',
-	mcpMaxToolsHint:
-		'Tous serveurs actifs confondus. Au-delà, le reste du catalogue est laissé de côté.',
-	mcpNotAllowed:
-		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
+		'{count:number} définitions d’outils partent dans chaque requête de chaque tour où MCP est actif.',
+	mcpMaxToolsHint: 'Tous serveurs actifs confondus.',
+	mcpNotAllowed: 'Votre administrateur n’a pas ouvert les serveurs MCP sur cette instance.',
 	noMcpServers: 'Aucun serveur MCP pour le moment',
 	addMcpServer: 'Ajouter un serveur MCP',
 	experimental: 'expérimental',
 	mcpProgressive: 'Annoncer les serveurs, pas leurs outils',
-	mcpProgressiveHint:
-		'Le modèle reçoit un seul outil qui énumère ce que contient chaque serveur, et les définitions d\u2019un serveur n\u2019arrivent que lorsqu\u2019il les demande. Une requête bien plus petite, au prix d\u2019un aller-retour de plus quand un outil est nécessaire.',
+	mcpProgressiveHint: 'Les définitions d’un serveur n’arrivent que lorsque le modèle les demande.',
 	mcpServerOptions: 'Réglages du serveur MCP',
 	deleteMcpServer: 'Supprimer ce serveur',
 	mcpServerUrl: 'Adresse du serveur',
-	mcpServerUrlHint:
-		'Le point d\u2019entrée HTTP streamable. Les autres transports ne sont pas gérés.',
+	mcpServerUrlHint: 'Le point d’entrée HTTP streamable.',
 	mcpToken: 'Jeton',
-	mcpTokenHint:
-		'Envoyé en bearer à chaque appel. À laisser vide pour un serveur qui n\u2019en demande pas.',
+	mcpTokenHint: 'Envoyé en bearer à chaque appel.',
 	mcpEnabled: 'Utiliser ce serveur',
-	mcpBlockedByAdmin:
-		'Suspendu par l\u2019administrateur. Votre propre interrupteur n\u2019a pas bougé.',
+	mcpBlockedByAdmin: 'Suspendu par l’administrateur.',
 	mcpToolPrefix: 'Ses outils s\u2019appellent {prefix:string}\u2026 devant le modèle',
 	mcpConnected: 'Connecté. {count:number} outil{{s}} trouvé{{s}}.',
 	mcpUpdateTools: 'Mettre à jour les outils',
@@ -975,10 +966,7 @@ const fr = extendDictionary(en, {
 	mcpToolsFound: '{count:number} outil{{s}}',
 	mcpLimitReached: 'Au maximum {count:number} serveurs MCP par compte.',
 	mcpAllowed: 'Autorisé sur cette instance',
-	allInstanceMcpServersHint:
-		'Ceux de tout le monde, et à qui ils sont. Suspendez-en un ou supprimez-le ; sa configuration reste à son propriétaire.',
-	adminMcpDescription:
-		'Qui peut brancher cette instance sur un catalogue d\u2019outils tournant ailleurs, et ce qui y est branché aujourd\u2019hui.',
+	adminMcpDescription: 'Qui peut en ajouter, et ce qui a été ajouté jusqu’ici.',
 	allowUserMcp: 'Les utilisateurs peuvent ajouter leurs propres serveurs MCP',
 	callingExternalTool: 'Appel d\u2019un outil externe',
 	mcpStepCalled: 'A appelé un outil externe',

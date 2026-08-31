@@ -185,7 +185,6 @@
 		     them cannot produce one. Reaching for the switch when there is something
 		     to do with it is cheaper and narrower than leaving it open all day. -->
 		<FieldCheckbox label={$LL.mcpByDefault()} bind:checked={$settingsStore.mcpByDefault} />
-		<SettingsHint>{$LL.mcpByDefaultHint()}</SettingsHint>
 
 		<!-- One number for every server together, because what costs is the size of a
 		     request and a request carries the lot. Above the list rather than on each

@@ -3274,7 +3274,7 @@ type RootTranslation = {
 	 */
 	mcpApprovalNoArguments: string
 	/**
-	 * T​h​e​ ​t​u​r​n​ ​i​s​ ​w​a​i​t​i​n​g​.​ ​L​e​f​t​ ​u​n​a​n​s​w​e​r​e​d​ ​f​o​r​ ​t​w​o​ ​m​i​n​u​t​e​s​,​ ​t​h​e​ ​c​a​l​l​ ​i​s​ ​r​e​f​u​s​e​d​.
+	 * U​n​a​n​s​w​e​r​e​d​,​ ​i​t​ ​i​s​ ​r​e​f​u​s​e​d​.
 	 */
 	mcpApprovalTimeoutHint: string
 	/**
@@ -3286,17 +3286,13 @@ type RootTranslation = {
 	 */
 	mcpServers: string
 	/**
-	 * C​a​t​a​l​o​g​u​e​s​ ​o​f​ ​t​o​o​l​s​ ​r​u​n​n​i​n​g​ ​e​l​s​e​w​h​e​r​e​.​ ​T​h​e​i​r​ ​t​o​o​l​s​ ​a​r​e​ ​o​f​f​e​r​e​d​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​ ​b​e​s​i​d​e​ ​t​h​i​s​ ​a​p​p​’​s​ ​o​w​n​,​ ​a​n​d​ ​t​h​e​i​r​ ​a​n​s​w​e​r​s​ ​c​o​m​e​ ​f​r​o​m​ ​a​ ​m​a​c​h​i​n​e​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​d​o​e​s​ ​n​o​t​ ​o​w​n​.
+	 * C​a​t​a​l​o​g​u​e​s​ ​o​f​ ​t​o​o​l​s​ ​r​u​n​n​i​n​g​ ​e​l​s​e​w​h​e​r​e​,​ ​c​a​l​l​e​d​ ​f​r​o​m​ ​y​o​u​r​ ​c​o​n​v​e​r​s​a​t​i​o​n​s​.
 	 */
 	mcpServersDescription: string
 	/**
 	 * O​f​f​e​r​ ​t​h​e​s​e​ ​t​o​o​l​s​ ​i​n​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
 	 */
 	mcpByDefault: string
-	/**
-	 * O​f​f​ ​b​y​ ​d​e​f​a​u​l​t​.​ ​T​h​e​ ​s​w​i​t​c​h​ ​i​n​ ​t​h​e​ ​c​o​m​p​o​s​e​r​ ​t​u​r​n​s​ ​t​h​e​m​ ​o​n​ ​f​o​r​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​t​h​a​t​ ​n​e​e​d​s​ ​t​h​e​m​,​ ​w​h​i​c​h​ ​k​e​e​p​s​ ​e​v​e​r​y​ ​o​t​h​e​r​ ​t​u​r​n​ ​f​r​o​m​ ​c​a​r​r​y​i​n​g​ ​t​h​e​i​r​ ​d​e​f​i​n​i​t​i​o​n​s​.
-	 */
-	mcpByDefaultHint: string
 	/**
 	 * T​o​o​l​s​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​m​o​d​e​l
 	 */
@@ -3306,16 +3302,16 @@ type RootTranslation = {
 	 */
 	mcpMaxToolsWarningTitle: string
 	/**
-	 * {​c​o​u​n​t​}​ ​t​o​o​l​ ​d​e​f​i​n​i​t​i​o​n​s​ ​r​i​d​e​ ​a​l​o​n​g​ ​i​n​ ​e​v​e​r​y​ ​r​e​q​u​e​s​t​ ​o​f​ ​e​v​e​r​y​ ​t​u​r​n​ ​w​h​e​r​e​ ​M​C​P​ ​i​s​ ​o​n​.​ ​S​e​r​v​i​n​g​ ​a​ ​g​r​o​u​p​ ​f​r​o​m​ ​y​o​u​r​ ​g​a​t​e​w​a​y​ ​r​a​t​h​e​r​ ​t​h​a​n​ ​t​h​e​ ​w​h​o​l​e​ ​o​f​ ​i​t​ ​i​s​ ​u​s​u​a​l​l​y​ ​t​h​e​ ​c​h​e​a​p​e​r​ ​a​n​s​w​e​r​.
+	 * {​c​o​u​n​t​}​ ​t​o​o​l​ ​d​e​f​i​n​i​t​i​o​n​s​ ​r​i​d​e​ ​a​l​o​n​g​ ​i​n​ ​e​v​e​r​y​ ​r​e​q​u​e​s​t​ ​o​f​ ​e​v​e​r​y​ ​t​u​r​n​ ​w​h​e​r​e​ ​M​C​P​ ​i​s​ ​o​n​.
 	 * @param {number} count
 	 */
 	mcpMaxToolsWarning: RequiredParams<'count'>
 	/**
-	 * A​c​r​o​s​s​ ​e​v​e​r​y​ ​s​e​r​v​e​r​ ​s​w​i​t​c​h​e​d​ ​o​n​.​ ​P​a​s​t​ ​t​h​i​s​ ​m​a​n​y​,​ ​t​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
+	 * A​c​r​o​s​s​ ​e​v​e​r​y​ ​s​e​r​v​e​r​ ​s​w​i​t​c​h​e​d​ ​o​n​.
 	 */
 	mcpMaxToolsHint: string
 	/**
-	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​n​o​t​ ​o​p​e​n​e​d​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​t​o​ ​a​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​n​o​t​ ​o​p​e​n​e​d​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​t​o​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
 	 */
 	mcpNotAllowed: string
 	/**
@@ -3335,7 +3331,7 @@ type RootTranslation = {
 	 */
 	mcpProgressive: string
 	/**
-	 * T​h​e​ ​m​o​d​e​l​ ​i​s​ ​g​i​v​e​n​ ​o​n​e​ ​t​o​o​l​ ​l​i​s​t​i​n​g​ ​w​h​a​t​ ​e​a​c​h​ ​s​e​r​v​e​r​ ​h​o​l​d​s​,​ ​a​n​d​ ​t​h​e​ ​d​e​f​i​n​i​t​i​o​n​s​ ​o​f​ ​a​ ​s​e​r​v​e​r​ ​a​r​r​i​v​e​ ​o​n​l​y​ ​o​n​c​e​ ​i​t​ ​a​s​k​s​ ​f​o​r​ ​t​h​e​m​.​ ​A​ ​m​u​c​h​ ​s​m​a​l​l​e​r​ ​r​e​q​u​e​s​t​,​ ​a​t​ ​t​h​e​ ​c​o​s​t​ ​o​f​ ​o​n​e​ ​e​x​t​r​a​ ​r​o​u​n​d​ ​w​h​e​n​ ​a​ ​t​o​o​l​ ​i​s​ ​n​e​e​d​e​d​.
+	 * T​h​e​ ​d​e​f​i​n​i​t​i​o​n​s​ ​o​f​ ​a​ ​s​e​r​v​e​r​ ​a​r​r​i​v​e​ ​o​n​l​y​ ​o​n​c​e​ ​t​h​e​ ​m​o​d​e​l​ ​a​s​k​s​ ​f​o​r​ ​i​t​.
 	 */
 	mcpProgressiveHint: string
 	/**
@@ -3351,7 +3347,7 @@ type RootTranslation = {
 	 */
 	mcpServerUrl: string
 	/**
-	 * T​h​e​ ​H​T​T​P​ ​s​t​r​e​a​m​a​b​l​e​ ​e​n​d​p​o​i​n​t​.​ ​O​t​h​e​r​ ​t​r​a​n​s​p​o​r​t​s​ ​a​r​e​ ​n​o​t​ ​s​u​p​p​o​r​t​e​d​.
+	 * T​h​e​ ​H​T​T​P​ ​s​t​r​e​a​m​a​b​l​e​ ​e​n​d​p​o​i​n​t​.
 	 */
 	mcpServerUrlHint: string
 	/**
@@ -3359,7 +3355,7 @@ type RootTranslation = {
 	 */
 	mcpToken: string
 	/**
-	 * S​e​n​t​ ​a​s​ ​a​ ​b​e​a​r​e​r​ ​t​o​k​e​n​ ​o​n​ ​e​v​e​r​y​ ​c​a​l​l​.​ ​L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​a​ ​s​e​r​v​e​r​ ​t​h​a​t​ ​n​e​e​d​s​ ​n​o​n​e​.
+	 * S​e​n​t​ ​a​s​ ​a​ ​b​e​a​r​e​r​ ​t​o​k​e​n​ ​o​n​ ​e​v​e​r​y​ ​c​a​l​l​.
 	 */
 	mcpTokenHint: string
 	/**
@@ -3367,7 +3363,7 @@ type RootTranslation = {
 	 */
 	mcpEnabled: string
 	/**
-	 * S​u​s​p​e​n​d​e​d​ ​b​y​ ​t​h​e​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.​ ​Y​o​u​r​ ​o​w​n​ ​s​w​i​t​c​h​ ​i​s​ ​u​n​t​o​u​c​h​e​d​.
+	 * S​u​s​p​e​n​d​e​d​ ​b​y​ ​t​h​e​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.
 	 */
 	mcpBlockedByAdmin: string
 	/**
@@ -3421,11 +3417,7 @@ type RootTranslation = {
 	 */
 	mcpAllowed: string
 	/**
-	 * E​v​e​r​y​b​o​d​y​’​s​,​ ​w​i​t​h​ ​w​h​o​s​e​ ​t​h​e​y​ ​a​r​e​.​ ​S​u​s​p​e​n​d​ ​o​n​e​ ​o​r​ ​r​e​m​o​v​e​ ​i​t​;​ ​h​o​w​ ​i​t​ ​i​s​ ​c​o​n​f​i​g​u​r​e​d​ ​s​t​a​y​s​ ​w​i​t​h​ ​i​t​s​ ​o​w​n​e​r​.
-	 */
-	allInstanceMcpServersHint: string
-	/**
-	 * W​h​o​ ​m​a​y​ ​p​o​i​n​t​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​a​t​ ​a​ ​c​a​t​a​l​o​g​u​e​ ​o​f​ ​t​o​o​l​s​ ​r​u​n​n​i​n​g​ ​e​l​s​e​w​h​e​r​e​,​ ​a​n​d​ ​w​h​a​t​ ​h​a​s​ ​b​e​e​n​ ​p​o​i​n​t​e​d​ ​a​t​ ​s​o​ ​f​a​r​.
+	 * W​h​o​ ​m​a​y​ ​a​d​d​ ​o​n​e​,​ ​a​n​d​ ​w​h​a​t​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d​ ​s​o​ ​f​a​r​.
 	 */
 	adminMcpDescription: string
 	/**
@@ -7593,7 +7585,7 @@ export type TranslationFunctions = {
 	 */
 	mcpApprovalNoArguments: () => LocalizedString
 	/**
-	 * The turn is waiting. Left unanswered for two minutes, the call is refused.
+	 * Unanswered, it is refused.
 	 */
 	mcpApprovalTimeoutHint: () => LocalizedString
 	/**
@@ -7605,17 +7597,13 @@ export type TranslationFunctions = {
 	 */
 	mcpServers: () => LocalizedString
 	/**
-	 * Catalogues of tools running elsewhere. Their tools are offered to the model beside this app’s own, and their answers come from a machine this instance does not own.
+	 * Catalogues of tools running elsewhere, called from your conversations.
 	 */
 	mcpServersDescription: () => LocalizedString
 	/**
 	 * Offer these tools in new conversations
 	 */
 	mcpByDefault: () => LocalizedString
-	/**
-	 * Off by default. The switch in the composer turns them on for a conversation that needs them, which keeps every other turn from carrying their definitions.
-	 */
-	mcpByDefaultHint: () => LocalizedString
 	/**
 	 * Tools sent to the model
 	 */
@@ -7625,15 +7613,15 @@ export type TranslationFunctions = {
 	 */
 	mcpMaxToolsWarningTitle: () => LocalizedString
 	/**
-	 * {count} tool definitions ride along in every request of every turn where MCP is on. Serving a group from your gateway rather than the whole of it is usually the cheaper answer.
+	 * {count} tool definitions ride along in every request of every turn where MCP is on.
 	 */
 	mcpMaxToolsWarning: (arg: { count: number }) => LocalizedString
 	/**
-	 * Across every server switched on. Past this many, the rest of the catalogue is left out.
+	 * Across every server switched on.
 	 */
 	mcpMaxToolsHint: () => LocalizedString
 	/**
-	 * Your administrator has not opened MCP servers to accounts on this instance.
+	 * Your administrator has not opened MCP servers to this instance.
 	 */
 	mcpNotAllowed: () => LocalizedString
 	/**
@@ -7653,7 +7641,7 @@ export type TranslationFunctions = {
 	 */
 	mcpProgressive: () => LocalizedString
 	/**
-	 * The model is given one tool listing what each server holds, and the definitions of a server arrive only once it asks for them. A much smaller request, at the cost of one extra round when a tool is needed.
+	 * The definitions of a server arrive only once the model asks for it.
 	 */
 	mcpProgressiveHint: () => LocalizedString
 	/**
@@ -7669,7 +7657,7 @@ export type TranslationFunctions = {
 	 */
 	mcpServerUrl: () => LocalizedString
 	/**
-	 * The HTTP streamable endpoint. Other transports are not supported.
+	 * The HTTP streamable endpoint.
 	 */
 	mcpServerUrlHint: () => LocalizedString
 	/**
@@ -7677,7 +7665,7 @@ export type TranslationFunctions = {
 	 */
 	mcpToken: () => LocalizedString
 	/**
-	 * Sent as a bearer token on every call. Leave empty for a server that needs none.
+	 * Sent as a bearer token on every call.
 	 */
 	mcpTokenHint: () => LocalizedString
 	/**
@@ -7685,7 +7673,7 @@ export type TranslationFunctions = {
 	 */
 	mcpEnabled: () => LocalizedString
 	/**
-	 * Suspended by the administrator. Your own switch is untouched.
+	 * Suspended by the administrator.
 	 */
 	mcpBlockedByAdmin: () => LocalizedString
 	/**
@@ -7733,11 +7721,7 @@ export type TranslationFunctions = {
 	 */
 	mcpAllowed: () => LocalizedString
 	/**
-	 * Everybody’s, with whose they are. Suspend one or remove it; how it is configured stays with its owner.
-	 */
-	allInstanceMcpServersHint: () => LocalizedString
-	/**
-	 * Who may point this instance at a catalogue of tools running elsewhere, and what has been pointed at so far.
+	 * Who may add one, and what has been added so far.
 	 */
 	adminMcpDescription: () => LocalizedString
 	/**

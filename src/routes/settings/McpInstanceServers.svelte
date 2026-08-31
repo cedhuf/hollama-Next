@@ -60,8 +60,6 @@
 
 {#if servers.length}
 	<div class="mt-1 flex flex-col gap-2">
-		<span class="text-muted text-xs leading-snug">{$LL.allInstanceMcpServersHint()}</span>
-
 		{#each servers as server (server.id)}
 			<div class="border-shade-3 bg-shade-0 flex items-center gap-3 rounded-xl border px-3 py-2">
 				<span class="min-w-0 flex-1">
