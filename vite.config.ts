@@ -1,6 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 
 /**
  * TLS on the dev server, for testing on a real phone.
@@ -27,8 +27,50 @@ import { defineConfig } from 'vite';
  */
 const httpsRequested = process.env.HTTPS === '1';
 
-export default defineConfig({
-	plugins: [sveltekit(), ...(httpsRequested ? [basicSsl()] : [])],
+/**
+ * The development half of what `server.js` does in production.
+ *
+ * Voice mode needs a WebSocket, and SvelteKit has none of its own. The app
+ * attaches one from inside its own bundle, because the socket has to share
+ * module state with the route that issues its tickets; all either entry does is
+ * leave the HTTP server somewhere the app can find it. Same registered symbol on
+ * both sides, so neither has to import the other.
+ *
+ * Vite's own hot-reload socket lives on this same server. Ours adds a listener
+ * rather than replacing one, and ignores every upgrade that is not addressed to
+ * it, so the two coexist without either knowing about the other.
+ */
+const voiceSocketHost: Plugin = {
+	name: 'llooma-voice-socket-host',
+	configureServer(server: ViteDevServer) {
+		// Null in middleware mode, where there is no server of ours to attach to.
+		if (!server.httpServer) return;
+		(globalThis as Record<symbol, unknown>)[Symbol.for('llooma.httpServer')] = server.httpServer;
+	}
+};
+
+export default defineConfig(({ command }) => ({
+	plugins: [sveltekit(), voiceSocketHost, ...(httpsRequested ? [basicSsl()] : [])],
+	ssr: {
+		/**
+		 * Bundled for the build, and left alone in development.
+		 *
+		 * The two halves need opposite answers, which is why this depends on the
+		 * command rather than being a constant.
+		 *
+		 * Building: Vite keeps CommonJS dependencies external by default, which
+		 * assumes a `node_modules` beside the built server. The Docker image copies
+		 * `build/` and nothing else, so an external import there is a module that
+		 * resolves on a developer's machine and is missing in the image. Rollup
+		 * converts `ws` from CommonJS on the way in, so inlining it works.
+		 *
+		 * Developing: there is a `node_modules`, and Vite's module runner is ESM
+		 * only. Inlining a CommonJS package there hands its `require` to a runtime
+		 * that has none, which is a `ReferenceError` on the first request that
+		 * touches it. Left external, Node resolves it itself and it simply works.
+		 */
+		noExternal: command === 'build' ? ['ws'] : []
+	},
 	preview: {
 		// Allow all hosts in preview mode
 		host: true,
@@ -37,4 +79,4 @@ export default defineConfig({
 			? process.env.VITE_ALLOWED_HOSTS.split(',')
 			: ['localhost']
 	}
-});
+}));

@@ -2,8 +2,8 @@ import { error } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
 import { hasPriceFigure, reportsCost, type ConnectionType } from '$lib/connections';
-import { requireUser } from '$lib/server/api';
-import { getModelPricing, getServer, getServerApiKey } from '$lib/server/db/servers';
+import { requireServer, requireUser } from '$lib/server/api';
+import { getModelPricing, getServerApiKey } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { applyChatPolicy, PolicyError } from '$lib/server/llmPolicy';
 import { meter, meterImages } from '$lib/server/usageMeter';
@@ -18,12 +18,7 @@ import type { RequestHandler } from './$types';
  */
 const proxy: RequestHandler = async (event) => {
 	const user = await requireUser(event);
-	const server = getServer(event.params.serverId);
-	if (!server) throw error(404, 'Server not found');
-	if (server.owner_user_id !== null && server.owner_user_id !== user.id) {
-		throw error(403, 'Forbidden');
-	}
-	if (!server.is_enabled) throw error(403, 'Server is disabled');
+	const server = requireServer(user.id, event.params.serverId);
 
 	/**
 	 * Whether this request is a turn, as opposed to asking what models exist.

@@ -34,9 +34,12 @@ ENV PORT=4173
 ENV BODY_SIZE_LIMIT=25M
 
 COPY --from=builder --chown=appuser:appgroup /app/build ./build
+# The entry is adapter-node's own, plus the few lines that hand the HTTP server
+# to the app so voice mode can accept a WebSocket on the same port. See the file.
+COPY --from=builder --chown=appuser:appgroup /app/server.js ./server.js
 
 USER appuser
 
 EXPOSE 4173
 
-CMD ["node", "build/index.js"]
+CMD ["node", "server.js"]

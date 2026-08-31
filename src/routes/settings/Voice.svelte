@@ -10,7 +10,6 @@
 	import SettingsHint from './SettingsHint.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
-	import SettingsSlider from './SettingsSlider.svelte';
 	import SpeechVoice from './SpeechVoice.svelte';
 
 	/**
@@ -127,22 +126,13 @@
 		{/if}
 	</SettingsSection>
 
-	<!-- The loop's own behaviour, which is neither of the two models above and does
-	     not belong to either. It is also the pair of values a first real session is
-	     most likely to disagree with, which is the argument for their being reachable
-	     rather than compiled in. -->
+	<!-- The screen's own behaviour, which belongs to neither of the two models
+	     above. Both of these are about what the voice screen looks like and does
+	     between one question and the next; when a turn ends is no longer a setting,
+	     because it is no longer a delay somebody has to guess at. -->
 	<SettingsSection title={$LL.voiceLoop()} description={$LL.voiceLoopHelp()} card>
-		<SettingsField label={$LL.voiceSilence()}>
-			<SettingsSlider
-				label={$LL.voiceSilence()}
-				bind:value={$settingsStore.voiceSilenceMs}
-				min={500}
-				max={4000}
-				step={250}
-				format={(value) => $LL.voiceSilenceValue({ seconds: String(value / 1000) })}
-			/>
-		</SettingsField>
-		<SettingsHint>{$LL.voiceSilenceHelp()}</SettingsHint>
+		<FieldCheckbox label={$LL.voiceTranscript()} bind:checked={$settingsStore.voiceTranscript} />
+		<SettingsHint>{$LL.voiceTranscriptHelp()}</SettingsHint>
 
 		<FieldCheckbox
 			label={$LL.voiceAutoContinue()}

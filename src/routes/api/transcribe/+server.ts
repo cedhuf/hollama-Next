@@ -1,8 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
-import { requireUser } from '$lib/server/api';
-import { getServer } from '$lib/server/db/servers';
+import { requireServer, requireSharedModel, requireUser } from '$lib/server/api';
 import { transcribe, TranscriptionError } from '$lib/server/transcription';
 import { recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
 
@@ -23,18 +22,12 @@ export async function POST(event) {
 	const model = form?.get('model');
 	const language = form?.get('language');
 
-	if (!(audio instanceof File) || typeof serverId !== 'string' || typeof model !== 'string') {
+	if (!(audio instanceof File) || typeof model !== 'string') {
 		throw error(400, 'serverId, model and audio are required');
 	}
 
-	const server = getServer(serverId);
-	if (!server) throw error(404, 'Server not found');
-	// The same two questions the relay asks: is this connection yours to use, and
-	// is it switched on.
-	if (server.owner_user_id !== null && server.owner_user_id !== user.id) {
-		throw error(403, 'Forbidden');
-	}
-	if (!server.is_enabled) throw error(403, 'Server is disabled');
+	const server = requireServer(user.id, serverId);
+	requireSharedModel(server, user.role === 'admin', model);
 
 	// The same two questions the chat relay asks before a billable call: is this
 	// account within its allowance, and can this call be counted at all. Neither

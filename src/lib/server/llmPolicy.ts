@@ -1,5 +1,5 @@
 import { getConfig } from '$lib/server/db/config';
-import { getSharedModels, type ServerRow } from '$lib/server/db/servers';
+import { getServer, getSharedModels, type ServerRow } from '$lib/server/db/servers';
 
 /**
  * What an admin decided, applied where it can't be bypassed.
@@ -42,6 +42,55 @@ export class PolicyError extends Error {
 	) {
 		super(message);
 	}
+}
+
+/**
+ * Whether this account may ask this connection for this model.
+ *
+ * The instance's shared list, and the two exemptions that go with it: an admin
+ * set the list, and a connection somebody owns is their own business. Everything
+ * else is measured against what was actually shared, and an empty list denies
+ * everything on purpose, because `/api/providers` offers a non-admin exactly the
+ * shared models and a server with none shared is a server they were never given
+ * anything to call.
+ *
+ * One function because the question is one question. It used to be asked in the
+ * words of whatever was asking: the chat policy below, image generation, and
+ * nowhere at all in transcription and reading aloud, which is how a model an
+ * administrator never shared could be reached by anybody willing to name it.
+ * Four askers, three answers and a gap is not a rule.
+ */
+export function isModelShared(server: ServerRow, isAdmin: boolean, model: string): boolean {
+	if (isAdmin || server.owner_user_id !== null) return true;
+	return getSharedModels(server.id).includes(model);
+}
+
+/**
+ * The connection an account may reach, or a refusal saying why.
+ *
+ * Three questions, always the same three: does it exist, is it this account's,
+ * and is it switched on. A system connection belongs to the instance, so anybody
+ * signed in may use it; a personal one belongs to exactly one account.
+ *
+ * Here rather than in `api.ts` because a request is no longer the only thing
+ * that asks. A voice socket asks once at the door and again on every call it
+ * makes, and it has no response to throw an HTTP error into. So the rule lives
+ * in one place and each caller dresses the refusal in its own terms:
+ * `requireServer` turns it into a 4xx, the voice pipeline into a message on the
+ * socket. What must not happen is two implementations drifting apart, which is
+ * how the disabled-connection check came to be missing from half of them.
+ */
+export function reachableServer(userId: string, serverId: unknown): ServerRow {
+	if (typeof serverId !== 'string' || !serverId) throw new PolicyError(400, 'serverId is required');
+
+	const server = getServer(serverId);
+	if (!server) throw new PolicyError(404, 'Server not found');
+	if (server.owner_user_id !== null && server.owner_user_id !== userId) {
+		throw new PolicyError(403, 'Forbidden');
+	}
+	if (!server.is_enabled) throw new PolicyError(403, 'Server is disabled');
+
+	return server;
 }
 
 /**
@@ -95,11 +144,7 @@ export function policeChatBody<T extends ChatBody>(
 	if (isAdmin || server.owner_user_id !== null) return parsed;
 
 	// --- The model has to be one the admin actually shared ---------------------
-	// An empty list denies everything, deliberately: `/api/providers` already
-	// offers a non-admin exactly the shared models, so a server with none shared
-	// is a server they were never given anything to call.
-	const shared = getSharedModels(server.id);
-	if (typeof parsed.model === 'string' && !shared.includes(parsed.model)) {
+	if (typeof parsed.model === 'string' && !isModelShared(server, isAdmin, parsed.model)) {
 		throw new PolicyError(403, `Model "${parsed.model}" is not shared on this server`);
 	}
 

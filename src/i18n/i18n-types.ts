@@ -1985,18 +1985,13 @@ type RootTranslation = {
 	 */
 	voiceLoopHelp: string
 	/**
-	 * S​t​o​p​ ​l​i​s​t​e​n​i​n​g​ ​a​f​t​e​r
+	 * S​h​o​w​ ​t​h​e​ ​t​r​a​n​s​c​r​i​p​t
 	 */
-	voiceSilence: string
+	voiceTranscript: string
 	/**
-	 * {​s​e​c​o​n​d​s​}​ ​s​ ​o​f​ ​s​i​l​e​n​c​e
-	 * @param {unknown} seconds
+	 * W​h​a​t​ ​y​o​u​ ​s​a​i​d​ ​a​n​d​ ​w​h​a​t​ ​i​s​ ​b​e​i​n​g​ ​s​a​i​d​ ​b​a​c​k​,​ ​u​n​d​e​r​ ​t​h​e​ ​s​h​a​p​e​.​ ​U​s​e​f​u​l​ ​f​o​r​ ​c​a​t​c​h​i​n​g​ ​a​ ​q​u​e​s​t​i​o​n​ ​t​h​a​t​ ​w​a​s​ ​m​i​s​h​e​a​r​d​;​ ​o​f​f​,​ ​t​h​e​ ​s​c​r​e​e​n​ ​i​s​ ​n​o​t​h​i​n​g​ ​b​u​t​ ​t​h​e​ ​v​o​i​c​e​.
 	 */
-	voiceSilenceValue: RequiredParams<'seconds'>
-	/**
-	 * L​o​n​g​ ​e​n​o​u​g​h​ ​t​o​ ​t​h​i​n​k​ ​m​i​d​-​s​e​n​t​e​n​c​e​,​ ​s​h​o​r​t​ ​e​n​o​u​g​h​ ​n​o​t​ ​t​o​ ​w​a​i​t​ ​a​r​o​u​n​d​.​ ​R​a​i​s​e​ ​i​t​ ​i​f​ ​i​t​ ​c​u​t​s​ ​y​o​u​ ​o​f​f​;​ ​l​o​w​e​r​ ​i​t​ ​i​f​ ​t​h​e​ ​a​n​s​w​e​r​ ​i​s​ ​s​l​o​w​ ​t​o​ ​s​t​a​r​t​.
-	 */
-	voiceSilenceHelp: string
+	voiceTranscriptHelp: string
 	/**
 	 * L​i​s​t​e​n​ ​a​g​a​i​n​ ​a​f​t​e​r​ ​a​n​s​w​e​r​i​n​g
 	 */
@@ -2110,9 +2105,21 @@ type RootTranslation = {
 	 */
 	voiceInterrupt: string
 	/**
-	 * D​o​n​e​ ​s​p​e​a​k​i​n​g
+	 * W​a​k​i​n​g​ ​u​p​.
 	 */
-	voiceSend: string
+	voiceConnecting: string
+	/**
+	 * T​a​p​ ​a​n​d​ ​s​p​e​a​k​.
+	 */
+	voiceReady: string
+	/**
+	 * M​u​t​e​ ​t​h​e​ ​m​i​c​r​o​p​h​o​n​e
+	 */
+	voiceMute: string
+	/**
+	 * U​n​m​u​t​e​ ​t​h​e​ ​m​i​c​r​o​p​h​o​n​e
+	 */
+	voiceUnmute: string
 	/**
 	 * S​t​o​p
 	 */
@@ -6107,17 +6114,13 @@ export type TranslationFunctions = {
 	 */
 	voiceLoopHelp: () => LocalizedString
 	/**
-	 * Stop listening after
+	 * Show the transcript
 	 */
-	voiceSilence: () => LocalizedString
+	voiceTranscript: () => LocalizedString
 	/**
-	 * {seconds} s of silence
+	 * What you said and what is being said back, under the shape. Useful for catching a question that was misheard; off, the screen is nothing but the voice.
 	 */
-	voiceSilenceValue: (arg: { seconds: unknown }) => LocalizedString
-	/**
-	 * Long enough to think mid-sentence, short enough not to wait around. Raise it if it cuts you off; lower it if the answer is slow to start.
-	 */
-	voiceSilenceHelp: () => LocalizedString
+	voiceTranscriptHelp: () => LocalizedString
 	/**
 	 * Listen again after answering
 	 */
@@ -6231,9 +6234,21 @@ export type TranslationFunctions = {
 	 */
 	voiceInterrupt: () => LocalizedString
 	/**
-	 * Done speaking
+	 * Waking up.
 	 */
-	voiceSend: () => LocalizedString
+	voiceConnecting: () => LocalizedString
+	/**
+	 * Tap and speak.
+	 */
+	voiceReady: () => LocalizedString
+	/**
+	 * Mute the microphone
+	 */
+	voiceMute: () => LocalizedString
+	/**
+	 * Unmute the microphone
+	 */
+	voiceUnmute: () => LocalizedString
 	/**
 	 * Stop
 	 */

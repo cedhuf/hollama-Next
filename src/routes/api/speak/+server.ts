@@ -1,8 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import { refusal } from '$lib/chat/refusal';
-import { requireUser } from '$lib/server/api';
-import { getServer } from '$lib/server/db/servers';
+import { requireServer, requireSharedModel, requireUser } from '$lib/server/api';
 import { askWhatItCost, listVoices, speak, SpeechError } from '$lib/server/speech';
 import { recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
 
@@ -19,18 +18,6 @@ import { recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
  * voices this model offers.
  */
 
-/** Which connection, and which of its models. The two checks the relay makes. */
-function reach(userId: string, serverId: unknown) {
-	if (typeof serverId !== 'string') throw error(400, 'serverId is required');
-	const server = getServer(serverId);
-	if (!server) throw error(404, 'Server not found');
-	if (server.owner_user_id !== null && server.owner_user_id !== userId) {
-		throw error(403, 'Forbidden');
-	}
-	if (!server.is_enabled) throw error(403, 'Server is disabled');
-	return server;
-}
-
 export async function POST(event) {
 	const user = await requireUser(event);
 
@@ -40,7 +27,8 @@ export async function POST(event) {
 		throw error(400, 'serverId, model, voice and text are required');
 	}
 
-	const server = reach(user.id, serverId);
+	const server = requireServer(user.id, serverId);
+	requireSharedModel(server, user.role === 'admin', model);
 
 	const refused = refuseForCredit(user.id, server, model);
 	if (refused) throw error(402, refusal(refused, model));
@@ -92,6 +80,10 @@ export async function GET(event) {
 	const model = event.url.searchParams.get('model');
 	if (!model) throw error(400, 'model is required');
 
-	const server = reach(user.id, event.url.searchParams.get('serverId'));
+	const server = requireServer(user.id, event.url.searchParams.get('serverId'));
+	// The voice list is about a model, so it is only answered for a model this
+	// account may actually use. Otherwise the picker becomes a way to enumerate
+	// what an administrator chose not to share.
+	requireSharedModel(server, user.role === 'admin', model);
 	return json({ voices: await listVoices(server, model) });
 }

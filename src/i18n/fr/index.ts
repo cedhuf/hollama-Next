@@ -524,10 +524,9 @@ const fr = extendDictionary(en, {
 	voiceLoop: 'Mode vocal',
 	voiceLoopHelp:
 		"Le comportement de l'écran vocal du téléphone entre une question et la suivante. Sans effet sur le micro du composer, qui s'arrête quand vous le dites.",
-	voiceSilence: "Arrêter d'écouter après",
-	voiceSilenceValue: '{seconds} s de silence',
-	voiceSilenceHelp:
-		'Assez long pour réfléchir en milieu de phrase, assez court pour ne pas attendre. Augmentez si ça vous coupe la parole, baissez si la réponse tarde à venir.',
+	voiceTranscript: 'Afficher la transcription',
+	voiceTranscriptHelp:
+		"Ce que vous avez dit et ce qui vous est répondu, sous la forme. Utile pour repérer une question mal comprise ; désactivé, l'écran n'est plus que la voix.",
 	voiceAutoContinue: 'Réécouter après avoir répondu',
 	voiceAutoContinueHelp:
 		"Activé, c'est une conversation qu'on tient avec le téléphone posé sur la table. Désactivé, la réponse est lue puis il attend qu'on le relance.",
@@ -562,7 +561,10 @@ const fr = extendDictionary(en, {
 	voiceSetupOpen: 'Configurer',
 	voiceStart: 'Commencer à parler',
 	voiceInterrupt: 'Reprendre la parole',
-	voiceSend: "J'ai fini de parler",
+	voiceConnecting: 'Je me réveille.',
+	voiceReady: 'Touchez et parlez.',
+	voiceMute: 'Couper le micro',
+	voiceUnmute: 'Rouvrir le micro',
 	voiceStop: 'Arrêter',
 	voiceListening: "J'écoute.",
 	voiceThinking: 'Je réfléchis.',

@@ -69,6 +69,29 @@ export default ts.config(
 		}
 	},
 
+	{
+		/**
+		 * The audio worklets, which run in a realm of their own.
+		 *
+		 * Plain JavaScript in `static/` because an `AudioWorklet` is fetched by URL
+		 * into a separate global scope: it never passes through the bundle, so there
+		 * is nothing to compile and no import it could resolve. That scope has its
+		 * own globals, which is what this block is for, and it has none of the DOM,
+		 * which is why `globals.browser` would be the wrong answer rather than a
+		 * generous one.
+		 */
+		files: ['static/worklets/*.js'],
+		languageOptions: {
+			globals: {
+				AudioWorkletProcessor: 'readonly',
+				registerProcessor: 'readonly',
+				currentFrame: 'readonly',
+				currentTime: 'readonly',
+				sampleRate: 'readonly'
+			}
+		}
+	},
+
 	// Prettier configuration (must be last to override other ESLint formatting rules)
 	prettier, // Disables ESLint rules that would conflict with Prettier
 	...svelte.configs.prettier // Applies Svelte-specific Prettier overrides from eslint-plugin-svelte

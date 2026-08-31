@@ -527,10 +527,9 @@ const en = {
 	voiceLoop: 'Voice mode',
 	voiceLoopHelp:
 		"How the phone's voice screen behaves between one question and the next. It does not affect the microphone in the composer, which stops when you say so.",
-	voiceSilence: 'Stop listening after',
-	voiceSilenceValue: '{seconds} s of silence',
-	voiceSilenceHelp:
-		'Long enough to think mid-sentence, short enough not to wait around. Raise it if it cuts you off; lower it if the answer is slow to start.',
+	voiceTranscript: 'Show the transcript',
+	voiceTranscriptHelp:
+		'What you said and what is being said back, under the shape. Useful for catching a question that was misheard; off, the screen is nothing but the voice.',
 	voiceAutoContinue: 'Listen again after answering',
 	voiceAutoContinueHelp:
 		'On, it is a conversation you can hold with the phone on the table. Off, it reads the answer and waits to be asked again.',
@@ -565,7 +564,10 @@ const en = {
 	voiceSetupOpen: 'Set it up',
 	voiceStart: 'Start talking',
 	voiceInterrupt: 'Take the floor',
-	voiceSend: 'Done speaking',
+	voiceConnecting: 'Waking up.',
+	voiceReady: 'Tap and speak.',
+	voiceMute: 'Mute the microphone',
+	voiceUnmute: 'Unmute the microphone',
 	voiceStop: 'Stop',
 	voiceListening: 'Listening.',
 	voiceThinking: 'Thinking.',

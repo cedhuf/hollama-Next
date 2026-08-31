@@ -1,9 +1,8 @@
 import { error, json } from '@sveltejs/kit';
 
 import { IMAGE_QUALITIES, IMAGE_RATIOS } from '$lib/connections';
-import { requireUser } from '$lib/server/api';
+import { requireServer, requireUser } from '$lib/server/api';
 import { listImages } from '$lib/server/db/generatedImages';
-import { getServer } from '$lib/server/db/servers';
 import { generateImages, ImageError } from '$lib/server/imageGeneration';
 
 /** Everything this account has drawn, newest first. Metadata only. */
@@ -29,14 +28,7 @@ export async function POST(event) {
 		throw error(400, 'serverId, model and prompt are required');
 	}
 
-	const server = getServer(body.serverId);
-	if (!server) throw error(404, 'Server not found');
-	// The same two questions the relay asks: is this connection yours to use, and
-	// is it switched on.
-	if (server.owner_user_id !== null && server.owner_user_id !== user.id) {
-		throw error(403, 'Forbidden');
-	}
-	if (!server.is_enabled) throw error(403, 'Server is disabled');
+	const server = requireServer(user.id, body.serverId);
 
 	try {
 		const images = await generateImages(user.id, user.role === 'admin', server, {

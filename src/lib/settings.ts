@@ -371,7 +371,19 @@ export interface Settings {
 	 * be a control that does nothing on every model anybody uses.
 	 */
 	voiceLanguage: string;
-	voiceSilenceMs: number;
+	/**
+	 * Whether the voice screen shows what was said and what is being said back.
+	 *
+	 * Worth a switch rather than a decision, because the two ways of using that
+	 * screen want opposite answers. Reading along catches a question the recogniser
+	 * misheard, which is the difference between a bad answer and a bad transcript.
+	 * With the phone on the table it is text nobody is looking at, on the one screen
+	 * whose whole point is not having to.
+	 *
+	 * Replaces the silence delay, which was the old loop's only tuning knob and has
+	 * no meaning now that ending a turn is the pipeline's own business.
+	 */
+	voiceTranscript: boolean;
 	/**
 	 * Whether the voice screen listens again once it has finished answering.
 	 *
@@ -479,7 +491,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	speechModel: null,
 	speechVoice: '',
 	voiceLanguage: '',
-	voiceSilenceMs: 1_500,
+	voiceTranscript: true,
 	voiceAutoContinue: true,
 	welcomeComplete: false,
 	onboardingEpochSeen: 0,

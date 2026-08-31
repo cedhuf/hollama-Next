@@ -27,11 +27,11 @@ import {
 	getModelKinds,
 	getModelPricing,
 	getServerApiKey,
-	getSharedModels,
 	type ServerRow
 } from '$lib/server/db/servers';
 import { creditLimitFor, isOverLimit } from '$lib/server/db/usage';
 import { ImageStoreError, writeImage } from '$lib/server/imageStore';
+import { isModelShared } from '$lib/server/llmPolicy';
 import { recordRunUsage } from '$lib/server/usageMeter';
 import { costOf } from '$lib/usageCounts';
 
@@ -91,9 +91,7 @@ function vet(server: ServerRow, isAdmin: boolean, model: string): void {
 	if (modelKind({ modelKinds: getModelKinds(server.id) }, model) !== 'image') {
 		throw new ImageError(400, `"${model}" is not an image model on this connection`);
 	}
-	// Admins set these rules, and a connection somebody owns is their own business.
-	if (isAdmin || server.owner_user_id !== null) return;
-	if (!getSharedModels(server.id).includes(model)) {
+	if (!isModelShared(server, isAdmin, model)) {
 		throw new ImageError(403, `Model "${model}" is not shared on this server`);
 	}
 }
