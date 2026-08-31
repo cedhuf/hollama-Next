@@ -19,16 +19,36 @@
 	 *
 	 * The label slides open rather than appearing, so moving between two
 	 * destinations reads as one object travelling rather than two labels swapping.
+	 *
+	 * The pill under the current tab is `shade-3` and not the obvious `shade-2`,
+	 * which is what it was and which drew nothing. `shade-2` is the colour of the
+	 * page this bar floats over, and the glass tint barely moves away from it: the
+	 * fill landed within two points of lightness of the bar around it, in both
+	 * themes, so the only thing marking the current destination was its label
+	 * opening. One step further along the scale is enough to read as a pill in both
+	 * themes, and it is as far as this should go: the mark under a thumb only has
+	 * to be found, not announced.
 	 */
 	const tabs = $derived([
 		{ href: '/m' as const, icon: House, label: $LL.mobileTabHome() },
 		{ href: '/m/sessions' as const, icon: MessagesSquare, label: $LL.mobileTabChats() },
 		...($canDrawImages ? [{ href: '/m/images' as const, icon: Images, label: $LL.images() }] : []),
-		{ href: '/m/profile' as const, icon: User, label: $LL.mobileTabProfile() }
+		{
+			href: '/m/profile' as const,
+			icon: User,
+			label: $LL.mobileTabProfile(),
+			// The Library is reached from Profile and belongs to it. Without this the
+			// bar had no current destination at all while you were in there, so every
+			// label was closed and the row read as four icons and nothing chosen.
+			owns: ['/m/library']
+		}
 	]);
 
-	const isCurrent = (href: string) =>
-		href === '/m' ? page.url.pathname === '/m' : page.url.pathname.startsWith(href);
+	const isCurrent = (tab: { href: string; owns?: string[] }) => {
+		const path = page.url.pathname;
+		if (tab.owns?.some((owned) => path === owned || path.startsWith(`${owned}/`))) return true;
+		return tab.href === '/m' ? path === '/m' : path.startsWith(tab.href);
+	};
 </script>
 
 <nav
@@ -66,13 +86,13 @@
 		<div class="glass flex min-w-0 flex-1 items-center gap-1 rounded-full p-1.5">
 			{#each tabs as tab (tab.href)}
 				{@const Icon = tab.icon}
-				{@const active = isCurrent(tab.href)}
+				{@const active = isCurrent(tab)}
 				<a
 					href={resolve(tab.href)}
 					aria-current={active ? 'page' : undefined}
 					aria-label={tab.label}
 					class="flex h-11 min-w-0 items-center justify-center gap-2 rounded-full px-3 transition-colors duration-200 {active
-						? 'bg-shade-2 text-active flex-1'
+						? 'bg-shade-3 text-active flex-1'
 						: 'text-muted hover:text-active shrink-0'}"
 				>
 					<Icon class="h-5 w-5 shrink-0" />
@@ -104,8 +124,13 @@
 	 * edge, which is what a pane of glass does with the light above it and the one
 	 * detail that makes the difference between translucent and merely transparent.
 	 *
-	 * The tint is deliberately low. Anything heavier and the blur is decoration
-	 * over an opaque bar, which is the thing this replaces.
+	 * The tint is as low as it can be and still hold an icon. Lower is prettier
+	 * over a plain background and fails over a photograph: a blurred image keeps
+	 * its light and dark patches, so an icon crossing one lands on whatever happens
+	 * to be behind it and disappears into the bright half. The tint is what stops
+	 * the backdrop reaching the extremes, and it is doing that job rather than a
+	 * decorative one. Anything much heavier and the blur is decoration over an
+	 * opaque bar, which is the thing this replaces.
 	 */
 	/*
 	 * A note for whoever adds page transitions, because it has been tried and undone.
@@ -122,9 +147,9 @@
 	 * or this stops being glass.
 	 */
 	.glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 38%, transparent);
-		backdrop-filter: blur(28px) saturate(190%);
-		-webkit-backdrop-filter: blur(24px) saturate(180%);
+		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);
+		backdrop-filter: blur(32px) saturate(190%);
+		-webkit-backdrop-filter: blur(32px) saturate(190%);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 45%, transparent),
 			0 0 0 1px color-mix(in srgb, var(--color-shade-4) 45%, transparent),
@@ -134,7 +159,7 @@
 	/* Dark themes take a firmer tint and a fainter highlight: the same 45% of white
 	   along the top edge reads as a chrome strip against a dark backdrop. */
 	:global([data-color-theme='dark']) .glass {
-		background-color: color-mix(in srgb, var(--color-shade-1) 44%, transparent);
+		background-color: color-mix(in srgb, var(--color-shade-1) 48%, transparent);
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
 			0 0 0 1px color-mix(in srgb, white 8%, transparent),
