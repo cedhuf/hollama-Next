@@ -1,5 +1,6 @@
-import type { Server as HttpServer } from 'node:http';
-import type { WebSocket } from 'ws';
+import type { Server as HttpServer, IncomingMessage } from 'node:http';
+import type { Duplex } from 'node:stream';
+import type { WebSocket, WebSocketServer as WebSocketServerType } from 'ws';
 
 import { VOICE_SOCKET_PATH, type ClientMessage, type ServerMessage } from '$lib/voice/protocol';
 
@@ -37,10 +38,53 @@ import { claimTicket, type VoiceGrant } from './tickets';
  */
 export const HTTP_SERVER = Symbol.for('llooma.httpServer');
 
+/**
+ * What this file leaves on the server it has attached to.
+ *
+ * On the server rather than in this module, and that distinction is the whole
+ * point. In development the HTTP server outlives every module: Vite re-evaluates
+ * this file whenever anything it imports changes, which resets a module-level
+ * flag while the listener the previous evaluation registered is still on the
+ * server. Two listeners then answer the same upgrade, the second one calls
+ * `handleUpgrade` on a socket the first has already taken, and `ws` throws
+ * "called more than once with the same socket" hard enough to take the dev server
+ * down with it.
+ *
+ * So the record of having attached lives where the listener does, and a fresh
+ * evaluation finds its predecessor and replaces it.
+ */
+const ATTACHED = Symbol.for('llooma.voiceSocketAttached');
+
 /** What `server.js` and the dev plugin write, and what this file reads. */
 type Host = typeof globalThis & { [HTTP_SERVER]?: HttpServer };
 
-let attached = false;
+/** The listener and the server behind it, kept together so both can be undone. */
+interface Attachment {
+	listener: (request: IncomingMessage, socket: Duplex, head: Buffer) => void;
+	sockets: WebSocketServerType;
+}
+
+type Attached = HttpServer & { [ATTACHED]?: Attachment };
+
+/**
+ * This evaluation's own socket server, kept only to recognise its own work.
+ *
+ * The server on the HTTP object is the authority on what is attached. This is
+ * how the fast path tells "attached, by me" from "attached, by the module I have
+ * just replaced", which are the two cases that need opposite answers.
+ */
+let sockets: WebSocketServerType | null = null;
+
+/**
+ * The attachment in progress, so two requests cannot both perform one.
+ *
+ * Attaching has an `await` in the middle of it, which is enough: the ticket route
+ * is what triggers this, and the first thing a page does on that screen is ask
+ * for a ticket. Two of those crossing would each pass the check, each build a
+ * listener, and leave both on the server, which is the same crash by a different
+ * route.
+ */
+let attaching: Promise<boolean> | null = null;
 
 /**
  * Attach the voice socket, once, to whichever server is running us.
@@ -50,12 +94,21 @@ let attached = false;
  * caller can refuse honestly rather than hand out a ticket for a door that does
  * not exist.
  */
-export async function ensureVoiceSocket(): Promise<boolean> {
-	if (attached) return true;
+export function ensureVoiceSocket(): Promise<boolean> {
+	const http = (globalThis as Host)[HTTP_SERVER] as Attached | undefined;
+	if (!http) return Promise.resolve(false);
 
-	const http = (globalThis as Host)[HTTP_SERVER];
-	if (!http) return false;
+	// Ours already, from this evaluation of this module. The ticket route calls
+	// this on every request, so this is the answer almost every time.
+	if (sockets && http[ATTACHED]?.sockets === sockets) return Promise.resolve(true);
 
+	// Cleared once it settles, so the check above stays the authority on what is
+	// attached and a failed attempt is retried rather than remembered.
+	attaching ??= attach(http).finally(() => (attaching = null));
+	return attaching;
+}
+
+async function attach(http: Attached): Promise<boolean> {
 	/**
 	 * `ws` without its native accelerators, and loaded only once voice is used.
 	 *
@@ -77,19 +130,40 @@ export async function ensureVoiceSocket(): Promise<boolean> {
 	process.env.WS_NO_UTF_8_VALIDATE = '1';
 	const { WebSocketServer } = await import('ws');
 
-	const sockets = new WebSocketServer({ noServer: true });
+	/**
+	 * Whatever attached before us, taken down first.
+	 *
+	 * Only ever found in development, and there it is always a previous evaluation
+	 * of this same file. Leaving it in place would mean two listeners racing for
+	 * one socket; leaving it in place *and* skipping our own would be worse, since
+	 * the old one holds the old module's ticket map and would refuse every ticket
+	 * the current route issues. Replacing is the only version of this that is
+	 * correct in both respects.
+	 *
+	 * A conversation running across a reload ends here. That is the honest outcome:
+	 * its exchange belongs to code that no longer exists.
+	 */
+	const previous = http[ATTACHED];
+	if (previous) {
+		http.off('upgrade', previous.listener);
+		for (const client of previous.sockets.clients) client.terminate();
+		previous.sockets.close();
+	}
 
-	http.on('upgrade', (request, socket, head) => {
+	const mine = new WebSocketServer({ noServer: true });
+	const listener = (request: IncomingMessage, socket: Duplex, head: Buffer) => {
 		// Every other upgrade on this server belongs to somebody else: in
 		// development that is Vite's own hot reload. Not ours, not touched, not
 		// destroyed, so the listener that does own it still gets it.
 		const path = (request.url ?? '').split('?')[0];
 		if (path !== VOICE_SOCKET_PATH) return;
 
-		sockets.handleUpgrade(request, socket, head, (ws) => hold(ws));
-	});
+		mine.handleUpgrade(request, socket, head, (ws) => hold(ws));
+	};
 
-	attached = true;
+	http.on('upgrade', listener);
+	http[ATTACHED] = { listener, sockets: mine };
+	sockets = mine;
 	return true;
 }
 
