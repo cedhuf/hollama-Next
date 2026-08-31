@@ -419,11 +419,21 @@ export class VoiceSession {
 			this.#floor += (this.#loud - this.#floor) * towards;
 
 			if (this.state === 'speaking') return this.#barge();
-			// Only when the floor is actually free. A turn started while the server is
-			// still transcribing or thinking would be uploaded into a state that drops
-			// frames, and its end would arrive at an exchange that is not listening:
-			// the whole utterance would vanish without anybody being told.
-			if (this.state !== 'idle') return;
+			/**
+			 * Only when the floor is free, and `listening` is the floor being used.
+			 *
+			 * The distinction is the whole of a bug this replaces. The server answers
+			 * the first frame of an utterance with `listening`, so a screen that only
+			 * ran the detector while `idle` ran it for one frame and then stopped: the
+			 * turn opened, the state came back, and nothing was left watching for the
+			 * silence that would have ended it. The microphone stayed open forever.
+			 *
+			 * `transcribing`, `thinking` and `speaking` really are closed, and for the
+			 * original reason: frames sent then are dropped, and an end sent then
+			 * arrives at an exchange that is not listening, so the whole utterance
+			 * disappears without anybody being told.
+			 */
+			if (this.state !== 'idle' && this.state !== 'listening') return;
 			this.#turnTaking();
 		};
 		this.#watching = requestAnimationFrame(tick);
@@ -443,6 +453,12 @@ export class VoiceSession {
 		const { open, close } = this.#gates();
 
 		if (!this.talking) {
+			// A turn only begins from a standing start. `listening` is reachable here
+			// for the moment between the end of an utterance being sent and the server
+			// moving on to transcribe it, and the tail of the sound that just ended is
+			// not the beginning of the next one.
+			if (this.state !== 'idle') return void (this.#onsetAt = 0);
+
 			// A sound has to last before it counts. A door, a keyboard and a cough all
 			// clear any threshold; none of them lasts a tenth of a second at the level
 			// a syllable does.

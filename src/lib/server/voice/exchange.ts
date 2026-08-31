@@ -10,13 +10,13 @@ import { askWhatItCost, speak, SpeechError } from '$lib/server/speech';
 import { transcribe, TranscriptionError } from '$lib/server/transcription';
 import { defaultSystemPrompt } from '$lib/server/turn';
 import { recordRunUsage, recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
+import { durationMs, wavFromPcm } from '$lib/server/wav';
 import type { Message, Session } from '$lib/sessions';
 import { INPUT_SAMPLE_RATE, type ServerMessage, type VoiceState } from '$lib/voice/protocol';
 import { split, spoken } from '$lib/voice/sentences';
 
 import type { VoiceTarget } from './config';
 import type { VoiceGrant } from './tickets';
-import { durationMs, wavFromPcm } from './wav';
 
 /**
  * One spoken exchange, from the samples to the answer coming back as sound.

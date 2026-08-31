@@ -1,5 +1,6 @@
 import { costLookupFor, modelKind, speechFor, type ConnectionType } from '$lib/connections';
 import { getModelKinds, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
+import { wavFromPcm } from '$lib/server/wav';
 
 /**
  * Reading a sentence out loud.
@@ -74,18 +75,54 @@ const PLAYABLE = [
 ];
 
 /**
- * The formats the app knows how to ask for and can then play.
+ * The formats the app knows how to ask for, best first.
  *
  * A provider names what it serves; this decides which of those names is worth
- * asking for. `pcm` is deliberately absent, and it is the reason any of this
- * exists: it is OpenRouter's default, it is raw samples with no rate in the
- * answer to assemble them by, and a browser cannot play it from a blob. A
- * descriptor may say a provider offers it. It may not make the app ask for it.
+ * asking for, and in what order. `pcm` sits last rather than being excluded: it
+ * is raw samples with no rate in the answer to assemble them by, which is why it
+ * cannot be relayed as it arrives, but a rate is not actually unknown here and
+ * the header that carries it is forty-four bytes. It goes out as a wav.
  */
-const ASKABLE = ['mp3', 'opus', 'aac', 'flac', 'wav'];
+const ASKABLE = ['mp3', 'opus', 'aac', 'flac', 'wav', 'pcm'];
 
 /** What the OpenAI contract produces, and so what to ask for when nobody says. */
 const DEFAULT_FORMAT = 'mp3';
+
+/**
+ * The rate raw samples come back at.
+ *
+ * Not a guess and not configurable: both routes that serve `pcm` document one
+ * rate and produce only that one. OpenAI's `/audio/speech` says 24 kHz, 16-bit,
+ * mono, little-endian, and Gemini's speech models emit the same, which is what
+ * reaches this app through an OpenAI-shaped proxy. A provider that one day serves
+ * something else would need to say so in its descriptor rather than have this
+ * quietly widened.
+ */
+const PCM_RATE = 24_000;
+
+/**
+ * What raw samples may arrive labelled as.
+ *
+ * Wider than `PLAYABLE` on purpose, and it is only reached when this asked for
+ * `pcm`: there is no agreed type for a naked buffer, so the routes that serve one
+ * label it as audio, as sixteen-bit linear, or as nothing in particular. Every
+ * one of them means the same thing, and none of them is a page of HTML.
+ */
+const RAW = ['audio/pcm', 'audio/l16', 'audio/x-pcm', 'application/octet-stream', ''];
+
+/**
+ * Which format a model actually accepted, once it has answered once.
+ *
+ * A connection serves several speech models and they do not agree: on OpenRouter
+ * the OpenAI voices take mp3 and the Gemini ones refuse everything but `pcm`,
+ * with a 400 that names the reason. So the descriptor can only say what the
+ * *provider* offers, and the model is asked. Remembering the answer is what keeps
+ * that from costing a refused request in front of every sentence of every reply.
+ *
+ * Keyed by connection and model, never by voice: the format is a property of the
+ * route, and no provider varies it by which voice was chosen.
+ */
+const accepted = new Map<string, string>();
 
 export interface Spoken {
 	audio: ArrayBuffer;
@@ -128,12 +165,60 @@ export async function speak(
 	const key = getServerApiKey(server);
 	const target = rules.url({ baseUrl: server.base_url.replace(/\/+$/, '') });
 
-	// The provider's first choice that this app can play, and mp3 when it has named
-	// nothing. A provider whose whole list is unplayable is refused here rather than
-	// after the wait and after the meter has run.
-	const format = (rules.formats ?? [DEFAULT_FORMAT]).find((name) => ASKABLE.includes(name));
-	if (!format) throw new SpeechError(400, 'That connection serves nothing this can play');
+	// Everything this connection offers that this app can handle, in the order the
+	// provider named: a descriptor lists its first choice first. A connection whose
+	// whole list is unusable is refused here rather than after the wait and after
+	// the meter has run.
+	const offered = (rules.formats ?? [DEFAULT_FORMAT]).filter((name) => ASKABLE.includes(name));
+	if (!offered.length) throw new SpeechError(400, 'That connection serves nothing this can play');
 
+	// What worked last time first, and the rest behind it. A model that has never
+	// answered is simply asked in the preferred order.
+	const remembered = accepted.get(`${server.id}:${model}`);
+	const order = remembered
+		? [remembered, ...offered.filter((name) => name !== remembered)]
+		: offered;
+
+	let refusal: SpeechError | null = null;
+	for (const format of order) {
+		try {
+			const { audio, type, headers } = await attempt(target, key, model, named, input, format);
+			accepted.set(`${server.id}:${model}`, format);
+			return { audio, type, generationId: reported(server, headers) };
+		} catch (cause) {
+			if (!(cause instanceof SpeechError) || cause.status !== 400) throw cause;
+			// The provider refusing the request itself, which is the one failure another
+			// format could fix: it is how a model says it serves only raw samples. Kept
+			// in case it is also the last word, so what comes back is the provider's own
+			// sentence rather than a summary of several.
+			refusal = cause;
+		}
+	}
+
+	throw refusal ?? new SpeechError(502, 'Reading aloud failed');
+}
+
+/** What the provider called this generation, when it says. */
+function reported(server: ServerRow, headers: Headers): string | undefined {
+	const lookup = costLookupFor(server.connection_type as ConnectionType);
+	return lookup ? (headers.get(lookup.header) ?? undefined) : undefined;
+}
+
+/**
+ * One request, in one format.
+ *
+ * Separated from `speak` because it is asked more than once: the caller walks the
+ * formats a connection offers until a model stops refusing, so everything that is
+ * decided per request lives here and everything decided per call stays there.
+ */
+async function attempt(
+	target: string,
+	key: string | null,
+	model: string,
+	voice: string,
+	input: string,
+	format: string
+): Promise<{ audio: ArrayBuffer; type: string; headers: Headers }> {
 	let response: Response;
 	try {
 		response = await fetch(target, {
@@ -142,7 +227,7 @@ export async function speak(
 				'content-type': 'application/json',
 				...(key ? { authorization: `Bearer ${key}` } : {})
 			},
-			body: JSON.stringify({ model, input, voice: named, response_format: format }),
+			body: JSON.stringify({ model, input, voice, response_format: format }),
 			signal: AbortSignal.timeout(SPEECH_TIMEOUT_MS)
 		});
 	} catch (cause) {
@@ -164,14 +249,27 @@ export async function speak(
 	}
 
 	const type = (response.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
+	const bytes = await response.arrayBuffer();
+
+	if (format === 'pcm') {
+		if (!RAW.includes(type)) throw new SpeechError(502, `The voice answered with ${type}`);
+		// Given the header it was missing, here rather than anywhere later: a browser
+		// cannot play a naked buffer, and neither the route that relays this to an
+		// `<audio>` element nor the voice socket should have a second case to carry for
+		// what is one provider's choice of encoding.
+		const wav = wavFromPcm([Buffer.from(bytes)], PCM_RATE);
+		return {
+			audio: wav.buffer.slice(wav.byteOffset, wav.byteOffset + wav.byteLength) as ArrayBuffer,
+			type: 'audio/wav',
+			headers: response.headers
+		};
+	}
+
 	if (!PLAYABLE.includes(type)) {
 		throw new SpeechError(502, `The voice answered with ${type || 'nothing playable'}`);
 	}
 
-	const lookup = costLookupFor(server.connection_type as ConnectionType);
-	const generationId = lookup ? (response.headers.get(lookup.header) ?? undefined) : undefined;
-
-	return { audio: await response.arrayBuffer(), type, generationId };
+	return { audio: bytes, type, headers: response.headers };
 }
 
 /**

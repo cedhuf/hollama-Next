@@ -129,6 +129,17 @@
 						: 'thinking'
 	);
 
+	/**
+	 * Whether the exchange is working, as opposed to waiting on somebody.
+	 *
+	 * The only thing the status dot animates on. A screen holding the floor open is
+	 * still, and a screen doing something breathes: two states, which is as much as
+	 * a dot two pixels across can honestly carry.
+	 */
+	const busy = $derived(
+		voice.live && (voice.talking || (voice.state !== 'idle' && voice.state !== 'listening'))
+	);
+
 	/** The orb draws the answer, so it reads the answer. Silence otherwise. */
 	const sample = $derived(() => (voice.state === 'speaking' ? voice.voiceReading() : SILENCE));
 
@@ -197,32 +208,67 @@
 </script>
 
 <div class="relative flex h-full flex-col overflow-hidden px-6 py-8">
-	<!-- Who is answering, and the way to read them instead of hearing them. Nothing
-	     at all when the conversation belongs to nobody in particular: an empty
-	     corner says "this is the app" perfectly well. The way out sits opposite,
-	     away from everything else, because a screen you talk to needs its exit
-	     somewhere the hand is not. -->
-	<div class="flex w-full items-center justify-between">
-		{#if persona && conversation}
-			<a
-				href={resolve('/m/sessions/[id]', { id: conversation })}
-				class="flex items-center gap-2 rounded-full transition-opacity active:opacity-70"
+	<!-- Who is answering, where the exchange has got to, and the way out. Three
+	     cells rather than two ends and a gap: the step belongs in the middle and it
+	     has to keep its place there whatever the name on the left is doing, which a
+	     centred overlay cannot promise on a narrow screen.
+
+	     Nothing at all in the first cell when the conversation belongs to nobody in
+	     particular: an empty corner says "this is the app" perfectly well. The way
+	     out sits opposite, away from everything else, because a screen you talk to
+	     needs its exit somewhere the hand is not. -->
+	<div class="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
+		<div class="flex min-w-0 items-center">
+			{#if persona && conversation}
+				<a
+					href={resolve('/m/sessions/[id]', { id: conversation })}
+					class="flex min-w-0 items-center gap-2 rounded-full transition-opacity active:opacity-70"
+				>
+					<PersonaAvatar {persona} size={36} />
+					<span class="text-muted truncate text-sm">{persona.name}</span>
+				</a>
+			{/if}
+		</div>
+
+		<!-- Which step the exchange is on, said where a status belongs rather than
+		     under the thing everybody is watching. It used to sit below the orb as a
+		     sentence addressed to the reader, which read as an instruction ("tap and
+		     speak") on a screen that does not need to be tapped, and it moved the
+		     transcript every time it changed length.
+
+		     A dot and a word. The dot carries the state in the same colour the orb
+		     does, so the two agree from across a room, and the word says which step
+		     for anybody close enough to read it. It breathes while the exchange is
+		     doing something and sits still when the floor is yours, which is the one
+		     distinction worth animating. -->
+		{#if ready}
+			<p
+				class="text-muted flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase"
+				aria-live="polite"
 			>
-				<PersonaAvatar {persona} size={36} />
-				<span class="text-muted max-w-32 truncate text-sm">{persona.name}</span>
-			</a>
+				<span
+					class="h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-300"
+					class:working={busy}
+					style="background: {tint}"
+				></span>
+				{status}
+			</p>
 		{:else}
+			<!-- Nothing to report on a screen that cannot run. What is wrong is said in
+			     full below, beside the way to fix it. -->
 			<span></span>
 		{/if}
 
-		<button
-			type="button"
-			onclick={leave}
-			aria-label={$LL.close()}
-			class="text-muted hover:text-active border-shade-3 flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
-		>
-			<X class="h-4 w-4" />
-		</button>
+		<div class="flex justify-end">
+			<button
+				type="button"
+				onclick={leave}
+				aria-label={$LL.close()}
+				class="text-muted hover:text-active border-shade-3 flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+			>
+				<X class="h-4 w-4" />
+			</button>
+		</div>
 	</div>
 
 	<!--
@@ -256,17 +302,13 @@
 		</button>
 	</div>
 
-	<!-- What is happening, in one line, in the same place every time. Plain text:
-	     it used to be spelled out one letter at a time, which cost a component and
-	     an animation to say four words that change every few seconds. -->
-	<p class="text-muted h-5 text-center text-sm">
-		{ready ? status : missing}
-	</p>
-
 	{#if !ready}
-		<!-- Naming what is missing without offering the door to it is a dead end with
-		     a caption. -->
-		<div class="flex justify-center pt-4">
+		<!-- What is missing, and the door to it. Named in full here rather than in the
+		     header, because this is the one case where the screen has nothing to do
+		     and the sentence is the content: naming it without offering the way to fix
+		     it is a dead end with a caption. -->
+		<div class="flex flex-col items-center gap-4 pt-2">
+			<p class="text-muted max-w-xs text-center text-sm">{missing}</p>
 			<button
 				type="button"
 				onclick={() => settingsModalOpen.set(true)}
@@ -334,6 +376,26 @@
 	 * Faded rather than cut. A hard edge reads as a layout mistake; a line dissolving
 	 * upwards reads as something passing out of view, which is what it is doing.
 	 */
+	/*
+	 * The status dot, while something is happening.
+	 *
+	 * Opacity rather than scale: a dot that grows drags the word beside it, and the
+	 * point of putting this in the header was that nothing there moves.
+	 */
+	.working {
+		animation: breathe 1.6s ease-in-out infinite;
+	}
+
+	@keyframes breathe {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.35;
+		}
+	}
+
 	.transcript {
 		overflow: hidden;
 		mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);

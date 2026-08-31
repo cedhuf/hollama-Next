@@ -2089,7 +2089,7 @@ type RootTranslation = {
 	 */
 	voiceTranscribing: string
 	/**
-	 * T​a​p​ ​t​o​ ​w​a​k​e​ ​m​e​.
+	 * T​a​p​ ​t​o​ ​s​t​a​r​t
 	 */
 	voiceIdle: string
 	/**
@@ -2117,11 +2117,11 @@ type RootTranslation = {
 	 */
 	voiceInterrupt: string
 	/**
-	 * W​a​k​i​n​g​ ​u​p​.
+	 * C​o​n​n​e​c​t​i​n​g
 	 */
 	voiceConnecting: string
 	/**
-	 * T​a​p​ ​a​n​d​ ​s​p​e​a​k​.
+	 * Y​o​u​r​ ​t​u​r​n
 	 */
 	voiceReady: string
 	/**
@@ -2137,15 +2137,15 @@ type RootTranslation = {
 	 */
 	voiceStop: string
 	/**
-	 * L​i​s​t​e​n​i​n​g​.
+	 * L​i​s​t​e​n​i​n​g
 	 */
 	voiceListening: string
 	/**
-	 * T​h​i​n​k​i​n​g​.
+	 * T​h​i​n​k​i​n​g
 	 */
 	voiceThinking: string
 	/**
-	 * A​n​s​w​e​r​i​n​g​.
+	 * A​n​s​w​e​r​i​n​g
 	 */
 	voiceAnswering: string
 	/**
@@ -6367,7 +6367,7 @@ export type TranslationFunctions = {
 	 */
 	voiceTranscribing: () => LocalizedString
 	/**
-	 * Tap to wake me.
+	 * Tap to start
 	 */
 	voiceIdle: () => LocalizedString
 	/**
@@ -6395,11 +6395,11 @@ export type TranslationFunctions = {
 	 */
 	voiceInterrupt: () => LocalizedString
 	/**
-	 * Waking up.
+	 * Connecting
 	 */
 	voiceConnecting: () => LocalizedString
 	/**
-	 * Tap and speak.
+	 * Your turn
 	 */
 	voiceReady: () => LocalizedString
 	/**
@@ -6415,15 +6415,15 @@ export type TranslationFunctions = {
 	 */
 	voiceStop: () => LocalizedString
 	/**
-	 * Listening.
+	 * Listening
 	 */
 	voiceListening: () => LocalizedString
 	/**
-	 * Thinking.
+	 * Thinking
 	 */
 	voiceThinking: () => LocalizedString
 	/**
-	 * Answering.
+	 * Answering
 	 */
 	voiceAnswering: () => LocalizedString
 	/**
