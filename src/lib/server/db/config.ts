@@ -48,6 +48,26 @@ export function setAllowUserIntegrations(value: boolean): void {
 	setConfig('allowUserIntegrations', value ? 'true' : 'false');
 }
 
+/**
+ * Whether users may add MCP servers of their own (default: false).
+ *
+ * Off by default, for the reason bots are: an MCP server is an address the
+ * instance opens outbound connections to, chosen by whoever typed it, and its
+ * answers land in the model's context carrying tool authority. That is granted,
+ * not assumed.
+ *
+ * One flag and no sharing modes. There is no admin value to hand down here, only
+ * a permission: the servers themselves are each account's own, and an
+ * administrator who wants one gone suspends that server rather than everybody's.
+ */
+export function allowUserMcp(): boolean {
+	return getConfig('allowUserMcp') === 'true';
+}
+
+export function setAllowUserMcp(value: boolean): void {
+	setConfig('allowUserMcp', value ? 'true' : 'false');
+}
+
 /** How many bots one account may run. */
 export function botsPerUser(): number {
 	return readCount('botsPerUser', DEFAULT_BOTS_PER_USER, BOTS_PER_USER_MAX);

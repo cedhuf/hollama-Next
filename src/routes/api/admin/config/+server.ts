@@ -6,6 +6,7 @@ import { appPromptsSharing, setAdminAppPrompts } from '$lib/server/appPromptsRes
 import {
 	allowUserIntegrations,
 	allowUserKeys,
+	allowUserMcp,
 	allowUserPersonas,
 	botRepliesPerHour,
 	botsPerUser,
@@ -16,6 +17,7 @@ import {
 	resetOnboarding,
 	setAllowUserIntegrations,
 	setAllowUserKeys,
+	setAllowUserMcp,
 	setAllowUserPersonas,
 	setBotRepliesPerHour,
 	setBotsPerUser,
@@ -40,6 +42,7 @@ export async function GET(event) {
 	return json({
 		allowUserKeys: allowUserKeys(),
 		allowUserIntegrations: allowUserIntegrations(),
+		allowUserMcp: allowUserMcp(),
 		botsPerUser: botsPerUser(),
 		botRepliesPerHour: botRepliesPerHour(),
 		creditLimit: instanceCreditLimit(),
@@ -85,6 +88,7 @@ export async function PUT(event) {
 	if (typeof body?.allowUserIntegrations === 'boolean') {
 		setAllowUserIntegrations(body.allowUserIntegrations);
 	}
+	if (typeof body?.allowUserMcp === 'boolean') setAllowUserMcp(body.allowUserMcp);
 	if (Number.isFinite(body?.botsPerUser)) setBotsPerUser(Number(body.botsPerUser));
 	if (Number.isFinite(body?.botRepliesPerHour))
 		setBotRepliesPerHour(Number(body.botRepliesPerHour));

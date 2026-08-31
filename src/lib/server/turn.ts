@@ -119,7 +119,9 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 
 	// Resolved before anything starts, so a refused model is an error the caller
 	// can report rather than an empty answer it has to explain.
-	const deps = serverDeps(input, principal);
+	// No MCP on this path: see `DepsOptions`. A bot's tools are the four its owner
+	// ticked, and reaching their MCP servers is not one of them.
+	const deps = serverDeps(input, principal, { mcp: false });
 
 	let text = '';
 	let usage: TurnResult['usage'];

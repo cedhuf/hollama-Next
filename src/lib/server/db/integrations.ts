@@ -18,6 +18,7 @@ export interface IntegrationRow {
 	config: string;
 	secret_enc: string | null;
 	is_enabled: number;
+	blocked: number;
 	created_at: string;
 }
 
@@ -35,7 +36,17 @@ export interface IntegrationRecord {
 	label: string;
 	config: IntegrationConfig;
 	hasSecret: boolean;
+	/** What the owner wants. */
 	enabled: boolean;
+	/**
+	 * What the instance allows, which is not the same question.
+	 *
+	 * An administrator suspends a bot here rather than by turning the owner's
+	 * switch off, because a switch the owner can turn back on is not a decision,
+	 * it is a suggestion. The owner keeps their own switch and keeps being told
+	 * why it changes nothing for now.
+	 */
+	blocked: boolean;
 	createdAt: string;
 }
 
@@ -56,6 +67,7 @@ function toRecord(row: IntegrationRow): IntegrationRecord {
 		config: normaliseConfig(kind, raw),
 		hasSecret: !!row.secret_enc,
 		enabled: !!row.is_enabled,
+		blocked: !!row.blocked,
 		createdAt: row.created_at
 	};
 }
@@ -67,6 +79,7 @@ export function toIntegrationView(record: IntegrationRecord): IntegrationView {
 		kind: record.kind,
 		label: record.label,
 		enabled: record.enabled,
+		blocked: record.blocked,
 		hasSecret: record.hasSecret,
 		config: record.config,
 		createdAt: record.createdAt
@@ -172,6 +185,18 @@ export function updateIntegration(
 		.prepare(`UPDATE integrations SET ${sets.join(', ')} WHERE id = ?`)
 		.run(...values, id);
 	return getIntegration(id);
+}
+
+/**
+ * Suspend one, or lift the suspension. An administrator's verb, and only theirs.
+ *
+ * Its own function rather than a field on `updateIntegration`, so that the route
+ * an owner reaches cannot set it by accident or by a crafted body.
+ */
+export function setIntegrationBlocked(id: string, blocked: boolean): void {
+	getDb()
+		.prepare('UPDATE integrations SET blocked = ? WHERE id = ?')
+		.run(blocked ? 1 : 0, id);
 }
 
 export function deleteIntegration(id: string): void {

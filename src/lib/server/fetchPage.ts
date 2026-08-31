@@ -52,8 +52,14 @@ function isBlockedAddress(address: string): boolean {
 	return a >= 224;
 }
 
-/** Throws unless the URL is http(s) and every address its host resolves to is public. */
-async function assertReachable(url: URL, allowedOrigins: string[]): Promise<void> {
+/**
+ * Throws unless the URL is http(s) and every address its host resolves to is public.
+ *
+ * Exported because page reading is no longer the only thing this instance opens
+ * on somebody's say-so: an MCP server is an address a user typed into a form
+ * too, and a guard each caller reimplements is a guard one of them gets wrong.
+ */
+export async function assertReachable(url: URL, allowedOrigins: string[]): Promise<void> {
 	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
 		throw new FetchPageError(`Unsupported protocol: ${url.protocol}`);
 	}

@@ -69,7 +69,11 @@ export function reconcile(): void {
 	let wanted: IntegrationRecord[];
 	try {
 		wanted = listAllIntegrations().filter(
-			(record) => record.enabled && isRunnable(record) && !!providerFor(record.kind)
+			// Two switches answering two questions: the owner's `enabled` says
+			// whether they want it running, the instance's `blocked` says whether it
+			// is allowed to. It runs when both agree, and neither speaks for the other.
+			(record) =>
+				record.enabled && !record.blocked && isRunnable(record) && !!providerFor(record.kind)
 		);
 	} catch (error) {
 		// No database yet, or one that cannot be opened. Nothing to supervise, and

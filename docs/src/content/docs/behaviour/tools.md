@@ -90,8 +90,15 @@ because they postdate its training. With it, it weighs them.
 Covered on its own page, including OCR and the instance-wide off switch. See
 [Documents](/context/documents/).
 
+## MCP servers
+
+Tools that are not the app's own: a catalogue running elsewhere, offered to the model beside the
+ones above. HTTP streamable only, client only, and with rules of its own about what an external
+answer may reach. See [MCP servers](/connect/mcp/).
+
 ## The instructions behind them
 
 Every one of these features works by adding text to what the model receives, and all of that text is
-yours to rewrite, in _Settings → Prompts_. It has its own page: see
+yours to rewrite, in _Settings → Prompts_. Tool descriptions coming from an MCP server are the one
+exception: they are written by whoever runs that server. It has its own page: see
 [Prompts](/context/prompts/).

@@ -2,7 +2,7 @@
 title: HTTP API
 description: What the API is for, and how far to trust it.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 Llooma's API exists to serve Llooma's own interface. It is documented so the behaviour is

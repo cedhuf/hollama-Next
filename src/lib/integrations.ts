@@ -123,7 +123,17 @@ export interface IntegrationView {
 	id: string;
 	kind: IntegrationKind;
 	label: string;
+	/** What the owner wants. */
 	enabled: boolean;
+	/**
+	 * What the instance allows, which is not the same question.
+	 *
+	 * An administrator suspends a bot with this rather than by turning the
+	 * owner's switch off: a switch the owner can turn back on is a suggestion,
+	 * not a decision. The owner keeps their own switch, and is told why it
+	 * changes nothing for now.
+	 */
+	blocked: boolean;
 	/** True when a credential is stored. Its value is never returned. */
 	hasSecret: boolean;
 	config: IntegrationConfig;

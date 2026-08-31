@@ -165,7 +165,7 @@ export type RunEvent =
 	/** A finished step joins the timeline above the live reasoning. */
 	| { type: 'trace'; step: ReasoningStep }
 	/** Whether a lookup is in flight, and which kind, for the live indicator. */
-	| { type: 'searching'; active: boolean; activity?: 'search' | 'read'; query?: string }
+	| { type: 'searching'; active: boolean; activity?: 'search' | 'read' | 'tool'; query?: string }
 	/** What the turn has put in front of the model so far. */
 	| { type: 'sources'; info: WebSearchInfo }
 	/** The turn's answer, complete and ready to be appended to the conversation. */

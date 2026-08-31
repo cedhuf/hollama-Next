@@ -12,6 +12,7 @@
 	import { DEFAULT_STORE } from '$lib/store';
 	import { webFetchConfig } from '$lib/webFetch';
 
+	import McpServers from './McpServers.svelte';
 	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
@@ -168,6 +169,11 @@
 		{/if}
 		<SettingsHint>{$LL.webFetchHint()}</SettingsHint>
 	</SettingsSection>
+
+	<!-- Tools that are not ours, after the ones that are. They are configured the
+	     way a connection is, so the section brings its own cards rather than
+	     living inside this file's list of switches. -->
+	<McpServers />
 
 	<!-- The store, once: one address serves every catalogue under it, so mirroring
 	     it is one folder and one field rather than one of each per kind. -->

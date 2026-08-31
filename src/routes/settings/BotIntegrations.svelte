@@ -125,12 +125,21 @@
 		}
 	}
 
-	async function setBotEnabled(bot: IntegrationView, enabled: boolean) {
-		await api(`/api/admin/integrations/${bot.id}`, 'PUT', { enabled });
+	/**
+	 * Suspend a bot, or lift the suspension.
+	 *
+	 * The switch reads as "allowed", so it is on when nothing is blocking it.
+	 * What it writes is the instance's decision, never the owner's: their own
+	 * switch stays exactly where they left it.
+	 */
+	async function setBotAllowed(bot: IntegrationView, allowed: boolean) {
+		await api(`/api/admin/integrations/${bot.id}`, 'PUT', { blocked: !allowed });
 		await loadAllBots();
 		// An administrator's own bot appears in both lists, and the card above
-		// would otherwise keep showing the switch it no longer reflects.
-		integrations = integrations.map((own) => (own.id === bot.id ? { ...own, enabled } : own));
+		// would otherwise keep showing a state it no longer reflects.
+		integrations = integrations.map((own) =>
+			own.id === bot.id ? { ...own, blocked: !allowed } : own
+		);
 	}
 
 	async function removeBot(bot: IntegrationView) {
@@ -403,15 +412,16 @@
 						<span class="text-active block truncate text-sm">{bot.label || bot.kind}</span>
 						<span class="text-muted block truncate text-xs">
 							{bot.owner} · {bot.config.model || $LL.botNeedsAModel()}
+							{#if !bot.enabled}· {$LL.offByItsOwner()}{/if}
 						</span>
 					</span>
 
-					<label class="flex shrink-0 cursor-pointer items-center" title={$LL.integrationEnabled()}>
+					<label class="flex shrink-0 cursor-pointer items-center" title={$LL.botAllowed()}>
 						<input
 							type="checkbox"
-							checked={bot.enabled}
-							onchange={(e) => setBotEnabled(bot, e.currentTarget.checked)}
-							aria-label={$LL.integrationEnabled()}
+							checked={!bot.blocked}
+							onchange={(e) => setBotAllowed(bot, e.currentTarget.checked)}
+							aria-label={$LL.botAllowed()}
 							class="peer sr-only"
 						/>
 						<span

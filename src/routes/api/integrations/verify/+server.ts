@@ -42,6 +42,7 @@ export async function POST(event) {
 		config,
 		hasSecret: true,
 		enabled: false,
+		blocked: false,
 		createdAt: new Date().toISOString()
 	};
 

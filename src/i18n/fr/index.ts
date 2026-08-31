@@ -53,6 +53,10 @@ const fr = extendDictionary(en, {
 		'Seul le prompt du persona est utilisé. Ni mémoire, ni conversation de bibliothèque, ni connaissances.',
 	botNeedsAModel: 'Choisissez un modèle : ce bot ne peut pas tourner sans.',
 	allowUserIntegrations: 'Les utilisateurs peuvent avoir leurs propres bots',
+	botAllowed: 'Autorisé sur cette instance',
+	offByItsOwner: 'désactivé par son propriétaire',
+	botBlockedByAdmin:
+		"Suspendu par l'administrateur. Votre interrupteur reste où vous l'avez laissé et reprendra effet à la levée de la suspension.",
 	botLimits: 'Limites',
 	botLimitsHint:
 		"Elles s'appliquent à tous les comptes, le vôtre compris : ce qu'elles protègent est la machine et la facture, pas un niveau de confiance.",
@@ -918,6 +922,37 @@ const fr = extendDictionary(en, {
 	memoryForgetAll: 'Tout oublier',
 	memoryForgetAllConfirm:
 		'Supprimer tout ce que {name} retient de vous ? Le persona lui-même n’est pas touché.',
+	mcpServers: 'Serveurs MCP',
+	mcpServersDescription:
+		'Des catalogues d\u2019outils qui tournent ailleurs. Leurs outils sont proposés au modèle à côté de ceux de l\u2019app, et leurs réponses viennent d\u2019une machine que cette instance ne possède pas.',
+	mcpNotAllowed:
+		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
+	noMcpServers: 'Aucun serveur MCP pour le moment',
+	addMcpServer: 'Ajouter un serveur MCP',
+	mcpServerUrl: 'Adresse du serveur',
+	mcpServerUrlHint:
+		'Le point d\u2019entrée HTTP streamable. Les autres transports ne sont pas gérés.',
+	mcpToken: 'Jeton',
+	mcpTokenHint:
+		'Envoyé en bearer à chaque appel. À laisser vide pour un serveur qui n\u2019en demande pas.',
+	mcpEnabled: 'Utiliser ce serveur',
+	mcpBlockedByAdmin:
+		'Suspendu par l\u2019administrateur. Votre propre interrupteur n\u2019a pas bougé.',
+	mcpToolPrefix: 'Ses outils s\u2019appellent {prefix:string}\u2026 devant le modèle',
+	mcpConnected: 'Connecté. {count:number} outil{{s}} trouvé{{s}}.',
+	mcpToolsFound: '{count:number} outil{{s}}',
+	mcpToolsCapped:
+		'Seuls les {count:number} premiers sont proposés au modèle. Le reste du catalogue est laissé de côté.',
+	mcpLimitReached: 'Au maximum {count:number} serveurs MCP par compte.',
+	mcpAllowed: 'Autorisé sur cette instance',
+	allInstanceMcpServers: 'Serveurs MCP de cette instance',
+	allInstanceMcpServersHint:
+		'Ceux de tout le monde, et à qui ils sont. Suspendez-en un ou supprimez-le ; sa configuration reste à son propriétaire.',
+	allowUserMcp: 'Les utilisateurs peuvent ajouter leurs propres serveurs MCP',
+	callingExternalTool: 'Appel d\u2019un outil externe',
+	mcpStepCalled: 'A appelé un outil externe',
+	mcpStepFailed: 'Un outil externe a échoué',
+	mcpStepUnavailable: 'Un serveur MCP est injoignable',
 	memoryStepKept: 'Retenu',
 	memoryStepProfile: 'A mis à jour ce qu’il garde en tête sur vous',
 	memoryStepForgot: 'A oublié une note',

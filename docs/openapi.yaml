@@ -603,3 +603,94 @@ paths:
       x-status: todo
       responses:
         '200': { description: TODO }
+  /api/mcp:
+    get:
+      tags: [mcp]
+      summary: The caller's own MCP servers, without their tokens
+      responses:
+        '200': { description: The list, oldest first. }
+    post:
+      tags: [mcp]
+      summary: Add one
+      description: |
+        Refused with 403 unless the caller is an administrator or the instance
+        has opened MCP servers to accounts, and with 409 past the per-account
+        ceiling. The address has to be http or https: HTTP streamable is the
+        only transport, and stdio is deliberately absent.
+      responses:
+        '201': { description: Added. }
+        '400': { description: Not a usable address. }
+        '403': { description: Not open to this account. }
+        '409': { description: Too many already. }
+  /api/mcp/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [mcp]
+      summary: One of them
+      responses:
+        '200': { description: The server. }
+        '404': { description: No such server, or not the caller's. }
+    put:
+      tags: [mcp]
+      summary: Save an edit
+      description: |
+        An absent field is left alone. `secret` omitted keeps the stored token,
+        `secret: ""` clears it. Renaming can change the slug the tools are named
+        after, so the answer carries the record as stored.
+      responses:
+        '200': { description: Saved. }
+        '404': { description: No such server, or not the caller's. }
+    delete:
+      tags: [mcp]
+      summary: Remove it
+      responses:
+        '204': { description: Gone. }
+  /api/mcp/config:
+    get:
+      tags: [mcp]
+      summary: Whether this account may add MCP servers, and how many
+      responses:
+        '200': { description: The permission and the ceiling. }
+  /api/mcp/verify:
+    post:
+      tags: [mcp]
+      summary: Connect to a server and list its tools, without storing anything
+      description: |
+        Send a `url`, with a `secret` when the server wants one, or an `id` to
+        re-test a stored server without typing its token again. Answers
+        `{ ok: true, tools, total }`, or `{ ok: false, error }` with the reason
+        in a sentence.
+      responses:
+        '200': { description: The verdict, whichever way it went. }
+        '404': { description: An id that is not the caller's. }
+  /api/admin/mcp:
+    get:
+      tags: [admin]
+      summary: Every MCP server on the instance, with whose it is
+      responses:
+        '200': { description: The roster. }
+  /api/admin/mcp/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [admin]
+      summary: Suspend one, or lift the suspension
+      description: |
+        Takes `{ blocked }` and nothing else. An administrator never edits
+        somebody else's address or token, and never touches the owner's own
+        switch.
+      responses:
+        '200': { description: The server as it now stands. }
+        '404': { description: No such server. }
+    delete:
+      tags: [admin]
+      summary: Remove somebody's server
+      responses:
+        '204': { description: Gone. }

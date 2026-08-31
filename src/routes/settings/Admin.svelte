@@ -53,6 +53,7 @@
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
 	let allowUserIntegrations = $state(false);
+	let allowUserMcp = $state(false);
 	let personaStoreMode = $state<'open' | 'curated'>('open');
 
 	let personaAutoUpdateForced = $state(false);
@@ -212,6 +213,7 @@
 			allowUserKeys = config.allowUserKeys;
 			allowUserPersonas = config.allowUserPersonas ?? true;
 			allowUserIntegrations = config.allowUserIntegrations ?? false;
+			allowUserMcp = config.allowUserMcp ?? false;
 			personaStoreMode = config.personaStoreMode ?? 'open';
 			personaAutoUpdateForced = config.personaAutoUpdateForced ?? false;
 			personaMemoryEnabled = config.personaMemoryEnabled ?? true;
@@ -397,6 +399,10 @@
 		await api('/api/admin/config', 'PUT', { allowUserIntegrations });
 	}
 
+	async function toggleAllowUserMcp() {
+		await api('/api/admin/config', 'PUT', { allowUserMcp });
+	}
+
 	async function toggleAllowUserPersonas() {
 		await api('/api/admin/config', 'PUT', { allowUserPersonas });
 	}
@@ -535,6 +541,15 @@
 			label={$LL.allowUserIntegrations()}
 			bind:checked={allowUserIntegrations}
 			onChange={toggleAllowUserIntegrations}
+		/>
+		<!-- One switch and no sharing modes: there is no administrator's value to
+		     hand down here, only a permission. The servers themselves are each
+		     account's own, and one that has to stop is suspended in the Tools tab
+		     rather than by revoking the permission for everybody. -->
+		<FieldCheckbox
+			label={$LL.allowUserMcp()}
+			bind:checked={allowUserMcp}
+			onChange={toggleAllowUserMcp}
 		/>
 		<!-- Not a permission but a composition, which is why it is a choice of two
 		     rather than a switch. A store is the door people already know; what an

@@ -65,8 +65,8 @@
 	/** A stored key is never returned, so an empty password field would read as "none". */
 	const keyIsStored = $derived(integration.hasSecret && !secret && !replacingKey);
 
-	/** Enabled and complete are two different things, and only one of them runs. */
-	const runs = $derived(integration.enabled && isRunnable(integration));
+	/** Wanted, allowed and complete are three different things. All three, or nothing runs. */
+	const runs = $derived(integration.enabled && !integration.blocked && isRunnable(integration));
 
 	/** Named from the same list the composer's menu uses, so a tool reads the same everywhere. */
 	const toolOptions = $derived(
@@ -402,9 +402,14 @@
 			</SettingsField>
 
 			<!-- Enabled and running are not the same thing, and the difference is
-			     invisible otherwise: without a model there is nothing to answer with,
-			     and the worker never starts however the switch is set. -->
-			{#if integration.enabled && !isRunnable(integration)}
+			     invisible otherwise. Two reasons a switched-on bot stays quiet, and
+			     the suspension comes first because it is the one the owner cannot fix
+			     and would otherwise spend the afternoon trying to. -->
+			{#if integration.blocked}
+				<span class="text-negative border-shade-3 border-t pt-3 text-xs">
+					{$LL.botBlockedByAdmin()}
+				</span>
+			{:else if integration.enabled && !isRunnable(integration)}
 				<span class="text-negative border-shade-3 border-t pt-3 text-xs">
 					{$LL.botNeedsAModel()}
 				</span>

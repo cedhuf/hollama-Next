@@ -498,6 +498,51 @@ const migrations: Migration[] = [
 			);
 			CREATE INDEX idx_integration_seen_age ON integration_seen(integration_id, seen_at);
 		`
+	},
+	{
+		version: 21,
+		up: `
+			-- An administrator's suspension, kept apart from the owner's own switch.
+			--
+			-- They were one column, which made an administrator's decision something
+			-- the owner undid by flipping their own switch back. Two states, because
+			-- they answer two different questions: the owner says whether they want
+			-- the bot running, the instance says whether it is allowed to. A bot runs
+			-- when both agree, and neither can speak for the other.
+			ALTER TABLE integrations ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0;
+		`
+	},
+	{
+		version: 22,
+		up: `
+			-- Catalogues of tools living somewhere else, that a turn may call out to.
+			--
+			-- Flat columns rather than the JSON bag the integrations table uses, and
+			-- the difference is that there is nothing to vary: one transport, HTTP
+			-- streamable, so a server is an address and at most a bearer token. A
+			-- second transport is not a column, it is a decision nobody has taken.
+			--
+			-- The token is encrypted with the instance secret, like a provider key,
+			-- and never goes back to a browser.
+			--
+			-- The slug is what the server's tools are named after in front of the
+			-- model, so it is stored rather than derived at call time: a rename must
+			-- not silently point the dispatch at nothing. Unique per owner, because
+			-- two servers with the same slug would offer the same tool names.
+			CREATE TABLE mcp_servers (
+				id            TEXT PRIMARY KEY,
+				owner_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+				label         TEXT NOT NULL,
+				slug          TEXT NOT NULL,
+				url           TEXT NOT NULL,
+				secret_enc    TEXT,
+				is_enabled    INTEGER NOT NULL DEFAULT 1,
+				blocked       INTEGER NOT NULL DEFAULT 0,
+				created_at    TEXT NOT NULL
+			);
+			CREATE INDEX idx_mcp_servers_owner ON mcp_servers(owner_user_id, created_at);
+			CREATE UNIQUE INDEX idx_mcp_servers_slug ON mcp_servers(owner_user_id, slug);
+		`
 	}
 ];
 

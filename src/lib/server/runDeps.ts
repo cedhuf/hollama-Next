@@ -16,12 +16,8 @@ import { resolvePrompt } from '$lib/defaultPrompts';
 import { getSettings } from '$lib/server/db/collections';
 import { getServer, getServerApiKey, type ServerRow } from '$lib/server/db/servers';
 import { allowedFetchOrigins, fetchPage } from '$lib/server/fetchPage';
-import {
-	policeChatBody,
-	PolicyError,
-	reachableServer,
-	type ChatBody
-} from '$lib/server/llmPolicy';
+import { policeChatBody, PolicyError, reachableServer, type ChatBody } from '$lib/server/llmPolicy';
+import { hasMcpServers, openMcpSession } from '$lib/server/mcp/session';
 import { serverMemory } from '$lib/server/personaMemoryAccess';
 import { webSearch, type SearchTarget } from '$lib/server/search';
 import { resolveSearch } from '$lib/server/searchResolver';
@@ -153,7 +149,24 @@ function policeCredit(row: ServerRow | null, model: string, principal: RunPrinci
 	if (refused) throw new PolicyError(402, refusal(refused));
 }
 
-export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
+/**
+ * What a caller may switch off, for the paths that are not a person typing.
+ *
+ * Only MCP so far, and it is off for exactly one caller. A bot answers to people
+ * who are not the account holder: letting a room reach the owner's MCP servers
+ * by asking the bot nicely is an escalation the owner never granted, and the
+ * grant it would need is a per-bot choice beside the other four in `BOT_TOOLS`,
+ * not a default.
+ */
+export interface DepsOptions {
+	mcp?: boolean;
+}
+
+export function serverDeps(
+	input: RunInput,
+	principal: RunPrincipal,
+	options: DepsOptions = {}
+): RunDeps {
 	const server = resolveRunServer(input, principal);
 	const row = getServer(input.serverId) ?? null;
 	policeCredit(row, input.model, principal);
@@ -192,6 +205,18 @@ export function serverDeps(input: RunInput, principal: RunPrincipal): RunDeps {
 		useNativeTools: () => useNativeTools(server, input.model, input.flags.nativeTools),
 
 		canCarryTools: () => canCarryTools(server, input.model, input.flags.nativeTools),
+
+		/**
+		 * The account's MCP servers, opened when the turn asks for them.
+		 *
+		 * Resolved here rather than carried in the run's body for the same reason
+		 * memory is: the servers belong to the signed-in account, and a client is
+		 * not entitled to say which addresses a turn may reach out to.
+		 */
+		openMcp:
+			options.mcp !== false && hasMcpServers(principal.userId, principal.isAdmin)
+				? () => openMcpSession(principal.userId, principal.isAdmin)
+				: undefined,
 
 		async search(query, startNumber = 1) {
 			if (!target) return null;

@@ -8,6 +8,7 @@
 		FileText,
 		Globe,
 		Pencil,
+		Plug,
 		RefreshCw,
 		Trash2,
 		X
@@ -75,7 +76,7 @@
 		isStreamingArticle?: boolean;
 		isSearching?: boolean;
 		/** Whether the running lookup is a search or a page read. They read differently. */
-		searchActivity?: 'search' | 'read';
+		searchActivity?: 'search' | 'read' | 'tool';
 		searchQuery?: string;
 		/** True while the model is streaming an <ask> block: show a choices skeleton. */
 		preparingChoices?: boolean;
@@ -169,7 +170,11 @@
 
 	/** What it is doing, or (once done) what it did. */
 	const activityLabel = $derived.by(() => {
-		if (isSearching) return searchActivity === 'read' ? $LL.readingPages() : $LL.searchingTheWeb();
+		if (isSearching) {
+			if (searchActivity === 'read') return $LL.readingPages();
+			if (searchActivity === 'tool') return $LL.callingExternalTool();
+			return $LL.searchingTheWeb();
+		}
 		if (isThinking && message.reasoning) return $LL.thinkingActivity();
 
 		const done: string[] = [];
@@ -193,6 +198,19 @@
 			default:
 				return $LL.memoryStepKept();
 		}
+	}
+
+	/**
+	 * What an MCP step did, naming the machine that answered.
+	 *
+	 * The server's name is not decoration here. A result from somebody else's
+	 * server is a different kind of thing from one the app produced, and a reader
+	 * who cannot tell them apart cannot judge the answer built on top of it.
+	 */
+	function mcpLabel(mcp: ReasoningStep['mcp']): string {
+		if (!mcp) return $LL.mcpStepCalled();
+		if (!mcp.tool) return $LL.mcpStepUnavailable();
+		return mcp.failed ? $LL.mcpStepFailed() : $LL.mcpStepCalled();
 	}
 
 	function toggleReasoningVisibility() {
@@ -388,6 +406,8 @@
 										<Globe class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{:else if step.type === 'memory'}
 										<BookMarked class="mt-1 h-3.5 w-3.5 shrink-0" />
+									{:else if step.type === 'mcp'}
+										<Plug class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{:else}
 										<FileText class="mt-1 h-3.5 w-3.5 shrink-0" />
 									{/if}
@@ -427,6 +447,23 @@
 											{#if step.memory?.title}
 												<span class="bg-shade-2 max-w-[15rem] truncate rounded-full px-2 py-0.5">
 													{step.memory.title}
+												</span>
+											{/if}
+										</div>
+									{:else if step.type === 'mcp'}
+										<!-- Named, not merely counted: "a tool was called" tells a reader
+										     nothing they can act on, and which machine answered is the one
+										     thing that separates this from the app's own tools. -->
+										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
+											<span>{mcpLabel(step.mcp)}</span>
+											{#if step.mcp?.server}
+												<span class="bg-shade-2 max-w-[15rem] truncate rounded-full px-2 py-0.5">
+													{step.mcp.server}
+												</span>
+											{/if}
+											{#if step.mcp?.tool}
+												<span class="bg-shade-2 max-w-[15rem] truncate rounded-full px-2 py-0.5">
+													{step.mcp.tool}
 												</span>
 											{/if}
 										</div>

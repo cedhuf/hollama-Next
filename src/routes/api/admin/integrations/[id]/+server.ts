@@ -4,17 +4,21 @@ import { requireAdmin } from '$lib/server/api';
 import {
 	deleteIntegration,
 	getIntegration,
-	toIntegrationView,
-	updateIntegration
+	setIntegrationBlocked,
+	toIntegrationView
 } from '$lib/server/db/integrations';
 import { reconcile } from '$lib/server/integrations/supervisor';
 
 /**
- * Switch somebody else's bot off, or remove it.
+ * Suspend somebody else's bot, or lift the suspension. Or remove it.
  *
- * Only those two. An administrator who could rewrite the model or the
- * instructions of a bot they do not own would be answering in somebody else's
- * name, on somebody else's chat server.
+ * Only those. An administrator who could rewrite the model or the instructions
+ * of a bot they do not own would be answering in somebody else's name, on
+ * somebody else's chat server.
+ *
+ * And a suspension, not their switch: turning the owner's own switch off would
+ * be a decision the owner undoes by turning it back on, without ever being told
+ * that somebody had asked them not to.
  */
 export async function PUT(event) {
 	await requireAdmin(event);
@@ -22,9 +26,9 @@ export async function PUT(event) {
 	if (!record) throw error(404, 'No such integration');
 
 	const body = await event.request.json().catch(() => null);
-	if (typeof body?.enabled !== 'boolean') throw error(400, 'Expected enabled');
+	if (typeof body?.blocked !== 'boolean') throw error(400, 'Expected blocked');
 
-	updateIntegration(record.id, { enabled: body.enabled });
+	setIntegrationBlocked(record.id, body.blocked);
 	reconcile();
 	return json(toIntegrationView(getIntegration(record.id)!));
 }

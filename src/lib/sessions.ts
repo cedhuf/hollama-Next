@@ -45,7 +45,7 @@ export interface WebSearchInfo {
  * that one is still streaming while the rest is already history.
  */
 export interface ReasoningStep {
-	type: 'search' | 'reasoning' | 'read' | 'memory';
+	type: 'search' | 'reasoning' | 'read' | 'memory' | 'mcp';
 	/** The thinking, for a `reasoning` step. */
 	content?: string;
 	/** What was searched, for a `search` step. */
@@ -62,6 +62,16 @@ export interface ReasoningStep {
 	 * should ship.
 	 */
 	memory?: { action: 'profile' | 'write' | 'forget' | 'read'; title?: string; refused?: boolean };
+	/**
+	 * Which external tool answered, for an `mcp` step.
+	 *
+	 * The server is named rather than only the tool, and that is the whole reason
+	 * this step exists: a result from a machine the instance does not own is a
+	 * different thing from a result the app produced, and a reader has to be able
+	 * to tell which they are looking at. An empty `tool` is the server itself
+	 * having failed, before any call was made.
+	 */
+	mcp?: { server: string; tool: string; failed?: boolean; error?: string };
 }
 
 export interface Message {
@@ -176,7 +186,7 @@ export interface Editor {
 	thinking?: boolean;
 	isSearching?: boolean; // True while a web search is running (live status)
 	/** Which of the two the live status is about. They read very differently. */
-	searchActivity?: 'search' | 'read';
+	searchActivity?: 'search' | 'read' | 'tool';
 	searchQuery?: string; // The query being searched, shown live while isSearching
 	webSearchInfo?: WebSearchInfo; // Live result info for the streaming article
 	/**

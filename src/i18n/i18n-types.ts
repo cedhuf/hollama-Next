@@ -176,6 +176,18 @@ type RootTranslation = {
 	 */
 	allowUserIntegrations: string
 	/**
+	 * A​l​l​o​w​e​d​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	botAllowed: string
+	/**
+	 * s​w​i​t​c​h​e​d​ ​o​f​f​ ​b​y​ ​i​t​s​ ​o​w​n​e​r
+	 */
+	offByItsOwner: string
+	/**
+	 * S​u​s​p​e​n​d​e​d​ ​b​y​ ​t​h​e​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.​ ​Y​o​u​r​ ​s​w​i​t​c​h​ ​i​s​ ​k​e​p​t​ ​a​s​ ​y​o​u​ ​l​e​f​t​ ​i​t​ ​a​n​d​ ​t​a​k​e​s​ ​e​f​f​e​c​t​ ​a​g​a​i​n​ ​o​n​c​e​ ​t​h​e​ ​s​u​s​p​e​n​s​i​o​n​ ​i​s​ ​l​i​f​t​e​d​.
+	 */
+	botBlockedByAdmin: string
+	/**
 	 * L​i​m​i​t​s
 	 */
 	botLimits: string
@@ -3234,6 +3246,107 @@ type RootTranslation = {
 	 */
 	memoryForgetAllConfirm: RequiredParams<'name'>
 	/**
+	 * M​C​P​ ​s​e​r​v​e​r​s
+	 */
+	mcpServers: string
+	/**
+	 * C​a​t​a​l​o​g​u​e​s​ ​o​f​ ​t​o​o​l​s​ ​r​u​n​n​i​n​g​ ​e​l​s​e​w​h​e​r​e​.​ ​T​h​e​i​r​ ​t​o​o​l​s​ ​a​r​e​ ​o​f​f​e​r​e​d​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​ ​b​e​s​i​d​e​ ​t​h​i​s​ ​a​p​p​’​s​ ​o​w​n​,​ ​a​n​d​ ​t​h​e​i​r​ ​a​n​s​w​e​r​s​ ​c​o​m​e​ ​f​r​o​m​ ​a​ ​m​a​c​h​i​n​e​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​ ​d​o​e​s​ ​n​o​t​ ​o​w​n​.
+	 */
+	mcpServersDescription: string
+	/**
+	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​n​o​t​ ​o​p​e​n​e​d​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​t​o​ ​a​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
+	 */
+	mcpNotAllowed: string
+	/**
+	 * N​o​ ​M​C​P​ ​s​e​r​v​e​r​ ​y​e​t
+	 */
+	noMcpServers: string
+	/**
+	 * A​d​d​ ​a​n​ ​M​C​P​ ​s​e​r​v​e​r
+	 */
+	addMcpServer: string
+	/**
+	 * S​e​r​v​e​r​ ​a​d​d​r​e​s​s
+	 */
+	mcpServerUrl: string
+	/**
+	 * T​h​e​ ​H​T​T​P​ ​s​t​r​e​a​m​a​b​l​e​ ​e​n​d​p​o​i​n​t​.​ ​O​t​h​e​r​ ​t​r​a​n​s​p​o​r​t​s​ ​a​r​e​ ​n​o​t​ ​s​u​p​p​o​r​t​e​d​.
+	 */
+	mcpServerUrlHint: string
+	/**
+	 * T​o​k​e​n
+	 */
+	mcpToken: string
+	/**
+	 * S​e​n​t​ ​a​s​ ​a​ ​b​e​a​r​e​r​ ​t​o​k​e​n​ ​o​n​ ​e​v​e​r​y​ ​c​a​l​l​.​ ​L​e​a​v​e​ ​e​m​p​t​y​ ​f​o​r​ ​a​ ​s​e​r​v​e​r​ ​t​h​a​t​ ​n​e​e​d​s​ ​n​o​n​e​.
+	 */
+	mcpTokenHint: string
+	/**
+	 * U​s​e​ ​t​h​i​s​ ​s​e​r​v​e​r
+	 */
+	mcpEnabled: string
+	/**
+	 * S​u​s​p​e​n​d​e​d​ ​b​y​ ​t​h​e​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​.​ ​Y​o​u​r​ ​o​w​n​ ​s​w​i​t​c​h​ ​i​s​ ​u​n​t​o​u​c​h​e​d​.
+	 */
+	mcpBlockedByAdmin: string
+	/**
+	 * I​t​s​ ​t​o​o​l​s​ ​a​r​e​ ​n​a​m​e​d​ ​{​p​r​e​f​i​x​}​…​ ​i​n​ ​f​r​o​n​t​ ​o​f​ ​t​h​e​ ​m​o​d​e​l
+	 * @param {string} prefix
+	 */
+	mcpToolPrefix: RequiredParams<'prefix'>
+	/**
+	 * C​o​n​n​e​c​t​e​d​.​ ​{​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}​ ​f​o​u​n​d​.
+	 * @param {number} count
+	 */
+	mcpConnected: RequiredParams<'count'>
+	/**
+	 * {​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}
+	 * @param {number} count
+	 */
+	mcpToolsFound: RequiredParams<'count'>
+	/**
+	 * O​n​l​y​ ​t​h​e​ ​f​i​r​s​t​ ​{​c​o​u​n​t​}​ ​a​r​e​ ​o​f​f​e​r​e​d​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​.​ ​T​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
+	 * @param {number} count
+	 */
+	mcpToolsCapped: RequiredParams<'count'>
+	/**
+	 * A​t​ ​m​o​s​t​ ​{​c​o​u​n​t​}​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​p​e​r​ ​a​c​c​o​u​n​t​.
+	 * @param {number} count
+	 */
+	mcpLimitReached: RequiredParams<'count'>
+	/**
+	 * A​l​l​o​w​e​d​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	mcpAllowed: string
+	/**
+	 * M​C​P​ ​s​e​r​v​e​r​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e
+	 */
+	allInstanceMcpServers: string
+	/**
+	 * E​v​e​r​y​b​o​d​y​’​s​,​ ​w​i​t​h​ ​w​h​o​s​e​ ​t​h​e​y​ ​a​r​e​.​ ​S​u​s​p​e​n​d​ ​o​n​e​ ​o​r​ ​r​e​m​o​v​e​ ​i​t​;​ ​h​o​w​ ​i​t​ ​i​s​ ​c​o​n​f​i​g​u​r​e​d​ ​s​t​a​y​s​ ​w​i​t​h​ ​i​t​s​ ​o​w​n​e​r​.
+	 */
+	allInstanceMcpServersHint: string
+	/**
+	 * U​s​e​r​s​ ​c​a​n​ ​a​d​d​ ​t​h​e​i​r​ ​o​w​n​ ​M​C​P​ ​s​e​r​v​e​r​s
+	 */
+	allowUserMcp: string
+	/**
+	 * C​a​l​l​i​n​g​ ​a​n​ ​e​x​t​e​r​n​a​l​ ​t​o​o​l
+	 */
+	callingExternalTool: string
+	/**
+	 * C​a​l​l​e​d​ ​a​n​ ​e​x​t​e​r​n​a​l​ ​t​o​o​l
+	 */
+	mcpStepCalled: string
+	/**
+	 * A​n​ ​e​x​t​e​r​n​a​l​ ​t​o​o​l​ ​f​a​i​l​e​d
+	 */
+	mcpStepFailed: string
+	/**
+	 * A​n​ ​M​C​P​ ​s​e​r​v​e​r​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​r​e​a​c​h​e​d
+	 */
+	mcpStepUnavailable: string
+	/**
 	 * K​e​p​t​ ​i​n​ ​m​e​m​o​r​y
 	 */
 	memoryStepKept: string
@@ -4339,6 +4452,18 @@ export type TranslationFunctions = {
 	 * Users can run their own bots
 	 */
 	allowUserIntegrations: () => LocalizedString
+	/**
+	 * Allowed on this instance
+	 */
+	botAllowed: () => LocalizedString
+	/**
+	 * switched off by its owner
+	 */
+	offByItsOwner: () => LocalizedString
+	/**
+	 * Suspended by the administrator. Your switch is kept as you left it and takes effect again once the suspension is lifted.
+	 */
+	botBlockedByAdmin: () => LocalizedString
 	/**
 	 * Limits
 	 */
@@ -7337,6 +7462,102 @@ export type TranslationFunctions = {
 	 * Delete everything {name} remembers about you? The persona itself is untouched.
 	 */
 	memoryForgetAllConfirm: (arg: { name: string }) => LocalizedString
+	/**
+	 * MCP servers
+	 */
+	mcpServers: () => LocalizedString
+	/**
+	 * Catalogues of tools running elsewhere. Their tools are offered to the model beside this app’s own, and their answers come from a machine this instance does not own.
+	 */
+	mcpServersDescription: () => LocalizedString
+	/**
+	 * Your administrator has not opened MCP servers to accounts on this instance.
+	 */
+	mcpNotAllowed: () => LocalizedString
+	/**
+	 * No MCP server yet
+	 */
+	noMcpServers: () => LocalizedString
+	/**
+	 * Add an MCP server
+	 */
+	addMcpServer: () => LocalizedString
+	/**
+	 * Server address
+	 */
+	mcpServerUrl: () => LocalizedString
+	/**
+	 * The HTTP streamable endpoint. Other transports are not supported.
+	 */
+	mcpServerUrlHint: () => LocalizedString
+	/**
+	 * Token
+	 */
+	mcpToken: () => LocalizedString
+	/**
+	 * Sent as a bearer token on every call. Leave empty for a server that needs none.
+	 */
+	mcpTokenHint: () => LocalizedString
+	/**
+	 * Use this server
+	 */
+	mcpEnabled: () => LocalizedString
+	/**
+	 * Suspended by the administrator. Your own switch is untouched.
+	 */
+	mcpBlockedByAdmin: () => LocalizedString
+	/**
+	 * Its tools are named {prefix}… in front of the model
+	 */
+	mcpToolPrefix: (arg: { prefix: string }) => LocalizedString
+	/**
+	 * Connected. {count} tool{{s}} found.
+	 */
+	mcpConnected: (arg: { count: number }) => LocalizedString
+	/**
+	 * {count} tool{{s}}
+	 */
+	mcpToolsFound: (arg: { count: number }) => LocalizedString
+	/**
+	 * Only the first {count} are offered to the model. The rest of the catalogue is left out.
+	 */
+	mcpToolsCapped: (arg: { count: number }) => LocalizedString
+	/**
+	 * At most {count} MCP servers per account.
+	 */
+	mcpLimitReached: (arg: { count: number }) => LocalizedString
+	/**
+	 * Allowed on this instance
+	 */
+	mcpAllowed: () => LocalizedString
+	/**
+	 * MCP servers on this instance
+	 */
+	allInstanceMcpServers: () => LocalizedString
+	/**
+	 * Everybody’s, with whose they are. Suspend one or remove it; how it is configured stays with its owner.
+	 */
+	allInstanceMcpServersHint: () => LocalizedString
+	/**
+	 * Users can add their own MCP servers
+	 */
+	allowUserMcp: () => LocalizedString
+	/**
+	 * Calling an external tool
+	 */
+	callingExternalTool: () => LocalizedString
+	/**
+	 * Called an external tool
+	 */
+	mcpStepCalled: () => LocalizedString
+	/**
+	 * An external tool failed
+	 */
+	mcpStepFailed: () => LocalizedString
+	/**
+	 * An MCP server could not be reached
+	 */
+	mcpStepUnavailable: () => LocalizedString
 	/**
 	 * Kept in memory
 	 */
