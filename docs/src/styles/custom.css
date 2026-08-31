@@ -1072,3 +1072,14 @@
 .release-empty {
 	color: var(--sl-color-gray-3);
 }
+
+/* The analytics note, last line of the home page. Small, grey, and out of the
+   way: it is a disclosure, not a paragraph anyone came here to read. */
+.counted {
+	margin-top: 3rem;
+	color: var(--sl-color-gray-4);
+	font-size: var(--sl-text-xs);
+	line-height: 1.6;
+	text-align: center;
+	text-wrap: balance;
+}

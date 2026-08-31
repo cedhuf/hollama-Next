@@ -38,6 +38,19 @@ export default defineConfig({
 				baseUrl: 'https://github.com/cedhuf/llooma/edit/main/docs/'
 			},
 			customCss: ['./src/styles/custom.css'],
+			// Self-hosted Umami, on a machine we own. No cookie, no personal data,
+			// so there is nothing to put a consent banner in front of. `defer` keeps
+			// it out of the critical path: if the box is down the page still renders.
+			head: [
+				{
+					tag: 'script',
+					attrs: {
+						defer: true,
+						src: 'https://audience.thehuf.uk/t.js',
+						'data-website-id': '433cde08-4dd1-4834-a15e-a67432ba0da7'
+					}
+				}
+			],
 			// The home page hero is a piece of the app rather than a logo, which
 			// Starlight's own hero has no room for. Nothing else is overridden.
 			components: {
