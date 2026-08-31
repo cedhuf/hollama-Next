@@ -152,7 +152,7 @@ export class Conversation implements RunSurface {
 			thinking: true,
 			// On, like every other tool switch: what makes MCP safe is the question
 			// asked before each call, not a switch somebody has to find first.
-			mcp: true,
+			mcp: this.#settings.current.mcpByDefault,
 			// Declared here rather than left undefined: it is bound into the streaming
 			// article, and Svelte refuses `bind:` against a prop that has a fallback when
 			// the bound value is undefined. Reattaching to a run in progress hit that
@@ -248,7 +248,7 @@ export class Conversation implements RunSurface {
 		this.editor.interactiveChoices = this.#settings.current.interactiveChoices;
 		this.editor.sendCurrentDate = this.#settings.current.sendCurrentDate;
 		this.editor.thinking = true;
-		this.editor.mcp = true;
+		this.editor.mcp = this.#settings.current.mcpByDefault;
 		this.editor.pendingApproval = undefined;
 		if (entry.atBottom !== false) void this.#view.scrollToBottom();
 
@@ -521,7 +521,7 @@ export class Conversation implements RunSurface {
 					sendCurrentDate: !!this.editor.sendCurrentDate,
 					nativeTools: this.#settings.current.nativeTools,
 					webSearchAuto: this.#settings.current.webSearchAuto,
-					mcp: this.editor.mcp !== false
+					mcp: !!this.editor.mcp
 				},
 				capabilities: { search: this.searchAvailable, fetch: this.#webFetch.current.available }
 			});
@@ -655,7 +655,7 @@ export class Conversation implements RunSurface {
 				sendCurrentDate: !!this.editor.sendCurrentDate,
 				nativeTools: settings.nativeTools,
 				webSearchAuto: settings.webSearchAuto,
-				mcp: this.editor.mcp !== false
+				mcp: !!this.editor.mcp
 			},
 			capabilities: {
 				search: this.searchAvailable,

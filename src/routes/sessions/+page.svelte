@@ -44,7 +44,10 @@
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
 	let webFetch = $state($webFetchConfig.available && $settingsStore.webFetchByDefault);
 	let interactiveChoices = $state($settingsStore.interactiveChoices);
-	let mcp = $state(true);
+	// Off unless this account says otherwise, like a conversation's own switch: the
+	// catalogues are what make a call possible, so a message that has not asked for
+	// them cannot produce one.
+	let mcp = $state($settingsStore.mcpByDefault);
 	let sendCurrentDate = $state($settingsStore.sendCurrentDate);
 	let thinking = $state(true);
 	let attachments = $state<Attachment[]>([]);

@@ -3290,6 +3290,14 @@ type RootTranslation = {
 	 */
 	mcpServersDescription: string
 	/**
+	 * O​f​f​e​r​ ​t​h​e​s​e​ ​t​o​o​l​s​ ​i​n​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
+	 */
+	mcpByDefault: string
+	/**
+	 * O​f​f​ ​b​y​ ​d​e​f​a​u​l​t​.​ ​T​h​e​ ​s​w​i​t​c​h​ ​i​n​ ​t​h​e​ ​c​o​m​p​o​s​e​r​ ​t​u​r​n​s​ ​t​h​e​m​ ​o​n​ ​f​o​r​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​t​h​a​t​ ​n​e​e​d​s​ ​t​h​e​m​,​ ​w​h​i​c​h​ ​k​e​e​p​s​ ​e​v​e​r​y​ ​o​t​h​e​r​ ​t​u​r​n​ ​f​r​o​m​ ​c​a​r​r​y​i​n​g​ ​t​h​e​i​r​ ​d​e​f​i​n​i​t​i​o​n​s​.
+	 */
+	mcpByDefaultHint: string
+	/**
 	 * T​o​o​l​s​ ​s​e​n​t​ ​t​o​ ​t​h​e​ ​m​o​d​e​l
 	 */
 	mcpMaxTools: string
@@ -7563,6 +7571,14 @@ export type TranslationFunctions = {
 	 * Catalogues of tools running elsewhere. Their tools are offered to the model beside this app’s own, and their answers come from a machine this instance does not own.
 	 */
 	mcpServersDescription: () => LocalizedString
+	/**
+	 * Offer these tools in new conversations
+	 */
+	mcpByDefault: () => LocalizedString
+	/**
+	 * Off by default. The switch in the composer turns them on for a conversation that needs them, which keeps every other turn from carrying their definitions.
+	 */
+	mcpByDefaultHint: () => LocalizedString
 	/**
 	 * Tools sent to the model
 	 */

@@ -936,6 +936,9 @@ const fr = extendDictionary(en, {
 	mcpServers: 'Serveurs MCP',
 	mcpServersDescription:
 		'Des catalogues d\u2019outils qui tournent ailleurs. Leurs outils sont proposés au modèle à côté de ceux de l\u2019app, et leurs réponses viennent d\u2019une machine que cette instance ne possède pas.',
+	mcpByDefault: 'Proposer ces outils dans les nouvelles conversations',
+	mcpByDefaultHint:
+		'Désactivé par défaut. L\u2019interrupteur du composer les active pour une conversation qui en a besoin, ce qui évite à tous les autres tours d\u2019emporter leurs définitions.',
 	mcpMaxTools: 'Outils envoyés au modèle',
 	mcpMaxToolsHint:
 		'Tous serveurs actifs confondus. Au-delà, le reste du catalogue est laissé de côté.',

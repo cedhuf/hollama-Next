@@ -6,6 +6,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
+	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import { settingsStore } from '$lib/localStorage';
 	import { MCP_LIMITS, type McpServerView } from '$lib/mcp';
@@ -215,6 +216,13 @@
 				<EmptyMessage>{$LL.noMcpServers()}</EmptyMessage>
 			</div>
 		{/if}
+
+		<!-- Off by default, unlike the web toggles: sending the catalogues is what
+		     makes a call possible at all, so a conversation that has not asked for
+		     them cannot produce one. Reaching for the switch when there is something
+		     to do with it is cheaper and narrower than leaving it open all day. -->
+		<FieldCheckbox label={$LL.mcpByDefault()} bind:checked={$settingsStore.mcpByDefault} />
+		<SettingsHint>{$LL.mcpByDefaultHint()}</SettingsHint>
 
 		<!-- One number for every server together, because what costs is the size of a
 		     request and a request carries the lot. Above the list rather than on each

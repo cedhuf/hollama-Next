@@ -141,6 +141,8 @@ export interface Settings {
 	webFetchMaxChars: number;
 	/** How many MCP tools may be sent to the model at once, across every server. */
 	mcpMaxTools: number;
+	/** Whether a new conversation starts with the MCP tools switched on. */
+	mcpByDefault: boolean;
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
@@ -446,6 +448,12 @@ export const DEFAULT_SETTINGS: Settings = {
 	webFetchMaxPages: 3,
 	webFetchMaxChars: 20000,
 	mcpMaxTools: MCP_LIMITS.defaultTools,
+	// Off, unlike the web toggles beside it, and deliberately. Sending the
+	// catalogues is what makes a call possible at all, so a conversation that has
+	// not asked for them cannot produce one: the switch is reached for when there
+	// is something to do with it, rather than standing open all day. It also keeps
+	// every ordinary turn from carrying tool definitions it will never use.
+	mcpByDefault: false,
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',

@@ -910,6 +910,9 @@ const en = {
 	mcpServers: 'MCP servers',
 	mcpServersDescription:
 		'Catalogues of tools running elsewhere. Their tools are offered to the model beside this app\u2019s own, and their answers come from a machine this instance does not own.',
+	mcpByDefault: 'Offer these tools in new conversations',
+	mcpByDefaultHint:
+		'Off by default. The switch in the composer turns them on for a conversation that needs them, which keeps every other turn from carrying their definitions.',
 	mcpMaxTools: 'Tools sent to the model',
 	mcpMaxToolsHint:
 		'Across every server switched on. Past this many, the rest of the catalogue is left out.',

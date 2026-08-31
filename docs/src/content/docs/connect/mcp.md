@@ -115,10 +115,16 @@ the timeline answers rather than a guess.
 
 ## Switching them off for a conversation
 
-The composer's lightning menu carries an **MCP tools** switch, on by default. It
+The composer's lightning menu carries an **MCP tools** switch, off by default. It
 is one switch for all your servers rather than one per server, and what it
 decides is whether the catalogues are sent at all: a conversation with no use for
 forty tool definitions should not be paying for them in every request it makes.
+
+Off is the default on purpose, and it is a narrowing rather than a saving. Sending
+the catalogues is what makes a call possible at all, so a conversation that never
+asked for them cannot produce one, and no approval card can appear in it. You
+switch them on for the conversation that needs them. _Settings → Tools_ has the
+other answer for anyone who would rather have them everywhere.
 
 Which of them may actually run is never decided there. That is decided call by
 call, when the call is about to be made.
