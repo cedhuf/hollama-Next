@@ -13,9 +13,10 @@
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
 	import { settingsModalOpen } from '$lib/stores/modal';
-	import Aura from '$lib/voice/Aura.svelte';
 	import { VoiceSession } from '$lib/voice/session.svelte';
 	import VoiceBars from '$lib/voice/VoiceBars.svelte';
+
+	import Orb from '../Orb.svelte';
 
 	/**
 	 * Talking to it, rather than typing at it.
@@ -35,7 +36,7 @@
 	 * through the same orchestrator a typed message uses, so an exchange held here
 	 * is an ordinary conversation in the list afterwards.
 	 *
-	 * Two visuals, for two speakers. The aura is the voice answering; the bars at
+	 * Two visuals, for two speakers. The orb is the voice answering; the bars at
 	 * the foot are yours. Which of them is moving says whose turn it is from across
 	 * a room, and no status text does that as quickly.
 	 */
@@ -109,7 +110,7 @@
 	);
 
 	/**
-	 * The four states the aura draws, which are not quite the five the screen has.
+	 * The four states the orb draws, which are not quite the five the screen has.
 	 *
 	 * Transcribing is a wait with nothing to hear, exactly like thinking, and
 	 * giving it a look of its own would draw a distinction nobody watching a shape
@@ -128,7 +129,7 @@
 						: 'thinking'
 	);
 
-	/** The aura draws the answer, so it reads the answer. Silence otherwise. */
+	/** The orb draws the answer, so it reads the answer. Silence otherwise. */
 	const sample = $derived(() => (voice.state === 'speaking' ? voice.voiceReading() : SILENCE));
 
 	/**
@@ -225,7 +226,7 @@
 	</div>
 
 	<!--
-		The aura is the control, and that is the whole of the interface.
+		The orb is the control, and that is the whole of the interface.
 
 		Pressing the object that is already the only thing on screen removes both the
 		second place to look and the second place to aim, and it gives a surface
@@ -246,7 +247,7 @@
 			disabled={!ready}
 			class="group relative flex items-center justify-center rounded-full outline-none"
 		>
-			<Aura
+			<Orb
 				class="aspect-square w-[min(78vw,22rem)] transition-[color,transform] duration-300 group-active:scale-95"
 				style="color: {tint}"
 				phase={shape}
