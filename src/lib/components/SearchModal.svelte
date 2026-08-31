@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CornerDownLeft, Layers, Search } from '@lucide/svelte';
+	import { CornerDownLeft, Layers, Search, X } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -182,6 +182,20 @@
 					: 'text-muted hover:bg-shade-2 hover:text-active'}"
 			>
 				<Layers class="h-3.5 w-3.5" />
+			</button>
+
+			<!-- The way out, and it has to be here rather than in the dialog's own
+			     corner: this content fills the frame from the top edge, so the built-in
+			     close would land on the field. It was simply left off, which cost
+			     nothing on a desktop where Escape is a key somebody's hand is already
+			     near, and left a phone with no way out of a full-screen dialog at all. -->
+			<button
+				type="button"
+				onclick={() => (open = false)}
+				aria-label={$LL.close()}
+				class="text-muted hover:bg-shade-2 hover:text-active shrink-0 rounded-lg p-1.5 transition-colors"
+			>
+				<X class="h-4 w-4" />
 			</button>
 		</div>
 
