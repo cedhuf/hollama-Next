@@ -4,46 +4,155 @@
  * Kept deliberately small: everything here is a deviation from a theme that is
  * already consistent and accessible, so each rule should earn its place.
  * Colours come from Starlight's own custom properties so both light and dark
- * ramps follow automatically.
+ * ramps follow automatically. The exception is the theme picker near the foot of
+ * the home page, which shows the app's palettes and therefore has to carry their
+ * actual values.
  *
- * Everything below is used by the home page.
+ * Starlight's own rules live in `@layer starlight.core`, and everything here is
+ * unlayered, so these win without needing specificity tricks.
+ *
+ * Everything down to the changelog is used by the home page.
  */
 
-/* The attribution, directly under the name it qualifies. Small and quiet, but
-   the first thing after the title, because being a fork is not a footnote. */
-.fork-note {
+/*
+ * A visually hidden label, still read aloud and still focusable. Used for the
+ * two fieldset legends in the theme picker, which say what a group of controls
+ * is for to someone who cannot see that it is a row of swatches.
+ */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/*
+ * The hero.
+ *
+ * Starlight reserves a second column for an image and left-aligns the text once
+ * there is one. There is no image here on purpose: the screenshot underneath is
+ * a desktop and a phone side by side, which is unreadable at a third of the page
+ * width, so it goes full width below instead and the hero keeps the whole line.
+ */
+.hero {
+	grid-template-columns: 100%;
+}
+
+.hero h1 {
+	max-width: 20ch;
+	font-weight: 650;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+.hero .tagline {
+	max-width: 58ch;
+	text-wrap: pretty;
+}
+
+@media (min-width: 50rem) {
+	.hero {
+		padding-block: clamp(3rem, 9vmin, 6rem) 1.5rem;
+	}
+
+	/* Starlight switches all three to `start` when it thinks there is an image
+	   beside them. */
+	.hero .stack {
+		text-align: center;
+	}
+
+	.hero .copy {
+		align-items: center;
+	}
+
+	.hero .actions {
+		justify-content: center;
+	}
+}
+
+/*
+ * The line under the buttons: what this is a fork of, and how finished it is.
+ *
+ * Both were blocks of their own before, a pill and a yellow caution box, which
+ * meant the first two things anyone read were a credit and a warning. On one
+ * quiet line they are still the first thing after the buttons, which is where a
+ * disclosure belongs, without being the loudest thing on the page.
+ */
+.meta {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
-	gap: 0.35rem;
-	width: fit-content;
-	margin: -1.5rem auto 3rem;
-	padding: 0.4rem 1rem;
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 999px;
-	background: var(--sl-color-gray-6);
-	color: var(--sl-color-gray-2);
+	gap: 0.5rem 1rem;
+	margin: 0 auto 1rem;
+	color: var(--sl-color-gray-3);
 	font-size: var(--sl-text-sm);
-	line-height: 1.4;
 	text-align: center;
-	text-wrap: balance;
 }
 
-/* MDX wraps the block's children in a paragraph; the pill is the container, so
-   that paragraph must not add spacing of its own. */
-.fork-note p {
+/* MDX wraps the block's children in a paragraph of its own. */
+.meta__note p {
 	margin: 0;
 }
 
-.fork-note a {
-	color: var(--sl-color-white);
+.meta__note a {
+	color: var(--sl-color-gray-2);
 	text-decoration-color: var(--sl-color-gray-4);
 	text-underline-offset: 0.2em;
 }
 
-.fork-note a:hover {
+.meta__note a:hover {
 	color: var(--sl-color-text-accent);
+}
+
+/*
+ * A small caps label. Ahead of a heading rather than under it: it says what
+ * subject is about to start, which is only useful before the subject starts.
+ */
+.eyebrow {
+	margin: 0 0 0.35rem;
+	color: var(--sl-color-text-accent);
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+/*
+ * A tag. Small, and ahead of what it qualifies rather than buried under it: a
+ * disclosure that arrives after the reader has formed an opinion has not
+ * disclosed anything.
+ */
+.tag {
+	display: inline-block;
+	width: fit-content;
+	padding: 0.25rem 0.7rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 999px;
+	background: var(--sl-color-gray-6);
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+/* The one warning on the page, in the colour Starlight already uses for a
+   caution aside, so it reads as the same kind of statement. */
+.tag--warn {
+	border-color: var(--sl-color-orange);
+	background: var(--sl-color-orange-low);
+	color: var(--sl-color-orange-high);
+}
+
+/* In a band it sits beside the heading, not above it: two words on a line of
+   their own would carry more weight than a disclosure deserves. */
+.band > .tag {
+	float: right;
+	margin: 0.2rem 0 0.5rem 1rem;
 }
 
 /*
@@ -59,7 +168,7 @@
 	/* The glow sits at a negative z-index, which without this would put it behind
 	   the page background rather than behind the image. */
 	isolation: isolate;
-	margin: 3rem 0;
+	margin: 2rem 0 4rem;
 }
 
 .shot img {
@@ -103,6 +212,143 @@
 }
 
 /*
+ * Install, in the form anyone will actually meet it.
+ *
+ * The argument for a self-hosted app is how little it asks of the machine, and
+ * that argument is the file itself rather than a sentence about the file. Two
+ * columns so the prose and the compose file are read as one statement, stacked
+ * below the width where the code would start wrapping.
+ */
+.start {
+	display: grid;
+	gap: 1.5rem 3rem;
+	align-items: center;
+	margin: 4rem 0;
+}
+
+@media (min-width: 56rem) {
+	.start {
+		grid-template-columns: 4fr 6fr;
+	}
+}
+
+.start h2 {
+	margin-top: 0;
+	border: 0;
+	font-size: var(--sl-text-3xl);
+	letter-spacing: -0.01em;
+}
+
+/* Expressive Code sets its own margins for a standalone block; inside a grid
+   cell they push the two columns out of alignment. */
+.start__code .expressive-code {
+	margin: 0;
+}
+
+/*
+ * The feature panels.
+ *
+ * A claim and the screen it happens on, side by side, alternating so the eye has
+ * somewhere to go down the page. This replaced four cards of text: a card can
+ * hold a sentence about a feature, it cannot show one.
+ */
+.panels {
+	display: flex;
+	flex-direction: column;
+	gap: 4rem;
+	margin: 5rem 0;
+}
+
+.panel {
+	display: grid;
+	gap: 1.5rem 3rem;
+	align-items: center;
+}
+
+@media (min-width: 56rem) {
+	.panel {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	/* Every other one reads right to left. The figure is second in the markup
+	   either way, so the reading order stays the same for a screen reader. */
+	.panel:nth-child(even) .panel__shot {
+		order: -1;
+	}
+}
+
+.panel h2 {
+	margin-top: 0;
+	border: 0;
+	font-size: var(--sl-text-3xl);
+	letter-spacing: -0.01em;
+	text-wrap: balance;
+}
+
+.panel__copy p {
+	color: var(--sl-color-gray-2);
+	line-height: 1.7;
+}
+
+.panel__shot {
+	margin: 0;
+}
+
+.panel__shot img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 0.75rem;
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 0.08),
+		0 16px 40px -16px rgb(0 0 0 / 0.4);
+}
+
+/* The phone shot is already a phone on a transparent ground, so a frame around
+   it would be a second device around the first. */
+.panel__shot--phone img {
+	width: min(100%, 17rem);
+	margin-inline: auto;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+/*
+ * The link that ends a panel, with a chevron drawn from two borders rather than
+ * typed as an arrow character, which would be read out loud by a screen reader.
+ */
+.more {
+	margin-top: 1.25rem;
+}
+
+.more a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: var(--sl-color-white);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.more a::after {
+	content: '';
+	width: 0.4rem;
+	height: 0.4rem;
+	border-top: 2px solid currentcolor;
+	border-right: 2px solid currentcolor;
+	transform: rotate(45deg);
+	transition: transform 0.2s;
+}
+
+.more a:hover {
+	color: var(--sl-color-text-accent);
+}
+
+.more a:hover::after {
+	transform: rotate(45deg) translate(2px, -2px);
+}
+
+/*
  * A band: a section tinted enough to read as a change of subject, without a
  * rule across the page or a heading shouting about it.
  */
@@ -123,32 +369,370 @@
 }
 
 /*
- * A disclosure pill.
+ * The theme picker.
  *
- * Small, and ahead of what it qualifies rather than buried under it: a
- * disclosure that arrives after the reader has formed an opinion has not
- * disclosed anything.
+ * This was a screenshot of twelve palettes, which is a lot of kilobytes to say
+ * something the reader cannot try. Real radio buttons and `:has()` do it with no
+ * JavaScript at all, which also means it works before hydration, keyboard first,
+ * and with the tab order the browser already knows how to build.
+ *
+ * The twelve palettes below are the ones in `ThemePicker.svelte`, which mirrors
+ * the `--hsl-*` blocks in the app's `app.pcss`. A palette added there has to be
+ * added here too; nothing checks that for us.
  */
-.pill {
-	display: inline-block;
-	width: fit-content;
-	margin: 2rem 0 0.75rem;
-	padding: 0.3rem 0.8rem;
+.themes {
+	display: grid;
+	gap: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+/* Off-screen rather than `display: none`, which would take them out of the tab
+   order and leave the labels unreachable without a mouse. */
+.themes input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.themes__controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1.5rem;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.themes__styles,
+.themes__modes {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.sw,
+.mode {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0.8rem;
 	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 999px;
-	background: var(--sl-color-gray-6);
+	border-radius: 0.6rem;
 	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-sm);
+	cursor: pointer;
+	transition:
+		border-color 0.2s,
+		color 0.2s;
+}
+
+.sw:hover,
+.mode:hover {
+	border-color: var(--sl-color-gray-4);
+	color: var(--sl-color-white);
+}
+
+.themes input:checked + label {
+	border-color: var(--sl-color-text-accent);
+	color: var(--sl-color-white);
+	font-weight: 600;
+}
+
+.themes input:focus-visible + label {
+	outline: 2px solid var(--sl-color-text-accent);
+	outline-offset: 2px;
+}
+
+/* Two dots rather than a name alone: which palette is which is the whole
+   question, and six words in a row answer none of it. */
+.sw__dot {
+	width: 0.85rem;
+	height: 0.85rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--accent) 50%, var(--bg) 50%);
+}
+
+.mode {
+	padding-inline: 1rem;
+}
+
+/* The palettes. Each style carries both of its ramps, and the mode rules below
+   choose which one is in play, for the preview and for the swatches at once. */
+.themes:has(#ts-classic:checked) {
+	--l-bg: #ebebeb;
+	--l-side: #f5f5f5;
+	--l-accent: #eb6d47;
+	--l-text: #0d0d0d;
+	--l-muted: #808080;
+	--d-bg: #1a1a1a;
+	--d-side: #242424;
+	--d-accent: #eb6d47;
+	--d-text: #f2f2f2;
+	--d-muted: #808080;
+}
+
+.themes:has(#ts-dracula:checked) {
+	--l-bg: #f2f2ea;
+	--l-side: #fdfdf7;
+	--l-accent: #ff79c6;
+	--l-text: #282a36;
+	--l-muted: #6272a4;
+	--d-bg: #282a36;
+	--d-side: #1e1f29;
+	--d-accent: #ff79c6;
+	--d-text: #f8f8f2;
+	--d-muted: #6272a4;
+}
+
+.themes:has(#ts-catppuccin:checked) {
+	--l-bg: #e6e9ef;
+	--l-side: #eff1f5;
+	--l-accent: #cba6f7;
+	--l-text: #4c4f69;
+	--l-muted: #7c7f93;
+	--d-bg: #1e1e2e;
+	--d-side: #181825;
+	--d-accent: #cba6f7;
+	--d-text: #cdd6f4;
+	--d-muted: #6c7086;
+}
+
+.themes:has(#ts-gruvbox:checked) {
+	--l-bg: #f2e5bc;
+	--l-side: #fbf1c7;
+	--l-accent: #d65d0e;
+	--l-text: #282828;
+	--l-muted: #7c6f64;
+	--d-bg: #282828;
+	--d-side: #1d2021;
+	--d-accent: #fe8019;
+	--d-text: #ebdbb2;
+	--d-muted: #7c6f64;
+}
+
+.themes:has(#ts-nord:checked) {
+	--l-bg: #e5e9f0;
+	--l-side: #eceff4;
+	--l-accent: #5e81ac;
+	--l-text: #2e3440;
+	--l-muted: #4c566a;
+	--d-bg: #2e3440;
+	--d-side: #272c36;
+	--d-accent: #88c0d0;
+	--d-text: #d8dee9;
+	--d-muted: #4c566a;
+}
+
+.themes:has(#ts-solarized:checked) {
+	--l-bg: #eee8d5;
+	--l-side: #fdf6e3;
+	--l-accent: #268bd2;
+	--l-text: #073642;
+	--l-muted: #839496;
+	--d-bg: #002b36;
+	--d-side: #073642;
+	--d-accent: #268bd2;
+	--d-text: #93a1a1;
+	--d-muted: #586e75;
+}
+
+/* Each swatch shows its own palette whichever one is selected, so it carries its
+   two ramps itself. The mode rules underneath then apply to it exactly as they
+   apply to the preview. */
+.sw--classic {
+	--l-bg: #ebebeb;
+	--l-accent: #eb6d47;
+	--d-bg: #1a1a1a;
+	--d-accent: #eb6d47;
+}
+
+.sw--dracula {
+	--l-bg: #f2f2ea;
+	--l-accent: #ff79c6;
+	--d-bg: #282a36;
+	--d-accent: #ff79c6;
+}
+
+.sw--catppuccin {
+	--l-bg: #e6e9ef;
+	--l-accent: #cba6f7;
+	--d-bg: #1e1e2e;
+	--d-accent: #cba6f7;
+}
+
+.sw--gruvbox {
+	--l-bg: #f2e5bc;
+	--l-accent: #d65d0e;
+	--d-bg: #282828;
+	--d-accent: #fe8019;
+}
+
+.sw--nord {
+	--l-bg: #e5e9f0;
+	--l-accent: #5e81ac;
+	--d-bg: #2e3440;
+	--d-accent: #88c0d0;
+}
+
+.sw--solarized {
+	--l-bg: #eee8d5;
+	--l-accent: #268bd2;
+	--d-bg: #002b36;
+	--d-accent: #268bd2;
+}
+
+/* Light or dark, resolved on the element that draws rather than on the group, so
+   each swatch resolves against its own ramp instead of the selected one. */
+.themes:has(#tm-light:checked) .ramp,
+.themes:has(#tm-light:checked) .sw {
+	--bg: var(--l-bg);
+	--side: var(--l-side);
+	--accent: var(--l-accent);
+	--text: var(--l-text);
+	--muted: var(--l-muted);
+}
+
+.themes:has(#tm-dark:checked) .ramp,
+.themes:has(#tm-dark:checked) .sw {
+	--bg: var(--d-bg);
+	--side: var(--d-side);
+	--accent: var(--d-accent);
+	--text: var(--d-text);
+	--muted: var(--d-muted);
+}
+
+/*
+ * The mock conversation the palettes are tried on.
+ *
+ * Built from the app's own arrangement, a sidebar and a thread, because a row of
+ * coloured rectangles proves a palette exists and nothing about living in it.
+ */
+.mock {
+	display: grid;
+	grid-template-columns: 11rem 1fr;
+	overflow: hidden;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.9rem;
+	background: var(--bg);
+	box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.45);
+	font-size: var(--sl-text-sm);
+	transition: background 0.25s;
+}
+
+@media (max-width: 34rem) {
+	/* Below this the sidebar and the thread are both too narrow to say anything,
+	   and the thread is the half worth keeping. */
+	.mock {
+		grid-template-columns: 1fr;
+	}
+
+	.mock__side {
+		display: none;
+	}
+}
+
+.mock__side {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.9rem;
+	background: var(--side);
+	transition: background 0.25s;
+}
+
+.mock__brand {
+	color: var(--text);
+	font-weight: 700;
+}
+
+/* Tinted rather than filled with the accent, which the app can afford and this
+   cannot: twelve palettes means twelve contrast ratios, and a pale accent under
+   a light ramp (Catppuccin, Nord) leaves no readable colour for the label. A mix
+   with the surface behind it is legible in all twelve. */
+.mock__new {
+	margin-bottom: 0.25rem;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.45rem;
+	background: color-mix(in oklab, var(--accent) 32%, var(--side));
+	color: var(--text);
 	font-size: var(--sl-text-xs);
 	font-weight: 600;
-	letter-spacing: 0.02em;
+	text-align: center;
+}
+
+.mock__row {
+	overflow: hidden;
+	color: var(--muted);
+	font-size: var(--sl-text-xs);
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.mock__row--on {
+	padding: 0.25rem 0.4rem;
+	border-radius: 0.35rem;
+	background: color-mix(in oklab, var(--text) 8%, transparent);
+	color: var(--text);
+	font-weight: 600;
+}
+
+.mock__main {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	padding: 1rem;
+}
+
+.mock__main p {
+	margin: 0;
+}
+
+.mock__you {
+	max-width: 80%;
+	margin-left: auto;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.6rem;
+	background: color-mix(in oklab, var(--accent) 22%, var(--bg));
+	color: var(--text);
+}
+
+.mock__label {
+	color: var(--muted);
+	font-size: var(--sl-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
 }
 
-/* In a band it sits beside the heading, not above it: two words on a line of
-   their own would carry more weight than a disclosure deserves. */
-.band > .pill {
-	float: right;
-	margin: 0.2rem 0 0.5rem 1rem;
+.mock__said {
+	color: var(--text);
+	line-height: 1.6;
+}
+
+.mock__composer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: auto;
+	padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+	border: 1px solid color-mix(in oklab, var(--muted) 40%, transparent);
+	border-radius: 0.6rem;
+	color: var(--muted);
+	font-size: var(--sl-text-xs);
+}
+
+.mock__run {
+	padding: 0.25rem 0.6rem;
+	border-radius: 0.4rem;
+	background: color-mix(in oklab, var(--accent) 20%, var(--bg));
+	color: var(--text);
+	font-weight: 600;
 }
 
 /*
@@ -228,12 +812,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.credit {
+	.credit,
+	.mock,
+	.mock__side,
+	.sw,
+	.mode,
+	.more a::after {
 		transition: none;
 	}
 
 	.credit:hover {
 		transform: none;
+	}
+
+	.more a:hover::after {
+		transform: rotate(45deg);
 	}
 }
 

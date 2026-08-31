@@ -1,12 +1,10 @@
 ---
 title: Llooma
-description: A (less) minimal LLM chat app that runs entirely in your browser.
+description: A self-hosted chat app for the models you already use, on hardware you own.
 template: splash
 hero:
-  tagline: A (less) minimal LLM chat app. Run it in your browser alone, or host it for your team.
-  image:
-    light: ../../assets/logo-mark.png
-    dark: ../../assets/logo-mark-dark.png
+  title: Every model you use, in an app you host
+  tagline: Point it at Ollama on the machine under your desk, or at a provider you already pay for. One place for the conversations, the personas and the keys, on a server that belongs to you.
   actions:
     - text: Install it
       link: /guides/installation/
@@ -21,68 +19,155 @@ hero:
       variant: minimal
 ---
 
-{/* Indentation inside CardGrid is load-bearing: indent a line by four spaces and MDX reads it as a code block, which is what broke these cards once. MDX files are excluded in .prettierignore for the same reason. Keep this comment on one line, since a wrapped one breaks the parse. */}
+{/* Indentation inside a JSX block is load-bearing: indent a line by four spaces and MDX reads it as a code block, which is what broke the cards on the previous version of this page. Tabs are safe, spaces are not. MDX files are excluded in .prettierignore for the same reason. Keep this comment on one line, since a wrapped one breaks the parse. */}
 
 import { Image } from 'astro:assets';
-import { Card, CardGrid } from '@astrojs/starlight/components';
 import Credits from '../../components/Credits.astro';
 import hero from '../../assets/screenshots/hero.png';
-import themes from '../../assets/screenshots/themes.png';
+import library from '../../assets/screenshots/desktop_library.png';
+import conversation from '../../assets/screenshots/desktop_conversation.png';
+import phone from '../../assets/screenshots/phone_home.png';
 
-{/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid: browsers split it and the pill loses its content. */}
+{/* A div, not a p: MDX wraps multi-line children in a paragraph of its own, and a p inside a p is invalid, so browsers split it and the line loses its content. */}
 
-<div class="fork-note">
-	A fork of [Hollama](https://github.com/fmaclen/hollama) by
-	[fmaclen](https://github.com/fmaclen)
+<div class="meta">
+	<div class="meta__note">
+		A fork of [Hollama](https://github.com/fmaclen/hollama) by
+		[fmaclen](https://github.com/fmaclen)
+	</div>
+	<div class="tag tag--warn">Early preview, not for production</div>
 </div>
-
-:::caution[Early preview]
-Llooma is not made for production use. Expect breaking changes, unfinished features and rough
-edges. The browser-only mode has just been retired, so anything that assumed it may still have
-rough edges of its own.
-:::
 
 <figure class="shot shot--bleed">
 	<Image src={hero} alt="Llooma on a desktop, with the phone interface beside it" loading="eager" />
 	<figcaption>The same conversations on a desktop and in your hand. Nothing of it leaves the machine unless you send it.</figcaption>
 </figure>
 
-<CardGrid>
-<Card title="Personal or shared" icon="laptop">
-One install. With nothing configured it is yours alone, with no login screen. Configure a way to sign in and the same instance stores each account's data separately, keeping the API keys where a browser can never read them.
+<section class="start">
 
-[See how →](/guides/running-modes/)
-</Card>
+<div class="start__copy">
 
-<Card title="Bring your own models" icon="puzzle">
-Ollama, OpenAI, Claude, Infomaniak and anything OpenAI-compatible. Several at once, each with its own label and colour, so you always know which endpoint is about to be billed.
+<p class="eyebrow">Two minutes</p>
 
-[See the providers →](/connect/providers/)
-</Card>
+## Eight lines and a port
 
-<Card title="Documents, read in the tab" icon="open-book">
-A PDF, a spreadsheet, a Word file. Parsed in your browser and never uploaded, in server mode too. Optional OCR for scans, and a vision fallback when a page is a picture of words.
+No database to provision and no build step. Bring your own models, whether that is Ollama on the same
+machine or an API key you already have.
 
-[How it works →](/context/documents/)
-</Card>
+[Read the installation guide](/guides/installation/)
 
-<Card title="Conversations that keep fitting" icon="seti:clock">
-`/compact` replaces a long history with a structured summary so it still fits in the window. Nothing is deleted, and one click puts it all back.
+</div>
 
-[Read about compaction →](/chat/compaction/)
-</Card>
-</CardGrid>
+<div class="start__code">
+
+```yaml title="docker-compose.yml"
+services:
+  llooma:
+    image: ghcr.io/cedhuf/llooma:latest
+    restart: unless-stopped
+    ports:
+      - '4173:4173'
+    environment:
+      - VITE_ALLOWED_HOSTS=localhost
+```
+
+</div>
+
+</section>
+
+<section class="panels">
+
+<article class="panel">
+	<div class="panel__copy">
+		<p class="eyebrow">Library</p>
+		<h2>Characters, procedures and notes, kept</h2>
+		<p>A persona carries its own prompt, model, avatar and voice, and answers a single turn when you mention it with <code>@</code>. A playbook is a procedure written once and switched on where it is needed. Knowledge is the text you were retyping into every conversation.</p>
+		<p>All three install from a store over the network, so adding one is a pull request rather than a release.</p>
+		<p class="more"><a href="/behaviour/personas/">How personas work</a></p>
+	</div>
+	<figure class="panel__shot">
+		<Image src={library} alt="The library, with three personas" />
+	</figure>
+</article>
+
+<article class="panel">
+	<div class="panel__copy">
+		<p class="eyebrow">Conversations</p>
+		<h2>Long ones keep fitting</h2>
+		<p>When a conversation outgrows the context window, <code>/compact</code> replaces what was said with a structured summary. Nothing is deleted and one click puts it all back.</p>
+		<p>The reply is written on the server, so reloading the page, walking away or letting the phone sleep no longer costs you the answer.</p>
+		<p class="more"><a href="/chat/compaction/">How compaction works</a></p>
+	</div>
+	<figure class="panel__shot">
+		<Image src={conversation} alt="A conversation, with the composer at the foot" />
+	</figure>
+</article>
+
+<article class="panel">
+	<div class="panel__copy">
+		<p class="eyebrow">On a phone</p>
+		<h2>A second interface, not a smaller one</h2>
+		<p>One column, a tab bar where a thumb already is, and the microphone set apart because talking is what it is for. Installable as a PWA, and offered to phones only.</p>
+		<p>Speaking is a loop rather than a button: it stops listening once the room goes quiet, answers out loud, and listens again. It works with the phone face down on a table.</p>
+		<p class="more"><a href="/media/voice/">How the voice mode works</a></p>
+	</div>
+	<figure class="panel__shot panel__shot--phone">
+		<Image src={phone} alt="The home screen of the phone interface" />
+	</figure>
+</article>
+
+</section>
 
 <section class="band">
 
+<p class="eyebrow">Appearance</p>
+
 ## Six themes, each with a light and a dark ramp
 
-Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized. Pick a palette without committing to a
-mode, or follow the system without committing to a palette.
+Pick a palette without committing to a mode, or follow the system without committing to a palette.
+Try them here, on a conversation that is going nowhere.
 
-<figure class="shot">
-	<Image src={themes} alt="The six themes, light ramps on the top row and dark on the bottom" />
-</figure>
+<div class="themes">
+	<div class="themes__controls">
+		<fieldset class="themes__styles">
+			<legend class="sr-only">Theme style</legend>
+			<input type="radio" name="theme-style" id="ts-classic" checked />
+			<label class="sw sw--classic" for="ts-classic"><span class="sw__dot"></span>Classic</label>
+			<input type="radio" name="theme-style" id="ts-dracula" />
+			<label class="sw sw--dracula" for="ts-dracula"><span class="sw__dot"></span>Dracula</label>
+			<input type="radio" name="theme-style" id="ts-catppuccin" />
+			<label class="sw sw--catppuccin" for="ts-catppuccin"><span class="sw__dot"></span>Catppuccin</label>
+			<input type="radio" name="theme-style" id="ts-gruvbox" />
+			<label class="sw sw--gruvbox" for="ts-gruvbox"><span class="sw__dot"></span>Gruvbox</label>
+			<input type="radio" name="theme-style" id="ts-nord" />
+			<label class="sw sw--nord" for="ts-nord"><span class="sw__dot"></span>Nord</label>
+			<input type="radio" name="theme-style" id="ts-solarized" />
+			<label class="sw sw--solarized" for="ts-solarized"><span class="sw__dot"></span>Solarized</label>
+		</fieldset>
+		<fieldset class="themes__modes">
+			<legend class="sr-only">Light or dark</legend>
+			<input type="radio" name="theme-mode" id="tm-light" checked />
+			<label class="mode" for="tm-light">Light</label>
+			<input type="radio" name="theme-mode" id="tm-dark" />
+			<label class="mode" for="tm-dark">Dark</label>
+		</fieldset>
+	</div>
+	<div class="mock ramp">
+		<div class="mock__side">
+			<span class="mock__brand">Llooma</span>
+			<span class="mock__new">New chat</span>
+			<span class="mock__row mock__row--on">Self-hosting everything</span>
+			<span class="mock__row">Reading a sourdough starter</span>
+			<span class="mock__row">Choosing a backup strategy</span>
+		</div>
+		<div class="mock__main">
+			<p class="mock__you">How do I check a backup actually restores?</p>
+			<p class="mock__label">Assistant</p>
+			<p class="mock__said">Restore it somewhere else, on a schedule, and look at the result. A backup nobody has read is a hypothesis.</p>
+			<div class="mock__composer"><span>Write literally anything</span><span class="mock__run">Run</span></div>
+		</div>
+	</div>
+</div>
 
 </section>
 
@@ -94,7 +179,7 @@ Llooma is a small amount of glue around a lot of other people's work.
 
 <section class="band">
 
-<p class="pill">Not sponsored</p>
+<p class="tag">Not sponsored</p>
 
 ## When local isn't an option
 
