@@ -339,18 +339,37 @@
 	     microphone is not reaching me" before somebody has spoken a whole sentence
 	     into nothing.
 
-	     The mute button beside it is not a convenience. A screen that holds the
+	     Always here, live or not, and that is the point. It used to arrive with the
+	     conversation and leave with it, and since it sits under a shape that takes
+	     whatever height is left, every appearance moved the orb: the screen
+	     reorganised itself at the very moments somebody is watching it. Reserved
+	     instead, and dimmed while there is nothing to hear, so the only thing that
+	     ever changes on this screen is what the shapes are doing.
+
+	     Narrow, and beside the button rather than stretched across the screen. The
+	     meter is a reassurance, not a readout; a full-width one competes with the
+	     orb for the same glance.
+
+	     The mute button is not a convenience either. A screen that holds the
 	     microphone open for the length of a conversation has to offer a way to shut
 	     it, visibly, in one press, without ending the conversation. -->
-	{#if voice.live}
-		<div class="flex w-full shrink-0 items-center gap-4 pt-4">
-			<VoiceBars class="h-6 flex-1" muted={voice.muted} sample={() => voice.micReading()} />
+	{#if ready}
+		<div
+			class="mt-4 flex h-9 w-full shrink-0 items-center justify-center gap-3 transition-opacity duration-300"
+			class:opacity-40={!voice.live}
+		>
+			<VoiceBars
+				class="h-4 w-28"
+				muted={voice.muted || !voice.live}
+				sample={() => voice.micReading()}
+			/>
 			<button
 				type="button"
 				onclick={() => voice.toggleMute()}
 				aria-label={voice.muted ? $LL.voiceUnmute() : $LL.voiceMute()}
 				aria-pressed={voice.muted}
-				class="border-shade-3 hover:border-shade-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors {voice.muted
+				disabled={!voice.live}
+				class="border-shade-3 hover:border-shade-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors {voice.muted
 					? 'text-muted'
 					: 'text-active'}"
 			>

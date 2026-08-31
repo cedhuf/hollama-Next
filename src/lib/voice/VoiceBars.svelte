@@ -6,7 +6,7 @@
 	/**
 	 * What the microphone is hearing, as bars.
 	 *
-	 * The counterpart of the aura, and different on purpose. The aura is the voice
+	 * The counterpart of the orb, and different on purpose. The orb is the voice
 	 * answering and the bars are yours, and two visuals for two speakers is what
 	 * lets somebody tell at a glance whose turn it is without reading a word.
 	 *
@@ -20,7 +20,7 @@
 	 * and it should look like one.
 	 */
 	interface Props {
-		/** Where the sound is, asked once per frame. The same contract as the aura. */
+		/** Where the sound is, asked once per frame. The same contract as the orb. */
 		sample?: () => Reading;
 		/** Shut, in which case it draws a flat line and says so in its colour. */
 		muted?: boolean;
@@ -58,24 +58,32 @@
 			ctx.clearRect(0, 0, width, height);
 			ctx.fillStyle = getComputedStyle(element).color;
 
-			// A gap of a third of the pitch, which is wide enough to read as separate
-			// bars at arm's length and narrow enough not to look like a comb.
+			// Thin bars, widely spaced. A meter reads as an instrument at this ratio
+			// and as a bar chart at anything fatter, and it is not measuring anything
+			// anybody needs a value from: it says "hearing you", quietly.
 			const pitch = width / BAND_COUNT;
-			const bar = pitch * 0.5;
-			const round = Math.min(bar / 2, height / 2);
+			const bar = Math.max(2, pitch * 0.3);
+			const round = bar / 2;
 
 			for (let i = 0; i < BAND_COUNT; i++) {
 				// Curved, not scaled. A band spends almost all of its time in the
 				// bottom fifth of its range, so a linear meter is a flat line that
-				// twitches when somebody shouts, which is what this was. The root
-				// spends the quiet end of the range generously and still has somewhere
-				// to go when a voice is actually loud.
-				const target = Math.min(1, Math.pow((reading.bands[i] ?? 0) * 2.4, 0.55));
+				// twitches when somebody shouts.
+				//
+				// The exponents are the difference between a meter and a light show.
+				// A gentler root than the obvious one, because the obvious one spends
+				// the whole range on the first breath: ordinary speech landed at two
+				// thirds of full height and everything above it was indistinguishable.
+				// This reaches half way at a conversational level and keeps the top of
+				// the range for somebody actually raising their voice.
+				const target = Math.min(1, Math.pow((reading.bands[i] ?? 0) * 1.7, 0.8));
 				heights[i] += (target - heights[i]) * (target > heights[i] ? 0.5 : 0.12);
 
-				// Never nothing: a meter drawn to zero height disappears, and a row of
-				// dots is what says "on, and hearing silence" rather than "off".
-				const tall = Math.max(round * 2, heights[i] * height);
+				// Never nothing, and never quite full: a meter drawn to zero height
+				// disappears, and a row of dots is what says "on, and hearing silence"
+				// rather than "off". The ceiling short of the edge keeps a loud syllable
+				// from looking like a bar that has run out of room.
+				const tall = Math.max(round * 2, heights[i] * height * 0.88);
 				const top = (height - tall) / 2;
 
 				const x = i * pitch + (pitch - bar) / 2;
