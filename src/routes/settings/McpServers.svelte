@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Check, LoaderCircle, Plug, Plus } from '@lucide/svelte';
+	import { Check, LoaderCircle, Plus } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
-	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import { MCP_LIMITS, type McpServerView } from '$lib/mcp';
 	import { toast } from '$lib/toast';
 
+	import McpServer, { type Verdict } from './McpServer.svelte';
 	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
@@ -25,8 +25,6 @@
 	 * question worth showing, so the tool names come back and stay on the card.
 	 */
 
-	type Verdict = { ok: boolean; tools?: string[]; total?: number; cap?: number; error?: string };
-
 	let servers = $state<McpServerView[]>([]);
 	let loading = $state(true);
 	let canManage = $state(false);
@@ -38,10 +36,17 @@
 
 	/** Tokens typed but not yet stored, by server id. Never filled from the server. */
 	let secrets = $state<Record<string, string>>({});
-	/** The last test's answer, by server id. Cleared when the address changes. */
-	let verdicts = $state<Record<string, Verdict>>({});
-	let testing = $state<string | null>(null);
+	/**
+	 * What the test run while adding a server said, by server id.
+	 *
+	 * Only that: from the moment a card exists, its own tests are its own. This is
+	 * what lets a server that was just added arrive with the catalogue its creation
+	 * test already produced, instead of asking for it again.
+	 */
+	let verdicts = $state<Record<string, Verdict | null>>({});
 
+	/** The one just added, opened so its settings are where the eye already is. */
+	let justAddedId = $state<string | null>(null);
 	let adding = $state(false);
 	let creating = $state(false);
 	let draft = $state({ label: '', url: '', secret: '' });
@@ -117,8 +122,8 @@
 		}, 500);
 	}
 
-	async function test(server: McpServerView) {
-		testing = server.id;
+	/** Test one, and hand the answer back to the card that asked. */
+	async function test(server: McpServerView): Promise<Verdict> {
 		try {
 			const typed = secrets[server.id];
 			const verdict = await api<Verdict>('/api/mcp/verify', 'POST', {
@@ -126,11 +131,10 @@
 				url: server.url,
 				...(typed ? { secret: typed } : {})
 			});
-			verdicts = { ...verdicts, [server.id]: verdict ?? { ok: false } };
+			return verdict ?? { ok: false };
 		} catch {
-			// Said already.
-		} finally {
-			testing = null;
+			// `api()` has already said what went wrong; the card still needs an answer.
+			return { ok: false };
 		}
 	}
 
@@ -158,6 +162,7 @@
 			if (created) {
 				servers = [...servers, created];
 				verdicts = { ...verdicts, [created.id]: verdict };
+				justAddedId = created.id;
 			}
 			adding = false;
 			draft = { label: '', url: '', secret: '' };
@@ -210,102 +215,16 @@
 		{/if}
 
 		{#each servers as server, index (server.id)}
-			{@const verdict = verdicts[server.id]}
-			<div class="border-shade-3 bg-shade-0 flex flex-col gap-3 rounded-xl border p-3">
-				<div class="flex items-center gap-2.5">
-					<span
-						class="bg-shade-2 text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-						aria-hidden="true"
-					>
-						<Plug class="base-icon" />
-					</span>
-					<input
-						class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-0 min-w-0 flex-1 rounded-md border border-transparent px-2 py-1 text-sm font-medium outline-none"
-						bind:value={servers[index].label}
-						oninput={() => persist(servers[index])}
-						aria-label={$LL.label()}
-					/>
-					<ButtonConfirm label={$LL.delete()} onConfirm={() => remove(server.id)} compact />
-				</div>
-
-				<SettingsField label={$LL.mcpServerUrl()}>
-					<input
-						class="settings-field font-mono text-xs"
-						bind:value={servers[index].url}
-						oninput={() => {
-							verdicts = { ...verdicts, [server.id]: undefined as unknown as Verdict };
-							persist(servers[index]);
-						}}
-						placeholder="https://mcp.example.com/mcp"
-						spellcheck="false"
-					/>
-				</SettingsField>
-
-				<SettingsField label={$LL.mcpToken()} hint={$LL.mcpTokenHint()}>
-					<input
-						class="settings-field font-mono text-xs"
-						type="password"
-						autocomplete="off"
-						value={secrets[server.id] ?? ''}
-						oninput={(e) => {
-							secrets = { ...secrets, [server.id]: e.currentTarget.value };
-							persist(servers[index]);
-						}}
-						placeholder={server.hasSecret ? '••••••••' : ''}
-					/>
-				</SettingsField>
-
-				<FieldCheckbox
-					label={$LL.mcpEnabled()}
-					checked={server.enabled}
-					disabled={server.blocked}
-					onChange={(value) => {
-						servers[index].enabled = value;
-						persist(servers[index]);
-					}}
-				/>
-
-				<!-- What the model will see this server's tools called. Shown because
-				     the name is derived, and because a suffixed slug is otherwise a
-				     surprise found in a trace. -->
-				<SettingsHint>{$LL.mcpToolPrefix({ prefix: `mcp_${server.slug}_` })}</SettingsHint>
-
-				{#if server.blocked}
-					<SettingsHint>{$LL.mcpBlockedByAdmin()}</SettingsHint>
-				{/if}
-
-				<div class="border-shade-3 flex flex-wrap items-center gap-2 border-t pt-3">
-					<Button variant="outline" onclick={() => test(server)} disabled={testing === server.id}>
-						{#if testing === server.id}
-							<LoaderCircle class="base-icon animate-spin" />
-						{/if}
-						{$LL.checkConnection()}
-					</Button>
-
-					{#if verdict?.ok}
-						<span class="text-muted min-w-0 text-xs">
-							{$LL.mcpToolsFound({ count: verdict.total ?? 0 })}
-						</span>
-					{:else if verdict}
-						<span class="text-muted min-w-0 truncate text-xs">{verdict.error}</span>
-					{/if}
-				</div>
-
-				{#if verdict?.ok && verdict.tools?.length}
-					<div class="flex flex-wrap gap-1.5">
-						{#each verdict.tools as tool (tool)}
-							<span
-								class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
-							>
-								{tool}
-							</span>
-						{/each}
-					</div>
-					{#if verdict.cap}
-						<SettingsHint>{$LL.mcpToolsCapped({ count: verdict.cap })}</SettingsHint>
-					{/if}
-				{/if}
-			</div>
+			<McpServer
+				bind:server={servers[index]}
+				initialVerdict={verdicts[server.id] ?? null}
+				secret={secrets[server.id] ?? ''}
+				startOpen={server.id === justAddedId}
+				onChange={() => persist(servers[index])}
+				onSecret={(value) => (secrets = { ...secrets, [server.id]: value })}
+				onDelete={() => remove(server.id)}
+				onVerify={() => test(server)}
+			/>
 		{/each}
 
 		{#if canManage}

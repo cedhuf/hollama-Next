@@ -3302,6 +3302,14 @@ type RootTranslation = {
 	 */
 	addMcpServer: string
 	/**
+	 * M​C​P​ ​s​e​r​v​e​r​ ​s​e​t​t​i​n​g​s
+	 */
+	mcpServerOptions: string
+	/**
+	 * D​e​l​e​t​e​ ​t​h​i​s​ ​s​e​r​v​e​r
+	 */
+	deleteMcpServer: string
+	/**
 	 * S​e​r​v​e​r​ ​a​d​d​r​e​s​s
 	 */
 	mcpServerUrl: string
@@ -7554,6 +7562,14 @@ export type TranslationFunctions = {
 	 * Add an MCP server
 	 */
 	addMcpServer: () => LocalizedString
+	/**
+	 * MCP server settings
+	 */
+	mcpServerOptions: () => LocalizedString
+	/**
+	 * Delete this server
+	 */
+	deleteMcpServer: () => LocalizedString
 	/**
 	 * Server address
 	 */

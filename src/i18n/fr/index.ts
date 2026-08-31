@@ -940,6 +940,8 @@ const fr = extendDictionary(en, {
 		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
 	noMcpServers: 'Aucun serveur MCP pour le moment',
 	addMcpServer: 'Ajouter un serveur MCP',
+	mcpServerOptions: 'Réglages du serveur MCP',
+	deleteMcpServer: 'Supprimer ce serveur',
 	mcpServerUrl: 'Adresse du serveur',
 	mcpServerUrlHint:
 		'Le point d\u2019entrée HTTP streamable. Les autres transports ne sont pas gérés.',

@@ -913,6 +913,8 @@ const en = {
 	mcpNotAllowed: 'Your administrator has not opened MCP servers to accounts on this instance.',
 	noMcpServers: 'No MCP server yet',
 	addMcpServer: 'Add an MCP server',
+	mcpServerOptions: 'MCP server settings',
+	deleteMcpServer: 'Delete this server',
 	mcpServerUrl: 'Server address',
 	mcpServerUrlHint: 'The HTTP streamable endpoint. Other transports are not supported.',
 	mcpToken: 'Token',
