@@ -128,6 +128,22 @@ model learned externally can still be remembered on a later turn, one a person s
 Refusals are traced like any other memory step, so how often the rule actually fires is a question
 the timeline answers rather than a guess.
 
+### Announcing the servers instead of their tools
+
+_Settings → Tools_ carries an experimental switch, off by default. With it on, a turn declares a
+single tool that lists what each server holds, and a server's definitions reach the model only once
+it has asked for them. Sixty-five definitions in every request become one, plus the names of the
+groups.
+
+What it costs is an extra round on the turns that do use a tool, and a missed prompt cache: the tool
+definitions are part of a request's prefix, so adding some mid-turn invalidates it exactly where the
+conversation is longest. Whether that is a saving depends on how big your catalogue is, how often it
+is used, and what your provider charges for cached tokens. It is a switch rather than a default
+because that is a thing to measure, not to assume.
+
+Asking what a server offers is not a call and is never put to you: nothing leaves the machine. The
+calls that follow are each put to you as usual.
+
 ## Switching them off for a conversation
 
 The composer's lightning menu carries an **MCP tools** switch, off by default. It

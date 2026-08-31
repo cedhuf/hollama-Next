@@ -200,6 +200,17 @@
 			/>
 		</SettingsField>
 
+		<!-- Experimental, and the badge is not decoration: what it trades is a smaller
+		     request against an extra round and a missed prompt cache, and which side
+		     wins depends on the catalogue, the habits and the provider's prices. It is
+		     here to be measured on a real conversation. -->
+		<FieldCheckbox label={$LL.mcpProgressive()} bind:checked={$settingsStore.mcpProgressive}>
+			{#snippet badge()}
+				<SettingsBadge>{$LL.experimental()}</SettingsBadge>
+			{/snippet}
+		</FieldCheckbox>
+		<SettingsHint>{$LL.mcpProgressiveHint()}</SettingsHint>
+
 		<!-- The same warning box the Users tab uses for a limit somebody is about to
 		     regret, rather than a red sentence laid under the field: a caution that
 		     looks like a caption reads as one. Not a refusal either, which is why it

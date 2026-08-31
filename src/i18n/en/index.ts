@@ -922,6 +922,10 @@ const en = {
 	mcpNotAllowed: 'Your administrator has not opened MCP servers to accounts on this instance.',
 	noMcpServers: 'No MCP server yet',
 	addMcpServer: 'Add an MCP server',
+	experimental: 'experimental',
+	mcpProgressive: 'Announce the servers, not their tools',
+	mcpProgressiveHint:
+		'The model is given one tool listing what each server holds, and the definitions of a server arrive only once it asks for them. A much smaller request, at the cost of one extra round when a tool is needed.',
 	mcpServerOptions: 'MCP server settings',
 	deleteMcpServer: 'Delete this server',
 	mcpServerUrl: 'Server address',

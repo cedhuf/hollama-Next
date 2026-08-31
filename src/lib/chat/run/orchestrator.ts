@@ -15,7 +15,7 @@ import {
 } from '$lib/chat/tools';
 import { formatCurrentDateTime } from '$lib/currentDate';
 import { resolvePrompt } from '$lib/defaultPrompts';
-import { isMcpToolName, type McpApprovalRequest } from '$lib/mcp';
+import { isMcpToolName, MCP_DISCOVERY_TOOL_NAME, type McpApprovalRequest } from '$lib/mcp';
 import {
 	indexLine,
 	MEMORY_LIMITS,
@@ -396,6 +396,16 @@ export async function runTurn(
 			deps.openMcp && input.flags.mcp !== false && (await carriesTools())
 				? await deps.openMcp()
 				: null;
+
+		/**
+		 * The app's own tools, which do not change once the turn has started.
+		 *
+		 * Kept apart from the MCP ones because those can grow mid-turn: under
+		 * progressive disclosure the model asks what a server offers, and the answer
+		 * has to be declared before it can call any of it.
+		 */
+		const ownTools = [...nativeTools];
+		const allTools = (): ToolSpec[] => [...ownTools, ...(mcp?.tools() ?? [])];
 		const mcpTools = mcp?.tools() ?? [];
 		nativeTools.push(...mcpTools);
 
@@ -753,6 +763,22 @@ export async function runTurn(
 				return runMemoryCall(call.name, args);
 			}
 
+			if (mcp && call.name === MCP_DISCOVERY_TOOL_NAME) {
+				// Not put to the person, because nothing leaves this process: asking what
+				// a server offers is reading a list this turn already holds. The calls
+				// that follow are each put to them as usual, which is where the decision
+				// belongs.
+				const outcome = await mcp.call(call.name, args);
+				emit({
+					type: 'trace',
+					step: {
+						type: 'mcp',
+						mcp: { server: outcome.server, tool: '', ...(outcome.failed ? { failed: true } : {}) }
+					}
+				});
+				return outcome.text;
+			}
+
 			if (mcp && isMcpToolName(call.name)) {
 				const known = mcp.describe(call.name);
 
@@ -954,6 +980,22 @@ export async function runTurn(
 			 */
 			if (nativeTools.length && round === maxRounds - 1) {
 				chatRequest = { ...chatRequest, toolChoice: 'none' };
+			}
+
+			/**
+			 * What the model was just told about, added to what it may call.
+			 *
+			 * Only under progressive disclosure, and only when something was actually
+			 * revealed: this changes the request's prefix, so the provider's prompt
+			 * cache misses on the round it happens. Paying that once, when a tool has
+			 * been asked for, is the trade the setting exists to make; paying it every
+			 * round would be a bug.
+			 */
+			if (mcp) {
+				const current = allTools();
+				if (current.length !== (chatRequest.tools?.length ?? 0)) {
+					chatRequest = { ...chatRequest, tools: current };
+				}
 			}
 
 			const reasoningProcessor = createReasoningProcessor(

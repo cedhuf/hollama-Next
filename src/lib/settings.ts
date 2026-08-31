@@ -143,6 +143,8 @@ export interface Settings {
 	mcpMaxTools: number;
 	/** Whether a new conversation starts with the MCP tools switched on. */
 	mcpByDefault: boolean;
+	/** Announce the servers and fetch a catalogue only when the model asks. Experimental. */
+	mcpProgressive: boolean;
 	searchUrl: string;
 	searchBackend: 'degoog' | 'searxng';
 	searchToken: string;
@@ -454,6 +456,12 @@ export const DEFAULT_SETTINGS: Settings = {
 	// is something to do with it, rather than standing open all day. It also keeps
 	// every ordinary turn from carrying tool definitions it will never use.
 	mcpByDefault: false,
+	// Off, and experimental. It trades the definitions a request carries for an
+	// extra round and a missed prompt cache, and which of the two wins depends on
+	// the size of the catalogue, how often it is used and what the provider charges
+	// for cached tokens. That is a thing to measure on a real conversation, not to
+	// assume, so it ships as something to turn on rather than as the default.
+	mcpProgressive: false,
 	searchUrl: '',
 	searchBackend: 'degoog',
 	searchToken: '',

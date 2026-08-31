@@ -949,6 +949,10 @@ const fr = extendDictionary(en, {
 		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
 	noMcpServers: 'Aucun serveur MCP pour le moment',
 	addMcpServer: 'Ajouter un serveur MCP',
+	experimental: 'expérimental',
+	mcpProgressive: 'Annoncer les serveurs, pas leurs outils',
+	mcpProgressiveHint:
+		'Le modèle reçoit un seul outil qui énumère ce que contient chaque serveur, et les définitions d\u2019un serveur n\u2019arrivent que lorsqu\u2019il les demande. Une requête bien plus petite, au prix d\u2019un aller-retour de plus quand un outil est nécessaire.',
 	mcpServerOptions: 'Réglages du serveur MCP',
 	deleteMcpServer: 'Supprimer ce serveur',
 	mcpServerUrl: 'Adresse du serveur',

@@ -165,6 +165,23 @@ export function mcpToolName(slug: string, tool: string): string {
 	return `${head}${tail}`.slice(0, 64);
 }
 
+/**
+ * The one tool a turn declares when it is discovering rather than announcing.
+ *
+ * Progressive disclosure, and the arithmetic is the whole point: a gateway in
+ * front of a mail server, a calendar and a house is sixty-five definitions in
+ * every request of every round. This is one, plus the list of section names it
+ * accepts, and the definitions of a section arrive only once the model has asked
+ * for it.
+ *
+ * What it costs is a round trip on the turns that do use a tool, and a missed
+ * prompt cache: the tools are part of a request's prefix, so adding some in the
+ * middle of a turn invalidates it exactly where the conversation is longest.
+ * Worth it for a large catalogue rarely used, not for a small one used
+ * constantly, which is why it is a switch and not a decision.
+ */
+export const MCP_DISCOVERY_TOOL_NAME = 'mcp_tools';
+
 /** Whether a name the model called belongs to an MCP server at all. */
 export function isMcpToolName(name: string): boolean {
 	return name.startsWith(`${MCP_TOOL_PREFIX}_`);

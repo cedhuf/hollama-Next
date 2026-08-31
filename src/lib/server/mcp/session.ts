@@ -2,7 +2,13 @@ import type { Client } from '@modelcontextprotocol/client';
 
 import type { ToolSpec } from '$lib/chat';
 import type { McpAccess, McpCallOutcome } from '$lib/chat/run/orchestrator';
-import { groupMcpTools, MCP_LIMITS, mcpToolName, parseMcpToolName } from '$lib/mcp';
+import {
+	groupMcpTools,
+	MCP_DISCOVERY_TOOL_NAME,
+	MCP_LIMITS,
+	mcpToolName,
+	parseMcpToolName
+} from '$lib/mcp';
 import { getSettings } from '$lib/server/db/collections';
 import { allowUserMcp } from '$lib/server/db/config';
 import {
@@ -32,6 +38,14 @@ interface Connected {
 	label: string;
 	client: Client;
 	specs: ToolSpec[];
+	/**
+	 * The sections this server's catalogue falls into, for discovery.
+	 *
+	 * One entry per group a gateway's names describe, or a single unnamed one for a
+	 * server that is only itself. What the model asks for by name, and what is
+	 * revealed a section at a time.
+	 */
+	sections: { id: string; label: string; specs: ToolSpec[] }[];
 	/** What each tool says it does, by its own name, for the question put to the person. */
 	purposes: Map<string, string>;
 }
@@ -107,16 +121,30 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 					groups.filter(({ group }) => refused.has(group)).flatMap(({ tools }) => tools)
 				);
 				const tools = all.filter((tool) => !dropped.has(tool.name));
+				const specs = tools.map((tool) => ({
+					name: mcpToolName(record.slug, tool.name),
+					description: tool.description || `A tool offered by ${record.label}.`,
+					parameters: asObjectSchema(tool.inputSchema)
+				}));
+
+				const byName = new Map(specs.map((spec, index) => [tools[index].name, spec]));
+				const sections = groupMcpTools(tools.map((tool) => tool.name)).map(
+					({ group, tools: names }) => ({
+						// Qualified by the server, since two gateways may both present a
+						// group called `mail` and the model has to be able to name one.
+						id: group ? `${record.slug}/${group}` : record.slug,
+						label: group ? `${record.label} · ${group}` : record.label,
+						specs: names.map((name) => byName.get(name)!).filter(Boolean)
+					})
+				);
+
 				connected.push({
 					slug: record.slug,
 					label: record.label,
 					client,
 					purposes: new Map(tools.map((tool) => [tool.name, tool.description])),
-					specs: tools.map((tool) => ({
-						name: mcpToolName(record.slug, tool.name),
-						description: tool.description || `A tool offered by ${record.label}.`,
-						parameters: asObjectSchema(tool.inputSchema)
-					}))
+					specs,
+					sections
 				});
 			} catch (cause) {
 				await client?.close().catch(() => {});
@@ -146,6 +174,45 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 		MCP_LIMITS.maxTools
 	);
 
+	/**
+	 * Whether this turn announces its catalogue or waits to be asked for it.
+	 *
+	 * Experimental and off by default: see the setting for what it trades away.
+	 */
+	const progressive = getSettings(userId)?.mcpProgressive === true;
+
+	/** The sections of every server, in the order they were configured. */
+	const sections = connected.flatMap((server) => server.sections);
+
+	/** What the model has asked to see, by section id. Empty until it asks. */
+	const revealed = new Set<string>();
+
+	/**
+	 * The one tool that stands in for the whole catalogue.
+	 *
+	 * The sections are an enum rather than a free string, so the model picks from
+	 * what exists instead of guessing a name, and the description carries how many
+	 * tools each one holds: enough to choose with, at a fraction of what the
+	 * definitions themselves would cost.
+	 */
+	const discoveryTool = (): ToolSpec => ({
+		name: MCP_DISCOVERY_TOOL_NAME,
+		description: `Tools you can use, grouped by where they come from, listed only when you ask. Call this with the name of the group you need before trying to use anything from it. Available: ${sections
+			.map((section) => `${section.id} (${section.label}, ${section.specs.length} tools)`)
+			.join('; ')}.`,
+		parameters: {
+			type: 'object',
+			properties: {
+				server: {
+					type: 'string',
+					description: 'Which group to list.',
+					enum: sections.map((section) => section.id)
+				}
+			},
+			required: ['server']
+		}
+	});
+
 	return {
 		/**
 		 * Every tool on offer, up to what the account allows.
@@ -155,7 +222,17 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 		 * slice of each: a person who has to lose tools can at least see which by
 		 * looking at the order of their servers.
 		 */
-		tools: () => connected.flatMap((server) => server.specs).slice(0, ceiling),
+		tools: () => {
+			if (!progressive) return connected.flatMap((server) => server.specs).slice(0, ceiling);
+			if (!sections.length) return [];
+			// The one tool, plus whatever has been asked for so far. What was revealed
+			// stays revealed for the rest of the turn: a model that had to ask once
+			// should not have to ask again to use what it just found.
+			const shown = sections
+				.filter((section) => revealed.has(section.id))
+				.flatMap((section) => section.specs);
+			return [discoveryTool(), ...shown].slice(0, ceiling);
+		},
 		unavailable: () => unavailable,
 
 		describe(name: string) {
@@ -174,6 +251,31 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 		},
 
 		async call(name: string, args: Record<string, unknown>): Promise<McpCallOutcome> {
+			if (name === MCP_DISCOVERY_TOOL_NAME) {
+				const wanted = typeof args.server === 'string' ? args.server : '';
+				const section = sections.find((entry) => entry.id === wanted);
+				if (!section) {
+					return {
+						server: '',
+						tool: MCP_DISCOVERY_TOOL_NAME,
+						failed: true,
+						text: `There is no group called "${wanted}". The groups are: ${sections.map((entry) => entry.id).join(', ')}.`
+					};
+				}
+
+				// Revealing is not calling: nothing leaves this process, so there is
+				// nothing to put to the person. The calls that follow are each put to
+				// them as usual.
+				revealed.add(section.id);
+				const listing = section.specs.map((spec) => `${spec.name}: ${spec.description}`).join('\n');
+				return {
+					server: section.label,
+					tool: MCP_DISCOVERY_TOOL_NAME,
+					failed: false,
+					text: `These tools are now available to you:\n\n${listing}`
+				};
+			}
+
 			const parsed = parseMcpToolName(name, slugs);
 			const server = parsed && connected.find((entry) => entry.slug === parsed.slug);
 			if (!parsed || !server) {

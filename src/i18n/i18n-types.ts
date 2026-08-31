@@ -3327,6 +3327,18 @@ type RootTranslation = {
 	 */
 	addMcpServer: string
 	/**
+	 * e​x​p​e​r​i​m​e​n​t​a​l
+	 */
+	experimental: string
+	/**
+	 * A​n​n​o​u​n​c​e​ ​t​h​e​ ​s​e​r​v​e​r​s​,​ ​n​o​t​ ​t​h​e​i​r​ ​t​o​o​l​s
+	 */
+	mcpProgressive: string
+	/**
+	 * T​h​e​ ​m​o​d​e​l​ ​i​s​ ​g​i​v​e​n​ ​o​n​e​ ​t​o​o​l​ ​l​i​s​t​i​n​g​ ​w​h​a​t​ ​e​a​c​h​ ​s​e​r​v​e​r​ ​h​o​l​d​s​,​ ​a​n​d​ ​t​h​e​ ​d​e​f​i​n​i​t​i​o​n​s​ ​o​f​ ​a​ ​s​e​r​v​e​r​ ​a​r​r​i​v​e​ ​o​n​l​y​ ​o​n​c​e​ ​i​t​ ​a​s​k​s​ ​f​o​r​ ​t​h​e​m​.​ ​A​ ​m​u​c​h​ ​s​m​a​l​l​e​r​ ​r​e​q​u​e​s​t​,​ ​a​t​ ​t​h​e​ ​c​o​s​t​ ​o​f​ ​o​n​e​ ​e​x​t​r​a​ ​r​o​u​n​d​ ​w​h​e​n​ ​a​ ​t​o​o​l​ ​i​s​ ​n​e​e​d​e​d​.
+	 */
+	mcpProgressiveHint: string
+	/**
 	 * M​C​P​ ​s​e​r​v​e​r​ ​s​e​t​t​i​n​g​s
 	 */
 	mcpServerOptions: string
@@ -7632,6 +7644,18 @@ export type TranslationFunctions = {
 	 * Add an MCP server
 	 */
 	addMcpServer: () => LocalizedString
+	/**
+	 * experimental
+	 */
+	experimental: () => LocalizedString
+	/**
+	 * Announce the servers, not their tools
+	 */
+	mcpProgressive: () => LocalizedString
+	/**
+	 * The model is given one tool listing what each server holds, and the definitions of a server arrive only once it asks for them. A much smaller request, at the cost of one extra round when a tool is needed.
+	 */
+	mcpProgressiveHint: () => LocalizedString
 	/**
 	 * MCP server settings
 	 */
