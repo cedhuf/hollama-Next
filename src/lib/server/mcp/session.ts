@@ -5,7 +5,12 @@ import type { McpAccess, McpCallOutcome } from '$lib/chat/run/orchestrator';
 import { MCP_LIMITS, mcpToolName, parseMcpToolName } from '$lib/mcp';
 import { getSettings } from '$lib/server/db/collections';
 import { allowUserMcp } from '$lib/server/db/config';
-import { getMcpServerSecret, listMcpServers } from '$lib/server/db/mcpServers';
+import {
+	getMcpServerSecret,
+	listMcpServers,
+	setMcpServerTools,
+	type McpServerRecord
+} from '$lib/server/db/mcpServers';
 
 import { callMcpTool, connectMcp, listMcpTools, McpError } from './client';
 
@@ -42,6 +47,28 @@ interface Connected {
 export function hasMcpServers(userId: string, isAdmin: boolean): boolean {
 	if (!isAdmin && !allowUserMcp()) return false;
 	return listMcpServers(userId).some((server) => server.enabled && !server.blocked);
+}
+
+/**
+ * Ask one server what it offers, and write the answer down.
+ *
+ * The one place a stored catalogue is refreshed, so "what this server gives me"
+ * has a single definition wherever it is asked: when a server is added, and when
+ * somebody presses the button because the gateway behind it has changed.
+ *
+ * Throws `McpError` with a sentence when it cannot be reached, which is what the
+ * caller reports rather than a stale list presented as current.
+ */
+export async function refreshMcpTools(record: McpServerRecord): Promise<string[]> {
+	let client: Client | null = null;
+	try {
+		client = await connectMcp(record.url, getMcpServerSecret(record.id));
+		const names = (await listMcpTools(client)).map((tool) => tool.name);
+		setMcpServerTools(record.id, names);
+		return names;
+	} finally {
+		await client?.close().catch(() => {});
+	}
 }
 
 /**

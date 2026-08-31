@@ -25,6 +25,8 @@ export interface McpServerRow {
 	is_enabled: number;
 	blocked: number;
 	created_at: string;
+	tools: string | null;
+	tools_at: string | null;
 }
 
 export interface McpServerRecord {
@@ -37,6 +39,10 @@ export interface McpServerRecord {
 	enabled: boolean;
 	blocked: boolean;
 	createdAt: string;
+	/** The catalogue this server last answered with, by name. */
+	tools: string[];
+	/** When it said so. Null for a server nobody has asked yet. */
+	toolsAt: string | null;
 }
 
 function toRecord(row: McpServerRow): McpServerRecord {
@@ -49,8 +55,23 @@ function toRecord(row: McpServerRow): McpServerRecord {
 		hasSecret: !!row.secret_enc,
 		enabled: !!row.is_enabled,
 		blocked: !!row.blocked,
-		createdAt: row.created_at
+		createdAt: row.created_at,
+		tools: parseTools(row.tools),
+		toolsAt: row.tools_at
 	};
+}
+
+/** A stored catalogue, or none. A row that will not parse is a row nobody has asked yet. */
+function parseTools(raw: string | null): string[] {
+	if (!raw) return [];
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		return Array.isArray(parsed)
+			? parsed.filter((name): name is string => typeof name === 'string')
+			: [];
+	} catch {
+		return [];
+	}
 }
 
 /** What a browser is allowed to know about one. */
@@ -63,7 +84,9 @@ export function toMcpServerView(record: McpServerRecord): McpServerView {
 		enabled: record.enabled,
 		blocked: record.blocked,
 		hasSecret: record.hasSecret,
-		createdAt: record.createdAt
+		createdAt: record.createdAt,
+		tools: record.tools,
+		toolsAt: record.toolsAt
 	};
 }
 
@@ -209,6 +232,19 @@ export function setMcpServerBlocked(id: string, blocked: boolean): void {
 	getDb()
 		.prepare('UPDATE mcp_servers SET blocked = ? WHERE id = ?')
 		.run(blocked ? 1 : 0, id);
+}
+
+/**
+ * Write down what a server just answered with.
+ *
+ * Names only, and replaced wholesale rather than merged: a tool that has gone
+ * from the catalogue has to disappear from ours too, and a union of every list
+ * ever seen would keep it forever.
+ */
+export function setMcpServerTools(id: string, tools: string[]): void {
+	getDb()
+		.prepare('UPDATE mcp_servers SET tools = ?, tools_at = ? WHERE id = ?')
+		.run(JSON.stringify(tools), new Date().toISOString(), id);
 }
 
 export function deleteMcpServer(id: string): void {

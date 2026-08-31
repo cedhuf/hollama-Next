@@ -914,10 +914,11 @@ const en = {
 	mcpByDefaultHint:
 		'Off by default. The switch in the composer turns them on for a conversation that needs them, which keeps every other turn from carrying their definitions.',
 	mcpMaxTools: 'Tools sent to the model',
-	mcpMaxToolsHint:
-		'Across every server switched on. Past this many, the rest of the catalogue is left out.',
+	mcpMaxToolsWarningTitle: 'A large catalogue on every request',
 	mcpMaxToolsWarning:
 		'{count:number} tool definitions ride along in every request of every turn where MCP is on. Serving a group from your gateway rather than the whole of it is usually the cheaper answer.',
+	mcpMaxToolsHint:
+		'Across every server switched on. Past this many, the rest of the catalogue is left out.',
 	mcpNotAllowed: 'Your administrator has not opened MCP servers to accounts on this instance.',
 	noMcpServers: 'No MCP server yet',
 	addMcpServer: 'Add an MCP server',
@@ -931,6 +932,11 @@ const en = {
 	mcpBlockedByAdmin: 'Suspended by the administrator. Your own switch is untouched.',
 	mcpToolPrefix: 'Its tools are named {prefix:string}\u2026 in front of the model',
 	mcpConnected: 'Connected. {count:number} tool{{s}} found.',
+	mcpUpdateTools: 'Update tools',
+	showTools: 'Show the {count:number} tool{{s}}',
+	hideTools: 'Hide the tools',
+	mcpNoTools: 'This server offers no tools.',
+	mcpToolsAsOf: 'As this server answered on {date:string}.',
 	mcpToolsFound: '{count:number} tool{{s}}',
 	mcpLimitReached: 'At most {count:number} MCP servers per account.',
 	mcpAllowed: 'Allowed on this instance',

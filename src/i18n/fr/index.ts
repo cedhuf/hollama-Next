@@ -940,10 +940,11 @@ const fr = extendDictionary(en, {
 	mcpByDefaultHint:
 		'Désactivé par défaut. L\u2019interrupteur du composer les active pour une conversation qui en a besoin, ce qui évite à tous les autres tours d\u2019emporter leurs définitions.',
 	mcpMaxTools: 'Outils envoyés au modèle',
-	mcpMaxToolsHint:
-		'Tous serveurs actifs confondus. Au-delà, le reste du catalogue est laissé de côté.',
+	mcpMaxToolsWarningTitle: 'Un gros catalogue à chaque requête',
 	mcpMaxToolsWarning:
 		'{count:number} définitions d\u2019outils partent dans chaque requête de chaque tour où MCP est actif. Exposer un groupe de votre passerelle plutôt que sa totalité coûte en général moins cher.',
+	mcpMaxToolsHint:
+		'Tous serveurs actifs confondus. Au-delà, le reste du catalogue est laissé de côté.',
 	mcpNotAllowed:
 		'Votre administrateur n\u2019a pas ouvert les serveurs MCP aux comptes de cette instance.',
 	noMcpServers: 'Aucun serveur MCP pour le moment',
@@ -961,6 +962,11 @@ const fr = extendDictionary(en, {
 		'Suspendu par l\u2019administrateur. Votre propre interrupteur n\u2019a pas bougé.',
 	mcpToolPrefix: 'Ses outils s\u2019appellent {prefix:string}\u2026 devant le modèle',
 	mcpConnected: 'Connecté. {count:number} outil{{s}} trouvé{{s}}.',
+	mcpUpdateTools: 'Mettre à jour les outils',
+	showTools: 'Voir les {count:number} outil{{s}}',
+	hideTools: 'Masquer les outils',
+	mcpNoTools: 'Ce serveur ne propose aucun outil.',
+	mcpToolsAsOf: 'Tel que ce serveur a répondu le {date:string}.',
 	mcpToolsFound: '{count:number} outil{{s}}',
 	mcpLimitReached: 'Au maximum {count:number} serveurs MCP par compte.',
 	mcpAllowed: 'Autorisé sur cette instance',

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, LoaderCircle, Plus } from '@lucide/svelte';
+	import { Check, LoaderCircle, Plus, TriangleAlert } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -11,7 +11,7 @@
 	import { MCP_LIMITS, type McpServerView } from '$lib/mcp';
 	import { toast } from '$lib/toast';
 
-	import McpServer, { type Verdict } from './McpServer.svelte';
+	import McpServer from './McpServer.svelte';
 	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
 	import SettingsHint from './SettingsHint.svelte';
@@ -34,20 +34,14 @@
 
 	/** Tokens typed but not yet stored, by server id. Never filled from the server. */
 	let secrets = $state<Record<string, string>>({});
-	/**
-	 * What the test run while adding a server said, by server id.
-	 *
-	 * Only that: from the moment a card exists, its own tests are its own. This is
-	 * what lets a server that was just added arrive with the catalogue its creation
-	 * test already produced, instead of asking for it again.
-	 */
-	let verdicts = $state<Record<string, Verdict | null>>({});
-
 	/** The one just added, opened so its settings are where the eye already is. */
 	let justAddedId = $state<string | null>(null);
 	let adding = $state(false);
 	let creating = $state(false);
 	let draft = $state({ label: '', url: '', secret: '' });
+
+	/** What `/api/mcp/verify` answers for a server that does not exist yet. */
+	type Verdict = { ok: boolean; tools?: string[]; total?: number; error?: string };
 
 	async function api<T>(url: string, method: string, body?: unknown): Promise<T | null> {
 		const response = await fetch(url, {
@@ -60,6 +54,25 @@
 			throw new Error(`HTTP ${response.status}`);
 		}
 		return response.status === 204 ? null : ((await response.json()) as T);
+	}
+
+	const ceiling = $derived($settingsStore.mcpMaxTools ?? MCP_LIMITS.defaultTools);
+
+	/** Ask one server what it offers now. The card shows the answer, whichever it is. */
+	async function refresh(id: string) {
+		try {
+			const answer = await api<{ ok: boolean; server?: McpServerView; error?: string }>(
+				`/api/mcp/${id}/tools`,
+				'POST'
+			);
+			if (answer?.ok && answer.server) {
+				servers = servers.map((entry) => (entry.id === id ? answer.server! : entry));
+			}
+			return answer ?? { ok: false };
+		} catch {
+			// `api()` has already said what went wrong; the card still needs an answer.
+			return { ok: false };
+		}
 	}
 
 	async function load() {
@@ -105,22 +118,6 @@
 		}, 500);
 	}
 
-	/** Test one, and hand the answer back to the card that asked. */
-	async function test(server: McpServerView): Promise<Verdict> {
-		try {
-			const typed = secrets[server.id];
-			const verdict = await api<Verdict>('/api/mcp/verify', 'POST', {
-				id: server.id,
-				url: server.url,
-				...(typed ? { secret: typed } : {})
-			});
-			return verdict ?? { ok: false };
-		} catch {
-			// `api()` has already said what went wrong; the card still needs an answer.
-			return { ok: false };
-		}
-	}
-
 	async function create() {
 		if (!draft.url.trim()) return;
 		creating = true;
@@ -144,7 +141,6 @@
 			});
 			if (created) {
 				servers = [...servers, created];
-				verdicts = { ...verdicts, [created.id]: verdict };
 				justAddedId = created.id;
 			}
 			adding = false;
@@ -202,25 +198,34 @@
 				bind:value={$settingsStore.mcpMaxTools}
 			/>
 		</SettingsField>
-		{#if ($settingsStore.mcpMaxTools ?? MCP_LIMITS.defaultTools) > MCP_LIMITS.warnAboveTools}
-			<!-- Said where the number is set, not in the documentation. Not a refusal:
-			     a catalogue that size is a legitimate thing to want, and it is also
-			     paid for on every round of every turn. -->
-			<p class="text-negative text-xs leading-snug">
-				{$LL.mcpMaxToolsWarning({ count: $settingsStore.mcpMaxTools ?? MCP_LIMITS.defaultTools })}
-			</p>
+
+		<!-- The same warning box the Users tab uses for a limit somebody is about to
+		     regret, rather than a red sentence laid under the field: a caution that
+		     looks like a caption reads as one. Not a refusal either, which is why it
+		     is the warning colour and not the negative one: a catalogue this size is a
+		     legitimate thing to want, and it is also paid for on every round of every
+		     turn. -->
+		{#if ceiling > MCP_LIMITS.warnAboveTools}
+			<div class="border-warning/40 bg-warning/10 flex flex-col gap-1 rounded-lg border p-3">
+				<span class="text-active flex items-center gap-1.5 text-sm font-medium">
+					<TriangleAlert class="h-4 w-4 shrink-0" />
+					{$LL.mcpMaxToolsWarningTitle()}
+				</span>
+				<p class="text-muted text-xs leading-relaxed">
+					{$LL.mcpMaxToolsWarning({ count: ceiling })}
+				</p>
+			</div>
 		{/if}
 
 		{#each servers as server, index (server.id)}
 			<McpServer
 				bind:server={servers[index]}
-				initialVerdict={verdicts[server.id] ?? null}
 				secret={secrets[server.id] ?? ''}
 				startOpen={server.id === justAddedId}
 				onChange={() => persist(servers[index])}
 				onSecret={(value) => (secrets = { ...secrets, [server.id]: value })}
 				onDelete={() => remove(server.id)}
-				onVerify={() => test(server)}
+				onRefresh={() => refresh(server.id)}
 			/>
 		{/each}
 

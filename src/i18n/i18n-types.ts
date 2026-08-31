@@ -3302,14 +3302,18 @@ type RootTranslation = {
 	 */
 	mcpMaxTools: string
 	/**
-	 * A​c​r​o​s​s​ ​e​v​e​r​y​ ​s​e​r​v​e​r​ ​s​w​i​t​c​h​e​d​ ​o​n​.​ ​P​a​s​t​ ​t​h​i​s​ ​m​a​n​y​,​ ​t​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
+	 * A​ ​l​a​r​g​e​ ​c​a​t​a​l​o​g​u​e​ ​o​n​ ​e​v​e​r​y​ ​r​e​q​u​e​s​t
 	 */
-	mcpMaxToolsHint: string
+	mcpMaxToolsWarningTitle: string
 	/**
 	 * {​c​o​u​n​t​}​ ​t​o​o​l​ ​d​e​f​i​n​i​t​i​o​n​s​ ​r​i​d​e​ ​a​l​o​n​g​ ​i​n​ ​e​v​e​r​y​ ​r​e​q​u​e​s​t​ ​o​f​ ​e​v​e​r​y​ ​t​u​r​n​ ​w​h​e​r​e​ ​M​C​P​ ​i​s​ ​o​n​.​ ​S​e​r​v​i​n​g​ ​a​ ​g​r​o​u​p​ ​f​r​o​m​ ​y​o​u​r​ ​g​a​t​e​w​a​y​ ​r​a​t​h​e​r​ ​t​h​a​n​ ​t​h​e​ ​w​h​o​l​e​ ​o​f​ ​i​t​ ​i​s​ ​u​s​u​a​l​l​y​ ​t​h​e​ ​c​h​e​a​p​e​r​ ​a​n​s​w​e​r​.
 	 * @param {number} count
 	 */
 	mcpMaxToolsWarning: RequiredParams<'count'>
+	/**
+	 * A​c​r​o​s​s​ ​e​v​e​r​y​ ​s​e​r​v​e​r​ ​s​w​i​t​c​h​e​d​ ​o​n​.​ ​P​a​s​t​ ​t​h​i​s​ ​m​a​n​y​,​ ​t​h​e​ ​r​e​s​t​ ​o​f​ ​t​h​e​ ​c​a​t​a​l​o​g​u​e​ ​i​s​ ​l​e​f​t​ ​o​u​t​.
+	 */
+	mcpMaxToolsHint: string
 	/**
 	 * Y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​h​a​s​ ​n​o​t​ ​o​p​e​n​e​d​ ​M​C​P​ ​s​e​r​v​e​r​s​ ​t​o​ ​a​c​c​o​u​n​t​s​ ​o​n​ ​t​h​i​s​ ​i​n​s​t​a​n​c​e​.
 	 */
@@ -3364,6 +3368,28 @@ type RootTranslation = {
 	 * @param {number} count
 	 */
 	mcpConnected: RequiredParams<'count'>
+	/**
+	 * U​p​d​a​t​e​ ​t​o​o​l​s
+	 */
+	mcpUpdateTools: string
+	/**
+	 * S​h​o​w​ ​t​h​e​ ​{​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}
+	 * @param {number} count
+	 */
+	showTools: RequiredParams<'count'>
+	/**
+	 * H​i​d​e​ ​t​h​e​ ​t​o​o​l​s
+	 */
+	hideTools: string
+	/**
+	 * T​h​i​s​ ​s​e​r​v​e​r​ ​o​f​f​e​r​s​ ​n​o​ ​t​o​o​l​s​.
+	 */
+	mcpNoTools: string
+	/**
+	 * A​s​ ​t​h​i​s​ ​s​e​r​v​e​r​ ​a​n​s​w​e​r​e​d​ ​o​n​ ​{​d​a​t​e​}​.
+	 * @param {string} date
+	 */
+	mcpToolsAsOf: RequiredParams<'date'>
 	/**
 	 * {​c​o​u​n​t​}​ ​t​o​o​l​{​{​s​}​}
 	 * @param {number} count
@@ -7579,13 +7605,17 @@ export type TranslationFunctions = {
 	 */
 	mcpMaxTools: () => LocalizedString
 	/**
-	 * Across every server switched on. Past this many, the rest of the catalogue is left out.
+	 * A large catalogue on every request
 	 */
-	mcpMaxToolsHint: () => LocalizedString
+	mcpMaxToolsWarningTitle: () => LocalizedString
 	/**
 	 * {count} tool definitions ride along in every request of every turn where MCP is on. Serving a group from your gateway rather than the whole of it is usually the cheaper answer.
 	 */
 	mcpMaxToolsWarning: (arg: { count: number }) => LocalizedString
+	/**
+	 * Across every server switched on. Past this many, the rest of the catalogue is left out.
+	 */
+	mcpMaxToolsHint: () => LocalizedString
 	/**
 	 * Your administrator has not opened MCP servers to accounts on this instance.
 	 */
@@ -7638,6 +7668,26 @@ export type TranslationFunctions = {
 	 * Connected. {count} tool{{s}} found.
 	 */
 	mcpConnected: (arg: { count: number }) => LocalizedString
+	/**
+	 * Update tools
+	 */
+	mcpUpdateTools: () => LocalizedString
+	/**
+	 * Show the {count} tool{{s}}
+	 */
+	showTools: (arg: { count: number }) => LocalizedString
+	/**
+	 * Hide the tools
+	 */
+	hideTools: () => LocalizedString
+	/**
+	 * This server offers no tools.
+	 */
+	mcpNoTools: () => LocalizedString
+	/**
+	 * As this server answered on {date}.
+	 */
+	mcpToolsAsOf: (arg: { date: string }) => LocalizedString
 	/**
 	 * {count} tool{{s}}
 	 */

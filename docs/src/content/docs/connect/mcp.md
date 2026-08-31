@@ -66,11 +66,15 @@ are not yours to rewrite. Worth knowing rather than discovering.
 A turn that has MCP tools gets eight rounds instead of four. Four was tuned for a search followed by
 a page read; a real chain against your own tools is longer than that.
 
+The catalogue a server answers with is stored when you add it, so the settings can say how many tools
+each one brings without reaching out to your machines every time you open the tab. **Update tools**
+retakes that snapshot, which is what you press after adding something to a gateway. The full list is
+one click away on each card.
+
 How many tools reach the model is yours to set, in the same section, and it counts across every
 server switched on rather than per server: what costs is the size of a request, and a request carries
-the lot. Two hundred by default. Past a hundred the setting says plainly that all of it rides along
-in every request of every turn, which is the moment a gateway's groups start being the cheaper
-answer.
+the lot. Two hundred by default. Past a hundred the setting warns that all of it rides along in every request
+of every turn, which is the moment a gateway's groups start being the cheaper answer.
 
 ## Every call is put to you first
 

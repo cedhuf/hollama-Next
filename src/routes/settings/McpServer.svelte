@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Check, KeyRound, LoaderCircle, Plug, X } from '@lucide/svelte';
+	import { KeyRound, LoaderCircle, Plug, RefreshCw, X } from '@lucide/svelte';
+	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -20,45 +21,34 @@
 	 * exception, because it is never read back: an untouched field means "keep what
 	 * is stored", and only a typed value replaces it.
 	 */
-	export type Verdict = { ok: boolean; tools?: string[]; total?: number; error?: string };
-
 	interface Props {
 		server: McpServerView;
 		/** Typed but not yet stored. Sent once, then cleared by the parent. */
 		secret: string;
 		/** Open on arrival, for the one that was just added. */
 		startOpen?: boolean;
-		/**
-		 * What a test said before this card existed, for the server just added.
-		 *
-		 * Only the starting value: what a test says from here on is this card's own
-		 * business. Bound to the parent it could not be, since a map has no entry for
-		 * a server nobody has tested and `bind:` will not take `undefined` against a
-		 * prop that defaults to something.
-		 */
-		initialVerdict?: Verdict | null;
 		onChange: () => void;
 		onSecret: (value: string) => void;
 		onDelete: () => void;
-		onVerify: () => Promise<Verdict>;
+		/** Ask the server what it offers now. Answers with the stored list, or why not. */
+		onRefresh: () => Promise<{ ok: boolean; server?: McpServerView; error?: string }>;
 	}
 
 	let {
 		server = $bindable(),
 		secret,
 		startOpen = false,
-		initialVerdict = null,
 		onChange,
 		onSecret,
 		onDelete,
-		onVerify
+		onRefresh
 	}: Props = $props();
 
 	// svelte-ignore state_referenced_locally
 	let open = $state(startOpen);
-	// svelte-ignore state_referenced_locally
-	let verdict = $state<Verdict | null>(initialVerdict);
-	let verifying = $state(false);
+	let showTools = $state(false);
+	let refreshing = $state(false);
+	let failure = $state<string | null>(null);
 	let replacingKey = $state(false);
 
 	/** Whether a turn can actually reach it, which needs both switches to agree. */
@@ -69,12 +59,12 @@
 	 *
 	 * What it says depends on what there is to say, in the order somebody would
 	 * want to hear it: a suspension first, since nothing else matters while it
-	 * stands, then the size of the catalogue once it has been asked for, and the
-	 * address the rest of the time.
+	 * stands, then the size of its catalogue, which is the question the card exists
+	 * to answer, and the address while nobody has asked yet.
 	 */
 	const summary = $derived.by(() => {
 		if (server.blocked) return $LL.mcpBlockedByAdmin();
-		if (verdict?.ok) return $LL.mcpToolsFound({ count: verdict.total ?? 0 });
+		if (server.toolsAt) return $LL.mcpToolsFound({ count: server.tools.length });
 		try {
 			return new URL(server.url).host;
 		} catch {
@@ -84,18 +74,22 @@
 
 	const keyIsStored = $derived(server.hasSecret && !replacingKey && !secret);
 
-	/** A stored answer stops being true the moment the address or the token changes. */
-	function invalidate() {
-		verdict = null;
-	}
-
-	async function verify() {
-		verifying = true;
-		verdict = null;
+	/**
+	 * Ask the server what it offers now.
+	 *
+	 * The same button whether it is the first time or the tenth: a gateway gains
+	 * and loses tools without telling anybody, so "does this work" and "what does
+	 * it have today" are the same question asked twice.
+	 */
+	async function refresh() {
+		refreshing = true;
+		failure = null;
 		try {
-			verdict = await onVerify();
+			const answer = await onRefresh();
+			if (answer.ok && answer.server) server = answer.server;
+			else failure = answer.error ?? $LL.connectionFailed();
 		} finally {
-			verifying = false;
+			refreshing = false;
 		}
 	}
 </script>
@@ -134,7 +128,10 @@
 			class="settings-field font-mono text-xs"
 			bind:value={server.url}
 			oninput={() => {
-				invalidate();
+				// Only the last failure: the stored catalogue is still the last thing this
+				// server actually answered, and typing an address does not make it untrue.
+				// What retakes the snapshot is the button below.
+				failure = null;
 				onChange();
 			}}
 			placeholder="https://mcp.example.com/mcp"
@@ -163,7 +160,7 @@
 					autocomplete="off"
 					value={secret}
 					oninput={(e) => {
-						invalidate();
+						failure = null;
 						onSecret(e.currentTarget.value);
 					}}
 				/>
@@ -183,59 +180,57 @@
 				{/if}
 			{/if}
 
-			<!-- The answer lands in the button that asked the question. The three
-			     wordings are stacked in one cell and only one is shown, so the button is
-			     as wide as the longest of them in whatever language it is read in, and
-			     changing state cannot move the field beside it. -->
-			<Button
-				variant="outline"
-				onclick={verify}
-				disabled={verifying || !server.url}
-				title={verdict?.ok
-					? $LL.mcpToolsFound({ count: verdict.total ?? 0 })
-					: (verdict?.error ?? $LL.checkConnection())}
-				class={verdict?.ok
-					? 'border-positive! text-positive! hover:border-positive! hover:text-positive!'
-					: verdict
-						? 'border-negative! text-negative! hover:border-negative! hover:text-negative!'
-						: ''}
-			>
-				{#if verifying}
+			<!-- One button for two questions that are the same question: does this
+			     answer, and what does it have today. A gateway gains and loses tools
+			     without telling anybody, so this is pressed again long after the first
+			     time. -->
+			<Button variant="outline" onclick={refresh} disabled={refreshing || !server.url}>
+				{#if refreshing}
 					<LoaderCircle class="base-icon animate-spin" />
-				{:else if verdict?.ok}
-					<Check class="base-icon" />
 				{:else}
-					<Plug class="base-icon" />
+					<RefreshCw class="base-icon" />
 				{/if}
-				<span class="grid text-center">
-					<span class="col-start-1 row-start-1 {verdict?.ok ? '' : 'invisible'}">
-						{$LL.connected()}
-					</span>
-					<span class="col-start-1 row-start-1 {verdict && !verdict.ok ? '' : 'invisible'}">
-						{$LL.connectionFailed()}
-					</span>
-					<span class="col-start-1 row-start-1 {verdict ? 'invisible' : ''}">
-						{$LL.checkConnection()}
-					</span>
-				</span>
+				{$LL.mcpUpdateTools()}
 			</Button>
 		</div>
 		<!-- Failures keep their own line: a server says why in a sentence, and a
 		     sentence does not fit in a button. -->
-		{#if verdict && !verdict.ok}
-			<span class="text-negative text-xs">{verdict.error}</span>
+		{#if failure}
+			<span class="text-negative text-xs">{failure}</span>
 		{/if}
 	</SettingsField>
 
-	<!-- What came back, which is the answer people actually wanted: "connected" says
-	     the address is right, the names say it is the server they meant. -->
-	{#if verdict?.ok && verdict.tools?.length}
-		<div class="flex flex-wrap gap-1.5">
-			{#each verdict.tools as tool (tool)}
-				<span class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs">
-					{tool}
-				</span>
-			{/each}
+	<!-- Folded, because the interesting figure is the count and the list is what you
+	     open when you want to know exactly what a turn is being offered. Kept from
+	     the last refresh rather than fetched on sight: opening a settings tab should
+	     not reach out to somebody's machine. -->
+	{#if server.toolsAt}
+		<div class="flex flex-col gap-2">
+			<button
+				type="button"
+				onclick={() => (showTools = !showTools)}
+				class="text-muted hover:text-active self-start text-xs transition-colors"
+			>
+				{showTools ? $LL.hideTools() : $LL.showTools({ count: server.tools.length })}
+			</button>
+
+			{#if showTools}
+				<div class="flex flex-wrap gap-1.5" transition:slide={{ duration: 150 }}>
+					{#each server.tools as tool (tool)}
+						<span
+							class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
+						>
+							{tool}
+						</span>
+					{:else}
+						<span class="text-muted text-xs">{$LL.mcpNoTools()}</span>
+					{/each}
+				</div>
+			{/if}
+
+			<span class="text-muted text-xs leading-snug">
+				{$LL.mcpToolsAsOf({ date: new Date(server.toolsAt).toLocaleString() })}
+			</span>
 		</div>
 	{/if}
 

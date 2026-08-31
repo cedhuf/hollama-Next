@@ -543,6 +543,26 @@ const migrations: Migration[] = [
 			CREATE INDEX idx_mcp_servers_owner ON mcp_servers(owner_user_id, created_at);
 			CREATE UNIQUE INDEX idx_mcp_servers_slug ON mcp_servers(owner_user_id, slug);
 		`
+	},
+	{
+		version: 23,
+		up: `
+			-- The catalogue a server answered with, and when it said so.
+			--
+			-- Kept rather than fetched on sight, because the question people have in
+			-- the settings is "what does this thing give me", and answering it used to
+			-- mean opening a connection to somebody's machine every time the tab was
+			-- opened. A stored list is also the only way the total across servers can
+			-- be shown at all, since the tab would otherwise have to reach every one
+			-- of them to count.
+			--
+			-- Names only: the descriptions and the schemas are read at the start of
+			-- each turn from the server itself, which is where they have to come from
+			-- anyway. This is what the settings display and nothing else, so a stale
+			-- copy is a list that is out of date, never a call made against one.
+			ALTER TABLE mcp_servers ADD COLUMN tools TEXT;
+			ALTER TABLE mcp_servers ADD COLUMN tools_at TEXT;
+		`
 	}
 ];
 

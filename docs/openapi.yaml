@@ -668,6 +668,25 @@ paths:
       summary: Remove it
       responses:
         '204': { description: Gone. }
+  /api/mcp/{id}/tools:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [mcp]
+      summary: Ask the server what it offers now, and store the answer
+      description: >
+        The stored catalogue is a snapshot, taken when the server is added and
+        retaken here. A gateway gains and loses tools without telling anybody, so
+        this is the button behind "update tools". Answers `{ ok: true, server }`
+        with the record as stored, or `{ ok: false, error }` when the server
+        could not be reached: the server still exists, it is its answer that
+        failed.
+      responses:
+        '200': { description: The outcome, whichever way it went. }
+        '404': { description: No such server, or not the caller's. }
   /api/mcp/config:
     get:
       tags: [mcp]

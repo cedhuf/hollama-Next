@@ -27,6 +27,19 @@ export interface McpServerView {
 	blocked: boolean;
 	hasSecret: boolean;
 	createdAt: string;
+	/**
+	 * The catalogue this server last answered with, by name.
+	 *
+	 * Stored rather than fetched on sight: the settings answer "what does this
+	 * give me" without opening a connection to somebody's machine every time the
+	 * tab is opened, and the total across servers can be counted at all. Names
+	 * only. What a turn actually sends is read from the server itself when the
+	 * turn starts, so a stale copy here is a list that is out of date, never a
+	 * call made against one.
+	 */
+	tools: string[];
+	/** When it said so, ISO. Null for a server nobody has asked yet. */
+	toolsAt: string | null;
 }
 
 /**

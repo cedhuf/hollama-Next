@@ -3,7 +3,13 @@ import { error, json } from '@sveltejs/kit';
 import { MCP_LIMITS, normaliseMcpUrl } from '$lib/mcp';
 import { requireUser } from '$lib/server/api';
 import { allowUserMcp } from '$lib/server/db/config';
-import { createMcpServer, listMcpServers, toMcpServerView } from '$lib/server/db/mcpServers';
+import {
+	createMcpServer,
+	getMcpServer,
+	listMcpServers,
+	toMcpServerView
+} from '$lib/server/db/mcpServers';
+import { refreshMcpTools } from '$lib/server/mcp/session';
 
 /**
  * An account's own MCP servers. Never anybody else's, and never the token.
@@ -39,5 +45,11 @@ export async function POST(event) {
 		enabled: body?.enabled ?? true
 	});
 
-	return json(toMcpServerView(record), { status: 201 });
+	// Asked once, here, so the card arrives with its catalogue rather than an empty
+	// list and a button. A server that cannot be reached is still created: the
+	// address may be right and the machine merely down, and a creation that fails
+	// on that would lose the token the person just typed.
+	await refreshMcpTools(record).catch(() => {});
+
+	return json(toMcpServerView(getMcpServer(record.id) ?? record), { status: 201 });
 }
