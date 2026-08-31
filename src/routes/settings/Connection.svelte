@@ -151,7 +151,22 @@
 
 	{#snippet title()}
 		<span class="flex max-w-full items-center gap-1.5">
-			<span class="text-active truncate text-sm font-medium">{name}</span>
+			<!-- The name is the heading and the field at once, as it already is on a
+			     bot: renaming something is editing what is on screen, and the box further
+			     down that used to ask the same question was a second question.
+
+			     `shrink-0` is what makes it exactly as wide as its text. It shares this
+			     line with the provider badge, which does not shrink, so without it the
+			     field is the one that gives way and the name is cut off at a width that
+			     has nothing to do with the name. -->
+			<input
+				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 field-sizing-content max-w-full shrink-0 rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
+				size={name.length + 1}
+				bind:value={server.label}
+				oninput={persist}
+				placeholder={provider.name}
+				aria-label={$LL.label()}
+			/>
 			<!-- Only when the label is something other than the provider's own name,
 			     so a connection called "Ollama" doesn't say Ollama twice. -->
 			{#if name !== provider.name}
@@ -277,15 +292,6 @@
 				{/if}
 			</SettingsField>
 		{/if}
-
-		<SettingsField label={$LL.label()}>
-			<input
-				class="settings-field"
-				bind:value={server.label}
-				placeholder={provider.name}
-				oninput={persist}
-			/>
-		</SettingsField>
 
 		<SettingsField label={$LL.modelsFilter()}>
 			<input
