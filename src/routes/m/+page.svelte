@@ -264,7 +264,7 @@
 					<button
 						type="button"
 						onclick={() => talkTo(persona)}
-						class="flex w-20 shrink-0 flex-col items-center gap-2 transition-transform active:scale-95"
+						class="face flex shrink-0 flex-col items-center gap-2 transition-transform active:scale-95"
 					>
 						<PersonaAvatar {persona} size={56} />
 						<span class="text-muted w-full truncate text-center text-xs">{persona.name}</span>
@@ -322,36 +322,54 @@
 		scrollbar-width: none;
 	}
 
+	/*
+	 * Four faces and two thirds of a fifth, whatever the phone is.
+	 *
+	 * A fixed width was the reason the fade said nothing: at 5rem a face, exactly
+	 * four of them landed on a common screen and the fifth started past the edge, so
+	 * the row ended on a gap and there was nothing there to dissolve. Nothing was cut
+	 * off, so nothing looked cut off, and the hint only appeared once you had already
+	 * done the thing it was meant to suggest.
+	 *
+	 * Measured against the row instead: 4.5 shares of what is left after the gaps
+	 * between them, which puts a face half past the edge at every width rather than
+	 * at the ones somebody happened to test. The floor is for the narrowest phones,
+	 * where that share would be smaller than the portrait it has to hold.
+	 */
+	.face {
+		width: max(4rem, calc((100% - 3rem) / 4.5));
+	}
+
 	.faces::-webkit-scrollbar {
 		display: none;
 	}
 
-	/* 1.25rem is the page's own gutter, so the fade begins exactly where the last
-	   face would otherwise touch the edge, and 3rem is about half a portrait: wide
-	   enough to read as a dissolve rather than as a shadow. */
+	/* Half a portrait, which is about what shows of the face past the edge: the one
+	   that is only partly there is the one that dissolves, and the four before it
+	   stay solid. Wide enough to read as a dissolve rather than as a shadow. */
 	.faces[data-more='right'] {
-		mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
-		-webkit-mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+		mask-image: linear-gradient(to right, black calc(100% - 2.5rem), transparent);
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 2.5rem), transparent);
 	}
 
 	.faces[data-more='left'] {
-		mask-image: linear-gradient(to left, black calc(100% - 3rem), transparent);
-		-webkit-mask-image: linear-gradient(to left, black calc(100% - 3rem), transparent);
+		mask-image: linear-gradient(to left, black calc(100% - 2.5rem), transparent);
+		-webkit-mask-image: linear-gradient(to left, black calc(100% - 2.5rem), transparent);
 	}
 
 	.faces[data-more='both'] {
 		mask-image: linear-gradient(
 			to right,
 			transparent,
-			black 3rem,
-			black calc(100% - 3rem),
+			black 2.5rem,
+			black calc(100% - 2.5rem),
 			transparent
 		);
 		-webkit-mask-image: linear-gradient(
 			to right,
 			transparent,
-			black 3rem,
-			black calc(100% - 3rem),
+			black 2.5rem,
+			black calc(100% - 2.5rem),
 			transparent
 		);
 	}
