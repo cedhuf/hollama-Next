@@ -69,6 +69,51 @@
 	 * is handed an id rather than making a blank one, which is the whole difference
 	 * between talking to somebody and talking into the air.
 	 */
+	/**
+	 * Whether the row of faces continues past an edge, and which one.
+	 *
+	 * Only ever answered by measuring, because the answer depends on the number of
+	 * personas, the width of the phone and where the row has already been pushed to.
+	 * Anything drawn from a guess would be a permanent hint on a row of three faces
+	 * that fits, which is the version of this that says nothing.
+	 */
+	let row = $state<HTMLDivElement | null>(null);
+	let more = $state<'none' | 'left' | 'right' | 'both'>('none');
+
+	/** A few pixels of slack, so a scroll that stopped a hair short still counts. */
+	const EDGE = 8;
+
+	function measure() {
+		const element = row;
+		if (!element) return;
+
+		const furthest = element.scrollWidth - element.clientWidth;
+		if (furthest <= EDGE) {
+			more = 'none';
+			return;
+		}
+
+		const behind = element.scrollLeft > EDGE;
+		const ahead = element.scrollLeft < furthest - EDGE;
+		more = behind && ahead ? 'both' : behind ? 'left' : ahead ? 'right' : 'none';
+	}
+
+	$effect(() => {
+		// Re-measured when the row's contents change: a persona added or removed
+		// changes whether there is anything past the edge, and an empty row has no
+		// edge to be past.
+		if (personas.length) measure();
+		else more = 'none';
+	});
+
+	$effect(() => {
+		// And when the window does. A phone turned on its side is the one case where
+		// the row stops overflowing without anybody having touched it.
+		const update = () => measure();
+		window.addEventListener('resize', update);
+		return () => window.removeEventListener('resize', update);
+	});
+
 	async function talkTo(persona: Persona) {
 		const id = await launchPersona(persona, $settingsStore.models ?? []);
 		// The id rides in the query rather than the path: the voice screen is one screen
@@ -209,7 +254,12 @@
 		<section class="flex flex-col gap-2">
 			<h2 class="text-active text-lg font-semibold tracking-tight">{$LL.mobilePersonas()}</h2>
 
-			<div class="faces -mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+			<div
+				bind:this={row}
+				onscroll={measure}
+				data-more={more}
+				class="faces -mx-5 flex gap-3 overflow-x-auto px-5 pb-1"
+			>
 				{#each personas as persona (persona.id)}
 					<button
 						type="button"
@@ -253,15 +303,57 @@
 </div>
 
 <style lang="postcss">
-	/* The row of faces scrolls, and says nothing about it. A bar under a row of
-	   portraits is a piece of furniture: the faces cut off at the edge already say
-	   there are more of them, which is the only thing it would have told anybody. */
+	/*
+	 * The row of faces scrolls, and says so by dissolving rather than by adding
+	 * anything.
+	 *
+	 * No scrollbar: a bar under a row of portraits is a piece of furniture. What
+	 * replaces it is the row fading out on whichever side it continues on, which is
+	 * the same thing the transcript on the voice screen does with what has scrolled
+	 * off the top, and the same thing a phone does everywhere else. A face cut off
+	 * by the screen edge is ambiguous, since the screen edge cuts everything; a face
+	 * dissolving before it reaches the edge is not.
+	 *
+	 * Both ends, separately, and neither when the row fits. `data-more` is measured
+	 * rather than assumed, so a library of three personas gets no hint at all and a
+	 * library of thirty loses the hint on the side it has run out of.
+	 */
 	.faces {
 		scrollbar-width: none;
 	}
 
 	.faces::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* 1.25rem is the page's own gutter, so the fade begins exactly where the last
+	   face would otherwise touch the edge, and 3rem is about half a portrait: wide
+	   enough to read as a dissolve rather than as a shadow. */
+	.faces[data-more='right'] {
+		mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+		-webkit-mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+	}
+
+	.faces[data-more='left'] {
+		mask-image: linear-gradient(to left, black calc(100% - 3rem), transparent);
+		-webkit-mask-image: linear-gradient(to left, black calc(100% - 3rem), transparent);
+	}
+
+	.faces[data-more='both'] {
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			black 3rem,
+			black calc(100% - 3rem),
+			transparent
+		);
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent,
+			black 3rem,
+			black calc(100% - 3rem),
+			transparent
+		);
 	}
 
 	/* The same glass as the bar at the foot of the screen, and it now genuinely is:
