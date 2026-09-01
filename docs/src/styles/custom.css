@@ -511,8 +511,8 @@
 	display: flex;
 	flex: 0 0 auto;
 	flex-direction: column;
-	gap: 0.4rem;
-	align-items: flex-start;
+	gap: 0.5rem;
+	align-items: center;
 }
 
 .nota__mark img {
@@ -522,10 +522,14 @@
 }
 
 .nota__label {
+	padding: 0.1rem 0.55rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 999px;
 	color: var(--sl-color-gray-3);
-	font-size: var(--sl-text-xs);
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
+	font-size: 0.6875rem;
+	letter-spacing: 0.03em;
+	line-height: 1.5;
+	white-space: nowrap;
 }
 
 .nota p {
@@ -620,7 +624,7 @@
 	height: 0.85rem;
 	border: 1px solid var(--sl-color-gray-5);
 	border-radius: 50%;
-	background: linear-gradient(135deg, var(--accent) 50%, var(--bg) 50%);
+	background: linear-gradient(135deg, var(--accent) 50%, var(--canvas) 50%);
 }
 
 .mode {
@@ -631,86 +635,89 @@
    choose which one is in play, for the preview and for the swatches at once.
 
    Every value below is the app's own, read off the `--hsl-*` blocks in
-   `src/app.pcss` and converted: canvas is `shade-2`, sidebar `shade-1`, accent
-   `primary`, text `text-shade-0`, muted `text-shade-2`, which is what the app
-   paints on those two surfaces. They used to be each palette's canonical hexes
-   copied from upstream, which is a different thing: close in light, wrong in
-   dark, and it put the sidebar on the wrong side of the canvas because the app's
-   ramp runs the other way there. A palette changed in `app.pcss` has to be
-   changed here too, and nothing checks that for us. */
+   `src/app.pcss`: canvas is `shade-2`, panel `shade-1`, accent `primary`, text
+   `text-shade-0`, muted `text-shade-2`. Checked against the pixels of the
+   screenshots above, which is what settled it: the app puts the sidebar and the
+   thread on the same `shade-1`, side by side on a `shade-2` ground that shows
+   between them. Two different surfaces, which is what this used to draw, an
+   arrangement the app does not have.
+
+   The values used to be each palette's canonical hexes copied from upstream, a
+   different thing again: close in light, wrong in dark. A palette changed in
+   `app.pcss` has to be changed here too, and nothing checks that for us. */
 .themes:has(#ts-classic:checked) {
-	--l-bg: #ebebeb;
-	--l-side: #f5f5f5;
+	--l-canvas: #ebebeb;
+	--l-panel: #f5f5f5;
 	--l-accent: #eb6d47;
 	--l-text: #0d0d0d;
 	--l-muted: #808080;
-	--d-bg: #2e2e2e;
-	--d-side: #242424;
+	--d-canvas: #2e2e2e;
+	--d-panel: #242424;
 	--d-accent: #eb6d47;
 	--d-text: #f2f2f2;
 	--d-muted: #808080;
 }
 
 .themes:has(#ts-dracula:checked) {
-	--l-bg: #edede3;
-	--l-side: #f5f5ef;
+	--l-canvas: #edede3;
+	--l-panel: #f5f5ef;
 	--l-accent: #ff7ac6;
 	--l-text: #272935;
 	--l-muted: #5f6881;
-	--d-bg: #353746;
-	--d-side: #2e303d;
+	--d-canvas: #353746;
+	--d-panel: #2e303d;
 	--d-accent: #ff7ac6;
 	--d-text: #f8f8f2;
 	--d-muted: #c1bfb3;
 }
 
 .themes:has(#ts-catppuccin:checked) {
-	--l-bg: #dadee7;
-	--l-side: #e3e6ed;
+	--l-canvas: #dadee7;
+	--l-panel: #e3e6ed;
 	--l-accent: #caa6f7;
 	--l-text: #4b4e68;
 	--l-muted: #6b6e85;
-	--d-bg: #292938;
-	--d-side: #242433;
+	--d-canvas: #292938;
+	--d-panel: #242433;
 	--d-accent: #caa6f7;
 	--d-text: #cdd6f4;
 	--d-muted: #a6adc9;
 }
 
 .themes:has(#ts-gruvbox:checked) {
-	--l-bg: #ebdbb2;
-	--l-side: #f2e5ba;
+	--l-canvas: #ebdbb2;
+	--l-panel: #f2e5ba;
 	--l-accent: #d85f0e;
 	--l-text: #292929;
 	--l-muted: #7d6f64;
-	--d-bg: #3b3735;
-	--d-side: #32302f;
+	--d-canvas: #3b3735;
+	--d-panel: #32302f;
 	--d-accent: #fe811b;
 	--d-text: #fbf0c6;
 	--d-muted: #a89985;
 }
 
 .themes:has(#ts-nord:checked) {
-	--l-bg: #dee4ed;
-	--l-side: #e5e9f0;
+	--l-canvas: #dee4ed;
+	--l-panel: #e5e9f0;
 	--l-accent: #5d81ac;
 	--l-text: #2f3541;
 	--l-muted: #4d576a;
-	--d-bg: #3c4353;
-	--d-side: #333a47;
+	--d-canvas: #3c4353;
+	--d-panel: #333a47;
 	--d-accent: #87bfcf;
 	--d-text: #eceff4;
 	--d-muted: #8fa1b3;
 }
 
 .themes:has(#ts-solarized:checked) {
-	--l-bg: #ede7d4;
-	--l-side: #f7f1de;
+	--l-canvas: #ede7d4;
+	--l-panel: #f7f1de;
 	--l-accent: #278bd3;
 	--l-text: #073541;
 	--l-muted: #839495;
-	--d-bg: #073541;
-	--d-side: #042f39;
+	--d-canvas: #073541;
+	--d-panel: #042f39;
 	--d-accent: #278bd3;
 	--d-text: #ede7d4;
 	--d-muted: #647a82;
@@ -720,44 +727,44 @@
    two ramps itself. The mode rules underneath then apply to it exactly as they
    apply to the preview. */
 .sw--classic {
-	--l-bg: #ebebeb;
+	--l-canvas: #ebebeb;
 	--l-accent: #eb6d47;
-	--d-bg: #2e2e2e;
+	--d-canvas: #2e2e2e;
 	--d-accent: #eb6d47;
 }
 
 .sw--dracula {
-	--l-bg: #edede3;
+	--l-canvas: #edede3;
 	--l-accent: #ff7ac6;
-	--d-bg: #353746;
+	--d-canvas: #353746;
 	--d-accent: #ff7ac6;
 }
 
 .sw--catppuccin {
-	--l-bg: #dadee7;
+	--l-canvas: #dadee7;
 	--l-accent: #caa6f7;
-	--d-bg: #292938;
+	--d-canvas: #292938;
 	--d-accent: #caa6f7;
 }
 
 .sw--gruvbox {
-	--l-bg: #ebdbb2;
+	--l-canvas: #ebdbb2;
 	--l-accent: #d85f0e;
-	--d-bg: #3b3735;
+	--d-canvas: #3b3735;
 	--d-accent: #fe811b;
 }
 
 .sw--nord {
-	--l-bg: #dee4ed;
+	--l-canvas: #dee4ed;
 	--l-accent: #5d81ac;
-	--d-bg: #3c4353;
+	--d-canvas: #3c4353;
 	--d-accent: #87bfcf;
 }
 
 .sw--solarized {
-	--l-bg: #ede7d4;
+	--l-canvas: #ede7d4;
 	--l-accent: #278bd3;
-	--d-bg: #073541;
+	--d-canvas: #073541;
 	--d-accent: #278bd3;
 }
 
@@ -765,8 +772,8 @@
    each swatch resolves against its own ramp instead of the selected one. */
 .themes:has(#tm-light:checked) .ramp,
 .themes:has(#tm-light:checked) .sw {
-	--bg: var(--l-bg);
-	--side: var(--l-side);
+	--canvas: var(--l-canvas);
+	--panel: var(--l-panel);
 	--accent: var(--l-accent);
 	--text: var(--l-text);
 	--muted: var(--l-muted);
@@ -774,8 +781,8 @@
 
 .themes:has(#tm-dark:checked) .ramp,
 .themes:has(#tm-dark:checked) .sw {
-	--bg: var(--d-bg);
-	--side: var(--d-side);
+	--canvas: var(--d-canvas);
+	--panel: var(--d-panel);
 	--accent: var(--d-accent);
 	--text: var(--d-text);
 	--muted: var(--d-muted);
@@ -789,10 +796,11 @@
 .mock {
 	display: grid;
 	grid-template-columns: 11rem 1fr;
-	overflow: hidden;
+	gap: 0.55rem;
+	padding: 0.55rem;
 	border: 1px solid var(--sl-color-gray-5);
 	border-radius: 0.9rem;
-	background: var(--bg);
+	background: var(--canvas);
 	box-shadow: 0 12px 32px -16px rgb(0 0 0 / 0.45);
 	font-size: var(--sl-text-sm);
 	transition: background 0.25s;
@@ -815,7 +823,8 @@
 	flex-direction: column;
 	gap: 0.5rem;
 	padding: 0.9rem;
-	background: var(--side);
+	border-radius: 0.6rem;
+	background: var(--panel);
 	transition: background 0.25s;
 }
 
@@ -832,7 +841,7 @@
 	margin-bottom: 0.25rem;
 	padding: 0.4rem 0.6rem;
 	border-radius: 0.45rem;
-	background: color-mix(in oklab, var(--accent) 32%, var(--side));
+	background: color-mix(in oklab, var(--accent) 32%, var(--panel));
 	color: var(--text);
 	font-size: var(--sl-text-xs);
 	font-weight: 600;
@@ -860,6 +869,9 @@
 	flex-direction: column;
 	gap: 0.6rem;
 	padding: 1rem;
+	border-radius: 0.6rem;
+	background: var(--panel);
+	transition: background 0.25s;
 }
 
 .mock__main p {
@@ -871,7 +883,7 @@
 	margin-left: auto;
 	padding: 0.5rem 0.75rem;
 	border-radius: 0.6rem;
-	background: color-mix(in oklab, var(--accent) 22%, var(--bg));
+	background: color-mix(in oklab, var(--accent) 22%, var(--panel));
 	color: var(--text);
 }
 
@@ -904,7 +916,7 @@
 .mock__run {
 	padding: 0.25rem 0.6rem;
 	border-radius: 0.4rem;
-	background: color-mix(in oklab, var(--accent) 20%, var(--bg));
+	background: color-mix(in oklab, var(--accent) 20%, var(--panel));
 	color: var(--text);
 	font-weight: 600;
 }
