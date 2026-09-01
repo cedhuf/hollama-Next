@@ -652,16 +652,22 @@
    choose which one is in play, for the preview and for the swatches at once.
 
    Every value below is the app's own, read off the `--hsl-*` blocks in
-   `src/app.pcss`: canvas is `shade-2`, panel `shade-1`, accent `primary`, text
-   `text-shade-0`, muted `text-shade-2`. Checked against the pixels of the
-   screenshots above, which is what settled it: the app puts the sidebar and the
-   thread on the same `shade-1`, side by side on a `shade-2` ground that shows
-   between them. Two different surfaces, which is what this used to draw, an
-   arrangement the app does not have.
+   `src/app.pcss` and named after the Tailwind tokens they feed: canvas is
+   `shade-2`, panel `shade-1`, card `shade-0`, accent `primary`, active
+   `text-shade-0`, body `text-shade-1`, muted `text-shade-2`.
 
-   The values used to be each palette's canonical hexes copied from upstream, a
-   different thing again: close in light, wrong in dark. A palette changed in
-   `app.pcss` has to be changed here too, and nothing checks that for us. */
+   What each one is used for was settled by sampling the captures above rather
+   than by reading the markup, after two passes that looked right and were not.
+   The sidebar and the thread share one `shade-1`, side by side on a `shade-2`
+   ground that shows between them. Rows, bubbles and the composer are `shade-0`
+   on top of that. Running text is `text-shade-1`; `shade-0` is reserved for what
+   is active. And the New chat button is the accent, whole, labelled in `shade-0`,
+   which is white under a light ramp and near-black under a dark one.
+
+   Before all that the values were each palette's canonical hexes copied from
+   upstream, a different mistake again: close in light, wrong in dark. A palette
+   changed in `app.pcss` has to be changed here too, and nothing checks that for
+   us. */
 .themes:has(#ts-classic:checked) {
 	--l-canvas: #ebebeb;
 	--l-panel: #f5f5f5;
