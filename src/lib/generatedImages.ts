@@ -3,30 +3,17 @@ import type { ImageQuality, ImageRatio } from '$lib/connections';
 /**
  * A picture the app made, and everything about it that is not the picture.
  *
- * The bytes live on disk and are reached through their own authenticated route;
- * what is here is small, listable and backupable. Splitting them is the whole
- * design: a gallery has to be able to draw a hundred rows without carrying a
- * hundred megabytes, and the prompt somebody wrote is worth keeping long after
- * they have deleted the image it produced.
+ * The bytes live on disk behind their own authenticated route; this is small,
+ * listable and backupable. A gallery has to draw a hundred rows without carrying
+ * a hundred megabytes, and the prompt outlives the image it produced.
  */
 export interface GeneratedImage {
 	id: string;
-	/**
-	 * A few words naming the picture, written by a text model after the fact.
-	 *
-	 * Absent on anything drawn before titling existed, and on anything drawn with
-	 * it switched off, so every reader falls back to the prompt. It is a label, not
-	 * a record: the prompt is what made the picture and is never replaced by it.
-	 */
+	/** Absent on anything drawn before titling existed or with it switched off, so every reader falls back to the prompt. A label, not a record. */
 	title?: string;
 	/** What the person asked for, in their words. Never overwritten. */
 	prompt: string;
-	/**
-	 * What was actually sent, when something rewrote it.
-	 *
-	 * Kept beside the original rather than instead of it, so "why does this not
-	 * look like what I asked for" is a question with an answer.
-	 */
+	/** Kept beside the original rather than instead of it, so "why does this not look like what I asked for" has an answer. */
 	sentPrompt?: string;
 	negativePrompt?: string;
 	/** Which connection drew it, and with what. Both needed to draw it again. */
@@ -34,13 +21,7 @@ export interface GeneratedImage {
 	model: string;
 	/** The concrete size that was sent, when one was. Absent means the model chose. */
 	size?: string;
-	/**
-	 * What was asked for, in the app's words rather than the provider's.
-	 *
-	 * Kept beside the size because it is what "make another like this" needs: the
-	 * pixel counts belong to whichever model drew it, and reusing them on another
-	 * model would be a refusal. A shape and a level of effort travel.
-	 */
+	/** What "make another like this" needs: the pixel counts belong to whichever model drew it, and reusing them on another would be a refusal. A shape and a level of effort travel. */
 	ratio?: ImageRatio;
 	quality?: ImageQuality;
 	style?: string;
@@ -57,13 +38,10 @@ export interface GeneratedImage {
 }
 
 /**
- * What the app will store, and what it refuses.
- *
  * A cap on one image and a cap on an account, because neither alone is enough:
- * without the first a provider returning something enormous fills the disk in
- * one request, and without the second it fills the same disk in a thousand
- * small ones. The numbers are deliberately generous. This is a guard against
- * runaway, not a quota anybody should meet in normal use.
+ * without the first one enormous answer fills the disk, without the second a
+ * thousand small ones do. Deliberately generous: a guard against runaway, not a
+ * quota anybody should meet.
  */
 export const IMAGE_LIMITS = {
 	/** One image, in bytes. A 1792x1024 PNG lands around 3 MB. */
@@ -77,28 +55,18 @@ export const IMAGE_LIMITS = {
 } as const;
 
 /**
- * The types the app will serve back.
- *
- * An allowlist rather than whatever the provider labelled its answer, because
- * this is served from the app's own origin: an SVG accepted here and handed to a
- * browser later is script running as the app. None of these three can carry any.
+ * The types the app will serve back. An allowlist rather than whatever the
+ * provider labelled its answer, because this is served from the app's own
+ * origin: an SVG accepted here is script running as the app.
  */
 /**
- * The types the app accepts as an *input* picture.
- *
- * Narrower than what it serves back, and narrower on purpose: the providers that
- * take reference pictures take these two and refuse the rest. Infomaniak
- * answers `must be a file of type: jpg, jpeg, png`. Accepting a third here would
- * be accepting something that fails after the upload rather than before it.
+ * The types accepted as an *input* picture. Narrower on purpose: the providers
+ * that take reference pictures take these two and refuse the rest, so a third
+ * would fail after the upload rather than before it.
  */
 export const IMAGE_INPUT_TYPES = ['image/png', 'image/jpeg'];
 
-/**
- * Whether the prompt names the trigger word, as a word rather than as letters.
- *
- * A boundary each side, so `image` does not pass for `img` and a trailing comma
- * does not stop one that should.
- */
+/** A word boundary each side, so `image` does not pass for `img` and a trailing comma does not stop one that should. */
 export function hasTrigger(prompt: string, trigger: string): boolean {
 	const escaped = trigger.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	return new RegExp(`\\b${escaped}\\b`, 'i').test(prompt);
@@ -110,13 +78,7 @@ export const IMAGE_TYPES: Record<string, string> = {
 	'image/webp': 'webp'
 };
 
-/**
- * The type of a picture, read from the picture.
- *
- * From the magic bytes, never from a `content-type` the provider chose and never
- * from a filename. Returns nothing for anything not on the list, and nothing is
- * what refuses the write.
- */
+/** From the magic bytes, never from a `content-type` the provider chose and never from a filename. Nothing is what refuses the write. */
 export function sniffImageType(bytes: Uint8Array): string | undefined {
 	const starts = (...signature: number[]) => signature.every((byte, i) => bytes[i] === byte);
 
@@ -138,13 +100,10 @@ export function extensionFor(contentType: string): string {
 }
 
 /**
- * A filename somebody would recognise in their downloads folder.
- *
- * Built from the title when there is one and from the prompt otherwise, because a
- * folder of `image-1.png` is a folder nobody can search, and because a filename
- * is the one piece of metadata every file manager and every desktop search
- * already indexes, without anyone writing a byte of EXIF. Stripped to what every filesystem accepts, and truncated: a
- * two-thousand-character prompt is not a filename.
+ * A filename somebody would recognise in their downloads folder, built from the
+ * title or the prompt: a folder of `image-1.png` is one nobody can search, and a
+ * filename is the one piece of metadata every desktop search already indexes.
+ * Stripped and truncated: a two-thousand-character prompt is not a filename.
  */
 export function downloadName(
 	image: Pick<GeneratedImage, 'title' | 'prompt' | 'contentType'>

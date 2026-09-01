@@ -3,33 +3,24 @@ import { env } from '$env/dynamic/public';
 /**
  * Reading a document into something a model can answer from.
  *
- * Everything here happens in the browser. A file is never uploaded, not even in
+ * Everything happens in the browser. A file is never uploaded, not even in
  * server mode: it is parsed where it was picked, turned into Markdown, and only
- * that text travels, as part of the message the user chooses to send.
+ * that text travels.
  *
- * Markdown rather than the parser's own object tree, which carries the same
- * words at roughly five to ten times the token cost, or plain text, which loses
- * the headings and tables a model needs to navigate a long document.
+ * Markdown rather than the parser's object tree, which costs five to ten times
+ * the tokens, or plain text, which loses the headings and tables a model needs.
  */
 
 /** Where the pdf.js worker is served from. Copied into `static/` by `prepare`. */
 const PDF_WORKER_SRC = '/vendor/pdf.worker.min.mjs';
 
-/**
- * Instance-wide off switch, for a deployment that does not want this at all.
- * Read at build time like every other `PUBLIC_` flag, so it cannot be talked out
- * of by anything running in the page.
- */
+/** Instance-wide off switch. Read at build time like every other `PUBLIC_` flag, so nothing running in the page can talk it out of it. */
 export const documentsDisabledByInstance = env.PUBLIC_DISABLE_DOCUMENTS === 'true';
 
 /**
- * Where the OCR engine and its language data are served from.
- *
- * Unset, Tesseract fetches both from a public CDN the first time OCR runs. That
- * is fine for a desktop install and unacceptable for an air-gapped one, so an
- * instance can host the files itself and point here. Documented in
- * `.env.example`; there is no user-facing setting because this is a property of
- * the deployment, not a preference.
+ * Unset, Tesseract fetches the engine and its language data from a public CDN
+ * the first time OCR runs, which is unacceptable for an air-gapped install. No
+ * user-facing setting: this is a property of the deployment.
  */
 const OCR_CORE_PATH = env.PUBLIC_OCR_CORE_PATH || undefined;
 const OCR_LANG_PATH = env.PUBLIC_OCR_LANG_PATH || undefined;
@@ -54,13 +45,7 @@ export const DOCUMENT_EXTENSIONS = [
 
 export const DOCUMENT_ACCEPT = DOCUMENT_EXTENSIONS.join(',');
 
-/**
- * A page of extracted text this short is not a page of text.
- *
- * A scanned PDF parses perfectly and yields almost nothing, because there are no
- * characters in it, only pictures of characters. Catching that is what lets the
- * app say so instead of quietly attaching an empty document.
- */
+/** A scanned PDF parses perfectly and yields almost nothing, because there are pictures of characters rather than characters. Catching that lets the app say so. */
 const MIN_CHARS_PER_PAGE = 40;
 
 export interface DocumentExtraction {
@@ -71,10 +56,7 @@ export interface DocumentExtraction {
 	pages?: number;
 	/** The document's own title, when it has one worth showing. */
 	title?: string;
-	/**
-	 * Text came back suspiciously thin for the size of the file: almost certainly
-	 * a scan. The caller offers the way out rather than pretending it worked.
-	 */
+	/** Text came back suspiciously thin for the size of the file: almost certainly a scan. The caller offers the way out rather than pretending it worked. */
 	looksScanned: boolean;
 	/** Non-fatal problems from the parser, already flattened to strings. */
 	warnings: string[];
@@ -86,15 +68,10 @@ export function isDocumentFile(name: string): boolean {
 }
 
 /**
- * The parser, loaded on demand.
- *
- * Two builds, and which one is fetched is the whole privacy story. Without OCR
- * the slim build is used: it has no OCR engine in it and no CDN addresses, so
- * there is nothing that could reach out even by mistake. Turning OCR on fetches
- * the full build instead, which is the moment Tesseract enters the picture.
- *
- * Either way this is a dynamic import, so an instance with documents switched
- * off never downloads a byte of it.
+ * The parser, loaded on demand. Two builds, and which one is fetched is the
+ * privacy story: the slim build has no OCR engine and no CDN addresses in it.
+ * Either way a dynamic import, so an instance with documents off downloads none
+ * of it.
  */
 async function loadParser(withOcr: boolean) {
 	return withOcr ? await import('officeparser') : await import('officeparser/slim');
@@ -113,13 +90,7 @@ function tidy(markdown: string): string {
 	);
 }
 
-/**
- * Read a file into Markdown.
- *
- * Throws on a file that cannot be parsed at all: the caller has to say so, since
- * silently attaching nothing is how a user ends up arguing with a model about a
- * document it never received.
- */
+/** Throws on a file that cannot be parsed: silently attaching nothing is how a user ends up arguing with a model about a document it never received. */
 export async function extractDocument(
 	file: File,
 	options: { ocr?: boolean; ocrLanguage?: string; signal?: AbortSignal } = {}
@@ -146,8 +117,8 @@ export async function extractDocument(
 	});
 
 	const { value } = await ast.to('md', {
-		// Anchor ids on every heading, and the formatting spans around them, are
-		// for a browser rendering a page. A model pays for them and reads past them.
+		// Anchor ids on every heading, and the spans around them, are for a browser
+		// rendering a page. A model pays for them and reads past them.
 		ignoreInternalLinks: true,
 		generateIds: false,
 		includeFormatting: false
@@ -170,16 +141,12 @@ export async function extractDocument(
 }
 
 /**
- * A scanned PDF, as pictures of its pages.
+ * A scanned PDF, as pictures of its pages: the fallback for anyone with a vision
+ * model who would rather not host thirty megabytes of OCR engine. They go
+ * through the image path that already exists.
  *
- * The fallback for the case OCR would have covered, for anyone who has a vision
- * model and would rather not host thirty megabytes of OCR engine. The pages go
- * through the image path that already exists, so there is nothing new for the
- * providers to support.
- *
- * Capped, and deliberately low: each page becomes a full-size image, and a
- * hundred of them would blow through any context window and most of the tab's
- * memory on the way.
+ * Capped low: each page becomes a full-size image, and a hundred would blow
+ * through any context window and most of the tab's memory.
  */
 export const MAX_PAGES_AS_IMAGES = 10;
 
@@ -196,8 +163,8 @@ export async function renderPdfPagesAsImages(
 
 	for (let pageNumber = 1; pageNumber <= count; pageNumber++) {
 		const page = await pdf.getPage(pageNumber);
-		// 1.6 is the smallest scale where 10pt body text still reads reliably once
-		// the image is re-encoded; below that the model starts inventing words.
+		// 1.6 is the smallest scale where 10pt body text still reads reliably once the
+		// image is re-encoded; below that the model starts inventing words.
 		const viewport = page.getViewport({ scale: 1.6 });
 		const canvas = document.createElement('canvas');
 		canvas.width = Math.floor(viewport.width);

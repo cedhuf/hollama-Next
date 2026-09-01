@@ -28,65 +28,36 @@ export interface Server {
 	apiKey?: string;
 	/** Accent used for this connection's badge; falls back to the provider default. */
 	color?: string;
-	/**
-	 * Display-only overrides, keyed by the real model id. Never sent to the API and
-	 * never persisted on sessions. `model.name` stays the single identifier.
-	 */
+	/** Display-only, keyed by the real model id. Never sent, never persisted on a session: `model.name` stays the identifier. */
 	modelLabels?: Record<string, string>;
 	/**
-	 * What a million tokens costs on this connection, keyed by the real model id.
-	 *
-	 * On the connection rather than on the model name, because the price is a fact
-	 * about *where* the model runs: the same id is billed differently by two
-	 * providers and costs nothing at all on an Ollama in the next room. Keyed like
-	 * `modelLabels`, so both answer "what do I know about this model here" from the
-	 * same place.
-	 *
-	 * Absent means unpriced, which is not the same as free: a conversation on an
-	 * unpriced model is not counted rather than counted as zero.
+	 * What a million tokens costs here, keyed by the real model id: the price is a
+	 * fact about *where* a model runs. Absent means unpriced, which is not free: an
+	 * unpriced conversation is not counted rather than counted as zero.
 	 */
 	modelPricing?: Record<string, ModelPrice>;
 	/**
-	 * What each of this connection's models is for, keyed like the two maps above.
+	 * What each model is for, and only where somebody disagreed with the guess:
+	 * `modelKind()` reads the name when there is no entry. Per connection, since the
+	 * same id can be a chat model on one endpoint and absent from the next.
 	 *
-	 * Sparse, and only where somebody disagreed with the guess: `modelKind()` reads
-	 * the name when there is no entry, so a fresh connection is already sorted
-	 * without anyone touching a hundred rows. Stored per connection for the same
-	 * reason the price is: the same id can be a chat model on one endpoint and
-	 * absent from the next.
-	 *
-	 * It exists because no provider says. `/v1/models` returns a list of ids and
-	 * nothing else, and Ollama does not list image models at all. Guessing from the
-	 * name is the only signal there is, so the guess has to be correctable.
+	 * It exists because no provider says: `/v1/models` returns ids and nothing else.
 	 */
 	modelKinds?: Record<string, ModelKind>;
 	/**
-	 * Where this connection's image endpoints live, when that is not where its
-	 * chat endpoint lives. Empty means the same base, which is the usual case.
+	 * Where this connection's image endpoints live, when that is not where its chat
+	 * endpoint lives. Empty means the same base.
 	 *
-	 * It exists because one base URL turned out to be an assumption rather than a
-	 * fact. OpenAI serves `chat/completions` and `images/generations` off the same
-	 * root, so appending a path reaches both. Infomaniak does not: chat is on API
-	 * version 2 under `/openai/v1`, images are only on version 1 under `/openai`,
-	 * and no amount of path appending gets from one to the other.
-	 *
-	 * Not an Infomaniak special case, though it is what forced the question. A
-	 * self-hosted setup running llama.cpp for chat and ComfyUI for pictures is two
-	 * different hosts, and this is the field that says so.
+	 * Infomaniak forced the question (chat on v2 under `/openai/v1`, images on v1
+	 * under `/openai`), but so does llama.cpp for chat and ComfyUI for pictures.
 	 */
 	imageBaseUrl?: string;
 	/**
 	 * How this Ollama loads a model: threads, GPU layers, mmap and the rest.
 	 *
-	 * On the connection because that is what they describe. They are facts about
-	 * one machine, decided once by whoever runs it, and identical for every
-	 * conversation held against it. They used to live on the conversation, where
-	 * they were neither: merely opening the parameters panel bound half a dozen
-	 * checkboxes to it and wrote `false` into every one, so a server configured to
-	 * memory-map its weights was told not to, by a conversation, forever.
-	 *
-	 * Ignored by every other kind of connection, which is why nothing outside the
-	 * Ollama strategy reads it.
+	 * On the connection because that is what they describe: facts about one machine.
+	 * On the conversation, merely opening the parameters panel wrote `false` into
+	 * every checkbox. Every other kind of connection ignores it.
 	 */
 	loadOptions?: LoadOptions;
 }
@@ -111,31 +82,21 @@ export const SERVER_COLORS = [
 ] as const;
 
 /**
- * What a model is billed by.
- *
- * Four, because that is what providers actually publish and the app converts
- * nothing. Tokens for anything you talk to. An image model is billed per image
- * by OpenAI, per second of compute by Replicate, and per minute by Infomaniak,
- * and a minute is not a second scaled by sixty as far as the person typing the
- * figure is concerned. Storing the unit as published means a price typed from an
- * invoice reads back the way the invoice wrote it.
+ * What a model is billed by. Four, because that is what providers publish and
+ * the app converts nothing: an image is billed per image by OpenAI, per second
+ * by Replicate and per minute by Infomaniak, so a price typed from an invoice
+ * reads back the way the invoice wrote it.
  */
 export type PriceUnit = 'token' | 'image' | 'second' | 'minute';
 
 export const PRICE_UNITS: PriceUnit[] = ['token', 'image', 'second', 'minute'];
 
 /**
- * The price of one model on one connection, in the currency beside it.
+ * The price of one model on one connection.
  *
- * Tokens keep two numbers, because that is how every text provider publishes
- * them and because the ratio between them is the whole reason a long
- * conversation costs what it does. Every other unit has one, since nothing that
- * is billed per image or per second bills the way in differently from the way
- * out.
- *
- * `unit` absent means tokens. Rows written before there was anything else are
- * token prices, and rewriting them to say so would have been a migration that
- * changes no behaviour.
+ * Tokens keep two numbers, since the ratio between them is why a long
+ * conversation costs what it does. Every other unit has one. `unit` absent means
+ * tokens, which is what rows written before there was anything else are.
  */
 export interface ModelPrice {
 	/** What this is billed by. Absent means `token`. */
@@ -146,13 +107,7 @@ export interface ModelPrice {
 	output?: number;
 	/** Per image, per second or per minute, depending on `unit`. */
 	rate?: number;
-	/**
-	 * What this model is billed in, when it is not the connection's currency.
-	 *
-	 * Per model because one account can be billed in more than one, and because a
-	 * limit that adds currencies together should at least be able to know that it
-	 * is doing so. Nothing is converted, here or anywhere.
-	 */
+	/** Per model, since one account can be billed in more than one. Nothing is converted, here or anywhere. */
 	currency?: string;
 }
 
@@ -162,13 +117,9 @@ export function priceUnit(price: Pick<ModelPrice, 'unit'> | undefined): PriceUni
 }
 
 /**
- * Whether anybody has actually given this price a figure.
- *
- * The one place that decides, because "unpriced" is load-bearing: an unpriced
- * model is not counted at all rather than counted as free, and while a credit
- * limit is in force it is refused outright. Which field carries the figure
- * depends on the unit, so asking about `input` alone stopped being the question
- * the moment there was more than one unit.
+ * The one place that decides, because "unpriced" is load-bearing: such a model
+ * is not counted rather than counted as free, and is refused outright while a
+ * credit limit is in force. Which field carries the figure depends on the unit.
  */
 export function hasPriceFigure(price: ModelPrice | undefined): boolean {
 	if (!price) return false;
@@ -187,13 +138,9 @@ export function modelPrice(
 }
 
 /**
- * Names that give a model away, checked before anything is assumed.
- *
- * Embeddings first: `bge_multilingual_gemma2` carries the name of a chat model
- * inside it, and reading it as one is exactly the mistake this exists to stop.
- * Substrings rather than exact ids because nobody ships one id, every family
- * arrives as a dozen sizes, dates and quantisations, and a list of exact names
- * is a list that is wrong by the end of the month.
+ * Names that give a model away. Embeddings first: `bge_multilingual_gemma2`
+ * carries the name of a chat model inside it. Substrings, since every family
+ * arrives as a dozen sizes, dates and quantisations.
  */
 const EMBEDDING_HINTS = [
 	'embed',
@@ -211,23 +158,16 @@ const EMBEDDING_HINTS = [
 ];
 
 /**
- * Sound, in the two directions it runs.
+ * Sound, in the two directions it runs: the words the industry uses, not a list
+ * of models.
  *
- * The words the industry uses for a model that hears or speaks, not a list of
- * the models themselves. `asr` and `stt` on one side, `tts` on the other;
- * `whisper`, `voxtral`, `parakeet` and `chirp` name themselves as listeners,
- * `kokoro` and `orpheus` as talkers.
+ * Speaking is checked first, and the order is load-bearing:
+ * `mistralai/voxtral-mini-tts-2603` carries the name of a transcription family
+ * and is a voice.
  *
- * Speaking is checked first, and that order is load-bearing rather than
- * arbitrary: `mistralai/voxtral-mini-tts-2603` carries the name of a
- * transcription family and is a voice, and reading it the other way is exactly
- * the mistake this order exists to stop.
- *
- * It is deliberately not exhaustive, and it cannot be. `fish-audio/transcribe-1`
- * listens while `fish-audio/s1` talks, and no substring tells them apart, which
- * is why a provider that will answer the question outright is asked instead: see
- * `catalogues` in the descriptors. This is what is left for the ones that will
- * not, and it stays correctable in Models and prices either way.
+ * Deliberately not exhaustive: `fish-audio/transcribe-1` listens and
+ * `fish-audio/s1` talks, and no substring tells them apart. A provider that will
+ * answer outright is asked instead, see `catalogues` in the descriptors.
  */
 const SPEECH_HINTS = ['tts', 'kokoro', 'orpheus', 'text-to-speech'];
 
@@ -267,13 +207,10 @@ const IMAGE_HINTS = [
 /**
  * What a model is, read from its name, for a connection nobody has sorted yet.
  *
- * A guess, and named one. It is right often enough that a freshly synced
- * connection lands in the right sections on its own, and wrong often enough that
- * the answer has to stay overridable, which is what `modelKinds` is for. Text
- * is the fallback because it is both the commonest and the least destructive
- * mistake: a text model offered for drawing fails loudly at the first request,
- * where an image model quietly missing from the chat picker looks like the
- * connection never synced.
+ * A guess, and named one: right often enough that a fresh connection lands in
+ * the right sections, wrong often enough to stay overridable through
+ * `modelKinds`. Text is the fallback because it fails loudly, where an image
+ * model missing from the chat picker looks like a connection that never synced.
  */
 export function guessModelKind(name: string): ModelKind {
 	const id = name.toLowerCase();
@@ -294,20 +231,13 @@ export function modelLabel(server: Pick<Server, 'modelLabels'> | undefined, name
 	return server?.modelLabels?.[name]?.trim() || name;
 }
 
-/**
- * The badge for a connection. Every connection gets its own colour at creation;
- * the provider default only covers rows created before that was the case.
- */
+/** Every connection gets its own colour at creation; the provider default only covers older rows. */
 export function serverBadge(server: Pick<Server, 'connectionType' | 'color'>) {
 	const fallback = PROVIDER_BADGES[server.connectionType] ?? { id: '', color: '#888780' };
 	return { id: fallback.id, color: server.color || fallback.color };
 }
 
-/**
- * A colour for a new connection, preferring one nobody else is using: two
- * providers sharing an accent would defeat the point of colouring them at all.
- * Once the palette is exhausted it just picks at random.
- */
+/** Prefers a colour nobody else is using, then picks at random once the palette is exhausted. */
 export function pickServerColor(usedColors: (string | undefined)[] = []): string {
 	const used = new Set(usedColors.filter(Boolean).map((color) => color!.toLowerCase()));
 	const free = SERVER_COLORS.filter((color) => !used.has(color.toLowerCase()));
@@ -327,25 +257,12 @@ export function serverInitials(name: string): string {
 	return first.charAt(0).toUpperCase() + first.charAt(1).toLowerCase();
 }
 
-/**
- * Where to send a drawing on this connection.
- *
- * The chat base whenever nothing says otherwise, so every provider that serves
- * both from one root needs no configuration and none of this is visible to it.
- * About a connection rather than about a provider, which is why it lives here
- * and not in a descriptor.
- */
+/** The chat base whenever nothing says otherwise. About a connection rather than a provider, which is why it is here. */
 export function imageBaseUrl(server: Pick<Server, 'baseUrl' | 'imageBaseUrl'>): string {
 	return server.imageBaseUrl?.trim() || server.baseUrl;
 }
 
-/**
- * What the connection form needs to know about a provider.
- *
- * A view of the descriptor rather than a second copy of it: the facts live in
- * `$lib/providers`, one file each, and this is the shape the form already reads.
- * Kept so nothing that renders a connection had to change when they moved.
- */
+/** A view of the descriptor rather than a second copy: the facts live in `$lib/providers`, one file each. */
 export interface ProviderInfo {
 	type: ConnectionType;
 	/** Display name: proper nouns, not translated. */
@@ -382,33 +299,17 @@ export function transcriptionFor(connectionType: ConnectionType) {
 	return describeProvider(connectionType).transcription;
 }
 
-/**
- * How this connection reads aloud, when it does that at all.
- *
- * Nothing is assumed in its absence, unlike transcription. Every compatible
- * endpoint serves `/audio/transcriptions`; hardly any serve `/audio/speech`, and
- * a speaker button that answers 404 on every press is worse than none.
- */
+/** Nothing is assumed in its absence, unlike transcription: hardly any endpoint serves `/audio/speech`, and a speaker that 404s on every press is worse than none. */
 export function speechFor(connectionType: ConnectionType) {
 	return describeProvider(connectionType).speech;
 }
 
-/**
- * Whether this connection will say what a call cost, if asked in its own way.
- *
- * Only the asking is gated. Reading a `usage.cost` that turns up in an answer
- * needs nobody's permission and is done everywhere.
- */
+/** Only the asking is gated. Reading a `usage.cost` that turns up in an answer is done everywhere. */
 export function reportsCost(connectionType: ConnectionType): boolean {
 	return !!describeProvider(connectionType).reportsCost;
 }
 
-/**
- * What a reporting connection reports in.
- *
- * Nothing for a connection that reports nothing, which is not the same as an
- * unknown currency: there is simply no figure of its own to label.
- */
+/** Nothing for a connection that reports nothing, which is not an unknown currency: there is no figure of its own to label. */
 export function reportedCurrency(connectionType: ConnectionType): string | undefined {
 	return describeProvider(connectionType).reportsCost?.currency;
 }
@@ -436,12 +337,7 @@ export function supportsThinkingRequest(connectionType: ConnectionType): boolean
 	return describeProvider(connectionType).thinkingRequest === true;
 }
 
-/**
- * Whether an endpoint is known to accept a `tools` array.
- *
- * Ollama does too, but only for some models, so it answers for itself per model
- * and its descriptor deliberately stays silent here.
- */
+/** Ollama does too, but only for some models, so it answers per model and its descriptor stays silent here. */
 export function supportsNativeTools(connectionType: ConnectionType): boolean {
 	return describeProvider(connectionType).nativeTools === true;
 }
@@ -470,9 +366,7 @@ export function getDefaultServer(
 	return {
 		id: generateRandomId(),
 		// A provider whose address is built from one field starts blank rather than
-		// carrying its template: an endpoint with a placeholder still in it is not a
-		// working endpoint, and leaving it empty is what makes the form refuse to
-		// sync until the value is given.
+		// carrying its template, which is what makes the form refuse to sync.
 		baseUrl: describeProvider(connectionType).urlField ? '' : provider.baseUrl,
 		connectionType,
 		modelFilter: provider.modelFilter,
@@ -482,11 +376,7 @@ export function getDefaultServer(
 	};
 }
 
-/**
- * Everything a provider decides about itself, re-exported so the rest of the app
- * keeps one import for "what is a connection" and never has to know which file a
- * particular provider's facts happen to live in.
- */
+/** Re-exported, so the rest of the app keeps one import for "what is a connection". */
 export {
 	type Catalogue,
 	declaredModels,

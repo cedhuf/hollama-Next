@@ -9,29 +9,19 @@
 	import SettingsHint from './SettingsHint.svelte';
 
 	/**
-	 * The sampling settings, in two groups that are two groups for a reason.
+	 * The sampling settings, in two groups that are two for a reason.
 	 *
-	 * The same component wherever they are edited: an account's own set in
-	 * Settings, the published set on the Admin tab, and a conversation's overrides
-	 * in its own dialog. Three copies of nineteen fields would have drifted apart
-	 * by the second one.
+	 * The same component wherever they are edited, since three copies of nineteen
+	 * fields would have drifted apart by the second one.
 	 *
-	 * The split down the middle is the point. The first group reaches every
-	 * provider; the second is llama.cpp's vocabulary and is never sent anywhere
-	 * else, because an endpoint that does not know a field answers 400 rather than
-	 * ignoring it. A panel that does not say which is which invites people to set
-	 * things that quietly do nothing.
+	 * The split is the point: the first group reaches every provider, the second is
+	 * llama.cpp's vocabulary and goes nowhere else, because an endpoint that does
+	 * not know a field answers 400 rather than ignoring it.
 	 */
 	interface Props {
 		/** This level's values, mutated through the binding. */
 		values: SamplingOptions;
-		/**
-		 * What an empty field falls back to, shown as its placeholder.
-		 *
-		 * Empty in Settings, where an empty field means the provider decides. Inside
-		 * a conversation it is the account's own set, so a blank box reads as the
-		 * value the turn will actually use rather than as nothing at all.
-		 */
+		/** Empty in Settings, where an empty field means the provider decides. Inside a conversation it is the account's own set, so a blank box reads as the value the turn will use. */
 		inherited?: SamplingOptions;
 		/** True when the model in play is on an Ollama connection. */
 		ollama: boolean;
@@ -50,17 +40,13 @@
 	}: Props = $props();
 
 	/**
-	 * One field, and what happens when nobody sets it.
+	 * An empty box reads as _Auto_ rather than a number, because there is no number
+	 * to print: these reach every provider and each defaults differently. The panel
+	 * used to show Ollama's figures, so somebody on OpenAI read 0.8 for a
+	 * temperature that would arrive as 1.0.
 	 *
-	 * An empty box reads as _Auto_ rather than as a number, because there is no
-	 * number to print: these settings now reach every provider, and each one
-	 * defaults differently. The panel used to show Ollama's own figures here, so
-	 * somebody on OpenAI read 0.8 for a temperature that would arrive as 1.0, and
-	 * a few of those figures had gone stale at Ollama too.
-	 *
-	 * `fallback` is for the rare field whose absence has a meaning worth naming in
-	 * words, and `seed` is the only one: no seed is not a default value, it is a
-	 * different draw every time.
+	 * `fallback` is for the rare field whose absence is worth naming in words, and
+	 * `seed` is the only one: no seed is a different draw every time.
 	 */
 	interface FieldSpec {
 		key: SamplingKey;
@@ -73,14 +59,10 @@
 	}
 
 	/**
-	 * The two fields people actually come here for. Everything else is folded away:
-	 * nineteen boxes open at once said this panel was for everybody, when in truth
-	 * a handful of people ever move anything but these.
-	 *
-	 * The context window earns its place over the other seventeen because it is the
-	 * one that decides whether the model still remembers the start of the
-	 * conversation. It is also the only one the app reads for itself, for the load
-	 * meter, so it means something here beyond what goes on the wire.
+	 * The two fields people actually come here for; everything else is folded away.
+	 * The context window earns its place because it decides whether the model still
+	 * remembers the start of the conversation, and because it is the one the app
+	 * reads for itself, for the load meter.
 	 */
 	const common: FieldSpec[] = $derived([
 		{
@@ -197,12 +179,7 @@
 		return above !== '' ? above : (spec.fallback ?? $LL.automatic());
 	}
 
-	/**
-	 * A blank box hands the field back to whatever is above it, which is what
-	 * people expect from clearing one. Written by removing the key rather than by
-	 * storing `undefined`: an `undefined` on the wire reads as a value somebody
-	 * chose, and that mistake is exactly what the retired panel used to make.
-	 */
+	/** A blank box hands the field back to whatever is above it. Written by removing the key rather than storing `undefined`, which on the wire reads as a value somebody chose. */
 	function write(key: SamplingKey, value: unknown) {
 		const next: Record<string, unknown> = { ...values };
 		if (value === undefined) delete next[key];
@@ -225,9 +202,8 @@
 {#snippet field(spec: FieldSpec)}
 	<SettingsField label={spec.label}>
 		{#if spec.kind === 'switch'}
-			<!-- The same three-position control as on an Ollama connection, and the
-			     app's own `Select` rather than the browser's: a raw `<select>` here was
-			     the last field in either panel drawn by the platform. -->
+			<!-- The same three-position control as on an Ollama connection, and the app's own
+			     `Select`: a raw `<select>` was the last field drawn by the platform. -->
 			<Select
 				{disabled}
 				value={values[spec.key] === undefined ? 'inherit' : values[spec.key] ? 'on' : 'off'}
@@ -280,13 +256,9 @@
 		</div>
 	</Collapsible>
 
-	<!-- Its own fold rather than a marked-out block at the bottom: these reach an
-	     Ollama and nothing else, and the difference is invisible until a turn
-	     fails. Still there when the model is not on one, dimmed and labelled,
-	     because hiding them would make a value somebody set look as though it had
-	     gone. Dimmed rather than disabled: "not in play" is the message, not
-	     "broken", and a value set for a model you are about to switch back to still
-	     has to be correctable. -->
+	<!-- Its own fold rather than a marked-out block: these reach an Ollama and
+	     nothing else, and the difference is invisible until a turn fails. Still
+	     there when the model is not on one, dimmed and labelled. -->
 	<div class:opacity-60={!ollama}>
 		<Collapsible
 			title={$LL.samplingOllamaOnly()}

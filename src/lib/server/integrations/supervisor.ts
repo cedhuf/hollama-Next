@@ -11,15 +11,12 @@ import type { IntegrationRuntime } from './types';
 /**
  * Who is running, and keeping that answer equal to what the database says.
  *
- * In memory and in this process, exactly like the run registry next door and
- * for the same reasons: what is held here is a timer and a socket's worth of
- * state, both of which a restart is entitled to lose. Two replicas would each
- * run their own copy of every bot and answer everything twice, which is the one
- * real limit of doing it this way and is fixed, the day it matters, by electing
- * a single watcher rather than by making this file cleverer.
+ * In memory and in this process, like the run registry next door: a timer and a
+ * socket's worth of state, which a restart is entitled to lose. Two replicas
+ * would each run every bot and answer twice, fixed the day it matters by
+ * electing a single watcher.
  *
  * Nothing subscribes to the database, so every mutation calls `reconcile()`.
- * That is one line in each route and it is the whole synchronisation story.
  */
 
 interface Running {
@@ -30,12 +27,7 @@ interface Running {
 
 const running = new Map<string, Running>();
 
-/**
- * Everything that decides how a bot behaves, in one string.
- *
- * The credential is in it by presence only: rotating a key has to restart the
- * worker, and the key itself has no business being held in a comparison table.
- */
+/** The credential is in it by presence only: rotating a key has to restart the worker, and the key has no business being held in a comparison table. */
 function fingerprintOf(record: IntegrationRecord): string {
 	return JSON.stringify({
 		kind: record.kind,
@@ -58,26 +50,19 @@ function stop(id: string): void {
 	running.delete(id);
 }
 
-/**
- * Start what should be running, stop what should not, restart what changed.
- *
- * Safe to call at any time and as often as wanted: it compares rather than
- * assumes, so a route that calls it after every write is doing the right thing
- * even when the write changed nothing.
- */
+/** Safe to call at any time: it compares rather than assumes, so a route that calls it after every write is right even when the write changed nothing. */
 export function reconcile(): void {
 	let wanted: IntegrationRecord[];
 	try {
 		wanted = listAllIntegrations().filter(
-			// Two switches answering two questions: the owner's `enabled` says
-			// whether they want it running, the instance's `blocked` says whether it
-			// is allowed to. It runs when both agree, and neither speaks for the other.
+			// Two switches answering two questions: the owner's `enabled` says whether they
+			// want it running, the instance's `blocked` whether it is allowed to.
 			(record) =>
 				record.enabled && !record.blocked && isRunnable(record) && !!providerFor(record.kind)
 		);
 	} catch (error) {
-		// No database yet, or one that cannot be opened. Nothing to supervise, and
-		// nothing worth taking a request down for.
+		// No database yet, or one that cannot be opened. Nothing worth taking a request
+		// down for.
 		console.error('[integrations] could not read the configuration:', error);
 		return;
 	}
@@ -94,8 +79,8 @@ export function reconcile(): void {
 		if (current) stop(record.id);
 
 		try {
-			// Read here rather than inside the provider, so nothing under this file
-			// has to know where credentials are kept or how they are encrypted.
+			// Read here rather than inside the provider, so nothing under this file has to
+			// know where credentials are kept.
 			const token = getIntegrationSecret(record.id);
 			if (!token) {
 				console.warn(`[integration ${record.id}] no API key stored, not starting`);
@@ -113,13 +98,7 @@ export function reconcile(): void {
 
 let started = false;
 
-/**
- * Bring the supervisor up, once.
- *
- * Called from the first request rather than at import time: the module graph is
- * loaded during the build too, and a build that opens the database and starts
- * polling a chat server is a build that does something nobody asked for.
- */
+/** Called from the first request rather than at import time: the module graph is loaded during the build too, and a build that starts polling a chat server does something nobody asked for. */
 export function ensureIntegrationsStarted(): void {
 	if (started) return;
 	started = true;
@@ -131,12 +110,7 @@ export function runningIntegrationIds(): string[] {
 	return [...running.keys()];
 }
 
-/**
- * Vite replaces this module when it is edited, and the replacement starts with
- * an empty map while the previous copy's timers keep firing. The result looks
- * exactly like a broken switch: a bot answering twice from one instance, and a
- * worker no button can reach because nothing holds a reference to it any more.
- */
+/** Vite replaces this module when it is edited, and the replacement starts with an empty map while the previous copy's timers keep firing: a bot answering twice, and a worker no button can reach. */
 if (import.meta.hot) {
 	import.meta.hot.dispose(() => {
 		for (const id of [...running.keys()]) stop(id);

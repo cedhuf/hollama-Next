@@ -2,63 +2,26 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
 /**
- * The app's own pictures of itself.
+ * The app's own pictures of itself: drives it to known states and photographs
+ * them for the manifest, the README and the docs home page.
  *
- * Not a test: nothing here asserts anything about behaviour. It drives the app
- * to a set of known states and photographs them, because those pictures are
- * needed in three places and none of them should be kept by hand: the manifest,
- * where Chromium reads them to draw its install sheet; the README; and the
- * documentation's home page.
- *
- * It replaces `docs.test.ts`, which did the same job through `toMatchSnapshot`.
- * That made every screenshot an assertion, so any change to the interface failed
- * the suite instead of updating the picture, which is the wrong way round: these
- * are output, not expectations.
- *
- * Run it on purpose (`pnpm run screenshots`), never as part of the suite: it
- * writes into `static/`, which is source, and a test that edits the repository
- * as a side effect of `pnpm test` would be a trap.
+ * Run on purpose (`pnpm run screenshots`), never with the suite: it writes into
+ * `static/`, which is source.
  */
 
-/**
- * Where the pictures live, and where the working ones do not.
- *
- * `RAW` is every single-screen capture, and none of them is a deliverable: each
- * exists to be read back and dressed in a frame. They used to be written into
- * `static/screenshots` beside the finished ones, so the repository carried two of
- * everything and it was never obvious which of the two the README was using.
- * Gitignored, and wiped at the start of a run.
- *
- * `OUT` keeps only what something actually points at: the composites, which are
- * finished as they are, and the framed folder beneath it.
- */
+/** `RAW` is the working captures, gitignored and wiped per run. `OUT` ships. */
 const RAW = '.screenshots';
 const OUT = 'static/screenshots';
 /** Astro's image pipeline needs its own copy, beside the page that imports it. */
 const DOCS_OUT = 'docs/src/assets/screenshots';
 
 /**
- * A phone, and a laptop.
- *
- * The phone's dimensions also serve the manifest, which is particular: every
- * picture of one form factor has to share an aspect ratio, none may be under
- * 320px or over 3840, and the ratio must stay below 2.3:1.
- */
-/**
- * An iPhone 17 Pro Max's screen, in points.
- *
- * The size of the glass, which the app fills and the frame matches. The system's
- * share of it is reserved by the app itself, from the insets a shot hands it.
+ * A phone and a laptop. The phone's size also serves the manifest, which wants
+ * one aspect ratio per form factor, 320 to 3840px, under 2.3:1.
  */
 const MOBILE = { width: 440, height: 956 };
 
-/**
- * The app gets the whole glass, and reserves the system's share itself.
- *
- * Which is what a device does. The insets are handed to it as CSS variables in
- * `shootPhone`, so it pads its own header and its own tab bar exactly as it would
- * on the phone, its background runs under both bars, and the frame paints nothing.
- */
+/** The app gets the whole glass; `shootPhone` hands it the insets as CSS variables so it pads itself. */
 const MOBILE_VIEWPORT = { width: MOBILE.width, height: MOBILE.height };
 
 /** What an iPhone 17 Pro Max keeps for the clock and the home indicator. */
@@ -76,23 +39,11 @@ const SLICE_ANGLE = 7;
 const NOW = Date.now();
 const ago = (hours: number) => new Date(NOW - hours * 3600 * 1000).toISOString();
 
-/**
- * The two models the fixtures name, with a stand-in connection.
- *
- * The real id is not known until the instance has made the connection, so these
- * carry a placeholder and `sessionsFor` swaps in the true one by name just before
- * the sessions are written.
- */
+/** The real connection id is the instance's to give, so `sessionsFor` swaps it in by name. */
 const MODEL = { name: 'llama3.1:8b', serverId: 'pending' };
 const MODEL_B = { name: 'gpt-4o-mini', serverId: 'pending' };
 
-/**
- * Enough of a life to photograph.
- *
- * Two conversations carry real length, because a picture of two lines says
- * nothing about what the app is for; the rest are there to fill the sidebar, so
- * the list reads as someone's rather than as a fixture.
- */
+/** Two conversations carry real length; the rest are there to fill the sidebar. */
 const SESSIONS = [
 	{
 		id: 'ab12cd',
@@ -231,20 +182,9 @@ The float test is popular and unreliable: a starter can float on gas it made yes
 ];
 
 /**
- * Three to talk to, for the phone interface's home row.
- *
- * Enough to show that the row is a row and that the faces differ, and no more:
- * these exist to be photographed, not to demonstrate the persona system. Each
- * carries a tagline because the Library draws one under the name, and three cards
- * with a blank second line is a picture of an app with nothing in it.
- */
-/**
- * One conversation that belongs to a persona.
- *
- * Apart from the others because it is what the voice screen is photographed on:
- * opened with a `?session=`, that screen shows whose voice it is in the corner
- * and their greeting in the transcript, where an unbound one shows an orb on an
- * empty screen. A picture of a feature should have the feature in it.
+ * Three to talk to for the home row, plus one session bound to a persona: the
+ * voice screen is photographed on it, so it shows a face and a greeting rather
+ * than an orb on an empty page.
  */
 const PERSONA_SESSION = {
 	id: 'nova01',
@@ -288,13 +228,7 @@ const PERSONAS = [
 	}
 ];
 
-/**
- * Two connections, and what each one serves.
- *
- * Paired here rather than listed apart, because a model without its connection is
- * a name with no badge and no colour. Neither endpoint is ever called: nothing in
- * these pictures sends a turn, so an address that does not answer is enough.
- */
+/** Two connections, never called. A model without one is a name with no badge. */
 const SERVERS = [
 	{
 		connection: {
@@ -304,10 +238,8 @@ const SERVERS = [
 			color: '#C8553D',
 			isEnabled: true
 		},
-		// Named so `guessModelKind` sorts them without anybody storing a correction:
-		// the drawing tab and the voice screen both check what a model is before they
-		// offer themselves, and a catalogue of chat models leaves both of them saying
-		// there is nothing set up.
+		// Named so `guessModelKind` sorts them: the drawing tab and the voice screen
+		// both check what a model is before offering themselves.
 		models: ['llama3.1:8b', 'flux.1-schnell', 'whisper-large-v3', 'kokoro-82m']
 	},
 	{
@@ -333,34 +265,11 @@ const BASE_SETTINGS = {
 	userLanguage: 'en',
 	themeStyle: 'classic',
 	themeMode: 'light',
-	/**
-	 * The responsive interface, explicitly.
-	 *
-	 * A phone gets the `/m` interface by default now, so every shot taken at a phone
-	 * viewport would be redirected out of the route it asked for. The classic
-	 * pictures still want the responsive layout, and the ones that want `/m` say so
-	 * by turning this back off.
-	 */
+	/** A phone gets `/m` by default, so a shot wanting the responsive layout must say so. */
 	simplifiedMobileUI: false,
-	/**
-	 * Already migrated, as far as the app is concerned.
-	 *
-	 * The one-time switch to the phone interface fires for any account that has not
-	 * been through it, and it overrode the line above on a fresh database: the
-	 * classic mobile shots were redirected to `/m` on the first run of a clean
-	 * checkout and photographed the wrong interface. Saying it has already happened
-	 * is what makes these fixtures an account that chose, rather than one waiting to
-	 * be moved.
-	 */
+	/** The one-time switch to `/m` fires for any account that has not had it, and would override the line above. */
 	mobileDefaultApplied: true,
-	/**
-	 * Voice, set up.
-	 *
-	 * Not to use it: nothing in these pictures records or speaks. It is so the voice
-	 * screen photographs as itself rather than as the notice it shows when there is
-	 * no model to hear or answer with, which is a picture of an unconfigured
-	 * instance rather than of the feature.
-	 */
+	/** Set up but never used: otherwise the voice screen photographs its "nothing configured" notice. */
 	voiceInput: true,
 	voiceModel: 'whisper-large-v3',
 	speechOutput: true,
@@ -369,21 +278,9 @@ const BASE_SETTINGS = {
 };
 
 /**
- * A life to photograph, written where the app actually keeps one.
- *
- * Through the API, not `localStorage`. That is the whole of what broke this file:
- * the instance under test runs in server mode, every store hydrates from
- * `/api/data`, and seeding the browser's own storage wrote into a place nothing
- * reads any more. Four of these five tests had been failing on a clean checkout
- * for that one reason, each of them at the first line that expected to see any of
- * the seeded content.
- *
- * The connection goes through the admin route for the same reason it does in the
- * functional suite: a lone owner is an administrator, and that is the endpoint a
- * click reaches.
- *
- * Everything is written before the first navigation. The stores read once at boot,
- * so anything written after it is invisible until the page loads again.
+ * Seeds through the API, not `localStorage`: the instance runs in server mode
+ * and every store hydrates from `/api/data`. Written before the first
+ * navigation, since the stores read once at boot.
  */
 /** Cleared once per run, so a picture never inherits the last run's leftovers. */
 let wiped = false;
@@ -391,24 +288,11 @@ let wiped = false;
 async function seed(page: Page, patch: Record<string, unknown> = {}) {
 	if (!wiped) {
 		wiped = true;
-		// The database outlives a run. Without this the sessions of a previous one
-		// stack up behind the seeded ones and the sidebar fills with history nobody
-		// wrote, which is only ever noticed once it is in a published picture.
+		// The database outlives a run, so old sessions would stack up in the sidebar.
 		await page.request.post('/api/data/reset');
 	}
 
-	/**
-	 * The connections first, because everything else is keyed to them.
-	 *
-	 * Their ids are the instance's to give, not this file's: `POST` generates one
-	 * and there is no way to ask for a particular one. So the models are built from
-	 * what comes back rather than from a constant, which is what keeps a model's
-	 * badge the colour of the connection it actually belongs to.
-	 *
-	 * Created once per run. The database outlives a test, so a second call would
-	 * hang a duplicate connection off the same instance and put two badges where
-	 * the picture wants one.
-	 */
+	/** Connections first: their ids are the instance's to give, so the models are built from what comes back. */
 	if (!models.length) {
 		for (const server of SERVERS) {
 			const made = await page.request.post('/api/admin/servers', { data: server.connection });
@@ -433,22 +317,9 @@ function sessionsFor(resolved: { name: string; serverId: string }[]) {
 	}));
 }
 
-/**
- * Settings, merged rather than replaced.
- *
- * The endpoint stores the blob whole, so putting one key would drop every other
- * and boot the app into a state no person could have produced.
- */
+/** Merged, not replaced: the endpoint stores the blob whole. */
 async function configure(page: Page, patch: Record<string, unknown>) {
-	/**
-	 * Nothing live while this writes.
-	 *
-	 * A page that is still open owns a hydrated settings store, and that store
-	 * flushes its own copy as it is torn down. Written straight after this, the
-	 * flush lands last and puts the previous shot's settings back: the theme strip
-	 * photographed six dark palettes in light, because each configure was undone by
-	 * the page it was about to replace.
-	 */
+	/** An open page flushes its own settings store on teardown, which would land after this. */
 	if (page.url().startsWith('http')) await page.goto('about:blank');
 
 	const current = await page.request.get('/api/data/settings');
@@ -458,26 +329,12 @@ async function configure(page: Page, patch: Record<string, unknown>) {
 	});
 }
 
-/**
- * The expand control that is actually on screen.
- *
- * Two buttons carry that label: one for the drawer on a narrow window and one on
- * the rail for a wide one, each hidden at the other's width. Taking the first
- * match found the mobile one on a desktop, where it is permanently hidden, and
- * the desktop shots waited five seconds for something that was never going to
- * appear.
- */
+/** Two buttons carry that label, one per width; `.first()` alone found the hidden one. */
 function expandSidebar(page: Page) {
 	return page.locator('button[aria-label="Expand sidebar"]:visible').first();
 }
 
-/**
- * A phone shot: the device's insets, then the picture.
- *
- * Injected rather than emulated, because no browser will pretend to have a notch.
- * The app reads its safe areas from these variables and pads itself, which is the
- * whole reason the frame no longer has to paint anything behind the clock.
- */
+/** Insets injected rather than emulated: no browser will pretend to have a notch. */
 async function shootPhone(page: Page, name: string) {
 	await page.addStyleTag({
 		content: `:root{--safe-top:${INSETS.top}px;--safe-bottom:${INSETS.bottom}px}`
@@ -486,8 +343,7 @@ async function shootPhone(page: Page, name: string) {
 }
 
 async function shoot(page: Page, name: string) {
-	// Fonts and the wallpaper layer settle a frame or two after the route does,
-	// and a picture taken before they do is a picture of the app loading.
+	// Fonts and the wallpaper settle a frame or two after the route does.
 	await page.waitForTimeout(500);
 	await page.screenshot({ path: `${RAW}/${name}.png`, animations: 'disabled' });
 }
@@ -499,20 +355,9 @@ async function capture(page: Page) {
 }
 
 /**
- * Assembles full screenshots into rows cut by diagonal seams.
- *
- * Playwright cannot composite images, so the pieces are put together in the
- * browser: every screenshot becomes a layer of a plain HTML page, clipped to its
- * own slanted band, and that page is what gets captured.
- *
- * `gap` is the width of the seam in CSS pixels. Zero draws a hairline on the cut
- * instead, for strips whose slices would otherwise melt into one another.
- *
- * `focus` is, per slice, the x of the screenshot that should end up in the
- * middle of its band. Without it every layer stays where it was captured, which
- * only works when the slices show the same page; a strip of different sections
- * needs each one panned so its content lands in the band rather than off to one
- * side.
+ * Composites screenshots into rows cut by diagonal seams, in the browser, since
+ * Playwright cannot. `gap` is the seam width in px, zero draws a hairline;
+ * `focus` pans each slice so its content lands inside its band.
  */
 async function composeRows(
 	page: Page,
@@ -523,9 +368,7 @@ async function composeRows(
 	const rowHeight = STRIP.height;
 	await page.setViewportSize({ width, height: rowHeight * rows.length });
 
-	// Half the horizontal travel of a seam, as a share of the width: the cut
-	// leans by `SLICE_ANGLE`, so it drifts `tan(angle) * height / 2` either side
-	// of its nominal x.
+	// Half a seam's horizontal travel, as a share of the width.
 	const skew = ((Math.tan((SLICE_ANGLE * Math.PI) / 180) * rowHeight) / 2 / width) * 100;
 	const half = (gap / 2 / width) * 100;
 
@@ -537,8 +380,7 @@ async function composeRows(
 					const left = i === 0 ? -50 : (i / shots.length) * 100 + half;
 					const right = i === shots.length - 1 ? 150 : ((i + 1) / shots.length) * 100 - half;
 					const clip = `polygon(${left + skew}% 0, ${right + skew}% 0, ${right - skew}% 100%, ${left - skew}% 100%)`;
-					// The pan rides on the image, not on the wrapper: a transform on the
-					// clipped element would drag its clip along with it.
+					// The pan rides on the image: a transform on the clipped element drags its clip.
 					const pan = focus[i] === undefined ? 0 : ((i + 0.5) / shots.length) * width - focus[i];
 					return `<div style="clip-path:${clip}"><img src="${src}" style="transform:translateX(${pan}px)"></div>`;
 				})
@@ -571,27 +413,15 @@ async function composeRows(
 		${html}
 	`);
 
-	// With a gap the seams are punched out of the alpha channel rather than
-	// painted, so the host page's own background shows through and the strip
-	// suits a light theme and a dark one alike.
+	// Seams punched out of the alpha channel, so the strip suits either theme.
 	const png = await page.screenshot({ animations: 'disabled', omitBackground: gap > 0 });
 	await writeFile(`${OUT}/${name}.png`, png);
 	await writeFile(`${DOCS_OUT}/${name}.png`, png);
 }
 
 /**
- * Dressing the shots.
- *
- * A bare viewport capture reads as a rectangle of pixels rather than as
- * software someone runs, so the README's copies get a frame around them: a Mac
- * window for the desktop shots, a phone for the mobile ones. Drawn in the
- * browser around the picture, the same trick `composeRows` uses, since
- * Playwright still cannot composite.
- *
- * Written beside the originals rather than over them, because the originals
- * have another job: the manifest declares their exact sizes, and Chromium wants
- * every narrow screenshot at one aspect ratio, under 2.3:1. A phone's bezel
- * breaks both.
+ * Frames for the README, written beside the originals rather than over them:
+ * the manifest declares the originals' exact sizes, and a bezel breaks them.
  */
 const FRAMED_OUT = `${OUT}/framed`;
 
@@ -604,20 +434,7 @@ const TITLE_BAR = 30;
 /** An iPhone 17 Pro Max, in the CSS pixels its 440x956pt screen is captured at. */
 const PHONE = { bezel: 13, corner: 66, screen: 53, statusBar: 54, homeBar: 34 };
 
-/**
- * The whole screen is 956, furniture included, and so is the capture.
- *
- * Two earlier constructions were wrong in opposite directions. Adding the bars
- * around the capture made a framed phone 1044 tall, the shape of nothing, and
- * painted a strip above the app in a flat colour it never used: the band. Cutting
- * the capture short fixed the shape and kept the band.
- *
- * What a device does is neither. The app is given the whole glass and told what
- * the system is keeping, it pads itself, and its own background runs behind the
- * clock and the home indicator. That is now what happens here, because the insets
- * are variables the shot can set rather than an `env()` that is always nought in a
- * plain viewport.
- */
+/** The whole screen is 956, furniture included, and so is the capture: the app runs behind the clock as it does on a device. */
 const PHONE_SCREEN = { width: MOBILE.width, height: MOBILE.height };
 
 /** A framed window and a framed phone, outer edge to outer edge. */
@@ -653,16 +470,7 @@ async function readShot(name: string) {
 
 type Edges = { top: string; bottom: string; darkTop: boolean; darkBottom: boolean };
 
-/**
- * The colour a screenshot ends on, top and bottom.
- *
- * A phone's status bar and home indicator are bands the app does not draw, and
- * painting them a guessed grey would put a seam across the picture. Reading the
- * shot's own edge instead lets the frame continue it, so the theme, the palette
- * and a wallpaper all come out right without being told which one is in force.
- * The same reading decides the window's chrome: a light title bar over a dark
- * interface looks like a screenshot of a different program.
- */
+/** The colour the shot ends on, so the frame continues it whatever theme or wallpaper is in force. */
 async function edges(page: Page, src: string): Promise<Edges> {
 	return page.evaluate(
 		(s) =>
@@ -691,14 +499,7 @@ async function edges(page: Page, src: string): Promise<Edges> {
 	);
 }
 
-/**
- * The frames themselves, as one stylesheet.
- *
- * Written once and shared, because a frame is needed twice: alone, for the
- * README's tables, and beside another one in the composite at the top of the
- * page. Everything a single shot decides for itself travels as a custom
- * property on the element rather than as its own rule.
- */
+/** Shared, since a frame is needed alone and inside the composite. Per-shot values travel as custom properties. */
 const FRAME_CSS = `
 	html, body { margin: 0; background: transparent; }
 
@@ -797,12 +598,7 @@ const FRAME_CSS = `
 	.phone .side { top: 19.8%; height: 9.3%; }
 `;
 
-/**
- * A minimal macOS window: rounded corners, one bar, three lights.
- *
- * No toolbar, no address bar, no title. The point is to say "this is an
- * application window" and then get out of the way of the application.
- */
+/** A minimal macOS window: rounded corners, one bar, three lights. */
 function windowHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
 	const bar = e.darkTop ? '#37373b' : '#f0efee';
 	const line = e.darkTop ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.10)';
@@ -835,15 +631,7 @@ function chassis(screenW: number, screenH: number, shotH: number, bezel: number,
 	);
 }
 
-/**
- * A phone around a mobile shot.
- *
- * The status bar and the home indicator sit above and below the screenshot rather
- * than over it: the app is captured in a plain viewport where the safe area is
- * nought, so its header is at the very top and an island painted on top would
- * cover it. The capture is taken short by exactly their height, so the screen
- * inside the chassis is a real 440 by 956 rather than that plus furniture.
- */
+/** The bars sit above and below the shot: the app is captured with a nought safe area, so an island on top would cover its header. */
 function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
 	const ink = e.darkTop ? '#fff' : '#000';
 	const inkHome = e.darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
@@ -911,8 +699,7 @@ async function draw(
 
 	const png = await page.screenshot({ animations: 'disabled', omitBackground: true });
 	await writeFile(out, png);
-	// A second copy where Astro's image pipeline can reach it: it reads from its
-	// own folder, not from `static/`.
+	// A second copy for Astro's image pipeline, which reads its own folder.
 	if (alsoOut) await writeFile(alsoOut, png);
 }
 
@@ -943,28 +730,13 @@ async function framePhone(page: Page, name: string) {
 }
 
 /**
- * The picture at the top of the README: a window, and a phone leaning on it.
- *
- * It replaces a strip of four diagonal slices, which was handsome from a
- * distance and told a visitor nothing: every band cut through a word or a
- * control, so the app was never shown once in one piece. Here both formats are
- * whole, and the transparent ground leaves a silhouette rather than a
- * rectangle, which is what stops the top of a README looking like a table.
- *
- * Dark, over a wallpaper, because a white window at the top of a page reads as
- * a document from ten years ago rather than as something anyone would want to
- * open.
+ * The README's picture: a window with a phone leaning on it, dark, over a
+ * wallpaper. Both formats whole, on a transparent ground.
  */
 const HERO = {
 	/** The shot in the window, and the one in the phone. */
 	window: 'desktop_wallpaper',
-	/**
-	 * The phone interface, not the responsive one at a phone's width.
-	 *
-	 * The picture at the top of the README is the first thing anybody sees of this
-	 * app, and what it should say is that there are two interfaces rather than one
-	 * that shrinks. A narrow copy of the window beside it says the opposite.
-	 */
+	/** The phone interface, not the responsive layout at a phone's width: the README should show two interfaces, not one that shrinks. */
 	phone: 'phone_home',
 	/** How much smaller the phone is, so it reads as nearer rather than as huge. */
 	scale: 0.62,
@@ -993,21 +765,18 @@ async function composeHero(page: Page) {
 			phoneHtml(
 				phoneSrc,
 				phoneEdges,
-				// A darker, wider shadow than the frame carries on its own: the phone
-				// sits on top of the window, and without it the two look pasted.
+				// Darker and wider than the frame's own shadow, or the two look pasted.
 				`top:${phoneTop}px;left:${phoneLeft}px;transform:scale(${HERO.scale});` +
 					`box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 40px 90px rgba(0,0,0,.45)`
 			),
 		out: `${OUT}/hero.png`,
-		// The documentation's home opens on this one too, and Astro's image
-		// pipeline reads from its own folder rather than from `static/`.
+		// Astro's image pipeline reads from its own folder rather than from `static/`.
 		alsoOut: `${DOCS_OUT}/hero.png`
 	});
 }
 
 test.beforeAll(async () => {
-	// The working captures, gone before anything reads one. A stale file from a
-	// previous run is worse than a missing one: it frames cleanly and ships.
+	// Astro's image pipeline reads its own folder, not `static/`.
 	await rm(RAW, { recursive: true, force: true });
 	await mkdir(RAW, { recursive: true });
 	await mkdir(OUT, { recursive: true });
@@ -1016,8 +785,7 @@ test.beforeAll(async () => {
 });
 
 test.describe('screenshots', () => {
-	// Off unless asked for: `testMatch` cannot tell this file from a test, and
-	// nobody running the suite expects their working tree to change.
+	// Wiped first: a stale capture frames cleanly and ships.
 	test.skip(!process.env.SCREENSHOTS, 'run with `pnpm run screenshots`');
 	test.describe.configure({ timeout: 120_000 });
 
@@ -1043,13 +811,7 @@ test.describe('screenshots', () => {
 		await shootPhone(page, 'mobile_library');
 	});
 
-	/**
-	 * The phone interface, which is a different product rather than a narrower one.
-	 *
-	 * Its own test because it needs the setting the others turn off, and because it
-	 * is what the README opens on: the picture at the top of the page is a desktop
-	 * window with one of these leaning on it.
-	 */
+	/** Its own test: it needs the setting the others turn off, and the README opens on it. */
 	test('phone interface', async ({ page }) => {
 		await page.setViewportSize(MOBILE_VIEWPORT);
 		await seed(page);
@@ -1058,8 +820,7 @@ test.describe('screenshots', () => {
 		await page.goto('/m');
 		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
 		await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();
-		// The orb draws from a frame loop and the card's light drifts on its own
-		// clock, so this waits for a shape rather than for a paint.
+		// The orb and the card's light run on their own clocks.
 		await page.waitForTimeout(900);
 		await shootPhone(page, 'phone_home');
 
@@ -1068,12 +829,9 @@ test.describe('screenshots', () => {
 		await page.waitForTimeout(600);
 		await shootPhone(page, 'phone_conversation');
 
-		// Opened on somebody, so the screen has a face, a name and a greeting rather
-		// than an orb alone on an empty page.
+		// Opened on somebody, so the screen has a face, a name and a greeting.
 		await page.goto(`/m/voice?session=${PERSONA_SESSION.id}`);
-		// The name in the corner, not the greeting. The greeting is drawn one letter
-		// per element with the spaces as widths rather than characters, so its text
-		// content has no spaces in it and no text query will ever match it.
+		// The greeting is drawn one letter per element, so no text query matches it.
 		await expect(page.getByRole('link', { name: /Nova/ })).toBeVisible();
 		await page.waitForTimeout(900);
 		await shootPhone(page, 'phone_voice');
@@ -1087,14 +845,10 @@ test.describe('screenshots', () => {
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
 		await shoot(page, 'desktop_conversation');
 
-		// The collapsed rail, which is a different way of using the app rather than
-		// the same one made narrower.
+		// The collapsed rail, which is a different way of using the app.
 		await configure(page, { sidebarExpanded: false });
 		await page.goto('/sessions/ab12cd');
-		// The state, not the control that undoes it. Asserting on the expand button was
-		// asserting on a detail of how the rail is escaped, and it broke the moment two
-		// buttons carried that label; what the picture needs is that the conversation
-		// list is no longer showing its conversations.
+		// Asserting on the expand button broke once two buttons carried that label.
 		await expect(page.getByText('Reading a sourdough starter')).toBeHidden();
 		await shoot(page, 'desktop_rail');
 
@@ -1107,8 +861,7 @@ test.describe('screenshots', () => {
 		await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
 		await shoot(page, 'desktop_library');
 
-		// A wallpaper, which is where the surface system finally shows: the column
-		// translucent over the picture, the conversation opaque on top of it.
+		// A wallpaper: the column translucent over it, the conversation opaque on top.
 		await configure(page, { backgroundImage: 'pack:ocean', surfaceTransparency: true });
 		await page.goto('/sessions/ab12cd');
 		await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'on');
@@ -1123,13 +876,8 @@ test.describe('screenshots', () => {
 	});
 
 	/**
-	 * The six palettes, light on the top row and dark on the bottom.
-	 *
-	 * Every slice is the same conversation at the same scroll position, so the
-	 * sidebar, the messages and the composer line up across the seams as if it
-	 * were one window wearing six coats. Two rows rather than one alternating
-	 * ramp: alternating showed each palette in only one of its halves, which is
-	 * half of what a palette is.
+	 * Six palettes, light on top and dark below, same conversation at the same
+	 * scroll. Two rows: alternating showed each palette in only one of its halves.
 	 */
 	test('theme strip', async ({ page }) => {
 		await seed(page);
@@ -1139,9 +887,7 @@ test.describe('screenshots', () => {
 		for (const themeMode of ['light', 'dark'] as const) {
 			const row: string[] = [];
 			for (const themeStyle of THEME_STYLES) {
-				// The flat bar rather than the floating pill: the pill hovers over the
-				// transcript, which is right in use and untidy in a photograph, where a
-				// half-covered line of text is all anyone sees.
+				// The flat bar, not the floating pill, which half-covers a line of text.
 				await configure(page, { themeStyle, themeMode, floatingChatHeader: false });
 				await page.goto('/sessions/ab12cd');
 				await expect(page.locator('html')).toHaveAttribute('data-color-theme', themeMode);
@@ -1155,15 +901,7 @@ test.describe('screenshots', () => {
 		await composeRows(page, rows, { name: 'themes' });
 	});
 
-	/**
-	 * The companion strip: one palette, four parts of the app.
-	 *
-	 * Four bands rather than five, cut at seven degrees rather than ten, with a
-	 * seam half as wide. All three for one reason: the strip was handsome and
-	 * unreadable, because a narrow band of a wide window shows mostly the space
-	 * between things. Wider bands, straighter cuts and a thinner seam give each
-	 * section room enough to be recognised.
-	 */
+	/** One palette, four parts of the app. Wide bands and a thin seam: a narrow band of a wide window is mostly the space between things. */
 	test('sections strip', async ({ page }) => {
 		await seed(page);
 		await page.setViewportSize(STRIP);
@@ -1192,20 +930,11 @@ test.describe('screenshots', () => {
 		await page.waitForTimeout(400);
 		shots.push(await capture(page));
 
-		// Where each section has something to show: the sidebar and its list sit
-		// left, the library's cards fill the middle, the settings dialog is centred,
-		// and the wallpaper reads best across the conversation.
+		// Where each section has something to show.
 		await composeRows(page, [shots], { gap: 6, focus: [260, 620, 900, 1150], name: 'sections' });
 	});
 
-	/**
-	 * The framed copies, for the README.
-	 *
-	 * Last, and from disk rather than from a live page: it dresses whatever the
-	 * two tests above have just written, so a frame can never disagree with the
-	 * picture it surrounds. Running it on its own works only if the shots are
-	 * already there.
-	 */
+	/** Last, and from disk, so a frame can never disagree with the picture it surrounds. */
 	test('frames', async ({ page }) => {
 		for (const name of WINDOW_SHOTS) await frameWindow(page, name);
 		for (const name of PHONE_SHOTS) await framePhone(page, name);

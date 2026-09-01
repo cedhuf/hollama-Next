@@ -1,22 +1,15 @@
 /**
  * The avatars the app can draw itself.
  *
- * A persona's face is either a picture someone uploaded or one of these, and the
- * difference matters once personas start travelling. A picture is tens of
- * kilobytes of base64 that has to be carried in the bundle, is fixed at the size
- * it was encoded, and looks like whatever it looked like on the machine it was
- * made on. A glyph is its name and a colour: thirty bytes, sharp at any size, and
- * drawn with the app's own ink so it belongs to the theme rather than sitting on
- * top of it.
+ * A picture is tens of kilobytes of base64 carried in every bundle, fixed at the
+ * size it was encoded. A glyph is its name and a colour: thirty bytes, sharp at
+ * any size, drawn with the app's own ink so it belongs to the theme.
  *
- * They used to be built into `defaultPersonas` as data URIs, which is the same
- * drawing written as a string nobody could reuse: the catalogue could not offer
- * them, the editor could not pick one, and the disc colour was baked into the
- * markup of the one glyph that cuts holes in itself.
+ * They used to be data URIs inside `defaultPersonas`, which is the same drawing
+ * written as a string nobody could reuse.
  *
- * The markup is drawn over the disc, in a 64x64 box. Two colours are available:
- * `currentColor` is the ink, and `var(--persona-glyph-cut)` is the disc showing
- * back through, for a shape that is read by what has been taken out of it.
+ * The markup is drawn over the disc in a 64x64 box. Two colours: `currentColor`
+ * is the ink, and `var(--persona-glyph-cut)` is the disc showing back through.
  */
 export interface PersonaGlyph {
 	/** Stored in the persona and named in a bundle, so it never changes. */
@@ -27,15 +20,7 @@ export interface PersonaGlyph {
 	body: string;
 }
 
-/**
- * The pieces every face is built from.
- *
- * Written once rather than repeated in each glyph, so a row of them looks like a
- * cast and not like five drawings that happen to be near each other: the eyes are
- * the same eyes, and only the thing on top of the head differs. The vertical
- * offset is the one parameter, because a chef's hat needs more room above than a
- * headband does.
- */
+/** Written once rather than repeated in each glyph, so a row of them looks like a cast: the eyes are the same eyes, and only the thing on top of the head differs. */
 const eyes = (y: number) =>
 	`<circle fill="currentColor" cx="25" cy="${y}" r="3"/><circle fill="currentColor" cx="39" cy="${y}" r="3"/>`;
 
@@ -50,12 +35,9 @@ const face = (worn: string, y = 36) => worn + eyes(y) + smile(y + 8) + cheeks(y 
 
 export const PERSONA_GLYPHS: PersonaGlyph[] = [
 	/*
-	 * The faces come first because they are the better answer to what a persona's
-	 * avatar is for. A pictogram of a saucepan says what the conversation will be
-	 * about while saying nothing about who is having it; eyes and a mouth do the
-	 * opposite, which is the right way round for something you talk to every day.
-	 * The symbols below them stay, for the personas that are a tool rather than a
-	 * character.
+	 * The faces come first: a pictogram of a saucepan says what the conversation
+	 * will be about while saying nothing about who is having it, and eyes and a
+	 * mouth do the opposite. The symbols stay for the personas that are a tool.
 	 */
 	{
 		id: 'face-antenna',
@@ -123,9 +105,8 @@ export const PERSONA_GLYPHS: PersonaGlyph[] = [
 	{
 		id: 'gamepad',
 		label: 'Gamepad',
-		// The pad and the buttons are the disc showing through the body, which is why
-		// the cut colour has to be a variable: written as a literal it was right for
-		// exactly one persona and wrong for every other colour the glyph was given.
+		// The pad and the buttons are the disc showing through, which is why the cut
+		// colour has to be a variable: as a literal it was right for exactly one persona.
 		body:
 			'<rect fill="currentColor" x="11" y="23" width="42" height="18" rx="9"/>' +
 			'<g fill="var(--persona-glyph-cut)"><rect x="17" y="31" width="12" height="4" rx="1"/>' +
@@ -135,8 +116,8 @@ export const PERSONA_GLYPHS: PersonaGlyph[] = [
 	{
 		id: 'pot',
 		label: 'Cooking pot',
-		// No steam, deliberately. The smallest this is ever drawn is the 24px badge
-		// beside a conversation in the sidebar, where a thin curl is a grey smudge.
+		// No steam, deliberately: the smallest this is drawn is the 24px sidebar badge,
+		// where a thin curl is a grey smudge.
 		body:
 			'<g fill="currentColor"><circle cx="32" cy="19" r="3.5"/>' +
 			'<rect x="14" y="24" width="36" height="5" rx="2.5"/>' +
@@ -169,14 +150,7 @@ export const PERSONA_GLYPHS: PersonaGlyph[] = [
 
 const BY_ID = new Map(PERSONA_GLYPHS.map((glyph) => [glyph.id, glyph]));
 
-/**
- * The glyph a stored id names, or nothing.
- *
- * A lookup rather than a passthrough, and that is the security of it: the markup
- * rendered into the page is always one of the strings above, never something a
- * bundle handed over. An id from a catalogue we do not control can therefore only
- * choose among these or miss, and a miss falls back to the initials.
- */
+/** A lookup rather than a passthrough, which is the security of it: the markup rendered into the page is always one of the strings above. A miss falls back to the initials. */
 export function personaGlyph(id: string | undefined): PersonaGlyph | undefined {
 	return id ? BY_ID.get(id) : undefined;
 }

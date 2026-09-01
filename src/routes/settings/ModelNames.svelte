@@ -36,27 +36,16 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 
 	/**
-	 * What this connection knows about each of its models: what to call it, what
-	 * it is for, and what it costs.
+	 * What this connection knows about each of its models: what to call it, what it
+	 * is for, and what it costs.
 	 *
-	 * The name is display only: the real id is still what gets sent to the
-	 * provider, matched by `modelFilter` and stored on sessions. The price is two
-	 * numbers per million tokens, which is how every provider publishes them.
-	 *
-	 * Both live on one row because they answer the same question about the same
-	 * model, and splitting them would mean finding the same model twice in a list
-	 * of two hundred. Rendered as a sub-view of the Servers tab rather than a
-	 * second modal: the settings panel is already a dialog.
+	 * The name is display only; the real id is what gets sent. All three sit on one
+	 * row because they answer the same question about the same model, and splitting
+	 * them would mean finding it twice in a list of two hundred.
 	 */
 	interface Props {
 		server: Server;
-		/**
-		 * The models this instance offers its users.
-		 *
-		 * Only these are coloured. An unpriced model matters when somebody else can
-		 * reach it: a model nobody is offered is nobody's allowance, and marking it
-		 * red would be an alarm about nothing.
-		 */
+		/** Only these are coloured: a model nobody is offered is nobody's allowance, so marking it red would be an alarm about nothing. */
 		shared?: string[];
 		onBack: () => void;
 		/** Called after each edit so the parent can persist the connection. */
@@ -69,22 +58,16 @@
 
 	/**
 	 * Models whose fallback price has been asked for on a connection that reports
-	 * its own.
+	 * its own. Like the stored API key one screen away: rather than an empty field
+	 * reading as "nobody set this", the state says the provider bills each call, so
+	 * a figure is not missing, it is not wanted.
 	 *
-	 * The same shape as the stored API key one screen away: rather than an empty
-	 * field that reads as "nobody has set this", the state says what is actually
-	 * happening, and typing over it is a thing you choose. Here the state is that
-	 * the provider bills each call and says what it billed, so a figure is not
-	 * missing, it is not wanted.
-	 *
-	 * A model that already carries a figure is open on sight. Something is set, so
-	 * hiding it would be hiding a value that is in play.
+	 * A model that already carries a figure is open on sight.
 	 */
 	const overriding = new SvelteSet<string>();
 
-	// Hand the way out to the modal header for as long as this view is mounted.
-	// Leaving by any route (back, another tab, closing the dialog) unmounts it,
-	// which clears it.
+	// Handed to the modal header for as long as this view is mounted; leaving by
+	// any route unmounts it, which clears it.
 	$effect(() => {
 		settingsBack.set({ label: $LL.servers(), onBack });
 		return () => settingsBack.set(null);
@@ -92,13 +75,7 @@
 
 	let query = $state('');
 	let confirmingReset = $state(false);
-	/**
-	 * Which model has its prices open, by id.
-	 *
-	 * One at a time and per model, not a switch over the whole list: pricing is
-	 * something you do to the two or three models you actually share, and two
-	 * hundred rows of number fields is a list nobody can rename in any more.
-	 */
+	/** One at a time: pricing is something you do to the two or three models you share, and two hundred rows of number fields is a list nobody can rename in. */
 	const priced = new SvelteSet<string>();
 
 	/** Enough to cover what people actually run, and free text is not a menu. */
@@ -108,15 +85,10 @@
 
 	const badge = $derived(serverBadge(server));
 	/**
-	 * Whether this connection says what each call actually cost.
-	 *
-	 * It changes what the prices below *are*. Where the provider reports, the
-	 * reported figure is what gets charged and a figure typed here is only ever a
-	 * fallback for a call that came back without one. Saying so is not decoration:
-	 * a field that looks like the price and is not the price is worse than no field.
-	 *
-	 * Per connection rather than per model, because that is how it is true: a
-	 * gateway reports on everything it serves or on nothing.
+	 * Whether this connection says what each call cost, which changes what the
+	 * prices below *are*: where the provider reports, a figure typed here is only a
+	 * fallback. Per connection, because that is how it is true: a gateway reports on
+	 * everything it serves or on nothing.
 	 */
 	const reported = $derived(reportsCost(server.connectionType));
 	// The catalogue is already loaded for the model picker; just take this server's.
@@ -138,7 +110,6 @@
 		speech: $LL.modelKindSpeech()
 	});
 
-	/** What each unit is called, and what it reads as beside a figure. */
 	/** "Cost in EUR, per million tokens", for the tooltip and the accessible name. */
 	function priceLabel(price: ModelPrice | undefined, unit: PriceUnit): string {
 		return $LL.priceTooltip({
@@ -162,8 +133,8 @@
 		minute: $LL.priceUnitMinute()
 	});
 
-	// Match on the id *and* the custom name: once a model is renamed, its new name
-	// is the only one you remember.
+	// The id *and* the custom name: once a model is renamed, the new name is the
+	// only one you remember.
 	const visible = $derived.by(() => {
 		const needle = query.trim().toLowerCase();
 		if (!needle) return models;
@@ -174,14 +145,7 @@
 		);
 	});
 
-	/**
-	 * The list, cut into what each part of it is for.
-	 *
-	 * Chat first because that is what most connections are mostly made of, then
-	 * images, then the embeddings, which are here to be seen and left alone, and
-	 * which no picker in the app offers any more. Empty sections are not drawn: a
-	 * heading over nothing says a connection is missing something it never had.
-	 */
+	/** Chat first, then images, then the embeddings, which are here to be seen and left alone. Empty sections are not drawn. */
 	const sections = $derived(
 		MODEL_KINDS.map((kind) => ({
 			kind,
@@ -190,13 +154,7 @@
 		})).filter((section) => section.models.length > 0)
 	);
 
-	/**
-	 * Say what a model is, when its name did not say it.
-	 *
-	 * Only the disagreements are stored. A choice that matches the guess clears its
-	 * entry instead of writing one, so the map stays a list of corrections and
-	 * keeps benefiting from a better guess later.
-	 */
+	/** Only the disagreements are stored: a choice matching the guess clears its entry, so the map stays a list of corrections and still benefits from a better guess. */
 	function setKind(name: string, kind: ModelKind) {
 		const kinds = { ...(server.modelKinds ?? {}) };
 		if (guessModelKind(name) === kind) delete kinds[name];
@@ -214,13 +172,10 @@
 	}
 
 	/**
-	 * A figure out of a field, or nothing.
-	 *
 	 * A comma is the decimal separator most of Europe types, and `type="number"`
-	 * simply reports an empty value for it: "0,2" silently set nothing at all. The
-	 * fields are text, and both separators are read. A negative price is refused
-	 * rather than clamped, so a stray minus does not quietly become zero, which is
-	 * a figure that gets counted.
+	 * reports an empty value for it, so "0,2" silently set nothing. The fields are
+	 * text. A negative price is refused rather than clamped, so a stray minus does
+	 * not quietly become a zero that gets counted.
 	 */
 	function figure(raw: string): { ok: boolean; value: number | undefined } {
 		const text = raw.trim().replace(',', '.');
@@ -231,16 +186,12 @@
 	}
 
 	/**
-	 * Store a price, or drop the row once it holds nothing worth keeping.
+	 * A figure is worth keeping, and so is a unit on its own: "billed per minute" is
+	 * an answer, given before the rate is known. Dropping the row there made the
+	 * unit snap back to tokens the instant it was chosen.
 	 *
-	 * A figure is worth keeping, and so is a unit on its own: saying "this one is
-	 * billed per minute" is an answer, given before the rate is typed and often
-	 * before it is known. Dropping it there was a bug you could watch happen: the
-	 * unit snapped back to tokens the instant it was chosen, because the row it
-	 * lived in had just been deleted for being empty.
-	 *
-	 * Unpriced is still unpriced. `hasPriceFigure` is what the meter and the credit
-	 * limit ask, and a row with a unit and no figure answers no to it.
+	 * Unpriced is still unpriced: a row with a unit and no figure answers no to
+	 * `hasPriceFigure`, which is what the meter and the credit limit ask.
 	 */
 	function writePrice(name: string, price: ModelPrice) {
 		const pricing = { ...(server.modelPricing ?? {}) };
@@ -250,13 +201,7 @@
 		onChange();
 	}
 
-	/**
-	 * Write one half of a token price, or clear it.
-	 *
-	 * An empty field means unpriced, not zero: a model nobody has given a figure
-	 * for must not be counted as free, so the key is removed rather than set to 0.
-	 * A model priced at genuinely nothing is written as 0 and stays counted.
-	 */
+	/** An empty field means unpriced, not zero, so the key is removed rather than set to 0. A model priced at genuinely nothing is written as 0 and stays counted. */
 	function setPrice(name: string, side: 'input' | 'output', raw: string) {
 		const parsed = figure(raw);
 		if (!parsed.ok) return;
@@ -270,15 +215,7 @@
 		writePrice(name, { ...(server.modelPricing?.[name] ?? {}), rate: parsed.value });
 	}
 
-	/**
-	 * Change what a model is billed by.
-	 *
-	 * The figures that belonged to the old unit are cleared, and that is a choice:
-	 * a price per million tokens is not a price per image, and leaving it behind
-	 * means a field that is invisible, ignored by the meter, and that would come
-	 * back the moment somebody switched the unit again. Losing it here, in front of
-	 * whoever made the change, beats losing it quietly on the next reload.
-	 */
+	/** The old unit's figures are cleared: a price per million tokens is not a price per image, and leaving it behind means a field that is invisible, ignored, and comes back on the next switch. */
 	function setUnit(name: string, unit: PriceUnit) {
 		const current = server.modelPricing?.[name] ?? {};
 		if (priceUnit(current) === unit) return;
@@ -293,13 +230,7 @@
 		onChange();
 	}
 
-	/**
-	 * The currency this model is billed in.
-	 *
-	 * Written only alongside a price: a currency on a model nobody has priced is a
-	 * row in the table saying nothing, and it would make "unpriced" stop meaning
-	 * unpriced.
-	 */
+	/** Written only alongside a price: a currency on an unpriced model is a row saying nothing, and it would make "unpriced" stop meaning unpriced. */
 	function setCurrency(name: string, code: string) {
 		const pricing = { ...(server.modelPricing ?? {}) };
 		const current = pricing[name];
@@ -318,8 +249,8 @@
 
 <!-- The sub-view owns its shell, so both modes present it identically. -->
 <SettingsPanel>
-	<!-- Which connection is being edited. The way back is in the modal's own header,
-	     published above, so this row is not a second one. -->
+	<!-- Which connection is being edited. The way back is in the modal's own
+	     header, so this row is not a second one. -->
 	<div class="flex items-center gap-2">
 		<span
 			class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
@@ -336,9 +267,8 @@
 	</div>
 
 	{#if models.length}
-		<!-- The unit, before anything is opened. It was stated on the labels inside
-		     each model's price panel, which is a panel nobody has opened yet: from
-		     the list, there was nothing anywhere saying what a figure would mean. -->
+		<!-- The unit, before anything is opened: it used to be stated only on the labels
+		     inside a price panel nobody had opened yet. -->
 		<p class="text-muted -mt-1 flex items-center gap-1.5 text-xs">
 			<Coins class="h-3.5 w-3.5 shrink-0" />
 			{$LL.pricingIntro()}
@@ -346,8 +276,7 @@
 	{/if}
 
 	{#if models.length}
-		<!-- Search first: past a couple of dozen models, scrolling isn't a way to
-		     reach one. -->
+		<!-- Search first: past a couple of dozen models, scrolling is not a way in. -->
 		<div class="flex flex-wrap items-center gap-2">
 			<div class="relative min-w-40 flex-1">
 				<Search
@@ -396,12 +325,9 @@
 		{/if}
 
 		{#if visible.length}
-			<!-- One section per kind rather than one list, because a connection is not
-			     one list: the models you hold a conversation with, the ones that draw
-			     and the ones that return a vector are three different tools. Telling
-			     them apart here is what lets every picker in the app stop offering the
-			     wrong one, which is not a tidiness problem: an embedding model chosen
-			     for a conversation is a 400 with no explanation attached. -->
+			<!-- One section per kind: the models you hold a conversation with, the ones that
+			     draw and the ones that return a vector are three different tools, and an
+			     embedding chosen for a conversation is a 400 with no explanation. -->
 			{#each sections as section (section.kind)}
 				<div class="flex flex-col gap-1.5">
 					<div class="flex items-baseline gap-2">
@@ -411,26 +337,17 @@
 						<span class="text-muted text-xs tabular-nums">{section.models.length}</span>
 					</div>
 
-					<!-- One row per model. The name reads as text until you touch it, the
-					     id lives on its tooltip rather than on a second line, and the two
-					     controls sit at the right. On a phone the name takes the line and
-					     they drop underneath, which is what the old two-column row could not
-					     do without crushing both halves. -->
+					<!-- One row per model: the name reads as text until you touch it, the id is on
+					     its tooltip, and the two controls sit at the right. -->
 					{#each section.models as name (name)}
 						{@const label = server.modelLabels?.[name] ?? ''}
 						{@const price = server.modelPricing?.[name]}
 						{@const hasPrice = hasPriceFigure(price)}
 						{@const unit = priceUnit(price)}
-						<!-- Green when a shared model has a price, red when it has none: while
-						     an allowance is in force an unpriced shared model is refused, so the
-						     colour is the state of something that works rather than decoration.
-						     A model nobody is offered is left alone.
-
-						     And nothing is red on a connection that reports its own costs, because
-						     nothing is refused there: the rule exists because uncounted means
-						     unlimited, and a provider that reports every call leaves nothing
-						     uncounted. An alarm about a figure nobody needs to enter is an alarm
-						     that teaches people to ignore alarms. -->
+						<!-- Green when a shared model has a price, red when it has none: an unpriced
+						     shared model is refused while an allowance is in force, so the colour is a
+						     state rather than decoration. Nothing is red on a connection that reports
+						     its own costs, where nothing is refused. -->
 						<div
 							class="flex flex-col gap-1 rounded-lg border p-2 transition-colors {isShared(name)
 								? hasPrice || reported
@@ -439,13 +356,10 @@
 								: 'border-shade-3'}"
 						>
 							<div class="flex items-center gap-1.5">
-								<!-- A field that does not look like one until it is wanted: this is a
-								     list to read, not a form to fill, and eighty boxed inputs made it
-								     the other way round. The id is the placeholder and the tooltip, so
-								     it is never printed twice. -->
-								<!-- The app's tooltip rather than a `title`: it is the one every
-								     other hint in the app uses, it opens on keyboard focus too, and it
-								     is not at the mercy of the platform's own delay and styling. -->
+								<!-- A field that does not look like one until it is wanted: this is a list to
+								     read, and eighty boxed inputs made it a form to fill. -->
+								<!-- The app's tooltip rather than a `title`: it opens on keyboard focus and is
+								     not at the mercy of the platform's delay and styling. -->
 								<Tooltip side="top" align="start">
 									{#snippet trigger({ props })}
 										<span {...props} class="flex min-w-0 flex-1 items-center gap-1">
@@ -457,9 +371,8 @@
 												aria-label={name}
 											/>
 											{#if label.trim()}
-												<!-- The old cross read as "remove this model". This puts the
-												     name back to what the provider calls it, which is what it
-												     does, and it is the same icon every other reset wears. -->
+												<!-- The old cross read as "remove this model". This puts the name back to what
+												     the provider calls it, and wears the same icon as every other reset. -->
 												<button
 													type="button"
 													onclick={() => setLabel(name, '')}
@@ -475,13 +388,10 @@
 									<span class="font-mono">{name}</span>
 								</Tooltip>
 
-								<!-- The one summary on the row, and the way in to everything else. It
-								     says the figures and what they are counted in; what they are counted
-								     per is the same for every model here, so it sits on the tooltip and
-								     inside the fold rather than on eighty rows. -->
-								<!-- The app's tooltip here too, and one plain sentence in it:
-								     "Cost in EUR, per million tokens". The row shows the figures and
-								     the scale; the tooltip is where the words go. -->
+								<!-- The one summary on the row, and the way in to everything else. What the
+								     figures are counted per is the same for every model here, so it is on the
+								     tooltip rather than repeated. -->
+								<!-- The row shows the figures and the scale; the tooltip is where the words go. -->
 								<Tooltip side="top" align="end">
 									{#snippet trigger({ props })}
 										<button
@@ -496,10 +406,8 @@
 										>
 											<Coins class="h-3.5 w-3.5" />
 											{#if hasPrice}
-												<!-- The same two arrows as inside the fold, up for what you send
-												     and down for what comes back, instead of a slash between the
-												     figures. One slash on the row is the scale; a second one
-												     separating a pair read as a division. -->
+												<!-- The same two arrows as inside the fold, up for what you send and down for
+												     what comes back, rather than a slash, which on this row is the scale. -->
 												<span class="flex items-center gap-1.5 tabular-nums">
 													{#if unit === 'token'}
 														<span class="flex items-center gap-0.5">
@@ -513,16 +421,13 @@
 													{:else}
 														<span>{price?.rate}</span>
 													{/if}
-													<!-- No currency here. A connection bills in one currency, so
-													     printing it on every row says the same word eighty times.
-													     It is in the tooltip and in the fold, where it is a thing
-													     to check rather than a thing to read past. -->
+													<!-- No currency here: a connection bills in one, so printing it on every row
+													     says the same word eighty times. It is in the tooltip and in the fold. -->
 													<span class="opacity-70">{UNIT_SUFFIX[unit]}</span>
 												</span>
 											{:else if reported}
-												<!-- Not "unset", which would read as something left undone. There
-												     is nothing to do here: the provider bills the call and says
-												     what it billed. -->
+												<!-- Not "unset", which reads as something left undone. There is nothing to do:
+												     the provider bills the call and says what it billed. -->
 												{$LL.priceAuto()}
 											{:else}
 												{$LL.priceUnset()}
@@ -539,26 +444,18 @@
 							</div>
 
 							{#if priced.has(name)}
-								<!-- Whether this model shows a state instead of a form.
-								     Only on a connection that reports its own costs, only while nothing
-								     has been typed, and only until somebody asks for the fields. A figure
-								     already set is a figure in play, so it is never hidden. -->
+								<!-- Whether this model shows a state instead of a form. Only on a reporting
+								     connection, only while nothing has been typed, and only until asked. -->
 								{@const auto = reported && !hasPrice && !overriding.has(name)}
-								<!-- Everything a model is worth saying, in two lines that are two
-								     lines on purpose: what it is and how it is billed, then what it
-								     costs. The kind lives here rather than on the row above because
-								     it is set once from the name and corrected rarely, and it was
-								     taking the width the names needed on a phone. -->
+								<!-- Two lines on purpose: what the model is and how it is billed, then what it
+								     costs. -->
 								<div
 									class="border-shade-3 bg-shade-1 mt-1 flex flex-col gap-2 rounded-md border p-2"
 									transition:slide={{ duration: 160, easing: quadInOut }}
 								>
 									<div class="flex flex-wrap items-center gap-2">
-										<!-- Three answers and no free text: this decides which picker
-										     offers the model, so a value nobody recognises would be a model
-										     that quietly exists nowhere. Prefilled from the name, which is
-										     the only thing any provider gives us to go on, and left
-										     correctable because that guess is wrong often enough. -->
+										<!-- Three answers and no free text: this decides which picker offers the model,
+										     so an unrecognised value would be a model that exists nowhere. -->
 										<span class="min-w-0 flex-1 basis-28">
 											<Select
 												value={modelKind(server, name)}
@@ -570,18 +467,12 @@
 											/>
 										</span>
 
-										<!-- Beside the kind because it is the other thing this model *is*,
-										     and because it decides what the line below asks. A model billed
-										     per minute has no way in and no way out, only a length of time,
-										     and two token fields for it would be asking two questions the
-										     invoice does not answer. It also says "per million tokens" once,
-										     for the whole block: the figures below carry no suffix, where
-										     the same words used to be printed twice.
+										<!-- Beside the kind because it is the other thing this model *is*, and because
+										     it decides what the line below asks: a model billed per minute has no way in
+										     and no way out. It also says "per million tokens" once for the whole block.
 
-										     Gone in the auto state along with the figures: how something is
-										     billed is only worth asking of somebody who is about to say what
-										     it costs. The kind beside it stays, because that is what a model
-										     *is* and it decides which picker offers it. -->
+										     Gone in the auto state along with the figures. The kind stays, since that is
+										     what decides which picker offers it. -->
 										{#if !auto}
 											<span class="min-w-0 flex-1 basis-40">
 												<Select
@@ -594,10 +485,8 @@
 												/>
 											</span>
 
-											<!-- Zero is a price: free, and counted as such. Clearing is the
-											     other answer (nobody has said) and a field cannot be walked
-											     back to it. On a reporting connection it is also the way back
-											     to auto, which is why it clears the reveal as well. -->
+											<!-- Zero is a price: free, and counted as such. Clearing is the other answer,
+											     nobody has said, and a field cannot be walked back to it. -->
 											<button
 												type="button"
 												onclick={() => {
@@ -614,15 +503,11 @@
 									</div>
 
 									{#if auto}
-										<!-- The state, not an empty form. This connection bills each call and
-										     reports what it billed, so there is no figure to enter and a row
-										     of blank fields would be inviting somebody to enter one that
-										     would never be read.
+										<!-- The state, not an empty form: this connection bills each call and reports
+										     what it billed, so a row of blank fields would invite a figure nothing reads.
 
-										     Setting one brings the fields back, the way typing over a stored
-										     key does: reachable, deliberate, and not the default posture. What
-										     it means there is not "in case they forget to tell us" but "bill
-										     this at my rate rather than theirs". -->
+										     Setting one brings the fields back, the way typing over a stored key does.
+										     It means "bill this at my rate rather than theirs". -->
 										<div class="flex items-center gap-2">
 											<Coins class="text-muted h-4 w-4 shrink-0" />
 											<p class="text-muted min-w-0 flex-1 text-xs leading-snug">
@@ -639,23 +524,19 @@
 										</div>
 									{:else}
 										{#if reported}
-											<!-- Said plainly, because this is the one place the two figures
-											     could be confused: the provider will still report what it
-											     charged, and this is the number that gets counted instead. -->
+											<!-- Said plainly, because this is where the two figures could be confused: the
+											     provider still reports what it charged, and this is what gets counted. -->
 											<p class="text-muted text-xs leading-snug">{$LL.priceFallbackHelp()}</p>
 										{/if}
 
-										<!-- One line, always: two figures and their currency fit on a
-										     phone, and wrapping the currency underneath left it alone on a
-										     row of its own with the width beside it unused. -->
+										<!-- One line, always: wrapping the currency underneath left it alone on a row
+										     with the width beside it unused. -->
 										<div class="flex items-center gap-2">
 											{#if unit === 'token'}
 												{#each [{ side: 'input' as const, icon: ArrowUpRight, label: $LL.pricePerMillionIn() }, { side: 'output' as const, icon: ArrowDownRight, label: $LL.pricePerMillionOut() }] as field (field.side)}
 													{@const Icon = field.icon}
-													<!-- The arrow is the whole label: up for what you send, down for
-												     what comes back, both leaning the same way so the pair reads
-												     as one movement rather than two opposed ones. The words are on
-												     the tooltip and the accessible name, where they cost no width. -->
+													<!-- The arrow is the whole label, both leaning the same way so the pair reads
+													     as one movement rather than two opposed ones. -->
 													<label
 														class="flex min-w-0 flex-1 items-center gap-1.5"
 														title="{field.label} · {UNIT_LABELS[unit]}"
@@ -676,8 +557,8 @@
 													</label>
 												{/each}
 											{:else}
-												<!-- One figure, because nothing billed per image or per second
-											     charges the way in differently from the way out. -->
+												<!-- One figure: nothing billed per image or per second charges the way in
+												     differently from the way out. -->
 												<label
 													class="flex min-w-0 flex-1 items-center gap-1.5"
 													title={UNIT_LABELS[unit]}
@@ -698,8 +579,8 @@
 												</label>
 											{/if}
 
-											<!-- No empty option: a price without a currency is a number nobody
-										     can add up, and USD is what providers publish in. -->
+											<!-- No empty option: a price without a currency is a number nobody can add up,
+											     and USD is what providers publish in. -->
 											<span class="w-20 shrink-0">
 												<Select
 													value={price?.currency ?? DEFAULT_CURRENCY}

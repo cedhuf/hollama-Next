@@ -1,11 +1,9 @@
 // Interactive quick-choice buttons.
 //
-// Like web search, this is NOT a native tool call (model/tool support is too
-// uneven across the Ollama + OpenAI-compatible backends we target). Instead the
-// model is instructed to emit a single <ask>…</ask> block when it wants to
-// clarify a preference; we parse it out of the streamed reply (the same way
-// reasoning <think> tags are handled) and render buttons. The user's selection
-// becomes a normal `user` message, so the history stays clean and natural.
+// Not a native tool call: support is too uneven across the Ollama and
+// OpenAI-compatible backends. The model is instructed to emit one <ask>…</ask>
+// block, parsed out of the streamed reply the way <think> tags are, and the
+// selection becomes a normal `user` message so the history stays natural.
 
 export type AskQuestionType = 'single_select' | 'multi_select';
 
@@ -47,17 +45,12 @@ function normalizeQuestions(raw: unknown): AskQuestion[] {
 }
 
 /**
- * The whole objects out of a broken one.
+ * The whole objects out of a broken one: a bracket in the wrong place makes the
+ * entire block unparseable, well-formed questions included, so this walks the
+ * text and collects every balanced `{…}` that parses on its own.
  *
- * A small model that gets the shape right can still get the punctuation wrong: a
- * bracket in the wrong place at the end of the block makes the entire thing
- * unparseable, questions that were perfectly well formed included. Rather than
- * throw all of it away, this walks the text and collects every balanced `{…}`
- * that parses on its own.
- *
- * Deliberately not a repair. Counting brackets and appending the missing ones
- * guesses at what the model meant, and a guess about a question somebody is
- * about to be asked is worse than one question fewer.
+ * Deliberately not a repair: counting brackets and appending the missing ones
+ * guesses at what the model meant, which is worse than one question fewer.
  */
 function salvageQuestions(json: string): unknown[] {
 	const found: unknown[] = [];
@@ -78,9 +71,8 @@ function salvageQuestions(json: string): unknown[] {
 		if (character === '"') inString = true;
 		else if (character === '{') starts.push(i);
 		else if (character === '}') {
-			// Every closer, at every depth: the questions are nested inside an object
-			// that the break usually leaves open, so waiting for the outer one to
-			// close would collect nothing at all.
+			// Every closer, at every depth: the questions are nested inside an object the
+			// break usually leaves open, so waiting for the outer one would collect nothing.
 			const from = starts.pop();
 			if (from === undefined) continue;
 			try {
@@ -97,12 +89,7 @@ function salvageQuestions(json: string): unknown[] {
 	return found;
 }
 
-/**
- * Split a finished assistant reply into the visible text and, if present, the
- * structured quick-choice questions. Tolerant of an optional code fence inside
- * the block, and of malformed JSON: what can be read is read, and what cannot is
- * dropped rather than shown.
- */
+/** Tolerant of a code fence inside the block and of malformed JSON: what can be read is read, and what cannot is dropped rather than shown. */
 export function parseAskBlock(raw: string): { content: string; choices?: AskChoices } {
 	const match = raw.match(/<ask>\s*([\s\S]*?)<\/ask>/i);
 	if (!match || match.index === undefined) return { content: raw };
@@ -119,41 +106,27 @@ export function parseAskBlock(raw: string): { content: string; choices?: AskChoi
 		const parsed = JSON.parse(json) as { questions?: unknown };
 		questions = normalizeQuestions(parsed?.questions);
 	} catch {
-		// Broken, but not necessarily worthless: keep the questions that are whole.
+		// Broken, but not worthless: keep the questions that are whole.
 		questions = normalizeQuestions(salvageQuestions(json));
 	}
 
-	// Never the raw block. It used to fall back to the whole reply when nothing
-	// could be parsed, which put a page of JSON in front of somebody who had asked
-	// for a quiz. A turn that produced nothing readable produced nothing, and the
-	// retry button is right there.
+	// Never the raw block. It used to fall back to the whole reply, which put a page
+	// of JSON in front of somebody who had asked for a quiz.
 	return questions.length ? { content: before, choices: { questions } } : { content: before };
 }
 
-/**
- * While streaming we don't yet have a complete block: hide anything from the
- * opening tag onward so the raw JSON never flashes in the bubble.
- */
+/** While streaming there is no complete block yet: hide everything from the opening tag on, so the raw JSON never flashes in the bubble. */
 export function stripAskBlock(raw: string): string {
 	const i = raw.search(/<ask\b/i);
 	return (i === -1 ? raw : raw.slice(0, i)).trim();
 }
 
-/**
- * A plain-text rendering of the questions, used as the assistant turn's content
- * when it emitted only the <ask> block. Some providers (e.g. Mistral) reject an
- * assistant message with empty content, and this also keeps the model's own
- * context about what it just asked.
- */
+/** The assistant turn's content when it emitted only the <ask> block: some providers reject an assistant message with empty content, and this keeps the model's own context about what it asked. */
 export function askChoicesToText(choices: AskChoices): string {
 	return choices.questions.map((q) => q.question).join('\n');
 }
 
-/**
- * Build the self-describing `user` message sent after the user picks. Including
- * the question text keeps the choice unambiguous for the model even if its own
- * prior turn carried no visible text.
- */
+/** Including the question text keeps the choice unambiguous for the model even when its own prior turn carried no visible text. */
 export function formatAskAnswer(questions: AskQuestion[], selected: string[][]): string {
 	const single = questions.length === 1;
 	return questions

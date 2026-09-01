@@ -59,14 +59,7 @@ interface OllamaToolCall {
 	function?: { name?: string; arguments?: Record<string, unknown> };
 }
 
-/**
- * The model's arguments as an object, or an empty one.
- *
- * A call whose JSON does not parse is a call that cannot be made. Throwing here
- * would take the whole request down over one malformed argument list, which is a
- * routine thing for a small model to produce; an empty object lets the tool
- * report a useless call and the turn carry on.
- */
+/** A call whose JSON does not parse cannot be made. Throwing would take the whole request down over one malformed argument list, which small models produce routinely; an empty object lets the tool report a useless call. */
 function safeParseArguments(raw: string): Record<string, unknown> {
 	try {
 		const parsed = JSON.parse(raw);
@@ -93,13 +86,10 @@ export class OllamaStrategy implements ChatStrategy {
 	}
 
 	/**
-	 * Ask `/api/show` whether a model can call tools.
-	 *
 	 * The opposite default to `supportsThinking`: unknown means no. Thinking has a
-	 * runtime fallback to catch a wrong guess, tool calling has none: a model that
-	 * cannot call tools but is offered them does not fail, it improvises, and the
-	 * user gets an answer with a JSON blob in it or a promise to search that never
-	 * happened. Better to keep the text protocol, which works everywhere.
+	 * runtime fallback, tool calling has none: a model offered tools it cannot call
+	 * improvises, and the user gets a JSON blob or a promise to search that never
+	 * happened.
 	 */
 	async supportsTools(model: string): Promise<boolean> {
 		const key = `${this.base}::${model}`;
@@ -124,12 +114,7 @@ export class OllamaStrategy implements ChatStrategy {
 		}
 	}
 
-	/**
-	 * Ask `/api/show` whether a model supports thinking. Passing `think: true` to a
-	 * model without the capability makes recent Ollama return HTTP 400, so we gate on
-	 * this. When the answer is unknown (old Ollama, network error) we optimistically
-	 * assume yes and rely on the runtime fallback in `chat()`.
-	 */
+	/** Passing `think: true` to a model without the capability makes recent Ollama answer 400. Unknown is assumed yes, with the runtime fallback in `chat()` to catch a wrong guess. */
 	private async supportsThinking(model: string): Promise<boolean> {
 		const key = `${this.base}::${model}`;
 		const cached = OllamaStrategy.thinkingSupport.get(key);
@@ -153,15 +138,7 @@ export class OllamaStrategy implements ChatStrategy {
 		}
 	}
 
-	/**
-	 * The `options` block for one request: what the conversation asked for, over
-	 * how this connection loads a model.
-	 *
-	 * Merged here rather than by each caller because there are four of them (the
-	 * turn, the summariser, the title, the prompt writer) and a merge written per
-	 * call site is a merge missing from the fifth. Nothing above this line has to
-	 * know that a connection has loading settings at all.
-	 */
+	/** Merged here rather than by each caller, because there are four of them and a merge written per call site is one missing from the fifth. */
 	private optionsFor(payload: AppChatRequest) {
 		return withLoadOptions(payload.options, this.server.loadOptions);
 	}
@@ -178,8 +155,8 @@ export class OllamaStrategy implements ChatStrategy {
 			await this.streamChat(payload, useThink, abortSignal, onChunk);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
-			// Belt-and-suspenders: a model rejected thinking despite our capability check.
-			// Remember it and retry once without thinking so the chat still completes.
+			// A model rejected thinking despite the capability check: remember it and retry
+			// once without, so the chat still completes.
 			if (useThink && /does not support thinking/i.test(message)) {
 				OllamaStrategy.thinkingSupport.set(`${this.base}::${payload.model}`, false);
 				await this.streamChat(payload, false, abortSignal, onChunk);
@@ -195,12 +172,11 @@ export class OllamaStrategy implements ChatStrategy {
 		abortSignal: AbortSignal,
 		onChunk: (part: ChatChunk) => void
 	): Promise<void> {
-		// Forward the resolved boolean: `think: false` is always safe, and `think: true`
-		// only reaches models we already verified support it.
+		// `think: false` is always safe, and `think: true` only reaches models already
+		// verified.
 		//
-		// `toolChoice` is dropped rather than forwarded: Ollama has no such field, and
-		// an unknown camelCase key on the wire is noise at best. The one value that
-		// changes anything is honoured below by withholding the tools, which is the
+		// `toolChoice` is dropped rather than forwarded: Ollama has no such field. Its
+		// one meaningful value is honoured below by withholding the tools, which is the
 		// only way to say "not this turn" to an endpoint with no parameter for it.
 		const { toolChoice, ...rest } = payload;
 		const offerTools = toolChoice !== 'none' && !!payload.tools?.length;
@@ -269,8 +245,7 @@ export class OllamaStrategy implements ChatStrategy {
 				};
 				const { message } = parsed;
 
-				// Ollama puts its counts on the final object, unasked. Forwarded as it
-				// is: whoever is counting decides what to do with it.
+				// Ollama puts its counts on the final object, unasked. Forwarded as it is.
 				if (parsed.prompt_eval_count || parsed.eval_count) {
 					onChunk({
 						usage: {
@@ -283,9 +258,8 @@ export class OllamaStrategy implements ChatStrategy {
 				if (message.thinking) onChunk({ thinking: message.thinking });
 				if (message.content) onChunk({ content: message.content });
 
-				// Whole, in one message, and with the arguments already parsed: none of
-				// the fragment reassembly the OpenAI path needs. There is no call id
-				// either, so one is minted for the round trip.
+				// Whole, in one message, with the arguments already parsed: none of the
+				// fragment reassembly the OpenAI path needs. No call id either, so one is minted.
 				const calls = (message as { tool_calls?: OllamaToolCall[] }).tool_calls;
 				if (calls?.length && !abortSignal.aborted) {
 					onChunk({
@@ -309,16 +283,15 @@ export class OllamaStrategy implements ChatStrategy {
 				messages: payload.messages.map((m) => ({ role: m.role, content: m.content })),
 				options: this.optionsFor(payload),
 				stream: false,
-				// The short internal errands don't want reasoning: it costs a round trip
-				// and buries the one line the caller is after. `false` is accepted by
-				// every model, unlike `true` (see `chat()` above).
+				// The short internal errands do not want reasoning: it costs a round trip and
+				// buries the one line the caller is after. `false` is accepted by every model.
 				think: false
 			})
 		});
 		if (!response.ok) return '';
 		const data = await response.json();
-		// Ollama returns reasoning in `message.thinking`, so `content` is normally
-		// clean, but a model that ignores `think: false` falls back to inline tags.
+		// Ollama returns reasoning in `message.thinking`, but a model that ignores
+		// `think: false` falls back to inline tags.
 		return stripThinkTags(data?.message?.content ?? '');
 	}
 

@@ -117,8 +117,7 @@ export function updateServer(
 		values.push(patch.baseUrl);
 	}
 	if (patch.imageBaseUrl !== undefined) {
-		// Blank is stored as NULL, so "same base as chat" has one representation
-		// rather than two that the proxy would have to test for separately.
+		// Blank is stored as NULL, so "same base as chat" has one representation.
 		sets.push('image_base_url = ?');
 		values.push(patch.imageBaseUrl?.trim() || null);
 	}
@@ -147,10 +146,9 @@ export function updateServer(
 		values.push(patch.color);
 	}
 	if (patch.loadOptions !== undefined) {
-		// Filtered on the way in as well as on the way out: the column is the only
-		// copy, so a field that should not be there is a field that gets sent to
-		// Ollama on every turn until somebody notices. An empty set is stored as
-		// NULL so "nothing configured" has one representation rather than two.
+		// Filtered on the way in as well as out: the column is the only copy, so a field
+		// that should not be there gets sent to Ollama on every turn until somebody
+		// notices. An empty set is stored as NULL.
 		const kept = parseLoadOptions(patch.loadOptions);
 		sets.push('load_options = ?');
 		values.push(Object.keys(kept).length ? JSON.stringify(kept) : null);
@@ -222,9 +220,8 @@ export function getModelPricing(serverId: string): Record<string, ModelPrice> {
 		rows.map((row) => [
 			row.model_name,
 			{
-				// NULL is the token unit, which is what every row written before units
-				// existed is. Left absent rather than filled in, so the shape the client
-				// gets back is the shape it sent.
+				// NULL is the token unit, which every row written before units existed is. Left
+				// absent rather than filled in, so the client gets back the shape it sent.
 				unit: (row.unit as ModelPrice['unit']) ?? undefined,
 				input: row.input ?? undefined,
 				output: row.output ?? undefined,
@@ -236,12 +233,10 @@ export function getModelPricing(serverId: string): Record<string, ModelPrice> {
 }
 
 /**
- * Replaces the whole set, dropping anything with no figure at all.
- *
- * A model priced at zero keeps its row: free is a price, and it is not the same
- * answer as "nobody has said". The meter counts the first and skips the second.
- * Which field carries the figure depends on the unit, so `hasPriceFigure`
- * answers rather than a test on `input` that only ever knew about tokens.
+ * Replaces the whole set, dropping anything with no figure. A model priced at
+ * zero keeps its row: free is a price, and not the same answer as "nobody has
+ * said". Which field carries the figure depends on the unit, so `hasPriceFigure`
+ * answers rather than a test on `input`.
  */
 export function setModelPricing(serverId: string, pricing: Record<string, ModelPrice>): void {
 	const db = getDb();
@@ -253,9 +248,9 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 			 VALUES (?, ?, ?, ?, ?, ?, ?)`
 		);
 		for (const [name, price] of Object.entries(pricing)) {
-			// A unit with no figure is still an answer worth keeping: it is how an
-			// administrator records that a model is billed per minute before they
-			// have looked up the rate. It is not a price, and nothing counts it.
+			// A unit with no figure is still worth keeping: it is how an administrator
+			// records that a model is billed per minute before looking up the rate. It is
+			// not a price, and nothing counts it.
 			if (!hasPriceFigure(price) && !(price?.unit && price.unit !== 'token')) continue;
 			insert.run(
 				serverId,
@@ -274,12 +269,7 @@ export function setModelPricing(serverId: string, pricing: Record<string, ModelP
 	}
 }
 
-/**
- * What each of this connection's models is for, keyed by the real model id.
- *
- * Sparse: only the ones somebody corrected. Everything else is answered by
- * `modelKind()` reading the name, on whichever side is asking.
- */
+/** Sparse: only the ones somebody corrected. Everything else is answered by `modelKind()` reading the name. */
 export function getModelKinds(serverId: string): Record<string, ModelKind> {
 	const rows = getDb()
 		.prepare('SELECT model_name, kind FROM model_kinds WHERE server_id = ?')
@@ -296,19 +286,14 @@ export function getModelKinds(serverId: string): Record<string, ModelKind> {
  * Keep what a provider said about its own models, without touching what a person
  * said about them.
  *
- * A guess read from a name is the app's answer of last resort, and for some
- * models it is simply wrong with no way to be right: nothing about
- * `fish-audio/s1` reveals that it talks, and nothing about
- * `fish-audio/transcribe-1` reveals that it listens, yet the provider will say
- * both outright when asked. Once it has, that answer should survive the request
- * that learned it, because the next thing to need it is the server checking that
- * the model somebody chose can do what they are asking of it.
+ * Nothing about `fish-audio/s1` reveals that it talks, yet the provider will say
+ * so outright when asked, and that answer should survive the request that
+ * learned it.
  *
- * Written on read, which is the one place it can be: the answer arrives with the
- * catalogue. Kept honest by two rules. A row that already exists is never
- * touched, so a correction made in Models and prices always wins. And a
- * declaration the guess would have reached anyway is not written at all, so the
- * table stays a list of what is *not* obvious.
+ * Written on read, the one place it can be. Two rules keep it honest: a row that
+ * already exists is never touched, so a correction in Models and prices always
+ * wins, and a declaration the guess would have reached anyway is not written, so
+ * the table stays a list of what is *not* obvious.
  */
 export function rememberModelKinds(serverId: string, kinds: Record<string, ModelKind>): void {
 	const entries = Object.entries(kinds).filter(
@@ -322,13 +307,7 @@ export function rememberModelKinds(serverId: string, kinds: Record<string, Model
 	for (const [name, kind] of entries) insert.run(serverId, name, kind);
 }
 
-/**
- * Replaces the whole set, keeping only what the guess would not already say.
- *
- * A row that agrees with `guessModelKind` is a row that says nothing, and it
- * would go stale the day the heuristic improves. Storing only the corrections
- * means the table stays small and the guess keeps getting better underneath it.
- */
+/** A row that agrees with `guessModelKind` says nothing and would go stale the day the heuristic improves. Storing only corrections keeps the guess getting better underneath. */
 export function setModelKinds(serverId: string, kinds: Record<string, ModelKind>): void {
 	const db = getDb();
 	db.exec('BEGIN');
@@ -350,17 +329,12 @@ export function setModelKinds(serverId: string, kinds: Record<string, ModelKind>
 }
 
 /**
- * Shared models nobody has priced, per system connection.
+ * Shared models nobody has priced, per system connection. A row that only
+ * records a unit does not count: the join asks for a figure.
  *
- * A row that only records a unit does not count as priced here: the join asks for
- * a figure, not for a row, because a unit is what somebody wrote down on the way
- * to a price rather than the price itself.
- *
- * The hole a credit limit has if this is not checked: a model with no price is
- * not counted, so a limit that is in force everywhere else is simply absent on
- * that one, and it is absent for everybody, silently, because it was an
- * oversight rather than a decision. An administrator has to be able to see the
- * list, and the relay has to refuse it in the meantime.
+ * A model with no price is not counted, so a credit limit in force everywhere
+ * else is simply absent on that one, for everybody, silently. An administrator
+ * has to see the list, and the relay has to refuse it meanwhile.
  */
 export function unpricedSharedModels(): { serverId: string; label: string; models: string[] }[] {
 	const rows = getDb()
@@ -390,23 +364,17 @@ export function unpricedSharedModels(): { serverId: string; label: string; model
 }
 
 /**
- * The currencies this instance's spending can be counted in.
+ * The currencies this instance's spending can be counted in. One is a label,
+ * several has to be admitted to since nothing is converted, and empty means
+ * there is nothing to label.
  *
- * One is the answer a figure can be labelled with; several is the answer that
- * has to be admitted to, since nothing is converted anywhere. Empty means there
- * is genuinely nothing to label, and then no figure is worth a unit.
+ * Two sources, because there are two ways a call gets a cost. A connection that
+ * reports its own costs needs no prices at all, so an instance whose only
+ * connection is one of those has an empty table by design: reading the table
+ * alone would render a twenty pound ceiling as a bare `20`.
  *
- * Two sources, because there are now two ways a call gets a cost. The table is
- * the older one, and it used to be the only one, which is why this function used
- * to read nothing else. Then a connection that reports its own costs stopped
- * needing any prices at all, and an instance whose only connection is one of
- * those has an empty table by design. Reading the table alone would answer
- * "no currency" and render a twenty pound ceiling as a bare `20`, which is worse
- * than no figure: a ceiling whose unit is a guess cannot be acted on.
- *
- * Only enabled system connections count towards the second source. A disabled one
- * bills nothing, and a personal one is somebody's own key and own bill, neither
- * counted here nor limited.
+ * Only enabled system connections count for the second source. A disabled one
+ * bills nothing, and a personal one is somebody's own bill.
  */
 export function spendCurrencies(): string[] {
 	const db = getDb();

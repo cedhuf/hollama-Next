@@ -27,13 +27,7 @@ export interface ToolCall {
 	/** The provider's id for this call, echoed back on the answer so they pair up. */
 	id: string;
 	name: string;
-	/**
-	 * The arguments exactly as the model wrote them, still JSON text.
-	 *
-	 * Not parsed here on purpose: this layer does not know any tool's schema, and a
-	 * small model writing malformed JSON is a routine event that the caller has to
-	 * handle as a failed call rather than as a crashed request.
-	 */
+	/** Not parsed here: this layer knows no tool's schema, and a small model writing malformed JSON is routine and has to reach the caller as a failed call. */
 	arguments: string;
 }
 
@@ -54,66 +48,50 @@ export interface ChatRequest {
 	messages: Message[];
 	stream?: boolean;
 	options?: Partial<OllamaOptions>;
-	/**
-	 * Whether the user allows the model to reason ("auto"). Defaults to true.
-	 * Ollama only enables thinking when the model actually supports it; set to
-	 * false to never request it (e.g. title generation, or a per-session toggle).
-	 */
+	/** Whether the model may reason ("auto"). Ollama only enables it where the model supports it; false never requests it, for a title or a per-session toggle. */
 	think?: boolean;
 	/** Tools the model may call this turn. Absent means none are offered. */
 	tools?: ToolSpec[];
 	/**
 	 * Whether the model may reach for those tools this turn.
 	 *
-	 * `none` keeps the definitions in the request and forbids calling them, which
-	 * is how a turn is made to stop asking and answer. Withdrawing the `tools`
-	 * array does the same thing by accident and costs twice: it changes the prefix
-	 * of the request, so the provider's prompt cache misses at the exact moment
-	 * the conversation is longest, and it leaves nothing saying why the model may
-	 * no longer call what it could call a moment ago.
+	 * `none` keeps the definitions in the request and forbids calling them.
+	 * Withdrawing the `tools` array does the same by accident and costs twice: it
+	 * changes the request's prefix, so the prompt cache misses where the
+	 * conversation is longest, and nothing says why the model may no longer call
+	 * what it could a moment ago.
 	 *
-	 * Absent means `auto`, which is every provider's default and needs no field.
+	 * Absent means `auto`, every provider's default.
 	 */
 	toolChoice?: 'auto' | 'none';
 }
 
 /**
- * A single streamed delta: regular `content`, separate reasoning `thinking`,
- * and/or the tool calls the turn ended on.
+ * A single streamed delta: `content`, separate `thinking`, and the tool calls
+ * the turn ended on.
  *
- * Tool calls arrive whole. Providers stream them in fragments. OpenAI sends the
- * name and then the arguments a few characters at a time, keyed by an index that
- * has to be reassembled, and every caller doing that reassembly itself would be
- * the same bug written three times. Each strategy accumulates internally and
- * emits the finished calls once, at the end of the stream.
+ * Tool calls arrive whole. Providers stream them in fragments keyed by an index
+ * that has to be reassembled, and every caller doing that itself would be the
+ * same bug written three times, so each strategy accumulates internally.
  */
 export type ChatChunk = {
 	content?: string;
 	thinking?: string;
 	toolCalls?: ToolCall[];
-	/**
-	 * What the provider says the turn consumed, on the chunk that carries it.
-	 *
-	 * Only ever the provider's own figure. Our character-count estimate colours a
-	 * ring; it has no business deciding what somebody spent. Absent on every
-	 * chunk but the last, and absent entirely from providers that do not report.
-	 */
+	/** Only ever the provider's own figure: the character-count estimate colours a ring and has no business deciding what somebody spent. */
 	usage?: TokenCount;
 };
 
 /**
  * The answer without the model's chain-of-thought.
  *
- * Providers that expose reasoning in a field of its own (Ollama's `thinking`,
- * `reasoning_content` over OpenAI-compatible endpoints) are already separated for
- * us. The rest emit `<think>…</think>` inline in the content, which the streaming
- * path splits out downstream, but `complete()` returns the raw string, so every
- * one-shot caller has to do it here or read the model's deliberation as if it were
- * the answer. A router that replies `<think>Hmm, is this real?…</think>NONE` is
- * indistinguishable from one that replies nothing at all.
+ * Providers with a field of their own are already separated for us. The rest
+ * emit `<think>…</think>` inline, which the streaming path splits out
+ * downstream, but `complete()` returns the raw string: a router replying
+ * `<think>Hmm…</think>NONE` is otherwise indistinguishable from one replying
+ * nothing.
  *
- * An unclosed block counts as thinking to the end: a truncated reply is all
- * deliberation and no answer.
+ * An unclosed block counts as thinking to the end.
  */
 export function stripThinkTags(raw: string): string {
 	return raw

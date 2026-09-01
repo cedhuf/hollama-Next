@@ -1,15 +1,13 @@
 /**
  * Whether this turn is driven by native tool calling.
  *
- * The app has two ways to give a model the web: text protocols it answers with
- * (`<read>` blocks, plus a router pre-pass that decides on searching for it), and
- * native tool calls the provider transports as structured fields. The text path
- * is the one that works on every endpoint, so it stays the default and the
- * fallback; native is opted into.
+ * Two ways to give a model the web: text protocols it answers with, and native
+ * tool calls the provider transports as structured fields. The text path works
+ * on every endpoint, so it stays the default and the fallback.
  *
- * Deciding is deliberately conservative. Offering tools to a model that cannot
- * call them is not a clean failure: it improvises, and the user reads a reply with
- * a JSON blob in it, or a claim that it searched when nothing was called.
+ * Deciding is conservative: a model offered tools it cannot call does not fail
+ * cleanly, it improvises, and the user reads a JSON blob or a claim that it
+ * searched when nothing was called.
  */
 import { ConnectionType, supportsNativeTools, type Server } from '$lib/connections';
 import { resolvePrompt, type PromptKey } from '$lib/defaultPrompts';
@@ -20,19 +18,13 @@ import { OllamaStrategy } from './ollama';
 export type NativeToolsSetting = 'off' | 'auto' | 'force';
 
 /**
- * The two tools, saying the same things the text prompts say.
- *
- * Built per turn rather than declared once, because the wording is the user's:
- * `toolSearch`, `toolSearchQuery`, `toolReadPage` and `toolReadUrl` sit in
- * Settings beside `searchRouter`, `searchContext` and `searchRead`. The two
- * paths have to produce the same behaviour or a bug becomes a bug on some
- * providers only, which is the kind nobody can reproduce, and that is far easier
- * to keep true when both are edited in the same screen than when one of them is
- * a constant in this file.
+ * The two tools, saying what the text prompts say. Built per turn because the
+ * wording is the user's and sits in Settings beside the text-path prompts: the
+ * two paths have to behave the same, which is easier to keep true when both are
+ * edited on one screen.
  *
  * The names are not editable. They are the wire protocol: the provider echoes
- * one back to say which tool it called, and a renamed tool is a call nobody
- * answers.
+ * one back to say which tool it called.
  */
 export const WEB_SEARCH_TOOL_NAME = 'web_search';
 export const READ_PAGE_TOOL_NAME = 'read_page';
@@ -71,12 +63,9 @@ export function readPageTool(overrides?: PromptOverrides): ToolSpec {
  * The memory tools, offered only when a persona is speaking and the instance
  * allows it.
  *
- * Native tool calling only, and that is a real limit worth stating rather than
- * hiding: an endpoint that cannot call tools still gets the memory injected and
- * still answers from it, but cannot write to it or open a note by itself. The
- * text protocols carry a read (`<read>`) and a question (`<ask>`); carrying a
- * structured write in prose is where models start inventing fields, and a
- * malformed write to somebody's memory is worse than no write.
+ * Native tool calling only, which is a real limit: an endpoint that cannot call
+ * tools still gets the memory injected and answers from it, but cannot write.
+ * Carrying a structured write in prose is where models start inventing fields.
  */
 export const MEMORY_PROFILE_TOOL_NAME = 'memory_profile';
 export const MEMORY_WRITE_TOOL_NAME = 'memory_write';
@@ -143,8 +132,7 @@ export function memoryTools(overrides?: PromptOverrides): ToolSpec[] {
 
 /** Whether this endpoint can carry tool calls at all, asked of the endpoint. */
 async function providerSupportsTools(server: Server, model: string): Promise<boolean> {
-	// Ollama answers per model, which is the finest-grained answer available
-	// anywhere and the reason no per-model setting is needed for it.
+	// Ollama answers per model, the finest-grained answer available anywhere.
 	if (server.connectionType === ConnectionType.Ollama) {
 		return new OllamaStrategy(server).supportsTools(model);
 	}
@@ -158,9 +146,8 @@ export async function useNativeTools(
 	setting: NativeToolsSetting
 ): Promise<boolean> {
 	if (setting === 'off') return false;
-	// The user asserting support for an endpoint that has no way to advertise it.
-	// Taken at their word, including for Ollama: they may know a model handles
-	// tools despite an older daemon not listing the capability.
+	// The user asserting support for an endpoint with no way to advertise it, taken
+	// at their word: they may know a model handles tools despite an older daemon.
 	if (setting === 'force') return true;
 
 	return providerSupportsTools(server, model);
@@ -170,15 +157,12 @@ export async function useNativeTools(
  * Whether tools can be sent at all, for the things that have no other way.
  *
  * Not the same question as `useNativeTools`, and conflating them cost memory its
- * whole feature. That setting decides which of two protocols carries the *web*
- * tools, and its default is `off` because the text protocol works everywhere and
- * this one does not. Memory has no text protocol: read through that setting, it
- * was switched off for everybody who had never opened Tools, which is everybody.
+ * whole feature: that setting decides which protocol carries the *web* tools and
+ * defaults to `off`, so memory was switched off for everybody who had never
+ * opened Tools.
  *
- * So this asks the endpoint instead. `force` is still honoured, because someone
- * asserting support for an endpoint that cannot advertise it is answering
- * exactly this question. `off` is not, because it answers a different one, and
- * an endpoint that would choke on tools says so here anyway.
+ * So this asks the endpoint. `force` is honoured, since asserting support
+ * answers exactly this question; `off` is not, since it answers another.
  */
 export async function canCarryTools(
 	server: Server,

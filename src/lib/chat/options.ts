@@ -1,27 +1,17 @@
 import type { OllamaOptions } from './ollama';
 
 /**
- * The three families the old parameters panel treated as one list.
+ * The three families the old parameters panel treated as one list, split
+ * because they answer to three owners: what every provider understands, what
+ * only llama.cpp has the vocabulary for, and what describes the machine the
+ * model is loaded on.
  *
- * They are three because they answer to three different owners. The first is
- * about the answer and every provider understands it. The second is about the
- * answer too, but only llama.cpp has the vocabulary for it. The third is not
- * about the answer at all: it describes the machine the model is loaded on, and
- * a conversation is the wrong place to keep a fact about somebody's graphics
- * card.
- *
- * Splitting them is what makes the rest of this possible. A panel that shows
- * thirty fields under one heading cannot say which of them will reach the
- * endpoint you are actually talking to, and the answer used to be "some of
- * them", silently.
+ * A panel that shows thirty fields under one heading cannot say which of them
+ * will reach the endpoint you are talking to, and the answer used to be "some
+ * of them", silently.
  */
 
-/**
- * Sampling every provider takes.
- *
- * Stored under Ollama's names because that is the vocabulary the app grew up
- * with; `samplingFrom()` in `chat/openai.ts` translates them on the way out.
- */
+/** Stored under Ollama's names, which is the vocabulary the app grew up with; `samplingFrom()` translates them on the way out. */
 export const PORTABLE_SAMPLING_KEYS = [
 	'temperature',
 	'top_p',
@@ -32,13 +22,7 @@ export const PORTABLE_SAMPLING_KEYS = [
 	'num_predict'
 ] as const;
 
-/**
- * Sampling only an Ollama endpoint understands.
- *
- * Deliberately never sent to an OpenAI-compatible endpoint: one that does not
- * know a field answers 400 rather than ignoring it, which costs a whole turn
- * over a setting nobody asked to be strict about.
- */
+/** Never sent to an OpenAI-compatible endpoint: one that does not know a field answers 400 rather than ignoring it. */
 export const OLLAMA_SAMPLING_KEYS = [
 	'num_keep',
 	'top_k',
@@ -53,13 +37,10 @@ export const OLLAMA_SAMPLING_KEYS = [
 ] as const;
 
 /**
- * How the model is loaded, which is a fact about the server and not about the
- * conversation.
- *
- * `num_ctx` is not here even though it is loading-time in Ollama's own terms:
- * the app reads it as the conversation's context window for the load meter, on
- * every provider, so it belongs with the settings a person picks per
- * conversation rather than with the ones an administrator picks per machine.
+ * How the model is loaded, which is a fact about the server rather than the
+ * conversation. `num_ctx` is not here despite being loading-time in Ollama's
+ * terms: the app reads it as the conversation's context window on every
+ * provider.
  */
 export const LOAD_KEYS = [
 	'numa',
@@ -82,7 +63,7 @@ export const LOAD_NUMBER_KEYS = [
 	'num_thread'
 ] as const satisfies readonly LoadKey[];
 
-/** The load keys that are a switch. Every one of them defaults to off nowhere: see below. */
+/** The load keys that are a switch. */
 export const LOAD_BOOLEAN_KEYS = [
 	'numa',
 	'low_vram',
@@ -120,17 +101,13 @@ export function isSamplingKey(key: string): key is SamplingKey {
 }
 
 /**
- * A conversation's options with the machine settings taken out.
- *
- * Applied where conversations are read, so values written by the old panel stop
- * being sent without anybody running a migration over stored conversations. The
- * strip is on the way out of storage rather than on the way in, which means it
- * also covers a conversation restored from an export written months ago.
+ * A conversation's options with the machine settings taken out, applied where
+ * conversations are read, so nothing has to migrate stored rows. On the way out
+ * of storage, so it also covers an export written months ago.
  *
  * They were never a choice anyone made: the old panel bound its checkboxes
- * straight to the conversation, so opening it once wrote half a dozen `false`
- * values that were then sent on every turn, forcing `use_mmap` off on a server
- * that wanted it on.
+ * straight to the conversation, so opening it wrote half a dozen `false` values
+ * that then forced `use_mmap` off on a server that wanted it on.
  */
 export function stripLoadOptions(options: Partial<OllamaOptions> | undefined): SamplingOptions {
 	if (!options) return {};
@@ -142,13 +119,7 @@ export function stripLoadOptions(options: Partial<OllamaOptions> | undefined): S
 	return kept as SamplingOptions;
 }
 
-/**
- * The load settings out of whatever was stored, ignoring anything else.
- *
- * The column is JSON written by this app, but it is still parsed rather than
- * trusted: a hand-edited row should cost a setting, not a request that Ollama
- * rejects for a field it has never heard of.
- */
+/** The column is JSON written by this app and still parsed rather than trusted: a hand-edited row should cost a setting, not a rejected request. */
 export function parseLoadOptions(raw: unknown): LoadOptions {
 	if (typeof raw === 'string') {
 		try {
@@ -170,13 +141,7 @@ export function parseLoadOptions(raw: unknown): LoadOptions {
 	return out as LoadOptions;
 }
 
-/**
- * The two halves put back together for one request.
- *
- * The conversation wins, but only where it actually says something: an absent
- * key is absent, never `undefined` sitting on top of the connection's value.
- * That distinction is the whole reason the old bug was a bug.
- */
+/** The conversation wins, but only where it says something: an absent key is absent, never `undefined` sitting on top of the connection's value. */
 export function withLoadOptions(
 	options: Partial<OllamaOptions> | undefined,
 	load: LoadOptions | undefined
@@ -196,19 +161,12 @@ function definedOnly<T extends object>(source: T): T {
 }
 
 /**
- * What this app asks for when nobody has asked for anything.
+ * What this app asks for when nobody has asked for anything: nothing.
  *
- * One set, shipped with the app, the same on every instance and the same for
- * every model. It is deliberately empty: an absent field is the provider
- * deciding for itself, and every provider's own default is better tuned to its
- * own models than a number picked here would be. Sending a temperature of 0.8 to
- * a model that ships with 0.6 would be this app overruling the people who
- * trained it, on no evidence.
- *
- * It exists as a named constant rather than as `{}` inline because it is a
- * destination: the reset control in Settings puts every field back to exactly
- * this, and "back to how the app ships" has to be one thing that one edit can
- * change if that judgement ever turns out to be wrong.
+ * An absent field is the provider deciding for itself, and its own default is
+ * better tuned to its own models than a number picked here. A named constant
+ * rather than `{}` inline because it is a destination: the reset control puts
+ * every field back to exactly this.
  */
 export const SYSTEM_SAMPLING_DEFAULTS: SamplingOptions = {};
 
@@ -239,12 +197,9 @@ export function parseSamplingOptions(raw: unknown): SamplingOptions {
 }
 
 /**
- * One set of settings over another, where an absent key means "whatever is
- * underneath" and never `undefined` laid on top of it.
- *
- * The distinction is the whole of the old bug in miniature: the retired panel
- * wrote `false` and `undefined` into a conversation for fields nobody had
- * touched, and both were then sent as though somebody had chosen them.
+ * One set over another, where an absent key means "whatever is underneath" and
+ * never `undefined` laid on top. The retired panel wrote `false` and `undefined`
+ * for fields nobody had touched, and both were sent as though chosen.
  */
 export function mergeSampling(
 	base: SamplingOptions,
@@ -272,14 +227,7 @@ export function isSystemDefault(options: SamplingOptions | undefined): boolean {
 	return true;
 }
 
-/**
- * Which sampling settings a request may carry, given who is answering it.
- *
- * The second family is dropped for anything that is not Ollama rather than left
- * to the endpoint to complain about. `samplingFrom()` already drops it on the
- * OpenAI path; this is the same answer one step earlier, so a panel can tell the
- * user which of their settings this conversation will actually use.
- */
+/** The Ollama-only family is dropped rather than left for the endpoint to complain about. `samplingFrom()` drops it too; this is the same answer one step earlier, so a panel can say which settings will be used. */
 export function samplingKeysFor(isOllama: boolean): readonly SamplingKey[] {
 	return isOllama ? SAMPLING_KEYS : (['num_ctx', ...PORTABLE_SAMPLING_KEYS] as const);
 }

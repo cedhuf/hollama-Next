@@ -13,32 +13,22 @@ import { formatSourceIndex, recallSearches } from './sourceIndex';
  * How heavy a conversation is, and how much of the model's context it uses.
  *
  * There is no tokenizer in the browser: shipping one would mean a megabyte of
- * vocabulary per model family, for a number that only has to be right enough to
- * colour an icon and to decide when to compact. So this estimates from character
- * counts and says so everywhere it is shown: the tooltip labels the figure as an
- * estimate rather than presenting it as what the provider will bill.
+ * vocabulary per model family for a number that only has to colour an icon and
+ * decide when to compact. Estimated from character counts, and labelled as an
+ * estimate everywhere it is shown.
  */
 
 /**
- * Characters per token.
- *
- * ~4 for English, ~3 for French and other accented languages (accents and
- * agglutinated words split more). 3.7 sits between the two: it overestimates a
- * little on English prose, which is the safe direction: compacting slightly
- * early costs one summary, compacting late costs a refused request.
+ * Characters per token: ~4 for English, ~3 for French and other accented
+ * languages. 3.7 overestimates a little on English prose, which is the safe
+ * direction: compacting early costs one summary, late costs a refused request.
  */
 const CHARS_PER_TOKEN = 3.7;
 
 /** Role framing, separators and the message envelope every provider adds. */
 const TOKENS_PER_MESSAGE = 4;
 
-/**
- * An attached image, flat.
- *
- * Vision models bill images by tile, not by byte, so the base64 length says
- * nothing useful. ~1100 is the common cost of one full-resolution tile-grid
- * image across OpenAI-compatible providers.
- */
+/** Vision models bill images by tile, not by byte, so the base64 length says nothing. ~1100 is the common cost of one full-resolution tile grid. */
 const TOKENS_PER_IMAGE = 1100;
 
 export function estimateTokens(text: string): number {
@@ -48,21 +38,15 @@ export function estimateTokens(text: string): number {
 
 export function estimateMessageTokens(message: Message): number {
 	let tokens = TOKENS_PER_MESSAGE + estimateTokens(message.content ?? '');
-	// Reasoning is sent back on some providers and, more to the point, it is what
-	// makes a conversation heavy: leaving it out would report a reassuring number
-	// about a context that is nearly full.
+	// Reasoning is sent back on some providers and is what makes a conversation
+	// heavy: leaving it out reports a reassuring number about a full context.
 	tokens += estimateTokens(message.reasoning ?? '');
 	tokens += (message.images?.length ?? 0) * TOKENS_PER_IMAGE;
 	if (message.knowledge?.content) tokens += estimateTokens(message.knowledge.content);
 	return tokens;
 }
 
-/**
- * What the index of earlier sources adds to a request.
- *
- * Only the list itself: the prompt wrapped around it is a fixed cost shared with
- * every other injected instruction, none of which this estimate counts either.
- */
+/** Only the list itself: the prompt around it is a fixed cost shared with every other injected instruction, none of which this estimate counts either. */
 export function estimateSourceIndexTokens(messages: Message[]): number {
 	const searches = recallSearches(messages);
 	if (!searches.length) return 0;
@@ -80,20 +64,13 @@ export interface CompactionSavings {
 	ratio: number;
 }
 
-/**
- * What a given compaction actually bought, computed from the messages rather
- * than stored on the marker.
- *
- * It can be computed because nothing is deleted: the stretch a marker replaced
- * is still sitting above it. Which also means summaries written before this was
- * shown report their figures too, instead of only new ones.
- */
+/** Computed from the messages rather than stored on the marker, which is possible because nothing is deleted: the stretch a marker replaced is still above it. So older summaries report their figures too. */
 export function compactionSavings(messages: Message[], markerIndex: number): CompactionSavings {
 	const marker = messages[markerIndex];
 	if (marker?.note?.kind !== 'compaction') return { before: 0, after: 0, saved: 0, ratio: 0 };
 
 	// Back to the previous marker, inclusive: an earlier summary was part of what
-	// this compaction was handed, so it is part of what this one replaced.
+	// this compaction was handed.
 	let start = 0;
 	for (let i = markerIndex - 1; i >= 0; i--) {
 		if (messages[i].note?.kind === 'compaction') {
@@ -133,13 +110,10 @@ export interface ContextUsage {
 }
 
 /**
- * The ceiling to measure against.
- *
- * `num_ctx` is the only context size the app actually knows: Ollama takes it per
- * request, so when the user set it, it is the truth. Every other provider keeps
- * its window to itself (some (Infomaniak today) do not even publish it) so the
- * fallback is the user's own threshold from Settings. That is the whole reason
- * the threshold is configurable rather than derived.
+ * `num_ctx` is the only context size the app knows: Ollama takes it per request,
+ * so where the user set it, it is the truth. Every other provider keeps its
+ * window to itself, so the fallback is the threshold from Settings, which is why
+ * that is configurable rather than derived.
  */
 export function resolveContextLimit(
 	session: Session,
@@ -165,8 +139,7 @@ export function contextUsage(
 	for (const message of active) tokens += estimateMessageTokens(message);
 	// The index of earlier sources is built at send time, so it is in the request
 	// without being in the messages. Left out, the gauge would read low on exactly
-	// the conversations that carry the most of it, and auto-compaction would fire
-	// late: the failure the estimate exists to prevent.
+	// the conversations that carry the most of it.
 	tokens += estimateSourceIndexTokens(active);
 
 	const { limit, limitSource } = resolveContextLimit(session, threshold, options);
@@ -190,13 +163,7 @@ export function formatTokens(tokens: number): string {
 	return `${Math.round(tokens / 1000)}k`;
 }
 
-/**
- * What a message is called in the report, in eighty characters or fewer.
- *
- * A document's name rather than its text: a message carrying a PDF holds the
- * whole of it in `content`, and quoting the first line of a parsed PDF says
- * nothing about which file it is.
- */
+/** A document's name rather than its text: a message carrying a PDF holds the whole of it in `content`, and its first line says nothing about which file it is. */
 function preview(message: Message): string {
 	if (message.document?.name) return message.document.name;
 	const text = (message.content ?? '').trim().replace(/\s+/g, ' ');
@@ -206,12 +173,9 @@ function preview(message: Message): string {
 /**
  * Freeze what the context holds right now, for `/context`.
  *
- * The totals come from `contextUsage`, the same function the ring in the
- * composer reads, so the two can never report different numbers for the same
- * conversation. What is added here is the breakdown: which of the three parts
- * the weight is in, and which single message carries the most of it, because
- * "why is my context full" almost always has one answer and it is usually a file
- * somebody pasted.
+ * The totals come from `contextUsage`, the same function the ring reads, so the
+ * two can never disagree. What is added is the breakdown, and which single
+ * message carries the most: "why is my context full" usually has one answer.
  */
 export function contextSnapshot(session: Session, threshold: number): ContextNote {
 	const usage = contextUsage(session, threshold);
@@ -221,7 +185,7 @@ export function contextSnapshot(session: Session, threshold: number): ContextNot
 	const sourceTokens = estimateSourceIndexTokens(active);
 
 	// Only the part paid on every message: the profile and one line per note. A
-	// note's body is paid when it is opened, and is nobody's standing cost.
+	// note's body is paid when it is opened.
 	const remembered = session.personaId
 		? get(personaMemoryStore).find((memory) => memory.id === session.personaId)
 		: undefined;

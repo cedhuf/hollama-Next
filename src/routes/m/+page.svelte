@@ -19,63 +19,29 @@
 	import Orb from './Orb.svelte';
 
 	/**
-	 * The first screen.
+	 * The first screen: four bands, in the order somebody actually asks them. Who
+	 * is this, hello, what can I start, what was I doing.
 	 *
-	 * Four bands, each answering a different question, in the order somebody
-	 * actually asks them: who is this, hello, what can I start, and what was I
-	 * doing. The hero is the only thing on the screen that carries the accent, and
-	 * it carries it because it is the one thing this interface exists for.
-	 *
-	 * The greeting does not scroll away behind an image. This is an app people open
-	 * forty times a day, and a screen that spends its top third saying hello wastes
+	 * The greeting does not scroll away behind an image: this is an app people open
+	 * forty times a day, and a screen spending its top third saying hello wastes
 	 * their time from the second visit onwards.
 	 */
 	const firstName = $derived($settingsStore.profileFirstName.trim());
 
-	/**
-	 * The card's line, rolled once when the screen is built.
-	 *
-	 * Not derived. A reactive expression would re-roll on every update the page
-	 * makes around it, and the line would flicker between phrases while somebody
-	 * read it. Once per arrival is also the right rhythm for a joke: it is new when
-	 * you come back, and it holds still while you are here.
-	 */
+	/** Not derived: a reactive expression would re-roll on every update around it, and the line would flicker while somebody read it. */
 	const line = heroLine($locale);
 
-	/**
-	 * The last few, personas excluded.
-	 *
-	 * A persona's conversation is reachable from the persona itself, one row up, and
-	 * showing it here as well listed the same thing twice under two different names:
-	 * once as somebody you talk to and once as a chat with a generated title. The
-	 * list tab still has everything, which is what a complete list is for.
-	 */
+	/** A persona's conversation is reachable from the persona itself, one row up, so showing it here listed the same thing twice under two names. */
 	const recent = $derived(($sessionsStore ?? []).filter((s) => !s.personaId).slice(0, 4));
 
-	/**
-	 * Everybody there is to talk to.
-	 *
-	 * All of them, not only the ones already spoken to. `conversedPersonas` answers a
-	 * different question, the one the sidebar asks, and here it would hide every
-	 * persona somebody has just written until they had found another way to start.
-	 */
+	/** All of them, not only the ones already spoken to: otherwise a persona somebody has just written is hidden until they find another way to start. */
 	const personas = $derived($personasStore ?? []);
 
+	/** `launchPersona` reopens the conversation this persona has, or makes one with their prompt, greeting and model, so the voice screen is handed an id rather than talking into the air. */
 	/**
-	 * Straight into the voice screen, carrying who is being talked to.
-	 *
-	 * `launchPersona` reopens the conversation this persona already has, or makes one
-	 * with their prompt, their greeting and their model. Either way the voice screen
-	 * is handed an id rather than making a blank one, which is the whole difference
-	 * between talking to somebody and talking into the air.
-	 */
-	/**
-	 * Whether the row of faces continues past an edge, and which one.
-	 *
-	 * Only ever answered by measuring, because the answer depends on the number of
-	 * personas, the width of the phone and where the row has already been pushed to.
-	 * Anything drawn from a guess would be a permanent hint on a row of three faces
-	 * that fits, which is the version of this that says nothing.
+	 * Whether the row of faces continues past an edge, and which one. Only ever
+	 * answered by measuring: a guess would be a permanent hint on a row of three
+	 * faces that fits.
 	 */
 	let row = $state<HTMLDivElement | null>(null);
 	let more = $state<'none' | 'left' | 'right' | 'both'>('none');
@@ -100,15 +66,14 @@
 
 	$effect(() => {
 		// Re-measured when the row's contents change: a persona added or removed
-		// changes whether there is anything past the edge, and an empty row has no
-		// edge to be past.
+		// changes whether there is anything past the edge.
 		if (personas.length) measure();
 		else more = 'none';
 	});
 
 	$effect(() => {
-		// And when the window does. A phone turned on its side is the one case where
-		// the row stops overflowing without anybody having touched it.
+		// And when the window does: a phone turned on its side is the one case where
+		// the row stops overflowing without anybody touching it.
 		const update = () => measure();
 		window.addEventListener('resize', update);
 		return () => window.removeEventListener('resize', update);
@@ -116,13 +81,12 @@
 
 	async function talkTo(persona: Persona) {
 		const id = await launchPersona(persona, $settingsStore.models ?? []);
-		// The id rides in the query rather than the path: the voice screen is one screen
-		// whichever conversation it is holding, and a route parameter would have made
-		// it two. In the URL rather than in a store so a reload lands back on the same
-		// conversation instead of a blank one.
+		// The id rides in the query rather than the path: the voice screen is one
+		// screen whichever conversation it holds. In the URL rather than in a store, so
+		// a reload lands back on the same conversation.
 		//
-		// The rule below is watching for unresolved paths, and this path is resolved.
-		// `resolve` has nowhere to put a query, which is the whole of the mismatch.
+		// The rule below watches for unresolved paths, and this one is resolved;
+		// `resolve` has nowhere to put a query.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		await goto(`${resolve('/m/voice')}?session=${encodeURIComponent(id)}`);
 	}
@@ -130,13 +94,11 @@
 
 <Head title={APP_NAME} />
 
-<!-- The foot clears the floating bar: it is fixed, so anything under it would
-     never be reachable. -->
+<!-- The foot clears the floating bar, which is fixed. -->
 <div class="flex flex-col gap-5 px-5 pt-4 pb-32">
 	<!-- The two things a phone reaches for from a home screen that is not a list:
-	     finding one conversation among many, and the account. Circular and in the
-	     same glass as the bar at the foot, so the screen is bracketed by one
-	     material. -->
+	     finding one conversation, and the account. Circular and in the same glass as
+	     the bar at the foot, so the screen is bracketed by one material. -->
 	<header class="flex items-center gap-2.5">
 		<Logo class="h-7 w-7" />
 		<span class="text-active flex-1 text-base font-semibold tracking-tight">{APP_NAME}</span>
@@ -167,8 +129,7 @@
 	</div>
 
 	<!-- The one card in the accent, because talking is what this interface is for.
-	     The orb is the same body the voice screen fills the display with, small: a
-	     card that shows what it opens rather than describing it. -->
+	     The orb is the body the voice screen fills the display with, small. -->
 	<button
 		type="button"
 		onclick={() => goto(resolve('/m/voice'))}
@@ -187,24 +148,17 @@
 			</span>
 		</div>
 
-		<!-- A light behind it, and only here. On the voice screen the orb fills the
-		     display and needs no help; on a card among other cards, at the app's usual
-		     restraint, it read as something switched off rather than as the one thing
-		     on the page meant to be pressed.
-
-		     Behind rather than brighter, deliberately: turning the orb itself up would
-		     have made it a different object on this page from the one it is on the
-		     next, where the whole point is that they are the same body. -->
+		<!-- A light behind it, and only here: on the voice screen the orb fills the
+		     display and needs no help, while on a card among cards it read as something
+		     switched off. Behind rather than brighter, so it stays the same object as on
+		     the next screen. -->
 		<span class="relative flex shrink-0 items-center justify-center">
 			<span class="halo" aria-hidden="true"></span>
-			<!-- In the accent, which it was quietly not: without a colour of its own the
-			     canvas reads back whatever the card's text colour is, and drew itself in
-			     grey.
+			<!-- In the accent, which it quietly was not: with no colour of its own the
+			     canvas reads back the card's text colour and drew itself grey.
 
-			     The rim is halved rather than removed. At nothing the shape had no
-			     boundary at all and dissolved into the card, which reads as a blur
-			     nobody meant rather than as light; at full it is a circle drawn round a
-			     disc. Half of it gives an edge you can find without one you can trace. -->
+			     The rim is halved rather than removed. At nothing the shape dissolved into
+			     the card; at full it is a circle drawn round a disc. -->
 			<Orb class="text-accent relative h-32 w-32 shrink-0" edge={0.45} />
 		</span>
 	</button>
@@ -244,13 +198,10 @@
 	</div>
 
 	{#if personas.length}
-		<!-- People rather than destinations, so the row is faces and names and nothing
-		     else. Scrolled sideways because the number of them is somebody's business
-		     and not the layout's: a grid would either wrap into a wall or cap the
-		     library at whatever fits.
-
-		     Straight into the voice screen, because that is what a persona is for here.
-		     Reading their prompt in a text box is the Library's job. -->
+		<!-- People rather than destinations: faces and names and nothing else. Scrolled
+		     sideways because the number of them is somebody's business and not the
+		     layout's. Straight into the voice screen, since reading their prompt in a
+		     text box is the Library's job. -->
 		<section class="flex flex-col gap-2">
 			<h2 class="text-active text-lg font-semibold tracking-tight">{$LL.mobilePersonas()}</h2>
 
@@ -283,9 +234,8 @@
 
 			<div class="flex flex-col gap-2">
 				{#each recent as session (session.id)}
-					<!-- One line, no border, no date. A home screen row has one job, which
-					     is to be recognised and tapped; the second line and the frame around
-					     it were weight for nothing. The list tab carries the detail. -->
+					<!-- One line, no border, no date: a home screen row has to be recognised and
+					     tapped, and the list tab carries the detail. -->
 					<a
 						href={resolve('/m/sessions/[id]', { id: session.id })}
 						class="bg-shade-0/70 flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors active:opacity-70"
@@ -305,18 +255,12 @@
 <style lang="postcss">
 	/*
 	 * The row of faces scrolls, and says so by dissolving rather than by adding
-	 * anything.
+	 * anything. No scrollbar: a bar under a row of portraits is furniture. A face
+	 * cut off by the screen edge is ambiguous, since the screen edge cuts
+	 * everything; a face dissolving before it reaches the edge is not.
 	 *
-	 * No scrollbar: a bar under a row of portraits is a piece of furniture. What
-	 * replaces it is the row fading out on whichever side it continues on, which is
-	 * the same thing the transcript on the voice screen does with what has scrolled
-	 * off the top, and the same thing a phone does everywhere else. A face cut off
-	 * by the screen edge is ambiguous, since the screen edge cuts everything; a face
-	 * dissolving before it reaches the edge is not.
-	 *
-	 * Both ends, separately, and neither when the row fits. `data-more` is measured
-	 * rather than assumed, so a library of three personas gets no hint at all and a
-	 * library of thirty loses the hint on the side it has run out of.
+	 * Both ends, separately, and neither when the row fits. `data-more` is measured,
+	 * so three personas get no hint at all.
 	 */
 	.faces {
 		scrollbar-width: none;
@@ -325,16 +269,11 @@
 	/*
 	 * Four faces and two thirds of a fifth, whatever the phone is.
 	 *
-	 * A fixed width was the reason the fade said nothing: at 5rem a face, exactly
-	 * four of them landed on a common screen and the fifth started past the edge, so
-	 * the row ended on a gap and there was nothing there to dissolve. Nothing was cut
-	 * off, so nothing looked cut off, and the hint only appeared once you had already
-	 * done the thing it was meant to suggest.
-	 *
-	 * Measured against the row instead: 4.5 shares of what is left after the gaps
-	 * between them, which puts a face half past the edge at every width rather than
-	 * at the ones somebody happened to test. The floor is for the narrowest phones,
-	 * where that share would be smaller than the portrait it has to hold.
+	 * A fixed width was why the fade said nothing: at 5rem a face, exactly four
+	 * landed on a common screen and the row ended on a gap, so there was nothing to
+	 * dissolve. Measured against the row instead: 4.5 shares of what is left after
+	 * the gaps, which puts a face half past the edge at every width. The floor is
+	 * for the narrowest phones.
 	 */
 	.face {
 		width: max(4rem, calc((100% - 3rem) / 4.5));
@@ -344,9 +283,8 @@
 		display: none;
 	}
 
-	/* Half a portrait, which is about what shows of the face past the edge: the one
-	   that is only partly there is the one that dissolves, and the four before it
-	   stay solid. Wide enough to read as a dissolve rather than as a shadow. */
+	/* Half a portrait, which is about what shows past the edge: the one that is only
+	   partly there dissolves, and the four before it stay solid. */
 	.faces[data-more='right'] {
 		mask-image: linear-gradient(to right, black calc(100% - 2.5rem), transparent);
 		-webkit-mask-image: linear-gradient(to right, black calc(100% - 2.5rem), transparent);
@@ -374,12 +312,10 @@
 		);
 	}
 
-	/* The same glass as the bar at the foot of the screen, and it now genuinely is:
-	   the two had drifted to different tints, which showed on this very screen,
-	   these buttons sitting a shade denser than the bar directly under them.
-
-	   Still local to this file, and that is now the weak part. Four screens repeat
-	   this block, which is what let them diverge in the first place. */
+	/* The same glass as the bar at the foot, and it now genuinely is: the two had
+	   drifted to different tints, these buttons sitting a shade denser than the bar
+	   under them. Still local to this file, which is what let them diverge: four
+	   screens repeat this block. */
 	.glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);
 		backdrop-filter: blur(32px) saturate(190%);
@@ -397,7 +333,7 @@
 	}
 
 	/* A wash rather than a border, and it leans: the one surface on the screen that
-	   is not a bordered box, so the eye lands on it without anything shouting. */
+	   is not a bordered box. */
 	.hero {
 		border: 1px solid color-mix(in srgb, var(--color-accent) 24%, transparent);
 		background: linear-gradient(
@@ -413,23 +349,13 @@
 	 *
 	 * Its own element behind the shape rather than a change to the shape, so the orb
 	 * is the same object here as on the voice screen. The card already clips, so it
-	 * is free to reach the edges and be cut by the rounding, which is what makes it
-	 * read as light in the card rather than as a circle drawn on it.
+	 * reaches the edges and is cut by the rounding, which makes it read as light in
+	 * the card rather than a circle drawn on it.
 	 *
-	 * One colour throughout. It swells and dims, it never shifts hue: the orb's own
-	 * colour is what says which state the app is in, and a halo that changed with it
-	 * would be a second voice saying the same thing less clearly.
-	 *
-	 * Brightest at the middle and fading the whole way out, with no boundary
-	 * anywhere. The orb is translucent and drawn in the same accent, so the light
-	 * passes through it and the two read as one luminous mass rather than as a shape
-	 * with a lamp behind it.
-	 *
-	 * An earlier version was hollow, to keep the light off the orb's inside. That was
-	 * solving the wrong problem: the orb was drawing itself grey, because it had no
-	 * colour of its own and inherited the card's text colour, and pink light behind a
-	 * grey disc is what looked wrong. With both in the accent there is nothing to
-	 * protect it from, and the hole was the thing making a ring of it.
+	 * One colour throughout: it swells and dims, never shifts hue, since the orb's
+	 * own colour is what says which state the app is in. Brightest at the middle
+	 * and fading the whole way out, so the light passes through the translucent orb
+	 * and the two read as one luminous mass.
 	 */
 	.halo {
 		position: absolute;
@@ -444,9 +370,8 @@
 			color-mix(in srgb, var(--color-accent) 9%, transparent) 66%,
 			transparent 88%
 		);
-		/* Held back from the centre and blurred less than it was. The light is meant to
-		   surround the shape, and a bright core washed straight over it: past a point,
-		   more glow stops adding presence and starts removing the object. */
+		/* Held back from the centre and blurred less: past a point, more glow stops
+	   adding presence and starts removing the object. */
 		filter: blur(9px);
 		/*
 		 * Two motions on two properties, at lengths that do not divide into each
@@ -459,8 +384,8 @@
 			halo-fade 9.3s ease-in-out infinite alternate;
 	}
 
-	/* Swelling and dimming together, on two clocks, so the light never settles. The
-	   floor is high: this is the brightest thing on the page and it is meant to be. */
+	/* Two clocks, so the light never settles. The floor is high: this is the
+	   brightest thing on the page and is meant to be. */
 	@keyframes halo-swell {
 		from {
 			scale: 0.94;

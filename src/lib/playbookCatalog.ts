@@ -17,17 +17,12 @@ import { catalogBase } from '$lib/store';
 /**
  * The store of playbooks you can install, which is not part of the application.
  *
- * The persona catalogue's twin, and it works the same way for the same reasons:
- * nothing ships inside the image, the listing is cached so only a very first
- * launch depends on the network, and in server mode the instance does the
- * fetching so one machine holds the listing for everyone.
+ * The persona catalogue's twin, working the same way for the same reasons.
  *
- * Not folded into one client for both. They agree on the mechanism and disagree
- * on everything the mechanism carries (what a row holds, what installing means,
- * what "you have edited this" is computed from) and a single client taking a
- * schema, a parser, a store and an installer as parameters would be the same
- * code with the differences moved into its arguments. What is genuinely shared
- * is the hash and the server proxy, and both of those are imported.
+ * Not folded into one client: they agree on the mechanism and disagree on
+ * everything it carries, so a single client taking a schema, a parser, a store
+ * and an installer as parameters would be the same code with the differences
+ * moved into its arguments. What is genuinely shared is imported.
  */
 
 const CACHE_KEY = `${LOCAL_STORAGE_PREFIX}-playbook-catalog`;
@@ -69,14 +64,7 @@ function writeCache(catalog: PlaybookCatalog): void {
 	}
 }
 
-/**
- * Fill the browser, from the cache first and then from the network.
- *
- * The cached listing shows immediately and is marked stale, so opening the page
- * never waits on a request. A failed fetch leaves it standing rather than
- * replacing it with an error, because a slightly old listing is far more useful
- * than none.
- */
+/** The cached listing shows immediately and is marked stale, so the page never waits on a request. A failed fetch leaves it standing: a slightly old listing beats none. */
 export async function loadPlaybookCatalog(force = false): Promise<void> {
 	const current = get(state);
 	if (!force && current.status === 'ready' && !current.stale) return;
@@ -87,9 +75,8 @@ export async function loadPlaybookCatalog(force = false): Promise<void> {
 	else state.set({ status: 'loading' });
 
 	try {
-		// `fresh` pierces the instance's own hold on the listing. Without it,
-		// pressing Refresh did nothing for up to fifteen minutes and there was no
-		// way to tell that from the store simply not having changed.
+		// `fresh` pierces the instance's own hold on the listing: without it, pressing
+		// Refresh did nothing for up to fifteen minutes and nothing said so.
 		const response = await fetch(`${base()}index.json${force ? '?fresh=1' : ''}`, {
 			headers: { accept: 'application/json' }
 		});
@@ -114,14 +101,7 @@ async function sha256(bytes: ArrayBuffer): Promise<string | undefined> {
 	return `sha256-${btoa(String.fromCharCode(...new Uint8Array(digest)))}`;
 }
 
-/**
- * Fetch one playbook whole, at the moment it is being installed.
- *
- * The listing's `integrity` is checked against the bytes as they arrived. A
- * mismatch is refused: the two came from the same place, and disagreeing means
- * one of them is stale, which is exactly the case where carrying on installs
- * something nobody published.
- */
+/** The listing's `integrity` is checked against the bytes as they arrived. A mismatch is refused: the two came from the same place, so disagreeing means one is stale. */
 export async function fetchPlaybookBundle(entry: PlaybookCatalogEntry): Promise<PlaybookBundle> {
 	const response = await fetch(`${base()}${entry.path}`, {
 		headers: { accept: 'application/json' }
@@ -151,13 +131,10 @@ function fromBundle(bundle: PlaybookBundle, base: Playbook): Playbook {
 }
 
 /**
- * Install a bundle as an editable playbook of your own.
- *
- * A copy, not a link. It lands in the library with a fresh id and is yours from
- * that moment: editing it is editing your copy, and the store cannot reach into
- * it afterwards. What is recorded is where it came from and what it said on the
- * way in, so "you have edited this" and "the store has moved on" can be told
- * apart later.
+ * A copy, not a link: it lands with a fresh id and is yours from that moment,
+ * and the store cannot reach into it. What is recorded is where it came from and
+ * what it said on the way in, so "you edited this" and "the store moved on" can
+ * be told apart.
  */
 export function installPlaybookBundle(
 	bundle: PlaybookBundle,
@@ -186,14 +163,7 @@ export function applyBundleToPlaybook(
 	savePlaybook(updated);
 }
 
-/**
- * What an installed copy is, against the listing: untouched, edited, or behind.
- *
- * Two comparisons rather than one, because they answer different questions.
- * Against the playbook as it stands now: have *you* changed it. Against the
- * store's current listing: has the *store* changed it. Without the second, a new
- * revision upstream would make an untouched copy look edited.
- */
+/** Two comparisons: against the playbook as it stands, have *you* changed it; against the listing, has the *store*. Without the second, a new revision upstream makes an untouched copy look edited. */
 export type PlaybookState = 'own' | 'clean' | 'edited' | 'outdated' | 'edited-outdated';
 
 export function playbookState(playbook: Playbook, published?: string): PlaybookState {

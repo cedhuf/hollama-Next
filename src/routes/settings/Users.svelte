@@ -19,21 +19,14 @@
 	/**
 	 * The accounts on this instance.
 	 *
-	 * Its own tab rather than a section at the bottom of Admin. Admin is about how
-	 * the instance behaves (what is shared, what is locked, what users may change
-	 *) and every control there is a policy. This is a list of people, with two
-	 * actions that are neither of those: adding somebody, and removing them along
-	 * with everything they wrote. It was the one thing on that page you scrolled
-	 * to rather than read.
-	 *
-	 * Loads on mount rather than with the rest of the admin configuration: nothing
-	 * here needs it, and a tab nobody opened is a request nobody made.
+	 * Its own tab rather than a section of Admin: every control there is a policy,
+	 * where this is a list of people with two actions that are neither. Loads on
+	 * mount, since a tab nobody opened is a request nobody made.
 	 */
 	/**
-	 * The row as the endpoint sends it, declared here rather than imported from
-	 * the database module: a type import is erased, but pointing a browser
-	 * component at `server/db` is an invitation for the next edit to reach for
-	 * something that is not.
+	 * The row as the endpoint sends it, declared here rather than imported from the
+	 * database module: a type import is erased, but pointing a browser component at
+	 * `server/db` invites the next edit to reach for something that is not.
 	 */
 	interface UserRow {
 		id: string;
@@ -90,18 +83,11 @@
 		}
 	}
 
-	/**
-	 * Set or clear one account's own allowance.
-	 *
-	 * An empty field means "follow the instance", not "no limit": those are
-	 * different answers, and only one of them keeps following when the instance's
-	 * figure changes.
-	 */
+	/** An empty field means "follow the instance", not "no limit": only one of those keeps following when the instance's figure changes. */
 	async function setLimit(user: UserRow, raw: string) {
 		// A comma is the decimal separator most of Europe types, and a `number` field
-		// reports an empty value for it: typing "0,5" did not set a limit of a half,
-		// it silently put the account back on the instance's. Text field, both
-		// separators read, like every other price in the app.
+		// reports an empty value for it, so "0,5" silently put the account back on the
+		// instance's limit. Text field, both separators read, like every other price.
 		const text = raw.trim().replace(',', '.');
 		const value = text === '' ? null : Number(text);
 		if (value !== null && (!Number.isFinite(value) || value < 0)) return;
@@ -109,14 +95,7 @@
 		await load();
 	}
 
-	/**
-	 * The instance's allowance, and how often it starts again.
-	 *
-	 * Here rather than in Admin, above the accounts it applies to. Admin is
-	 * governance in the abstract; a default allowance is a fact about this list,
-	 * and reading it a screen away from the column it fills in is how a number
-	 * ends up set twice.
-	 */
+	/** Here rather than in Admin, above the accounts it applies to: a default allowance is a fact about this list, and reading it a screen away is how a number ends up set twice. */
 	async function saveInstance() {
 		const text = instanceLimitField.trim().replace(',', '.');
 		const value = text === '' ? 0 : Number(text);
@@ -178,33 +157,28 @@
 
 <SettingsPanel>
 	<SettingsSection title={$LL.users()} description={$LL.usersDescription()}>
-		<!-- Under the heading and above the rows it governs: an allowance is read as
-			     a property of this list, and a screen away from the column it fills in is
-			     how a number ends up set twice. Folded, because most instances never set
-			     one, and what it is set to is on the closed row. -->
+		<!-- Under the heading and above the rows it governs. Folded, because most
+		     instances never set one, and what it is set to is on the closed row. -->
 		<Collapsible
 			title={$LL.credits()}
 			summary={instanceLimit > 0 ? money(instanceLimit) : UNLIMITED}
 			icon={Wallet}
 		>
-			<!-- What the figures are worth, before the fields that set them. Short on
-			     purpose: what somebody needs to know here is that this counts well
-			     enough to catch a runaway, not well enough to bill anyone. -->
+			<!-- What the figures are worth, before the fields that set them: this counts
+			     well enough to catch a runaway, not well enough to bill anyone. -->
 			<p
 				class="border-shade-3 bg-shade-1 text-muted flex items-start gap-1.5 rounded-md border p-2 text-xs"
 			>
 				<Info class="mt-0.5 h-3.5 w-3.5 shrink-0" />
 				{$LL.creditsApproximate()}
 			</p>
-			<!-- The same two controls the per-account panel shows, in the same boxes:
-			     one is the default for everybody, the other is one person's override,
-			     and two layouts for one decision is how they stop matching. -->
+			<!-- The same two controls the per-account panel shows, in the same boxes: two
+			     layouts for one decision is how they stop matching. -->
 			<div class="flex flex-wrap items-end gap-2">
 				<label class="flex min-w-0 flex-1 flex-col gap-1 text-sm">
 					<span class="text-muted">{$LL.creditLimitDefault()}</span>
-					<!-- Empty rather than a zero sitting in the field: "nobody has set one"
-					     and "somebody typed nought" read the same on screen, and only one of
-					     them is what an untouched instance has. -->
+					<!-- Empty rather than a zero: "nobody has set one" and "somebody typed nought"
+					     read the same on screen, and only one is what an untouched instance has. -->
 					<input
 						class="settings-field text-right tabular-nums"
 						type="text"
@@ -216,10 +190,9 @@
 					/>
 				</label>
 
-				<!-- Not a <label>: it forwards its click to the control it labels, which
-				     on a menu trigger is a second click: the menu opens and shuts in the
-				     same gesture. Sized for the longest option, so choosing a short one
-				     does not move everything beside it. -->
+				<!-- Not a <label>: it forwards its click to the control it labels, which on a
+				     menu trigger opens and shuts the menu in one gesture. Sized for the longest
+				     option, so a short one does not move everything beside it. -->
 				<div class="flex flex-col gap-1 text-sm">
 					<span class="text-muted">{$LL.creditPeriod()}</span>
 					<div class="w-52">
@@ -239,9 +212,8 @@
 			<p class="text-muted text-xs">{$LL.creditsHelp()}</p>
 
 			{#if unpriced.length}
-				<!-- Not a nicety. While a limit is in force these models are refused, and
-				     the reason is here rather than in a log the person who set the limit
-				     will never read. -->
+				<!-- Not a nicety: while a limit is in force these models are refused, and the
+				     reason belongs here rather than in a log nobody reads. -->
 				<div class="border-warning/40 bg-warning/10 flex flex-col gap-1 rounded-lg border p-3">
 					<span class="text-active flex items-center gap-1.5 text-sm font-medium">
 						<TriangleAlert class="h-4 w-4 shrink-0" />
@@ -269,28 +241,24 @@
 						{user.email}
 						<span class="text-muted text-xs">({user.role})</span>
 					</span>
-					<!-- Quiet and to the right of the row, before the one control that acts on
-				     it: an administrator scanning the list is looking for who is still
-				     around, not reading a report. Blank rather than a guess for an account
-				     nobody has opened since this existed. -->
+					<!-- Quiet and to the right: an administrator scanning the list is looking for
+					     who is still around. Blank rather than a guess for an account nobody has
+					     opened since this existed. -->
 					<span class="text-muted ml-auto shrink-0 text-[11px] tabular-nums">
 						{user.last_seen_at ? lastSeen(user.last_seen_at) : $LL.lastSeenNever()}
 					</span>
 					<ButtonConfirm onConfirm={() => removeUser(user.id)} label={$LL.deleteUserConfirm()} />
 				</div>
 
-				<!-- What they have spent this period, and what they may. An empty field
-				     follows the instance; a figure overrides it; zero is no limit. -->
-				<!-- What this account has spent, and what it is allowed. The allowance
-				     itself is folded away: most accounts follow the instance, and a row of
-				     controls on every one of them is a list nobody can read down. -->
+				<!-- What this account has spent, and what it is allowed. An empty field follows
+				     the instance, a figure overrides it, zero is no limit. The allowance is
+				     folded away: most accounts follow the instance. -->
 				<div class="text-muted flex items-center gap-2 text-xs">
 					<span class="tabular-nums">
 						{$LL.usageSpent({ spent: money(user.spend.cost) })}
 					</span>
-					<!-- The ceiling as a figure, or the sign for not having one. Zero is
-					     what "no limit" is stored as, and printing a bare 0 next to a spend
-					     reads as an allowance of nothing, which is the opposite. -->
+					<!-- The ceiling as a figure, or the sign for not having one: zero is how "no
+					     limit" is stored, and a bare 0 beside a spend reads as the opposite. -->
 					<span class="opacity-60">
 						{user.effectiveLimit > 0 ? money(user.effectiveLimit) : UNLIMITED}
 						· {periodLabel(user.effectivePeriod)}
@@ -316,17 +284,14 @@
 				</div>
 
 				{#if opened.has(user.id)}
-					<!-- The same two controls as the instance's, because it is the same
-					     decision made for one person. Empty and "follow the instance" are
-					     what an account has until somebody decides otherwise, and the note
-					     says which one is winning. -->
+					<!-- The same two controls as the instance's, being the same decision made for
+					     one person. The note says which one is winning. -->
 					<div
 						class="border-shade-3 bg-shade-1 flex flex-col gap-2 rounded-md border p-2"
 						transition:slide={{ duration: 160, easing: quadInOut }}
 					>
-						<!-- Labels beside their control rather than above it: this panel opens
-						     inside a row of a list, and two stacked captions push every account
-						     under it down a line for nothing. -->
+						<!-- Labels beside their control rather than above: this panel opens inside a
+						     row, and two stacked captions push every account under it down a line. -->
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-2">
 							<label class="flex min-w-0 flex-1 items-center gap-2 text-xs">
 								<span class="text-muted shrink-0">{$LL.creditLimit()}</span>
@@ -341,9 +306,8 @@
 								/>
 							</label>
 
-							<!-- Not a <label>: it forwards its click to the control it labels,
-							     which on a menu trigger is a second click, so the menu opens and
-							     shuts in the same gesture. -->
+							<!-- Not a <label>: on a menu trigger the forwarded click opens and shuts the
+							     menu in one gesture. -->
 							<div class="flex shrink-0 items-center gap-2 text-xs">
 								<span class="text-muted shrink-0">{$LL.creditPeriod()}</span>
 								<div class="w-52">

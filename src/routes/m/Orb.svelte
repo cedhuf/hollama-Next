@@ -6,76 +6,54 @@
 	/**
 	 * The app's voice, given a body.
 	 *
-	 * Drawn rather than declared, and the reason is the one thing the CSS version
-	 * could never do. Three blurred discs on `@keyframes` orbits look alive, but
-	 * they are alive on a timer: they cannot punch on a consonant, because nothing
-	 * about them has ever heard the sound. This one is handed a reading every frame
-	 * and shaped by it.
+	 * Drawn rather than declared, because three blurred discs on `@keyframes`
+	 * orbits are alive on a timer: they cannot punch on a consonant, having never
+	 * heard the sound. This one is handed a reading every frame.
 	 *
-	 * A closed curve in polar coordinates, not a ring of bars. Bars are the shape
-	 * every audio visualiser has had since the nineties, and they read as equipment.
-	 * A body whose outline swells where the energy is reads as something speaking.
+	 * A closed curve in polar coordinates, not a ring of bars. Bars read as
+	 * equipment; a body whose outline swells where the energy is reads as something
+	 * speaking.
 	 *
-	 * Two layers, and the contrast between them is the whole effect. A soft filled
-	 * core carries the slow envelope, so the shape has mass. A crisp rim on top
-	 * carries the spectrum with a fast attack, so it has edge. Softness alone is
-	 * fog; an edge alone is a diagram.
+	 * Two layers, and the contrast between them is the effect. A soft filled core
+	 * carries the slow envelope, so the shape has mass; a crisp rim carries the
+	 * spectrum with a fast attack, so it has edge.
 	 */
 	interface Props {
 		/**
-		 * Where the sound is, asked once per frame.
-		 *
-		 * A function rather than a value: this redraws sixty times a second, and
+		 * Where the sound is, asked once per frame. A function rather than a value:
 		 * pushing sixty readings a second through reactive state would wake the whole
-		 * page to animate one canvas. The caller decides which end of the conversation
-		 * it points at.
+		 * page to animate one canvas.
 		 */
 		sample?: () => Reading;
-		/**
-		 * What is happening, for the parts no reading can express.
-		 *
-		 * `thinking` is the one state with no sound at all, and it must not look like
-		 * silence: a shape that goes still while a model is working reads as an app
-		 * that has crashed.
-		 */
+		/** `thinking` is the one state with no sound at all, and it must not look like silence: a shape that goes still while a model works reads as a crash. */
 		phase?: 'idle' | 'listening' | 'thinking' | 'speaking';
 		/**
-		 * How much of the crisp outline to draw, where one is the full rim.
+		 * How much of the crisp outline to draw, one being the full rim.
 		 *
-		 * The rim is what gives the shape an edge, and on a screen it fills that is
-		 * exactly right: a soft body with a sharp line on it reads as something with
-		 * a surface. Small, on a card, the same line reads as a circle drawn round a
-		 * disc, and two hard curves in ninety pixels is a diagram.
-		 *
-		 * Turned right down it becomes pure light with no boundary anywhere, which is
-		 * what a small orb wants and what a large one would look shapeless with.
+		 * On a screen it fills, a soft body with a sharp line reads as a surface. Small,
+		 * on a card, the same line reads as a circle drawn round a disc. Turned right
+		 * down it is pure light with no boundary anywhere.
 		 */
 		edge?: number;
 		class?: string;
 		/**
-		 * Anything the caller wants on the element, which in practice is its colour.
-		 *
-		 * The drawing reads `color` back off this element every frame, so a caller
-		 * that wants a different hue sets one here and needs no property of its own.
-		 * That is also what lets a colour be computed rather than named: a state on
-		 * the voice screen turns the accent's hue instead of picking a second token.
+		 * Anything the caller wants on the element, which in practice is its colour:
+		 * the drawing reads `color` back off this element every frame, which is what
+		 * lets a colour be computed rather than named.
 		 */
 		style?: string;
 	}
 
 	// `phase` rather than `state`: a local binding by that name makes every `$state`
-	// in the file read as a store subscription, which the compiler rightly refuses.
+	// in the file read as a store subscription, which the compiler refuses.
 	let { sample, phase = 'idle', edge = 1, class: className = '', style = '' }: Props = $props();
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 
 	/**
-	 * How fast a band rises and how slowly it falls.
-	 *
-	 * Not symmetrical, and that asymmetry is the entire brief. Rising instantly is
-	 * what makes a plosive land as a hit rather than as a swell; falling slowly is
-	 * what stops the shape flickering between syllables. Matched attack and release
-	 * gives you a shape that vibrates, which reads as noise rather than as speech.
+	 * How fast a band rises and how slowly it falls. Rising instantly is what makes
+	 * a plosive land as a hit; falling slowly is what stops the shape flickering
+	 * between syllables. Matched attack and release vibrates, which reads as noise.
 	 */
 	const ATTACK = 1;
 	const RELEASE_SPEAKING = 0.86;
@@ -99,13 +77,7 @@
 		let width = 0;
 		let height = 0;
 
-		/**
-		 * Redrawn at the device's own resolution.
-		 *
-		 * A canvas sized in CSS pixels on a phone is a canvas at a third of the
-		 * resolution of everything around it, and on a shape made of curves that is
-		 * immediately visible.
-		 */
+		/** A canvas sized in CSS pixels on a phone is at a third of the resolution of everything around it, which on curves is immediately visible. */
 		const resize = () => {
 			const ratio = Math.min(window.devicePixelRatio || 1, 3);
 			const box = element.getBoundingClientRect();
@@ -121,13 +93,10 @@
 		resize();
 
 		/**
-		 * The colour, read off the element rather than passed in.
-		 *
-		 * A canvas cannot use a custom property, so the value has to be resolved. The
-		 * declaration is live, so it is fetched once and read every frame: the theme
-		 * changing and the caller changing the element's own colour both arrive with
-		 * no plumbing at all, which is what lets the page say "this conversation is
-		 * engaged" by swapping one class.
+		 * A canvas cannot use a custom property, so the colour is resolved off the
+		 * element. The declaration is live, so it is fetched once and read every frame:
+		 * a theme change and a caller changing the element's colour both arrive with no
+		 * plumbing.
 		 */
 		const style = getComputedStyle(element);
 
@@ -140,8 +109,8 @@
 			const quiet = calm.matches;
 			const speaking = phase === 'speaking';
 
-			// Fast up, slow down, and slower down while listening: a room's level
-			// wanders, and a body that chased it would fidget.
+			// Fast up, slow down, and slower down while listening: a room's level wanders,
+			// and a body that chased it would fidget.
 			const release = speaking ? RELEASE_SPEAKING : RELEASE_LISTENING;
 			for (let band = 0; band < BAND_COUNT; band++) {
 				const value = reading.bands[band] ?? 0;
@@ -149,8 +118,7 @@
 			}
 			envelope = reading.level > envelope ? reading.level : envelope * 0.94;
 
-			// The idle drift, which is what the CSS version was made of and is still
-			// worth keeping: an outline that never quite repeats is what makes a shape
+			// The idle drift: an outline that never quite repeats is what makes a shape
 			// read as alive rather than as a graphic.
 			turn = quiet ? 0 : now / 1000;
 
@@ -160,13 +128,7 @@
 			const cy = height / 2;
 			const base = Math.min(width, height) * 0.32;
 
-			/**
-			 * The radius at one angle.
-			 *
-			 * Three slow harmonics for the body, so it is never a circle, plus the
-			 * spectrum wrapped twice around: once round would put the loud low bands
-			 * all on one side and leave the shape lopsided for the whole sentence.
-			 */
+			/** Three slow harmonics for the body, so it is never a circle, plus the spectrum wrapped twice around: once would put the loud low bands all on one side. */
 			const radius = (angle: number, reach: number) => {
 				const drift =
 					Math.sin(angle * 2 + turn * 0.7) * 0.045 +
@@ -177,8 +139,8 @@
 				const low = held[Math.floor(slot) % BAND_COUNT];
 				const high = held[(Math.floor(slot) + 1) % BAND_COUNT];
 				const between = slot - Math.floor(slot);
-				// Cosine rather than linear, so bands meet smoothly and the outline has
-				// no corners where two of them join.
+				// Cosine rather than linear, so bands meet smoothly and the outline has no
+				// corners where two of them join.
 				const spectrum = low + ((high - low) * (1 - Math.cos(between * Math.PI))) / 2;
 
 				return base * (1 + drift + envelope * 0.12 + spectrum * reach);
@@ -198,11 +160,9 @@
 				context.closePath();
 			};
 
-			// The body: soft, wide, and reaching less than the rim, so the edge always
-			// runs outside the mass rather than cutting through it.
-			// Named for what it is. A property called `glow` once shadowed this and
-			// turned every alpha into NaN, which drew the orb at full opacity
-			// everywhere and looked like a colour change.
+			// The body: soft, wide, and reaching less than the rim, so the edge runs outside
+			// the mass rather than through it. Named for what it is: a property called
+			// `glow` once shadowed this and turned every alpha into NaN.
 			const body = context.createRadialGradient(
 				cx - base * 0.3,
 				cy - base * 0.3,
@@ -232,17 +192,16 @@
 				context.shadowBlur = speaking ? 18 : 8;
 				context.shadowColor = accent;
 			}
-			// Skipped outright rather than stroked at nothing: a hairline at two per
-			// cent alpha is still a hairline on a high-density screen.
+			// Skipped outright rather than stroked at nothing: a hairline at two per cent
+			// alpha is still a hairline on a high-density screen.
 			if (edge > 0.02) {
 				trace(speaking ? 0.42 : 0.18);
 				context.stroke();
 			}
 			context.restore();
 
-			// Thinking has no sound to read, so it gets the one thing the others do not:
-			// a mark going round. Deliberately unlike both, because a shape that merely
-			// went quiet would read as an app that had stopped.
+			// Thinking has no sound to read, so it gets a mark going round: a shape that
+			// merely went quiet would read as an app that had stopped.
 			if (phase === 'thinking' && !quiet) {
 				const angle = now / 420;
 				context.save();
@@ -270,7 +229,6 @@
 	});
 </script>
 
-<!-- The text colour is not decoration here, it is the input: the drawing reads it
-     back off this element every frame. That is how the orb follows the theme, and
-     how a caller says "engaged" by handing it a different colour class. -->
+<!-- The text colour is the input, not decoration: the drawing reads it back off
+     this element every frame. -->
 <canvas bind:this={canvas} class="block {className}" {style} aria-hidden="true"></canvas>

@@ -49,11 +49,7 @@
 	/** Knowledge in no collection, which is where everything starts out. */
 	const looseKnowledge = $derived($knowledgeStore.filter((k) => !k.collectionId));
 
-	/**
-	 * Naming a collection happens where the collection will appear, not in a
-	 * dialog stacked on the page: the card turns into a field, you type, you press
-	 * Enter. Creating and renaming share it, since they are the same act.
-	 */
+	/** Naming happens where the collection will appear, not in a dialog: the card turns into a field. Creating and renaming share it, being the same act. */
 	let namingNew = $state(false);
 	let renamingId = $state<string | null>(null);
 	let draftName = $state('');
@@ -112,17 +108,7 @@
 		deleteCollection(id);
 	}
 
-	/**
-	 * The listing, for the badges on your own cards.
-	 *
-	 * Without it a persona installed before the fingerprint existed has nothing to
-	 * be compared against and is reported as untouched, whatever you have done to
-	 * it. With it the comparison falls back to what the store publishes today,
-	 * which answers the question for every copy, however old.
-	 *
-	 * Cached after the first fetch, and this page is about personas, so asking for
-	 * it here is not a request anyone is paying for twice.
-	 */
+	/** Without it, a persona installed before the fingerprint existed has nothing to compare against and is reported as untouched. Cached after the first fetch. */
 	$effect(() => {
 		void loadCatalog();
 	});
@@ -152,13 +138,7 @@
 
 	let importInput = $state<HTMLInputElement | undefined>();
 	let storeOpen = $state(false);
-	/**
-	 * Which shelf the store opens on.
-	 *
-	 * The door is where you are: the button in the Personas section opens the
-	 * store on the personas, the one in the Playbooks section on the playbooks,
-	 * and the one at the top of the page on everything. Same window, three ways in.
-	 */
+	/** The door is where you are: each section's button opens the store on its own shelf, the one at the top on everything. Same window, three ways in. */
 	let storeFamily = $state<'' | 'personas' | 'playbooks'>('');
 
 	function openStore(family: '' | 'personas' | 'playbooks' = '') {
@@ -183,13 +163,7 @@
 		goto(resolve('/sessions/[id]', { id }));
 	}
 
-	/**
-	 * One Import, which reads the files rather than asking what is in them.
-	 *
-	 * The reading itself is `$lib/libraryActions`, shared with the phone interface's
-	 * Library: both of them accept the same files and say the same thing about what
-	 * arrived, and the day one learns a new format the other has already learnt it.
-	 */
+	/** The reading is `$lib/libraryActions`, shared with the phone interface's Library, so the day one learns a new format the other has already learnt it. */
 	async function onImport(event: Event) {
 		const input = event.target as HTMLInputElement;
 		const files = [...(input.files ?? [])];
@@ -205,11 +179,7 @@
 		playbookModalOpen = true;
 	}
 
-	/**
-	 * A new playbook is saved as soon as it is named, like a persona: the modal
-	 * writes through on every keystroke, so there is no draft to lose and no Save
-	 * button to forget.
-	 */
+	/** Saved as soon as it is named, like a persona: the modal writes through on every keystroke, so there is no draft to lose. */
 	function createPlaybook() {
 		editingPlaybook = newPlaybook();
 		playbookModalOpen = true;
@@ -232,8 +202,8 @@
 
 <Head title={$LL.library()} />
 
-<!-- Frameless like the sessions landing, and for the same reason it still carries a
-     surface: see the comment there. -->
+<!-- Frameless like the sessions landing, and carrying a surface for the same
+     reason. -->
 <div
 	class="app-panel surface-pane flex h-full flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
 >
@@ -247,9 +217,9 @@
 				</div>
 
 				<div class="flex shrink-0 items-center gap-2">
-					<!-- One store, at the top of the page, because there is one store. The
-					     small icon on each create tile opens the same window on that shelf,
-					     which is where you are when you have just found nothing that suits. -->
+					<!-- One store, at the top of the page. The icon on each create tile opens the
+					     same window on that shelf, which is where you are when you have just found
+					     nothing that suits. -->
 					<button
 						type="button"
 						onclick={() => openStore()}
@@ -273,11 +243,11 @@
 
 			<!-- Personas -->
 			<!-- Each section carries its own turn of the accent, so three grids of
-			     near-identical cards are separable at a glance without a legend. -->
-			<!-- The shortcut in the heading and the one at the end of the grid are both
-			     worth having: the heading is where you look when you arrive knowing what
-			     you want, the tile is where you end up having scrolled and found nothing
-			     that suits. -->
+			     near-identical cards are separable without a legend.
+
+			     The shortcut in the heading and the one at the end of the grid are both
+			     worth having: one is where you look arriving, the other where you end up
+			     having scrolled. -->
 			<div class="mb-3 flex items-baseline justify-between gap-2">
 				<div class="flex items-baseline gap-2">
 					<h2 class="text-active text-sm font-medium">{$LL.personas()}</h2>
@@ -285,11 +255,8 @@
 				</div>
 			</div>
 
-			<!-- Equal rows: a card's height comes from how many lines its tags wrap
-			     onto, so two rows of personas ended up visibly different heights. Only
-			     within a section: the three hold different things and forcing a
-			     knowledge card to the height of a persona card would be padding, not
-			     alignment. -->
+			<!-- Equal rows: a card's height comes from how many lines its tags wrap onto.
+			     Only within a section, since the three hold different things. -->
 			<div
 				class="library-section mb-3 grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"
 				style="--section-turn: 0"
@@ -305,16 +272,12 @@
 						onclick={() => editPersona(persona)}
 					>
 						{#snippet badges()}
-							<!-- What it is now, not where it came from.
-							     "Official" said nothing on a card in your own library: everything
-							     here is either the store's or yours, and the useful signal is
-							     whether it still says what it said when it arrived. One badge, and
-							     none at all in the ordinary case. -->
+							<!-- What it is now, not where it came from: everything here is either the
+							     store's or yours, and the useful signal is whether it still says what it
+							     said when it arrived. -->
 							{#if state === 'edited' || state === 'outdated' || state === 'edited-outdated'}
-								<!-- Thin, and tinted rather than grey. Kept at the weight of a
-								     footnote, but in the accent: it is the one thing on the card that
-								     is worth catching an eye, and a grey annotation on a grey card
-								     catches none. -->
+								<!-- Thin, and tinted rather than grey: a grey annotation on a grey card catches
+								     no eye. -->
 								<span
 									class="border-accent/30 bg-accent/10 text-accent rounded border px-1 text-[9px] leading-[15px] font-medium"
 								>
@@ -354,10 +317,8 @@
 								</button>
 							{/if}
 
-							<!-- Both of them, spelled out. Talking to a persona is the frequent
-							     act and editing it the rare one, but the Library is where you
-							     manage them, so neither is left to a control that only exists
-							     under a pointer. -->
+							<!-- Both spelled out: the Library is where you manage them, so neither is left
+							     to a control that only exists under a pointer. -->
 							<button
 								type="button"
 								onclick={() => chatWith(persona)}
@@ -380,11 +341,8 @@
 				{/each}
 			</div>
 
-			<!-- On a row of its own after the cards, not among them. A grid stretches
-			     every cell in a row to the tallest, so among the personas this control
-			     was as tall as a card, which is neither what it is nor what its twin in
-			     the knowledge section looks like. Its own grid gives it one column of
-			     the same width and its natural height. -->
+			<!-- On a row of its own after the cards: a grid stretches every cell to the
+			     tallest, so among the personas this control was as tall as a card. -->
 			<div class="mb-9 grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
 				<div
 					class="border-shade-4 hover:border-accent flex items-stretch gap-1 rounded-xl border border-dashed transition-colors"
@@ -411,9 +369,8 @@
 			</div>
 
 			<!-- Playbooks -->
-			<!-- Between the personas and the knowledge on purpose: who answers, how the
-			     job is done, what it is done with. That is the order somebody builds
-			     things up in. -->
+			<!-- Between the personas and the knowledge on purpose: who answers, how the job
+			     is done, what it is done with. -->
 			<div class="mb-3 flex items-baseline justify-between gap-2">
 				<div class="flex items-baseline gap-2">
 					<h2 class="text-active text-sm font-medium">{$LL.playbooks()}</h2>
@@ -466,9 +423,8 @@
 				<span class="text-muted text-xs">{$knowledgeStore.length}</span>
 			</div>
 
-			<!-- Loose knowledge first: it is where everything starts out, so it is what
-			     you came to look at. No heading over it, because "everything not filed
-			     anywhere" is not a category anyone thinks in. -->
+			<!-- Loose knowledge first: it is where everything starts out. No heading, since
+			     "everything not filed anywhere" is not a category anyone thinks in. -->
 			<div class="mb-6">
 				<div
 					class="library-section grid auto-rows-fr grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3"
@@ -479,9 +435,8 @@
 					{/each}
 
 					{#if namingNew}
-						<!-- The card became the field it was going to create. Nothing opened,
-						     nothing covered the grid, and the name is typed where the folder
-						     will sit. -->
+						<!-- The card became the field it was going to create: nothing opened, nothing
+						     covered the grid. -->
 						<div
 							class="border-accent bg-shade-0 flex items-center gap-2 rounded-xl border p-3.5 text-left"
 						>
@@ -520,9 +475,8 @@
 					{/if}
 				</div>
 			</div>
-			<!-- One page, no navigation: a collection is a heading over its own grid,
-			     and the cards below it are the same cards as everywhere else. Nothing to
-			     enter, nothing to come back from, and what is where stays visible. -->
+			<!-- One page, no navigation: a collection is a heading over its own grid, and
+			     the cards below are the same cards as everywhere else. -->
 			{#each collections as collection (collection.id)}
 				{@const items = knowledgeInCollection($knowledgeStore, collection.id)}
 				{@const collapsed = isCollapsed(collection.id)}
@@ -566,8 +520,8 @@
 							>
 								<Pencil class="h-3.5 w-3.5" />
 							</button>
-							<!-- What survives is on the tooltip: "delete the folder" reads as
-							     "delete what is in it" to most people, and here it does not. -->
+							<!-- What survives is on the tooltip: "delete the folder" reads as "delete what
+							     is in it" to most people, and here it does not. -->
 							<ButtonConfirm
 								compact
 								onConfirm={() => removeCollection(collection.id)}
@@ -593,9 +547,8 @@
 </div>
 
 <!-- Hidden file inputs driven by the Import menu in the header -->
-<!-- Several at once, and text as readily as JSON: the button reads whatever it
-     is handed, so restricting the picker would be the one place still asking the
-     question the rest of it stopped asking. -->
+<!-- Several at once, and text as readily as JSON: the button reads whatever it is
+     handed. -->
 <input
 	bind:this={importInput}
 	type="file"

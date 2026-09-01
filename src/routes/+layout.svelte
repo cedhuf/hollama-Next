@@ -53,9 +53,8 @@
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	// Wait for the async hydration before rendering the app, so pages always read
-	// fully-loaded stores (otherwise a refresh can show an empty session until you
-	// navigate away and back).
+	// Wait for the async hydration, so a page always reads a loaded store: a
+	// refresh could otherwise show an empty session until you navigate away.
 	let booted = $state(false);
 
 	$effect(() => {
@@ -67,13 +66,11 @@
 		const { latestVersion, isCurrentVersionLatest, isCheckingForUpdates } = $updateStatusStore;
 		if (isCheckingForUpdates || isCurrentVersionLatest || !latestVersion) return;
 
-		// On a shared instance only an admin can act on this. A user would get a
-		// notice about something they can't do anything about: the About tab still
-		// lets them check by hand.
+		// On a shared instance only an admin can act on this. The About tab still lets
+		// a user check by hand.
 		if ($currentRole !== 'admin') return;
 
-		// Read through `get` rather than `$settingsStore`: subscribing here would
-		// make the write below re-run this effect.
+		// Through `get`: subscribing here would make the write below re-run this effect.
 		if (get(settingsStore).notifiedUpdateVersion === latestVersion) return;
 		settingsStore.update((settings) => ({ ...settings, notifiedUpdateVersion: latestVersion }));
 
@@ -87,13 +84,9 @@
 	});
 
 	/**
-	 * The server is now serving a build this client isn't running.
-	 *
-	 * Distinct from the release notice above: that one says a newer version exists
-	 * somewhere, this one says the instance in front of you has already moved:
-	 * after a `podman auto-update`, say, and everyone's tab is running yesterday's
-	 * code until it reloads. It notifies rather than reloading on its own: a reload
-	 * would take an unsent message or a running generation with it.
+	 * The server is serving a build this client is not running, which is a
+	 * different thing from a newer version existing somewhere. It notifies rather
+	 * than reloading: a reload would take an unsent message or a running turn.
 	 */
 	let notifiedReload = false;
 	$effect(() => {
@@ -109,21 +102,13 @@
 	});
 
 	/**
-	 * Which of the two interfaces this account is on.
+	 * Which of the two interfaces this account is on, redirected at the one place
+	 * both trees pass through. Both directions, on the same rule: a phone with the
+	 * setting on goes there and anything wider comes back, including a dragged
+	 * corner.
 	 *
-	 * The redirect lives here, at the one place both trees pass through, and it
-	 * runs in both directions on the same rule: this interface is for a phone, so
-	 * a phone with the setting on goes there and anything wider comes back. Not
-	 * only when the setting changes, but whenever the window stops being a phone,
-	 * which is what a dragged corner does.
-	 *
-	 * Nothing under `/m` reads any of this: an interface that has to check whether
-	 * it is allowed on screen is one that will one day be on screen wrongly.
-	 *
-	 * And nothing here touches the OS chrome. The tint follows the theme, once,
-	 * where it always did: a version of this that repainted it on every navigation
-	 * cost the app its safe area on both interfaces, and it is not worth a second
-	 * attempt for a strip four percent off.
+	 * Nothing under `/m` reads any of this. And nothing here touches the OS chrome:
+	 * the tint follows the theme, once, where it always did.
 	 */
 	let onPhone = $state(false);
 
@@ -132,10 +117,8 @@
 
 	$effect(() => {
 		if (!browser) return;
-		// A phone, not a small screen. 640 keeps tablets out, including the small
-		// ones: an iPad mini is 744 points across and has room for the sidebar and a
-		// conversation beside it, which is the whole argument for the other
-		// interface.
+		// A phone, not a small screen. 640 keeps tablets out: an iPad mini is 744
+		// across and has room for the sidebar and a conversation beside it.
 		const query = window.matchMedia('(max-width: 640px)');
 		onPhone = query.matches;
 		const update = (event: MediaQueryListEvent) => (onPhone = event.matches);
@@ -144,19 +127,12 @@
 	});
 
 	/**
-	 * Nothing escapes any more, and that is the point.
+	 * Nothing escapes, and that is the point. The allow-list that let `/library`
+	 * out only opened outwards: the next tap in the full interface was caught by
+	 * the redirect and threw you back. `/m/library` is that page now.
 	 *
-	 * There used to be an allow-list here, holding `/library`, because the phone
-	 * interface had no Library and the row in Profile had to be let out. It worked
-	 * once and then not at all: you arrived in the full interface, which has a
-	 * sidebar this one does not, and the next tap anywhere was caught by the
-	 * redirect and threw you back here. A door that only opened outwards and closed
-	 * by accident.
-	 *
-	 * `/m/library` is that page now, so the exception has nothing left to except.
-	 * Leaving is still possible and is now only ever deliberate: the row under it in
-	 * Profile turns the phone interface off, which is a decision rather than a link
-	 * that happens to land somewhere else.
+	 * Leaving is still possible and only ever deliberate: the row under it in
+	 * Profile turns the phone interface off.
 	 */
 	$effect(() => {
 		if (!booted) return;
@@ -170,16 +146,9 @@
 
 	onNavigate(() => {
 		/**
-		 * Started, not awaited.
-		 *
-		 * `onNavigate` holds the navigation open until whatever it returns settles, so
-		 * awaiting a network call here made every page change wait on a version check
-		 * nobody asked for. On a slow connection that is a tap that appears to do
-		 * nothing, and with the phone interface's page transitions on top of it, the
-		 * old screen stayed frozen on screen for the duration: indistinguishable from
-		 * the navigation having failed.
-		 *
-		 * Whether there is a new version is worth knowing and worth nobody's wait.
+		 * Started, not awaited. `onNavigate` holds the navigation open until what it
+		 * returns settles, so awaiting made every page change wait on a version check
+		 * nobody asked for, which with page transitions looks like a failed navigation.
 		 */
 		if (!($settingsStore.autoCheckForUpdates === false)) void checkForUpdates();
 
@@ -188,19 +157,11 @@
 	});
 
 	/**
-	 * Coming back to an app that never went away.
-	 *
-	 * A browser tab is opened, used and closed; an installed PWA is suspended and
-	 * resumed for days without ever re-running its boot. Both things it reads once
-	 * at startup (the stored conversations and the running build) can have moved
-	 * on in the meantime, so both are checked here, on the way back in.
+	 * Coming back to an app that never went away: an installed PWA is suspended and
+	 * resumed for days without re-running its boot, so both things read at startup
+	 * (the stored conversations and the running build) are checked here.
 	 */
-	/**
-	 * ⌘K / Ctrl+K opens conversation search from anywhere.
-	 *
-	 * Ignored while typing: the shortcut belongs to the app, but a message being
-	 * composed owns the keyboard first.
-	 */
+	/** Command-K opens conversation search. Ignored while typing: a message being composed owns the keyboard first. */
 	$effect(() => {
 		if (!browser) return;
 
@@ -246,9 +207,8 @@
 		const dy = t.clientY - touchStartY;
 		// Only a deliberate, mostly-horizontal swipe counts.
 		if (Math.abs(dx) < 60 || Math.abs(dx) <= Math.abs(dy)) return;
-		// Open: a rightward swipe that begins just *inland* of the very edge. The first
-		// ~20px belong to iOS's system back-swipe, so we start the open band past it to
-		// avoid fighting the system gesture (the extreme edge is left to iOS).
+		// Open: a rightward swipe beginning just inland of the edge. The first ~20px
+		// belong to iOS's system back-swipe, so the band starts past it.
 		if (drawerWasClosed && dx > 0 && touchStartX > 24 && touchStartX < 80)
 			mobileDrawerOpen.set(true);
 		else if (!drawerWasClosed && dx < 0) mobileDrawerOpen.set(false);
@@ -261,12 +221,9 @@
 	});
 
 	/**
-	 * Repaint the strips the OS draws around the app.
-	 *
-	 * A browser tab picks up a new `content` on the existing tag, but the
-	 * installed app reads that tag when it launches and then keeps the colour it
-	 * got, which is why switching themes left the status bar on the old one until
-	 * the app was killed. Replacing the whole node is what gets it read again.
+	 * A browser tab picks up a new `content` on the existing tag, but the installed
+	 * app reads that tag at launch and keeps the colour it got. Replacing the whole
+	 * node is what gets it read again.
 	 */
 	function setThemeColor(color: string) {
 		for (const stale of document.querySelectorAll('meta[name="theme-color"]')) stale.remove();
@@ -276,19 +233,13 @@
 		document.head.appendChild(meta);
 	}
 
-	/**
-	 * The wallpaper as CSS, which is a pack entry's gradient or the user's own file.
-	 *
-	 * Resolved once, here, so that the attribute driving the shadows and the layer
-	 * that paints the picture cannot disagree about whether there is one.
-	 */
+	/** Resolved once, here, so the attribute driving the shadows and the layer painting the picture cannot disagree about whether there is one. */
 	const wallpaper = $derived(wallpaperImage($settingsStore.backgroundImage));
 
 	$effect(() => {
-		// A locked instance theme wins over the stored one rather than overwriting
-		// it: unlock it later and everyone gets their own back, which is not true of
-		// a policy that rewrote people's settings on its way through. An offered one
-		// applies only until this account picks for itself.
+		// A locked instance theme wins over the stored one rather than overwriting it,
+		// so unlocking gives everyone their own back. An offered one applies only until
+		// this account picks for itself.
 		const sharing = data.instance?.themeSharing ?? 'off';
 		const locked =
 			sharing === 'locked' || (sharing === 'overridable' && !$settingsStore.themeChosen);
@@ -298,22 +249,18 @@
 		document.documentElement.setAttribute('data-theme-style', style);
 
 		// One number for the whole app: every translucent surface scales itself from
-		// it rather than being told, so a panel rendered anywhere is already in the
-		// right state. Switching the effect off is the attribute's job, not the
-		// number's: the bottom of the slider is the thinnest surface, not the absence
-		// of one, and only the attribute can also turn `backdrop-filter` off.
+		// it. Switching the effect off is the attribute's job, since the bottom of the
+		// slider is the thinnest surface rather than the absence of one.
 		const on = $settingsStore.surfaceTransparency !== false;
-		// 50 is the reference the surfaces are drawn for, so it maps to 1 and the
-		// slider reaches past it as well as below it.
+		// 50 is the reference the surfaces are drawn for, so it maps to 1.
 		const strength = ($settingsStore.surfaceTransparencyLevel ?? 50) / 50;
 		document.documentElement.style.setProperty('--surface-strength', String(on ? strength : 0));
 		document.documentElement.setAttribute('data-transparency', on ? 'on' : 'off');
 
-		// Drives the wallpaper's own layer and the shadow the columns need to read as
-		// panels on a picture rather than as holes cut in it.
+		// Drives the wallpaper's layer and the shadow that makes the columns read as
+		// panels on a picture rather than holes cut in it.
 		document.documentElement.setAttribute('data-wallpaper', wallpaper ? 'on' : 'off');
-		// Same shape as the surfaces above, and 50 means the same thing here: the
-		// value the effect was drawn for, in the middle of its own track.
+		// Same shape as the surfaces above, and 50 means the same thing.
 		const blur = ($settingsStore.backgroundBlurLevel ?? 50) / 50;
 		document.documentElement.style.setProperty('--wallpaper-strength', String(blur));
 
@@ -329,8 +276,8 @@
 			}
 			document.documentElement.setAttribute('data-color-theme', theme);
 
-			// Keep the OS/browser chrome tint in sync with the live safe-area chrome
-			// colour (shade-1), across all theme styles. Dracula, Catppuccin, …
+			// Keep the OS chrome tint in sync with the live safe-area colour (shade-1),
+			// across every theme style.
 			if (browser) {
 				const chrome = getComputedStyle(document.documentElement)
 					.getPropertyValue('--color-shade-1')
@@ -360,26 +307,18 @@
 		await loadIntegrationsConfig();
 		await loadMcpConfig();
 		await loadServerPlaybooks();
-		// The gallery's index, which is small by construction: the pictures
-		// themselves are fetched one at a time by the page that shows them.
+		// Small by construction: the pictures themselves are fetched one at a time by
+		// the page that shows them.
 		await loadImages();
 
-		// No personas are written at boot any more. They used to be built here and
-		// pushed straight into the store, which made "shipped with the app" and
-		// "installed by you" the same thing: the starters were in your library
-		// whether you wanted them or not, and they went out in your backup as if you
-		// had written them. They now live in the store the Library browses, and
-		// nothing arrives until you install it.
+		// No personas are written at boot. They used to be pushed into the store, which
+		// made "shipped with the app" and "installed by you" the same thing and sent
+		// them out in your backup. They live in the store the Library browses now.
 		/**
-		 * The phone interface, switched on once for accounts that predate it.
-		 *
-		 * Here rather than in the defaults because a default reaches only a browser
-		 * that has stored nothing, and by now every account has stored everything. See
-		 * `mobileDefaultApplied` for why overriding a stored `false` is defensible this
-		 * one time and would not be a second.
-		 *
-		 * After boot, so it writes to a hydrated store rather than to the defaults it
-		 * is about to be overwritten by.
+		 * The phone interface, switched on once for accounts that predate it. Here
+		 * rather than in the defaults, which reach only a browser that has stored
+		 * nothing; see `mobileDefaultApplied`. After boot, so it writes to a hydrated
+		 * store rather than to the defaults about to overwrite it.
 		 */
 		if (!$settingsStore.mobileDefaultApplied) {
 			$settingsStore = {
@@ -394,7 +333,7 @@
 		// Language
 		if (!$settingsStore.userLanguage)
 			// `detectLocale` is generated from the installed locale folders, so a new
-			// language is picked up here without touching this file.
+			// language is picked up without touching this file.
 			$settingsStore.userLanguage = detectLocale(navigatorDetector);
 
 		loadLocale($settingsStore.userLanguage);
@@ -406,14 +345,11 @@
 		}
 
 		// One first run, composed for whoever is in front of it: the tour asks for a
-		// connection and a name only where they are missing and the person is
-		// allowed to give them, and skips straight to the introduction otherwise.
-		// Two flows used to answer the same question, and a new arrival walked
-		// through setup did not then need to be shown around it.
+		// connection and a name only where they are missing and allowed, and skips to
+		// the introduction otherwise.
 		//
-		// Shown again when an administrator says so, which is what the epoch is for:
-		// each browser remembers the stamp it acknowledged, so a newer one plays the
-		// tour once for everybody and then stops, with nothing tracking who saw what.
+		// Shown again when an administrator bumps the epoch: each browser remembers the
+		// stamp it acknowledged, so nothing tracks who saw what.
 		const epoch = data.instance?.onboardingEpoch ?? 0;
 		const seen = $settingsStore.onboardingEpochSeen ?? 0;
 
@@ -421,8 +357,7 @@
 			if (!$settingsStore.welcomeComplete || epoch > seen) $welcomeOpen = true;
 		}
 
-		// The web component is only ever loaded in the browser: it registers a custom
-		// element, which is not a thing the server can do.
+		// Browser only: it registers a custom element.
 		void import('@khmyznikov/pwa-install');
 	});
 
@@ -430,17 +365,12 @@
 	let pwaInstall: PwaInstallDialog | undefined = $state();
 
 	/**
-	 * The offer, once the component says there is one to make.
+	 * The offer, on the component's event rather than on its `isInstallAvailable`
+	 * property: that belongs to a Lit element, so reading it here creates no
+	 * dependency and the answer is taken too early. Chromium settles it when the
+	 * browser hands its prompt over, Apple half a second after load.
 	 *
-	 * On its event rather than on its `isInstallAvailable` property, which is the
-	 * mistake worth not making twice: that property belongs to a Lit element, so
-	 * reading it here creates no dependency and the answer is taken once, too early.
-	 * Chromium settles it when the browser hands its prompt over, and Apple half a
-	 * second after load, by which time an effect that ran at mount is long finished.
-	 *
-	 * Never over the first-run wizard: two dialogs on a first launch is one too
-	 * many, and the app has not yet given anyone a reason to want it on their home
-	 * screen. On a returning visit there is no wizard, so the offer is immediate.
+	 * Never over the first-run wizard: two dialogs on a first launch is one too many.
 	 */
 	$effect(() => {
 		const dialog = pwaInstall;
@@ -485,18 +415,15 @@
 		<LoaderCircle class="text-muted h-6 w-6 animate-spin" />
 	</div>
 {:else}
-	<!-- The dialogs belong to the account, not to a frame: both interfaces open the
-	     same settings, the same search and the same library, so they are mounted
-	     once, above the choice of shell. -->
+	<!-- The dialogs belong to the account, not to a frame, so they are mounted once
+	     above the choice of shell. -->
 	<SettingsModal />
 	<SearchModal bind:open={$searchModalOpen} initialQuery={$searchModalQuery} />
 	<KnowledgeModal />
 	<Welcome />
 
-	<!-- Held in manual mode, so it shows nothing of its own accord: when to ask is
-	     the product's business, and it is decided above. The manifest is where it
-	     reads the name, the description and the screenshots from, so the sheet it
-	     draws is the same one Chromium draws natively. -->
+	<!-- Manual mode, so it shows nothing of its own accord: when to ask is decided
+	     above. It reads the name, description and screenshots from the manifest. -->
 	{#if browser && !isInstalled()}
 		<pwa-install
 			bind:this={pwaInstall}
@@ -507,60 +434,44 @@
 	{/if}
 
 	{#if onMobileUi}
-		<!-- The mobile interface brings its own frame, so it gets none of this one.
-		     Nested inside it, as it was, the page carried a hidden sidebar, a chrome
-		     header and the page card underneath itself: three layers with their own
-		     heights, their own `overflow-hidden` and, in the installed app, their own
-		     idea of what `100vh` means. A second interface is a second shell or it is
-		     a skin, and this one is not a skin. -->
+		<!-- The mobile interface brings its own frame. Nested inside this one it carried
+	     a hidden sidebar, a chrome header and the page card underneath itself, each
+	     with its own height, `overflow-hidden` and idea of what `100vh` means. -->
 		{@render children()}
 	{:else}
-		<!-- bg-shade-1 on mobile so the notch + home-indicator safe strips are one
-	     consistent chrome colour everywhere (native feel); shade-2 canvas on desktop. -->
-		<!-- The wallpaper, when there is one, is painted by this box's own backdrop layer
-	     and handed over as a custom property: a `filter` set here would blur the
-	     application along with the picture. It shows through the margin this padding
-	     leaves and the gap between the two columns. -->
+		<!-- shade-1 on mobile, so the notch and home-indicator strips are one chrome
+	     colour; shade-2 canvas on desktop.
+
+	     The wallpaper is painted by this box's own backdrop layer and handed over as
+	     a custom property: a `filter` here would blur the application with it. -->
 		<div
 			class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden lg:p-4 lg:pt-4 lg:pb-4"
 			style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 		>
 			<CollapsibleSidebar />
 			<!-- The card runs the full height of the display, so its corners round on the
-		     corners of the screen rather than somewhere below them.
+			     corners of the screen. It owes the safe areas nothing: content is meant to
+			     pass under the status bar and the home indicator, and the bars over it hold
+			     themselves off the edge on their own account.
 
-		     It owes the safe areas nothing at either end. Content is meant to reach both
-		     edges and pass under the status bar and the home indicator; that is what
-		     makes an app read as native rather than as a page in a frame. What has to
-		     stay legible are the bars over it, and each of those holds itself off the
-		     edge on its own account. -->
-			<!-- Content side = the top layer (iOS-style reveal). On mobile it's an opaque card
-		     that slides right to uncover the stationary sidebar underneath; left-rounded
-		     corners (matching the phone's screen radius) + a left-edge shadow make it read
-		     as a sheet lifted above the menu. The rounding and the shadow are painted only
-		     while it is open, and travel with the slide: a corner cut into a card that
-		     covers the whole screen shows whatever is behind it, which with the drawer
-		     shut is the page's own background in the corner of the screen.
-
-		     With it open, what the corner shows is the column, and by construction
-		     rather than by arrangement: the column paints the full width of the display
-		     and only lays its contents out to `--drawer-w`, so the card slides onto its
-		     own material and the notch cannot land past its edge. The shadow falls on
-		     that same material, exactly as it does along the rest of the edge.
-		     A no-op on desktop, where the sidebar lives in flow. -->
+			     On mobile it is an opaque card sliding right to uncover the sidebar. The
+			     rounding and the shadow are painted only while it is open and travel with
+			     the slide, because a corner cut into a full-screen card shows the page's own
+			     background. Open, what the corner shows is the column: it paints the full
+			     width and lays its contents out to `--drawer-w`, so the card slides onto its
+			     own material. A no-op on desktop, where the sidebar lives in flow. -->
 			<div
 				class="app-card max-lg:bg-shade-1 relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden {$mobileDrawerOpen
 					? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
 					: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
 			>
-				<!-- Each route now owns the single sidebar toggle at its top-left (inside its
-			     header bar, or a blank MobileMenuBar on headerless pages), so there's no
-			     extra top strip here. -->
+				<!-- Each route owns the sidebar toggle at its top-left, so there is no extra
+				     top strip here. -->
 				<div class="relative min-h-0 min-w-0 flex-1">
 					{@render children()}
 				</div>
-				<!-- Scrim lives inside the sliding card, so it only dims the page (never the
-			     revealed sidebar) and travels with it; tap anywhere on the page to close. -->
+				<!-- Inside the sliding card, so it dims the page and never the revealed
+				     sidebar, and travels with it. -->
 				{#if $mobileDrawerOpen}
 					<div
 						class="absolute inset-0 z-20 bg-black/30 lg:hidden"
@@ -576,16 +487,16 @@
 
 <style lang="postcss">
 	:global(html) {
-		/* Desktop: match bg-shade-2 (the app-shell canvas) so the rounded-corner
-		   margins share one seamless background. */
+		/* Desktop: match bg-shade-2, so the rounded-corner margins share one
+	   seamless background. */
 		background-color: var(--color-shade-2);
 		font-size: 1rem;
 		line-height: 1.5rem;
 		letter-spacing: normal;
 	}
 
-	/* Mobile: the app shell is shade-1, so the root background must match it, because the OS-managed
-	   status-bar and home-indicator strips then blend in seamlessly. */
+	/* Mobile: the shell is shade-1, so the root must match it for the OS status-bar
+	   and home-indicator strips to blend in. */
 	@media (max-width: 1023px) {
 		:global(html),
 		:global(body) {
@@ -593,25 +504,22 @@
 		}
 	}
 
-	/* Full-height app shell. In a browser tab `dvh` is the right unit: it tracks the
-	   toolbars sliding in and out. */
+	/* Full-height shell. In a browser tab `dvh` tracks the toolbars sliding in
+	   and out. */
 	.app-shell {
 		height: 100dvh;
 	}
 
-	/* The installed app is a different animal, and these numbers were measured on the
-	   device rather than argued about.
+	/* The installed app is a different animal, and these numbers were measured on
+	   the device.
 
-	   Under the status bar, iOS moves the document up but leaves the layout viewport
-	   at the height of the display minus the status bar: 812 against 874 on an iPhone
-	   16 Pro. The document is drawn at the top, and the strip left over at the bottom
-	   shows nothing at all, which is the white bar every guide to this warns about.
+	   Under the status bar, iOS moves the document up but leaves the layout
+	   viewport at the display height minus the status bar (812 against 874 on an
+	   iPhone 16 Pro), so the strip left at the bottom shows nothing.
 
-	   The cure is to give the document the height of the display and to stop it
-	   scrolling. Sized but scrollable, it merely slides its own bottom off the screen
-	   instead of filling the strip, which is what happened on the first attempt here.
-	   `vh` is the only unit that knows the real number: `dvh`, `svh` and a plain
-	   percentage all report the short one. */
+	   The cure is the display's height plus no scrolling: sized but scrollable, it
+	   slides its own bottom off screen instead of filling the strip. `vh` is the
+	   only unit that knows the real number. */
 	@media (display-mode: standalone) {
 		:global(html),
 		:global(body) {

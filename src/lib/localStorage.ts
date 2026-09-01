@@ -17,22 +17,15 @@ import { NotAuthenticatedError } from './data/repository';
 // Re-exported so existing call sites keep importing these from `$lib/localStorage`.
 export { LOCAL_STORAGE_PREFIX, StorageKey } from './data/keys';
 
-/**
- * Persistence is suspended until the first hydration completes. The stores load
- * asynchronously, and any write before that finishes (a page creating a session,
- * the model-list cache, a default theme...) would PUT empty or default values
- * and clobber the stored data: the cause of data vanishing on refresh.
- */
+/** Persistence is suspended until the first hydration completes: the stores load asynchronously, and any write before that would PUT empty defaults over the stored data. */
 let persistenceReady = false;
 
 /**
  * A writable store that persists every change through the active repository.
  *
- * The very first (synchronous) emission (the seed echo) is skipped: there's
- * nothing new to persist, and in server mode persisting the empty seed before
- * async hydration would clobber the user's server-side data. `setQuiet()` sets
- * the value without persisting, used to hydrate from the repository at boot.
- * `reset()` returns the store to `defaultValue`.
+ * The first synchronous emission is skipped: there is nothing new to persist,
+ * and in server mode persisting the empty seed would clobber the stored data.
+ * `setQuiet()` hydrates without persisting; `reset()` returns to `defaultValue`.
  */
 function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise<void>) {
 	const store = writable<T>(seed);
@@ -66,15 +59,13 @@ function persistedStore<T>(seed: T, defaultValue: T, save: (value: T) => Promise
 /**
  * A collection of identified items, persisted one item at a time.
  *
- * `persistedStore` above persists whatever the store now holds, which is right
- * for a single value (the settings) and wrong for a collection: the array is all
- * the repository ever sees, so "this session changed" and "these are the only
- * sessions left" become the same write. Here the operation is explicit:
- * `upsert` saves one item, `remove` deletes one item, and the in-memory array
- * is kept in step for the components reading it.
+ * `persistedStore` persists whatever the store holds, which for a collection
+ * makes "this session changed" and "these are the only sessions left" the same
+ * write. Here the operation is explicit: `upsert` saves one, `remove` deletes
+ * one, and the in-memory array is kept in step.
  *
- * `setQuiet` fills the store from storage without writing anything back;
- * `replaceAll` is the deliberate wholesale write, used when restoring a backup.
+ * `setQuiet` fills from storage without writing back; `replaceAll` is the
+ * deliberate wholesale write, for restoring a backup.
  */
 function collectionStore<
 	T extends { id: string },
@@ -85,24 +76,13 @@ function collectionStore<
 		save: (item: T) => Promise<void>;
 		remove: (id: string) => Promise<void>;
 		replaceAll: (items: T[]) => Promise<void>;
-		/**
-		 * What the store keeps of an item. Identity for most collections; for
-		 * conversations it drops the messages, which the lists never read and which
-		 * would otherwise sit in memory in their entirety.
-		 */
+		/** Identity for most collections; for conversations it drops the messages, which the lists never read and which would sit in memory in their entirety. */
 		summarize: (item: T) => S;
 	}
 ) {
 	const store = writable<S[]>(seed);
 
-	/**
-	 * Show what an item has become, without writing it back.
-	 *
-	 * For the changes somebody else has already stored. A turn is written by the
-	 * server as it produces it, so a reply landing has to reach the lists this
-	 * store feeds, while saving it from here would be this tab writing over a row
-	 * it does not own.
-	 */
+	/** For changes somebody else has already stored: a turn written by the server has to reach the lists this store feeds, while saving it from here would be this tab writing over a row it does not own. */
 	const reflect = (item: T) => {
 		const summary = ops.summarize(item);
 		store.update((items) => {
@@ -182,13 +162,7 @@ export const personasStore = collectionStore<Persona>(seed.personas, {
 	replaceAll: (personas) => repository.replacePersonas(personas),
 	summarize: (persona) => persona
 });
-/**
- * What each persona remembers about you.
- *
- * A collection like the others, keyed by the persona's id, and deliberately not
- * a field on the persona: a persona an admin shares is one object everybody
- * reads, and a memory living on it would be everybody's.
- */
+/** Keyed by the persona's id and deliberately not a field on the persona: a persona an admin shares is one object everybody reads, and a memory on it would be everybody's. */
 export const personaMemoryStore = collectionStore<PersonaMemory>(seed.personaMemory, {
 	save: (memory) => repository.savePersonaMemory(memory),
 	remove: (id) => repository.deletePersonaMemory(id),
@@ -202,17 +176,13 @@ export const playbooksStore = collectionStore<Playbook>(seed.playbooks, {
 	summarize: (playbook) => playbook
 });
 
-/**
- * Fill the stores from the repository at boot: each collection is loaded over
- * the network and set quietly, without writing anything back.
- */
+/** Each collection is loaded over the network and set quietly, without writing anything back. */
 export async function hydrateStores(): Promise<void> {
 	try {
 		await loadIntoStores();
 	} catch (error) {
-		// Persistence stays suspended. The stores still hold their empty seed, and
-		// letting a write out now would replace the user's stored collections with
-		// it: the boot equivalent of the refresh wipe guarded against below.
+		// Persistence stays suspended: the stores hold their empty seed, and a write now
+		// would replace the user's stored collections with it.
 		reportLoadFailure(error);
 		return;
 	}
@@ -223,28 +193,24 @@ export async function hydrateStores(): Promise<void> {
 /**
  * Re-read everything, for an app that has been running while the data moved.
  *
- * The stores are filled once at boot and never again, which is right for a page
- * that lives as long as its data. A PWA doesn't: it is suspended and resumed for
- * days, so conversations written from the browser (or from another device
- * against the same server) never appeared until it was force-quit. Called when
- * the app comes back to the foreground.
+ * The stores are filled once at boot, which is right for a page that lives as
+ * long as its data. A PWA is suspended and resumed for days, so conversations
+ * written elsewhere never appeared until it was force-quit.
  *
- * Settings and servers are deliberately left alone: they are edited in place in
- * the Settings modal, and replacing them under an open field would throw away
- * what is being typed. Only the collections the user browses are re-read.
+ * Settings and servers are left alone: they are edited in place, and replacing
+ * them under an open field would throw away what is being typed.
  */
 export async function refreshStores(): Promise<void> {
 	if (!browser) return;
 
-	// Never before the boot hydration has completed: the stores would be filled
-	// with data the app isn't yet allowed to write back.
+	// Never before the boot hydration: the stores would be filled with data the app
+	// is not yet allowed to write back.
 	if (!persistenceReady) return;
 
-	// A refresh that fails must change nothing. This runs when the app comes back
-	// to the foreground: typically right after the server restarted under it, so
-	// the read failing is the expected case, not the exotic one. Emptying the
-	// stores here would arm the next `saveSession` to replace every stored session
-	// with the single one still open on screen.
+	// A refresh that fails must change nothing. This runs when the app comes back to
+	// the foreground, typically right after the server restarted under it, so a
+	// failed read is the expected case. Emptying the stores here would arm the next
+	// `saveSession` to replace every stored session with the one on screen.
 	let sessions: SessionSummary[],
 		knowledge: Knowledge[],
 		personas: Persona[],
@@ -270,17 +236,10 @@ export async function refreshStores(): Promise<void> {
 	playbooksStore.setQuiet(playbooks);
 }
 
-/**
- * Tell the user their data could not be read.
- *
- * Silence here is what makes the failure dangerous: an empty sidebar looks like
- * an empty account, and the natural reaction (carry on typing) is what used to
- * destroy the rest. Saving is off until a load succeeds, so say so.
- */
+/** Silence is what makes the failure dangerous: an empty sidebar looks like an empty account, and carrying on typing is what used to destroy the rest. */
 function reportLoadFailure(error: unknown): void {
 	// Signed out is not a failure: the login page boots the same stores and would
-	// otherwise greet every visitor with an alarm about data it was never meant
-	// to read yet.
+	// otherwise greet every visitor with an alarm.
 	if (error instanceof NotAuthenticatedError) return;
 
 	toast.error('Could not load your data', {

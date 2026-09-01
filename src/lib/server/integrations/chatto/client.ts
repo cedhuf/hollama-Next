@@ -1,19 +1,14 @@
 /**
  * Talking to a Chatto server as a bot.
  *
- * Chatto's public API is ConnectRPC, and Connect's unary calls are a plain POST
- * of JSON to a path built from the service and method names. So this is a fetch
- * wrapper and a handful of typed methods, not a generated client: the five calls
- * a bot makes are written out below, and adding a sixth is four lines.
+ * Chatto's public API is ConnectRPC, whose unary calls are a plain POST of JSON
+ * to a path built from the service and method names. So this is a fetch wrapper
+ * and five typed methods rather than a generated client: adding a sixth is four
+ * lines, where generating from the `.proto` files costs a build step and a
+ * vendored copy of an API explicitly allowed to break in the 0.x line.
  *
- * The alternative was generating a client from the `.proto` files, which buys
- * exhaustive types and costs a build step, a code generator and a vendored copy
- * of an API that is explicitly experimental and explicitly allowed to break in
- * the 0.x line. When it breaks, a small hand-written surface is a small edit.
- *
- * The types below describe only the fields this integration reads. Protobuf
- * JSON is lowerCamelCase, and unknown fields are ignored on both sides, so a
- * server that grows a field costs nothing here.
+ * The types describe only the fields this integration reads. Protobuf JSON is
+ * lowerCamelCase and unknown fields are ignored on both sides.
  */
 
 export interface ChattoUser {
@@ -55,14 +50,7 @@ export interface ChattoTimelinePage {
 	hasNewer?: boolean;
 }
 
-/**
- * The pointer a notification carries, as Chatto sends it.
- *
- * The room arrives as a summary object rather than as an id, which is the one
- * place in this API where a reference is not a bare string. Kept in the shape
- * the wire uses, and flattened by `referenceOf` into what the rest of the code
- * works with, so exactly one function knows about the difference.
- */
+/** The room arrives as a summary object rather than an id, the one place in this API where a reference is not a bare string. `referenceOf` flattens it, so exactly one function knows. */
 interface WireMessageReference {
 	room?: { id?: string; name?: string };
 	eventId?: string;
@@ -76,13 +64,7 @@ export interface ChattoMessageReference {
 	threadRootEventId?: string;
 }
 
-/**
- * The causes this integration acts on.
- *
- * Chatto raises others for the same account, and they are ignored rather than
- * rejected: a bot that answered every reaction and every room message would be
- * a bot nobody keeps.
- */
+/** Chatto raises others for the same account, ignored rather than rejected: a bot that answered every reaction would be one nobody keeps. */
 export const ACTIVATING_CAUSES = [
 	'directMessageReceived',
 	'directMentionReceived',
@@ -132,9 +114,8 @@ export class ChattoClient {
 		});
 
 		if (!response.ok) {
-			// Connect reports failures as a JSON body carrying a code and a message.
-			// Both are worth keeping: the code is what a caller branches on, the
-			// message is what a person reads in the settings form.
+			// Connect reports failures as a JSON body with a code and a message. The code is
+			// what a caller branches on, the message is what a person reads in the form.
 			const detail = (await response.json().catch(() => null)) as {
 				code?: string;
 				message?: string;
@@ -154,13 +135,7 @@ export class ChattoClient {
 		return this.#call('chatto.api.v1.ViewerService/GetViewer', {}, signal);
 	}
 
-	/**
-	 * What has happened that concerns this account.
-	 *
-	 * A latest-value list, newest first, not a queue: the same occurrence comes
-	 * back on every call until it ages out, which is why the caller claims each
-	 * one before acting on it.
-	 */
+	/** A latest-value list, newest first, not a queue: the same occurrence comes back on every call until it ages out, which is why the caller claims each one first. */
 	async listNotificationOccurrences(
 		limit: number,
 		signal?: AbortSignal
@@ -223,13 +198,7 @@ export class ChattoClient {
 		return this.#call('chatto.api.v1.UserService/BatchGetUsers', { userIds }, signal);
 	}
 
-	/**
-	 * Fetch an attachment's bytes from the signed URL the message carried.
-	 *
-	 * The credential goes along even though the URL is signed: it is the bot's own
-	 * server either way, and a deployment that checks both is one that works here
-	 * rather than one that needs finding out about.
-	 */
+	/** The credential goes along even though the URL is signed: it is the bot's own server either way, and a deployment that checks both works here rather than needing finding out about. */
 	async fetchAsset(url: string, signal?: AbortSignal): Promise<{ bytes: ArrayBuffer } | null> {
 		const response = await fetch(url, {
 			headers: { authorization: `Bearer ${this.#token}` },
@@ -253,13 +222,7 @@ export class ChattoClient {
 		);
 	}
 
-	/**
-	 * Say that the bot is composing, in a room or in a thread.
-	 *
-	 * Live-only and short-lived on Chatto's side, so it is a refresh rather than a
-	 * switch: it has to be called again every few seconds for as long as it should
-	 * show. Membership is all it asks for, not permission to post.
-	 */
+	/** Live-only and short-lived on Chatto's side, so it is a refresh rather than a switch. Membership is all it asks for, not permission to post. */
 	async updateTypingIndicator(
 		roomId: string,
 		threadRootEventId: string | undefined,
@@ -272,14 +235,7 @@ export class ChattoClient {
 		);
 	}
 
-	/**
-	 * Post the answer.
-	 *
-	 * Deliberately this rather than a bot's incoming webhook, which Chatto also
-	 * offers: a webhook can post at room level or open a new thread, and cannot
-	 * reply inside the thread the question was asked in, which is the case that
-	 * matters most. This also means one credential instead of two.
-	 */
+	/** Rather than a bot's incoming webhook, which Chatto also offers: a webhook cannot reply inside the thread the question was asked in, which is the case that matters most. */
 	async createMessage(
 		input: {
 			roomId: string;

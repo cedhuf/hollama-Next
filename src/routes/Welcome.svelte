@@ -38,46 +38,23 @@
 	import Profile from './settings/Profile.svelte';
 	import ServerConnections from './settings/ServerConnections.svelte';
 
-	/**
-	 * The welcome tour shown once on a user's first connection (server mode). Unlike
-	 * the local-mode wizard it configures nothing mandatory: the account already
-	 * exists and its profile comes from the identity provider, so this is an
-	 * introduction, what the app is, how it can look, and who you can talk to.
-	 */
+	/** The tour shown once on a first connection. It configures nothing mandatory: the account already exists, so this is an introduction. */
 	let step = $state(0);
 
 	/**
 	 * The tour is a list of named steps, composed for the person in front of it.
 	 *
-	 * Named rather than numbered, and that is what makes the composing safe: two
-	 * of these steps run animations keyed on which step is showing, and with plain
-	 * indices, inserting the setup steps ahead of them would have started the
-	 * wrong one. The dots at the foot of the dialog count this list, so they stay
-	 * honest whichever way it comes out.
+	 * Named rather than numbered: two steps run animations keyed on which step is
+	 * showing, and with plain indices inserting the setup steps ahead of them would
+	 * start the wrong one. The dots at the foot count this list.
 	 *
-	 * What varies, and why:
-	 *
-	 * - **servers**, only where the person can actually add one and none is
-	 *   reachable yet. On a shared instance the connections are the
-	 *   administrator's, and a step telling somebody to add one they are not
-	 *   allowed to add is worse than no step.
-	 * - **profile**, only while there is no name on it. The name is the account's
-	 *   own, not the identity provider's, so it is always fillable; what varies is
-	 *   whether there is anything left to ask. The email is the one field that
-	 *   comes from elsewhere when the instance has accounts, and the panel already
-	 *   reads it back rather than offering to change it.
-	 * - **images**, only where the instance draws.
+	 * **servers** only where the person can add one and none is reachable.
+	 * **profile** only while there is no name on it. **images** only where the
+	 * instance draws.
 	 */
 	const canManageServers = $derived($currentRole === 'admin' || !!$instanceConfig?.allowUserKeys);
 	const needsServer = $derived($welcomeShowAll || (canManageServers && $serversStore.length === 0));
-	/**
-	 * Whether the money is anybody's business here.
-	 *
-	 * On a shared instance it is: somebody else pays for the models, and what that
-	 * buys you is a fact you would rather learn on the first day than on the day it
-	 * stops you. On a personal install there is nobody to be allowanced by, and a
-	 * step about a ceiling that does not exist is a step about nothing.
-	 */
+	/** On a shared instance somebody else pays for the models, which is a fact worth learning before the day it stops you. On a personal install there is no ceiling to describe. */
 	const hasAllowance = $derived($welcomeShowAll || !!$instanceConfig?.accounts);
 
 	const needsProfile = $derived(
@@ -101,16 +78,10 @@
 	const TOTAL_STEPS = $derived(steps.length);
 
 	/**
-	 * Pictures the app drew, on the step that says it can.
-	 *
-	 * Eleven for six tiles, which is the whole reason there are more than six: a
-	 * tile hands over to the next picture in the pool at the one moment its own
-	 * animation has it at zero opacity, so the grid keeps refilling for as long as
-	 * anyone reads the step, and nobody sees a swap.
-	 *
-	 * Shipped with the app rather than fetched, small and square-cropped at build
-	 * time: the tiles are square and a picture cropped at the source is a picture
-	 * that is never upscaled to fill one.
+	 * Eleven pictures for six tiles: a tile takes the next one at the moment its
+	 * own animation has it at zero opacity, so the grid keeps refilling and nobody
+	 * sees a swap. Shipped with the app, square-cropped at build time, so a tile
+	 * never upscales one.
 	 */
 	const TOUR_IMAGES = [
 		'/tour/panda-insects.webp',
@@ -139,13 +110,7 @@
 	/** The next picture to deal out, advanced past anything already on screen. */
 	let nextImage = TILES;
 
-	/**
-	 * The picture after this one, skipping whatever is already up.
-	 *
-	 * Eleven pictures for six tiles, so there are always five to choose from and
-	 * this cannot spin. Without the skip a tile could be dealt the picture its
-	 * neighbour is holding, which is the one arrangement that reads as a bug.
-	 */
+	/** Eleven pictures for six tiles, so there are always five to choose from and this cannot spin. Without the skip a tile could be dealt its neighbour's picture. */
 	function deal(): number {
 		let candidate = nextImage % TOUR_IMAGES.length;
 		while (tileImages.includes(candidate)) {
@@ -157,19 +122,14 @@
 	}
 
 	/**
-	 * One picture changes. Then, a while later, one other.
+	 * One picture changes, then a while later one other.
 	 *
-	 * A single timer rather than one per tile, which is what makes "one at a time" a
-	 * property of the code instead of a hope about how six timers happen to fall.
-	 * The wait is irregular so the grid never settles into a rhythm, and the tile is
-	 * picked at random, never the one that just changed.
+	 * A single timer rather than one per tile, which makes "one at a time" a
+	 * property of the code. The wait is irregular so the grid never settles into a
+	 * rhythm, and the tile is picked at random, never the one that just changed.
 	 *
-	 * The tiles keep the arrival they always had, fading up in sequence. They simply
-	 * do it once now: looping it meant all six fading out and back in for ever, which
-	 * is a grid blinking rather than pictures arriving.
-	 *
-	 * Nothing runs when the step is not on screen, and nothing runs for somebody who
-	 * asked for less motion.
+	 * Nothing runs when the step is off screen, or for somebody who asked for less
+	 * motion.
 	 */
 	$effect(() => {
 		if (step !== 5) return;
@@ -183,8 +143,8 @@
 		};
 
 		function swap() {
-			// Any tile but the one that just changed, so the eye is never sent back to
-			// the same corner twice running.
+			// Any tile but the one that just changed, so the eye is never sent back to the
+			// same corner twice running.
 			const offset = 1 + Math.floor(Math.random() * (TILES - 1));
 			const tile = last < 0 ? Math.floor(Math.random() * TILES) : (last + offset) % TILES;
 			last = tile;
@@ -192,8 +152,8 @@
 			queue();
 		}
 
-		// Not before the last tile has landed: changing a picture during the entrance
-		// would be a seventh thing happening while six are still arriving.
+		// Not before the last tile has landed: a seventh thing happening while six are
+		// still arriving.
 		timer = setTimeout(queue, TILES * TILE_STAGGER_MS + SWAP_FADE_MS);
 
 		return () => clearTimeout(timer);
@@ -202,11 +162,7 @@
 	/** Four drift, and a fifth turns up when the mention step calls for it. */
 	const drifting = TOUR_CAST.slice(0, 4);
 
-	/**
-	 * Where each one sits before it starts wandering, and which side its bubble is
-	 * on. Opposite sides on opposite halves, so nothing can grow into anything
-	 * else as the text wraps on a narrow screen.
-	 */
+	/** Where each one sits before it wanders, and which side its bubble is on. Opposite sides on opposite halves, so nothing grows into anything else. */
 	const SLOTS = [
 		{ at: 'left-0 top-0', flip: false },
 		{ at: 'right-0 top-[27%]', flip: true },
@@ -222,14 +178,9 @@
 	);
 
 	/**
-	 * The store, asked once, for one line.
-	 *
-	 * The tour's characters are written down (see `tourCast`), so nothing here has
-	 * to succeed for the step to make sense. What the store contributes is how many
-	 * personas are actually available on this instance today, which is a fact only
-	 * it has. If it cannot be reached the line is simply absent: an introduction
-	 * that opens by apologising for a network call is worse than one that says
-	 * slightly less.
+	 * The store, asked once, for one line. The characters are written down in
+	 * `tourCast`, so nothing here has to succeed; what the store adds is how many
+	 * personas this instance actually has. Unreachable, the line is simply absent.
 	 */
 	$effect(() => {
 		if (current === 'personas') void loadCatalog();
@@ -240,16 +191,12 @@
 	);
 
 	/**
-	 * How far the little conversation has got.
+	 * How far the little conversation has got: 1 is what you typed, then each
+	 * persona takes two beats, thinking and answering. One number rather than a flag
+	 * per bubble, so the second persona cannot answer before the first.
 	 *
-	 * 1 is what you typed, then each persona takes two beats, thinking and then
-	 * answering. A stage counter rather than a flag per bubble because the thing
-	 * being played is a sequence, and a sequence with one number in it cannot get
-	 * into a state where the second persona has answered before the first.
-	 *
-	 * The beats are real ones: the pause before an answer is the pause a model
-	 * actually takes, and the dots during it are the dots the conversation shows.
-	 * The step is a small replay of a turn, not a cartoon of one.
+	 * The beats are real: the pause is the pause a model takes, and the dots are the
+	 * dots the conversation shows.
 	 */
 	let stage = $state(0);
 	const finalStage = $derived(1 + replies.length * 2);
@@ -258,7 +205,7 @@
 		if (current !== 'mention') return;
 
 		// Someone who asked for less motion asked for less motion, not for a slower
-		// version of it: the whole thread is simply already there.
+		// version of it: the whole thread is already there.
 		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 			stage = finalStage;
 			return;
@@ -277,13 +224,7 @@
 		return () => timers.forEach(clearTimeout);
 	});
 
-	/**
-	 * Restoring instead of starting.
-	 *
-	 * Backups carry the profile, the connections and the conversations, so a
-	 * restored instance has nothing left for the tour to ask: it ends there rather
-	 * than walking somebody through settings they have just brought with them.
-	 */
+	/** Backups carry the profile, the connections and the conversations, so a restored instance has nothing left for the tour to ask. */
 	let fileInput: HTMLInputElement | undefined = $state();
 
 	const isFreshInstall = $derived(
@@ -354,10 +295,8 @@
 			</div>
 
 			{#if isFreshInstall}
-				<!-- The way past the whole tour, for somebody who has already been
-				     through it once somewhere else. Offered only on an install with
-				     nothing in it: anywhere else it is a button that overwrites what is
-				     already there. -->
+				<!-- The way past the whole tour, for somebody who has been through it
+				     elsewhere. Offered only on an install with nothing in it. -->
 				<button
 					type="button"
 					onclick={() => fileInput?.click()}
@@ -376,9 +315,8 @@
 			{/if}
 		</div>
 	{:else if current === 'servers'}
-		<!-- The one step that configures rather than introduces. It is here because
-		     without a connection nothing else in the tour can be tried, and it is
-		     absent for everybody who has one or cannot add one. -->
+		<!-- The one step that configures rather than introduces: without a connection
+		     nothing else can be tried. Absent for anyone who has one or cannot add one. -->
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col items-center gap-2 text-center">
 				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
@@ -405,9 +343,8 @@
 			<Profile showUsage={false} />
 		</div>
 	{:else if current === 'allowance'}
-		<!-- The one step about money, and it says it in a number. On a shared instance
-		     somebody else is paying for the models, and what that buys is the sort of
-		     thing people otherwise discover the day it runs out. -->
+		<!-- The one step about money, said in a number: on a shared instance somebody
+		     else pays, which people otherwise discover the day it runs out. -->
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col items-center gap-2 text-center">
 				<div class="bg-accent/10 flex h-11 w-11 items-center justify-center rounded-full">
@@ -444,9 +381,8 @@
 			</div>
 
 			<!-- They wander rather than sit in a list, because a list of four rows is a
-			     table of contents and these are meant to read as people. The paths are
-			     long, slow and out of phase with each other, so the group never falls
-			     into step and nothing ever moves fast enough to chase. -->
+		     table of contents and these are meant to read as people. The paths are long,
+		     slow and out of phase, so the group never falls into step. -->
 			<div class="relative h-56">
 				{#each drifting as persona, i (persona.id)}
 					<div
@@ -462,8 +398,8 @@
 							<span class="text-muted mb-0.5 block px-1 text-[10px] font-medium">
 								{persona.name}
 							</span>
-							<!-- A tail on the corner nearest its face, which is the whole of what
-							     makes a rounded box read as speech rather than as a chip. -->
+							<!-- A tail on the corner nearest its face, which is what makes a rounded box
+							     read as speech rather than as a chip. -->
 							<p
 								class="border-shade-3 bg-shade-0 text-active rounded-2xl border px-2.5 py-1.5 text-[11px] leading-snug shadow-sm {SLOTS[
 									i
@@ -497,8 +433,7 @@
 				</p>
 			</div>
 
-			<!-- The step plays the feature instead of describing it: a message with two
-			     names in it, then two answers arriving one after the other. -->
+			<!-- The step plays the feature instead of describing it. -->
 			<div class="border-shade-3 bg-shade-0/50 flex flex-col gap-3 rounded-2xl border p-3">
 				{#if stage >= 1}
 					<div class="flex justify-end" in:fly={{ y: 8, duration: 300, easing: cubicOut }}>
@@ -559,11 +494,9 @@
 				</p>
 			</div>
 
-			<!-- Each one shown as the thing it is rather than described: a playbook is a
-			     short numbered procedure, so it is drawn as one, and knowledge is a few
-			     named pieces of text, so it is drawn as those. Two cards side by side
-			     from `sm` up, stacked below it, because at a phone's width two columns
-			     of this would be two columns of nothing. -->
+			<!-- Each one drawn as the thing it is rather than described. Two cards side by
+		     side from `sm` up, stacked below it, where two columns would be two columns
+		     of nothing. -->
 			<div class="grid gap-3 sm:grid-cols-2">
 				<div class="border-shade-3 bg-shade-0/50 flex flex-col gap-2.5 rounded-2xl border p-3.5">
 					<div class="flex items-center gap-2">
@@ -621,24 +554,20 @@
 				</p>
 			</div>
 
-			<!-- A gallery filling in, played rather than described: the same shapes the
-			     page shows while it is drawing, then the pictures landing one by one.
-			     Nothing is fetched. These are the app's own accent, not photographs. -->
+			<!-- A gallery filling in, played rather than described. Nothing is fetched:
+		     these are the app's own accent, not photographs. -->
 			<div class="grid grid-cols-3 gap-2">
 				{#each tileImages as image, tile (tile)}
 					<div
 						class="tour-tile border-shade-3 from-accent/25 to-accent/5 relative aspect-square overflow-hidden rounded-xl border bg-gradient-to-br"
 						style="animation-delay:{tile * TILE_STAGGER_MS}ms"
 					>
-						<!-- Keyed on the picture, so a change replaces this element rather than
-						     editing it, and the two overlap while they trade places. Stacked
-						     absolutely for that reason: a cross-fade needs both on screen at once,
-						     and a tile that empties out first is the flicker this exists to avoid.
+						<!-- Keyed on the picture, so a change replaces this element rather than editing
+						     it, and the two overlap while they trade places. Stacked absolutely, because
+						     a cross-fade needs both on screen at once.
 
-						     Decorative, and the empty alt is deliberate: they are examples of what
-						     the feature makes, and the paragraph above has already said so. Six
-						     descriptions of six pictures would be six things for a screen reader to
-						     read out before the sentence that matters. -->
+						     Decorative, and the empty alt is deliberate: the paragraph above has already
+						     said what they are. -->
 						{#key image}
 							<img
 								src={TOUR_IMAGES[image]}
@@ -653,18 +582,17 @@
 		</div>
 	{/if}
 
-	<!-- The way out lives on whichever step is last, and which one that is depends
-	     on the instance. Rendered here rather than inside a step so there is one of
-	     it however the tour is composed. -->
+	<!-- The way out lives on whichever step is last, which depends on the instance.
+	     Rendered here so there is one of it however the tour is composed. -->
 	{#if step === TOTAL_STEPS - 1}
 		<Button class="mt-4 w-full" onclick={finish}>{$LL.tourStart()}</Button>
 	{/if}
 </OnboardingDialog>
 
 <style lang="postcss">
-	/* One path, taken at four different speeds and picked up mid-way by a negative
-	   delay, which is enough for four of them never to agree. `translate` rather
-	   than a transform, so nothing here fights a transition set in a class. */
+	/* One path at four different speeds, picked up mid-way by a negative delay,
+	   which is enough for four of them never to agree. `translate` rather than a
+	   transform, so nothing here fights a transition set in a class. */
 	.tour-drift {
 		animation-name: tour-drift;
 		animation-timing-function: ease-in-out;
@@ -690,16 +618,12 @@
 		}
 	}
 
-	/* A gallery filling in: each tile waits, fades up, and stays. The delay is set
-	   per tile inline, so six of them arrive as a sequence rather than together.
+	/* A gallery filling in: each tile waits, fades up, and stays, with the delay set
+	   per tile inline so they arrive as a sequence.
 
-	   Once, not on a loop. Looping it meant all six fading out and back in for ever,
-	   which reads as a grid blinking rather than as pictures arriving, and it fought
-	   the one thing this step is trying to show. After the entrance only a single
-	   picture changes at a time, cross-faded inside its own tile.
-
-	   `backwards` so the delay is spent invisible, rather than spent showing the
-	   tile it is about to fade in. */
+	   Once, not on a loop: looping meant all six fading out and back in for ever,
+	   which reads as a grid blinking. `backwards` so the delay is spent invisible
+	   rather than showing the tile it is about to fade in. */
 	.tour-tile {
 		animation: tour-tile 500ms ease-out backwards;
 	}
@@ -741,8 +665,7 @@
 			animation: none;
 		}
 
-		/* Nothing to give back: with the animation off, `backwards` never applies and
-		   the tiles simply are where they end up. The pictures stop changing too, in
-		   the effect that schedules them. */
+		/* Nothing to give back: with the animation off, `backwards` never applies.
+		   The pictures stop changing too, in the effect that schedules them. */
 	}
 </style>

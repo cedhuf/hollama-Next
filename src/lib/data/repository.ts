@@ -9,15 +9,7 @@ import type { Settings } from '$lib/settings';
 
 import type { StorageKey } from './keys';
 
-/**
- * Nobody is signed in.
- *
- * Distinct from a read that failed, because the two deserve opposite reactions:
- * a failure has to be shouted about, since an empty sidebar looks exactly like
- * an empty account. Being signed out is not a failure at all: the login page
- * asks the same questions as the app and would answer 401 to every one of them.
- * Saving still stays suspended either way.
- */
+/** Distinct from a read that failed: a failure has to be shouted about, since an empty sidebar looks like an empty account, while being signed out is not a failure at all. Saving stays suspended either way. */
 export class NotAuthenticatedError extends Error {
 	constructor() {
 		super('Not signed in');
@@ -36,43 +28,25 @@ export interface AppData {
 	personaMemory: PersonaMemory[];
 }
 
-/**
- * A portable backup, keyed by `StorageKey` for backwards-compatibility with
- * files exported by earlier versions.
- */
+/** A portable backup, keyed by `StorageKey` for compatibility with files exported by earlier versions. */
 export type Backup = Partial<Record<StorageKey, unknown>>;
 
 /**
- * The single seam between the app and where its data lives.
- *
- * Components never touch storage directly. They read and write the reactive
- * stores, which delegate persistence here: `ApiRepository`, the SvelteKit
- * endpoints backed by SQLite. Asynchronous throughout, so the stores are filled
- * by the `load*()` methods at boot rather than seeded synchronously.
+ * The single seam between the app and where its data lives. Components read and
+ * write the reactive stores, which delegate persistence here. Asynchronous
+ * throughout, so the stores are filled by the `load*()` methods at boot.
  */
 export interface DataRepository {
 	loadSettings(): Promise<Settings | null>;
 	loadServers(): Promise<Server[]>;
 	/** The conversation list: titles, dates and models. Never the messages. */
 	loadSessions(): Promise<SessionSummary[]>;
-	/**
-	 * One whole conversation, or `null` if there is no such conversation yet.
-	 *
-	 * Takes an optional `fetch` so a SvelteKit `load` can hand over its own: that
-	 * one carries the request's cookies, is recorded for hydration, and doesn't
-	 * make the browser repeat the call the server already made.
-	 */
+	/** Takes an optional `fetch` so a SvelteKit `load` can hand over its own: that one carries the request's cookies and is recorded for hydration. */
 	loadSession(id: string, fetchFn?: typeof fetch): Promise<Session | null>;
 	loadKnowledge(): Promise<Knowledge[]>;
 	loadPersonas(): Promise<Persona[]>;
 	loadPlaybooks(): Promise<Playbook[]>;
-	/**
-	 * What each persona remembers about the person signed in.
-	 *
-	 * Loaded whole rather than per persona: the always-present part of a memory is
-	 * capped, so the whole set is small, and a turn must not wait on a round trip
-	 * to find out what its persona knows.
-	 */
+	/** Loaded whole rather than per persona: the always-present part is capped, so the set is small, and a turn must not wait on a round trip to find out what its persona knows. */
 	loadPersonaMemory(): Promise<PersonaMemory[]>;
 
 	saveSettings(value: Settings): Promise<void>;
@@ -81,13 +55,10 @@ export interface DataRepository {
 	/**
 	 * Collections are written one item at a time.
 	 *
-	 * Handing over the whole array instead would describe a *value* ("here is the
-	 * state of the world") where what happened is an *operation* ("this session
-	 * changed"). A server given only the value has to infer removals from absence,
-	 * so every save becomes delete-everything-and-reinsert: the cost of a write
-	 * grows with the whole history, and any client holding a stale or partial list
-	 * silently erases what the others added. Saying what actually changed costs the
-	 * same in localStorage and is the only thing a database can implement safely.
+	 * The whole array would describe a *value* where what happened is an
+	 * *operation*. A server given only the value infers removals from absence, so
+	 * every save becomes delete-everything-and-reinsert, and any client holding a
+	 * stale list silently erases what the others added.
 	 */
 	saveSession(session: Session): Promise<void>;
 	deleteSession(id: string): Promise<void>;
@@ -100,30 +71,17 @@ export interface DataRepository {
 	savePersonaMemory(memory: PersonaMemory): Promise<void>;
 	deletePersonaMemory(personaId: string): Promise<void>;
 
-	/**
-	 * Wholesale replacement, for restoring a backup: the one case where the
-	 * caller really does mean "this is now the entire collection".
-	 */
+	/** Wholesale replacement, for restoring a backup: the one case where the caller really does mean "this is now the entire collection". */
 	replaceSessions(sessions: Session[]): Promise<void>;
 	replaceKnowledge(knowledge: Knowledge[]): Promise<void>;
 	replacePersonas(personas: Persona[]): Promise<void>;
 	replacePlaybooks(playbooks: Playbook[]): Promise<void>;
 	replacePersonaMemory(memories: PersonaMemory[]): Promise<void>;
 
-	/**
-	 * Conversations matching a content search, best first, from SQLite's full-text
-	 * index. `everything` includes what a clear set aside and what a compaction
-	 * replaced.
-	 */
+	/** From SQLite's full-text index, best first. `everything` includes what a clear set aside and what a compaction replaced. */
 	searchSessions(query: string, everything?: boolean): Promise<ConversationResult[]>;
 
-	/**
-	 * Land every queued write before going on.
-	 *
-	 * Called when what happens next reads back what was just written: creating a
-	 * conversation and navigating to it, above all. Absent on repositories that do
-	 * not queue, which is why it is optional rather than a no-op nobody can see.
-	 */
+	/** Called when what happens next reads back what was just written, above all creating a conversation and navigating to it. Absent on repositories that do not queue. */
 	flush?(): Promise<void>;
 
 	exportBackup(): Promise<Backup>;

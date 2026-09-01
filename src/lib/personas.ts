@@ -16,13 +16,9 @@ export interface PersonaParams {
 }
 
 /**
- * Where a persona came from, for the ones nobody here wrote.
- *
- * One notion rather than three. There used to be `installedFrom` for an admin's
- * shared persona and nothing at all for a file someone dropped on the page, which
- * meant the answer to "is this mine?" was spelled differently depending on how it
- * had arrived. The catalogue makes that a third case, and three spellings of the
- * same question is where it stops being answerable.
+ * Where a persona came from, for the ones nobody here wrote. One notion rather
+ * than three: `installedFrom` for an admin's share and nothing at all for a
+ * dropped file meant "is this mine?" was spelled differently per arrival route.
  *
  * A persona without a source is one you wrote.
  */
@@ -33,34 +29,23 @@ export interface PersonaSource {
 	/** The revision installed, so a newer one can be noticed later. */
 	revision?: number;
 	/**
-	 * What it said when it was installed, from `personaDigest`.
-	 *
-	 * Two comparisons rather than one, and they answer different questions.
-	 * Against the persona as it stands now: have *you* changed it. Against the
-	 * store's current listing: has the *store* changed it. Without this one, a new
-	 * revision upstream would make an untouched persona look edited, which is the
-	 * wrong thing to tell someone and the wrong thing to offer them.
+	 * What it said when installed, from `personaDigest`. Two comparisons: against
+	 * the persona now, have *you* changed it; against the store's listing, has the
+	 * *store*. Without this, a new revision upstream makes an untouched persona look
+	 * edited.
 	 */
 	digest?: string;
 }
 
-/**
- * The catalogue or shared id a persona was installed from, whichever field says so.
- *
- * `installedFrom` is what personas installed before `source` existed carry, and
- * they are already in people's stores. Read in one place so nothing else has to
- * know there were ever two fields.
- */
+/** `installedFrom` is what personas installed before `source` existed carry. Read in one place, so nothing else knows there were two fields. */
 export function personaOrigin(persona: Persona): string | undefined {
 	return persona.source?.id ?? persona.installedFrom;
 }
 
 /**
- * A reusable "character": a named bundle of a system prompt (its soul), a base
- * model, an avatar and a few capabilities. Created in the Library, chatted with
- * as an ongoing relationship. A persona is a *template*, when a chat starts its
- * values are snapshotted into the session, so the persona never acts as a live
- * resolution layer (which would fight the per-session/per-model/global resolver).
+ * A named bundle of a system prompt, a base model, an avatar and a few
+ * capabilities. A *template*: its values are snapshotted into the session when a
+ * chat starts, so it never acts as a live resolution layer.
  */
 export interface Persona {
 	id: string;
@@ -80,16 +65,11 @@ export interface Persona {
 	/** Model name; resolved to a concrete server when a chat is created. Empty = your default. */
 	modelName: string;
 	/**
-	 * The language it answers in, whatever language it was written in.
-	 *
-	 * Free text rather than a list, because the point is that it is not tied to the
-	 * interface: someone reading Llooma in French can perfectly well want this one
-	 * assistant to answer in Spanish, and the list of locales the app is translated
-	 * into has nothing to do with the languages a model speaks.
+	 * The language it answers in, whatever language it was written in. Free text
+	 * rather than a list: the locales the app is translated into have nothing to do
+	 * with the languages a model speaks.
 	 *
 	 * Empty means the interface's language, resolved when a conversation starts.
-	 * Not stored resolved, so changing the interface language moves the personas
-	 * that never said otherwise.
 	 */
 	language?: string;
 	params?: PersonaParams;
@@ -168,22 +148,14 @@ export const deletePersona = (id: string): void => {
 };
 
 /**
- * Open the persona's single ongoing conversation, creating it (seeded from the
- * persona) the first time. The persona is a template: its values are snapshotted
- * into the session here, so the chat stays self-contained afterwards. Returns the
- * session id for the caller to navigate to.
- */
-/**
  * The language a persona answers in, and the line that says so.
  *
- * Written into the conversation's system prompt rather than left to the model to
- * infer, because inferring it is exactly what goes wrong: a prompt written in
- * English makes an English answer feel right to the model even when everything
- * around it is French. One sentence removes the guess.
+ * Written into the system prompt rather than left to the model to infer, since
+ * inferring is what goes wrong: a prompt written in English makes an English
+ * answer feel right even when everything around it is French.
  *
  * Resolved when the conversation starts, like everything else a persona
- * contributes, so it is a snapshot and not a live setting reaching into a chat
- * already under way.
+ * contributes, so it is a snapshot and not a live setting.
  */
 export function languageInstruction(persona: Persona): string {
 	const settings = get(settingsStore);
@@ -197,13 +169,9 @@ export function languageInstruction(persona: Persona): string {
 /**
  * Open a persona's conversation, creating it the first time.
  *
- * Async because the conversation has to exist where the next line will look for
- * it. Every caller navigates to the id this returns, and the page behind that id
- * reads the conversation back from storage: with the write still queued, the
- * read came back empty, the page started a blank conversation on the same id,
- * and the persona's prompt, greeting and binding were overwritten by it. The
- * persona still pointed at the conversation; the conversation no longer pointed
- * back, so it behaved as an ordinary chat with no character and no memory.
+ * Async because the conversation has to exist where the next line looks for it:
+ * with the write still queued, the page read back empty, started a blank
+ * conversation on the same id, and overwrote the prompt, greeting and binding.
  */
 export async function launchPersona(persona: Persona, models: Model[]): Promise<string> {
 	const sessions = get(sessionsStore) || [];
@@ -212,10 +180,9 @@ export async function launchPersona(persona: Persona, models: Model[]): Promise<
 	}
 
 	const id = generateRandomId();
-	// A persona names a model, or leaves it empty to mean "whichever is mine".
-	// The fallback has to happen here: a conversation opened directly resolves
-	// nothing, so an empty one arrived with no model at all and could not be
-	// answered in until somebody picked one by hand.
+	// A persona names a model, or leaves it empty to mean "whichever is mine". The
+	// fallback has to happen here: a conversation opened directly resolves nothing,
+	// so an empty one arrived with no model at all.
 	const defaultModel = get(chatDefaultsConfig).defaultModel.value;
 	const model =
 		models.find((m) => m.name === persona.modelName) ??
@@ -244,12 +211,7 @@ export async function launchPersona(persona: Persona, models: Model[]): Promise<
 	return id;
 }
 
-/**
- * Personas you've actually talked to, i.e. whose bound conversation still
- * exists, most recent first. Drives both the sidebar launchers and the home
- * "recent personas" row. A persona leaves this list when its conversation is
- * deleted (see `unbindPersonaSession`).
- */
+/** Personas whose bound conversation still exists, most recent first. One leaves this list when its conversation is deleted, see `unbindPersonaSession`. */
 export function conversedPersonas(personas: Persona[], sessions: SessionSummary[]): Persona[] {
 	const updatedAt: Record<string, string> = {};
 	for (const s of sessions) updatedAt[s.id] = s.updatedAt ?? '';
@@ -273,8 +235,7 @@ export function installPersona(persona: Persona): Persona {
 }
 
 // --- Import / export -------------------------------------------------------
-// We read our own native format *and* OpenWebUI model exports, so the wide
-// ecosystem of existing personas can be imported. Native export stays clean.
+// Reads our own native format and OpenWebUI model exports. Native export stays clean.
 
 interface OpenWebUIModelMeta {
 	description?: string;

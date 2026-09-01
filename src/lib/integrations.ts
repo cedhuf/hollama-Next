@@ -1,15 +1,12 @@
 /**
- * Bots living outside Llooma, and what each of them is configured to be.
+ * Bots living outside Llooma, and what each is configured to be.
  *
  * An integration is an account somewhere else that answers with a model from
- * here. Chatto is the first, and the shape below is deliberately not built
- * around it: the row carries a `kind` and a bag of settings, so the second one
- * is a new folder under `server/integrations/` and a new form, not a migration.
+ * here. The row carries a `kind` and a bag of settings, so the second one is a
+ * new folder under `server/integrations/` and a new form, not a migration.
  *
- * Nothing in here is stored per conversation. The remote chat keeps the
- * transcript, this side reads what it needs at the moment it is called and
- * forgets it afterwards, which is the reason there is no session, no history
- * and no compaction anywhere near this feature.
+ * Nothing is stored per conversation: the remote chat keeps the transcript, and
+ * this side reads what it needs when it is called and forgets it.
  */
 
 export const INTEGRATION_KINDS = ['chatto'] as const;
@@ -17,13 +14,10 @@ export const INTEGRATION_KINDS = ['chatto'] as const;
 export type IntegrationKind = (typeof INTEGRATION_KINDS)[number];
 
 /**
- * How much of the surrounding conversation goes to the model.
- *
- * The remote server does not decide this: a notification carries an exact
- * pointer to one message, and everything around it is a request we choose to
- * make. So it is a setting, and its floor is real: `mention` sends the single
- * message that called the bot, which is the only mode that guarantees nothing
- * else from the room is read.
+ * How much of the surrounding conversation goes to the model. The remote server
+ * does not decide this: a notification points at one message, and everything
+ * around it is a request we choose to make. Its floor is real, `mention` being
+ * the only mode that guarantees nothing else from the room is read.
  */
 export type ContextDepth =
 	/** The message that called the bot, and nothing else. */
@@ -33,14 +27,7 @@ export type ContextDepth =
 	/** The whole thread it was called in, root included. */
 	| 'thread';
 
-/**
- * Where the bot's instructions come from.
- *
- * `default` is what a conversation started here would get, which is the honest
- * default: a bot with no instructions at all is a different assistant from the
- * one this account talks to every day. The other two replace it rather than add
- * to it, because a persona is a whole character and not a modifier.
- */
+/** `default` is what a conversation started here would get. The other two replace it rather than add to it, because a persona is a whole character. */
 export type InstructionsMode = 'default' | 'persona' | 'custom';
 
 /** Where the answer is posted, once it exists. */
@@ -53,32 +40,25 @@ export type Placement =
 	| 'room';
 
 /**
- * The tools a bot may use, out of the ones the composer offers.
+ * The tools a bot may use. All but one: interactive choices draw buttons, and a
+ * chat server that renders a message as text has nothing to draw them with.
  *
- * All but one, and the missing one is deliberate: interactive choices draw
- * buttons, and a chat server that renders a message as text has nothing to draw
- * them with. Offering it would be offering something that cannot work.
- *
- * `mcp` is here on the owner's say-so and behaves differently from everywhere
- * else in the app. In a conversation, every MCP call is put to the person before
- * it is made; a bot has no person to put it to, so ticking this box is accepting
- * that the bot's calls run unasked, on the owner's servers, at the prompting of
- * whoever is in the room. Off by default, and it should stay a decision somebody
- * took rather than one they inherited.
+ * `mcp` is on the owner's say-so and behaves differently from everywhere else:
+ * a bot has no person to put a call to, so ticking this accepts that its calls
+ * run unasked, on the owner's servers, at the prompting of whoever is in the
+ * room. Off by default, and it should stay a decision somebody took.
  */
 export const BOT_TOOLS = ['webSearch', 'webFetch', 'sendCurrentDate', 'thinking', 'mcp'] as const;
 
 export type BotTool = (typeof BOT_TOOLS)[number];
 
 /**
- * How many bots one account may run, and how many answers an hour it may
- * produce across all of them, before an administrator says otherwise.
+ * How many bots one account may run, and how many answers an hour across all of
+ * them, before an administrator says otherwise.
  *
- * Defaults rather than laws. The first is a physical bound: each bot is a timer
- * and an open conversation with a chat server, held in this process for as long
- * as it is switched on. The second is what a runaway costs before somebody
- * notices, and it is counted per account because a per-bot ceiling is walked
- * around by making a second bot.
+ * The first is a physical bound: each bot is a timer and an open conversation
+ * held in this process. The second is what a runaway costs, counted per account
+ * because a per-bot ceiling is walked around by making a second bot.
  */
 export const DEFAULT_BOTS_PER_USER = 5;
 export const DEFAULT_BOT_REPLIES_PER_HOUR = 60;
@@ -104,13 +84,7 @@ export interface ChattoConfig {
 	serverId: string;
 	model: string;
 	instructionsMode: InstructionsMode;
-	/**
-	 * Who the bot is, in `persona` mode.
-	 *
-	 * A persona contributes its prompt and nothing else: no memory, no library
-	 * conversation, no knowledge. It is a way to reuse a personality that already
-	 * exists, not a way to give the bot a life of its own here.
-	 */
+	/** A persona contributes its prompt and nothing else: no memory, no library conversation, no knowledge. */
 	personaId?: string;
 	/** The instructions, in `custom` mode. */
 	instructions: string;
@@ -132,14 +106,7 @@ export interface IntegrationView {
 	label: string;
 	/** What the owner wants. */
 	enabled: boolean;
-	/**
-	 * What the instance allows, which is not the same question.
-	 *
-	 * An administrator suspends a bot with this rather than by turning the
-	 * owner's switch off: a switch the owner can turn back on is a suggestion,
-	 * not a decision. The owner keeps their own switch, and is told why it
-	 * changes nothing for now.
-	 */
+	/** An administrator suspends a bot with this rather than by turning the owner's switch off: a switch the owner can turn back on is a suggestion. */
 	blocked: boolean;
 	/** True when a credential is stored. Its value is never returned. */
 	hasSecret: boolean;
@@ -179,13 +146,7 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[], fallback
 	return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
-/**
- * What was sent, read as what it is allowed to be.
- *
- * Applied on the way in and on the way out of the database, so a row written by
- * an older version, or by somebody with curl, is still a configuration the
- * runtime can act on without checking every field again at every use.
- */
+/** Applied on the way in and out of the database, so a row written by an older version, or by curl, is still a configuration the runtime can act on. */
 export function normaliseConfig(kind: IntegrationKind, raw: unknown): IntegrationConfig {
 	const base = defaultConfig(kind);
 	const input = (raw ?? {}) as Partial<ChattoConfig>;

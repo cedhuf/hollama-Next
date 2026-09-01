@@ -5,17 +5,13 @@ import type { RunEvent, RunStatus, RunSummary, SequencedRunEvent } from '$lib/ch
 /**
  * Turns in flight, held by the process rather than by a tab.
  *
- * This is the whole point of the exercise. A generation belongs to the
- * conversation, not to the window that happened to start it, so it lives here:
- * it keeps going when nobody is listening, it remembers everything it emitted,
- * and a client that comes back after a reload replays the part it missed.
+ * A generation belongs to the conversation, not to the window that started it,
+ * so it lives here: it keeps going when nobody is listening, it remembers what
+ * it emitted, and a client that comes back replays what it missed.
  *
- * In memory on purpose, and only in memory. A restart loses whatever was in
- * flight, and a second replica behind a load balancer has its own map: both are
- * real limits, both are fixed the same way (a shared store) on the day someone
- * runs llooma at that scale. Paying for that now would buy nothing, because the
- * failure it prevents is a server restart landing inside the ten seconds a model
- * takes to answer.
+ * In memory only. A restart loses whatever was in flight and a second replica
+ * has its own map; both are fixed by a shared store on the day somebody runs
+ * llooma at that scale.
  */
 
 /** How long a finished run stays readable, so a reload can still collect it. */
@@ -35,13 +31,7 @@ interface Run {
 	events: SequencedRunEvent[];
 	controller: AbortController;
 	listeners: Set<(event: SequencedRunEvent) => void>;
-	/**
-	 * MCP calls this run is stopped on, by call id.
-	 *
-	 * Held here rather than in the turn because the answer arrives on a different
-	 * request, from a tab that may not be the one that started it. The run is what
-	 * both sides can name.
-	 */
+	/** Held here rather than in the turn: the answer arrives on a different request, from a tab that may not be the one that started it. */
 	pending: Map<string, (allowed: boolean) => void>;
 }
 
@@ -55,8 +45,7 @@ function sweep(): void {
 	}
 
 	// Still over the ceiling after the ordinary sweep: give up the oldest finished
-	// runs first, and only then the oldest running ones, which is the least bad
-	// order to break a promise in.
+	// runs first, then the oldest running ones.
 	if (runs.size <= MAX_RUNS) return;
 	const ordered = [...runs.values()].sort((a, b) => {
 		if (!!a.finishedAt !== !!b.finishedAt) return a.finishedAt ? -1 : 1;
@@ -85,12 +74,7 @@ export function createRun(sessionId: string, userId: string | null): Run {
 	return run;
 }
 
-/**
- * Write an event down and hand it to whoever is watching.
- *
- * The log is what makes this survivable, so it is written first and always:
- * a listener that throws must not cost the run its own memory of what happened.
- */
+/** The log is what makes this survivable, so it is written first and always: a listener that throws must not cost the run its memory of what happened. */
 export function emitTo(run: Run, event: RunEvent): void {
 	const sequenced: SequencedRunEvent = { id: run.events.length + 1, event };
 	run.events.push(sequenced);
@@ -111,18 +95,12 @@ function finish(run: Run, status: RunStatus): void {
 	run.status = status;
 	run.finishedAt = Date.now();
 	// A run that has ended cannot make the call it was asking about, so every
-	// question still standing is answered no. Silence is never consent here, and
-	// a promise nobody will ever settle is a turn that never returns.
+	// question still standing is answered no. Silence is never consent here.
 	for (const settle of run.pending.values()) settle(false);
 	run.pending.clear();
 }
 
-/**
- * Wait for a person to allow or refuse one call.
- *
- * Returns false when the wait runs out, when the run is cancelled, and when
- * anybody says no. The only way to true is somebody saying yes.
- */
+/** False when the wait runs out, when the run is cancelled, and when anybody says no. The only way to true is somebody saying yes. */
 export function awaitApproval(run: Run, callId: string, timeoutMs: number): Promise<boolean> {
 	return new Promise((resolve) => {
 		let settled = false;
@@ -145,12 +123,7 @@ export function awaitApproval(run: Run, callId: string, timeoutMs: number): Prom
 	});
 }
 
-/**
- * Answer one of those questions. True when there was one to answer.
- *
- * Records the answer as an event before settling, so every client watching the
- * run stops asking, including the ones that never sent anything.
- */
+/** Records the answer as an event before settling, so every client watching stops asking, including the ones that never sent anything. */
 export function decideApproval(run: Run, callId: string, allowed: boolean): boolean {
 	const settle = run.pending.get(callId);
 	if (!settle) return false;
@@ -162,8 +135,8 @@ export function decideApproval(run: Run, callId: string, allowed: boolean): bool
 export function getRun(id: string, userId: string | null): Run | undefined {
 	const run = runs.get(id);
 	if (!run) return undefined;
-	// Ownership is checked here rather than in each route, because forgetting it
-	// in one route is all it takes to hand someone else's conversation over.
+	// Checked here rather than in each route: forgetting it in one route is all it
+	// takes to hand someone else's conversation over.
 	if (run.userId !== userId) return undefined;
 	return run;
 }
@@ -171,14 +144,10 @@ export function getRun(id: string, userId: string | null): Run | undefined {
 /**
  * The conversation's most recent run, which is what a reloading tab asks for.
  *
- * The most recent, and it used to be whichever came out of the map first, which
- * is the oldest one still held. So a conversation answered twice inside the
- * retention window handed a returning tab the turn before last: it replayed a
- * finished run, saw its ending, and sat there looking idle while the real one was
- * still being written a few metres away.
- *
- * A turn still going wins over a finished one whatever their order, since that is
- * the one there is anything left to watch.
+ * It used to be whichever came out of the map first, which is the oldest still
+ * held, so a conversation answered twice inside the retention window handed a
+ * returning tab the turn before last. A turn still going wins over a finished
+ * one, being the one there is anything left to watch.
  */
 export function findRunForSession(sessionId: string, userId: string | null): Run | undefined {
 	let best: Run | undefined;
@@ -194,22 +163,15 @@ export function findRunForSession(sessionId: string, userId: string | null): Run
 
 export function cancelRun(run: Run): void {
 	if (run.status !== 'running') return;
-	// Said before the abort lands, so a client that is looking at the question
-	// sees it withdrawn rather than left hanging until the error arrives.
+	// Said before the abort lands, so a client looking at the question sees it
+	// withdrawn rather than hanging until the error arrives.
 	for (const callId of run.pending.keys()) {
 		emitTo(run, { type: 'approvalResolved', id: callId, allowed: false, by: 'aborted' });
 	}
 	run.controller.abort();
 }
 
-/**
- * Watch a run from a given point in its log.
- *
- * Everything already recorded after `fromId` is handed over first, then the
- * live ones. Deliberately not deduplicated against what the caller may already
- * have: the sequence number is the contract, and a caller that asks for the
- * whole log gets the whole log.
- */
+/** Everything recorded after `fromId` first, then the live ones. Deliberately not deduplicated: the sequence number is the contract, and a caller that asks for the whole log gets it. */
 export function subscribe(
 	run: Run,
 	fromId: number,

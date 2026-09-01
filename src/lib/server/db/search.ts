@@ -5,13 +5,7 @@ import { resolveSessionTitle } from '$lib/sessionShape';
 
 import { getDb } from './index';
 
-/**
- * Full-text search over message content, backed by SQLite's FTS5 index
- * (`sessions_fts`, created in migration 6).
- *
- * Everything that knows about that index lives here: how it is filled, how it is
- * kept in step with the stored conversations, and how it is queried.
- */
+/** Full-text search over message content, backed by SQLite's FTS5 index (`sessions_fts`, migration 6). Everything that knows about that index lives here. */
 
 export interface SearchHit {
 	sessionId: string;
@@ -22,26 +16,17 @@ export interface SearchHit {
 }
 
 /**
- * Rebuild a conversation's entries in the index.
- *
- * Reads back from the row that was just written rather than from the object in
- * hand: the extraction then lives in exactly one place (this statement and the
- * backfill in migration 6 are the same SELECT) so the index cannot drift from
- * what the stored data actually contains.
+ * Rebuild a conversation's entries in the index, reading back from the row just
+ * written rather than the object in hand, so the extraction lives in one place
+ * and cannot drift from what is stored.
  */
 /**
- * The markers a conversation carries, extracted from the same walk.
+ * The markers a conversation carries, from the same walk. Written beside the
+ * index rather than derived at search time, so the statement that says where a
+ * boundary is and the one that says where a word is cannot fall out of step.
  *
- * Written beside the index rather than derived at search time. Both statements
- * live here, next to each other, so the one that says where a boundary is and
- * the one that says where a word is are updated by the same call and cannot fall
- * out of step.
- *
- * The list of kinds comes from the registry rather than being spelled out. This
- * used to be a `CASE` naming one field per kind, which is the third place the
- * same idea was written and the one nobody would have remembered to edit. Now
- * the kind is a value in the JSON, so SQL reads it like any other column and a
- * new kind reaches the database by existing.
+ * The kinds come from the registry rather than a `CASE` naming one field each,
+ * so a new kind reaches the database by existing.
  */
 const MARKERS_SELECT = `
 	SELECT s.id, s.user_id, m.key, json_extract(m.value, '$.note.kind')
@@ -99,13 +84,10 @@ export function reindexAllSessions(userId: string): void {
 }
 
 /**
- * Turn what the user typed into an FTS5 expression.
- *
- * The raw string cannot go through as-is: `-`, `*`, `"`, `NEAR` and `OR` are
- * operators there, so a quote or a stray dash turns a search into a syntax
- * error. Each word is quoted as a literal (doubling any inner quote, FTS5's own
- * escape), which also makes the words implicitly AND-ed. The last one gets a
- * prefix `*` so results narrow while still typing.
+ * Turn what the user typed into an FTS5 expression. `-`, `*`, `"`, `NEAR` and
+ * `OR` are operators there, so a stray dash turns a search into a syntax error.
+ * Each word is quoted as a literal, which also ANDs them; the last gets a prefix
+ * `*` so results narrow while still typing.
  */
 export function toMatchExpression(query: string): string | null {
 	const words = query
@@ -118,13 +100,7 @@ export function toMatchExpression(query: string): string | null {
 	return [...words.slice(0, -1), `${words[words.length - 1]}*`].join(' ');
 }
 
-/**
- * Matching messages, best first.
- *
- * `rank` is FTS5's relevance ordering (more distinctive terms, closer together,
- * in shorter messages, score higher): the caller groups by conversation while
- * keeping this order.
- */
+/** `rank` is FTS5's relevance ordering: more distinctive terms, closer together, in shorter messages. The caller groups by conversation while keeping it. */
 export function searchSessions(userId: string, query: string, limit = 100): SearchHit[] {
 	const match = toMatchExpression(query);
 	if (!match) return [];
@@ -158,14 +134,7 @@ export interface SessionHeader {
 	updatedAt?: string;
 }
 
-/**
- * Titles and dates for the conversations a search matched.
- *
- * Resolved here rather than left to the client: the same fallback to the first
- * user message that `resolveSessionTitle` applies has to happen somewhere, and once
- * conversations load lazily the client no longer holds the messages to derive it
- * from.
- */
+/** Resolved here rather than left to the client: the same fallback to the first user message has to happen somewhere, and a lazily loading client no longer holds the messages. */
 export function getSessionHeaders(userId: string, ids: string[]): Map<string, SessionHeader> {
 	const headers = new Map<string, SessionHeader>();
 	if (!ids.length) return headers;
@@ -191,12 +160,9 @@ export function getSessionHeaders(userId: string, ids: string[]): Map<string, Se
 /**
  * The boundaries a conversation carries, for hiding what is behind them.
  *
- * A read of `session_markers`, which is a handful of integers per conversation
- * and indexed by conversation. It used to unfold every matched conversation's
- * messages array with `json_each` on each search: correct, and megabytes of JSON
- * reparsed to answer a question about a few numbers. The extraction moved to the
- * write, where it happens once and where the same walk was already being done
- * for the full-text index.
+ * A handful of integers per conversation, indexed. It used to unfold every
+ * matched conversation's messages with `json_each`: correct, and megabytes of
+ * JSON reparsed to answer a question about a few numbers.
  */
 export interface SessionBoundaries {
 	/** Index of the last clear marker, or -1. Everything below it is set aside. */

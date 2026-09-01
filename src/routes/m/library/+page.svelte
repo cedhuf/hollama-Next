@@ -45,39 +45,22 @@
 	/**
 	 * The Library, on a phone.
 	 *
-	 * It exists because the alternative was worse than missing: the row in Profile
-	 * used to leave for the full interface, which has a sidebar this one does not,
-	 * and the redirect that keeps a phone on the phone then caught the next tap and
-	 * threw you back. A door that only opens outwards, and closes by accident.
+	 * Not the same page narrowed. The desktop Library is three grids down one long
+	 * scroll, which works because a wide screen shows all three at once; a phone
+	 * shows one column, so they become three walls and the headings stop being a
+	 * map. Here the three are a switch and one list at a time.
 	 *
-	 * Not the same page narrowed. The desktop Library is three grids of cards down
-	 * one long scroll, which works because a wide screen shows all three at once and
-	 * the eye picks the section. A phone shows one column, so three grids become
-	 * three walls to scroll past, and the section headings stop being a map. Here
-	 * the three are a switch at the top and one list at a time: a persona, a
-	 * playbook and a document are different things, and this is the width where you
-	 * only ever want one of them.
+	 * Rows rather than cards, for the same reason: at this width a card is a row
+	 * with wasted air.
 	 *
-	 * Rows rather than cards, for the same reason. A 200px card holds an avatar, a
-	 * name, a tagline and two buttons because it has two dimensions to put them in.
-	 * At this width a card is a row with wasted air, so it is a row.
-	 *
-	 * What is not rewritten is everything behind it. The persona editor, the
-	 * playbook editor, the knowledge editor and the store are the app's own dialogs,
-	 * which already take the whole screen on a phone, and the import is
-	 * `$lib/libraryActions`, shared with the full interface so the two cannot learn
-	 * different formats.
+	 * Everything behind it is shared. The editors and the store are the app's own
+	 * dialogs, already full-screen on a phone, and the import is
+	 * `$lib/libraryActions`, so the two interfaces cannot learn different formats.
 	 */
 
 	type Shelf = 'personas' | 'playbooks' | 'knowledge';
 
-	/**
-	 * Which of the three is showing.
-	 *
-	 * Kept here and not in the address. It is a view of one screen rather than a
-	 * place, nobody links to "the library, on playbooks", and putting it in the URL
-	 * would put a back button between two taps of a switch.
-	 */
+	/** Kept here and not in the address: it is a view of one screen rather than a place, and a URL would put a back button between two taps of a switch. */
 	let shelf = $state<Shelf>('personas');
 
 	const shelves = $derived([
@@ -103,15 +86,12 @@
 	}
 
 	/**
-	 * Talking to a persona, which on a phone means out loud.
+	 * Talking to a persona, which on a phone means out loud: the same tap goes to
+	 * the voice screen, because that is where this interface sends you from
+	 * everywhere else a persona is offered.
 	 *
-	 * The full interface opens their conversation to type in. Here the same tap goes
-	 * to the voice screen, because that is where this interface sends you from every
-	 * other place a persona is offered, and a library that disagreed with the home
-	 * screen about what a persona is for would be the odd one.
-	 *
-	 * The rule below watches for unresolved paths, and this one is resolved.
-	 * `resolve` has nowhere to put a query, which is the whole of the mismatch.
+	 * The rule below watches for unresolved paths and this one is resolved;
+	 * `resolve` has nowhere to put a query.
 	 */
 	async function talkTo(persona: Persona) {
 		const id = await launchPersona(persona, $settingsStore.models ?? []);
@@ -119,14 +99,7 @@
 		await goto(`${resolve('/m/voice')}?session=${encodeURIComponent(id)}`);
 	}
 
-	/**
-	 * The listing, for the badges on your own personas.
-	 *
-	 * Without it a persona installed before the fingerprint existed has nothing to
-	 * be compared against and is reported as untouched, whatever you have done to
-	 * it. Cached after the first fetch, and shared with the full interface's copy of
-	 * this page, so asking here costs nothing twice.
-	 */
+	/** Without it, a persona installed before the fingerprint existed has nothing to be compared against and is reported as untouched. Cached after the first fetch and shared with the full interface. */
 	$effect(() => {
 		void loadCatalog();
 	});
@@ -172,11 +145,7 @@
 	/** Knowledge in no collection, which is where everything starts out. */
 	const looseKnowledge = $derived($knowledgeStore.filter((item) => !item.collectionId));
 
-	/**
-	 * Naming a collection happens where the collection will appear, not in a dialog
-	 * stacked on the page: the row turns into a field, you type, you confirm.
-	 * Creating and renaming share it, since they are the same act.
-	 */
+	/** Naming happens where the collection will appear, not in a dialog: the row turns into a field. Creating and renaming share it, being the same act. */
 	let namingNew = $state(false);
 	let renamingId = $state<string | null>(null);
 	let draftName = $state('');
@@ -255,8 +224,7 @@
 
 <div class="flex flex-col gap-4 px-5 pt-6 pb-32">
 	<!-- The title, and the two things that bring something in from outside. Round
-	     and in the same glass as the rest of this interface, because they are the
-	     same kind of control as the search and settings keys on the home screen. -->
+	     and in the same glass as the search and settings keys on the home screen. -->
 	<header class="flex items-center gap-2">
 		<h1 class="text-active flex-1 text-2xl font-semibold tracking-tight">{$LL.library()}</h1>
 
@@ -278,9 +246,8 @@
 		</button>
 	</header>
 
-	<!-- The three shelves, as a switch rather than as three headings down one
-	     scroll. The count rides on the label: it is the one thing you want before
-	     choosing, and it saves the empty shelf being a surprise. -->
+	<!-- The three shelves as a switch rather than three headings down one scroll.
+	     The count rides on the label, so an empty shelf is never a surprise. -->
 	<div class="border-shade-3 bg-shade-0 flex gap-1 rounded-full border p-1">
 		{#each shelves as entry (entry.id)}
 			<button
@@ -304,9 +271,8 @@
 				{@const state = personaState(persona, entryFor(persona)?.contentDigest)}
 				{@const stale = state === 'edited' || state === 'outdated' || state === 'edited-outdated'}
 				<div class="border-shade-3 bg-shade-0 flex items-center gap-3 rounded-2xl border px-3 py-3">
-					<!-- The row is the edit, and the buttons on it are the exceptions. A
-					     persona is a thing you keep rather than a thing you run from here:
-					     running it is the microphone, which is its own target. -->
+					<!-- The row is the edit and the buttons are the exceptions: a persona is a thing
+					     you keep, and running it is the microphone, which is its own target. -->
 					<button
 						type="button"
 						onclick={() => editPersona(persona)}
@@ -319,9 +285,7 @@
 									{persona.name || $LL.untitled()}
 								</span>
 								{#if stale}
-									<!-- What it is now, not where it came from. Thin, and tinted
-									     rather than grey: it is the one thing on the row worth
-									     catching an eye. -->
+									<!-- What it is now, not where it came from. Thin and tinted rather than grey. -->
 									<span
 										class="border-accent/30 bg-accent/10 text-accent shrink-0 rounded border px-1 text-[9px] leading-[15px] font-medium"
 									>
@@ -400,9 +364,8 @@
 		</section>
 	{:else}
 		<section class="flex flex-col gap-2">
-			<!-- Loose knowledge first: it is where everything starts out, so it is what
-			     you came to look at. No heading over it, because "everything not filed
-			     anywhere" is not a category anyone thinks in. -->
+			<!-- Loose knowledge first: it is where everything starts out. No heading, since
+			     "everything not filed anywhere" is not a category anyone thinks in. -->
 			{#each looseKnowledge as knowledge (knowledge.id)}
 				{@render document(knowledge)}
 			{/each}
@@ -424,8 +387,7 @@
 			{/if}
 
 			<!-- A collection is a heading over its own rows, folded away when it is not
-			     wanted. Nothing to enter and nothing to come back from, which is the one
-			     thing this screen borrows unchanged from the full interface. -->
+			     wanted. Nothing to enter and nothing to come back from. -->
 			{#each collections as collection (collection.id)}
 				{@const items = knowledgeInCollection($knowledgeStore, collection.id)}
 				{@const collapsed = isCollapsed(collection.id)}
@@ -450,8 +412,7 @@
 								<span class="text-muted shrink-0 text-xs font-normal">{items.length}</span>
 							</button>
 
-							<!-- Always visible, unlike the full interface's, where they appear
-							     under a pointer. There is no pointer here. -->
+							<!-- Always visible, unlike the full interface's: there is no pointer here. -->
 							<button
 								type="button"
 								onclick={() => startRenaming(collection.id, collection.name)}
@@ -460,8 +421,8 @@
 							>
 								<Pencil class="h-3.5 w-3.5" />
 							</button>
-							<!-- What survives is on the label: "delete the folder" reads as
-							     "delete what is in it" to most people, and here it does not. -->
+							<!-- What survives is on the label: "delete the folder" reads as "delete what is
+							     in it" to most people, and here it does not. -->
 							<ButtonConfirm
 								compact
 								onConfirm={() => deleteCollection(collection.id)}
@@ -499,9 +460,8 @@
 	</button>
 {/snippet}
 
-<!-- The way to add one more of whatever is on screen, at the end of the list where
-     somebody arrives having scrolled and found nothing that suits. Dashed, so it
-     reads as a slot rather than as another item. -->
+<!-- One more of whatever is on screen, at the end of the list. Dashed, so it
+     reads as a slot rather than another item. -->
 {#snippet add(label: string, onclick: () => void, disabled = false)}
 	<button
 		type="button"
@@ -514,8 +474,8 @@
 	</button>
 {/snippet}
 
-<!-- The row became the field it is going to name. Nothing opened, nothing covered
-     the list, and the name is typed where the folder will sit. -->
+<!-- The row became the field it is going to name: nothing opened, nothing
+     covered the list. -->
 {#snippet nameRow(placeholder: string)}
 	<div class="border-accent bg-shade-0 flex items-center gap-3 rounded-2xl border px-4 py-3.5">
 		<Folder class="text-muted h-4 w-4 shrink-0" />
@@ -531,8 +491,8 @@
 {/snippet}
 
 <!-- Several at once, and text as readily as JSON: the import reads whatever it is
-     handed, so restricting the picker would be the one place still asking the
-     question the rest of it stopped asking. -->
+     handed, so restricting the picker would ask a question the rest stopped
+     asking. -->
 <input
 	bind:this={importInput}
 	type="file"
@@ -551,7 +511,7 @@
 
 <style lang="postcss">
 	/* The same glass as everywhere else in this interface. Local to this file, like
-	   its four siblings; the day it moves to one place, it moves for all five. */
+		   its four siblings. */
 	.glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);
 		backdrop-filter: blur(32px) saturate(190%);

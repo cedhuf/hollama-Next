@@ -36,21 +36,12 @@
 
 	const searchAvailable = $derived($searchConfig.available);
 
-	/**
-	 * Dictation, offered only where it can work.
-	 *
-	 * Both halves have to be true: the account (or the instance) has switched it on
-	 * and a model has been chosen to transcribe with. A microphone that fails the
-	 * first time it is pressed is worse than no microphone.
-	 */
+	/** Both halves have to be true: switched on, and a model chosen to transcribe with. A microphone that fails on first press is worse than none. */
 	const voiceCfg = $derived($chatDefaultsConfig.voice);
 	const voiceReady = $derived(voiceCfg.voiceInput && !!voiceCfg.voiceModel);
 	const voice = new VoiceRecorder();
 
-	/**
-	 * Dictated words join what is already typed rather than replacing it: somebody
-	 * who wrote half a sentence and then spoke the rest meant both halves.
-	 */
+	/** Dictated words join what is already typed: somebody who wrote half a sentence and spoke the rest meant both halves. */
 	function dictate() {
 		if (voice.state === 'recording') return voice.stop();
 		if (voice.state === 'transcribing') return;
@@ -110,8 +101,8 @@
 			available: canClear,
 			unavailableReason: canClear ? undefined : $LL.nothingToClear()
 		},
-		// Always available: there is always a context, and a report saying it is
-		// nearly empty is a perfectly good answer to the question.
+		// Always available: there is always a context, and a report saying it is nearly
+		// empty is a good answer.
 		{ name: 'context', description: $LL.contextCommandDescription(), available: true },
 		{
 			name: 'playbooks',
@@ -121,9 +112,9 @@
 	]);
 	const knownCommands = $derived(commands.map((c) => ({ name: c.name, takesArgs: c.takesArgs })));
 
-	// The menu is open only while the prompt is a bare `/word`: as soon as a space
-	// or a newline is typed, the user is writing a message that starts with a
-	// slash, and an autocomplete floating over it would be in the way.
+	// Open only while the prompt is a bare `/word`: after a space the user is
+	// writing a message that starts with a slash, and an autocomplete floating over
+	// it would be in the way.
 	const prefix = $derived(commandPrefix(editor.prompt ?? ''));
 	const matches = $derived(
 		prefix === null ? [] : commands.filter((c) => c.name.startsWith(prefix))
@@ -137,8 +128,8 @@
 
 	let selectedCommand = $state(0);
 	$effect(() => {
-		// Land on the first command that can actually run whenever the list changes
-		// under the highlight; -1 when none can, so Enter falls through.
+		// Land on the first command that can run whenever the list changes; -1 when
+		// none can, so Enter falls through.
 		void matches.length;
 		selectedCommand = selectable[0] ?? -1;
 	});
@@ -151,15 +142,7 @@
 		selectedCommand = selectable[next];
 	}
 
-	/**
-	 * Choosing a command from the menu.
-	 *
-	 * One that takes arguments is written into the composer with a space after it
-	 * rather than run, because the whole point of picking it from a list is that
-	 * you were not going to type the name yourself, and running it there and then
-	 * would take away the only moment you had to say anything. Enter again sends it
-	 * with no arguments, which is what it did before.
-	 */
+	/** A command that takes arguments is written into the composer rather than run: picking it from a list means you were not going to type the name, and running it there would take away the moment to say anything. */
 	function pickCommand(command: SlashCommand) {
 		if (!command.available) return;
 		editor.prompt = command.takesArgs ? `/${command.name} ` : `/${command.name}`;
@@ -170,15 +153,10 @@
 	// --- mentions -------------------------------------------------------------
 
 	/**
-	 * Calling a persona into this conversation with `@`.
-	 *
-	 * The twin of the slash menu above, in the same place with the same keys. What
-	 * differs is what happens on Enter: a command runs, a mention is inserted and
-	 * you keep typing, because a mention is the start of a sentence rather than the
-	 * whole of one.
-	 *
-	 * The caret is tracked rather than the whole prompt, since a mention can be
-	 * added in the middle of a message already written.
+	 * Calling a persona into this conversation with `@`. The twin of the slash menu,
+	 * with the same keys; what differs is Enter, which inserts and lets you keep
+	 * typing, because a mention is the start of a sentence rather than the whole of
+	 * one. The caret is tracked, since a mention can be added mid-message.
 	 */
 	let caret = $state(0);
 
@@ -203,19 +181,10 @@
 		selectedMention = 0;
 	});
 
-	/**
-	 * The prompt cut into plain runs and mentions, for the mirror behind the input.
-	 */
+	/** The prompt cut into plain runs and mentions, for the mirror behind the input. */
 	const promptSegments = $derived(splitMentions(editor.prompt ?? '', $personasStore ?? []));
 
-	/**
-	 * One space when the prompt ends on a newline.
-	 *
-	 * A textarea keeps its blank last line and a box collapses it, so without this
-	 * the mirror is one line short of the text standing on it. A zero-width space
-	 * was tried and is worse: it is a break opportunity, so it can move where the
-	 * last line wraps.
-	 */
+	/** A textarea keeps its blank last line and a box collapses it, so without this the mirror is one line short. A zero-width space is worse: it is a break opportunity, so it can move where the last line wraps. */
 	const trailingPad = $derived((editor.prompt ?? '').endsWith('\n') ? ' ' : '');
 
 	let mirror = $state<HTMLDivElement | undefined>();
@@ -230,15 +199,14 @@
 		const at = text.slice(0, caret).lastIndexOf('@');
 		if (at === -1) return;
 
-		// A trailing space, because a mention is almost never the end of the message
-		// and typing one by hand after every name is a small tax paid every time.
+		// A trailing space, because a mention is almost never the end of the message.
 		const inserted = `@${persona.name.trim()} `;
 		editor.prompt = text.slice(0, at) + inserted + text.slice(caret);
 
 		const position = at + inserted.length;
 		const textarea = editor.promptTextarea;
 		textarea?.focus();
-		// After the value has been written, or the caret lands where the old text put it.
+		// After the value is written, or the caret lands where the old text put it.
 		tick().then(() => {
 			textarea?.setSelectionRange(position, position);
 			caret = position;
@@ -247,8 +215,8 @@
 
 	let attachments: Attachment[] = $state([]);
 
-	// The quick-choice card takes over the composer; dismissing (✕) falls back to free
-	// typing for the current choice. A fresh (or cleared) pending choice re-arms the card.
+	// The quick-choice card takes over the composer; dismissing falls back to free
+	// typing. A fresh pending choice re-arms it.
 	let choiceBypassed = $state(false);
 	$effect(() => {
 		void pendingChoice;
@@ -260,8 +228,7 @@
 		return ct !== undefined && supportsReasoningToggle(ct);
 	});
 
-	// Persona chats keep the composer minimal: no parameters/controls tab and no
-	// expand-to-code-editor toggle.
+	// Persona chats keep the composer minimal: no controls tab, no expand toggle.
 	const isPersona = $derived(!!session.personaId);
 
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
@@ -303,11 +270,9 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		// The command menu takes the arrows, Tab and Escape while it is open, and
-		// Enter picks the highlighted command rather than sending `/comp` as text.
-		// The mention menu takes the same keys as the command menu, and only one of
-		// them is ever open: a prompt that is a bare `/word` cannot also be inside an
-		// `@name`.
+		// The command menu takes the arrows, Tab and Escape while open, and Enter picks
+		// the highlighted command rather than sending `/comp` as text. The mention menu
+		// takes the same keys, and only one is ever open.
 		if (mentionMenuOpen) {
 			if (event.key === 'ArrowDown' || (event.key === 'Tab' && !event.shiftKey)) {
 				event.preventDefault();
@@ -321,8 +286,8 @@
 			}
 			if (event.key === 'Escape') {
 				event.preventDefault();
-				// Closing without losing what was typed: the `@` is left in place as the
-				// ordinary character it is, and moving the caret past it shuts the menu.
+				// Closing without losing what was typed: the `@` stays as the ordinary
+				// character it is, and moving the caret past it shuts the menu.
 				caret = -1;
 				return;
 			}
@@ -358,8 +323,8 @@
 
 		if (event.key !== 'Enter') return;
 
-		// Expanded is the long-form mode: Enter breaks the line and ⌘/Ctrl+Enter sends,
-		// so paragraphs can be written without the composer firing on every return.
+		// Expanded is long-form: Enter breaks the line and Cmd/Ctrl+Enter sends, so
+		// paragraphs can be written without the composer firing on every return.
 		if (editor.isExpanded) {
 			if (!event.metaKey && !event.ctrlKey) return;
 			event.preventDefault();
@@ -386,14 +351,12 @@
 	}
 
 	function submit() {
-		// The message is gone, so the keyboard has nothing left to type into and is
-		// covering the answer about to arrive. Only on touch: on a laptop the next
-		// thing anyone does is type the next message.
+		// The message is gone, so the keyboard is covering the answer about to arrive.
+		// Only on touch: on a laptop the next thing anyone does is type.
 		if (isTouchPrimary()) editor.promptTextarea?.blur();
 
-		// A recognised command never becomes a message: it runs, and the composer
-		// clears. Anything else (including an unknown `/word`) is sent as typed,
-		// minus the `//` escape for a message that really does start with a slash.
+		// A recognised command never becomes a message. Anything else, an unknown
+		// `/word` included, is sent as typed, minus the `//` escape.
 		const command = parseSlashCommand(editor.prompt ?? '', knownCommands);
 		if (command) {
 			editor.prompt = '';
@@ -419,8 +382,8 @@
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
 		{#if pendingChoice?.choices && !editor.isExpanded && !choiceBypassed}
 			{@const choice = pendingChoice}
-			<!-- Interactive quick-choice temporarily takes over the composer (Claude-style):
-			     one question at a time, numbered + scrollable, dismiss (✕) to type freely. -->
+			<!-- A quick-choice temporarily takes over the composer: one question at a time,
+			     numbered and scrollable, dismissable to type freely. -->
 			{#key choice}
 				<AskChoicesCard
 					choices={choice.choices!}
@@ -439,8 +402,8 @@
 				/>
 			{/if}
 			{#if menuOpen}
-				<!-- Above the composer, not over it: the text being typed is what the
-				     list is filtered on, so it has to stay readable. -->
+				<!-- Above the composer, not over it: the text being typed is what the list is
+				     filtered on. -->
 				<SlashMenu
 					commands={matches}
 					selected={selectedCommand}
@@ -448,39 +411,32 @@
 					onHover={(i) => (selectedCommand = i)}
 				/>
 			{/if}
-			<!-- One composer, always: expanding only grows the card, so the toggle, Run,
-			     Cancel, attachments and tools stay reachable in every state. -->
+			<!-- One composer, always: expanding only grows the card, so every control stays
+			     reachable in every state. -->
 			<ImageDrop
 				label={$LL.dropImagesHere()}
 				onImages={(images) => (attachments = [...attachments, ...images])}
 				class="surface-floating border-shade-3 focus-within:border-shade-5 flex flex-col rounded-2xl border shadow-lg transition-colors"
 			>
-				<!-- The textarea auto-grows with its content (field-sizing); expanding only
-				     raises its floor and ceiling, so no flex-height chain to depend on. -->
-				<!-- A mention is drawn as a label, and a textarea cannot hold one.
-				     So the pill is painted behind the text rather than in it: a mirror
-				     with the same font, the same padding and the same wrapping renders
-				     the prompt with the names highlighted, and the textarea sits on top
-				     with its own text transparent and its caret left visible.
+				<!-- The textarea auto-grows (field-sizing); expanding raises its floor and
+				     ceiling, so there is no flex-height chain to depend on. -->
+				<!-- A mention is drawn as a label and a textarea cannot hold one, so the pill is
+				     painted behind the text: a mirror with the same font, padding and wrapping
+				     renders the prompt, and the textarea sits on top with transparent text and a
+				     visible caret.
 
-				     Which is why the highlight has no weight, no size and no border of
-				     its own. Anything that changed a glyph's metrics would move the
-				     mirror out from under the real text, and the two would drift apart
-				     by a character more with every line. Colour and a background do not
-				     move anything; the padding is cancelled by an equal negative margin.
-
-				     `aria-hidden`, because the textarea already carries the text. -->
+				     Which is why the highlight has no weight, size or border of its own. Anything
+				     that changed a glyph's metrics would move the mirror out from under the real
+				     text, a character further with every line. -->
 				<div class="relative">
 					<div
 						bind:this={mirror}
 						aria-hidden="true"
 						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 px-4 pt-3.5"
 					>
-						<!-- Written on one line, and it has to stay on one line. The mirror
-						     renders with `pre-wrap`, so the newlines and indentation between
-						     these tags are not formatting, they are characters: laid out
-						     normally, every segment pushed the next one along and two mentions
-						     were enough to see the text slide out from under itself. -->
+						<!-- Written on one line, and it has to stay on one line: the mirror renders with
+						     `pre-wrap`, so the newlines between these tags are characters, and every
+						     segment pushed the next one along. -->
 						<!-- prettier-ignore -->
 						{#each promptSegments as segment, i (i)}{#if segment.kind === 'mention'}<span class="prompt-editor__mention">{segment.text}</span>{:else}{segment.text}{/if}{/each}{trailingPad}
 					</div>
@@ -542,11 +498,8 @@
 							{/if}
 
 							{#if voiceReady}
-								<!-- Dictation, beside the controls that act on what is in the field
-								     rather than out in the row with the attachments: it writes into the
-								     composer, it does not send. It turns the accent while listening and
-								     spins while the words are on their way, which are the two states
-								     that have to be legible from across the desk. -->
+								<!-- Dictation, beside the controls that act on what is in the field rather than
+								     out with the attachments: it writes into the composer, it does not send. -->
 								<Button
 									variant="icon"
 									class={voice.state === 'recording' ? 'text-accent' : ''}
@@ -608,37 +561,30 @@
 		font-variant-ligatures: none;
 	}
 
-	/* Everything that decides where a glyph lands is shared between the two, and
-	   only what does not is allowed to differ. `white-space: pre-wrap` and
-	   `overflow-wrap` are stated because a div and a textarea do not wrap the same
-	   way by default, which is the one difference that would show. */
+	/* Everything that decides where a glyph lands is shared between the two.
+	   `white-space` and `overflow-wrap` are stated because a div and a textarea do
+	   not wrap the same way by default. */
 	.prompt-editor__mirror,
 	.prompt-editor__input {
 		white-space: pre-wrap;
 		overflow-wrap: break-word;
 		word-break: normal;
 		tab-size: 4;
-		/* Reserved on both, always, so the two never wrap at different widths.
-		   Without it the textarea takes a gutter the moment it overflows and the
-		   mirror does not, which is a drift that only appears on a long prompt and
-		   only on the platforms that draw classic scrollbars. */
+		/* Reserved on both, always, so the two never wrap at different widths: without
+		   it the textarea takes a gutter the moment it overflows and the mirror does
+		   not. */
 		scrollbar-gutter: stable;
 	}
 
-	/* The mirror is what is read, so it carries the theme's ink. The textarea on
-	   top keeps its caret and its selection and nothing else.
+	/* The mirror is what is read, so it carries the theme's ink; the textarea on top
+	   keeps its caret and its selection.
 
-	   `display: block`, and that is not a detail: it borrows `base-input` to be sure
-	   it resolves the same padding as the textarea does, and `base-input` is a flex
-	   container. Laid out as flex, every mention became a flex item and the
-	   whitespace-only text nodes between them were dropped outright, which is why two
-	   mentions ended up stuck together and everything after them sat in the wrong
-	   place. Text has to be laid out as text.
+	   `display: block` is not a detail: it borrows `base-input` for the same padding
+	   as the textarea, and `base-input` is a flex container. Laid out as flex, every
+	   mention became a flex item and the whitespace between them was dropped.
 
-	   `overflow-y: auto` rather than hidden, so a prompt long enough to scroll
-	   reserves the same scrollbar gutter the textarea reserves, and both wrap at the
-	   same width. It is never scrolled by hand: the pointer goes through it, and its
-	   position is copied from the textarea. */
+	   `overflow-y: auto` rather than hidden, so a long prompt reserves the same
+	   scrollbar gutter the textarea does and both wrap at the same width. */
 	.prompt-editor__mirror {
 		display: block;
 		overflow-y: auto;
@@ -652,16 +598,14 @@
 	}
 
 	.prompt-editor__input::selection {
-		/* A selection over transparent text would be an empty band, so it paints its
-		   own ink for the length of the highlight. */
+		/* A selection over transparent text would be an empty band, so it paints its own
+		   ink for the length of the highlight. */
 		color: var(--color-active);
 	}
 
-	/* Colour alone, and that is not only taste. Anything with a box around it,
-	   a background, a border, padding: is a rectangle drawn under a caret that
-	   moves through it, and it looks like a mistake at every position but one.
-	   Colour changes no metric either, so the mirror stays exactly under the text
-	   it is standing in for. */
+	/* Colour alone, and not only for taste: anything with a box around it is a
+	   rectangle drawn under a moving caret, and it looks like a mistake at every
+	   position but one. Colour also changes no metric. */
 	.prompt-editor__mention {
 		color: var(--color-accent);
 	}

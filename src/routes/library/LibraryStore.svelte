@@ -31,16 +31,13 @@
 	/**
 	 * The store: one door, several catalogues.
 	 *
-	 * There were two of these, one per catalogue, and the mechanism was the same
-	 * in both. The argument that settled it is the one nobody thinks of as design:
-	 * "is anything of mine out of date" was a question you had to ask twice, in two
-	 * windows, with two buttons and two settings, and three times once plugins
-	 * arrive. A store that holds everything answers it once.
+	 * There were two of these, with the same mechanism in both. "Is anything of
+	 * mine out of date" was a question you had to ask twice, in two windows, and
+	 * three times once plugins arrive.
 	 *
 	 * The views follow: what you can install, what is yours, what this instance
-	 * hands out. None of them is about a *type*, which is why splitting them by
-	 * type was arbitrary. The type is a filter, and the shelf groups by it so
-	 * nobody has to skim playbooks looking for a persona.
+	 * hands out. None of them is about a *type*, which is why splitting by type was
+	 * arbitrary: the type is a filter, and the shelf groups by it.
 	 */
 	interface Props {
 		open: boolean;
@@ -52,9 +49,8 @@
 
 	let view = $state<OfferView>('store');
 
-	// Opening is what asks for the listings, not mounting: this lives on the
-	// Library page whether or not anyone opens it, and a page load is not a reason
-	// to fetch a catalogue nobody asked to see.
+	// Opening asks for the listings, not mounting: this lives on the Library page
+	// whether or not anyone opens it.
 	$effect(() => {
 		if (!open) return;
 		void loadCatalog();
@@ -64,13 +60,7 @@
 	const personaCatalog = $derived($catalogState);
 	const playbookCatalog = $derived($playbookCatalogState);
 
-	/**
-	 * One status for two listings.
-	 *
-	 * Failing means both failed: with one of them answering there is a shelf to
-	 * show, and an error page over a store that has something on it would be a
-	 * lie about the half that worked.
-	 */
+	/** Failing means both failed: with one answering there is a shelf to show, and an error page over a store that has something on it would be a lie. */
 	const status = $derived(
 		personaCatalog.status === 'ready' || playbookCatalog.status === 'ready'
 			? ('ready' as const)
@@ -92,14 +82,7 @@
 		toast.success($LL.installedPersona({ name: entry.name }));
 	}
 
-	/**
-	 * Put the published text back over a copy.
-	 *
-	 * Everything of yours that is not text is kept: the id, the model you chose,
-	 * the conversation you are having with it, the knowledge you attached. It asks
-	 * first when there is something of yours to lose, because there is no merge to
-	 * offer and pretending otherwise would be worse than the question.
-	 */
+	/** Everything of yours that is not text is kept. It asks first when there is something to lose, because there is no merge to offer. */
 	async function restorePersona(persona: Persona, ask: boolean) {
 		const entry = (personaCatalog.status === 'ready' ? personaCatalog.catalog.entries : []).find(
 			(row) => row.id === persona.source?.id || row.name.trim() === persona.name.trim()
@@ -212,14 +195,7 @@
 		)
 	);
 
-	/**
-	 * Whether this person may hand anything out.
-	 *
-	 * Both catalogues answer it, and both answer it the same way, because it is a
-	 * property of the account rather than of the shelf: an administrator shares,
-	 * everybody else does not. Read from one of them, once, so a card in a store
-	 * that holds two catalogues is never gated on the config of the other.
-	 */
+	/** A property of the account rather than of the shelf: an administrator shares, everybody else does not. Read once, so a card is never gated on the config of the other catalogue. */
 	const canShare = $derived($personasConfig.canShare || $playbooksConfig.canShare);
 
 	// --- the shelf ------------------------------------------------------------
@@ -238,13 +214,7 @@
 		shared: personas.offered.length + playbooks.offered.length
 	});
 
-	/**
-	 * One "update all", over both catalogues.
-	 *
-	 * The whole reason the two stores became one. Untouched copies only: a single
-	 * press that quietly overwrote everything somebody had rewritten would be the
-	 * one nobody could undo.
-	 */
+	/** The whole reason the two stores became one. Untouched copies only: a single press that quietly overwrote everything somebody had rewritten would be the one nobody could undo. */
 	const updatableCount = $derived(personas.updatable.length + playbooks.updatable.length);
 
 	async function updateAll() {
@@ -321,10 +291,8 @@
 		meta={offer.meta}
 		layout={$settingsStore.personaStoreLayout}
 	>
-		<!-- One label, on one kind of card. A copy you have changed is the only thing
-		     here that is not simply what it says it is, so it is the only thing that
-		     says so. Everything else the card could announce is already in the button
-		     under it. -->
+		<!-- One label, on one kind of card: a copy you have changed is the only thing
+		     here that is not simply what it says it is. -->
 		{#snippet badges()}
 			{#if offer.edited}
 				<span

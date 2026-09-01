@@ -13,32 +13,22 @@ import {
 } from './protocol';
 
 /**
- * A conversation held out loud, from this side.
+ * A conversation held out loud, from this side: the only thing on the screen
+ * that knows there is a network. The page reads a state, two readings and two
+ * lines of text; underneath are a microphone, two worklets, a socket and a queue.
  *
- * One object for the whole screen, and deliberately the only thing on it that
- * knows there is a network. What the page reads is a state, two readings and two
- * lines of text; what happens underneath is a microphone, two worklets, a socket
- * and a queue.
- *
- * The microphone opens once and stays open for the length of the conversation.
- * That is the difference between this and the recorder it replaces, and it is
- * what makes interruption possible: you can only take the floor from something
- * that was still listening while it spoke.
+ * The microphone opens once and stays open, which is what makes interruption
+ * possible: you can only take the floor from something still listening.
  */
 
 /**
- * Deciding when somebody has started and finished speaking.
+ * Deciding when somebody has started and finished speaking, relative to the
+ * room rather than to a fixed threshold: a fixed one misses a soft voice in a
+ * quiet room and never closes in a room with a fan. The numbers below say how
+ * far above the room a voice has to be, and the room is measured continuously.
  *
- * Relative to the room, never absolute, and that is the whole of the difference
- * from the gate this replaces. A fixed threshold is calibrated for one room: in a
- * quiet one it misses a soft voice, and in a room with a fan it never closes at
- * all, so the turn either never ends or ends on the first breath. What the
- * numbers below describe is *how far above the room* a voice has to be, and the
- * room is measured continuously.
- *
- * Two thresholds rather than one, because a single one chatters: a voice sitting
- * near it opens and closes the gate every few frames. Speech has to clear the
- * higher one to begin and fall under the lower one to end.
+ * Two thresholds, because one chatters: a voice sitting near it opens and closes
+ * the gate every few frames.
  */
 
 /** How far above the room a voice has to be to start, and to keep going. */
@@ -55,13 +45,7 @@ const ONSET_MS = 120;
 const SILENCE_MS = 1_100;
 const MINIMUM_MS = 350;
 
-/**
- * How much louder than the room somebody has to be to interrupt an answer.
- *
- * Higher than starting, on purpose. The browser's echo canceller is good and not
- * perfect, and what leaks through is the answer itself: at the ordinary
- * threshold the app hears itself and stops mid-sentence, over and over.
- */
+/** Higher than starting: the echo canceller is good and not perfect, and what leaks through is the answer itself. */
 const BARGE = 6.0;
 const BARGE_MS = 200;
 
@@ -81,34 +65,18 @@ export class VoiceSession {
 	/** Whether the microphone is deliberately shut. */
 	muted = $state(false);
 
-	/**
-	 * Whether the person currently has the floor.
-	 *
-	 * Theirs to set, not something inferred from how loud the room is. Frames only
-	 * leave while this is true, so a conversation held next to a television uploads
-	 * the sentence somebody meant to say and nothing else.
-	 */
+	/** Theirs to set, not inferred from loudness. Frames only leave while this is true, so a conversation next to a television uploads the sentence and nothing else. */
 	talking = $state(false);
 
 	/**
-	 * The conversation, as lines to read back.
-	 *
-	 * A list rather than the last question and the last answer, which is what this
-	 * held before. Two strings can only ever show the exchange in progress, and a
-	 * spoken conversation is exactly the kind nobody can scroll back through in
-	 * their head: a misheard word four turns ago is the thing you want to go and
-	 * look at. Seeded from the stored conversation when the screen was opened on
-	 * one, so what is on screen is the conversation and not the visit.
+	 * The conversation, as lines to read back. A list rather than two strings: a
+	 * spoken conversation is the kind nobody can scroll back through in their head,
+	 * and a misheard word four turns ago is what you want to look at. Seeded from
+	 * the stored conversation, so this shows the conversation and not the visit.
 	 */
 	lines = $state<Line[]>([]);
 
-	/**
-	 * Whether the answer being spoken already has a line of its own.
-	 *
-	 * The answer arrives in pieces, one per sentence synthesised, and they belong
-	 * on one line. Reset at the start of every turn, which is the only thing that
-	 * separates one answer from the next.
-	 */
+	/** The answer arrives one synthesised sentence at a time, and they belong on one line. Reset at the start of every turn. */
 	#answering = false;
 
 	/** The conversation this is being written into, once there is one. */
@@ -128,14 +96,7 @@ export class VoiceSession {
 	/** The format the current answer is arriving in, from `speech-begin`. */
 	#mime = '';
 
-	/**
-	 * Whether the browser refused to start the audio without being touched.
-	 *
-	 * The screen opens listening, which is what anybody arriving at a voice screen
-	 * wants, and most browsers allow it because arriving was itself a tap. iOS
-	 * sometimes does not, and the honest answer then is to say so and offer the
-	 * press rather than to sit there with a dead microphone.
-	 */
+	/** The screen opens listening, which most browsers allow since arriving was itself a tap. iOS sometimes does not, and then the honest answer is to offer the press. */
 	needsGesture = $state(false);
 
 	/** The room, and where the voice is against it. */
@@ -151,21 +112,13 @@ export class VoiceSession {
 	#over = 0;
 
 	/**
-	 * Held from the first press until the socket is up.
-	 *
-	 * `live` cannot do this job: it stays false while the microphone is being
-	 * granted and the ticket fetched, which is the one window where a second press
-	 * gets through, and two presses would open two microphones and two sockets.
+	 * Held from the first press until the socket is up. `live` cannot do this: it
+	 * stays false while the microphone is granted and the ticket fetched, which is
+	 * the window where a second press would open two microphones.
 	 */
 	#starting = false;
 
-	/**
-	 * Start listening, from inside a tap.
-	 *
-	 * Not optional: a browser only lets sound out of an audio context a person's
-	 * own gesture created or resumed, and iOS is strict about it. By the time
-	 * there is an answer to play, the gesture is long gone.
-	 */
+	/** A browser only lets sound out of a context a person's gesture created or resumed, and by the time there is an answer to play the gesture is long gone. */
 	async start(sessionId?: string): Promise<void> {
 		if (this.live || this.#starting) return;
 		this.#starting = true;
@@ -180,13 +133,9 @@ export class VoiceSession {
 		const strings = get(LL);
 
 		try {
-			// The microphone and the audio hardware first, and the order is not
-			// arbitrary. A browser only lets sound out of a context a person's own
-			// gesture created or resumed, and the gesture is spent by the first
-			// `await` that goes to the network: asking for a ticket before this left
-			// iOS with a context it would never unsuspend and a screen that looked
-			// broken. Everything that needs the tap happens before anything that
-			// needs the server.
+			// The microphone and the hardware first: the gesture is spent by the first
+			// `await` that goes to the network, and asking for a ticket before this left iOS
+			// with a context it would never unsuspend.
 			await this.#openAudio();
 		} catch {
 			this.stop();
@@ -240,14 +189,7 @@ export class VoiceSession {
 		this.state = 'idle';
 	}
 
-	/**
-	 * What was already said in this conversation, before the screen opened.
-	 *
-	 * Handed in rather than fetched, because the screen has already read the
-	 * conversation to find out whose it is and reading it twice would be a second
-	 * request for the same bytes. Only what can be read back out loud: a system
-	 * prompt is not part of the exchange, and an empty message is not a line.
-	 */
+	/** Handed in rather than fetched: the screen has already read the conversation to find out whose it is. Only what can be read aloud. */
 	seed(messages: { role: string; content: string }[]): void {
 		this.lines = messages
 			.filter((message) => message.role === 'user' || message.role === 'assistant')
@@ -259,9 +201,8 @@ export class VoiceSession {
 	toggleMute(): void {
 		this.muted = !this.muted;
 		this.#stream?.getAudioTracks().forEach((track) => (track.enabled = !this.muted));
-		// Muting mid-sentence hands the question over rather than leaving a turn open
-		// that nothing will ever close: the detector stops running while muted, so
-		// nothing else would ever send the end of it.
+		// Muting mid-sentence hands the question over: the detector stops while muted,
+		// so nothing else would ever close the turn.
 		if (this.muted && this.talking) {
 			this.talking = false;
 			this.#send({ type: 'end' });
@@ -301,13 +242,9 @@ export class VoiceSession {
 			if (response.ok && body?.ticket) return body.ticket as string;
 
 			/**
-			 * The instance says it is not set up for this, and it names which half.
-			 *
-			 * Said out loud even though the screen draws its own version of the same
-			 * question, because the two can disagree and the server is the one that is
-			 * right: it applies the administrator's sharing, which the browser cannot
-			 * see. Silence here is a press that does nothing for a reason nobody can
-			 * discover, which is exactly how this failed the first time it was tried.
+			 * The instance says which half is missing. Said out loud even though the screen
+			 * draws its own version, because the server is the one that is right: it applies
+			 * the administrator's sharing, which the browser cannot see.
 			 */
 			if (response.status === 409) {
 				const missing: string[] = Array.isArray(body?.missing) ? body.missing : [];
@@ -340,9 +277,8 @@ export class VoiceSession {
 		let stream: MediaStream;
 		try {
 			stream = await navigator.mediaDevices.getUserMedia({
-				// All three on, and the first one is the load-bearing one: without echo
-				// cancellation the microphone hears the answer and the conversation
-				// interrupts itself.
+				// All three on, and the first is load-bearing: without echo cancellation the
+				// microphone hears the answer and the conversation interrupts itself.
 				audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
 			});
 		} catch {
@@ -356,10 +292,8 @@ export class VoiceSession {
 		this.#ctx = ctx;
 		if (ctx.state === 'suspended') await ctx.resume().catch(() => {});
 
-		// A context that will not start is a screen with a dead microphone on it, and
-		// nothing about it looks broken. Browsers allow this when the page was opened
-		// by a tap, which is how anybody arrives here; iOS sometimes does not, and the
-		// honest answer then is to ask for the press rather than to pretend.
+		// A context that will not start is a dead microphone that does not look broken.
+		// Browsers allow it when the page was opened by a tap; iOS sometimes does not.
 		if (ctx.state !== 'running') {
 			this.needsGesture = true;
 			throw new Error('audio needs a gesture');
@@ -381,8 +315,8 @@ export class VoiceSession {
 		this.#capture = new AudioWorkletNode(ctx, 'voice-capture');
 		this.#capture.port.onmessage = ({ data }) => this.#frame(data as ArrayBuffer);
 		source.connect(this.#capture);
-		// Never to the speakers. A capture node with no destination is not scheduled
-		// on some browsers, so it goes to a gain of zero rather than nowhere.
+		// Never to the speakers. A capture node with no destination is not scheduled on
+		// some browsers, so it goes to a gain of zero rather than nowhere.
 		const sink = ctx.createGain();
 		sink.gain.value = 0;
 		this.#capture.connect(sink).connect(ctx.destination);
@@ -398,10 +332,8 @@ export class VoiceSession {
 	}
 
 	#connect(ticket: string): Promise<void> {
-		// Built as a string rather than through `URL`, which here would be a mutable
-		// object built to be read once. Same origin as the page, always: the socket
-		// is this app's own route, so there is no host to resolve and nothing to
-		// configure.
+		// Same origin as the page, always: the socket is this app's own route, so
+		// there is no host to resolve.
 		const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
 		const socket = new WebSocket(`${scheme}://${location.host}${VOICE_SOCKET_PATH}`);
 		socket.binaryType = 'arraybuffer';
@@ -409,8 +341,8 @@ export class VoiceSession {
 
 		return new Promise((resolve, reject) => {
 			socket.onopen = () => {
-				// The ticket travels in the socket rather than in the address, so it is
-				// never written into a proxy's log on its way past.
+				// The ticket travels in the socket rather than in the address, so it is never
+				// written into a proxy's log.
 				this.#send({ type: 'hello', ticket });
 				resolve();
 			};
@@ -425,13 +357,8 @@ export class VoiceSession {
 	// --- hearing the room ----------------------------------------------------
 
 	/**
-	 * The loop that decides when somebody is speaking, and when they have stopped.
-	 *
-	 * Everything about turn-taking lives here, and it is measured against the room
-	 * rather than against a number. The loudness of a frame means nothing on its
-	 * own: 0.02 is a shout in a recording booth and silence beside a fan. What
-	 * means something is the ratio to the quiet the room settles at, which is
-	 * tracked continuously below.
+	 * The loop that decides when somebody is speaking, measured against the room
+	 * rather than a number: 0.02 is a shout in a booth and silence beside a fan.
 	 */
 	#watch(): void {
 		const tick = () => {
@@ -445,31 +372,21 @@ export class VoiceSession {
 			this.#loud = Math.sqrt(sum / this.#samples.length);
 
 			/**
-			 * The room, which falls fast and rises slowly.
-			 *
-			 * Asymmetric on purpose. Falling fast means walking into a quiet room is
-			 * noticed within a second, so a soft voice is heard there. Rising slowly
-			 * means a voice cannot drag the floor up behind it and gate itself out
-			 * mid-sentence, which is what a symmetric average does: the longer you
-			 * speak the more it thinks the room is loud.
+			 * The room, which falls fast and rises slowly. Falling fast means a quiet room
+			 * is noticed within a second; rising slowly means a voice cannot drag the floor
+			 * up behind it and gate itself out mid-sentence.
 			 */
 			const towards = this.#loud < this.#floor ? 0.25 : 0.0015;
 			this.#floor += (this.#loud - this.#floor) * towards;
 
 			if (this.state === 'speaking') return this.#barge();
 			/**
-			 * Only when the floor is free, and `listening` is the floor being used.
+			 * Only when the floor is free, and `listening` is the floor being used: the
+			 * server answers the first frame with `listening`, so running the detector only
+			 * while `idle` ran it for one frame and left the microphone open forever.
 			 *
-			 * The distinction is the whole of a bug this replaces. The server answers
-			 * the first frame of an utterance with `listening`, so a screen that only
-			 * ran the detector while `idle` ran it for one frame and then stopped: the
-			 * turn opened, the state came back, and nothing was left watching for the
-			 * silence that would have ended it. The microphone stayed open forever.
-			 *
-			 * `transcribing`, `thinking` and `speaking` really are closed, and for the
-			 * original reason: frames sent then are dropped, and an end sent then
-			 * arrives at an exchange that is not listening, so the whole utterance
-			 * disappears without anybody being told.
+			 * `transcribing`, `thinking` and `speaking` really are closed: frames sent then
+			 * are dropped, and an end sent then loses the whole utterance silently.
 			 */
 			if (this.state !== 'idle' && this.state !== 'listening') return;
 			this.#turnTaking();
@@ -491,15 +408,13 @@ export class VoiceSession {
 		const { open, close } = this.#gates();
 
 		if (!this.talking) {
-			// A turn only begins from a standing start. `listening` is reachable here
-			// for the moment between the end of an utterance being sent and the server
-			// moving on to transcribe it, and the tail of the sound that just ended is
-			// not the beginning of the next one.
+			// A turn only begins from a standing start. `listening` is reachable between an
+			// utterance being sent and the server transcribing it, and the tail of the sound
+			// that just ended is not the beginning of the next one.
 			if (this.state !== 'idle') return void (this.#onsetAt = 0);
 
-			// A sound has to last before it counts. A door, a keyboard and a cough all
-			// clear any threshold; none of them lasts a tenth of a second at the level
-			// a syllable does.
+			// A door, a keyboard and a cough all clear any threshold; none of them lasts a
+			// tenth of a second at the level a syllable does.
 			if (this.#loud <= open) return void (this.#onsetAt = 0);
 			if (!this.#onsetAt) this.#onsetAt = now;
 			if (now - this.#onsetAt < ONSET_MS) return;
@@ -515,8 +430,7 @@ export class VoiceSession {
 			return;
 		}
 
-		// Nothing ends in its first fraction of a second: somebody who starts and
-		// then gathers their thoughts has not finished, they have not started.
+		// Somebody who starts and then gathers their thoughts has not finished.
 		if (now - this.#startedAt < MINIMUM_MS) return;
 		if (now - this.#spokeAt < SILENCE_MS) return;
 
@@ -525,12 +439,7 @@ export class VoiceSession {
 		this.#send({ type: 'end' });
 	}
 
-	/**
-	 * Somebody talking over the answer.
-	 *
-	 * Sustained, like an onset, and for the same reason twice over: a consonant
-	 * leaking through the echo canceller is loud and brief, and so is a door.
-	 */
+	/** Sustained, like an onset: a consonant leaking through the echo canceller is loud and brief, and so is a door. */
 	#barge(): void {
 		const now = performance.now();
 		if (this.#loud <= Math.max(QUIETEST * 2, this.#floor * BARGE)) {
@@ -611,23 +520,17 @@ export class VoiceSession {
 
 		try {
 			const samples = await this.#decode(ctx, bytes);
-			// Transferred rather than copied: it is a second of audio and nothing here
-			// reads it again.
+			// Transferred rather than copied: a second of audio, never read again here.
 			this.#playback.port.postMessage(samples.buffer, [samples.buffer]);
 		} catch {
-			// One piece that would not decode. The rest of the answer still plays,
-			// which is better than an interruption nobody asked for.
+			// One piece that would not decode. The rest still plays.
 		}
 	}
 
 	/**
-	 * A piece of the answer as samples at the context's own rate.
-	 *
-	 * Two cases, and they are genuinely different. Anything compressed goes to the
-	 * browser's decoder, which resamples on the way. Raw samples carry their rate
-	 * in the content type and have to be resampled here, which is worth doing
-	 * rather than avoiding: raw is the format that starts playing soonest, because
-	 * there is nothing to decode.
+	 * A piece of the answer as samples at the context's own rate. Compressed audio
+	 * goes to the browser's decoder, which resamples on the way; raw carries its
+	 * rate in the content type and is resampled here. Raw starts playing soonest.
 	 */
 	async #decode(ctx: AudioContext, bytes: ArrayBuffer): Promise<Float32Array> {
 		if (!this.#mime.startsWith('audio/pcm')) {

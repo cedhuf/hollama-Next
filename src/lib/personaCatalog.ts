@@ -13,17 +13,13 @@ import { catalogBase } from '$lib/store';
 /**
  * The store of personas you can install, which is not part of the application.
  *
- * Nothing ships inside the image. The app knows one address, fetches a listing
- * from it, and fetches a persona whole only when someone installs it. That is
- * what lets a persona be added by a pull request instead of a release, and what
- * lets the store move to a repository of its own later.
+ * Nothing ships inside the image: the app knows one address, fetches a listing,
+ * and fetches a persona whole only on install. That is what lets a persona be
+ * added by a pull request instead of a release.
  *
- * What it costs is worth stating plainly: with nothing bundled, a first launch
- * with no network has an empty library. Three things blunt that. The listing is
- * cached once it arrives, so only the very first launch depends on the network;
- * in server mode the fetch is the instance's rather than each browser's, so one
- * machine can hold it for everyone; and the address is a setting, so a closed
- * network can point at its own mirror.
+ * The cost is an empty library on a first launch with no network. The listing is
+ * cached once it arrives, in server mode the fetch is the instance's rather than
+ * each browser's, and the address is a setting, so a closed network can mirror it.
  */
 
 /** Where the last listing is kept, so a second launch does not depend on the network. */
@@ -40,14 +36,7 @@ const state = writable<CatalogState>({ status: 'idle' });
 /** The persona store, as far as this session knows it. */
 export const catalogState = { subscribe: state.subscribe };
 
-/**
- * The address to read, which is not the address of the store.
- *
- * The instance reads on the app's behalf: one machine holds the listing for all
- * its users, an instance whose browsers have no way out can still be given a
- * store, and the address is set once by an administrator rather than by each
- * person.
- */
+/** The instance reads on the app's behalf: one machine holds the listing for all its users, and the address is set once by an administrator. */
 function base(): string {
 	return catalogBase('personas');
 }
@@ -75,14 +64,7 @@ function writeCache(catalog: Catalog): void {
 	}
 }
 
-/**
- * Fill the browser, from the cache first and then from the network.
- *
- * The cached listing shows immediately and is marked stale, so opening the page
- * never waits on a request; the fetched one replaces it when it arrives. A
- * failed fetch leaves the cached listing standing rather than replacing it with
- * an error, because a slightly old listing is far more useful than none.
- */
+/** The cached listing shows immediately and is marked stale, so the page never waits on a request. A failed fetch leaves it standing: a slightly old listing beats none. */
 export async function loadCatalog(force = false): Promise<void> {
 	const current = get(state);
 	if (!force && current.status === 'ready' && !current.stale) return;
@@ -93,9 +75,8 @@ export async function loadCatalog(force = false): Promise<void> {
 	else state.set({ status: 'loading' });
 
 	try {
-		// A forced reload says so to the server as well as to the browser: the
-		// instance holds its own copy, and refreshing past one cache into another is
-		// not refreshing.
+		// A forced reload says so to the server too: the instance holds its own copy,
+		// and refreshing past one cache into another is not refreshing.
 		const response = await fetch(`${base()}index.json${force ? '?fresh=1' : ''}`, {
 			headers: { accept: 'application/json' },
 			cache: force ? 'no-store' : 'default'
@@ -108,8 +89,7 @@ export async function loadCatalog(force = false): Promise<void> {
 		writeCache(catalog);
 		state.set({ status: 'ready', catalog, stale: false });
 
-		// Here rather than at the call sites, so it happens wherever the listing is
-		// read and nobody has to remember to ask for it.
+		// Here rather than at the call sites, so it happens wherever the listing is read.
 		await autoUpdate(entries);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
@@ -118,28 +98,14 @@ export async function loadCatalog(force = false): Promise<void> {
 	}
 }
 
-/**
- * `sha256-<base64>` over some bytes, the way the listing writes it.
- *
- * `crypto.subtle` is only available over HTTPS and on localhost. Anywhere else
- * it is missing entirely, which is a reason to skip the check rather than to
- * refuse the install: the check is about a mirror having drifted, not about
- * trusting the connection, and an insecure origin has larger problems.
- */
+/** `crypto.subtle` is only available over HTTPS and on localhost, which is a reason to skip the check rather than refuse the install: it is about a mirror having drifted, not about trusting the connection. */
 async function sha256(bytes: ArrayBuffer): Promise<string | undefined> {
 	if (!globalThis.crypto?.subtle) return undefined;
 	const digest = await crypto.subtle.digest('SHA-256', bytes);
 	return `sha256-${btoa(String.fromCharCode(...new Uint8Array(digest)))}`;
 }
 
-/**
- * Fetch one persona whole, at the moment it is being installed.
- *
- * The listing's `integrity` is checked here when there is one, against the bytes
- * as they arrived. A mismatch is refused: the two came from the same place and
- * disagreeing means one of them is stale, which is exactly the case where
- * carrying on installs something nobody published.
- */
+/** The listing's `integrity` is checked against the bytes as they arrived. A mismatch is refused: the two came from the same place, so disagreeing means one is stale. */
 export async function fetchBundle(entry: CatalogEntry): Promise<PersonaBundle> {
 	const response = await fetch(`${base()}${entry.path}`, {
 		headers: { accept: 'application/json' }
@@ -158,15 +124,10 @@ export async function fetchBundle(entry: CatalogEntry): Promise<PersonaBundle> {
 }
 
 /**
- * Take the new revisions, for the personas nobody has touched.
+ * Take the new revisions, for the personas nobody has touched. A persona you
+ * have edited is yours, and those keep being offered on their card instead.
  *
- * Only those. A persona you have edited is yours, and replacing your text
- * because someone upstream changed theirs is not an update, it is a loss. Those
- * keep being offered on their card instead, which is where the choice belongs.
- *
- * Off by default, and an instance can force it on: an administrator who wants
- * their people on the current version of what they hand out should not have to
- * hope each of them ticked a box.
+ * Off by default, and an instance can force it on.
  */
 async function autoUpdate(entries: CatalogEntry[]): Promise<void> {
 	if (!browser) return;
@@ -189,8 +150,8 @@ async function autoUpdate(entries: CatalogEntry[]): Promise<void> {
 				revision: entry.revision
 			});
 		} catch {
-			// One that cannot be fetched is not a reason to abandon the others, and
-			// not a reason to interrupt anyone: it will be offered on its card.
+			// One that cannot be fetched is not a reason to abandon the others: it will be
+			// offered on its card.
 		}
 	}
 }

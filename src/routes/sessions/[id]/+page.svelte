@@ -36,12 +36,9 @@
 	let { data }: Props = $props();
 
 	/**
-	 * The conversation itself, which is not this page.
-	 *
-	 * Everything a turn is made of lives in there: sending it, following it,
-	 * picking it back up after a reload, folding the context away. What is left
-	 * here is the screen it is drawn on, and the only thing the conversation asks
-	 * of the screen is where the bottom of it is.
+	 * The conversation itself, which is not this page: sending a turn, following
+	 * it, picking it back up after a reload all live in there. What is left here is
+	 * the screen, and all the conversation asks of it is where the bottom is.
 	 */
 	// svelte-ignore state_referenced_locally
 	const chat = new Conversation(data.session, {
@@ -60,32 +57,22 @@
 	}
 	let sessionModalOpen = $state(false);
 
-	/**
-	 * Where the composer is drawn: sticky at the foot of the conversation while you
-	 * are reading it, in the column's own footer once the editor takes the screen.
-	 */
+	/** Sticky at the foot of the conversation while you read it, in the column's footer once the editor takes the screen. */
 	const floatingComposer = $derived(!chat.editor.isExpanded);
 
-	/**
-	 * The bar floats on the same terms, plus the setting.
-	 *
-	 * Reading a conversation is the only view where either of them has something to
-	 * float over; with the editor or the controls filling the screen, both go back
-	 * to being the column's edges.
-	 */
+	/** Reading a conversation is the only view where either has something to float over. */
 	const floatingHeader = $derived($settingsStore.floatingChatHeader !== false && floatingComposer);
 
-	// The chat composer floats over the message list (translucent + blur). We reserve
-	// matching bottom space in the scroll area so the last message clears it. Only the
-	// plain chat view floats; controls and the expanded code editor stay in flow.
+	// The composer floats over the message list, so the scroll area reserves matching
+	// bottom space for the last message to clear it.
 
 	// The persona this conversation belongs to, if any (drives the header identity).
 	const persona = $derived(
 		chat.session.personaId ? $personasStore.find((p) => p.id === chat.session.personaId) : undefined
 	);
 
-	// Empty until the conversation has a real title (or a first user message to
-	// derive one from): the header falls back to "Session #id" until then.
+	// Empty until there is a real title or a first user message: the header falls
+	// back to "Session #id" until then.
 	const sessionTitle = $derived(chat.editor.isNewSession ? '' : resolveSessionTitle(chat.session));
 
 	$effect(() => {
@@ -94,8 +81,7 @@
 
 	$effect(() => chat.syncModel());
 
-	// Kept as it is typed, so a reload or a closed tab costs nothing. Watched here
-	// rather than inside the conversation, which holds no effects of its own.
+	// Watched here rather than inside the conversation, which holds no effects.
 	$effect(() => {
 		void chat.editor.prompt;
 		untrack(() => chat.rememberDraft());
@@ -108,9 +94,8 @@
 	});
 
 	// Taking focus back once an answer lands is a convenience with a mouse and a
-	// nuisance with a thumb, where it reopens the keyboard over the reply nobody
-	// has read yet. The request is still consumed either way, so it does not sit
-	// around waiting to fire the next time the composer appears.
+	// nuisance with a thumb, where it reopens the keyboard over the unread reply.
+	// The request is consumed either way, so it does not fire later.
 	$effect(() => {
 		if (chat.editor.shouldFocusTextarea && chat.editor.promptTextarea) {
 			if (!isTouchPrimary()) chat.editor.promptTextarea.focus();
@@ -118,10 +103,7 @@
 		}
 	});
 
-	/**
-	 * Arriving from a search result: `?m=<index>` names the passage that was
-	 * chosen, so land on it rather than at the bottom of the conversation.
-	 */
+	/** Arriving from a search result: `?m=<index>` names the passage chosen, so land on it rather than at the bottom. */
 	const searchMatchIndex = $derived.by(() => {
 		const raw = page.url.searchParams.get('m');
 		if (raw === null) return null;
@@ -129,25 +111,14 @@
 		return Number.isInteger(index) && index >= 0 ? index : null;
 	});
 
-	/**
-	 * Watched rather than run once on mount.
-	 *
-	 * Opening a result from the search dialog is a client-side navigation: the
-	 * component is reused, so `onMount` never fires again and the jump only ever
-	 * worked on a full reload. Following the URL means it also works when the
-	 * dialog is used twice in a row on the same conversation.
-	 */
+	/** Watched rather than run on mount: opening a result is a client-side navigation, so the component is reused and `onMount` never fires again. */
 	$effect(() => {
 		const index = searchMatchIndex;
 		if (index === null) return;
 		void highlightMessage(index);
 	});
 
-	/**
-	 * The message may not be in the DOM yet (the conversation has just been
-	 * swapped in and its articles render over the following frames) so wait for
-	 * it rather than giving up on the first miss.
-	 */
+	/** The message may not be in the DOM yet, so wait for it rather than give up on the first miss. */
 	async function highlightMessage(index: number): Promise<void> {
 		await tick();
 
@@ -160,9 +131,8 @@
 
 		target.scrollIntoView({ block: 'center' });
 
-		// Restart the animation even when the same message is chosen twice: removing
-		// the class isn't enough on its own, the reflow in between is what makes the
-		// browser treat it as a new animation.
+		// Restart the animation even for the same message twice: removing the class is
+		// not enough on its own, the reflow in between is what makes it a new animation.
 		target.classList.remove('message--found');
 		void target.offsetWidth;
 		target.classList.add('message--found');
@@ -174,13 +144,9 @@
 	});
 
 	/**
-	 * Hand the conversation whatever it was opened with.
-	 *
-	 * The two ways in are both the router's business rather than the
-	 * conversation's: a message composed on the home page travels in a store, and
-	 * a prompt named in the address travels in the URL. Both are read here, taken
-	 * out of where they were so a refresh does not send them twice, and handed
-	 * over as one thing.
+	 * Both ways in are the router's business: a message composed on the home page
+	 * travels in a store, a prompt named in the address travels in the URL. Read
+	 * here, taken out of where they were so a refresh does not send them twice.
 	 */
 	function openConversation() {
 		const pending = $pendingMessage;
@@ -195,8 +161,7 @@
 				search: page.url.searchParams.get('search') === '1'
 			};
 
-			// Strip the one-shot params so a refresh doesn't re-submit the prompt
-			// (and doesn't repopulate the input with already-sent text).
+			// Strip the one-shot params, so a refresh does not re-submit the prompt.
 			const cleaned = new URL(page.url);
 			cleaned.searchParams.delete('q');
 			cleaned.searchParams.delete('model');
@@ -208,35 +173,20 @@
 	}
 
 	beforeNavigate(() => {
-		// Leaving never abandons a turn any more: it runs in the server, it is
-		// written down there as it goes, and it is waiting when the conversation is
-		// opened again. So there is nothing to ask about, and leaving only stops
-		// watching.
+		// Leaving never abandons a turn: it runs in the server, is written down as it
+		// goes, and is waiting when the conversation is reopened. So leaving only
+		// stops watching, and what is in the composer is saved on every keystroke.
 		chat.detach();
-
-		// And nothing is lost by leaving either: what is in the composer is written
-		// down on every keystroke, per conversation, and is there again when this one
-		// is reopened. The warning that used to stand here dated from when it was
-		// not, and it was the browser's own box asking it.
 	});
 
-	/**
-	 * "Near enough to the bottom" needs slack: an exact comparison flips to
-	 * `userScrolledUp` on a single pixel of sub-pixel rounding (which happens
-	 * constantly while streamed content grows) and auto-follow silently stops.
-	 */
+	/** "Near enough to the bottom" needs slack: an exact comparison flips on a single pixel of sub-pixel rounding, which happens constantly while content grows. */
 	const SCROLL_BOTTOM_THRESHOLD = 32;
 
 	/**
-	 * Where the conversation is, read from the box itself.
-	 *
-	 * This is the only thing that ever puts auto-follow back on: you are following
-	 * again once you are at the bottom, whether you got there with the button, with
-	 * the wheel, or by letting the answer catch up with you.
-	 *
-	 * It is deliberately not the only thing that turns it off. Geometry cannot tell
-	 * a scroll you made from a scroll the page made, and during a generation the
-	 * page makes one every frame.
+	 * Where the conversation is, read from the box. The only thing that ever puts
+	 * auto-follow back on, and deliberately not the only thing that turns it off:
+	 * geometry cannot tell a scroll you made from one the page made, and during a
+	 * generation the page makes one every frame.
 	 */
 	function handleScroll() {
 		if (!messagesWindow) return;
@@ -245,18 +195,11 @@
 	}
 
 	/**
-	 * Reading upwards stops the follow, at once, from the gesture rather than from
-	 * where it lands.
-	 *
-	 * This is what the page was missing, and it is why scrolling during a
-	 * generation caught: a flick of the wheel takes a moment to travel more than
-	 * the slack above, and the next token landed inside that moment, scrolled to
-	 * the bottom, and killed the momentum with it. Flick, snap back, flick, snap
-	 * back. Nothing was wrong with the arithmetic; the intent simply arrived too
-	 * late to be acted on.
-	 *
-	 * A wheel event fires before the scroll it causes, so setting this here means
-	 * the frame that would have yanked you back reads it and does nothing.
+	 * Reading upwards stops the follow at once, from the gesture rather than from
+	 * where it lands. A flick of the wheel takes a moment to travel more than the
+	 * slack above, and the next token landed inside that moment and killed the
+	 * momentum. A wheel event fires before the scroll it causes, so the frame that
+	 * would have yanked you back reads this and does nothing.
 	 */
 	function detachOnIntent() {
 		userScrolledUp = true;
@@ -279,15 +222,10 @@
 	/**
 	 * Bound to the box, and rebound whenever there is a different box.
 	 *
-	 * This used to be one `addEventListener` in `onMount`, which is a fix rather
-	 * than a tidy-up: the scroller lives in the `else` of the view switch, so
-	 * opening the model's controls destroyed it and coming back built a new one
-	 * with nothing listening to it. From then on `userScrolledUp` was never set
-	 * again, auto-follow was permanently on, and the page pulled you back to the
-	 * bottom whatever you did.
-	 *
-	 * As an effect it follows the element, and cleans up after the one that left.
-	 * Passive throughout: none of these ever cancels a gesture, they only read it.
+	 * As one `addEventListener` in `onMount` this broke: the scroller lives in the
+	 * `else` of the view switch, so opening the controls destroyed it and coming
+	 * back built a new one with nothing listening. Passive throughout: none of these
+	 * cancels a gesture, they only read it.
 	 */
 	$effect(() => {
 		const box = messagesWindow;
@@ -310,15 +248,11 @@
 	/** One frame may hold at most one queued auto-follow, however many tokens land. */
 	let scrollQueued = false;
 
-	/**
-	 * `smooth` is for the deliberate jump back (the button): the animation shows
-	 * how far you travelled. Auto-follow during streaming stays instant: animating
-	 * a scroll that retriggers on every token would never settle.
-	 */
+	/** `smooth` is for the deliberate jump back: the animation shows how far you travelled. Auto-follow stays instant, or a scroll retriggering on every token would never settle. */
 	async function scrollToBottom(shouldForceScroll = false, smooth = false) {
 		if (!shouldForceScroll && (!messagesWindow || userScrolledUp)) return;
-		// Streaming calls this on every chunk. Without coalescing, each one queued
-		// its own frame and they piled up faster than they could run.
+		// Streaming calls this on every chunk, and without coalescing each queued its
+		// own frame faster than they could run.
 		if (!shouldForceScroll) {
 			if (scrollQueued) return;
 			scrollQueued = true;
@@ -327,10 +261,9 @@
 		requestAnimationFrame(() => {
 			if (!shouldForceScroll) scrollQueued = false;
 			if (!messagesWindow) return;
-			// Re-checked here, not only on the way in: the user may have started
-			// scrolling up between the call and this frame, and yanking them back
-			// then also cleared `userScrolledUp`, so auto-follow resumed and the
-			// page fought every attempt to read further up.
+			// Re-checked here, not only on the way in: the user may have started scrolling
+			// between the call and this frame, and yanking them back also cleared
+			// `userScrolledUp`, so the page fought every attempt to read further up.
 			if (!shouldForceScroll && userScrolledUp) return;
 			messagesWindow.scrollTo({
 				top: messagesWindow.scrollHeight,
@@ -344,8 +277,7 @@
 	<Header {floating}>
 		{#snippet headline()}
 			{#if persona}
-				<!-- Persona identity, laid out like the classic title/meta pair: avatar + name,
-			     tagline as the muted second line. -->
+				<!-- Persona identity, laid out like the title/meta pair: avatar, name, tagline. -->
 				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
 					<PersonaAvatar {persona} size={32} />
 					<div class="flex min-w-0 flex-col gap-0.5">
@@ -356,10 +288,10 @@
 					</div>
 				</div>
 			{:else}
-				<!-- Once a conversation has a title it becomes the headline, with the id
-			     kept as a parenthesised link so it stays copyable/navigable. -->
+				<!-- Once there is a title it becomes the headline, with the id as a
+				     parenthesised link so it stays copyable. -->
 				<!-- leading-tight, not leading-none: `truncate` hides overflow, so a line box
-			     the exact height of the font clips descenders. -->
+				     the exact height of the font clips descenders. -->
 				<p data-testid="session-id" class="truncate leading-tight font-bold">
 					{#if sessionTitle}
 						{sessionTitle}
@@ -383,20 +315,17 @@
 
 		{#snippet nav()}
 			{#if !persona}
-				<!-- Model + settings as one control: the model belongs to this conversation's
-			     configuration, so it sits with the button that opens it. Keeping it out
-			     of the headline also leaves the title its full height. On mobile only the
-			     settings half shows: the model is changed from inside the panel.
-			     The border lives on the group rather than on each half, so focusing (or
-			     opening) the picker rings the whole control instead of stopping mid-way. -->
+				<!-- Model and settings as one control: the model is this conversation's
+				     configuration, so it sits with the button that opens it, and the title keeps
+				     its full height. On mobile only the settings half shows. The border is on
+				     the group, so focusing the picker rings the whole control. -->
 				<div
 					class="border-shade-3 focus-within:border-accent has-[[data-state=open]]:border-accent mr-1 flex items-center overflow-hidden rounded-md border transition-colors"
 				>
 					<span class="hidden lg:flex">
 						<ModelSelect bind:value={chat.modelName} variant="attached" />
 					</span>
-					<!-- Transparent on the header's own background: the control is chrome, not
-				     content, so it only lifts on hover. -->
+					<!-- Transparent on the header's background: chrome, not content. -->
 					<button
 						type="button"
 						class="text-muted hover:bg-shade-2 hover:text-active flex h-8 items-center justify-center bg-transparent px-2 transition-colors"
@@ -409,9 +338,8 @@
 				</div>
 			{/if}
 			{#if !chat.editor.isNewSession}
-				<!-- Nothing moves while the question stands: the button says so itself
-				     now, so the bar no longer turns red and its neighbour no longer
-				     disappears out from under the pointer. -->
+				<!-- Nothing moves while the question stands: the button says so itself, so the
+				     bar no longer turns red and its neighbour no longer disappears. -->
 				<ButtonCopyConversation session={chat.session} assistantLabel={persona?.name} />
 				<ButtonConfirm
 					bind:armed={shouldConfirmDeletion}
@@ -421,8 +349,8 @@
 			{/if}
 		{/snippet}
 
-		<!-- The phone's two buttons. Deleting takes the pill over while it waits for an
-		     answer, rather than asking somewhere else: there is nowhere else. -->
+		<!-- The phone's two buttons. Deleting takes the pill over while it waits: there
+		     is nowhere else to ask. -->
 		{#snippet compact()}
 			{#if shouldConfirmDeletion}
 				<ButtonConfirm
@@ -452,9 +380,8 @@
 						</button>
 					{/snippet}
 
-					<!-- The title lives here now, and this is the one place it has room to be
-					     read: two lines, fixed, cut with an ellipsis past that, so the menu
-					     never changes height with the conversation it belongs to. -->
+					<!-- The title has room here: two lines, fixed, cut with an ellipsis, so the menu
+					     never changes height with the conversation. -->
 					<p class="text-muted line-clamp-2 px-2 py-1.5 text-xs leading-snug">
 						{chat.editor.isNewSession ? $LL.newSession() : resolveSessionTitle(chat.session)}
 					</p>
@@ -500,24 +427,13 @@
 		{@render topBar(false)}
 	{/if}
 
-	<!-- The transcript and the button that returns to its foot, in one box: the
-	     button then anchors to the conversation rather than to the column, and
-	     stops needing to be told how tall the composer happens to be.
+	<!-- The transcript and the button returning to its foot, in one box, so the
+	     button anchors to the conversation rather than to the column and needs no
+	     telling how tall the composer is.
 
-	     Its scrollbar gutter is reserved whether or not there is a scrollbar to
-	     put in it, because the two floating bars live inside this box: otherwise
-	     they would be a scrollbar narrower on a long conversation than on a short
-	     one, and would shift sideways the moment a reply made the page overflow.
-	     A no-op where scrollbars are drawn over the content and take no room, which
-	     is the case this now asks for.
-
-	     The scrollbar itself is the platform's, deliberately, where the rest of the
-	     app styles its own. Styling one at all is what opts an element out of the
-	     overlay behaviour macOS and iOS give it: any width, any colour, and the bar
-	     stops fading away and sits there for the length of the conversation. That
-	     trade is worth it on a code block, where a bar is how you learn the line
-	     runs past the edge. It is not worth it down the side of the thing you are
-	     reading. -->
+	     Its scrollbar gutter is reserved whether or not there is a scrollbar: the
+	     two floating bars live inside this box, and would otherwise shift sideways
+	     the moment a reply made the page overflow. -->
 	<div class="relative flex min-h-0 flex-grow flex-col">
 		<div
 			class="session__history surface-pane flex flex-grow flex-col overflow-auto px-4 lg:px-6 xl:px-8"
@@ -525,19 +441,15 @@
 			bind:this={messagesWindow}
 		>
 			{#if floatingHeader}
-				<!-- The mirror image of the composer below: sticky rather than laid on
-				     top, so it reserves its own room at the head of the conversation and
-				     never covers the first message, while everything after it passes
-				     behind on the way up. -->
+				<!-- The mirror of the composer below: sticky rather than laid on top, so it
+				     reserves its own room and never covers the first message. -->
 				<div class="sticky top-0 z-20 -mx-4 lg:-mx-6 xl:-mx-8">
 					{@render topBar(true)}
 				</div>
 			{/if}
-			<!-- Grows to fill whatever the conversation does not, which is what puts the
-			     composer at the foot of a short exchange instead of halfway up the page.
-			     A sticky element only sticks once there is something to scroll; below
-			     that it simply sits where the flow leaves it, and the flow is what this
-			     corrects. -->
+			<!-- Grows to fill whatever the conversation does not, which puts the composer at
+			     the foot of a short exchange rather than halfway up: a sticky element only
+			     sticks once there is something to scroll. -->
 			<div class="grow">
 				<Messages
 					bind:session={chat.session}
@@ -555,19 +467,14 @@
 			</div>
 
 			{#if floatingComposer}
-				<!-- Sticky rather than laid on top, which is the whole of the difference:
-				     it stays in the flow, so it reserves its own room at the end of the
-				     conversation and never covers the last message, while everything above
-				     passes behind it on the way there. Nothing measures it, nothing pads
-				     for it. The negative margins undo the transcript's side gutter so it
-				     spans the column rather than the text; there is no vertical one left to
-				     undo, because a stuck element anchors to the inside of the scrollport
-				     and a padding there would have pushed it back down. -->
+				<!-- Sticky rather than laid on top, which is the whole difference: it stays in
+				     the flow, reserves its own room and never covers the last message. The
+				     negative margins undo the transcript's side gutter; there is no vertical one
+				     left, because a stuck element anchors inside the scrollport. -->
 				<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
-					<!-- Scrolling up during a reply silently opts you out of auto-follow;
-					     without this there is nothing to say content is still arriving below,
-					     nor any way back short of dragging. Carried by the composer, so it
-					     stands above it without anyone having to know how tall it is. -->
+					<!-- Scrolling up during a reply opts you out of auto-follow, and without this
+					     nothing says content is still arriving below. Carried by the composer, so it
+					     stands above it without anyone knowing how tall it is. -->
 					{#if userScrolledUp}
 						<button
 							type="button"
@@ -586,8 +493,7 @@
 		</div>
 	</div>
 
-	<!-- Drawn in one of two places, never both, which is why it is written once and
-	     rendered where it belongs. -->
+	<!-- Drawn in one of two places, never both. -->
 	{#if !floatingComposer}
 		<div class="surface-chrome shrink-0">
 			{@render composer()}

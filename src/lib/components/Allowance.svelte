@@ -7,24 +7,15 @@
 	/**
 	 * What this instance lets you spend, and how much of it is gone.
 	 *
-	 * The ceiling is the subject of the card and stays the subject. It is the fact
-	 * somebody came here for, and the spend qualifies it rather than replacing it:
-	 * a card whose biggest number is what you have used reads as a bill, where this
-	 * one is meant to read as an allowance.
+	 * The ceiling is the subject and stays the subject: the spend qualifies it
+	 * rather than replacing it, or the card reads as a bill.
 	 *
-	 * `spend` off, the card is the ceiling alone. That is the welcome tour, where
-	 * the account is an hour old, every figure below would be zero, and announcing
-	 * the allowance is the whole point. On, the bar and the two facts under it
-	 * appear, which is Profile, where the question is whether you can keep going.
+	 * `spend` off is the ceiling alone, for the welcome tour where every figure
+	 * would be zero. On adds the bar and the two facts, which is Profile.
 	 *
-	 * Still not the usage card in Settings. That one is a chart over thirty days,
-	 * and a chart is what you read when you want to know why. This is what you
-	 * glance at on a phone.
-	 *
-	 * One animation drives everything. A single eased value climbs from nothing to
-	 * one on arrival, the figure and the bar are both read off it, and they land
-	 * together. Two timers would have been two things to keep in step, and the day
-	 * they drifted the card would show a full bar over a number still counting.
+	 * One animation drives everything: a single eased value climbs to one on
+	 * arrival and both the figure and the bar are read off it, so they land
+	 * together.
 	 */
 	interface Props {
 		/** Show what has been spent against the ceiling, not only the ceiling. */
@@ -35,13 +26,9 @@
 
 	/**
 	 * Only the fields this card draws, and `spend` is an object rather than a
-	 * figure.
-	 *
-	 * It carries the tokens, the images and the seconds beside the cost, because
-	 * the card in Settings reports all four. Here only `cost` is wanted, and naming
-	 * the shape is what stops it being read as the figure: the answer arrives from
-	 * `response.json()`, so this declaration is the only thing that was ever going
-	 * to catch the difference.
+	 * figure: it carries tokens, images and seconds beside the cost. Naming the
+	 * shape is what stops it being read as the figure, since the answer arrives
+	 * from `response.json()`.
 	 */
 	type Usage = {
 		period: 'month' | 'week' | 'day';
@@ -60,8 +47,8 @@
 			const response = await fetch('/api/usage');
 			if (response.ok) usage = await response.json();
 		} catch {
-			// A card that opens by apologising for a network call is worse than one
-			// that says slightly less.
+			// A card that opens by apologising for a network call is worse than one that
+			// says slightly less.
 		}
 	});
 
@@ -94,31 +81,18 @@
 	);
 
 	/**
-	 * No currency here, on purpose.
+	 * No currency here, on purpose. The instance counts in whatever its prices are
+	 * written in, and on a reporting connection in whatever that provider bills in;
+	 * printing one invites a question nothing anywhere converts an answer for.
 	 *
-	 * The instance counts in whatever its prices are written in, and on a
-	 * connection that reports its own costs it counts in whatever that provider
-	 * bills in. Printing one of those beside an allowance invites a question this
-	 * card has no business raising: whether the figure is euros, dollars, or two
-	 * currencies added together, which nothing anywhere converts.
-	 *
-	 * It is also not the question being asked. Somebody looking here wants to know
-	 * how much of their allowance is left, and a mark that means "this instance's
-	 * unit of account" answers that exactly. Settings still shows the real
-	 * currencies, admits it when there is more than one, and is where that question
-	 * belongs.
+	 * It is also not the question being asked. Settings shows the real currencies
+	 * and admits it when there is more than one.
 	 */
 
 	/** How much of the allowance is gone, capped: a bar cannot be more than full. */
 	const fraction = $derived(usage?.limit ? Math.min(1, usage.spend.cost / usage.limit) : 0);
 
-	/**
-	 * Past the ceiling, which the app allows on purpose.
-	 *
-	 * A turn already running always finishes, and what it cost is only known once
-	 * it has, so an allowance is a line you can be carried over rather than a wall.
-	 * The bar says so by changing colour instead of by refusing to fill.
-	 */
+	/** A turn already running always finishes, and its cost is only known once it has, so an allowance is a line you can be carried over. The bar says so by changing colour rather than by refusing to fill. */
 	const over = $derived(!!usage?.limit && usage.spend.cost > usage.limit);
 
 	/** The day the counter goes back to zero, in the reader's own format. */
@@ -128,14 +102,7 @@
 			: ''
 	);
 
-	/**
-	 * A figure, and never the word NaN.
-	 *
-	 * The guard is here because it already happened: `spend` carries the cost, this
-	 * card read it as the cost, and the arithmetic printed `NaN / 20 EUR` in front
-	 * of somebody. The shape above is the fix; this makes the next such mistake
-	 * render a nought rather than shout about itself.
-	 */
+	/** The guard is here because it already happened: `spend` carries the cost, this card read it as the cost, and the arithmetic printed `NaN / 20 EUR`. */
 	const money = (value: number) =>
 		(Number.isFinite(value) ? value : 0).toLocaleString(undefined, {
 			maximumFractionDigits: value < 10 ? 2 : 0
@@ -151,18 +118,17 @@
 			<span
 				class="text-active flex items-baseline gap-2 text-4xl leading-none font-semibold tabular-nums"
 			>
-				<!-- The same mark the price fields use, so a figure here and a figure in
-				     Models and prices are visibly the same unit. Baseline-aligned rather
-				     than centred: next to a number this size, a centred icon floats. -->
+				<!-- The same mark the price fields use, so the two are visibly the same unit.
+				     Baseline-aligned: next to a number this size, a centred icon floats. -->
 				<Coins class="text-accent h-6 w-6 shrink-0 self-center" aria-hidden="true" />
 				{money(usage.limit * t)}
 			</span>
 			<span class="text-active mt-1.5 text-sm">{period}</span>
 
 			{#if spend}
-				<!-- Filled from the same arrival value as the figure above, so the two
-				     cannot disagree. Its own rounded cap and a breath of glow, because a
-				     flat rectangle under a card this warm reads as a loading placeholder. -->
+				<!-- Filled from the same arrival value as the figure, so the two cannot
+				     disagree. Its own cap and a breath of glow, or a flat rectangle under a card
+				     this warm reads as a loading placeholder. -->
 				<div
 					class="track mt-4"
 					role="progressbar"
@@ -174,17 +140,16 @@
 					<span class="fill" class:fill--over={over} style="--fill: {fraction * t}"></span>
 				</div>
 
-				<!-- The figure without its unit, because the unit is already the largest
-				     thing on the card. Written twice on something this small, a currency
-				     stops reading as information and starts reading as a template. The
-				     accessible name below keeps it: there, nothing else is in view. -->
+				<!-- Without its unit, because the unit is already the largest thing on the card.
+				     Written twice on something this small, a currency reads as a template. The
+				     accessible name below keeps it. -->
 				<p class="text-muted mt-3 flex flex-wrap items-center justify-center text-xs">
 					<span class="font-medium {over ? 'text-negative' : 'text-active'}">
 						{$LL.usageSpent({ spent: money(usage.spend.cost) })}
 					</span>
 					{#if resets}
-						<!-- A drawn separator rather than a character, so it is spacing and
-						     colour rather than a glyph that can wrap to a line of its own. -->
+						<!-- A drawn separator rather than a character, so it is spacing and colour
+						     rather than a glyph that can wrap to a line of its own. -->
 						<span class="sep" aria-hidden="true"></span>
 						<span>{$LL.allowanceResets({ date: resets })}</span>
 					{/if}
@@ -195,9 +160,8 @@
 		{:else}
 			<span class="text-accent text-5xl leading-none font-semibold" aria-hidden="true">∞</span>
 			<span class="text-active mt-1.5 text-sm">{$LL.allowanceUnlimited()}</span>
-			<!-- No ceiling means no fraction to draw, so what is left to say is what has
-			     gone. Said only once there is something to say: "0 spent" on a fresh
-			     account is a line that reports nothing. -->
+			<!-- No ceiling means no fraction to draw, so what is left is what has gone. Only
+			     once there is something to say: "0 spent" reports nothing. -->
 			{#if spend && usage.spend.cost > 0}
 				<span class="text-muted mt-1 text-xs">
 					{$LL.usageSpent({ spent: spelled(usage.spend.cost) })}

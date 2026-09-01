@@ -29,16 +29,13 @@ import type { Message } from '$lib/sessions';
 /**
  * What a turn running in this process can reach.
  *
- * The mirror of the browser's own wiring, and the reason the orchestrator takes
- * its capabilities as arguments: the steps are identical, only the way out is
- * different. Here the search and the page reads are function calls rather than
- * requests back to ourselves, and the provider is addressed directly rather than
- * through the proxy.
+ * The mirror of the browser's wiring, which is why the orchestrator takes its
+ * capabilities as arguments: the steps are identical, only the way out differs.
  *
- * Addressing it directly is exactly what makes the policy below load-bearing.
- * The proxy used to be the only path a request could take, so the admin's rules
- * lived there. This is a second path, so they have to be applied on it too, or
- * running a turn server-side would be a way to ask for a model nobody shared.
+ * Addressing the provider directly is what makes the policy below
+ * load-bearing. The proxy used to be the only path, so the admin's rules lived
+ * there; this is a second path, or running a turn server-side would be a way to
+ * ask for a model nobody shared.
  */
 
 export interface RunPrincipal {
@@ -46,14 +43,7 @@ export interface RunPrincipal {
 	isAdmin: boolean;
 }
 
-/**
- * The connection a run names, resolved by the only party allowed to resolve it.
- *
- * The same three questions `requireServer` asks of a request: does it exist, is
- * it this account's, and is it switched on. The last one was missing here, which
- * meant a connection an administrator had switched off still answered a turn
- * started on this side, while refusing the identical turn typed in the browser.
- */
+/** The same three questions `requireServer` asks: does it exist, is it this account's, is it switched on. The last was missing, so a connection an administrator had switched off still answered a turn started on this side. */
 export function resolveRunServer(input: RunInput, principal: RunPrincipal): Server {
 	return fromRow(reachableServer(principal.userId, input.serverId));
 }
@@ -68,26 +58,19 @@ function fromRow(row: ServerRow): Server {
 		modelFilter: row.model_filter ?? undefined,
 		isEnabled: !!row.is_enabled,
 		isVerified: row.verified_at ? new Date(row.verified_at) : null,
-		// Carried here rather than merged at the call site: every request a turn
-		// makes goes through a strategy built from this, so the machine settings
-		// ride along without the orchestrator, the summariser or the router each
-		// having to remember them.
+		// Carried here rather than merged at the call site: every request goes through a
+		// strategy built from this, so the machine settings ride along without the
+		// orchestrator, the summariser and the router each remembering them.
 		loadOptions: parseLoadOptions(row.load_options)
 	};
 }
 
-/**
- * A strategy that answers to the admin before it answers to the model.
- *
- * Wrapped rather than checked at the call sites: every request a turn makes has
- * to pass, including the router's pre-pass and the summariser's, and a check
- * written once per call site is a check that will be missing from the next one.
- */
+/** Wrapped rather than checked at the call sites: every request a turn makes has to pass, and a check written once per call site is one that will be missing from the next. */
 function policed(strategy: ChatStrategy, row: ServerRow | null, isAdmin: boolean): ChatStrategy {
 	if (!row) return strategy;
 
 	// The policy speaks in terms of a request body, which a `ChatRequest` is: the
-	// cast says so once rather than loosening the policy's own signature.
+	// cast says so once rather than loosening the policy's signature.
 	const vet = (payload: ChatRequest): ChatRequest =>
 		policeChatBody(row, isAdmin, payload as unknown as ChatBody) as unknown as ChatRequest;
 
@@ -133,16 +116,11 @@ function fetchLimits(
 }
 
 /**
- * The credit limit, applied on this path too.
+ * The credit limit, applied on this path too. It used to live only in
+ * `/api/llm`, which is no longer the only way out: a turn running here talks to
+ * the provider itself, so an account over its allowance kept spending.
  *
- * It used to live only in `/api/llm`, which is the browser's way out and is not
- * the only one any more: a turn running in this process talks to the provider
- * itself, so an account over its allowance kept spending as long as the turn
- * started server-side. The same oversight the policy above was written to
- * close, on the one rule that was left behind.
- *
- * Asked before the turn starts and never during one, exactly as the proxy asks
- * it: a conversation already under way always finishes.
+ * Asked before the turn starts and never during one, exactly as the proxy asks.
  */
 function policeCredit(row: ServerRow | null, model: string, principal: RunPrincipal): void {
 	if (!row) return;
@@ -153,26 +131,16 @@ function policeCredit(row: ServerRow | null, model: string, principal: RunPrinci
 /**
  * What the caller supplies that the turn cannot get for itself.
  *
- * One entry, and it is what decides whether MCP happens at all. Every MCP call
- * is put to a person before it is made, so a path with nobody to ask has no
- * business making them: `approve` absent means the catalogues are never opened.
+ * One entry, and it decides whether MCP happens at all: every call is put to a
+ * person, so a path with nobody to ask has no business making them.
  *
  * That is why bots have none. A bot answers to people who are not the account
- * holder, in a room the account holder may not be reading: there is no one to put
- * the question to, and letting the room through by asking the bot nicely is an
- * escalation nobody granted. The same goes for a spoken turn, where the answer
- * would have to be a dialog nobody is looking at.
+ * holder, in a room they may not be reading. The same goes for a spoken turn,
+ * where the answer would be a dialog nobody is looking at.
  */
 export interface DepsOptions {
 	approve?: (request: McpApprovalRequest) => Promise<boolean>;
-	/**
-	 * MCP with nobody to ask, every call allowed.
-	 *
-	 * The one deliberate hole in the rule above, and it is the owner's to open: a
-	 * bot with `mcp` ticked runs its calls unasked, because there is no one at the
-	 * other end of its turn. Written as its own option rather than as an absent
-	 * `approve`, so that no path acquires it by forgetting something.
-	 */
+	/** The one deliberate hole in the rule above, and the owner's to open. Written as its own option rather than as an absent `approve`, so no path acquires it by forgetting something. */
 	mcpUnattended?: boolean;
 }
 
@@ -220,13 +188,7 @@ export function serverDeps(
 
 		canCarryTools: () => canCarryTools(server, input.model, input.flags.nativeTools),
 
-		/**
-		 * The account's MCP servers, opened when the turn asks for them.
-		 *
-		 * Resolved here rather than carried in the run's body for the same reason
-		 * memory is: the servers belong to the signed-in account, and a client is
-		 * not entitled to say which addresses a turn may reach out to.
-		 */
+		/** Resolved here rather than carried in the run's body, like memory: the servers belong to the signed-in account, and a client is not entitled to say which addresses a turn may reach. */
 		approve: options.approve ?? (options.mcpUnattended ? async () => true : undefined),
 
 		openMcp:
@@ -258,14 +220,14 @@ export function serverDeps(
 			const pages: { title: string; url: string; text: string }[] = [];
 			for (const url of wanted) {
 				try {
-					// The allow-list, which this path used to skip: it was applied only by
-					// the browser-facing route, so the setting restricted the caller that
-					// no longer exists and never the turn that actually reads the page.
+					// The allow-list, which this path used to skip: applied only by the
+					// browser-facing route, it restricted the caller that no longer exists rather
+					// than the turn that actually reads the page.
 					const page = await fetchPage(url, limits.maxChars, allowedFetchOrigins());
 					pages.push({ title: page.title, url: page.url, text: page.text });
 				} catch {
-					// One unreachable page must not cost the others, exactly as the
-					// endpoint does it: failures are reported, not thrown.
+					// One unreachable page must not cost the others: failures are reported, not
+					// thrown.
 				}
 			}
 			if (!pages.length) return null;
@@ -277,8 +239,8 @@ export function serverDeps(
 		},
 
 		// The speaker's own persona when somebody was called in with @, and the
-		// conversation's otherwise. The account comes from the principal, never
-		// from the body: naming whose memory to read is not a client's call.
+		// conversation's otherwise. The account comes from the principal, never from the
+		// body: naming whose memory to read is not a client's call.
 		memory: serverMemory(principal.userId, input.speaker?.personaId ?? input.personaId),
 
 		title: input.title
@@ -329,8 +291,7 @@ export function serverDeps(
 							replacedCount: messages.length
 						};
 					} catch {
-						// Best-effort, like every automatic compaction: the answer already
-						// landed, and a summary that failed costs one longer request.
+						// Best-effort, like every automatic compaction: the answer already landed.
 						return null;
 					}
 				}
@@ -338,13 +299,7 @@ export function serverDeps(
 	};
 }
 
-/**
- * A connection for one of the small jobs around a turn: a title, a compaction.
- *
- * Nothing rather than a refusal, because none of these is the answer somebody is
- * waiting for: a title that cannot be written is a conversation without one, not
- * a turn that failed. The three questions are the same ones as everywhere else.
- */
+/** Nothing rather than a refusal: a title that cannot be written is a conversation without one, not a turn that failed. */
 function helper(serverId: string, principal: RunPrincipal): Server | null {
 	try {
 		return fromRow(reachableServer(principal.userId, serverId));

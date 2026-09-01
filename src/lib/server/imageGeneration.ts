@@ -38,16 +38,11 @@ import { costOf } from '$lib/usageCounts';
 /**
  * Asking a provider for a picture, and keeping what comes back.
  *
- * Server-side and only server-side, which is not an implementation detail. The
- * key is here, the admin's rules are here, and the picture that arrives has to
- * be looked at before it is stored. None of which a browser can be asked to do
- * on its own behalf.
+ * Server-side only: the key is here, the admin's rules are here, and what
+ * arrives has to be inspected before it is stored.
  *
  * It is also what makes a generation survive the tab that started it. The
- * request the browser makes is long, but nothing depends on the browser still
- * being there when it ends: the answer is written to the gallery, and the
- * gallery is what the page reads. Close the tab halfway through and the picture
- * is waiting on the next load.
+ * answer is written to the gallery, and the gallery is what the page reads.
  */
 
 export class ImageError extends Error {
@@ -70,23 +65,11 @@ export interface ImageRequest {
 	quality?: ImageQuality;
 	style?: string;
 	n?: number;
-	/**
-	 * Pictures to work from, as data URLs, when the model takes any.
-	 *
-	 * Never stored. They are read once into the request that uses them and then
-	 * dropped: a reference is a thing you brought, not a thing the app keeps, and
-	 * keeping it would mean a second quota and a second thing to delete.
-	 */
+	/** Never stored: read once into the request that uses them and dropped. A reference is a thing you brought, not a thing the app keeps. */
 	references?: string[];
 }
 
-/**
- * Vet a request against what the administrator actually allows.
- *
- * The same question the relay asks of a chat turn, asked here because this path
- * does not go through the relay: the server holds the connection itself, and a
- * rule that only lived in the proxy would be a rule this route quietly dropped.
- */
+/** The same question the relay asks of a chat turn, asked here because this path holds the connection itself and does not go through the relay. */
 function vet(server: ServerRow, isAdmin: boolean, model: string): void {
 	if (modelKind({ modelKinds: getModelKinds(server.id) }, model) !== 'image') {
 		throw new ImageError(400, `"${model}" is not an image model on this connection`);
@@ -96,14 +79,7 @@ function vet(server: ServerRow, isAdmin: boolean, model: string): void {
 	}
 }
 
-/**
- * The body every provider the app draws with understands.
- *
- * Shape and quality are translated here and left out entirely when there is no
- * translation, which is the safe answer: every endpoint has a default, and a
- * field it does not recognise is a refusal arriving after the wait rather than
- * before it.
- */
+/** Shape and quality are translated here and left out where there is no translation: every endpoint has a default, and an unrecognised field is a refusal after the wait. */
 function requestBody(input: ImageRequest, count: number, options: ImageOptions) {
 	const size = input.ratio ? sizeFor(options, input.ratio) : undefined;
 	const quality = input.quality ? qualityFor(options, input.quality) : undefined;
@@ -112,9 +88,8 @@ function requestBody(input: ImageRequest, count: number, options: ImageOptions) 
 		model: input.model,
 		prompt: input.sentPrompt?.trim() || input.prompt,
 		n: count,
-		// Base64, always. A URL would mean fetching a host the provider named,
-		// which is a request the app makes on its own network from its own
-		// address: the shape of every SSRF there has ever been.
+		// Base64, always. A URL would mean fetching a host the provider named, from the
+		// app's own network and address: the shape of every SSRF there has ever been.
 		response_format: 'b64_json',
 		...(input.negativePrompt?.trim() ? { negative_prompt: input.negativePrompt.trim() } : {}),
 		...(size ? { size } : {}),
@@ -124,13 +99,10 @@ function requestBody(input: ImageRequest, count: number, options: ImageOptions) 
 }
 
 /**
- * A reference picture, read out of the data URL the browser sent.
- *
- * Inspected exactly like a picture coming back from a provider, and for the same
- * reason: the type is read from the bytes, never from what the sender labelled
- * them. The list is the input one rather than the one the app serves back, which
- * is narrower: a WebP passes every check here and is then refused by the
- * endpoint, so refusing it before the upload is the honest place.
+ * Inspected exactly like a picture coming back: the type is read from the bytes,
+ * never from what the sender labelled them. The input list is narrower than the
+ * one the app serves, so a WebP is refused before the upload rather than by the
+ * endpoint.
  */
 function decodeReference(dataUrl: string): { bytes: Buffer; contentType: string } {
 	const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
@@ -147,14 +119,7 @@ function decodeReference(dataUrl: string): { bytes: Buffer; contentType: string 
 	return { bytes, contentType };
 }
 
-/**
- * The request that carries reference pictures.
- *
- * Multipart, because that is what both endpoints want, their specifications
- * disagree, and the endpoints do not. The same fields as a plain drawing, so
- * there is one answer to "what does the app send" rather than two, plus the
- * pictures under whatever this provider calls that field.
- */
+/** Multipart, because that is what both endpoints want even though their specifications disagree. The same fields as a plain drawing, plus the pictures under whatever this provider calls that field. */
 function referenceRequest(
 	accepts: ReferenceImages,
 	input: ImageRequest,
@@ -184,13 +149,7 @@ function referenceRequest(
 	return form;
 }
 
-/**
- * Draw, and keep what comes back.
- *
- * Returns the rows as they were stored. Throws `ImageError` for anything the
- * caller did wrong and for anything the provider refused, so the route stays a
- * translation of errors into statuses and holds no rules of its own.
- */
+/** Returns the rows as stored. Throws `ImageError` for anything the caller did wrong and anything the provider refused, so the route holds no rules of its own. */
 export async function generateImages(
 	userId: string,
 	isAdmin: boolean,
@@ -208,19 +167,16 @@ export async function generateImages(
 
 	const count = Math.min(Math.max(Math.floor(input.n ?? 1), 1), IMAGE_LIMITS.maxPerRequest);
 
-	// Asked before the work starts, never during it, which is the same rule the
-	// credit limit follows: whatever is already running always finishes.
+	// Asked before the work starts, never during it, like the credit limit:
+	// whatever is already running always finishes.
 	if (bytesHeld(userId) >= IMAGE_LIMITS.maxBytesPerUser) {
 		throw new ImageError(413, 'Image storage is full; delete some images first');
 	}
 
 	/**
-	 * The allowance, asked here because this path does not go through the relay.
-	 *
-	 * The relay learned to meter and refuse drawings, but only the ones a browser
-	 * sends through it. This route holds the provider connection itself, so a
-	 * limit enforced only there would be a limit that images walked straight past
-	 *, which is the hole that was just closed, reopened one level up.
+	 * The allowance, asked here because this path does not go through the relay: the
+	 * relay meters what a browser sends through it, and this route holds the
+	 * provider connection itself.
 	 *
 	 * Only on the instance's own connections. A personal one is somebody's own key
 	 * and their own bill.
@@ -228,8 +184,8 @@ export async function generateImages(
 	const price = getModelPricing(server.id)[input.model];
 	if (server.owner_user_id === null && creditLimitFor(userId) > 0) {
 		if (isOverLimit(userId)) throw new ImageError(402, refusal('credit-limit'));
-		// Unpriced is not counted, and not counted would mean not limited. One model
-		// nobody got round to pricing is an unlimited allowance for everybody.
+		// Unpriced is not counted, and not counted would mean not limited: one model
+		// nobody priced is an unlimited allowance for everybody.
 		if (!hasPriceFigure(price)) throw new ImageError(402, refusal('unpriced-model', input.model));
 	}
 
@@ -241,14 +197,7 @@ export async function generateImages(
 	const options = imageOptionsFor(server.connection_type, input.model);
 	const key = getServerApiKey(server);
 
-	/**
-	 * Where this request goes, and in what shape.
-	 *
-	 * With no reference picture it is the drawing endpoint, unchanged. With one it
-	 * is whatever the descriptor says this model takes them on, and a model that
-	 * says nothing takes none, so the pictures are refused here rather than sent
-	 * to an endpoint that would ignore them and bill for the ignoring.
-	 */
+	/** With no reference it is the drawing endpoint. With one it is whatever the descriptor says this model takes them on, and a model that says nothing takes none. */
 	const references = input.references ?? [];
 	const accepts = references.length
 		? referencesFor(server.connection_type, input.model)
@@ -259,9 +208,9 @@ export async function generateImages(
 	if (accepts && references.length > accepts.max) {
 		throw new ImageError(400, `At most ${accepts.max} reference images`);
 	}
-	// Asked here rather than only in the composer, and before the request goes out:
-	// the endpoint refuses this after the wait and after the meter has run, and a
-	// missing word is not worth a minute of somebody's allowance.
+	// Before the request goes out: the endpoint refuses this after the wait and
+	// after the meter has run, and a missing word is not worth a minute of
+	// somebody's allowance.
 	if (accepts?.trigger && !hasTrigger(input.sentPrompt?.trim() || prompt, accepts.trigger)) {
 		throw new ImageError(400, `The prompt must contain the word "${accepts.trigger}"`);
 	}
@@ -294,9 +243,8 @@ export async function generateImages(
 	}
 
 	if (!response.ok) {
-		// The provider's own words, trimmed. Whoever typed the prompt is the person
-		// who can act on "prompt too long" or "model is loading", and hiding it
-		// behind a generic failure sends them to their administrator for nothing.
+		// The provider's own words, trimmed. Whoever typed the prompt can act on
+		// "prompt too long"; a generic failure sends them to their administrator.
 		const detail = (await response.text().catch(() => '')).slice(0, 500);
 		throw new ImageError(
 			response.status === 401 ? 502 : response.status,
@@ -314,22 +262,15 @@ export async function generateImages(
 
 	const now = new Date().toISOString();
 
-	/**
-	 * Everything that survived inspection, before anything is written.
-	 *
-	 * Nothing is stored inside the loop, because what each picture costs is a
-	 * share of what the request cost, and that cannot be divided until it is known
-	 * how many of them there are. Vetting first also means a batch never lands
-	 * half-written.
-	 */
+	/** Nothing is stored inside the loop: what each picture costs is a share of what the request cost, which cannot be divided until the count is known. Vetting first also means a batch never lands half-written. */
 	const usable: { bytes: Buffer; contentType: string }[] = [];
 	for (const b64 of encoded) {
 		const bytes = Buffer.from(b64, 'base64');
 		if (!bytes.length || bytes.length > IMAGE_LIMITS.maxBytes) continue;
 
-		// From the bytes, never from what the provider called them. This is served
-		// back from the app's own origin, so an SVG accepted here would be script
-		// running as the app.
+		// From the bytes, never from what the provider called them: this is served back
+		// from the app's own origin, so an SVG accepted here would be script running as
+		// the app.
 		const contentType = sniffImageType(bytes);
 		if (!contentType || !IMAGE_TYPES[contentType]) continue;
 
@@ -338,14 +279,7 @@ export async function generateImages(
 
 	if (!usable.length) throw new ImageError(502, 'The provider returned nothing usable');
 
-	/**
-	 * What the request cost, and each picture's share of it.
-	 *
-	 * The request is what the provider bills: one stretch of time, or a count of
-	 * images. Dividing it is only for the gallery, so a row can answer "what did
-	 * this one cost" without implying it was charged four times. `undefined` stays
-	 * undefined all the way down: an unpriced model is not free.
-	 */
+	/** The provider bills the request: one stretch of time, or a count of images. Dividing it is only for the gallery. `undefined` stays undefined: an unpriced model is not free. */
 	const total = costOf({ input: 0, output: 0, images: usable.length, seconds }, price);
 	const share = total === undefined ? undefined : total / usable.length;
 
@@ -358,8 +292,8 @@ export async function generateImages(
 			negativePrompt: input.negativePrompt?.trim() || undefined,
 			serverId: server.id,
 			model: input.model,
-			// What was actually sent, and what was asked for. The first is a fact about
-			// this picture, the second is what "another like this" can be built from.
+			// What was sent, and what was asked for: the first is a fact about this
+			// picture, the second is what "another like this" is built from.
 			size: input.ratio ? sizeFor(options, input.ratio) : undefined,
 			ratio: input.ratio,
 			quality: input.quality,
@@ -377,14 +311,11 @@ export async function generateImages(
 			writeImage(userId, image.id, contentType, bytes);
 			insertImage(userId, image);
 		} catch (cause) {
-			// A picture that was drawn and paid for and cannot be kept. Reported as
-			// what it is rather than as an unhandled exception: the provider did its
-			// part, the instance could not do its own, and the person who pressed the
-			// button needs to hear the difference before they try again.
+			// A picture that was drawn and paid for and cannot be kept. Reported as what it
+			// is: the provider did its part and the instance could not do its own.
 			//
-			// Whatever landed before this stays. A half-written batch is not tidy, but
-			// deleting pictures somebody has already been billed for, to make a failure
-			// look neater, is worse than keeping them.
+			// Whatever landed before this stays. Deleting pictures somebody has been billed
+			// for, to make a failure look neater, is worse than keeping them.
 			throw new ImageError(
 				500,
 				cause instanceof ImageStoreError ? cause.message : 'The image could not be stored'
@@ -394,8 +325,7 @@ export async function generateImages(
 	}
 
 	// One reading for the whole request, priced the way a turn is. A personal
-	// connection is somebody's own key and own bill, which `recordRunUsage`
-	// already knows and refuses to count.
+	// connection is somebody's own bill, which `recordRunUsage` refuses to count.
 	recordRunUsage(userId, server.id, input.model, {
 		input: 0,
 		output: 0,

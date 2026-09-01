@@ -60,13 +60,9 @@
 	import { toast } from '$lib/toast';
 
 	/**
-	 * Everything the app has drawn, and the one field that adds to it.
-	 *
-	 * Built as a page in the Library family rather than as a conversation: a
-	 * gallery is something you come back to and browse, not a thread you are in
-	 * the middle of. So it scrolls on its own, it has a heading, and the field
-	 * that makes new ones sits at the top where the page starts rather than
-	 * floating at the bottom where a composer would.
+	 * Everything the app has drawn, and the field that adds to it. A page in the
+	 * Library family rather than a conversation: it scrolls on its own, has a
+	 * heading, and the field sits at the top rather than floating at the bottom.
 	 */
 
 	let prompt = $state(readDraft(IMAGE_DRAFT));
@@ -77,38 +73,18 @@
 	let count = $state(1);
 	let showAdvanced = $state(false);
 	let busy = $state(false);
-	/**
-	 * What the writer produced, waiting to be read.
-	 *
-	 * A field of its own rather than a replacement for what was typed. The person
-	 * keeps their words, sees what would be sent instead, and can edit or discard
-	 * it. A helper that silently overwrote the box would be one nobody could tell
-	 * apart from a bug the first time it made the picture worse.
-	 */
+	/** A field of its own rather than a replacement: the person keeps their words, sees what would be sent, and can edit or discard it. */
 	let rewritten = $state('');
 	let rewriting = $state(false);
 	let opened = $state<GeneratedImage | null>(null);
 
-	/**
-	 * What this connection understands, for the model currently chosen.
-	 *
-	 * Empty on anything the app has no translation for, which disables both
-	 * controls rather than offering a choice that becomes a refusal thirty seconds
-	 * later. The request then carries neither field and the model uses its own
-	 * default, which is valid everywhere.
-	 */
+	/** Empty on anything the app has no translation for, which disables both controls rather than offering a choice that becomes a refusal thirty seconds later. */
 	const options = $derived.by(() => {
 		const server = serverFor(serverIdFor(model) ?? '');
 		return server ? imageOptionsFor(server.connectionType, model) : {};
 	});
 
-	/**
-	 * Pictures to work from, when the model chosen takes any.
-	 *
-	 * Held here and nowhere else: they travel with one request and are never
-	 * stored, so switching to a model that takes none has to put them down rather
-	 * than keep them waiting for a model that would.
-	 */
+	/** Held here and nowhere else: they travel with one request and are never stored, so switching to a model that takes none puts them down. */
 	let references = $state<ImageAttachment[]>([]);
 
 	const accepts = $derived.by(() => {
@@ -118,14 +94,7 @@
 
 	const roomLeft = $derived(accepts ? accepts.max - references.length : 0);
 
-	/**
-	 * Whether the words still owe the model its trigger.
-	 *
-	 * Shown only once there is something to work from, because before that the
-	 * sentence is about a rule for pictures nobody has attached. The server refuses
-	 * the same case, which is the one that protects the allowance; this is only so
-	 * the refusal never has to happen.
-	 */
+	/** Shown only once there is something to work from. The server refuses the same case; this is so the refusal never has to happen. */
 	const missingTrigger = $derived.by(() => {
 		const word = accepts?.trigger;
 		if (!word || !references.length) return undefined;
@@ -153,25 +122,15 @@
 		if (images.length > room) toast.warning($LL.imageReferencesFull({ count: accepts.max }));
 	}
 
-	/**
-	 * Whether there is anything to put down.
-	 *
-	 * The button is drawn only when the answer is yes. A control that resets an
-	 * empty composer is a control that does nothing, and one sitting over the
-	 * placeholder is the first thing you see on a page you have not used yet.
-	 */
+	/** The button is drawn only when the answer is yes: a reset on an empty composer does nothing and is the first thing you see on an unused page. */
 	const composerFilled = $derived(
 		!!prompt.trim() || !!rewritten.trim() || !!negativePrompt.trim() || references.length > 0
 	);
 
 	/**
-	 * Put down everything composed for the next drawing.
-	 *
-	 * The words, the rewrite, the negative prompt and the pictures brought along:
-	 * all of it belongs to the message being written, so a reset that left any of it
-	 * behind would be a reset you have to check. What it does not touch is the
-	 * model, the shape, the quality and the count, which are how you work rather
-	 * than what you are asking for this time.
+	 * The words, the rewrite, the negative prompt and the references: all of it
+	 * belongs to the message being written. It does not touch the model, shape,
+	 * quality and count, which are how you work rather than what you are asking.
 	 */
 	function resetComposer() {
 		prompt = '';
@@ -182,13 +141,10 @@
 	}
 
 	/**
-	 * The words survive a reload; the pictures brought along do not.
-	 *
-	 * Only the prompt is kept. A reference is measured in megabytes and the whole
-	 * of local storage in five, so keeping one would evict the galleries and the
-	 * conversations it sits beside. The negative prompt stays out for a smaller
-	 * reason: it is behind a toggle, and restoring a field somebody cannot see is
-	 * how a request goes out carrying something nobody remembered writing.
+	 * Only the prompt is kept. A reference is measured in megabytes and local
+	 * storage in five, so keeping one would evict the galleries beside it. The
+	 * negative prompt stays out because it is behind a toggle, and restoring a field
+	 * nobody can see is how a request carries something nobody remembers writing.
 	 */
 	$effect(() => {
 		void prompt;
@@ -212,14 +168,7 @@
 		high: $LL.imageQualityHigh()
 	});
 
-	/**
-	 * The three lists on the strip, in the shape the shared picker takes.
-	 *
-	 * Built here rather than inline so the markup stays one component per control.
-	 * The values are strings because that is what a picked option carries; the two
-	 * that are really a union and the one that is really a number are converted back
-	 * on the way in, which is the only place the conversion belongs.
-	 */
+	/** Built here so the markup stays one component per control. The values are strings, since that is what a picked option carries; the union and the number are converted back on the way in. */
 	const RATIO_OPTIONS = $derived(
 		IMAGE_RATIOS.map((value) => ({ value, label: RATIO_LABELS[value] }))
 	);
@@ -233,17 +182,14 @@
 		}))
 	);
 
-	/**
-	 * Whether to offer the rewriter: switched on, and with a model to run it,
-	 * its own, or failing that the one this account uses for everything else.
-	 */
+	/** Switched on, and with a model to run it: its own, or the one this account uses for everything else. */
 	const canRewrite = $derived(
 		$chatDefaultsConfig.images.imagePromptWriter &&
 			!!($chatDefaultsConfig.images.imagePromptModel || $chatDefaultsConfig.defaultModel.value)
 	);
 
-	// The instance's or the account's default, and failing both the first model
-	// that can draw, so the field is never empty on arrival.
+	// The instance's or the account's default, failing both the first model that
+	// can draw, so the field is never empty on arrival.
 	onMount(() => {
 		if (model) return;
 		const preferred = $chatDefaultsConfig.images.defaultImageModel;
@@ -254,16 +200,15 @@
 	async function rewrite() {
 		if (!prompt.trim()) return;
 		rewriting = true;
-		// Emptied first, so a second run does not read as the first one still there
-		// while the model thinks. The panel opens on `rewriting`, not on the text.
+		// Emptied first, so a second run does not read as the first still there. The
+		// panel opens on `rewriting`, not on the text.
 		rewritten = '';
 		try {
 			const text = await writeImagePrompt(prompt, (partial) => (rewritten = partial));
 			if (text) rewritten = text;
 			else toast.error($LL.imageRewriteFailed());
 		} catch (error) {
-			// Whatever landed before it failed is half a sentence, and half a sentence
-			// left in the field is one somebody sends by mistake.
+			// Half a sentence left in the field is one somebody sends by mistake.
 			rewritten = '';
 			toast.error($LL.imageRewriteFailed(), {
 				description: error instanceof Error ? error.message : undefined
@@ -275,11 +220,7 @@
 
 	const serverFor = (id: string) => $serversStore.find((server) => server.id === id);
 
-	/**
-	 * The connection's accent, which is the app's way of saying where something
-	 * came from. The same dot appears beside every model everywhere else, so a
-	 * gallery mixing two providers reads without a legend.
-	 */
+	/** The connection's accent: the same dot appears beside every model everywhere else, so a gallery mixing two providers reads without a legend. */
 	function badgeColor(serverId: string): string {
 		const server = serverFor(serverId);
 		return server ? serverBadge(server).color : '#888780';
@@ -294,31 +235,27 @@
 			const made = await generateImages({
 				serverId,
 				model,
-				// Both, always. The words that were typed are what the gallery shows and
-				// what a search would match; the rewrite is what was actually sent, and
-				// keeping it is what makes "why does this not look like what I asked
-				// for" a question with an answer.
+				// Both, always. The typed words are what the gallery shows and what a search
+				// matches; the rewrite is what was actually sent, which is what makes "why does
+				// this not look like what I asked for" a question with an answer.
 				prompt: prompt.trim(),
 				sentPrompt: rewritten.trim() || undefined,
 				negativePrompt: negativePrompt.trim() || undefined,
-				// The app's own words. The server holds the connection, so it is the side
-				// that knows what this provider calls them, and it translates there.
+				// The app's own words. The server holds the connection, so it is the side that
+				// knows what this provider calls them.
 				ratio,
 				quality,
 				n: count,
 				references: references.length ? references.map((image) => image.dataUrl) : undefined
 			});
 
-			// Sent, so it is no longer a draft. The field keeps the words on purpose,
-			// but there is nothing left to restore after a reload that it would not
-			// already have.
+			// Sent, so it is no longer a draft. The field keeps the words on purpose.
 			clearDraft(IMAGE_DRAFT);
 
-			// Not awaited: the pictures are already on screen, and a label arriving a
-			// moment later is a label arriving a moment later.
+			// Not awaited: the pictures are already on screen.
 			void titleImages(made, rewritten.trim() || prompt.trim());
-			// The prompt stays. Drawing is iterative, and the commonest next action is
-			// the same words with one of them changed.
+			// The prompt stays: drawing is iterative, and the commonest next action is the
+			// same words with one of them changed.
 		} catch (error) {
 			toast.error($LL.imageGenerationFailed(), {
 				description: error instanceof Error ? error.message : undefined
@@ -328,14 +265,7 @@
 		}
 	}
 
-	/**
-	 * Hand a file to the browser.
-	 *
-	 * An anchor rather than a navigation, because the picture route serves its
-	 * bytes `inline`: going to it would show the image instead of saving it, and
-	 * `download` is what says which of the two is meant. Both routes are
-	 * same-origin and behind the same session as the page itself.
-	 */
+	/** An anchor rather than a navigation: the picture route serves its bytes `inline`, so going to it would show the image instead of saving it. */
 	function saveAs(url: string, name?: string) {
 		const link = document.createElement('a');
 		link.href = url;
@@ -351,25 +281,12 @@
 		if (latest) saveAs(imageUrl(latest.id), downloadName(latest));
 	}
 
-	/**
-	 * Everything, as one archive built and streamed by the server.
-	 *
-	 * Not a loop of downloads: browsers block the second and third of those, and
-	 * an account may hold hundreds. The archive carries a manifest of the prompts
-	 * beside the pictures, which is the half that cannot be recovered from the
-	 * files themselves.
-	 */
+	/** Not a loop of downloads, which browsers block after the first. The archive carries a manifest of the prompts, which is the half the files cannot recover. */
 	function exportAll() {
 		saveAs('/api/images/export');
 	}
 
-	/**
-	 * Set the field back to how this picture was made.
-	 *
-	 * The prompt and everything beside it, because reusing a prompt without the
-	 * model, size and negative prompt that produced the result is reusing a third
-	 * of it, and the difference shows in the next image rather than in the form.
-	 */
+	/** The prompt and everything beside it: reusing a prompt without the model, size and negative prompt that produced it is reusing a third of it. */
 	function reuse(image: GeneratedImage) {
 		prompt = image.prompt;
 		rewritten = image.sentPrompt ?? '';
@@ -384,10 +301,8 @@
 	/** What one picture cost, when its model was priced. Unpriced says nothing. */
 </script>
 
-<!-- One trigger for the three lists on the strip: the value and a chevron, no box
-     of its own, because the group around them owns the border. Sized to what it
-     says, so the strip does not reserve three equal columns for three answers of
-     very different lengths. -->
+<!-- One trigger for the three lists: the value and a chevron, no box of its own,
+     sized to what it says. -->
 {#snippet compactTrigger({ props, label }: { props: Record<string, unknown>; label: string })}
 	<button
 		{...props}
@@ -409,16 +324,14 @@
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
 		<div class="mx-auto w-full max-w-5xl px-6 py-8">
-			<!-- Same header as the library's, and the same height by construction rather
-			     than by a floor set here: the row is as tall as its button, and that
-			     button is the same button. -->
+			<!-- The library's header, and the same height by construction: the row is as
+			     tall as its button, and it is the same button. -->
 			<div class="mb-1 flex items-center justify-between gap-3">
 				<h1 class="text-active truncate text-xl font-semibold tracking-tight">{$LL.images()}</h1>
 
 				{#if $imagesStore.length}
 					<div class="flex shrink-0 items-center gap-2">
-						<!-- How many, next to the thing that acts on them rather than next to
-						     the title: it is the size of what you are about to export. -->
+						<!-- Next to the thing that acts on them: it is the size of what you export. -->
 						<span class="text-muted text-xs tabular-nums">
 							{$LL.imagesCount({ count: $imagesStore.length })}
 						</span>
@@ -448,14 +361,10 @@
 			<p class="text-muted mb-7 text-sm">{$LL.imagesSubtitle()}</p>
 
 			{#if $canDrawImages}
-				<!-- What makes a new one. At the top because that is where the page starts,
-				     and because everything below it is the result.
+				<!-- What makes a new one, at the top, because everything below it is the result.
 
-				     Built as one surface rather than a stack of form rows: the words, the
-				     controls that qualify them and the button that acts on them are one
-				     gesture, so they share a frame and the field inside it has no border of
-				     its own. Same idea as the composer in a conversation, in the shape this
-				     page needs. -->
+				     One surface rather than a stack of form rows: the words, the controls that
+				     qualify them and the button that acts on them are one gesture. -->
 				<ImageDrop
 					enabled={!!accepts}
 					label={$LL.imageReferencesDrop()}
@@ -464,11 +373,9 @@
 					class="library-section bg-shade-0 focus-within:border-accent section-tint mb-8 overflow-hidden rounded-2xl border shadow-sm transition-colors"
 					style="--section-turn: 40"
 				>
-					<!-- The words and the model that will draw them, in one box. The model
-					     sits in the corner rather than on the strip below because it is not a
-					     setting you adjust, it is the thing being addressed: you write to a
-					     model the way you write to somebody. `pb-11` is the room it needs, so
-					     a third line of prompt stops above it instead of running underneath. -->
+					<!-- The words and the model that will draw them, in one box. The model sits in
+					     the corner rather than on the strip: it is not a setting you adjust, it is
+					     the thing being addressed. -->
 					<div class="relative">
 						<textarea
 							bind:value={prompt}
@@ -478,9 +385,8 @@
 							class="placeholder:text-muted w-full resize-none border-0 bg-transparent pt-4 pr-11 pb-2 pl-4 text-base leading-relaxed outline-none"
 						></textarea>
 						{#if composerFilled}
-							<!-- The opposite corner from the model, and only while there is
-							     something to undo. Fading in rather than appearing keeps it from
-							     flicking on and off as the first character is typed and deleted. -->
+							<!-- Only while there is something to undo. Fading in keeps it from flicking on
+							     and off as the first character is typed and deleted. -->
 							<div class="absolute top-2.5 right-2.5" transition:fade={{ duration: 120 }}>
 								<Tooltip side="left">
 									{#snippet trigger({ props })}
@@ -499,16 +405,11 @@
 							</div>
 						{/if}
 						{#if canRewrite && (rewriting || rewritten)}
-							<!-- Opened by the asking, not by the answer. It used to wait for the
-							     finished text, so the one thing that said anything was happening
-							     was a spinner on a button at the other end of the strip, and then
-							     a box appeared fully formed. Now the panel is there from the
-							     click and the words land inside it.
+							<!-- Opened by the asking, not by the answer, so something says the work started
+							     before the words land.
 
-							     Shown, not applied: what is in this box is what gets sent, and
-							     emptying it sends the words above instead. Tinted with the accent
-							     so it reads as something the app added rather than something you
-							     typed. -->
+							     Shown, not applied: what is in this box is what gets sent, and emptying it
+							     sends the words above instead. -->
 							<div
 								transition:slide={{ duration: 180, easing: cubicOut }}
 								class="mx-4 mb-3 overflow-hidden"
@@ -531,9 +432,7 @@
 											</button>
 										{/if}
 									</div>
-									<!-- Read-only while it fills, because the caret would be fighting
-									     the model for the same field, and a word typed into it would
-									     be overwritten by the next fragment. -->
+									<!-- Read-only while it fills: the caret would fight the model for the field. -->
 									<textarea
 										bind:value={rewritten}
 										readonly={rewriting}
@@ -549,9 +448,8 @@
 							</div>
 						{/if}
 
-						<!-- On its own row at the foot of the box rather than laid over it: the
-						     rewrite panel appears above it, and an absolute corner would have
-						     been covered by it the moment it opened. -->
+						<!-- On its own row at the foot rather than laid over it: the rewrite panel
+						     opens above and would cover an absolute corner. -->
 						<div class="flex justify-end px-2.5 pb-2">
 							<ModelSelect bind:value={model} kinds={['image']} variant="ghost" />
 						</div>
@@ -571,17 +469,15 @@
 					{/if}
 
 					{#if missingTrigger}
-						<!-- Beside the pictures rather than under the button: it is a rule about
-						     what the words must say, and it appears when there is something for
-						     them to say it about. -->
+						<!-- Beside the pictures: it is a rule about what the words must say, and it
+						     appears when there is something to say it about. -->
 						<p class="text-muted mx-4 mb-3 text-xs leading-snug">
 							{$LL.imageReferencesTrigger({ word: missingTrigger })}
 						</p>
 					{/if}
 
 					{#if references.length}
-						<!-- What the drawing will work from, as thumbnails rather than names: a
-						     reference is a picture, and a filename is not one. -->
+						<!-- Thumbnails rather than names: a reference is a picture. -->
 						<div class="mx-4 mb-3 flex flex-wrap gap-2">
 							{#each references as reference (reference.id)}
 								<span
@@ -605,30 +501,22 @@
 						</div>
 					{/if}
 
-					<!-- The controls, on their own strip at the foot of the surface. A hairline
-					     rather than a second card: they qualify the words above, they are not a
-					     separate subject. -->
+					<!-- The controls, on a strip at the foot. A hairline rather than a second card:
+					     they qualify the words above, they are not a separate subject. -->
 					<div
 						class="border-shade-2 bg-shade-1/60 flex flex-wrap items-center gap-2 border-t px-3 py-2.5"
 					>
-						<!-- Two groups rather than five boxes. What you hand the model sits on
-						     the left, how it should draw sits beside it, and each group owns one
-						     border so the strip reads as two objects instead of a row of fields
-						     all shouting the same way. It is the joined control the conversation
-						     header already uses, applied twice. -->
+						<!-- Two groups rather than five boxes: what you hand the model on the left, how
+						     it should draw beside it, each group owning one border. -->
 						<div
 							class="border-shade-3 focus-within:border-accent flex shrink-0 items-center overflow-hidden rounded-lg border transition-colors"
 						>
-							<!-- The other way in, for a pointer that would rather not drag.
-							     Disabled rather than hidden on a model that takes none, for the
-							     same reason the selects beside it are: the control still says what
-							     it would have done. -->
+							<!-- The other way in, for a pointer that would rather not drag. Disabled rather
+							     than hidden on a model that takes none, so it still says what it does. -->
 							<Tooltip side="top">
 								{#snippet trigger({ props })}
-									<!-- The tooltip listens on the wrapper, not on the button. A
-									     disabled button emits no pointer events at all, so hanging it
-									     there would hide the explanation in exactly the case it exists
-									     for: the model this one cannot work with. -->
+									<!-- The tooltip listens on the wrapper: a disabled button emits no pointer
+									     events, so hanging it there would hide the explanation. -->
 									<span {...props} class="inline-flex">
 										<button
 											type="button"
@@ -648,11 +536,8 @@
 									: $LL.imageReferencesUnsupported()}
 							</Tooltip>
 
-							<!-- The rarely-used half, as a toggle rather than a link that reads
-							     like a page. `Ban` and not a slider: what this opens is the list of
-							     things you do not want in the picture, which is a refusal, where a
-							     slider would promise settings to adjust. It shows it is on by
-							     staying lit. -->
+							<!-- A toggle rather than a link that reads like a page. `Ban` and not a slider:
+							     what it opens is what you do not want in the picture. -->
 							<Tooltip side="top">
 								{#snippet trigger({ props })}
 									<button
@@ -672,22 +557,15 @@
 							</Tooltip>
 						</div>
 
-						<!-- Disabled, not hidden, where the app has no translation: the control
-						     still says what it would have controlled, and the request simply
-						     leaves the field out so the model uses its own default.
+						<!-- Disabled, not hidden, where the app has no translation: the control still
+						     says what it would have controlled, and the request leaves the field out.
 
-						     The app's own picker, not a raw `<select>`: portalled so the panel is
-						     never clipped by the composer's `overflow-hidden`, flipped when there
-						     is no room below, and drawn by the app rather than by the operating
-						     system, which is the difference between three controls that match the
-						     strip and three that match whatever platform you are on.
-
-						     The divider sits on the wrapper rather than on each trigger, so one
-						     snippet serves all three. -->
-						<!-- Allowed to shrink, unlike the icons beside it: three answers of very
-						     different lengths ("Landscape", "Standard", "1 image") are what push
-						     this strip past a phone's width, and the triggers already truncate.
-						     Fixed again above `sm`, where it reads better at its natural size. -->
+						     The app's own picker, not a raw `<select>`: portalled so the panel is never
+						     clipped by the composer's `overflow-hidden`, and flipped when there is no
+						     room below. The divider sits on the wrapper, so one snippet serves all three. -->
+						<!-- Allowed to shrink, unlike the icons: three answers of very different lengths
+						     are what push this strip past a phone's width, and the triggers truncate.
+						     Fixed again above `sm`. -->
 						<div
 							class="border-shade-3 focus-within:border-accent flex min-w-0 flex-1 items-center overflow-hidden rounded-lg border transition-colors sm:flex-none sm:shrink-0"
 						>
@@ -717,11 +595,9 @@
 							/>
 						</div>
 
-						<!-- A row of their own below `sm`, decided rather than left to the
-						     wrap: with everything set to shrink last, the browser broke the line
-						     wherever it ran out and `ml-auto` then pushed the remainder around.
-						     Three ragged rows on a phone. Above `sm` they go back to the right
-						     end of the single row. -->
+						<!-- A row of their own below `sm`, decided rather than left to the wrap: with
+						     everything set to shrink last, the browser broke the line wherever it ran out
+						     and `ml-auto` pushed the remainder around. -->
 						<div
 							class="flex w-full items-center justify-end gap-2 max-sm:order-last sm:ml-auto sm:w-auto"
 						>
@@ -760,22 +636,17 @@
 				</ImageDrop>
 			{/if}
 
-			<!-- The gallery. Newest first, because the one you just made is the one you
-			     want to look at.
+			<!-- The gallery, newest first.
 
-			     Two columns on a phone, stated rather than left to `auto-fill`. A 190px
-			     floor needs 392px for two tracks and a gap, which no phone has once the
-			     page's own margins are taken out, so the fill rule quietly collapsed to a
-			     single column of pictures the width of the screen. Above `sm` the floor
-			     fits and the fill rule is the better answer, because it keeps the tiles
-			     the same size at every window width instead of stretching them. -->
+			     Two columns on a phone, stated rather than left to `auto-fill`: a 190px floor
+			     needs 392px for two tracks and a gap, which no phone has, so the fill rule
+			     collapsed to one column. Above `sm` the floor fits and fill keeps the tiles
+			     the same size at every width. -->
 			{#if $imagesStore.length || busy}
 				<div class="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))]">
 					{#if busy}
-						<!-- One placeholder per picture asked for, at the front, where the
-						     pictures will be. Thirty seconds of a spinner somewhere else reads
-						     as a page that has stopped; thirty seconds of the shapes filling in
-						     reads as a page that is working, and it says how many are coming. -->
+						<!-- One placeholder per picture asked for, at the front. Thirty seconds of a
+						     spinner elsewhere reads as a page that has stopped. -->
 						{#each Array.from({ length: count }, (_, i) => i) as slot (slot)}
 							<div
 								class="border-accent/40 bg-accent/5 flex aspect-square animate-pulse items-center justify-center rounded-xl border border-dashed"
@@ -792,9 +663,8 @@
 							onclick={() => (opened = image)}
 							class="group border-shade-3 bg-shade-1 hover:border-shade-4 focus-visible:border-accent relative aspect-square overflow-hidden rounded-xl border transition-all hover:shadow-md focus-visible:outline-none"
 						>
-							<!-- The picture grows a little under the pointer inside a frame that
-							     does not, which is what makes a grid of squares feel like objects
-							     rather than a contact sheet. -->
+							<!-- The picture grows under the pointer inside a frame that does not, which is
+							     what makes a grid of squares feel like objects. -->
 							<img
 								src={imageUrl(image.id)}
 								alt={image.prompt}
@@ -802,26 +672,19 @@
 								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
 							/>
 
-							<!-- Which connection drew it, in the colour that connection wears
-							     everywhere else in the app. A gallery mixing two providers reads
-							     without a legend. -->
+							<!-- Which connection drew it, in the colour it wears everywhere else. -->
 							<span
 								class="absolute top-2 left-2 h-2 w-2 rounded-full ring-1 ring-black/20"
 								style="background-color: {badgeColor(image.serverId)}"
 							></span>
 
-							<!-- The prompt, on the picture, on hover and on keyboard focus. A grid
-							     of pictures with no words is a grid you open one by one to search.
-							     Focus counts as hover here, or the keyboard never sees it.
+							<!-- The prompt, on the picture, on hover and on keyboard focus, or a grid of
+							     pictures is one you open one by one to search. Focus counts as hover, or the
+							     keyboard never sees it.
 
-							     The same one the dialog shows: what was actually sent, so the two
-							     never disagree about what made this picture.
-
-							     One line, truncated. Two lines clamped left a long prompt broken
-							     off mid-thought across the bottom of a thumbnail, which is neither
-							     readable nor a summary. One line ending in an ellipsis is honest
-							     about being an excerpt, and the dialog is one click away for the
-							     rest. -->
+							     What was actually sent, so this and the dialog never disagree. One line,
+							     truncated: two clamped lines broke a long prompt off mid-thought, which is
+							     neither readable nor a summary. -->
 							<span
 								class="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-2.5 pt-5 pb-2 text-left text-[11px] leading-snug text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
 							>
@@ -845,7 +708,6 @@
 	</div>
 </div>
 
-<!-- The viewer, shared with the strip on the home page: one dialog, opened from
-     either side. `onReuse` is what this page has and the home page has not, a form
-     to send a picture back to. -->
+<!-- The viewer, shared with the home page's strip. `onReuse` is what this page
+     has and the home page has not: a form to send a picture back to. -->
 <ImageViewer bind:image={opened} onReuse={reuse} />

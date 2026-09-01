@@ -1,17 +1,12 @@
 /**
- * MCP servers this instance may call out to, and what one is made of.
+ * MCP servers this instance may call out to.
  *
- * An MCP server is a catalogue of tools living somewhere else. Llooma is a
- * client only: it lists what a server offers, hands those definitions to the
- * model beside its own tools, and forwards the calls that come back. It never
- * serves tools to anybody.
+ * Llooma is a client only: it lists what a server offers, hands the definitions
+ * to the model beside its own tools, and forwards the calls back.
  *
- * One transport, HTTP streamable, and that is a decision rather than a first
- * step. The other transport in the protocol, stdio, spawns a process: on an
- * instance with accounts on it that is arbitrary code execution on the host,
- * triggered by whatever address a user typed into a form. There is no careful
- * version of that without a sandbox. HTTP is also where the protocol itself is
- * heading, so nothing is being given up.
+ * One transport, HTTP streamable. The other, stdio, spawns a process, which on
+ * an instance with accounts on it is arbitrary code execution triggered by an
+ * address somebody typed into a form.
  */
 
 /** A server as its owner configured it, without the credential. */
@@ -28,63 +23,38 @@ export interface McpServerView {
 	hasSecret: boolean;
 	createdAt: string;
 	/**
-	 * The catalogue this server last answered with, by name.
-	 *
-	 * Stored rather than fetched on sight: the settings answer "what does this
-	 * give me" without opening a connection to somebody's machine every time the
-	 * tab is opened, and the total across servers can be counted at all. Names
-	 * only. What a turn actually sends is read from the server itself when the
-	 * turn starts, so a stale copy here is a list that is out of date, never a
-	 * call made against one.
+	 * The catalogue this server last answered with, by name. Stored rather than
+	 * fetched on sight, so the settings can say what a server gives without opening
+	 * a connection. What a turn sends is read from the server when the turn starts,
+	 * so a stale copy here is an out-of-date list, never a call made against one.
 	 */
 	tools: string[];
 	/** When it said so, ISO. Null for a server nobody has asked yet. */
 	toolsAt: string | null;
 	/**
-	 * Groups this account has switched off, by name.
-	 *
-	 * Behind a gateway a group is a server, so this is how "all of the house, none
-	 * of the mail" is said. The refused ones rather than the kept ones, so a tool
-	 * that appears later is offered when its group is on and left out when it is
-	 * off, which is what the switch was set to mean.
+	 * Groups this account switched off. Behind a gateway a group is a server, so
+	 * this is how "all of the house, none of the mail" is said. The refused ones
+	 * rather than the kept ones, so a tool appearing later follows its group.
 	 */
 	disabledGroups: string[];
 }
 
-/**
- * The bounds a turn holds an MCP server to.
- *
- * All of them are about a server that is slow, enormous or hostile, which is the
- * only kind worth writing limits for. A well-behaved one never meets any of
- * these numbers.
- */
+/** The bounds a turn holds an MCP server to. All of them are about a server that is slow, enormous or hostile. */
 export const MCP_LIMITS = {
 	/** Servers one account may configure. */
 	perUser: 10,
 	/**
-	 * How many tools reach the model, across every server switched on.
-	 *
-	 * A ceiling on the total rather than per server, because what costs is the
-	 * size of a request and a request carries the lot. It was forty per server,
-	 * chosen for a server that offers a handful of tools, which is not what a
-	 * gateway is: a hub standing in front of a mail server, a calendar and a house
-	 * presents the sum of their catalogues, and forty cut a third of it off with no
-	 * criterion but the order they arrived in.
-	 *
-	 * So the number is the account's own, this is only its default, and the app
-	 * says what it costs rather than deciding quietly.
+	 * How many tools reach the model, across every server switched on. A ceiling on
+	 * the total, since what costs is the size of a request and a request carries the
+	 * lot. A gateway standing in front of a mail server, a calendar and a house
+	 * presents the sum of their catalogues, so this is only a default and the number
+	 * is the account's own.
 	 */
 	defaultTools: 200,
 	/** What a person may set that number to, whatever the browser sends. */
 	minTools: 1,
 	maxTools: 500,
-	/**
-	 * Past this, the settings say plainly that every request carries all of it.
-	 *
-	 * Not a limit and not a refusal: a catalogue this size is a legitimate thing to
-	 * want, and it is also a cost paid on every round of every turn. The number is
-	 * where "you would notice this on your bill" begins.
-	 */
+	/** Not a limit: a catalogue this size is legitimate and is also paid for on every round. The number is where a bill starts to show it. */
 	warnAboveTools: 100,
 	/** How much of one result reaches the model, in characters. */
 	resultChars: 20_000,
@@ -93,27 +63,20 @@ export const MCP_LIMITS = {
 	/** One call. Generous: an MCP tool may be doing real work at the other end. */
 	callTimeoutMs: 30_000,
 	/**
-	 * How long a call waits for a person to allow or refuse it.
-	 *
-	 * It has to end somewhere: a turn parked on a question nobody is there to
-	 * answer would hold its connections, its run and its place in the conversation
-	 * until the process restarts. Running out counts as a refusal, never as
-	 * consent, and the model is told which of the two happened.
+	 * How long a call waits for an answer. It has to end somewhere: a turn parked on
+	 * a question nobody will answer holds its connections and its run until the
+	 * process restarts. Running out counts as a refusal, and the model is told which.
 	 */
 	approvalTimeoutMs: 120_000
 } as const;
 
 /**
- * One call, put to the person before it is made.
+ * One call, put to the person before it is made. Every one, not the
+ * risky-looking ones: the alternative is us ruling on tools we have never seen,
+ * on servers we do not run, from descriptions those servers wrote.
  *
- * Every MCP call is asked for. Not the risky-looking ones, not the first one of a
- * turn: every one. The alternative is a rule about which tools are dangerous,
- * written by us, about tools we have never seen, on servers we do not run. The
- * description comes from the server too, so it cannot be the basis of the
- * decision either.
- *
- * What it carries is what a person needs to answer: which machine, which tool,
- * what that tool says it does, and the exact arguments it would be called with.
+ * It carries what a person needs: which machine, which tool, what it says it
+ * does, and the exact arguments.
  */
 export interface McpApprovalRequest {
 	/** The provider's id for the call, and what the answer is addressed to. */
@@ -132,12 +95,9 @@ export interface McpApprovalRequest {
 export const MCP_TOOL_PREFIX = 'mcp';
 
 /**
- * A label turned into something that can live in a tool name.
- *
- * Providers accept `[a-zA-Z0-9_-]{1,64}` there, so the slug is reduced to that
- * alphabet. Empty input, or a label made entirely of characters that do not
- * survive, falls back to `server`: the caller makes it unique afterwards, so a
- * dull name is never a broken one.
+ * A label reduced to `[a-zA-Z0-9_-]{1,64}`, which is what providers accept in a
+ * tool name. Falls back to `server`; the caller makes it unique, so a dull name
+ * is never a broken one.
  */
 export function slugify(label: string): string {
 	const slug = label
@@ -151,13 +111,10 @@ export function slugify(label: string): string {
 }
 
 /**
- * What the model sees this tool called.
- *
- * Prefixed twice over: once with `mcp` so an external tool can never be mistaken
- * for `web_search` or `memory_write`, and once with the server's slug so two
- * servers offering `search` are two different tools. Truncated to the 64
- * characters providers allow, from the tool's end, because the prefix is the
- * part that has to survive intact for the dispatch to work.
+ * Prefixed twice: `mcp`, so an external tool is never mistaken for `web_search`,
+ * and the server's slug, so two servers offering `search` are two tools.
+ * Truncated to 64 characters from the tool's end, since the prefix has to
+ * survive for the dispatch to work.
  */
 export function mcpToolName(slug: string, tool: string): string {
 	const head = `${MCP_TOOL_PREFIX}_${slug}_`;
@@ -168,17 +125,13 @@ export function mcpToolName(slug: string, tool: string): string {
 /**
  * The one tool a turn declares when it is discovering rather than announcing.
  *
- * Progressive disclosure, and the arithmetic is the whole point: a gateway in
- * front of a mail server, a calendar and a house is sixty-five definitions in
- * every request of every round. This is one, plus the list of section names it
- * accepts, and the definitions of a section arrive only once the model has asked
- * for it.
+ * A gateway in front of a mail server, a calendar and a house is sixty-five
+ * definitions in every request of every round. This is one, plus the section
+ * names, and a section's definitions arrive once the model asks.
  *
- * What it costs is a round trip on the turns that do use a tool, and a missed
- * prompt cache: the tools are part of a request's prefix, so adding some in the
- * middle of a turn invalidates it exactly where the conversation is longest.
- * Worth it for a large catalogue rarely used, not for a small one used
- * constantly, which is why it is a switch and not a decision.
+ * It costs a round trip and a missed prompt cache, since tools are part of a
+ * request's prefix. Worth it for a large catalogue rarely used, not for a small
+ * one used constantly, which is why it is a switch.
  */
 export const MCP_DISCOVERY_TOOL_NAME = 'mcp_tools';
 
@@ -187,13 +140,7 @@ export function isMcpToolName(name: string): boolean {
 	return name.startsWith(`${MCP_TOOL_PREFIX}_`);
 }
 
-/**
- * Which server and which tool a call names.
- *
- * Resolved against the slugs actually configured rather than by splitting on
- * underscores, because both halves may contain them. The longest matching slug
- * wins, so `mail` and `mail_archive` can both exist.
- */
+/** Resolved against the configured slugs rather than by splitting on underscores, which both halves may contain. Longest match wins, so `mail` and `mail_archive` can both exist. */
 export function parseMcpToolName(
 	name: string,
 	slugs: string[]
@@ -213,22 +160,16 @@ export function parseMcpToolName(
 /**
  * The tools of one catalogue, gathered into the servers they came from.
  *
- * A gateway is one address in front of many servers, so its catalogue arrives
- * flat: sixty-five tools in a heap, with nothing saying which three belong to the
- * mail and which thirty to the house. What it does carry is a naming habit, since
- * a hub has to keep its own names apart: `Chatto-post_message`,
- * `home-assistant-HassTurnOn`, `Infomaniak_Mail-mail_list_emails`.
+ * A gateway's catalogue arrives flat, with nothing saying which three tools are
+ * the mail. What it carries is a naming habit, since a hub has to keep its own
+ * names apart: `Chatto-post_message`, `home-assistant-HassTurnOn`.
  *
- * So the grouping is read off the names, by taking for each tool the longest
- * prefix ending in `-` that at least one other tool shares. Longest, because
- * `home-` and `home-assistant-` are both shared and only the second is a server.
- * Hyphen only, because underscores are how a tool names itself: splitting on them
- * would break `mail_list_emails` into a group of its own.
+ * So the grouping is the longest prefix ending in `-` that another tool shares.
+ * Longest, because `home-` and `home-assistant-` are both shared. Hyphen only,
+ * or `mail_list_emails` would become a group of its own.
  *
- * This is a reading habit, not a fact. It arranges a list on screen and nothing
- * else: no call, no permission and no limit is ever decided from it. A server
- * that names its tools differently simply falls into one unnamed group, which is
- * exactly what a flat list looks like today.
+ * A reading habit, not a fact: it arranges a list and nothing else. No call, no
+ * permission and no limit is ever decided from it.
  */
 export function groupMcpTools(names: string[]): { group: string; tools: string[] }[] {
 	const candidates = new Map<string, number>();
@@ -253,8 +194,7 @@ export function groupMcpTools(names: string[]): { group: string; tools: string[]
 		else groups.set(group, [name]);
 	}
 
-	// Named groups first, alphabetically; whatever could not be grouped last, since
-	// it is a remainder rather than a server.
+	// Named groups first, alphabetically; the ungrouped remainder last.
 	return [...groups.entries()]
 		.map(([group, tools]) => ({ group, tools }))
 		.sort((a, b) => {
@@ -263,13 +203,7 @@ export function groupMcpTools(names: string[]): { group: string; tools: string[]
 		});
 }
 
-/**
- * An address a server may be reached at, or null.
- *
- * Only the shape is checked here, since this runs in the browser too. Whether
- * the address is one this instance is willing to open is a server-side question,
- * asked where every other outbound request asks it.
- */
+/** Only the shape, since this runs in the browser too. Whether the instance will open the address is asked server-side, with every other outbound request. */
 export function normaliseMcpUrl(input: string): string | null {
 	const trimmed = input.trim();
 	if (!trimmed) return null;

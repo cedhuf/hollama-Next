@@ -19,12 +19,9 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
-	// Admin = governance only. Servers are configured in the Servers tab; here the
-	// admin picks which of each system server's models to share, manages users,
-	// and toggles whether users may add their own providers.
-
-	/** The governance choice repeated by every "share this with users" control. */
-	/** What a user's store is made of. See `personaStoreMode` on the server. */
+	// Governance only. Servers are configured in the Servers tab; here the admin
+	// picks which of each system server's models to share, manages users, and
+	// decides whether users may add their own providers.
 	const personaStoreModes = $derived([
 		{ value: 'open', label: $LL.personaStoreModeOpen() },
 		{ value: 'curated', label: $LL.personaStoreModeCurated() }
@@ -43,14 +40,7 @@
 		sharedModels: string[];
 	}
 
-	/**
-	 * How long ago, in one glance.
-	 *
-	 * Hours up to a day, then days, and nothing finer: the value is written at most
-	 * every few minutes, so a figure in minutes would be more precise than the data
-	 * behind it. Under an hour reads as "now", which is what it means in a list
-	 * whose question is who is still around.
-	 */
+	/** Hours up to a day, then days: the value is written every few minutes, so minutes would be more precise than the data behind it. */
 	let allowUserKeys = $state(false);
 	let allowUserPersonas = $state(true);
 	let allowUserIntegrations = $state(false);
@@ -95,14 +85,7 @@
 	let voiceShareEnabled = $state(false);
 	let samplingSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let samplingShareEnabled = $state(false);
-	/**
-	 * What is about to be handed over, said while the panel is closed.
-	 *
-	 * A count rather than the numbers themselves: nineteen fields do not fit on
-	 * one line, and the question this row has to answer is "am I sharing anything
-	 * at all", not "what exactly". The values are one tab away, where they are
-	 * edited.
-	 */
+	/** A count rather than the numbers: nineteen fields do not fit on one line, and the question is "am I sharing anything at all". */
 	const samplingCount = $derived(Object.keys($settingsStore.sampling ?? {}).length);
 	const samplingSummary = $derived(
 		samplingCount ? $LL.samplingFieldCount({ count: samplingCount }) : $LL.samplingNothingSet()
@@ -139,13 +122,7 @@
 		saveTitle();
 	}
 
-	/**
-	 * Sharing only, with no fields of its own.
-	 *
-	 * The numbers are typed in Settings, by everyone including whoever is looking
-	 * at this tab. A second set of inputs here would be the same decision in two
-	 * places, and the two would disagree the first time somebody edited one of them.
-	 */
+	/** Sharing only. The numbers are typed in Settings, and a second set of inputs here would be the same decision in two places. */
 	function syncSamplingShare() {
 		samplingSharing = samplingShareEnabled
 			? samplingSharing === 'off'
@@ -162,14 +139,7 @@
 		});
 	}
 
-	/**
-	 * Sharing the transcription setup.
-	 *
-	 * The model is chosen in Settings, by everyone including whoever is looking at
-	 * this tab, and what is published is their choice. On most instances the
-	 * administrator is the only person who could have set one up at all, so this is
-	 * the difference between a feature everybody has and one only they have.
-	 */
+	/** The model is chosen in Settings, and what is published is that choice. On most instances the administrator is the only person who could have set one up. */
 	function syncVoiceShare() {
 		voiceSharing = voiceShareEnabled ? (voiceSharing === 'off' ? 'locked' : voiceSharing) : 'off';
 		saveVoice();
@@ -247,12 +217,7 @@
 		}
 	}
 
-	/**
-	 * Models offered by each system server. `/api/providers` already returns the
-	 * full (unfiltered) list for admins (the same `listProviderModels` call the
-	 * old per-server "Load models" button made) so there is nothing to fetch here.
-	 * Refreshing the catalogue is done from the Servers tab.
-	 */
+	/** `/api/providers` already returns the full unfiltered list for admins, so there is nothing to fetch. Refreshing the catalogue is done from the Servers tab. */
 	const availableByServer = $derived.by(() => {
 		const byServer: Record<string, string[]> = {};
 		for (const model of $settingsStore.models ?? []) {
@@ -266,14 +231,14 @@
 		return (
 			Array.from(new Set([...(availableByServer[server.id] ?? []), ...server.sharedModels]))
 				.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-				// Deliberately the raw ids: this is the admin's sharing console, where the
-				// exact model being exposed matters more than a friendly name.
+				// Deliberately the raw ids: this is the sharing console, where the exact model
+				// being exposed matters more than a friendly name.
 				.map((model) => ({ value: model, label: model }))
 		);
 	}
 
-	// All sharing controls autosave on change (no Save buttons). The search /
-	// prompts / title snapshots mirror the admin's own Chat config.
+	// Every sharing control autosaves. The search, prompts and title snapshots
+	// mirror the admin's own Chat config.
 	async function saveSearch() {
 		await api('/api/admin/config', 'PUT', {
 			searchSharing,
@@ -284,11 +249,7 @@
 		sharedUrl = $settingsStore.searchUrl;
 	}
 
-	/**
-	 * Web fetch is configured once, in the Tools tab; here the admin only decides
-	 * who else gets that configuration: the tool being off is shareable too, and
-	 * that is what turns it off for the whole instance.
-	 */
+	/** Web fetch is configured in the Tools tab; here the admin decides who else gets that configuration, the tool being off included. */
 	async function saveWebFetch() {
 		await api('/api/admin/config', 'PUT', {
 			webFetchSharing,
@@ -342,8 +303,7 @@
 			titleModel: $settingsStore.titleModel ?? '',
 			titleServerId: model?.serverId ?? '',
 			// Shared with the rest of it: an admin configures naming for themselves in
-			// Chat, and this section decides who else gets that configuration. A second
-			// set of controls here would be the same decision in two places.
+			// Chat, and this decides who else gets it.
 			titleRegenerate: $settingsStore.regenerateTitle,
 			titleRegenerateAfter: $settingsStore.regenerateTitleAfter
 		});
@@ -380,8 +340,8 @@
 
 	onMount(async () => {
 		await load();
-		// Refresh the snapshots from the admin's current Chat config on open, so
-		// editing prompts/search/title there stays in sync without a Save step.
+		// Refreshed from the admin's current Chat config on open, so editing there
+		// stays in sync without a Save step.
 		if (shareEnabled) saveSearch();
 		if (promptsShareEnabled) saveSystemPrompts();
 		if (appPromptsShareEnabled) saveAppPrompts();
@@ -420,11 +380,7 @@
 		await api('/api/admin/config', 'PUT', { personaMemoryEnabled });
 	}
 
-	/**
-	 * The admin shares the theme they are using, the way they share their search
-	 * engine and their prompts: the panel decides who gets it, the values come
-	 * from this account. Nothing to pick twice.
-	 */
+	/** The admin shares the theme they are using, like their search engine and their prompts: the panel decides who gets it, the values come from this account. */
 	async function saveTheme() {
 		await api('/api/admin/config', 'PUT', {
 			themeSharing,
@@ -438,14 +394,7 @@
 		await saveTheme();
 	}
 
-	/**
-	 * Play the welcome tour again, for everyone.
-	 *
-	 * A release note nobody can miss: what the tour says is what changed, and it
-	 * appears in front of every account on its next load whether or not they have
-	 * seen it before. It stamps a moment rather than clearing a flag on each
-	 * person, so nothing here has to know who has seen what.
-	 */
+	/** A release note nobody can miss: it appears in front of every account on its next load. Stamps a moment rather than clearing a flag per person. */
 	async function askForOnboarding() {
 		resettingOnboarding = true;
 		try {
@@ -460,13 +409,7 @@
 		await api(`/api/admin/servers/${server.id}`, 'PUT', { sharedModels: server.sharedModels });
 	}
 
-	/** Replay the first-connection welcome tour, so it can be reviewed on demand. */
-	/**
-	 * One of each severity, so a change to the toast styling can be looked at
-	 * without having to break something first. Staggered: they arrive one after
-	 * the other in real life, and a stack that appears all at once does not show
-	 * how they pile up.
-	 */
+	/** One of each severity, staggered, so a change to the toast styling can be looked at without breaking something first. */
 	function previewToasts() {
 		$settingsModalOpen = false;
 		const messages = [
@@ -487,10 +430,8 @@
 				})
 		];
 
-		// One after the other, because that is how they arrive in real life, and a
-		// stack that appears all at once shows neither the entrance nor the way the
-		// older ones recede. More of them than fit on purpose: the far end of the
-		// stack is the part worth looking at.
+		// One after the other, which is how they arrive in real life. More of them than
+		// fit on purpose: the far end of the stack is the part worth looking at.
 		messages.forEach((send, index) => setTimeout(send, index * 350));
 		setTimeout(() => toast.dismiss('toast-preview-loading'), messages.length * 350 + 2_000);
 	}
@@ -502,14 +443,7 @@
 		$welcomeOpen = true;
 	}
 
-	/**
-	 * The same tour with nothing left out.
-	 *
-	 * It composes itself for whoever opens it, so an account that already has a
-	 * connection and a name never sees those two steps again. This forces them all
-	 * in, for checking the wording and the layout without emptying an account to
-	 * get at them.
-	 */
+	/** The tour composes itself for whoever opens it, so this forces every step in, for checking the wording without emptying an account to get at them. */
 	function replayEveryStep() {
 		$welcomeShowAll = true;
 		$settingsStore.welcomeComplete = false;
@@ -536,16 +470,15 @@
 			onChange={toggleAllowUserPersonas}
 		/>
 		<!-- The grant lives here with the other grants. What it grants, and the
-		     ceilings that apply to everybody including an administrator, live in the
-		     Bots tab: a limit on how many bots exist is not a permission. -->
+		     ceilings that apply to everybody, live in the Bots tab. -->
 		<FieldCheckbox
 			label={$LL.allowUserIntegrations()}
 			bind:checked={allowUserIntegrations}
 			onChange={toggleAllowUserIntegrations}
 		/>
 		<!-- Not a permission but a composition, which is why it is a choice of two
-		     rather than a switch. A store is the door people already know; what an
-		     instance decides is what is behind it. -->
+		     rather than a switch: a store is the door people know, and the instance
+		     decides what is behind it. -->
 		<SettingsField label={$LL.personaStoreModeLabel()}>
 			<Select
 				bind:value={personaStoreMode}
@@ -560,8 +493,8 @@
 		</SettingsHint>
 
 		<!-- Forced rather than defaulted: an admin who wants their people on the
-		     current version of what they hand out should not have to hope each of
-		     them ticked a box. Untouched personas only, here as everywhere. -->
+		     current version should not have to hope each of them ticked a box.
+		     Untouched personas only. -->
 		<FieldCheckbox
 			label={$LL.personaAutoUpdateForce()}
 			bind:checked={personaAutoUpdateForced}
@@ -569,11 +502,10 @@
 		/>
 		<SettingsHint>{$LL.personaAutoUpdateForceHelp()}</SettingsHint>
 
-		<!-- The whole feature, not a default. Off means the tools are never offered
-		     and nothing is injected, so a persona here behaves as it did before
-		     memory existed. What people already wrote is left where it is: erasing
-		     the most personal data on the instance is not something a switch should
-		     be able to do as a side effect. -->
+		<!-- The whole feature, not a default. Off means the tools are never offered, so
+		     a persona behaves as it did before memory existed. What people already wrote
+		     is left where it is: erasing the most personal data on the instance is not
+		     something a switch should do as a side effect. -->
 		<FieldCheckbox
 			label={$LL.personaMemoryAllow()}
 			bind:checked={personaMemoryEnabled}
@@ -582,15 +514,13 @@
 		<SettingsHint>{$LL.personaMemoryAllowHelp()}</SettingsHint>
 	</SettingsSection>
 
-	<!-- Its own section rather than a line among the permissions: what an
-	     administrator decides here is a permission *and* a roster of what other
-	     people have configured, and the second one is not something to stumble on
-	     while ticking boxes about personas. -->
+	<!-- Its own section rather than a line among the permissions: this is a
+	     permission *and* a roster of what other people have configured, and the
+	     second is not something to stumble on while ticking boxes. -->
 	<SettingsSection title={$LL.mcpServers()} description={$LL.adminMcpDescription()} card>
 		<!-- One switch and no sharing modes: there is no administrator's value to hand
-		     down here, only a permission. The servers themselves are each account's
-		     own, and one that has to stop is suspended below rather than by revoking
-		     the permission for everybody. -->
+		     down, only a permission. The servers are each account's own, and one that
+		     has to stop is suspended below. -->
 		<FieldCheckbox
 			label={$LL.allowUserMcp()}
 			bind:checked={allowUserMcp}
@@ -727,8 +657,7 @@
 		{/if}
 	</SettingsSection>
 
-	<!-- Voice sharing. Same shape as the rest: the model is chosen in Settings, and
-	     the only decision here is who else gets it. -->
+	<!-- Voice sharing. Same shape as the rest: the model is chosen in Settings. -->
 	<SettingsSection title={$LL.voiceInput()} description={$LL.voiceAdminDescription()} card>
 		<FieldCheckbox
 			label={$LL.shareVoice()}
@@ -745,8 +674,7 @@
 		{/if}
 	</SettingsSection>
 
-	<!-- Sampling sharing. No fields: the numbers live in Settings, the same ones
-	     this administrator uses, and the only decision here is who else gets them. -->
+	<!-- Sampling sharing. No fields: the numbers live in Settings. -->
 	<SettingsSection title={$LL.sampling()} description={$LL.samplingAdminDescription()} card>
 		<FieldCheckbox
 			label={$LL.shareSampling()}
@@ -761,13 +689,10 @@
 		{/if}
 	</SettingsSection>
 
-	<!-- Image defaults sharing. Only worth showing once the instance draws at all:
-	     a panel for choosing which model an instance uses for something it has
-	     switched off is a panel about nothing. -->
-	<!-- Sharing only, like every other feature on this tab. Whether this instance
-	     draws at all is not a switch here any more: it is whether an image model is
-	     marked as one and shared, which is the same decision taken where the models
-	     already live rather than restated as a permission. -->
+	<!-- Only worth showing once the instance draws at all. -->
+	<!-- Sharing only. Whether this instance draws is not a switch here: it is
+	     whether an image model is marked as one and shared, decided where the models
+	     already live. -->
 	<SettingsSection title={$LL.images()} description={$LL.imagesSharingDescription()} card>
 		<FieldCheckbox
 			label={$LL.shareImages()}
@@ -882,9 +807,8 @@
 			</Button>
 		</div>
 
-		<!-- The same tour, for everyone rather than for you. Worth its own row
-		     beside the preview above: one shows you what they will see, the other
-		     makes them see it. -->
+		<!-- The same tour, for everyone rather than for you: one row shows you what
+		     they will see, the other makes them see it. -->
 		<div
 			class="border-shade-3 mt-2 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
 		>
@@ -898,8 +822,7 @@
 			</Button>
 		</div>
 
-		<!-- The tour as it composes itself is the row above; this is the whole of it,
-		     for looking at what a first arrival would never see twice. -->
+		<!-- The tour as it composes itself is the row above; this is the whole of it. -->
 		<div
 			class="border-shade-3 mt-2 flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
 		>

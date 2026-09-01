@@ -1,25 +1,19 @@
 import type { ProviderDescriptor } from './types';
 
 /**
- * Infomaniak AI Tools.
- *
- * The provider that forced most of this file's shape, and the one worth reading
- * if you are adding another.
+ * Infomaniak AI Tools, the provider that forced most of this file's shape.
  *
  * Its endpoint is fixed except for the product id in the path, so the form asks
  * for that one value and builds the URL. It starts blank rather than carrying
- * the template: an address with `{productId}` still in it is not an address, and
- * leaving it empty is what stops the connection being synced before it can work.
+ * the template: an address with `{productId}` still in it is not an address.
  *
- * And its images are not under its chat endpoint. Chat is API version 2 under
- * `/openai/v1`; images are only on version 1 under `/openai`, with no `/v1` at
- * all. No path appended to the first reaches the second, which is why a
- * connection can carry two roots and why this file derives the second from the
- * first.
+ * Its images are not under its chat endpoint. Chat is API version 2 under
+ * `/openai/v1`; images are on version 1 under `/openai`, with no `/v1` at all,
+ * which is why a connection can carry two roots.
  *
- * Chat stays on version 2 deliberately. Version 1's chat route is marked
- * deprecated in their own specification, and version 2 is the one that documents
- * function calling and multimodal input, both of which this app uses.
+ * Chat stays on version 2 deliberately: version 1's chat route is deprecated in
+ * their own specification, and version 2 documents function calling and
+ * multimodal input, both of which this app uses.
  */
 
 /** Everything but the product id, which the connection form asks for. */
@@ -35,7 +29,7 @@ export const INFOMANIAK_PHOTO_MAKER = 'photo_maker';
 /** The product id out of a stored endpoint, or nothing when there is none in it. */
 export function infomaniakProductId(baseUrl: string): string {
 	const found = baseUrl?.match(/\/ai\/([^/]+)\/openai/)?.[1] ?? '';
-	// An unsubstituted placeholder reads as no id at all, which is what it is.
+	// An unsubstituted placeholder reads as no id, which is what it is.
 	return found === '{productId}' ? '' : found;
 }
 
@@ -51,14 +45,7 @@ export function infomaniakImageBaseUrl(productId: string): string {
 	return id ? IMAGE_URL_TEMPLATE.replace('{productId}', id) : '';
 }
 
-/**
- * Portrait customisation, which is a third root again.
- *
- * Not under `/openai` like the drawing endpoint, and not under `/v1` like chat:
- * it is Infomaniak's own route, so it hangs directly off the product. Derived
- * from the same product id as the other two, so a connection still asks for one
- * value and gets all three.
- */
+/** Not under `/openai` like drawing and not under `/v1` like chat: Infomaniak's own route, hanging off the product. Derived from the same one field as the other two. */
 export function infomaniakPhotoMakerUrl(productId: string): string {
 	const id = productId.trim();
 	return id ? PHOTO_MAKER_URL_TEMPLATE.replace('{productId}', id) : '';
@@ -89,25 +76,20 @@ export const infomaniak: ProviderDescriptor = {
 	thinkingRequest: true,
 	imageGeneration: true,
 	// One image model, one answer, so no rules are needed: `flux` is what the
-	// product lists, and their specification enumerates these three sizes and
-	// these two quality words for it.
+	// product lists, with these three sizes and two quality words.
 	images: {
 		sizes: { square: '1024x1024', portrait: '1024x1792', landscape: '1792x1024' },
 		qualities: { low: 'standard', standard: 'standard', high: 'hd' }
 	},
 	imageBaseFrom: (baseUrl) => infomaniakImageBaseUrl(infomaniakProductId(baseUrl)),
-	// A route rather than a model, so nothing lists it. Named here, it becomes one:
-	// it shows up in Models and pricing, it is priced per minute, it is shared or
-	// not, and the credit limit refuses it unpriced exactly like everything else.
+	// A route rather than a model, so nothing lists it. Named here it becomes one:
+	// priced, shared, and refused unpriced like everything else.
 	extraModels: [INFOMANIAK_PHOTO_MAKER],
 	/**
-	 * Transcription, which departs from the usual contract twice over.
-	 *
-	 * It is on version 1 under `/openai`, like drawing and unlike chat, so the
-	 * connection's own root does not reach it. And it is asynchronous: the POST
-	 * answers with a batch id, and the words are collected from `/results` once
-	 * the job is done. Their catalogue lists the model on version 2 all the same,
-	 * which is why one shows up in the picker and the obvious address 404s.
+	 * Transcription departs from the contract twice: it is on version 1 under
+	 * `/openai`, so the connection's own root does not reach it, and it is
+	 * asynchronous, the POST answering with a batch id. Their catalogue lists the
+	 * model on version 2 all the same, so the obvious address 404s.
 	 */
 	transcription: {
 		url: ({ baseUrl }) =>
@@ -118,14 +100,9 @@ export const infomaniak: ProviderDescriptor = {
 				return `${infomaniakResultsUrl(infomaniakProductId(baseUrl))}/${batch}`;
 			},
 			/**
-			 * Their job envelope.
-			 *
-			 * `status` is at the root, and `data` is a *string* holding the JSON with
-			 * the words in it, rather than the object it looks like. There is also a
-			 * `url` to download the same thing, which is a second round trip for a
-			 * payload already in hand.
-			 *
-			 * Their transcription arrives with a leading space. The app trims.
+			 * Their job envelope: `status` is at the root and `data` is a *string* holding
+			 * the JSON with the words in it. Their transcription arrives with a leading
+			 * space, which the app trims.
 			 */
 			read: (body) => {
 				const job = body as { status?: unknown; data?: unknown };
@@ -154,8 +131,7 @@ export const infomaniak: ProviderDescriptor = {
 	modelRules: [
 		{
 			matches: [INFOMANIAK_PHOTO_MAKER],
-			// The same three sizes and two quality words as the drawing endpoint, per
-			// their specification, so nothing is repeated here that is not different.
+			// The same three sizes and two quality words as the drawing endpoint.
 			images: {
 				sizes: { square: '1024x1024', portrait: '1024x1792', landscape: '1792x1024' },
 				qualities: { low: 'standard', standard: 'standard', high: 'hd' }

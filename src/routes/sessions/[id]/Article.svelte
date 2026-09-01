@@ -50,9 +50,8 @@
 		currentRawReasoning,
 		currentRawCompletion,
 		// Write-only here: the component sets it for the parent and never reads it
-		// back, which the rule below reads as a dead initialiser. It isn't: an
-		// unbound parent still needs the default, and $bindable() must be the
-		// declared value for the prop to be bindable at all.
+		// back, which the rule below reads as a dead initialiser. It is not: an unbound
+		// parent still needs the default, and $bindable() must be the declared value.
 		// eslint-disable-next-line no-useless-assignment
 		streamingReasoningExpanded = $bindable(false),
 		onToggleReasoning = undefined,
@@ -103,14 +102,7 @@
 		message.role === 'user' && !isKnowledgeAttachment && !isDocumentAttachment
 	);
 
-	/**
-	 * Who wrote this, when it was not the conversation's assistant.
-	 *
-	 * The stored name for a message that has landed, the live one for the bubble
-	 * still filling. The face comes from the library, since it is decoration and can
-	 * be missing; the name comes from the message, since it is attribution and
-	 * cannot.
-	 */
+	/** The stored name for a message that has landed, the live one for the bubble still filling. The face comes from the library, since it can be missing; the name comes from the message, since attribution cannot. */
 	const speakerName = $derived(message.personaName ?? liveSpeakerName);
 	const speakerId = $derived(message.personaId ?? liveSpeakerPersonaId);
 	const speaker = $derived(
@@ -132,17 +124,12 @@
 	);
 	// URLs indexed by citation number, so the answer's inline [n] become links.
 	const citations = $derived(message.webSearch?.sources?.map((s) => s.url));
-	// Seed from the persisted value (initial only) so a restored-expanded panel doesn't
-	// play its intro animation on load; the effect below keeps it in sync afterwards.
+	// Seeded from the persisted value so a restored-expanded panel does not play its
+	// intro on load; the effect below keeps it in sync afterwards.
 	let isReasoningVisible = $state(untrack(() => message.isReasoningVisible) ?? false);
 	let userHasInteractedWithToggle = $state(false);
 
-	/**
-	 * The timeline, oldest first: the recorded steps, then the round still being
-	 * written. The last round lives in `reasoning` rather than in the trace (it is
-	 * still streaming) but it belongs at the end of the same list, which is what
-	 * keeps it from jumping when a second round pushes it into history.
-	 */
+	/** Oldest first: the recorded steps, then the round still being written. The last round lives in `reasoning` rather than the trace, but belongs at the end of the same list, which stops it jumping when a second round pushes it into history. */
 	const steps = $derived([
 		// Messages written before the trace existed still know they searched.
 		...(message.reasoningTrace ??
@@ -161,11 +148,7 @@
 	/** The steps are still running: the answer itself hasn't started yet. */
 	const isThinking = $derived(isStreamingArticle && !currentRawCompletion?.trim());
 
-	/**
-	 * Closes the timeline as soon as the answer starts, not when the whole stream
-	 * ends: the first token of the real text is the moment the steps are over, and
-	 * waiting past it leaves the sequence hanging open under a finished answer.
-	 */
+	/** Closed as soon as the answer starts rather than when the stream ends: the first token is the moment the steps are over. */
 	const showDone = $derived(steps.length > 0 && !isThinking);
 
 	/** What it is doing, or (once done) what it did. */
@@ -200,17 +183,11 @@
 		}
 	}
 
-	/**
-	 * What an MCP step did, naming the machine that answered.
-	 *
-	 * The server's name is not decoration here. A result from somebody else's
-	 * server is a different kind of thing from one the app produced, and a reader
-	 * who cannot tell them apart cannot judge the answer built on top of it.
-	 */
+	/** The server's name is not decoration: a result from somebody else's server is a different kind of thing from one the app produced. */
 	function mcpLabel(mcp: ReasoningStep['mcp']): string {
 		if (!mcp) return $LL.mcpStepCalled();
-		// A refusal first: it is the only one of these where nothing left the
-		// machine, and reading it as a failure would be reading it backwards.
+		// A refusal first: it is the only one where nothing left the machine, and
+		// reading it as a failure would be reading it backwards.
 		if (mcp.refused) return $LL.mcpStepRefused();
 		if (!mcp.tool) return $LL.mcpStepUnavailable();
 		return mcp.failed ? $LL.mcpStepFailed() : $LL.mcpStepCalled();
@@ -229,14 +206,13 @@
 		}
 	}
 
-	// Follow-along mode: the timeline unfolds as the steps land and folds away once
-	// the answer starts. Off (the default) it stays folded under its one line. Only
-	// while streaming, and only until the user works the toggle themselves.
+	// Follow-along: the timeline unfolds as the steps land and folds once the answer
+	// starts. Only while streaming, and only until the user works the toggle.
 	$effect(() => {
 		if (!$settingsStore.autoExpandReasoningBlocks) return;
 		if (isStreamingArticle && !userHasInteractedWithToggle) {
-			// Any step counts, not just thinking: a search is the first thing that
-			// happens in a turn, and it's worth watching too.
+			// Any step counts, not just thinking: a search is the first thing that happens
+			// in a turn.
 			const hasReasoning = steps.length > 0 || !!currentRawReasoning?.trim();
 			const hasCompletion = !!currentRawCompletion?.trim();
 
@@ -276,8 +252,7 @@
 
 {#if isDocumentAttachment && message.document}
 	<!-- The document as it was attached, not as the model reads it: a hundred pages
-	     of Markdown unrolled in the thread would bury the conversation it belongs to.
-	     The text is still in the message, still searchable, still exported. -->
+	     of Markdown would bury the conversation. The text is still in the message. -->
 	<div class="mx-auto mb-2 flex w-full max-w-[80ch] justify-end px-3 md:px-4 lg:px-6">
 		<AttachmentPill
 			attachment={{
@@ -316,10 +291,9 @@
 		</div>
 	</article>
 {:else}
-	<!-- Two shapes, not one: the assistant answers as plain prose across the column,
-	     the user speaks in a bubble pushed to the right. Identical cards for both
-	     turned a long conversation into a wall of boxes where the eye couldn't find
-	     who said what. -->
+	<!-- Two shapes, not one: the assistant answers as prose across the column, the
+	     user speaks in a bubble pushed right. Identical cards turned a long
+	     conversation into a wall of boxes. -->
 	<article
 		id={anchorId}
 		class:folded
@@ -327,9 +301,8 @@
 			? 'items-end'
 			: ''} {message.role === 'system' ? 'border-shade-3 rounded-md border p-3 md:p-4' : ''}"
 	>
-		<!-- Header carries identity only: who spoke and when. Mirrored for the user so
-		     the badge always hugs the message's outer edge and the time sits inward,
-		     on both sides of the thread. -->
+		<!-- Identity only: who spoke and when. Mirrored for the user, so the badge hugs
+		     the message's outer edge on both sides. -->
 		<nav
 			class="article__nav text-muted flex items-center gap-2 {isUserRole ? 'flex-row-reverse' : ''}"
 		>
@@ -340,11 +313,8 @@
 				data-testid="session-role"
 				class="article__role text-center text-xs leading-7 font-bold uppercase"
 			>
-				<!-- A persona called in with `@` answers as itself, so the badge says its
-				     name and its face sits beside it. Read from the message rather than
-				     from the library: the name has to keep working after the persona has
-				     been renamed or deleted, and attribution that stops working when
-				     somebody tidies up is attribution nobody can rely on. -->
+				<!-- A persona called in with `@` answers as itself. Read from the message rather
+				     than the library: the name has to keep working after the persona is gone. -->
 				<Badge>
 					{#if isUserRole}
 						{$LL.you()}
@@ -356,9 +326,8 @@
 				</Badge>
 			</div>
 			{#if sentAt}
-				<!-- Revealed on hover, like the message's own actions: worth having, not
-				     worth carrying on every line of a long conversation. Stays visible
-				     where there is no hover to reveal it with. -->
+				<!-- Revealed on hover, like the message's own actions. Stays visible where there
+				     is no hover to reveal it with. -->
 				<span
 					class="article__sent-at text-muted shrink-0 text-[11px] tabular-nums"
 					title={message.createdAt}
@@ -368,10 +337,9 @@
 			{/if}
 		</nav>
 
-		<!-- Everything the turn did before answering, under one heading: searching,
-		     thinking, reading, thinking again. Each of these used to be its own widget
-		     appearing and replacing the previous one, so the article flickered while it
-		     worked and only the last round survived. One list, appended to. -->
+		<!-- Everything the turn did before answering, under one heading. Each of these
+		     used to be its own widget replacing the previous one, so the article
+		     flickered and only the last round survived. One list, appended to. -->
 		{#if steps.length || isSearching}
 			<div class="activity text-xs">
 				<button
@@ -400,8 +368,8 @@
 					>
 						{#each steps as step, i (i)}
 							<div class="flex gap-2">
-								<!-- Gutter: the icon says what the step is, the rule under it ties the
-								     steps together so they read as one sequence rather than as a stack. -->
+								<!-- The icon says what the step is; the rule under it ties them into one
+								     sequence rather than a stack. -->
 								<div class="text-muted flex w-4 shrink-0 flex-col items-center">
 									{#if step.type === 'reasoning'}
 										<Brain class="mt-1 h-3.5 w-3.5 shrink-0" />
@@ -421,9 +389,8 @@
 
 								<div class="min-w-0 flex-1 {i < steps.length - 1 || showDone ? 'pb-2' : ''}">
 									{#if step.type === 'reasoning'}
-										<!-- The step being written is left unclamped: its newest text is at
-										     the bottom, which is exactly what a clamp would hide. It clamps
-										     once the answer starts and it stops moving. -->
+										<!-- The step being written is unclamped: its newest text is at the bottom, which
+										     is exactly what a clamp would hide. -->
 										<ActivityText clamp={!(isThinking && i === steps.length - 1)}>
 											<article class="article--reasoning text-muted">
 												<Markdown markdown={step.content ?? ''} />
@@ -441,10 +408,9 @@
 											</span>
 										</div>
 									{:else if step.type === 'memory'}
-										<!-- Shown for the same reason a search is shown: something was done
-										     on the user's behalf that they did not ask for. A refusal is
-										     shown too, since "it tried and could not" is what somebody
-										     wondering why it forgot needs to see. -->
+										<!-- Shown for the same reason a search is: something was done on the user's
+										     behalf that they did not ask for. Refusals too, since "it tried and could
+										     not" is what somebody wondering needs. -->
 										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
 											<span>{memoryLabel(step.memory)}</span>
 											{#if step.memory?.title}
@@ -454,9 +420,8 @@
 											{/if}
 										</div>
 									{:else if step.type === 'mcp'}
-										<!-- Named, not merely counted: "a tool was called" tells a reader
-										     nothing they can act on, and which machine answered is the one
-										     thing that separates this from the app's own tools. -->
+										<!-- Named, not merely counted: which machine answered is the one thing that
+										     separates this from the app's own tools. -->
 										<div class="text-muted flex flex-wrap items-center gap-1.5 py-0.5">
 											<span>{mcpLabel(step.mcp)}</span>
 											{#if step.mcp?.server}
@@ -494,8 +459,7 @@
 							</div>
 						{/each}
 
-						<!-- The timeline needs an end, otherwise the last step reads as one that
-						     was cut short: especially when it's a page read with no thinking after. -->
+						<!-- The timeline needs an end, or the last step reads as one cut short. -->
 						{#if showDone}
 							<div class="flex gap-2">
 								<div class="text-muted flex w-4 shrink-0 flex-col items-center">
@@ -519,17 +483,15 @@
 			</div>
 		{:else if message.content}
 			{#if isUserRole}
-				<!-- Tinted with the app's accent by default so your own turns are findable
-				     when scanning back through a long conversation; Interface can turn it
-				     off for a plainer, lower-contrast thread. -->
+				<!-- Tinted with the accent so your own turns are findable when scanning back;
+				     Interface can turn it off for a plainer thread. -->
 				<div
 					class="article__bubble max-w-[85%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 {$settingsStore.accentUserMessages
 						? 'bg-accent/10'
 						: 'bg-shade-2'}"
 				>
-					<!-- The names you called are drawn as labels, the way every chat draws a
-					     mention. Segments rather than markup, for the reason the search
-					     excerpts give: message content turned into HTML would hand any
+					<!-- The names you called, drawn as labels. Segments rather than markup, for the
+					     reason the search excerpts give: content turned into HTML would hand any
 					     conversation containing markup a way into the page. -->
 					{#if mentionSegments.length > 1}
 						<p class="text-sm leading-relaxed whitespace-pre-wrap">
@@ -593,8 +555,7 @@
 		{#if message.images && message.images.length}
 			<div class="article__images mt-2 flex flex-wrap gap-1">
 				{#each message.images as img (img.filename)}
-					<!-- The same pill it was attached as, minus the way to take it back:
-					     what was sent should look like what was composed. -->
+					<!-- The same pill it was attached as, minus the way to take it back. -->
 					<AttachmentPill
 						attachment={{
 							type: 'image',
@@ -607,10 +568,8 @@
 			</div>
 		{/if}
 
-		<!-- Actions hang under the message they act on, along its own edge: the same
-		     rule for both roles, so they read as belonging to that turn rather than
-		     sitting at some fixed corner of the thread. Small and muted: they are
-		     always secondary to the text. -->
+		<!-- Actions hang under the message they act on, along its own edge, so they read
+		     as belonging to that turn rather than to a corner of the thread. -->
 		{#if !isStreamingArticle}
 			<div class="article__interactive -mt-0.5 flex items-center gap-0.5">
 				{#if retryIndex !== undefined}
@@ -634,15 +593,11 @@
 				{/if}
 				<ButtonCopy content={message.content} compact />
 
-				<!-- Removing one turn, which the conversation had no way to do: everything
-				     that deleted anything deleted the whole conversation, so a message
-				     sent twice, a reply that went wrong, or a duplicate left by an older
-				     bug had to be lived with.
+				<!-- Removing one turn, which the conversation had no way to do: everything that
+				     deleted anything deleted the whole conversation.
 
-				     It asks first, and it asks here rather than in a dialog somewhere
-				     else, the way the sidebar's rows do. Nothing else in the thread moves
-				     while it waits: the confirmation replaces the icon it was asked
-				     from. -->
+				     It asks first, and asks here rather than in a dialog, the way the sidebar's
+				     rows do. Nothing else moves while it waits. -->
 				{#if handleDeleteMessage}
 					{#if confirmingDelete}
 						<Button
@@ -679,12 +634,7 @@
 {/if}
 
 <style lang="postcss">
-	/**
-	 * A message a summary now stands in for. It is still part of the conversation
-	 * and still readable, it is simply no longer what the model is answering from,
-	 * so it steps back rather than leaving. Full strength on hover, because the
-	 * one time it matters is when you go back to read it.
-	 */
+	/** A message a summary stands in for: still part of the conversation and still readable, simply no longer what the model answers from. Full strength on hover, when it matters. */
 	.folded {
 		opacity: 0.45;
 		transition: opacity 0.25s ease;

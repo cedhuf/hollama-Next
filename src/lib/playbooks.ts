@@ -6,33 +6,21 @@ import { generateRandomId } from '$lib/utils';
 /**
  * A way of doing something, written once and reused in any conversation.
  *
- * The other half of what a persona is, and deliberately not the same object. A
- * persona is *who* is answering: a voice, a model, an ongoing relationship, a
- * conversation of its own. A playbook is *how* a job gets done: a procedure the
- * model follows, with no voice, no model and no conversation. You do not talk to
- * a playbook; you switch one on and it changes how the answer is produced.
+ * The other half of what a persona is, and deliberately not the same object: a
+ * persona is *who* is answering, a playbook is *how* a job gets done. You do not
+ * talk to a playbook, you switch one on.
  *
- * Which is why a playbook has no face. It is drawn on the same card as
- * everything else in the library, at the same size, with the space a portrait
- * would have taken given back to the sentence that says when to use it. You are
- * choosing a method, and a method does not look like anyone.
+ * Which is why it has no face: the space a portrait would take is given to the
+ * sentence saying when to use it.
  *
- * The instructions are Markdown, and they are the whole of it. No templating, no
+ * The instructions are Markdown and are the whole of it. No templating, no
  * variables, no steps the app interprets: what makes a playbook reusable is that
- * it is text a model reads, so it survives every model, every provider, and
- * every change of ours.
+ * it is text a model reads.
  */
 export interface Playbook {
 	id: string;
 	name: string;
-	/**
-	 * When to use it, in one line.
-	 *
-	 * It carries more weight than a persona's tagline, which is decoration. This
-	 * is what `/playbooks` lists and what somebody reads when deciding whether
-	 * this is the one, so it is written for that decision rather than as a
-	 * description of the contents.
-	 */
+	/** It carries more weight than a persona's tagline, which is decoration: this is what `/playbooks` lists and what somebody reads when deciding. */
 	summary: string;
 	/** The procedure itself, in Markdown. */
 	instructions: string;
@@ -73,13 +61,7 @@ export const deletePlaybook = (id: string): void => {
 	playbooksStore.remove(id);
 };
 
-/**
- * Install a playbook an administrator shared, as an editable copy of your own.
- *
- * A copy, not a link: a fresh id, and what it is a copy *of* recorded, so the
- * card can tell later whether you have changed it. The share is a snapshot, so
- * nothing here reaches back into the admin's library either.
- */
+/** A copy, not a link: a fresh id, and what it is a copy *of* recorded, so the card can tell later whether you have changed it. */
 export function installSharedPlaybook(playbook: Playbook): Playbook {
 	const now = new Date().toISOString();
 	const copy: Playbook = {
@@ -95,13 +77,10 @@ export function installSharedPlaybook(playbook: Playbook): Playbook {
 }
 
 /**
- * The playbooks a conversation is running with, in the order they were switched on.
- *
  * Held by id and resolved on the fly, unlike a persona, which is snapshotted
- * into the session when the conversation starts. The difference is not an
- * oversight: a persona is who you are talking to and must not change under a
- * conversation already under way, while a playbook is a procedure you are
- * maintaining, and fixing a step in it should fix it everywhere it is on.
+ * when the conversation starts: a persona must not change under a conversation
+ * already under way, while fixing a step in a procedure should fix it
+ * everywhere it is on.
  */
 export function playbooksOf(ids: string[] | undefined): Playbook[] {
 	if (!ids?.length) return [];
@@ -121,13 +100,7 @@ export function playbookInstructions(playbooks: Playbook[]): string {
 		.join('\n\n');
 }
 
-/**
- * How long a procedure is, counted the way it is written.
- *
- * Headings first, since a playbook with sections is organised by them; failing
- * that, numbered or bulleted lines. Not words or characters: what somebody wants
- * to know before switching one on is how much of a procedure it is.
- */
+/** Headings first, since a playbook with sections is organised by them; failing that, numbered or bulleted lines. What somebody wants before switching one on is how much of a procedure it is. */
 export function playbookSteps(instructions: string): number {
 	const headings = (instructions.match(/^#{1,6}\s+\S/gm) ?? []).length;
 	if (headings) return headings;

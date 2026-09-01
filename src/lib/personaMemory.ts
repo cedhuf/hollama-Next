@@ -3,21 +3,13 @@
  *
  * Not a summary of what was said: a small set of things the persona decided were
  * worth keeping, written by calling a tool and readable by you at any time. It
- * belongs to the pair (persona, person) and to nothing else. A persona an admin
- * shares is one object read by everybody, so a memory living on it would be
- * everybody's, which is the opposite of what this is for.
+ * belongs to the pair (persona, person): a persona an admin shares is one object
+ * read by everybody, so a memory living on it would be everybody's.
  *
- * Two tiers, because they answer different questions and cost differently.
- *
- * The **profile** is one block, always in the context. What is true most of the
- * time: who you are to this persona, what you want from it, the preferences that
- * do not change per conversation. Never searched, since it is never absent.
- *
- * The **notes** are everything else. Only their index goes into the context: the
- * title, and one line saying when the note matters. The body is read on demand,
- * exactly the way a search result's address is opened rather than pasted. That is
- * what keeps the cost of remembering a hundred things equal to the cost of
- * listing a hundred titles.
+ * Two tiers. The **profile** is one block always in the context: what is true
+ * most of the time. The **notes** are everything else, and only their index goes
+ * into the context, the body being read on demand. That is what keeps the cost
+ * of remembering a hundred things equal to listing a hundred titles.
  */
 
 export interface MemoryNote {
@@ -29,25 +21,12 @@ export interface MemoryNote {
 	/** The note itself, read only when asked for. */
 	body: string;
 	createdAt: string;
-	/**
-	 * When it was last written or reaffirmed.
-	 *
-	 * Separate from `createdAt` because the interesting question about a memory is
-	 * not how old it is but how long ago anybody checked it was still true. A note
-	 * written in January and confirmed in August is current; the same note never
-	 * revisited is a guess with a date on it.
-	 */
+	/** Separate from `createdAt`, because the interesting question is how long ago anybody checked it was still true. A note never revisited is a guess with a date on it. */
 	confirmedAt: string;
 }
 
 export interface PersonaMemory {
-	/**
-	 * The persona's id, which is also this memory's own.
-	 *
-	 * There is one memory per persona per person, so a separate identifier would
-	 * only be a second name for the same thing, and the field is called `id` so
-	 * this collection stores, loads and restores like every other one.
-	 */
+	/** There is one memory per persona per person, so a separate identifier would be a second name for the same thing. Called `id` so this collection stores and restores like every other. */
 	id: string;
 	profile: string;
 	notes: MemoryNote[];
@@ -55,16 +34,12 @@ export interface PersonaMemory {
 }
 
 /**
- * One number to tune, and the rest follows from it.
+ * One number to tune, and the rest follows. `alwaysInContext` is the only budget
+ * that matters, being the only part paid on every turn; the per-item caps stop
+ * any single item eating it, not to be tuned separately.
  *
- * `alwaysInContext` is the only budget that matters, because it is the only part
- * paid on every single turn: the profile plus one index line per note. The
- * per-item caps below exist to stop any single item from eating that budget on
- * its own, not to be tuned separately.
- *
- * `body` is generous on purpose. A note's body is paid only when the persona
- * asks for it, so the reason to cap it at all is to keep one note from filling a
- * context window by itself.
+ * `body` is generous: it is paid only when the persona asks for it, so the cap
+ * only stops one note filling a context window by itself.
  */
 export const MEMORY_LIMITS = {
 	/** Profile + every index line, in characters. The real ceiling. */
@@ -97,13 +72,10 @@ export function hasContent(memory: PersonaMemory | null | undefined): boolean {
 }
 
 /**
- * Why a write was refused, in the words the model gets back.
- *
- * Refusals are returned rather than fixed. Truncating a block silently leaves a
- * model believing it wrote something it did not, and evicting an old note to fit
- * a new one throws away a memory nobody agreed to lose. Both failures are
- * invisible, which is what makes them worse than an error the model has to
- * answer: over budget, it has to merge or forget, and say which.
+ * Refusals are returned rather than fixed. Truncating silently leaves a model
+ * believing it wrote something it did not, and evicting an old note throws away
+ * a memory nobody agreed to lose. Over budget, it has to merge or forget, and
+ * say which.
  */
 export type MemoryRefusal = { ok: false; reason: string };
 export type MemoryResult<T> = { ok: true; value: T } | MemoryRefusal;

@@ -21,13 +21,11 @@ const DEBOUNCE_MS = 800;
 /**
  * Mode `server`: data lives in SQLite behind the guarded `/api/data` endpoints.
  *
- * Writes are debounced and coalesced per collection: the stores persist the
- * whole collection on every change (e.g. each streamed token), so without this
- * we'd PUT the entire session list dozens of times per message. Pending writes
- * are flushed on `pagehide` (with `keepalive`) so nothing is lost on close.
+ * Writes are debounced and coalesced per item, since the stores persist a whole
+ * collection on every change, down to each streamed token. Pending writes are
+ * flushed on `pagehide` with `keepalive`.
  *
- * No `hydrate()`: the stores seed with defaults and the layout fills them via
- * the async `load*()` methods at boot.
+ * No `hydrate()`: the stores seed with defaults and the layout fills them.
  */
 export class ApiRepository implements DataRepository {
 	/** Keyed by request URL, so each item debounces on its own. */
@@ -47,11 +45,7 @@ export class ApiRepository implements DataRepository {
 		return this.#get<SessionSummary[]>('sessions', []);
 	}
 
-	/**
-	 * A 404 means "no such conversation yet": opening an unknown id is how a new
-	 * chat begins. Anything else throws, so a server that is merely unreachable is
-	 * never mistaken for an empty conversation.
-	 */
+	/** A 404 means "no such conversation yet", which is how a new chat begins. Anything else throws, so an unreachable server is never mistaken for an empty conversation. */
 	async loadSession(id: string, fetchFn: typeof fetch = fetch): Promise<Session | null> {
 		const response = await fetchFn(`/api/data/sessions/${id}`);
 		if (response.status === 404) return null;
@@ -71,16 +65,13 @@ export class ApiRepository implements DataRepository {
 	/**
 	 * Playbooks, and nothing if this server has never heard of them.
 	 *
-	 * A 404 here means the server predates the collection, which happens on every
-	 * rolling deploy and every browser left open across one. Treated as an error it
-	 * took the whole boot down: the load is a single `Promise.all`, so one unknown
-	 * route meant no conversations, no personas and a page saying the data could
-	 * not be read.
+	 * A 404 means the server predates the collection, which happens on every rolling
+	 * deploy. As an error it took the whole boot down, since the load is one
+	 * `Promise.all`.
 	 *
-	 * Empty rather than absent is safe here, and only because a collection is
-	 * persisted one item at a time: an empty store cannot write an empty
-	 * collection back. Anything other than a 404 still throws, so a server that is
-	 * merely down is never mistaken for one that is simply older.
+	 * Empty rather than absent is safe only because a collection is persisted one
+	 * item at a time, so an empty store cannot write an empty collection back.
+	 * Anything other than a 404 still throws.
 	 */
 	async loadPlaybooks(): Promise<Playbook[]> {
 		return this.#getOptional<Playbook[]>('playbooks', []);
@@ -103,10 +94,7 @@ export class ApiRepository implements DataRepository {
 		this.#schedule(`/api/data/personas/${persona.id}`, persona);
 	}
 
-	/**
-	 * Deletions are sent immediately, and cancel any write still queued for that
-	 * item: a debounced save landing after its own delete would resurrect it.
-	 */
+	/** Sent immediately, cancelling any write still queued for that item: a debounced save landing after its own delete would resurrect it. */
 	async deleteSession(id: string): Promise<void> {
 		await this.#delete(`/api/data/sessions/${id}`);
 	}
@@ -182,13 +170,10 @@ export class ApiRepository implements DataRepository {
 	}
 
 	/**
-	 * Reads a collection, or throws.
-	 *
-	 * It must never answer "empty" for "I could not tell". The stores persist the
-	 * whole collection at once, so a failed read that returned `[]` would leave the
-	 * store empty and the next save would replace every stored row with nothing,
-	 * the caller has to be able to distinguish the two and leave the data alone.
-	 * `null`/absent from the server is a genuine empty, and keeps the fallback.
+	 * Reads a collection, or throws. It must never answer "empty" for "I could not
+	 * tell": a failed read returning `[]` would leave the store empty and the next
+	 * save would replace every stored row with nothing. Absent from the server is a
+	 * genuine empty and keeps the fallback.
 	 */
 	/** As `#get`, but a collection this server does not know about is simply empty. */
 	async #getOptional<T>(collection: Collection, fallback: T): Promise<T> {
@@ -206,14 +191,7 @@ export class ApiRepository implements DataRepository {
 		return ((await response.json()) as T) ?? fallback;
 	}
 
-	/**
-	 * Coalesce writes per item, not per collection.
-	 *
-	 * A streaming answer saves its session on every chunk, so the debounce still
-	 * earns its keep. Keying on the item's own URL means a burst on the open
-	 * conversation is no longer merged with (or delayed by) an unrelated edit to
-	 * another one.
-	 */
+	/** Keyed on the item's own URL, so a burst on the open conversation is not merged with an unrelated edit to another one. */
 	#schedule(url: string, value: unknown): void {
 		this.#pending.set(url, value);
 		clearTimeout(this.#timers.get(url));
@@ -247,8 +225,8 @@ export class ApiRepository implements DataRepository {
 				body,
 				keepalive
 			});
-			// 401 = not authenticated (e.g. a boot write while on /login). Benign;
-			// the route guard handles auth, so don't surface it as a save error.
+			// 401 is not authenticated, for instance a boot write while on /login. The route
+			// guard handles auth, so it is not surfaced as a save error.
 			if (response.status === 401) return;
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 		} catch (error) {
@@ -272,13 +250,10 @@ export class ApiRepository implements DataRepository {
 	/**
 	 * Send everything queued, now, and wait for it to land.
 	 *
-	 * The debounce is there because the stores persist on every change, down to
-	 * each streamed token. That is the right trade for an edit and the wrong one
-	 * for a creation: creating a conversation and then navigating to it means
-	 * reading back, in the same breath, something that is still sitting in a
-	 * timer. The read answers 404, the page treats "not there yet" as "does not
-	 * exist", starts a blank conversation over it, and the real one is gone with
-	 * everything that made it a persona's.
+	 * The debounce is right for an edit and wrong for a creation: creating a
+	 * conversation and navigating to it means reading back something still sitting
+	 * in a timer. The read answers 404, the page starts a blank conversation over
+	 * it, and the real one is gone.
 	 */
 	async flush(): Promise<void> {
 		const queued = [...this.#pending];

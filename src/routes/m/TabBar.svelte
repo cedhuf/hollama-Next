@@ -10,24 +10,16 @@
 	/**
 	 * The way around, floating over the content at thumb height.
 	 *
-	 * Two things make it a bar rather than a row of buttons. The voice key is
-	 * separate, on the left, in the accent, because it is not a destination: it
-	 * opens the way this interface is meant to be used, and putting it in the row
-	 * would have made talking one option among four. And only the current
-	 * destination carries its name, the others being their icon alone, which is
-	 * what lets four fit at this width without either shrinking or abbreviating.
+	 * The voice key is separate, on the left, in the accent, because it is not a
+	 * destination: putting it in the row would make talking one option among four.
+	 * Only the current destination carries its name, which is what lets four fit at
+	 * this width. The label slides open rather than appearing, so moving between two
+	 * reads as one object travelling.
 	 *
-	 * The label slides open rather than appearing, so moving between two
-	 * destinations reads as one object travelling rather than two labels swapping.
-	 *
-	 * The pill under the current tab is `shade-3` and not the obvious `shade-2`,
-	 * which is what it was and which drew nothing. `shade-2` is the colour of the
-	 * page this bar floats over, and the glass tint barely moves away from it: the
-	 * fill landed within two points of lightness of the bar around it, in both
-	 * themes, so the only thing marking the current destination was its label
-	 * opening. One step further along the scale is enough to read as a pill in both
-	 * themes, and it is as far as this should go: the mark under a thumb only has
-	 * to be found, not announced.
+	 * The pill under the current tab is `shade-3` rather than `shade-2`, which is
+	 * the colour of the page this floats over: the fill landed within two points of
+	 * lightness of the bar around it, so only the label opening marked the current
+	 * destination.
 	 */
 	const tabs = $derived([
 		{ href: '/m' as const, icon: House, label: $LL.mobileTabHome() },
@@ -37,9 +29,8 @@
 			href: '/m/profile' as const,
 			icon: User,
 			label: $LL.mobileTabProfile(),
-			// The Library is reached from Profile and belongs to it. Without this the
-			// bar had no current destination at all while you were in there, so every
-			// label was closed and the row read as four icons and nothing chosen.
+			// The Library is reached from Profile and belongs to it. Without this the bar
+			// had no current destination while you were in there.
 			owns: ['/m/library']
 		}
 	]);
@@ -55,17 +46,9 @@
 	class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex px-4 pb-[max(1rem,var(--safe-bottom))]"
 	aria-label={$LL.mobileTabChats()}
 >
-	<!-- Two objects, not one, and the left one never moves.
-	     
-	     The row is anchored left rather than centred: the pill grows and shrinks as
-	     the label under the thumb changes, and a centred row would have slid the
-	     microphone sideways every time somebody changed tab. Pinned first in a
-	     left-aligned row, only the pill's far edge moves.
-	     
-	     The voice key is its own object because it is not a destination: it opens
-	     the way this interface is meant to be used, and sitting inside the row would
-	     have made talking one option among four. Same height and same corner as the
-	     tabs, so the pair reads as one instrument in two pieces. -->
+	<!-- Two objects, not one, and the left one never moves: the row is anchored left
+	     rather than centred, so only the pill's far edge moves when the label under
+	     the thumb changes. -->
 	<div class="pointer-events-auto flex w-full items-center gap-2">
 		<button
 			type="button"
@@ -76,13 +59,9 @@
 			<Mic class="h-5 w-5" />
 		</button>
 
-		<!-- The bar takes what is left of the line rather than the width of its
-		     labels: a row that resizes itself under the thumb is a row whose targets
-		     move while it is being aimed at.
-		     
-		     Inside it, the slack goes to the tab that needs it. Equal shares looked
-		     tidier and cut every label in half: three quarters of the bar was held by
-		     icons that needed forty pixels each. -->
+		<!-- The bar takes what is left of the line rather than the width of its labels: a
+		     row that resizes under the thumb is a row whose targets move while it is
+		     being aimed at. Inside it, the slack goes to the tab that needs it. -->
 		<div class="glass flex min-w-0 flex-1 items-center gap-1 rounded-full p-1.5">
 			{#each tabs as tab (tab.href)}
 				{@const Icon = tab.icon}
@@ -96,10 +75,8 @@
 						: 'text-muted hover:text-active shrink-0'}"
 				>
 					<Icon class="h-5 w-5 shrink-0" />
-					<!-- Grid rather than width: a `max-width` transition has to guess a
-					     number, and the guess is wrong for every language but the one it was
-					     measured in. A grid track animates from nothing to the text's own
-					     size, whatever that turns out to be. -->
+					<!-- Grid rather than width: a `max-width` transition has to guess a number, and
+					     the guess is wrong for every language but the one it was measured in. -->
 					<span
 						class="grid transition-[grid-template-columns] duration-200 ease-out {active
 							? 'grid-cols-[1fr]'
@@ -115,36 +92,24 @@
 
 <style lang="postcss">
 	/*
-	 * Glass, the way the platform draws it.
+	 * Glass, the way the platform draws it. Three things together: a heavy blur, so
+	 * what passes behind is texture rather than content; a push on saturation,
+	 * because blurring alone drains colour and the result reads as a dirty window;
+	 * and a hairline of light along the top edge.
 	 *
-	 * Three things together, and it needs all three. A heavy blur, so what passes
-	 * behind becomes texture rather than content competing with the icons. A push
-	 * on saturation, because blurring alone drains colour and the result reads as a
-	 * dirty window rather than as glass. And a hairline of light along the top
-	 * edge, which is what a pane of glass does with the light above it and the one
-	 * detail that makes the difference between translucent and merely transparent.
-	 *
-	 * The tint is as low as it can be and still hold an icon. Lower is prettier
-	 * over a plain background and fails over a photograph: a blurred image keeps
-	 * its light and dark patches, so an icon crossing one lands on whatever happens
-	 * to be behind it and disappears into the bright half. The tint is what stops
-	 * the backdrop reaching the extremes, and it is doing that job rather than a
-	 * decorative one. Anything much heavier and the blur is decoration over an
-	 * opaque bar, which is the thing this replaces.
+	 * The tint is as low as it can be and still hold an icon. Lower fails over a
+	 * photograph, where a blurred image keeps its light and dark patches and an icon
+	 * disappears into the bright half.
 	 */
 	/*
 	 * A note for whoever adds page transitions, because it has been tried and undone.
 	 *
-	 * `backdrop-filter` and the View Transitions API do not coexist. During a
-	 * transition the whole document is replaced by snapshots, so an element that
-	 * blurs what is behind it has nothing behind it, and this bar went clear for the
-	 * length of every navigation. Giving it a `view-transition-name` to hold it out
-	 * of the snapshot is worse: a named element is its own stacking context and
-	 * containing block, and on iOS the glass then vanished permanently rather than
-	 * for a moment.
+	 * `backdrop-filter` and the View Transitions API do not coexist: during a
+	 * transition the document is replaced by snapshots, so this bar went clear for
+	 * every navigation. A `view-transition-name` is worse, since a named element is
+	 * its own stacking context and on iOS the glass then vanished permanently.
 	 *
-	 * There is no third setting. Either the transitions go, which is what happened,
-	 * or this stops being glass.
+	 * Either the transitions go, which is what happened, or this stops being glass.
 	 */
 	.glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);

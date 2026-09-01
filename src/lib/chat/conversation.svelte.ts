@@ -39,14 +39,7 @@ import type { RunInput, RunSpeaker } from './run/types';
 /** Images as the composer hands them over, already encoded. */
 export type PromptImages = { data: string; filename: string }[];
 
-/**
- * The part of a conversation only a rendered page can do.
- *
- * Deliberately one method. Everything else this class needs, it reads from the
- * stores itself; what it cannot know is where the reader is looking, and a
- * transcript that does not follow its own answer is the one thing that has to be
- * arranged from outside.
- */
+/** The part of a conversation only a rendered page can do: where the reader is looking. */
 export interface ConversationView {
 	scrollToBottom(force?: boolean, smooth?: boolean): void | Promise<void>;
 }
@@ -64,47 +57,26 @@ export interface OpenEntry {
 	pending?: PendingMessage | null;
 	/** The same, named in the address instead. */
 	query?: QueryEntry | null;
-	/**
-	 * Whether to land at the foot of the conversation, which is the ordinary case.
-	 *
-	 * False when the address names a message to land on instead: arriving from a
-	 * search result, the passage that was chosen is the whole point of the visit.
-	 * A view decision, so it is made by the view and passed in.
-	 */
+	/** False when the address names a message to land on instead. A view decision, so the view makes it. */
 	atBottom?: boolean;
 }
 
 /**
  * A conversation, and everything that happens to one.
  *
- * This used to live in the page, and grew there: 351 lines at the fork, 1434 by
- * the time reasoning traces, web search, compaction, personas called in with
- * `@`, notes and server-side runs had each added their wiring where the state
- * already happened to be. Nothing about that was wrong one commit at a time,
- * and all of it was wrong by the end, because a page is a thing you look at and
- * none of this is.
+ * The line is between the conversation and the screen showing it. Sending a
+ * turn, following it, picking it back up after a reload, folding the context
+ * away, calling a persona in: all of that is here. Scroll position, which
+ * message is lit, whether the composer floats: that stays in the page.
  *
- * The line drawn here is between the conversation and the screen showing it.
- * Sending a turn, following it, picking it back up after a reload, folding the
- * context away, calling a persona in: all of that is the conversation, and it is
- * here. Where the transcript is scrolled, which message is lit up, whether the
- * composer floats: that is the screen, and it stays in the page.
- *
- * The class holds no `$effect`. What has to be watched is watched by whoever
- * renders it, calling the methods below; that is what keeps this usable from a
- * second interface rather than only from the one it was extracted out of.
+ * No `$effect` here. Whoever renders it watches what needs watching and calls
+ * the methods below, which is what makes this usable from a second interface.
  */
 export class Conversation implements RunSurface {
 	session: Session = $state()!;
 	editor: Editor = $state()!;
 
-	/**
-	 * The model by name, which is what the picker binds to.
-	 *
-	 * The name rather than the model, because the picker is a list of names and
-	 * because a conversation can carry one that no longer resolves. `syncModel`
-	 * turns it back into a model, or into nothing.
-	 */
+	/** The name rather than the model: the picker is a list of names, and a conversation can carry one that no longer resolves. */
 	modelName: string | undefined = $state();
 
 	/** The id of the run being watched, if one is being watched. */
@@ -129,10 +101,7 @@ export class Conversation implements RunSurface {
 	#stopFollowing: (() => void) | null = null;
 	#compactAbort: AbortController | null = null;
 
-	/**
-	 * Tracks the last system prompt we auto-resolved, so a model switch can update
-	 * it, but we never overwrite one somebody wrote themselves.
-	 */
+	/** The last system prompt we auto-resolved, so a model switch can update it without overwriting one somebody wrote. */
 	#lastAutoSystemPrompt = '';
 
 	constructor(session: Session, view: ConversationView) {
@@ -150,13 +119,12 @@ export class Conversation implements RunSurface {
 			interactiveChoices: this.#settings.current.interactiveChoices,
 			sendCurrentDate: this.#settings.current.sendCurrentDate,
 			thinking: true,
-			// On, like every other tool switch: what makes MCP safe is the question
-			// asked before each call, not a switch somebody has to find first.
+			// On, like every other tool switch: what makes MCP safe is the question asked
+			// before each call, not a switch somebody has to find first.
 			mcp: this.#settings.current.mcpByDefault,
-			// Declared here rather than left undefined: it is bound into the streaming
-			// article, and Svelte refuses `bind:` against a prop that has a fallback when
-			// the bound value is undefined. Reattaching to a run in progress hit that
-			// before the first turn had set it, and threw during render.
+			// Declared rather than left undefined: Svelte refuses `bind:` against a prop
+			// with a fallback when the bound value is undefined, and reattaching to a run
+			// in progress hit that before the first turn had set it.
 			streamingReasoningExpanded: false
 		};
 	}
@@ -172,44 +140,29 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * The sampling this turn will actually use: the account's settings, with
-	 * whatever this conversation says of its own laid over them.
-	 *
-	 * Resolved here at send time rather than copied into the conversation when it
-	 * was created, so changing a number in Settings reaches every conversation
-	 * that never disagreed. A conversation that did disagree keeps its own, which
-	 * is the whole point of it having said so.
+	 * The account's sampling with this conversation's own laid over it, resolved at
+	 * send time so a change in Settings reaches every conversation that never
+	 * disagreed.
 	 */
 	get options(): SamplingOptions {
 		return mergeSampling(this.#chatDefaults.current.sampling.value, this.session.options);
 	}
 
-	/**
-	 * There has to be enough conversation for a summary to be worth a request:
-	 * below a handful of messages, compacting costs more context than it frees.
-	 */
+	/** Below a handful of messages, compacting costs more context than it frees. */
 	readonly canCompact = $derived(
 		!this.isCompacting &&
 			!this.editor.isCompletionInProgress &&
 			messagesInContext(this.session.messages).length >= 4
 	);
 
-	/**
-	 * Something to fold away, and nothing already running.
-	 *
-	 * A lower bar than compaction's: clearing costs no request and frees whatever
-	 * is there, so one message is enough to be worth it.
-	 */
+	/** A lower bar than compaction's: clearing costs no request, so one message is enough. */
 	readonly canClear = $derived(
 		!this.isCompacting &&
 			!this.editor.isCompletionInProgress &&
 			messagesInContext(this.session.messages).length > 0
 	);
 
-	/**
-	 * The unanswered quick-choice awaiting input: shown docked above the composer
-	 * (Claude-style) instead of inline, and skipped in the message list until answered.
-	 */
+	/** The unanswered quick-choice: docked above the composer, and skipped in the message list until answered. */
 	readonly pendingChoice = $derived.by(() => {
 		if (this.editor.isCompletionInProgress) return null;
 		const last = this.session.messages.at(-1);
@@ -221,14 +174,9 @@ export class Conversation implements RunSurface {
 	/**
 	 * Point this at a conversation, whichever one was there before.
 	 *
-	 * Opening another conversation reuses whatever is rendering this one, so what
-	 * was on screen for the last one has to be put down explicitly. Without it the
-	 * streaming article of the conversation you just left is the first thing the
-	 * next one shows, and the run being followed is the wrong conversation's.
-	 *
-	 * The entry point is handed in rather than read here: a prompt in the address
-	 * bar is the router's business, and a message composed on the home page is the
-	 * home page's. What the conversation does about either is this method.
+	 * Opening another reuses whatever is rendering this one, so what was on screen
+	 * has to be put down explicitly. The entry point is handed in: a prompt in the
+	 * address bar is the router's business.
 	 */
 	async open(session: Session, entry: OpenEntry = {}): Promise<void> {
 		this.detach();
@@ -258,8 +206,7 @@ export class Conversation implements RunSurface {
 			: null;
 		if (boundPersona) {
 			this.editor.webSearch = this.searchAvailable && !!boundPersona.webSearch;
-			// Heal the model if it wasn't resolvable when the conversation was created
-			// (e.g. an imported persona whose model was mapped afterwards).
+			// Heal the model if it wasn't resolvable when the conversation was created.
 			if (!this.session.model && boundPersona.modelName) this.modelName = boundPersona.modelName;
 		}
 
@@ -273,13 +220,12 @@ export class Conversation implements RunSurface {
 			return;
 		}
 
-		// Whatever was left in the composer last time. After the two hand-offs above
-		// and never before them: they arrive with something to send right now, and a
-		// draft is what you had not decided to send yet.
+		// Whatever was left in the composer last time. After the two hand-offs above:
+		// they arrive with something to send now, a draft is what you had not sent.
 		this.editor.prompt = readDraft(sessionDraft(this.session.id));
 
-		// The reason any of this exists: a turn that was still going when the page
-		// went away is picked back up here, transcript and all.
+		// The reason any of this exists: a turn still going when the page went away is
+		// picked back up here, transcript and all.
 		void this.reattach();
 	}
 
@@ -296,8 +242,7 @@ export class Conversation implements RunSurface {
 
 		this.editor.webSearch = pending.webSearch;
 		this.editor.webFetch = pending.webFetch;
-		// Carry over the composer tool switches set on the home page (undefined →
-		// keep the session defaults already assigned above).
+		// Composer tool switches from the home page (undefined keeps the session defaults).
 		if (pending.thinking !== undefined) this.editor.thinking = pending.thinking;
 		if (pending.interactiveChoices !== undefined)
 			this.editor.interactiveChoices = pending.interactiveChoices;
@@ -330,22 +275,12 @@ export class Conversation implements RunSurface {
 		this.submit();
 	}
 
-	/**
-	 * Remember what is in the composer, for this conversation.
-	 *
-	 * Called by whoever draws it rather than watched from here, so this class keeps
-	 * no effects of its own and a second interface can wire it its own way.
-	 */
+	/** Called by whoever draws it, so this class keeps no effects of its own. */
 	rememberDraft = (): void => {
 		writeDraft(sessionDraft(this.session.id), this.editor.prompt ?? '');
 	};
 
-	/**
-	 * Resolve the picked name into the conversation's model.
-	 *
-	 * Reads both of the things it depends on, so whoever watches it is watching a
-	 * plain call rather than having to know what it looks at.
-	 */
+	/** Reads both things it depends on, so a watcher watches a plain call. */
 	syncModel = (): void => {
 		this.session.model = this.#settings.current.models.find((m) => m.name === this.modelName);
 	};
@@ -369,8 +304,7 @@ export class Conversation implements RunSurface {
 		if (!this.session.model) return;
 		this.editor.isExpanded = false;
 		this.editor.isNewSession = false;
-		// Sent is no longer a draft. Dropped here rather than after the turn, because
-		// the message is already on its way and the composer is already empty.
+		// Sent is no longer a draft, and the composer is already empty.
 		clearDraft(sessionDraft(this.session.id));
 
 		if (this.editor.messageIndexToEdit !== null) void this.#submitEdit(images);
@@ -385,14 +319,9 @@ export class Conversation implements RunSurface {
 		};
 		if (images && images.length) message.images = images;
 		this.session.messages = [...this.session.messages, message];
-		// Written before the turn goes out, not after it comes back.
-		//
-		// The conversation used to reach storage only when a reply landed, which is
-		// the same write and so covers both messages at once. The hole is the turn
-		// that never produces one: a reload, a crash, a closed tab or a failure
-		// between sending and answering took the message with it, and no refresh
-		// brought it back because it had never been written. What you typed and sent
-		// is yours from the moment you send it.
+		// Written before the turn goes out, not after it comes back: a reload, a crash
+		// or a failure between sending and answering used to take the message with it,
+		// since storage was only reached when a reply landed.
 		this.save();
 		await this.#view.scrollToBottom(true); // Force scroll after submitting prompt
 		await this.complete(this.session.messages);
@@ -415,8 +344,7 @@ export class Conversation implements RunSurface {
 		this.editor.messageIndexToEdit = null;
 		this.editor.prompt = '';
 
-		// Same reason as a new message: the edit is what you meant to say, and the
-		// messages after it are already gone from the array above.
+		// Same reason as a new message: the edit is what you meant to say.
 		this.save();
 		await this.complete(this.session.messages);
 	}
@@ -428,11 +356,7 @@ export class Conversation implements RunSurface {
 		this.submit();
 	};
 
-	/**
-	 * Lock the picked option(s) onto the message (so reload renders them) and send
-	 * the selection as a normal user message. Shared by the inline bubble and the
-	 * docked panel above the composer.
-	 */
+	/** Locks the picked options onto the message, so a reload renders them, and sends the selection as a normal user message. */
 	answerChoice = (message: Message, selected: string[][]): void => {
 		if (!message.choices || message.choices.answered) return;
 		const text = formatAskAnswer(message.choices.questions, selected);
@@ -443,12 +367,8 @@ export class Conversation implements RunSurface {
 	};
 
 	/**
-	 * Allow or refuse the MCP call the turn is stopped on.
-	 *
 	 * The card disappears when the run says the question is over, not when the
-	 * button is pressed: the answer that counts is the one the server recorded, and
-	 * a second tab may have got there first. Clearing it here as well would be this
-	 * tab believing itself.
+	 * button is pressed: a second tab may have answered first.
 	 */
 	approveTool = (allow: boolean): void => {
 		const request = this.editor.pendingApproval;
@@ -467,16 +387,11 @@ export class Conversation implements RunSurface {
 	};
 
 	/**
-	 * Who answers this turn.
+	 * Who answers this turn: the personas named with `@`, in order, each carrying
+	 * its own model, server, options, prompt and tools.
 	 *
-	 * The personas named with `@` in the message just sent, in the order they were
-	 * named, each carrying everything they are: their model, their server, their
-	 * options, their prompt, their tools. Nothing is borrowed from the conversation
-	 * except the conversation itself, which is the point of calling one in.
-	 *
-	 * Empty means the conversation's own assistant, which is every turn that
-	 * mentions nobody. Naming somebody is choosing them, so the assistant does not
-	 * answer alongside them.
+	 * Empty means the conversation's own assistant. Naming somebody is choosing
+	 * them, so the assistant does not answer alongside them.
 	 */
 	#speakersFor(messages: Message[]): RunSpeaker[] | undefined {
 		const lastUser = [...messages].reverse().find((m) => m.role === 'user' && !m.knowledge);
@@ -488,9 +403,7 @@ export class Conversation implements RunSurface {
 		const speakers: RunSpeaker[] = [];
 
 		for (const persona of named) {
-			// Its own model, and the conversation's when it names one nobody has. A
-			// persona that cannot answer at all would be worse than one answering on
-			// the model in front of it.
+			// Its own model, and the conversation's when it names one nobody has.
 			const model =
 				this.#settings.current.models.find((m) => m.name === persona.modelName) ??
 				this.session.model;
@@ -512,9 +425,8 @@ export class Conversation implements RunSurface {
 				think: this.editor.thinking !== false,
 				systemPrompt: [persona.systemPrompt, language, framing].filter(Boolean).join('\n\n'),
 				flags: {
-					// Its own capabilities, not the composer's: the toggles above the input
-					// belong to the conversation's assistant, and a persona that searches
-					// the web searches the web wherever it is asked to speak.
+					// Its own capabilities, not the composer's: the toggles above the input belong
+					// to the conversation's assistant.
 					webSearch: !!persona.webSearch,
 					webFetch: !!this.editor.webFetch,
 					interactiveChoices: !!this.editor.interactiveChoices,
@@ -531,12 +443,9 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * Send a turn and follow it.
-	 *
-	 * Everything that used to happen inline here now happens in the orchestrator,
-	 * which is what lets the same turn run in a process that outlives this page.
-	 * What is left is this half of the job: settle what the turn is, hand it over,
-	 * and apply what comes back.
+	 * Send a turn and follow it. The turn itself is the orchestrator's, which is
+	 * what lets it run in a process outliving this page; this half settles what the
+	 * turn is, hands it over, and applies what comes back.
 	 */
 	async complete(messages: Message[]): Promise<void> {
 		const server = this.#servers.current.find((s) => s.id === this.session.model?.serverId);
@@ -558,8 +467,8 @@ export class Conversation implements RunSurface {
 		const input = this.#inputFor(messages, server);
 		const wants = this.#wants();
 
-		// The server writes the title and the summary itself, so it has to be told
-		// which model to use for each: the browser is where that configuration lives.
+		// The server writes the title and the summary, so it has to be told which model
+		// to use for each: the browser is where that configuration lives.
 		const titleConfig = this.#chatDefaults.current.title;
 		if (wants.title && titleConfig.titleModel) {
 			input.title = {
@@ -580,33 +489,24 @@ export class Conversation implements RunSurface {
 		}
 
 		try {
-			// The server reads the conversation to write into it, so everything this
-			// tab has to say about it has to have landed first. Ordinary saves are
-			// coalesced a moment at a time, which is right for an edit and wrong for
+			// The server reads the conversation to write into it, so everything this tab
+			// has to say must have landed. Ordinary saves are coalesced, which is wrong for
 			// the message the turn is about to answer.
 			await repository.flush?.();
 			const run = await startRun(input);
 			await this.#follow(run.id, 0);
 		} catch (error) {
-			// The handover failed, so there is no turn: nothing was started, and this
-			// tab has nowhere to run one. Said plainly rather than worked around,
-			// because the workaround used to be a second way of producing an answer,
-			// and the message is still in the conversation and still in the composer.
+			// The handover failed, so there is no turn and this tab has nowhere to run one.
+			// The message is still in the conversation and still in the composer.
 			this.#handleError(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 
 	/**
-	 * Which connection serves a model chosen for an errand.
-	 *
-	 * A named connection wins, and the catalogue answers when there is none: these
-	 * settings store a model by name alone, so the connection has to be looked up
-	 * rather than assumed. It used to fall back to the conversation's own server,
-	 * which is right only while every model lives on one connection. Point the
-	 * title model at a hosted provider, hold the conversation on a local Ollama,
-	 * and every turn asked that Ollama for a model it has never heard of. The 404
-	 * went nowhere: naming is best-effort, so the conversation simply stayed
-	 * untitled and nothing said why.
+	 * Which connection serves a model chosen for an errand. A named connection
+	 * wins, and the catalogue answers otherwise: these settings store a model by
+	 * name alone. Falling back to the conversation's server asked a local Ollama for
+	 * a hosted title model, and the 404 went nowhere, since naming is best-effort.
 	 */
 	#connectionFor(model: string, preferred: string): string {
 		if (preferred) return preferred;
@@ -621,17 +521,15 @@ export class Conversation implements RunSurface {
 
 		return {
 			sessionId: this.session.id,
-			// Named rather than described: the instance resolves the address and the
-			// key from its own database, and a browser never holds either.
+			// Named rather than described: the instance resolves the address and the key
+			// from its own database, and a browser never holds either.
 			serverId: server.id,
 			model: this.session.model!.name,
 			options: this.options,
 			think: this.editor.thinking !== false,
-			// The playbooks in force are appended to the conversation's own prompt
-			// rather than replacing it: a procedure says how a job is done, not who is
-			// doing it, and it has to sit under whatever instructions were already
-			// there. Resolved at send time, so editing a playbook reaches every
-			// conversation running it without anyone reattaching anything.
+			// Playbooks are appended to the conversation's prompt rather than replacing it:
+			// a procedure says how a job is done, not who is doing it. Resolved at send
+			// time, so editing one reaches every conversation running it.
 			systemPrompt:
 				[
 					this.session.systemPrompt.content,
@@ -639,14 +537,11 @@ export class Conversation implements RunSurface {
 				]
 					.filter((part) => part?.trim())
 					.join('\n\n') || undefined,
-			// Only so the turn can find what this persona remembers about this
-			// account. Everything else about the persona is already resolved into the
-			// fields above, which is deliberate and stays that way.
+			// Only so the turn can find what this persona remembers. Everything else about
+			// it is already resolved into the fields above.
 			personaId: this.session.personaId,
-			// Compaction acts here and nowhere else: the conversation keeps every
-			// message it ever had, and only what leaves for the model is cut back to
-			// the last summary. Without a marker this returns the array untouched,
-			// which is what every conversation written before compaction existed gets.
+			// The conversation keeps every message it ever had; only what leaves for the
+			// model is cut back to the last summary. No marker means untouched.
 			messages: messagesInContext(messages),
 			flags: {
 				webSearch: !!this.editor.webSearch,
@@ -668,18 +563,12 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * What this turn should leave behind, asked before it goes out.
+	 * What this turn should leave behind, asked before it goes out: both are about
+	 * the state it will end in.
 	 *
-	 * Both are about the state it will end in: a conversation with no assistant
-	 * message yet is the one about to earn a name, and automatic compaction is due
-	 * once this answer has landed rather than before it does.
-	 *
-	 * The title, twice, and the second is the interesting one. The first is
-	 * written before anything has been answered, so it names the question rather
-	 * than the conversation; a few exchanges later there is something to name.
-	 * Once, though, and never over a name someone typed. A conversation whose name
-	 * keeps changing is worse than one badly named, and a title you chose being
-	 * quietly replaced is worse than either.
+	 * The title twice. The first names the question, since nothing has been answered
+	 * yet; a few exchanges later there is a conversation to name. Never a third
+	 * time, and never over a name someone typed.
 	 */
 	#wants(): { title: boolean; compact: boolean } {
 		const titleConfig = this.#chatDefaults.current.title;
@@ -699,12 +588,7 @@ export class Conversation implements RunSurface {
 
 	// --- following, and picking back up ----------------------------------------
 
-	/**
-	 * Watch a server-side run and apply what it sends.
-	 *
-	 * The same reducer the local path uses, from the same events, which is what
-	 * makes reattaching after a reload identical to having watched it all along.
-	 */
+	/** The same reducer the local path uses, from the same events, which is what makes reattaching identical to having watched it. */
 	async #follow(runId: string, from: number, replayThrough = 0): Promise<void> {
 		this.activeRun = runId;
 		this.editor.isCompletionInProgress = true;
@@ -716,19 +600,16 @@ export class Conversation implements RunSurface {
 			(event, replay) => {
 				if (event.type === 'done' || event.type === 'error') ended = true;
 				applyRunEvent(event, this, { replay });
-				// The run has already stored what these three changed, and the lists
-				// around the conversation are drawn from a summary this tab holds in
-				// memory. Without this the sidebar keeps yesterday's snippet and the
-				// name written mid-turn appears only after a reload.
+				// The run stored what these three changed, but the lists around the
+				// conversation are drawn from a summary held in memory here.
 				if (event.type === 'message' || event.type === 'title' || event.type === 'compaction') {
 					sessionsStore.reflect(this.session);
 				}
 			},
 			{
 				replayThrough,
-				// The backlog lands in one flush, so there is exactly one place the
-				// conversation should be: at the end of it. Following each fragment on
-				// the way would be answering a question nobody asked, a hundred times.
+				// The backlog lands in one flush, so there is one place to be: at the end of
+				// it. Following each fragment would answer that question a hundred times.
 				onCaughtUp: () => void this.#view.scrollToBottom(true)
 			}
 		);
@@ -739,28 +620,19 @@ export class Conversation implements RunSurface {
 		} finally {
 			this.#stopFollowing = null;
 			this.activeRun = null;
-			// Stopped watching without the turn ending, which is what leaving the
-			// conversation does: the composer is given back rather than left looking
-			// like something is still arriving here.
+			// Stopped watching without the turn ending, which is what leaving does: give
+			// the composer back rather than look like something is still arriving.
 			if (!ended) this.editor.isCompletionInProgress = false;
 		}
 	}
 
 	/**
-	 * Pick up a turn that was already running when this page loaded.
+	 * Pick up a turn that was already running when this page loaded. The server is
+	 * asked, since it is the one running the turn.
 	 *
-	 * Simpler than it was in the part that mattered: the note this browser used to
-	 * keep in local storage, saying there might be an answer waiting somewhere, is
-	 * gone. The run writes what it produces, so nothing is waiting anywhere. The
-	 * server is asked instead, since it is the one running the turn and the only
-	 * one that can say whether it still is.
-	 *
-	 * A run that has already ended is still followed, though, and that is not a
-	 * leftover. The conversation was read from storage a moment before this, and a
-	 * turn that landed inside that moment wrote itself into a row this page had
-	 * already read: a reload two seconds before the last word arrived showed the
-	 * question with no answer under it until the next visit. Replaying the log
-	 * closes exactly that gap, and costs nothing now that replaying it stores
+	 * A run that has already ended is still followed: the conversation was read from
+	 * storage a moment earlier, so a turn that landed inside that moment wrote into
+	 * a row this page had already read. Replaying the log closes that gap and stores
 	 * nothing.
 	 */
 	async reattach(): Promise<void> {
@@ -772,36 +644,23 @@ export class Conversation implements RunSurface {
 		if (sessionId !== this.session.id) return;
 		if (!run) return;
 
-		// From zero, so a half-written answer is rebuilt as it stands rather than
-		// picked up mid-sentence. What had already landed before this page opened is
-		// applied as history rather than performed: on a local model at ten tokens a
-		// second, a reply worth leaving the room for is not worth watching twice.
-		// Anything the conversation already holds is recognised and skipped.
+		// From zero, so a half-written answer is rebuilt as it stands. What landed
+		// before this page opened is applied as history rather than performed, and
+		// anything the conversation already holds is recognised and skipped.
 		await this.#follow(run.id, 0, run.lastEventId);
 	}
 
-	/**
-	 * Stop watching, without stopping the turn.
-	 *
-	 * Leaving a server-side turn is not abandoning it: it keeps going and is
-	 * waiting when the conversation is opened again.
-	 */
+	/** Leaving a server-side turn is not abandoning it: it keeps going and is waiting when the conversation is opened again. */
 	detach = (): void => {
 		this.#stopFollowing?.();
 		this.#stopFollowing = null;
 	};
 
-	/**
-	 * Stop, and keep what was written.
-	 *
-	 * Only the abort: what to do with a half-written answer is the run's ending,
-	 * and it is written down once in the reducer. Doing it here as well is how the
-	 * same partial message used to be appended twice.
-	 */
+	/** Only the abort. What to do with a half-written answer is the run's ending, written down once in the reducer. */
 	stop = (): void => {
 		this.editor.abortController?.abort();
-		// A server-side turn does not hear an AbortController in this tab, so the
-		// stop has to travel. What it wrote so far still comes back as an ending.
+		// A server-side turn does not hear an AbortController in this tab, so the stop
+		// has to travel. What it wrote still comes back as an ending.
 		if (this.activeRun) void cancelRun(this.activeRun);
 	};
 
@@ -826,11 +685,8 @@ export class Conversation implements RunSurface {
 	#handleError(error: Error): void {
 		const strings = get(LL);
 		/**
-		 * A refusal is not a failure, and a toast is the wrong shape for it.
-		 *
-		 * A toast says "that did not work, try again", which is right when a server
-		 * did not answer and wrong when somebody set a rule: trying again does the
-		 * same thing. So a refusal stops the page and says who to ask.
+		 * A refusal is not a failure. A toast says "try again", which is wrong when
+		 * somebody set a rule: trying again does the same thing.
 		 */
 		const refused = refusalIn(error.message);
 		if (refused) {
@@ -868,12 +724,8 @@ export class Conversation implements RunSurface {
 	// --- notes: what happened to the conversation -------------------------------
 
 	/**
-	 * Draw a line and start again.
-	 *
-	 * Nothing is deleted. A marker is appended, everything before it folds under
-	 * it, and the model is handed the conversation from that point on. Removing
-	 * the marker gives all of it back, which is what makes this safe to reach for:
-	 * it costs the model its memory of the exchange, and costs you nothing.
+	 * Draw a line and start again. Nothing is deleted: a marker is appended and
+	 * everything before it folds under it. Removing the marker gives it all back.
 	 */
 	clearContext(): void {
 		const cleared = messagesInContext(this.session.messages).length;
@@ -896,12 +748,9 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * Write down what the context holds, for the reader alone.
-	 *
-	 * A note like the others, so it folds into the conversation where it was
-	 * asked for and survives a reload. The model never sees it: `messagesInContext`
-	 * drops every note that is not the boundary, and its content is empty, which
-	 * is also why it never turns up in a search.
+	 * A note like the others, so it folds into the conversation and survives a
+	 * reload. The model never sees it: `messagesInContext` drops every note that is
+	 * not the boundary, and its content is empty, so it never turns up in a search.
 	 */
 	reportContext(): void {
 		this.session.messages = [
@@ -918,12 +767,8 @@ export class Conversation implements RunSurface {
 	}
 
 	/**
-	 * Open the playbook list here.
-	 *
-	 * One panel per conversation, moved to wherever it was last asked for rather
-	 * than stacked. Two of them would show the same live state in two places, and
-	 * only the lower one would be worth looking at. Nothing is lost by moving it:
-	 * unlike every other note this one records nothing, it is a set of switches.
+	 * One panel per conversation, moved rather than stacked: two would show the
+	 * same live state twice. Nothing is lost, since it records nothing.
 	 */
 	openPlaybooks(): void {
 		this.session.messages = [
@@ -951,15 +796,10 @@ export class Conversation implements RunSurface {
 	/**
 	 * Fold a recorded exchange into this conversation, so the model has it too.
 	 *
-	 * Two messages, in the roles they were said in, with a framing on the question
-	 * saying where it came from: without it the model reads a question it has no
-	 * memory of being asked and starts explaining itself. The framing is an
-	 * overridable prompt like every other, so it can be reworded without touching
-	 * the code.
-	 *
-	 * The note keeps the exchange whatever happens here, so this adds and never
-	 * moves: deleting the two messages afterwards leaves the record intact and the
-	 * offer available again.
+	 * Two messages in the roles they were said in, with a framing on the question
+	 * saying where it came from, or the model reads a question it has no memory of
+	 * being asked. Adds and never moves: the note keeps the exchange whatever
+	 * happens here.
 	 */
 	addMention = (marker: Message): void => {
 		const note = marker.note;
@@ -984,22 +824,16 @@ export class Conversation implements RunSurface {
 	// --- compaction -------------------------------------------------------------
 
 	/**
-	 * Compact now, and say what happened.
-	 *
-	 * The waiting and the result are both drawn in the conversation, at the spot
-	 * the boundary will land, so there is no success toast: the divider appearing
-	 * is the confirmation. Failure still goes to a toast, because the user asked
-	 * for the context to be shortened and if it was not, the next message goes out
-	 * full-length: silently letting them believe otherwise is how a conversation
-	 * hits a provider's wall.
+	 * Compact now, drawn where the boundary will land, so there is no success
+	 * toast: the divider appearing is the confirmation. Failure does toast, or the
+	 * next message goes out full-length into a provider's wall.
 	 */
 	async compact(automatic = false, instruction = ''): Promise<boolean> {
 		if (this.isCompacting) return false;
 		this.isCompacting = true;
 		this.#compactAbort = new AbortController();
 		const signal = this.#compactAbort.signal;
-		// The pill is the whole feedback now, so bring it into view before the wait
-		// starts rather than after it ends.
+		// The pill is the whole feedback, so bring it into view before the wait.
 		await this.#view.scrollToBottom(true, true);
 
 		try {
@@ -1007,14 +841,13 @@ export class Conversation implements RunSurface {
 			this.session.messages = [...this.session.messages, marker];
 			this.session.updatedAt = new Date().toISOString();
 			this.save();
-			// Cleared in the same flush as the marker landing, so the pending pill and
-			// the real one hand over to each other instead of one following the other.
+			// Cleared in the same flush as the marker landing, so the pending pill and the
+			// real one hand over to each other.
 			this.isCompacting = false;
 			await this.#view.scrollToBottom(true);
 			return true;
 		} catch (error) {
-			// An abandoned summary is not a failure: the user said stop, and the
-			// conversation is exactly as they left it.
+			// An abandoned summary is not a failure: the user said stop.
 			if (!signal.aborted) {
 				const message = error instanceof Error ? error.message : String(error);
 				toast.error(get(LL).compactFailed(), { description: message });
@@ -1044,8 +877,8 @@ export class Conversation implements RunSurface {
 			return;
 		}
 		if (name === 'clear') {
-			// The menu hides it when there is nothing to fold, but the name can still
-			// be typed in full, so the refusal lives here rather than only in the menu.
+			// The menu hides it when there is nothing to fold, but the name can still be
+			// typed in full.
 			if (!this.canClear) {
 				toast.info(strings.nothingToClear());
 				return;
@@ -1054,9 +887,7 @@ export class Conversation implements RunSurface {
 			return;
 		}
 		if (name !== 'compact') return;
-		// The menu hides `/compact` when there is nothing to compact, but the name
-		// can still be typed in full, so the refusal lives here rather than only in
-		// what the autocomplete offers.
+		// Same: the menu hides `/compact`, but the name can still be typed in full.
 		if (!this.canCompact) {
 			toast.info(strings.nothingToCompact());
 			return;

@@ -19,44 +19,27 @@ import { defuseMentions, split } from './text';
  * The bot itself: watch, answer, post.
  *
  * A loop rather than a socket. Chatto's realtime channel is binary protobuf and
- * a moving target in the 0.x line; the notification list it feeds from is
- * ordinary JSON over the same API as everything else here, and a few seconds of
- * latency is not what makes an assistant useful or useless. The day that stops
- * being true, what changes is this file and nothing above it.
+ * a moving target in the 0.x line, the notification list is ordinary JSON, and
+ * a few seconds of latency is not what makes an assistant useful.
  */
 
 /** How many occurrences to ask for each time. Comfortably more than a quiet room produces. */
 const PAGE = 25;
 
-/**
- * How old an activation can be and still be answered.
- *
- * A bot that has been off for a day and comes back should not open with twenty
- * late replies to conversations that have moved on. Belt to the braces of the
- * claim table, which already stops it answering the same thing twice.
- */
+/** A bot that has been off for a day should not open with twenty late replies. Belt to the braces of the claim table. */
 const MAX_AGE_MS = 10 * 60 * 1000;
 
-/**
- * How often to say the bot is still writing.
- *
- * Chatto's typing indicator is live-only and expires on its own, so this is a
- * refresh rate rather than a duration. Comfortably under any plausible expiry,
- * and cheap: one small call while a model is spending seconds on an answer.
- */
+/** Chatto's typing indicator is live-only and expires on its own, so this is a refresh rate rather than a duration. */
 const TYPING_REFRESH_MS = 3_000;
 
 /** What the bot puts on a message to say it has been picked up. Chatto wants a shortcode. */
 const ACK_EMOJI = 'eyes';
 
 /**
- * When each account's bots last answered, for the hourly ceiling.
- *
- * Per account rather than per bot. It used to be per runtime, which a second
- * bot walked straight around, and the thing being protected is the account's
- * bill and the provider at the other end: neither of them cares how many bots
- * the traffic was split across. The figure itself is the instance's, read each
- * time so that lowering it takes effect without restarting anything.
+ * When each account's bots last answered, for the hourly ceiling. Per account
+ * rather than per bot, which a second bot walked straight around: what is
+ * protected is the account's bill. The figure is read each time, so lowering it
+ * takes effect without a restart.
  */
 const repliesByOwner = new Map<string, number[]>();
 
@@ -104,9 +87,8 @@ class ChattoRuntime implements IntegrationRuntime {
 			await this.#poll();
 		} catch (error) {
 			if (this.#stopped) return;
-			// A server that is down, a key that was rotated, a network that blinked:
-			// all the same answer, which is to slow down rather than to give up. The
-			// integration stays configured, and it picks up when the far end does.
+			// A server down, a rotated key, a network blink: all the same answer, which is
+			// to slow down rather than give up.
 			delay = Math.min(120, Math.max(delay * 4, 15));
 			console.error(`[integration ${this.#record.id}] poll failed:`, describe(error));
 		}
@@ -123,9 +105,8 @@ class ChattoRuntime implements IntegrationRuntime {
 		const { occurrences } = await this.#client.listNotificationOccurrences(PAGE, this.#signal);
 		const list = occurrences ?? [];
 
-		// The first pass answers nothing. What is already in the list happened
-		// before this bot was watching, and a bot that opens by replying to
-		// yesterday is a bot somebody turns off.
+		// The first pass answers nothing: what is already in the list happened before
+		// this bot was watching.
 		if (!this.#baselined) {
 			for (const occurrence of list) this.#claim(occurrence);
 			this.#baselined = true;
@@ -141,14 +122,7 @@ class ChattoRuntime implements IntegrationRuntime {
 		}
 	}
 
-	/**
-	 * Write down that this activation has been dealt with.
-	 *
-	 * Twice: once for the occurrence, once for the message it points at. Chatto
-	 * says plainly that one message can raise several causes, and answering a
-	 * mention and then the followed-thread notification for the same message is
-	 * the ordinary way that happens.
-	 */
+	/** Twice: once for the occurrence, once for the message it points at. One message can raise several causes, and a mention followed by the thread notification is the ordinary way. */
 	#claim(occurrence: ChattoOccurrence): boolean {
 		const reference = referenceOf(occurrence);
 		const first = claimSeen(this.#record.id, `occurrence:${occurrence.id}`);
@@ -157,12 +131,9 @@ class ChattoRuntime implements IntegrationRuntime {
 	}
 
 	/**
-	 * Whether this has already been dealt with, asked before anything else.
-	 *
-	 * The list is a current state rather than a queue, so everything in it comes
-	 * back on every poll until it expires. Every other test below explains itself
-	 * in the log, which is right the first time and is noise from then on: this is
-	 * what makes each of them happen once.
+	 * Asked before anything else. The list is a current state rather than a queue,
+	 * so everything comes back on every poll until it expires, and every test below
+	 * logs itself, which is right once and noise from then on.
 	 */
 	#handled(occurrence: ChattoOccurrence): boolean {
 		if (hasSeen(this.#record.id, `occurrence:${occurrence.id}`)) return true;
@@ -173,12 +144,12 @@ class ChattoRuntime implements IntegrationRuntime {
 	async #consider(occurrence: ChattoOccurrence): Promise<void> {
 		if (this.#handled(occurrence)) return;
 
-		// Claimed even when it turns out there is nothing to do with it: an
-		// unclaimed notification is one the next poll will consider again.
+		// Claimed even when there turns out to be nothing to do: an unclaimed
+		// notification is one the next poll considers again.
 		const cause = activatingCause(occurrence);
 		if (!cause) {
-			// Not one of the four causes a bot acts on. Ordinary, and only worth a
-			// line while somebody is working out why nothing happens.
+			// Not one of the four causes a bot acts on. Only worth a line while somebody
+			// is working out why nothing happens.
 			this.#log(
 				`ignoring ${Object.keys(occurrence.signal ?? {}).join(',') || 'a signal-less'} notification`
 			);
@@ -192,8 +163,8 @@ class ChattoRuntime implements IntegrationRuntime {
 			return;
 		}
 
-		// Never itself, and never another bot. The second is what keeps two
-		// assistants in one room from talking to each other until somebody notices.
+		// Never itself, and never another bot: the second keeps two assistants in one
+		// room from talking to each other.
 		if (occurrence.actor?.id === this.#selfId || occurrence.actor?.isBot) {
 			this.#log(`${cause} from a bot, skipped`);
 			this.#claim(occurrence);
@@ -207,20 +178,17 @@ class ChattoRuntime implements IntegrationRuntime {
 			return;
 		}
 
-		// Claimed before the work, not after: a turn takes seconds and the next
-		// poll comes sooner than that. Claiming afterwards is how a slow answer
-		// gets written twice.
+		// Claimed before the work, not after: a turn takes seconds and the next poll
+		// comes sooner than that.
 		if (!this.#claim(occurrence)) return;
 		this.#log(`answering ${cause} in room ${reference.roomId}`);
 
-		// Seen, and said so before the thinking starts. The typing indicator says
-		// "in progress" and vanishes with it; this stays, so a turn that fails
-		// still leaves a trace that the bot was listening.
+		// Said before the thinking starts. The typing indicator vanishes with the turn;
+		// this stays, so a turn that fails still shows the bot was listening.
 		void this.#client
 			.addReaction(reference.roomId, reference.eventId, ACK_EMOJI, this.#signal)
 			.catch(() => {
-				// The bot may not have message.react, which is a permission and not a
-				// fault. The answer is what matters.
+				// The bot may not have message.react, which is a permission and not a fault.
 			});
 
 		if (!this.#allowance()) {
@@ -253,14 +221,7 @@ class ChattoRuntime implements IntegrationRuntime {
 		return true;
 	}
 
-	/**
-	 * Show that the bot is writing, for as long as it is.
-	 *
-	 * Without it a mention lands in silence for however long the model takes, and
-	 * the room has no way to tell a slow answer from a bot that is not listening.
-	 * Returns the way to stop it, so the caller cannot forget which timer it
-	 * started.
-	 */
+	/** Without it a mention lands in silence for however long the model takes. Returns the way to stop it, so the caller cannot forget which timer it started. */
 	#typing(reference: ChattoMessageReference): () => void {
 		const thread = threadFor(this.#record.config.placement, reference);
 		const ping = () =>
@@ -311,12 +272,12 @@ class ChattoRuntime implements IntegrationRuntime {
 			this.#log(`answered with ${text.length} characters`);
 		} catch (error) {
 			if (this.#stopped) return;
-			// Said in the log, not in the room. A bot that posts its own stack traces
-			// into a family channel is worse than a bot that stays quiet.
+			// Said in the log, not in the room: a bot that posts its own stack traces into
+			// a family channel is worse than one that stays quiet.
 			console.error(`[integration ${this.#record.id}] could not answer:`, describe(error));
 		} finally {
-			// Before the message lands rather than after, so the room never shows a
-			// bot still typing underneath an answer it has already read.
+			// Before the message lands, so the room never shows a bot still typing under an
+			// answer it has already read.
 			stopTyping();
 		}
 	}
@@ -324,16 +285,16 @@ class ChattoRuntime implements IntegrationRuntime {
 	async #post(reference: ChattoMessageReference, text: string): Promise<void> {
 		const threadRootEventId = threadFor(this.#record.config.placement, reference);
 
-		// Defused here rather than at the model: what is unsafe is posting it, and
-		// this is the only place that posts.
+		// Defused here rather than at the model: what is unsafe is posting it, and this
+		// is the only place that posts.
 		for (const [index, chunk] of split(defuseMentions(text)).entries()) {
 			await this.#client.createMessage(
 				{
 					roomId: reference.roomId,
 					body: chunk,
 					threadRootEventId,
-					// Only the first part carries the attribution: repeating it on every
-					// chunk would draw the same reply arrow three times.
+					// Only the first part carries the attribution, or the same reply arrow is drawn
+					// three times.
 					inReplyTo: index === 0 && !threadRootEventId ? reference.eventId : undefined
 				},
 				this.#signal
@@ -343,14 +304,10 @@ class ChattoRuntime implements IntegrationRuntime {
 }
 
 /**
- * Which thread the bot speaks into, if any.
- *
- * `auto` answers where it was asked. `thread` takes a question asked at room
- * level and roots a thread on it, which is what keeps a busy channel readable.
- * `room` does the opposite and always answers in the open.
- *
- * Shared by the answer and by the typing indicator, so the room cannot show the
- * bot writing in one place and then hear from it in another.
+ * `auto` answers where it was asked. `thread` roots a thread on a room-level
+ * question, which keeps a busy channel readable. `room` always answers in the
+ * open. Shared by the answer and the typing indicator, so the room cannot show
+ * the bot writing in one place and hear from it in another.
  */
 function threadFor(
 	placement: IntegrationRecord['config']['placement'],
@@ -361,14 +318,7 @@ function threadFor(
 	return undefined;
 }
 
-/**
- * What the bot has been told to be.
- *
- * The default is what a conversation started by this account would get, which
- * is also what somebody who configured nothing is entitled to expect. The other
- * two replace it: a persona is a whole character, and instructions written here
- * are written knowing they are the whole of it.
- */
+/** The default is what a conversation started by this account would get. The other two replace it: a persona is a whole character, and instructions written here are written knowing they are the whole of it. */
 function instructionsFor(record: IntegrationRecord): string {
 	const { instructionsMode, personaId, instructions } = record.config;
 
@@ -376,9 +326,8 @@ function instructionsFor(record: IntegrationRecord): string {
 
 	if (instructionsMode === 'persona' && personaId) {
 		const persona = getPersonas(record.ownerUserId).find((p: Persona) => p.id === personaId);
-		// A persona that has since been deleted falls back to the account's usual
-		// prompt rather than to nothing: a bot that suddenly has no character at
-		// all is a stranger, and silence would not explain why.
+		// A persona since deleted falls back to the account's usual prompt rather than
+		// to nothing: a bot that suddenly has no character is a stranger.
 		if (persona?.systemPrompt?.trim()) return persona.systemPrompt.trim();
 	}
 
@@ -407,8 +356,8 @@ export const chattoProvider: IntegrationProvider = {
 			const profile = viewer.user?.profile;
 			if (!profile?.id) return { ok: false, error: 'The server did not identify this key' };
 			if (!profile.isBot) {
-				// Worth refusing rather than warning: a human key would run the
-				// integration as that person, answering their own mentions as them.
+				// Refused rather than warned: a human key would run the integration as that
+				// person, answering their own mentions as them.
 				return { ok: false, error: 'This key belongs to a person, not to a bot account' };
 			}
 			return { ok: true, detail: profile.displayName || profile.login || profile.id };

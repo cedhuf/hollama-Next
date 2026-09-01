@@ -21,16 +21,12 @@ import type { VoiceGrant } from './tickets';
 /**
  * One spoken exchange, from the samples to the answer coming back as sound.
  *
- * The state machine behind a voice socket, and deliberately the same machine the
- * typed path uses for the part that matters: the turn itself is `runTurn` with
- * `serverDeps` and `sessionWriter`, exactly as `/api/runs` runs it. So a spoken
- * conversation is an ordinary conversation in the list, with the same model
- * policy, the same credit limit, the same accounting and the same transcript.
+ * The turn itself is `runTurn` with `serverDeps` and `sessionWriter`, exactly as
+ * `/api/runs` runs it, so a spoken conversation is an ordinary conversation with
+ * the same model policy, credit limit, accounting and transcript.
  *
- * What is genuinely new here is only the two ends: turning a run of samples into
- * a question, and turning a written answer back into sound as it is written
- * rather than once it is finished. The old screen waited for the whole answer
- * before synthesising a word of it, which is where most of its latency was.
+ * What is new here is the two ends: turning samples into a question, and turning
+ * the answer back into sound as it is written rather than once it is finished.
  */
 
 /** Nothing shorter than this is a question. A knock on the table is not speech. */
@@ -55,13 +51,9 @@ export class VoiceExchange {
 	#frames: Buffer[] = [];
 
 	/**
-	 * Which turn is current, bumped by anything that ends one early.
-	 *
-	 * The whole of the interruption machinery, and it has to be a number rather
-	 * than a flag: a turn is a chain of awaits, and every one of them has to be
-	 * able to ask "am I still the turn anybody wants" when it resumes. A boolean
-	 * would answer that question wrong the moment a new turn started before the
-	 * old one had finished unwinding.
+	 * Which turn is current, bumped by anything that ends one early. A number
+	 * rather than a flag: a turn is a chain of awaits, and each has to ask whether
+	 * it is still the turn anybody wants when it resumes.
 	 */
 	#turn = 0;
 
@@ -78,26 +70,15 @@ export class VoiceExchange {
 		return this.#sessionId;
 	}
 
-	/**
-	 * Whether what is being spoken is the greeting rather than an answer.
-	 *
-	 * It changes what an interruption means. Talking over an answer should cut the
-	 * stored answer back to what was heard; talking over a greeting must not touch
-	 * it, because that text is the persona's, written once and reread at the top of
-	 * every conversation. Truncating it would edit the character.
-	 */
+	/** It changes what an interruption means: talking over an answer cuts the stored answer back, talking over a greeting must not, since that text is the persona's. */
 	#greeting = false;
 
 	/**
-	 * The persona's opening line, read out on arrival.
+	 * The persona's opening line, read out on arrival. Only when the conversation is
+	 * that line and nothing else: anything with a history is somebody coming back.
 	 *
-	 * Only when the conversation is that line and nothing else, which is exactly a
-	 * persona's conversation that has never been used. Anything with a history is
-	 * somebody coming back, and rereading the last answer they already heard is not
-	 * a greeting, it is a machine that has lost its place.
-	 *
-	 * Spoken without being announced: the text is already stored, so the screen has
-	 * it from the conversation it read on the way in. What is missing is the sound.
+	 * Spoken without being announced, since the text is already stored and the
+	 * screen read it on the way in. What is missing is the sound.
 	 */
 	async greet(): Promise<void> {
 		if (!this.#sessionId) return;
@@ -127,14 +108,12 @@ export class VoiceExchange {
 
 	/** Samples from the microphone, while somebody is speaking. */
 	push(frame: Buffer): void {
-		// Only while listening. Frames that arrive during an answer are the tail of
-		// a detector that has not caught up, and keeping them would put the end of
-		// one question at the front of the next.
+		// Only while listening. Frames arriving during an answer are a detector that
+		// has not caught up, and would put the end of one question before the next.
 		if (this.#state !== 'idle' && this.#state !== 'listening') return;
 
-		// Through `#at`, not by assignment. Setting the field directly is what kept
-		// the screen showing "idle" for the whole of a question: the state changed
-		// here and nobody was told.
+		// Through `#at`, not by assignment: setting the field directly left the screen
+		// showing "idle" for the whole of a question.
 		this.#at('listening');
 		this.#frames.push(frame);
 
@@ -150,9 +129,8 @@ export class VoiceExchange {
 		const frames = this.#frames;
 		this.#frames = [];
 
-		// Too short to be a question. Silently back to idle rather than an error: a
-		// press that landed on nothing should cost nothing, least of all an
-		// explanation.
+		// Too short to be a question. Silently back to idle: a press that landed on
+		// nothing should cost nothing, least of all an explanation.
 		if (durationMs(frames, INPUT_SAMPLE_RATE) < SHORTEST_UTTERANCE_MS) {
 			this.#at('idle');
 			return;
@@ -170,21 +148,16 @@ export class VoiceExchange {
 	}
 
 	/**
-	 * Somebody spoke over the answer.
-	 *
-	 * `heard` is the share of the answer that actually reached the room, and it is
-	 * the reason this is not simply "stop": the conversation should remember what
-	 * was heard, not what was generated. Storing the whole of an answer that was
-	 * cut off after four words leaves a transcript that disagrees with everybody's
-	 * memory of the exchange.
+	 * Somebody spoke over the answer. `heard` is the share that actually reached the
+	 * room, which is why this is not simply "stop": storing the whole of an answer
+	 * cut off after four words leaves a transcript nobody recognises.
 	 */
 	interrupt(heard: number): void {
 		if (this.#state !== 'speaking') return;
 		const greeting = this.#greeting;
 		this.#stop();
-		// Read before stopping, and honoured after: a greeting is stored text that
-		// belongs to the persona rather than a record of this exchange, so cutting it
-		// short here would rewrite the character for every conversation after.
+		// Read before stopping, honoured after: a greeting is the persona's stored
+		// text, so cutting it here would rewrite the character for every conversation.
 		if (!greeting) this.#truncate(heard);
 		this.#at('idle');
 	}
@@ -202,14 +175,7 @@ export class VoiceExchange {
 		this.#frames = [];
 	}
 
-	/**
-	 * End the turn in flight, wherever it had got to.
-	 *
-	 * Both halves, and the second is the one that costs money: bumping the counter
-	 * makes every pending await give up, but the model keeps writing unless it is
-	 * told. Cutting the sound and letting a provider finish an answer nobody will
-	 * hear is paying for silence.
-	 */
+	/** Both halves: bumping the counter makes every pending await give up, but the model keeps writing unless it is told, and that is paying for silence. */
 	#stop(): void {
 		this.#turn++;
 		this.#greeting = false;
@@ -227,8 +193,7 @@ export class VoiceExchange {
 		const heard = await this.#listen(frames);
 		if (this.#turn !== turn) return;
 
-		// A recording of a quiet room. Nothing was asked, so nothing is answered,
-		// and the loop comes round without a turn in the transcript.
+		// A recording of a quiet room. Nothing asked, nothing answered.
 		if (!heard) return;
 		this.#io.say({ type: 'heard', text: heard });
 
@@ -250,14 +215,7 @@ export class VoiceExchange {
 		return text.trim();
 	}
 
-	/**
-	 * The turn, run exactly as a typed one is.
-	 *
-	 * `runTurn` with `serverDeps` and `sessionWriter`: the same orchestrator, the
-	 * same admin policy, the same credit refusal, the same accounting, and the
-	 * answer written into the stored conversation as it arrives rather than after.
-	 * Nothing about a spoken turn is a different kind of turn.
-	 */
+	/** The same orchestrator, admin policy, credit refusal and accounting as a typed turn, written into the stored conversation as it arrives. */
 	async #think(turn: number, sessionId: string, question: string): Promise<void> {
 		const principal: RunPrincipal = {
 			userId: this.#grant.userId,
@@ -271,9 +229,8 @@ export class VoiceExchange {
 		};
 
 		const input = this.#input(sessionId, asked);
-		// Resolved before anything starts, so a refusal is an error the person hears
-		// about rather than a silence they have to interpret. It is also where the
-		// credit limit and the shared-model rule are applied to the answering model.
+		// Resolved before anything starts, so a refusal is heard rather than a silence
+		// to interpret. Also where the credit limit and the shared-model rule apply.
 		const deps = serverDeps(input, principal);
 
 		const write = sessionWriter(principal.userId, sessionId);
@@ -283,8 +240,7 @@ export class VoiceExchange {
 		const speech = new SpeechQueue(this.#grant, this.#io, () => this.#turn === turn);
 
 		// Its own controller, so an interruption stops the model as well as the
-		// speaker. Cutting the sound while a provider keeps writing is paying for an
-		// answer nobody will ever hear.
+		// speaker: otherwise the provider keeps writing an answer nobody will hear.
 		const stop = new AbortController();
 		this.#abort = stop;
 
@@ -298,9 +254,8 @@ export class VoiceExchange {
 					recordRunUsage(principal.userId, event.serverId, event.model, event.used);
 				}
 
-				// The answer, cut where a reader would pause and synthesised piece by
-				// piece. This is the whole latency story: the first sentence is spoken
-				// while the model is still writing the second.
+				// Cut where a reader would pause and synthesised piece by piece: the first
+				// sentence is spoken while the model is still writing the second.
 				if (event.type === 'content') {
 					this.#at('speaking');
 					speech.feed(event.text);
@@ -319,11 +274,9 @@ export class VoiceExchange {
 	/**
 	 * What the turn is, assembled here because there is no browser to assemble it.
 	 *
-	 * Deliberately the modest version: the conversation as stored, the persona's
-	 * prompt through the instance's own resolver, and the flags off. The typed
-	 * path assembles more than this (playbooks, knowledge, the tool toggles), and
-	 * it assembles it in the page. Bringing that here means lifting it out of the
-	 * browser first, which is its own piece of work and not this one.
+	 * The modest version: the conversation as stored, the persona's prompt, flags
+	 * off. The typed path assembles playbooks, knowledge and the tool toggles, and
+	 * does it in the page; lifting that out is its own piece of work.
 	 */
 	#input(sessionId: string, asked: Message): RunInput {
 		const stored = getItem<Session>('sessions', this.#grant.userId, sessionId);
@@ -346,8 +299,7 @@ export class VoiceExchange {
 				sendCurrentDate: true,
 				nativeTools: 'auto',
 				webSearchAuto: false,
-				// A spoken turn has no way to ask. Every MCP call is put to the person
-				// before it is made, and a card nobody is looking at is not a question.
+				// A spoken turn has no way to ask, and every MCP call is put to the person.
 				mcp: false
 			},
 			capabilities: { search: false, fetch: false }
@@ -356,12 +308,7 @@ export class VoiceExchange {
 
 	// --- the conversation ----------------------------------------------------
 
-	/**
-	 * The conversation to write into, made on the first question if there was none.
-	 *
-	 * Not before, which is the same rule the old screen had: arriving at the voice
-	 * screen and leaving without saying anything should leave nothing behind.
-	 */
+	/** Not before: arriving at the voice screen and leaving without saying anything should leave nothing behind. */
 	#session(): string {
 		if (this.#sessionId) return this.#sessionId;
 
@@ -386,12 +333,9 @@ export class VoiceExchange {
 	}
 
 	/**
-	 * Cut the stored answer back to what was actually heard.
-	 *
-	 * Proportional, because what the browser can report is a share of the sound and
-	 * what we hold is text. Sound and characters do not line up exactly and nothing
-	 * available here would make them, but the alternative is storing an answer
-	 * whose ending nobody heard, which is worse than a sentence cut a word early.
+	 * Cut the stored answer back to what was heard. Proportional, because the
+	 * browser reports a share of the sound and we hold text. A sentence cut a word
+	 * early beats an answer whose ending nobody heard.
 	 */
 	#truncate(heard: number): void {
 		const share = Math.max(0, Math.min(1, heard));
@@ -432,13 +376,11 @@ export class VoiceExchange {
 }
 
 /**
- * The answer, spoken while it is still being written.
+ * The answer, spoken while it is still being written: fragments are held back
+ * until they end where a reader would pause.
  *
- * Fed fragments as the model produces them, it holds back whatever does not yet
- * end somewhere a reader would pause, and sends each complete piece to be
- * synthesised. One request at a time: two would not arrive sooner, because the
- * provider is the bottleneck rather than the round trip, and every piece
- * synthesised ahead of where the listener actually is, is a piece paid for and
+ * One request at a time. Two would not arrive sooner, since the provider is the
+ * bottleneck, and anything synthesised ahead of the listener is paid for and
  * thrown away the moment they interrupt.
  */
 class SpeechQueue {
@@ -447,15 +389,11 @@ class SpeechQueue {
 	#current: () => boolean;
 
 	/**
-	 * The answer so far, and how much of it has already been spoken.
+	 * The answer so far, and how much of it has been spoken.
 	 *
-	 * Two fields rather than a shrinking buffer, and the reason is a bug this
-	 * replaces. The text is cut into pieces from its *spoken* form, which has the
-	 * markdown taken out of it, so a piece taken from there cannot be found by
-	 * position in the raw text: the moment an answer contained a bold word or a
-	 * link, the offsets diverged and everything after the first piece was sliced in
-	 * the wrong place. Counting characters of the cleaned text is the only measure
-	 * that means the same thing at both ends.
+	 * Two fields rather than a shrinking buffer: pieces are cut from the *spoken*
+	 * form, with the markdown taken out, so a piece cannot be found by position in
+	 * the raw text. One bold word and every offset after it diverged.
 	 */
 	#raw = '';
 	#spoken = 0;
@@ -463,14 +401,7 @@ class SpeechQueue {
 	#work: Promise<void> = Promise.resolve();
 	#announced = false;
 
-	/**
-	 * Whether the text being spoken is also news.
-	 *
-	 * On for an answer, which the screen learns about only through these messages.
-	 * Off for a greeting, which is already stored and already on screen: sending it
-	 * again would put the persona's opening line up twice, once from the
-	 * conversation and once from the reading of it.
-	 */
+	/** On for an answer, which the screen learns about only through these messages. Off for a greeting, which is already stored and on screen. */
 	#echo: boolean;
 
 	constructor(grant: VoiceGrant, io: ExchangeIO, current: () => boolean, echo = true) {
@@ -486,13 +417,10 @@ class SpeechQueue {
 		const rest = this.#rest();
 		if (!rest) return;
 
-		// The first piece goes as soon as there is a sentence, and that is the whole
-		// of the latency story. `split` works to a budget and cuts at the last
-		// sentence end inside it, which is right for everything after: a longer piece
-		// is one request rather than three, and nobody hears the seam because it is
-		// made while the piece before it plays. But the first piece is the only one
-		// whose wait anybody experiences, and holding it back for two hundred
-		// characters of a model's output is a second of silence spent for nothing.
+		// The first piece goes as soon as there is a sentence. `split` works to a
+		// budget, which is right for everything after: a longer piece is one request
+		// rather than three, and the seam is made while the piece before it plays. The
+		// first piece is the only one whose wait anybody experiences.
 		if (!this.#queued) {
 			const early = firstSentence(rest);
 			if (early) return this.#take(early);
@@ -515,13 +443,7 @@ class SpeechQueue {
 		return spoken(this.#raw).slice(this.#spoken).trimStart();
 	}
 
-	/**
-	 * Send one piece, and remember that much of the answer as said.
-	 *
-	 * The count advances by what the piece cost in the cleaned text, plus whatever
-	 * whitespace `#rest` trimmed off its front, so the next call resumes exactly
-	 * where this one stopped.
-	 */
+	/** The count advances by what the piece cost in the cleaned text, plus the whitespace `#rest` trimmed, so the next call resumes exactly here. */
 	#take(piece: string): void {
 		const cleaned = spoken(this.#raw);
 		const at = cleaned.indexOf(piece, this.#spoken);
@@ -554,10 +476,8 @@ class SpeechQueue {
 		const { audio, type, generationId } = await speak(server, target.model, target.voice, piece);
 		if (!this.#current()) return;
 
-		// Counted like every other call, and after the fact for the same reason the
-		// route gives: a synthesis answers with sound, so what it cost has to be
-		// asked for separately, and waiting on that question would put a round trip
-		// between somebody and a sentence they are listening for.
+		// Counted after the fact: a synthesis answers with sound, so its cost has to be
+		// asked for separately, and waiting on that would delay the sentence.
 		void (async () => {
 			const reported = generationId ? await askWhatItCost(server, generationId) : undefined;
 			recordVoiceUsage(this.#grant.userId, server, target.model, {
@@ -577,15 +497,9 @@ class SpeechQueue {
 }
 
 /**
- * The first thing worth saying out loud, once there is one.
- *
- * Long enough not to spend a request on a greeting: "Yes." synthesised on its
- * own costs a round trip and buys a syllable. Short enough that an ordinary
- * opening sentence goes on its own rather than being glued to the one after it,
- * which is what a higher threshold does and it costs a second of silence.
- *
- * Two or three seconds of speech. A tuning knob, and the one to reach for first
- * if answers start too slowly or if the seams become audible.
+ * The first thing worth saying out loud. Long enough not to spend a request on
+ * "Yes."; short enough that an ordinary opening sentence is not glued to the one
+ * after it. Two or three seconds of speech, and the first knob to reach for.
  */
 const EARLIEST = 40;
 

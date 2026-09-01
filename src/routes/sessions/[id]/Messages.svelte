@@ -24,14 +24,7 @@
 		chooseAnswer: (message: Message, selected: string[][]) => void;
 		/** The pending quick-choice (shown docked above the composer, so it's skipped inline). */
 		pendingChoice?: Message | null;
-		/**
-		 * Allow or refuse the MCP call the turn is stopped on.
-		 *
-		 * Here rather than in either composer, and that is the point: the question
-		 * belongs at the foot of the thread, which on a phone and on a desktop is
-		 * the same place. One implementation, both surfaces, and neither can end up
-		 * with a version of a security prompt the other does not have.
-		 */
+		/** Here rather than in either composer: the question belongs at the foot of the thread, which on a phone and a desktop is the same place. One implementation, both surfaces. */
 		onApproveTool?: (allow: boolean) => void;
 		assistantLabel?: string;
 		/** A summary is being written right now: the boundary is drawn before it lands. */
@@ -61,25 +54,16 @@
 	/**
 	 * Where a clear was drawn, and what is behind it.
 	 *
-	 * Compaction leaves its history on screen, faded; clearing takes it off, into
-	 * the divider. The difference is deliberate: a summary is an aside about a
-	 * conversation you are still in, while a clear says you are done with that one,
-	 * and leaving it in the way would be ignoring what you just asked for.
+	 * Compaction leaves its history faded on screen; clearing takes it into the
+	 * divider, because a clear says you are done with that conversation.
 	 *
-	 * Only the last one folds. An earlier clear is inside a stretch that a later
-	 * one has already put away, so folding it again would nest two boxes saying the
-	 * same thing.
+	 * Only the last one folds: an earlier clear is inside a stretch a later one has
+	 * already put away.
 	 */
 	const boundary = $derived(conversationBoundary(session.messages));
 	const clearedAt = $derived(boundary.note?.kind === 'cleared' ? boundary.index : -1);
 
-	/**
-	 * Everything before the last marker is out of context: on screen, but not sent.
-	 *
-	 * While a compaction runs, every message qualifies in advance (the summary
-	 * covers all of them) so the fade lands with the pending pill rather than
-	 * after it, and the two read as one action.
-	 */
+	/** While a compaction runs, every message qualifies in advance, so the fade lands with the pending pill rather than after it. */
 	const foldedBefore = $derived(
 		isCompacting
 			? session.messages.length
@@ -90,28 +74,17 @@
 	const fade = $derived($settingsStore.fadeCompactedMessages);
 
 	/**
-	 * The list actually drawn, cut before it is walked.
-	 *
-	 * Iterating the whole conversation and rendering nothing for the folded part
-	 * still costs a block per message: two thousand messages behind a clear were
-	 * two thousand empty blocks created and kept. Slicing first means the folded
-	 * stretch is not iterated at all.
+	 * The list actually drawn, cut before it is walked: rendering nothing for the
+	 * folded part still costs a block per message, and two thousand messages behind
+	 * a clear were two thousand empty blocks.
 	 *
 	 * `offset` puts the original indices back, since anchors, retries and edits all
-	 * address a message by its position in the conversation and not by its position
-	 * in what happens to be on screen.
+	 * address a message by its position in the conversation.
 	 */
 	const offset = $derived(clearedAt === -1 ? 0 : clearedAt);
 	const visible = $derived(clearedAt === -1 ? session.messages : session.messages.slice(clearedAt));
 
-	/**
-	 * What the divider holds, computed from the boundary rather than from the
-	 * conversation.
-	 *
-	 * Keyed on the index alone: `session.messages` changes on every streamed token,
-	 * and this used to allocate a copy of the whole folded stretch each time. The
-	 * folded stretch, by definition, is the part that is not changing.
-	 */
+	/** Keyed on the index alone: `session.messages` changes on every streamed token, and this used to copy the whole folded stretch each time. */
 	let clearedMessages = $state<Message[]>([]);
 	$effect(() => {
 		const at = clearedAt;
@@ -119,12 +92,9 @@
 			at === -1 ? [] : session.messages.slice(0, at).filter((m) => m.note?.kind !== 'cleared');
 	});
 
-	// While the model is streaming an <ask> block the visible text is empty: show
-	// a choices skeleton instead of a bare "…".
-	//
-	// A <read> block is protocol too, and its whole round is thrown away once the
-	// pages come back: showing it wrote an answer on screen that then vanished.
-	// Cut from the opening tag, so a half-streamed block never lands either.
+	// While an <ask> block streams the visible text is empty: a choices skeleton
+	// rather than a bare ellipsis. A <read> block is protocol too and its round is
+	// thrown away once the pages come back, so it is cut from the opening tag.
 	const streamingContent = $derived(
 		stripAskBlock(
 			stripReadBlock(editor.completion || '')
@@ -155,25 +125,16 @@
 	}
 
 	/**
-	 * Remove one turn.
-	 *
-	 * By identity rather than by index: the list drawn is a slice of the
-	 * conversation when something has been cleared, and an index into what is on
-	 * screen is not an index into what is stored.
-	 *
-	 * Only the message asked for. Deleting a question does not delete its answer,
-	 * because sometimes the answer is the part worth keeping, and a rule that took
-	 * both would be one nobody could undo.
+	 * By identity rather than by index: the list drawn is a slice when something has
+	 * been cleared. Only the message asked for, since sometimes the answer is the
+	 * part worth keeping.
 	 */
 	function handleDeleteMessage(message: Message) {
 		session.messages = session.messages.filter((m) => m !== message);
 		saveSession(session);
 	}
 
-	/**
-	 * Undo a compaction: drop the marker and the model sees the whole history
-	 * again. Nothing else has to be restored, because nothing was removed.
-	 */
+	/** Drop the marker and the model sees the whole history again. Nothing else has to be restored, because nothing was removed. */
 	function handleUndoCompaction(message: Message) {
 		session.messages = session.messages.filter((m) => m !== message);
 		saveSession(session);
@@ -187,9 +148,8 @@
 {#each visible as message, index (session.id + (index + offset))}
 	{@const i = index + offset}
 	{#if message.note}
-		<!-- Not a turn: something that happened to the conversation. A kind this
-		     build does not know how to draw is drawn as nothing, which is the same
-		     answer the context builder gives it. -->
+		<!-- Not a turn: something that happened to the conversation. A kind this build
+		     cannot draw is drawn as nothing, the same answer the context builder gives. -->
 		{#if message.note.kind === 'cleared'}
 			{#if i === clearedAt}
 				<ClearedDivider
@@ -235,14 +195,14 @@
 {/each}
 
 {#if isCompacting}
-	<!-- The boundary, drawn where it will settle: the marker is appended, so the
-	     pill that waits is already standing in the pill that reports. -->
+	<!-- Drawn where it will settle, so the pill that waits stands in for the pill
+	     that reports. -->
 	<CompactionDivider pending onCancel={onCancelCompaction} />
 {/if}
 
 {#if editor.pendingApproval && onApproveTool}
-	<!-- The turn is stopped here, waiting. Below the half-written answer, because
-	     what the model said on its way to the call is what the decision is about. -->
+	<!-- The turn is stopped here. Below the half-written answer, because what the
+	     model said on its way to the call is what the decision is about. -->
 	{#key editor.pendingApproval.id}
 		<div class="mt-3">
 			<ToolApproval request={editor.pendingApproval} onDecide={onApproveTool} />
@@ -251,8 +211,8 @@
 {/if}
 
 {#if editor.isCompletionInProgress}
-	<!-- `currentRawCompletion` is the stripped text on purpose: a <read> round is
-	     not an answer, and treating it as one collapsed the timeline mid-turn. -->
+	<!-- The stripped text on purpose: a <read> round is not an answer, and treating
+	     it as one collapsed the timeline mid-turn. -->
 	<Article
 		message={{
 			role: 'assistant',

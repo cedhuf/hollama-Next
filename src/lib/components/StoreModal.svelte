@@ -24,15 +24,12 @@
 	/**
 	 * The store, as a page: search, views, layout, refresh, and a grid of cards.
 	 *
-	 * Everything here is true of any store, what a view is, what the one button
-	 * says, when "update all" appears, what an unreachable store looks like. What
-	 * differs between the personas and the playbooks is the card, and the card is
-	 * a snippet the caller supplies.
+	 * Everything here is true of any store. What differs between the personas and
+	 * the playbooks is the card, and the card is a snippet the caller supplies.
 	 *
-	 * The offers are built by the caller too, through the rules in `storeOffer`.
-	 * That split is deliberate: the machinery that decides what a card offers is
-	 * shared and testable, the drawing is per kind, and the shell in the middle
-	 * never asks what it is selling.
+	 * The offers are built by the caller too, through `storeOffer`: the machinery
+	 * that decides what a card offers is shared and testable, the drawing is per
+	 * kind, and the shell never asks what it is selling.
 	 */
 	interface Props {
 		open: boolean;
@@ -43,24 +40,14 @@
 		view: OfferView;
 		/** How many entries each view holds, so a chip can say so without switching to it. */
 		counts?: Partial<Record<OfferView, number>>;
-		/**
-		 * The catalogues on offer, in the order the shelf groups them.
-		 *
-		 * A filter rather than a view: what you are looking at (on offer, mine,
-		 * shared) is a different question from what kind of thing it is. With none
-		 * selected the shelf is grouped under a heading each, so nobody has to skim
-		 * playbooks looking for a persona.
-		 */
+		/** A filter rather than a view: what you are looking at is a different question from what kind of thing it is. With none selected the shelf groups under a heading each. */
 		families?: { value: StoreKind; label: string; tint: number; count: number }[];
 		family?: StoreKind | '';
 		layout: 'grid' | 'list';
 		/** Whether the listing is being fetched, and what went wrong if it did. */
 		status: 'idle' | 'loading' | 'ready' | 'error';
 		errorMessage?: string;
-		/**
-		 * The section's turn of the accent, so a card in the store is tinted like the
-		 * same card in the library. Degrees as a plain number: see `library-section`.
-		 */
+		/** The section's turn of the accent, so a card in the store is tinted like the same card in the library. Degrees as a plain number: see `library-section`. */
 		tint?: number;
 		searchPlaceholder: string;
 		emptyMine: string;
@@ -68,28 +55,13 @@
 		unreachable: string;
 		onRefresh: () => void;
 		onLayout: (layout: 'grid' | 'list') => void;
-		/**
-		 * How many copies could take a newer published version, and how to take them.
-		 *
-		 * Counted by the caller rather than from what is on screen: the answer is
-		 * about the whole library, and it must not change because a filter is typed
-		 * or a view is switched.
-		 */
+		/** Counted by the caller rather than from what is on screen: the answer is about the whole library, and must not change because a filter is typed. */
 		updatableCount?: number;
 		onUpdateAll?: () => Promise<void> | void;
-		/**
-		 * Whether sharing exists here at all, and whether this person may.
-		 *
-		 * Drawn for everyone and refused where it is not allowed, rather than
-		 * absent: a card that loses a control depending on who is looking is a
-		 * different card, and the two then have to be designed twice.
-		 */
+		/** Drawn for everyone and refused where it is not allowed, rather than absent: a card that loses a control depending on who is looking is a different card. */
 		sharing?: boolean;
 		shareAllowed?: boolean;
-		/**
-		 * One card. Handed the offer and the shell's own action row, so the button
-		 * is the same button in both stores and only its surroundings differ.
-		 */
+		/** One card, handed the offer and the shell's own action row, so the button is the same button in both stores. */
 		card: Snippet<[Offer, Snippet<[Offer]>]>;
 	}
 
@@ -212,8 +184,7 @@
 {/snippet}
 
 {#snippet actions(offer: Offer)}
-	<!-- One button, and what it says was decided when the card was built. Nothing
-	     here asks which view it is in. -->
+	<!-- One button, and what it says was decided when the card was built. -->
 	{#if offer.run}
 		<button
 			type="button"
@@ -323,8 +294,8 @@
 			</div>
 		</div>
 
-		<!-- Search and filters above the grid rather than beside it: a phone has no
-		     room for a sidebar of facets, and the same row works at every width. -->
+		<!-- Search and filters above the grid rather than beside it: a phone has no room
+		     for a sidebar of facets, and the same row works at every width. -->
 		<div class="border-shade-2 shrink-0 border-b px-4 py-3">
 			<div class="relative">
 				<Search class="text-muted pointer-events-none absolute top-2.5 left-3 h-4 w-4" />
@@ -338,9 +309,8 @@
 
 			<div class="mt-2 flex items-start gap-2">
 				<div class="flex min-w-0 flex-1 flex-wrap gap-1.5">
-					<!-- Views, not filters. They are not the same control wearing two hats:
-					     a view decides what the page is about, a filter narrows what is
-					     already there. -->
+					<!-- Views, not filters: a view decides what the page is about, a filter narrows
+					     what is already there. -->
 					{#each views as name (name)}
 						{@const count = counts?.[name] ?? 0}
 						{@render chip(
@@ -363,8 +333,8 @@
 					{/if}
 				</div>
 
-				<!-- At the end of the filters, because it is one: how much of each entry
-				     you want to see at a time. -->
+				<!-- At the end of the filters, because it is one: how much of each entry you
+				     want to see at a time. -->
 				<div class="border-shade-3 flex shrink-0 items-center rounded-lg border p-0.5">
 					{#each layouts as option (option.value)}
 						<button
@@ -390,8 +360,8 @@
 					<LoaderCircle class="h-5 w-5 animate-spin" />
 				</div>
 			{:else if status === 'error' && offers.length === 0}
-				<!-- Nothing ships inside the app, so an unreachable store is an empty
-				     library. Say which of the two it is, and offer the retry. -->
+				<!-- Nothing ships inside the app, so an unreachable store is an empty library.
+				     Say which of the two it is, and offer the retry. -->
 				<div class="flex h-full flex-col items-center justify-center gap-3 text-center">
 					<p class="text-muted text-sm">{unreachable}</p>
 					{#if errorMessage}
@@ -420,8 +390,8 @@
 			{:else if family || families.length === 0}
 				{@render shelf(filtered, families.find((f) => f.value === family)?.tint ?? tint)}
 			{:else}
-				<!-- Grouped, with a heading each. Interleaved, two catalogues of
-				     near-identical cards read as one long shelf nobody can scan. -->
+				<!-- Grouped, with a heading each: interleaved, two catalogues of near-identical
+				     cards read as one long shelf nobody can scan. -->
 				<div class="flex flex-col gap-6">
 					{#each families as group (group.value)}
 						{@const rows = filtered.filter((offer) => offer.family === group.value)}

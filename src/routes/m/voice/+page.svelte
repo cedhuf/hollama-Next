@@ -21,35 +21,23 @@
 	/**
 	 * Talking to it, rather than typing at it.
 	 *
-	 * The whole screen, and deliberately almost empty: one thing is being done
-	 * here, and every control that is not part of it is a control asking to be
-	 * pressed by mistake while somebody is speaking.
+	 * Deliberately almost empty: every control that is not part of the one thing
+	 * being done here is a control pressed by mistake while somebody is speaking.
 	 *
-	 * It is a conversation rather than a form, and it is one because the microphone
-	 * stays open. You speak, it hears you stop, the turn runs, the answer is read
-	 * back, and you can cut it off mid-sentence by simply talking. Nothing is
-	 * tapped between one question and the next.
+	 * A conversation rather than a form, because the microphone stays open: you
+	 * speak, it hears you stop, the answer is read back, and you cut it off by
+	 * talking. Nothing is tapped between one question and the next.
 	 *
-	 * Everything underneath is `VoiceSession`, which holds the socket, the two
-	 * worklets and the microphone. This file draws, and it is the only file here
-	 * that knows what the screen looks like. The turn itself runs on the server,
-	 * through the same orchestrator a typed message uses, so an exchange held here
-	 * is an ordinary conversation in the list afterwards.
+	 * `VoiceSession` holds the socket, the worklets and the microphone; this file
+	 * only draws. The turn runs on the server through the same orchestrator a typed
+	 * message uses.
 	 *
-	 * Two visuals, for two speakers. The orb is the voice answering; the bars at
-	 * the foot are yours. Which of them is moving says whose turn it is from across
-	 * a room, and no status text does that as quickly.
+	 * Two visuals for two speakers: the orb is the voice answering, the bars at the
+	 * foot are yours. Which one moves says whose turn it is from across a room.
 	 */
 	const voice = new VoiceSession();
 
-	/**
-	 * The conversation to hold, when the screen was opened to hold a particular one.
-	 *
-	 * A persona on the home screen is a person to talk to, so tapping one arrives
-	 * here with their conversation. Read once, on arrival: the screen holds one
-	 * conversation for as long as it is open, and swapping it underneath somebody
-	 * mid-sentence is not a feature.
-	 */
+	/** Read once, on arrival: the screen holds one conversation for as long as it is open. */
 	const given = page.url.searchParams.get('session');
 
 	/** Whose voice this is, when it belongs to somebody. */
@@ -61,8 +49,8 @@
 		if (!stored) return;
 
 		// What has already been said, so the screen opens on the conversation rather
-		// than on the visit. It is also how a persona's greeting appears: it is the
-		// first message of their conversation, written when it was created.
+		// than on the visit. Also how a persona's greeting appears: it is the first
+		// message of their conversation.
 		voice.seed(stored.messages ?? []);
 		if (stored.personaId) {
 			persona = ($personasStore ?? []).find((entry) => entry.id === stored.personaId);
@@ -72,13 +60,7 @@
 	/** The conversation being written into, which is the one to go and read. */
 	const conversation = $derived(voice.sessionId || given || '');
 
-	/**
-	 * What is happening, and it is the person's own state first.
-	 *
-	 * `voice.talking` is theirs and instant; everything else is the server's and
-	 * arrives a moment later. Reading them in that order is what makes the screen
-	 * answer a press immediately instead of a network round trip later.
-	 */
+	/** `voice.talking` is the person's and instant; everything else is the server's and arrives later. That order is what makes the screen answer a press immediately. */
 	const status = $derived(
 		voice.needsGesture
 			? $LL.voiceIdle()
@@ -96,15 +78,10 @@
 	);
 
 	/**
-	 * The colour of each state, derived from the accent rather than chosen.
-	 *
-	 * A hue turned right round for speaking, so listening and answering are not two
-	 * shades of one colour but two colours, which is the only difference legible
-	 * from across a room. Turned rather than picked, so it holds whatever accent
-	 * somebody set and stays inside the palette instead of beside it.
-	 *
-	 * Thinking keeps the hue and loses most of its chroma. Working is not a third
-	 * voice in the conversation.
+	 * A hue turned right round for speaking, so listening and answering are two
+	 * colours rather than two shades, which is the only difference legible from
+	 * across a room. Turned rather than picked, so it holds whatever accent somebody
+	 * set. Thinking keeps the hue and loses its chroma: working is not a third voice.
 	 */
 	const tint = $derived(
 		!voice.live
@@ -116,14 +93,7 @@
 					: 'oklch(from var(--color-accent) l calc(c * 0.3) h)'
 	);
 
-	/**
-	 * The four states the orb draws, which are not quite the five the screen has.
-	 *
-	 * Transcribing is a wait with nothing to hear, exactly like thinking, and
-	 * giving it a look of its own would draw a distinction nobody watching a shape
-	 * needs: what they want to know is whether it is their turn, and in both it is
-	 * not.
-	 */
+	/** Transcribing is a wait with nothing to hear, exactly like thinking. What somebody watching a shape wants to know is whether it is their turn. */
 	const shape = $derived<'idle' | 'listening' | 'thinking' | 'speaking'>(
 		!voice.live
 			? 'idle'
@@ -136,13 +106,7 @@
 						: 'thinking'
 	);
 
-	/**
-	 * Whether the exchange is working, as opposed to waiting on somebody.
-	 *
-	 * The only thing the status dot animates on. A screen holding the floor open is
-	 * still, and a screen doing something breathes: two states, which is as much as
-	 * a dot two pixels across can honestly carry.
-	 */
+	/** The only thing the status dot animates on: a screen holding the floor open is still, one doing something breathes. Two states is all a dot two pixels across can carry. */
 	const busy = $derived(
 		voice.live && (voice.talking || (voice.state !== 'idle' && voice.state !== 'listening'))
 	);
@@ -151,17 +115,14 @@
 	const sample = $derived(() => (voice.state === 'speaking' ? voice.voiceReading() : SILENCE));
 
 	/**
-	 * Whether this screen can do its job, asked before it offers to.
+	 * Whether this screen can do its job, asked before it offers to. The instance
+	 * settles it when a ticket is asked for, with the admin's sharing applied; this
+	 * is the same question asked locally, so the screen can say so up front.
 	 *
-	 * The instance settles it properly when a ticket is asked for, and it settles
-	 * it with the admin's sharing applied, which the browser cannot see. This is
-	 * the same question asked locally so the screen can say so up front rather than
-	 * opening a microphone that was never going to be heard.
+	 * Through the resolved defaults rather than the raw settings, as the server
+	 * does: an administrator can share a transcription model that never appears in
+	 * this account's own settings.
 	 */
-	// Through the resolved defaults rather than the raw settings, which is what the
-	// server does: an administrator can share a transcription model that never
-	// appears in this account's own settings, and reading those alone would grey
-	// out a screen the instance would happily have run.
 	const hears = $derived(
 		!!$chatDefaultsConfig.voice.voiceInput && !!$chatDefaultsConfig.voice.voiceModel
 	);
@@ -178,40 +139,19 @@
 				: $LL.voiceSetupSpeaking()
 	);
 
-	/**
-	 * The one control, and it means one thing: whether the conversation is open.
-	 *
-	 * Nothing here starts or ends a *turn*, because nothing should: the screen
-	 * opens listening and hears for itself when somebody has finished. A press is
-	 * for hanging up, and for picking back up when a browser refused to start the
-	 * audio without being touched.
-	 */
+	/** Nothing here starts or ends a *turn*: the screen opens listening and hears for itself when somebody has finished. A press hangs up, or gets through a browser that refused to start the audio. */
 	function press() {
 		if (!ready) return;
 		if (voice.live) return voice.stop();
 		void voice.start(given ?? undefined);
 	}
 
-	/**
-	 * Listening on arrival, without being asked.
-	 *
-	 * A screen whose only purpose is speaking should not open with a button that
-	 * says "ready to open". Getting here was itself a tap, which most browsers
-	 * accept as the gesture that lets audio start; where one does not, the session
-	 * says so and the press above is the way through.
-	 */
+	/** Getting here was itself a tap, which most browsers accept as the gesture that lets audio start. Where one does not, the press above is the way through. */
 	onMount(() => {
 		if (ready) void voice.start(given ?? undefined);
 	});
 
-	/**
-	 * The transcript, and whether it should keep up on its own.
-	 *
-	 * It follows the conversation until somebody scrolls back, and then stops: an
-	 * answer arriving should not yank the line somebody is reading off the screen.
-	 * Going back to the bottom hands it over again, which is the same bargain every
-	 * chat log makes and the only one nobody has to be told about.
-	 */
+	/** It follows the conversation until somebody scrolls back, then stops: an answer arriving should not yank the line being read off the screen. */
 	let log = $state<HTMLDivElement | null>(null);
 	let following = $state(true);
 
@@ -222,8 +162,7 @@
 
 	$effect(() => {
 		// One number covering both ways the transcript grows: another line, or another
-		// sentence on the line being written. Nought only when there is nothing to
-		// scroll to.
+		// sentence on the line being written.
 		const written = voice.lines.length + (voice.lines.at(-1)?.text.length ?? 0);
 		if (written && following && log) log.scrollTop = log.scrollHeight;
 	});
@@ -240,14 +179,8 @@
 
 <div class="relative flex h-full flex-col overflow-hidden px-6 py-8">
 	<!-- Who is answering, where the exchange has got to, and the way out. Three
-	     cells rather than two ends and a gap: the step belongs in the middle and it
-	     has to keep its place there whatever the name on the left is doing, which a
-	     centred overlay cannot promise on a narrow screen.
-
-	     Nothing at all in the first cell when the conversation belongs to nobody in
-	     particular: an empty corner says "this is the app" perfectly well. The way
-	     out sits opposite, away from everything else, because a screen you talk to
-	     needs its exit somewhere the hand is not. -->
+	     cells rather than two ends and a gap, so the step keeps its place in the
+	     middle whatever the name on the left is doing. -->
 	<div class="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
 		<div class="flex min-w-0 items-center">
 			{#if persona && conversation}
@@ -261,17 +194,11 @@
 			{/if}
 		</div>
 
-		<!-- Which step the exchange is on, said where a status belongs rather than
-		     under the thing everybody is watching. It used to sit below the orb as a
-		     sentence addressed to the reader, which read as an instruction ("tap and
-		     speak") on a screen that does not need to be tapped, and it moved the
-		     transcript every time it changed length.
+		<!-- Which step the exchange is on, said where a status belongs. Below the orb
+		     it read as an instruction ("tap and speak") on a screen that does not need
+		     tapping, and moved the transcript every time it changed length.
 
-		     A dot and a word. The dot carries the state in the same colour the orb
-		     does, so the two agree from across a room, and the word says which step
-		     for anybody close enough to read it. It breathes while the exchange is
-		     doing something and sits still when the floor is yours, which is the one
-		     distinction worth animating. -->
+		     A dot and a word, the dot in the same colour the orb is using. -->
 		{#if ready}
 			<p
 				class="text-muted flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] uppercase"
@@ -285,7 +212,7 @@
 				{status}
 			</p>
 		{:else}
-			<!-- Nothing to report on a screen that cannot run. What is wrong is said in
+			<!-- Nothing to report on a screen that cannot run: what is wrong is said in
 			     full below, beside the way to fix it. -->
 			<span></span>
 		{/if}
@@ -303,17 +230,14 @@
 	</div>
 
 	<!--
-		The orb is the control, and that is the whole of the interface.
+		The orb is the control, and that is the whole of the interface: pressing the
+		only thing on screen removes the second place to look and the second place to
+		aim, and gives a surface used at arm's length a target the size of a fist.
 
-		Pressing the object that is already the only thing on screen removes both the
-		second place to look and the second place to aim, and it gives a surface
-		meant to be used at arm's length a target the size of a fist.
-
-		Colour carries the one fact a shape cannot: whether a conversation is
-		engaged. Muted is a screen waiting to be started. The transition is not
-		decoration either, since the drawing reads the computed colour back every
-		frame: easing it makes the body cross from one hue to the other rather than
-		snap, which is the difference between a state changing and a light switching.
+		Colour carries the one fact a shape cannot: whether a conversation is engaged.
+		The transition is not decoration, since the drawing reads the computed colour
+		back every frame, so easing it makes the body cross from one hue to the other
+		rather than snap.
 	-->
 	<div class="flex flex-1 items-center justify-center">
 		<button
@@ -334,10 +258,9 @@
 	</div>
 
 	{#if !ready}
-		<!-- What is missing, and the door to it. Named in full here rather than in the
-		     header, because this is the one case where the screen has nothing to do
-		     and the sentence is the content: naming it without offering the way to fix
-		     it is a dead end with a caption. -->
+		<!-- What is missing, and the door to it. Named in full here, because this is the
+		     one case where the sentence is the content: naming it without offering the
+		     way to fix it is a dead end with a caption. -->
 		<div class="flex flex-col items-center gap-4 pt-2">
 			<p class="text-muted max-w-xs text-center text-sm">{missing}</p>
 			<button
@@ -349,18 +272,12 @@
 			</button>
 		</div>
 	{:else if $settingsStore.voiceTranscript}
-		<!-- What was said and what came back, because speech recognition is wrong
-		     often enough that hearing only the answer leaves no way to tell a bad
-		     reply from a misheard question.
+		<!-- What was said and what came back, because speech recognition is wrong often
+		     enough that hearing only the answer leaves no way to tell a bad reply from a
+		     misheard question.
 
-		     The whole conversation rather than the last exchange, and it scrolls. A
-		     spoken conversation is the one nobody can reread in their head: the word
-		     you want to check is four turns back, and it used to be gone the moment
-		     the next question started.
-
-		     A fixed height, empty or not, and the scrolling happens inside it.
-		     Letting it size itself is what pushed the shape above it up and down a
-		     turn at a time. -->
+		     The whole conversation rather than the last exchange, and it scrolls: a
+		     spoken conversation is the one nobody can reread in their head. -->
 		<div
 			bind:this={log}
 			onscroll={follow}
@@ -379,24 +296,11 @@
 	{/if}
 
 	<!-- Your own voice, at the foot, where a level meter belongs. A room it cannot
-	     hear draws a flat line, which is the only honest way to say "your
-	     microphone is not reaching me" before somebody has spoken a whole sentence
-	     into nothing.
+	     hear draws a flat line, which is the only honest way to say "your microphone
+	     is not reaching me".
 
-	     Always here, live or not, and that is the point. It used to arrive with the
-	     conversation and leave with it, and since it sits under a shape that takes
-	     whatever height is left, every appearance moved the orb: the screen
-	     reorganised itself at the very moments somebody is watching it. Reserved
-	     instead, and dimmed while there is nothing to hear, so the only thing that
-	     ever changes on this screen is what the shapes are doing.
-
-	     Narrow, and beside the button rather than stretched across the screen. The
-	     meter is a reassurance, not a readout; a full-width one competes with the
-	     orb for the same glance.
-
-	     The mute button is not a convenience either. A screen that holds the
-	     microphone open for the length of a conversation has to offer a way to shut
-	     it, visibly, in one press, without ending the conversation. -->
+	     Always here, live or not: it sits under a shape that takes whatever height is
+	     left, so arriving with the conversation moved the orb every time. -->
 	{#if ready}
 		<div
 			class="mt-4 flex h-9 w-full shrink-0 items-center justify-center gap-3 transition-opacity duration-300"
@@ -429,22 +333,13 @@
 
 <style lang="postcss">
 	/*
-	 * A fixed window on the last thing said, not a scroller.
-	 *
-	 * Nobody scrolls back through a conversation they are having out loud, and a bar
-	 * appearing beside a spoken answer is an invitation to do the one thing this
-	 * screen is not for. So the height is fixed, the content sits at the bottom, and
-	 * anything older than the window simply leaves the top.
-	 *
-	 * Faded rather than cut. A hard edge reads as a layout mistake; a line dissolving
-	 * upwards reads as something passing out of view, which is what it is doing.
+	 * A fixed window on the last thing said, not a scroller. Nobody scrolls back
+	 * through a conversation they are having out loud, so the height is fixed, the
+	 * content sits at the bottom, and anything older leaves the top. Faded rather
+	 * than cut: a hard edge reads as a layout mistake.
 	 */
-	/*
-	 * The status dot, while something is happening.
-	 *
-	 * Opacity rather than scale: a dot that grows drags the word beside it, and the
-	 * point of putting this in the header was that nothing there moves.
-	 */
+
+	/* The status dot. Opacity rather than scale: a dot that grows drags the word beside it. */
 	.working {
 		animation: breathe 1.6s ease-in-out infinite;
 	}
@@ -463,11 +358,9 @@
 		mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
 		-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem);
 
-		/*
-		 * Scrollable, with nothing to say so. A bar down the side of a spoken
-		 * conversation is a piece of furniture on a screen that has one object on
-		 * it, and the fade above already says there is more up there.
-		 */
+		/* Scrollable, with nothing to say so: a bar down the side of a spoken
+		   conversation is furniture on a screen with one object on it, and the fade
+		   above already says there is more up there. */
 		scrollbar-width: none;
 		overscroll-behavior: contain;
 		-webkit-overflow-scrolling: touch;

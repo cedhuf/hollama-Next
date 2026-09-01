@@ -16,33 +16,22 @@ import { generateRandomId } from '$lib/utils';
 /**
  * What a persona looks like when it travels.
  *
- * Deliberately not a `Persona`. The stored record is an account of one install:
- * its id, the conversation it is bound to, when you created it, whether an admin
- * shared it. None of that means anything to whoever receives it, and exporting it
- * was handing over somebody else's bookkeeping. Worse, `knowledgeIds` pointed at
- * documents the recipient did not have, so a persona with attached knowledge
- * arrived quietly broken.
+ * Deliberately not a `Persona`: the stored record is an account of one install,
+ * which means nothing to whoever receives it, and its `knowledgeIds` pointed at
+ * documents the recipient did not have. A bundle carries what was written, its
+ * documents included, by content.
  *
- * A bundle carries what was written and nothing else. Its documents are in it, by
- * content; the install side gives them fresh ids on the way in.
- *
- * `modelName` is absent on purpose. There are hundreds of models across nearly as
- * many providers, all naming them differently and all revising them constantly, so
- * a model named in a bundle is wrong for almost everyone who reads it and stale for
- * the rest. Installing uses your default, and the persona's own field is yours to
- * change afterwards.
+ * `modelName` is absent on purpose: a model named in a bundle is wrong for
+ * almost everyone who reads it and stale for the rest. Installing uses your
+ * default.
  */
 export const PERSONA_BUNDLE_FORMAT = 'llooma.persona';
 export const PERSONA_BUNDLE_VERSION = 1;
 
 /**
- * A face, in one of the three forms it can take.
- *
- * A glyph is a name and a colour, so it costs nothing to carry and is drawn with
- * the app's own ink. An image is whatever was uploaded, inlined as a data URI,
- * which is the only way it survives the trip. Initials are the fallback, and are
- * a form rather than an absence: a persona that has chosen to be a coloured disc
- * with two letters on it is saying so.
+ * A face, in one of three forms. A glyph is a name and a colour, drawn with the
+ * app's own ink; an image is inlined as a data URI, the only way it survives the
+ * trip; initials are a form rather than an absence.
  */
 export type BundleAvatar =
 	| { kind: 'glyph'; id: string; color: string }
@@ -57,22 +46,11 @@ export interface BundleKnowledge {
 export interface PersonaBundle {
 	format: typeof PERSONA_BUNDLE_FORMAT;
 	version: number;
-	/**
-	 * Its identity in a catalogue, stable across revisions.
-	 *
-	 * Not a storage id: this is what says "the Pixel you already installed" when a
-	 * newer Pixel appears. A bundle from a file may have none.
-	 */
+	/** Its identity in a catalogue, stable across revisions: this is what says "the Pixel you already installed". A bundle from a file may have none. */
 	id?: string;
 	/** Bumped whenever the bundle's contents change. */
 	revision?: number;
-	/**
-	 * BCP 47, informational: the language the prompt is written in.
-	 *
-	 * Not what the persona answers in, which is the reader's setting, and not
-	 * something the listing carries any more. Models are not monolingual, so what a
-	 * prompt happens to be written in tells nobody whether the persona is for them.
-	 */
+	/** BCP 47, informational: the language the prompt is written in, not what the persona answers in. Models are not monolingual. */
 	locale?: string;
 	author?: string;
 	license?: string;
@@ -110,7 +88,7 @@ function parseAvatar(value: unknown): BundleAvatar | undefined {
 		return src ? { kind: 'image', src, color } : undefined;
 	}
 	// A colour is the disc a glyph or a pair of initials is drawn on, so it is not
-	// optional for either: without it the persona has no face at all, only a shape.
+	// optional for either.
 	if (!color) return undefined;
 	if (o.kind === 'initials') return { kind: 'initials', color };
 	const id = str(o.id);
@@ -127,14 +105,7 @@ function parseParams(value: unknown): PersonaParams | undefined {
 	return Object.keys(params).length ? params : undefined;
 }
 
-/**
- * Read a bundle out of parsed JSON, or nothing.
- *
- * Everything a catalogue hands over goes through here, including our own: a file
- * served from a URL is not more trustworthy for having been written by us, and
- * one shape check is cheaper than the ten guards its absence would scatter
- * downstream. What comes out is a value of the declared type or `undefined`.
- */
+/** Everything a catalogue hands over goes through here, our own included: a file served from a URL is not more trustworthy for having been written by us. */
 export function parsePersonaBundle(json: unknown): PersonaBundle | undefined {
 	if (!json || typeof json !== 'object') return undefined;
 	const o = json as Record<string, unknown>;
@@ -182,13 +153,7 @@ export function parsePersonaBundle(json: unknown): PersonaBundle | undefined {
 	};
 }
 
-/**
- * A bundle's avatar as the three fields a persona stores it in.
- *
- * The catalogue draws faces for personas nobody has installed, so this is needed
- * before there is a `Persona` to draw. One conversion rather than two, since the
- * listing and the install would otherwise disagree the day a fourth kind appears.
- */
+/** The catalogue draws faces for personas nobody has installed, so this is needed before there is a `Persona`. One conversion, or the listing and the install disagree the day a fourth kind appears. */
 export function avatarFields(
 	avatar: BundleAvatar,
 	name: string
@@ -207,13 +172,9 @@ function defaultModelName(): string {
 }
 
 /**
- * Install a bundle as an editable persona of your own.
- *
- * A copy, not a link. The persona lands in your library with a fresh id and is
- * yours to edit or delete; `source` only records where it came from, so the
- * catalogue can show it as already installed and so a later revision can be
- * noticed. Its documents are copied in the same way, since a catalogue's
- * knowledge has no existence in your store until it does.
+ * A copy, not a link: the persona lands in your library with a fresh id and is
+ * yours to edit. `source` only records where it came from. Its documents are
+ * copied the same way.
  */
 export function installPersonaBundle(bundle: PersonaBundle, source: PersonaSource): Persona {
 	const knowledgeIds: string[] = [];
@@ -236,16 +197,12 @@ export function installPersonaBundle(bundle: PersonaBundle, source: PersonaSourc
 }
 
 /**
- * Take the published version over the one in the library.
+ * Take the published version over the one in the library: the authored fields
+ * are replaced and everything of yours is kept, which is why this is not
+ * `installPersonaBundle` under another name.
  *
- * The authored fields are replaced and everything of yours is kept: the id, the
- * model you chose, the conversation you are having with it, the knowledge you
- * attached. Updating a persona is not reinstalling it, and the difference is the
- * whole reason this is not `installPersonaBundle` with a different name.
- *
- * Here rather than in the dialog that used to hold it, because it is now called
- * from three places: the update button, the reset button, and the automatic pass
- * that runs when the listing arrives.
+ * Called from the update button, the reset button, and the automatic pass that
+ * runs when the listing arrives.
  */
 export function applyBundleToPersona(
 	persona: Persona,
@@ -273,17 +230,12 @@ export function applyBundleToPersona(
 }
 
 /**
- * The persona a bundle describes, without putting it anywhere.
+ * The persona a bundle describes, without putting it anywhere: for an admin
+ * offering one from the store to their instance without adding it to their own
+ * library.
  *
- * For the one case that is not an install: an admin offering a persona from the
- * store to everyone on their instance, without adding it to their own library
- * first. Sharing and owning stopped being the same act, so building and saving
- * had to stop being the same call.
- *
- * No documents, because there is nowhere to put them: a shared persona's
- * knowledge ids would name documents in the admin's store, which mean nothing to
- * anyone else. Already true of everything shared from a library, and the reason
- * a bundle carries its documents in the first place.
+ * No documents, because a shared persona's knowledge ids would name documents in
+ * the admin's store, which mean nothing to anyone else.
  */
 export function personaFromBundle(bundle: PersonaBundle, source: PersonaSource): Persona {
 	const { avatar, ...authored } = bundle.persona;
@@ -292,19 +244,14 @@ export function personaFromBundle(bundle: PersonaBundle, source: PersonaSource):
 		...authored,
 		...avatarFields(avatar, bundle.persona.name),
 		modelName: defaultModelName(),
-		// What it said on the way in, so "you edited this" and "the store moved on"
-		// can be told apart later. Taken from the bundle rather than from the persona
-		// just built, so the two sides hash the same thing.
+		// What it said on the way in, so "you edited this" and "the store moved on" can
+		// be told apart. From the bundle rather than the persona just built, so the two
+		// sides hash the same thing.
 		source: { ...source, digest: source.digest ?? contentDigest(bundleAuthored(bundle)) }
 	};
 }
 
-/**
- * Turn one of your personas into a bundle, for the export action.
- *
- * The attached documents are resolved and inlined here, which is the whole
- * difference between sharing a persona and sharing a description of one.
- */
+/** The attached documents are inlined here, which is the difference between sharing a persona and sharing a description of one. */
 export function personaToBundle(persona: Persona): PersonaBundle {
 	const documents = get(knowledgeStore) ?? [];
 	const knowledge = (persona.knowledgeIds ?? [])

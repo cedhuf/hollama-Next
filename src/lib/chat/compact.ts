@@ -13,12 +13,11 @@ import { OllamaStrategy } from './ollama';
 import { OpenAIStrategy } from './openai';
 
 /**
- * Compaction: replace the earlier part of a conversation with a summary of it,
- * so the conversation can keep going without outgrowing the model's context.
+ * Compaction: replace the earlier part of a conversation with a summary, so it
+ * can keep going without outgrowing the model's context.
  *
- * The result is a marker message appended to the transcript, not a rewrite:
- * `messagesInContext` starts the sent context at the last marker, and deleting
- * the marker restores everything. Nothing is destroyed, so a bad compaction
+ * A marker appended to the transcript, not a rewrite: `messagesInContext` starts
+ * at the last marker, and deleting it restores everything. A bad compaction
  * costs one request and is undone by removing one message.
  */
 
@@ -29,20 +28,16 @@ function transcribe(message: Message): string {
 	const parts = [message.content?.trim()].filter(Boolean);
 	if (message.images?.length) parts.push(`[${message.images.length} image(s) attached]`);
 	if (message.knowledge?.content) parts.push(`[Knowledge: ${message.knowledge.name}]`);
-	// Reasoning is deliberately dropped: it is the bulkiest part of a heavy
-	// conversation and the least worth carrying: what the model concluded is in
-	// the answer, and a summary of scratch thinking is noise in the next turn.
+	// Reasoning is dropped: the bulkiest part of a heavy conversation and the least
+	// worth carrying, since what the model concluded is in the answer.
 	return `${role}: ${parts.join('\n')}`;
 }
 
 /**
- * The model that writes the summary.
- *
- * Defaults to the conversation's own model: it already has the right window, the
- * user already trusts it here, and it needs no configuration. A dedicated model
- * can be set in Settings (or shared by an admin) when a cheaper or longer-window
- * one is preferred: the title model is deliberately NOT reused, since a model
- * picked to write six words will quietly drop facts over fifty thousand tokens.
+ * Defaults to the conversation's own model: right window, already trusted here,
+ * no configuration. A dedicated one can be set for a cheaper or longer window.
+ * The title model is deliberately not reused: a model picked to write six words
+ * will quietly drop facts over fifty thousand tokens.
  */
 function resolveCompactModel(session: Session): { name: string; serverId: string } | null {
 	const settings = get(settingsStore);
@@ -51,9 +46,8 @@ function resolveCompactModel(session: Session): { name: string; serverId: string
 	if (config.compactModel) {
 		const known = settings.models.find((m) => m.name === config.compactModel);
 		if (known) return { name: known.name, serverId: known.serverId };
-		// The model may live on a system server the user cannot list (an admin's
-		// shared compaction model): the proxy authorizes by server, so use the id
-		// the server handed us.
+		// The model may live on a system server the user cannot list, so use the id the
+		// server handed us: the proxy authorises by server.
 		if (config.compactServerId) {
 			return { name: config.compactModel, serverId: config.compactServerId };
 		}
@@ -72,13 +66,7 @@ export interface CompactionOutcome {
 	replacedCount: number;
 }
 
-/**
- * Summarise everything currently in context and return the marker to append.
- *
- * Throws on failure rather than returning null: unlike a title, a compaction the
- * user asked for must not fail silently. They need to know the context was not
- * shortened, so the caller can say so.
- */
+/** Throws rather than returning null: unlike a title, a compaction the user asked for must not fail silently. */
 export async function compactSession(
 	session: Session,
 	options: { signal?: AbortSignal; automatic?: boolean; instruction?: string } = {}
@@ -96,8 +84,8 @@ export async function compactSession(
 	const instruction = options.instruction?.trim()
 		? resolvePrompt('compactInstruction', overrides, { instruction: options.instruction.trim() })
 		: '';
-	// An earlier summary is part of what gets summarised: compacting twice must
-	// carry the first summary's facts forward, not drop them for being old.
+	// An earlier summary is part of what gets summarised: compacting twice carries
+	// the first summary's facts forward.
 	const transcript = active.map(transcribe).join('\n\n');
 
 	const strategy: ChatStrategy =
@@ -115,24 +103,20 @@ export async function compactSession(
 			messages: [
 				{
 					role: 'system',
-					// Anything typed after `/compact` goes last and outranks what is above
-					// it, length and structure included.
+					// Anything typed after `/compact` goes last and outranks what is above it.
 					//
-					// It was written the other way round first, with a wrapper ending "this
-					// does not licence a shorter or looser summary", which is the model
-					// being told to ignore the user. `/compact one word only` produced the
-					// full six-section record, correctly, because that is what it had been
-					// asked for. A request that cannot lose is not a request.
+					// It was written the other way round first, ending "this does not licence a
+					// shorter summary", which is the model being told to ignore the user. A request
+					// that cannot lose is not a request.
 					//
-					// The guard against a summary that throws the conversation away is not
-					// a prompt refusing to obey: it is that compaction is reversible, and
-					// the divider offers the way back.
+					// What guards against a summary that throws the conversation away is not a
+					// prompt refusing to obey: it is that compaction is reversible.
 					content: [resolvePrompt('compact', overrides), instruction].filter(Boolean).join('\n\n')
 				},
 				{ role: 'user', content: transcript }
 			],
-			// A summary does not need reasoning, and asking for it doubles the wait on
-			// what is already the longest single request the conversation will make.
+			// A summary does not need reasoning, and asking doubles the wait on the longest
+			// single request the conversation will make.
 			think: false
 		},
 		controller.signal,
@@ -147,11 +131,9 @@ export async function compactSession(
 	return {
 		marker: {
 			role: 'system',
-			// The bare summary, without the instructions that frame it for the model,
-			// those are added at send time. Storing them here would put a paragraph of
-			// prompt engineering in front of the user every time they unfold the
-			// divider, and would freeze the wording of an overridable prompt into the
-			// conversation forever.
+			// The bare summary, without the instructions that frame it: those are added at
+			// send time. Storing them would put prompt engineering in front of the user
+			// every time they unfold the divider, and freeze an overridable prompt forever.
 			content: summary,
 			createdAt: new Date().toISOString(),
 			note: {
@@ -160,8 +142,8 @@ export async function compactSession(
 				replacedCount: active.length,
 				model: model.name,
 				automatic: options.automatic,
-				// Kept as the user typed it, not as it was wrapped: the divider says what
-				// was asked for, and the framing around it is ours.
+				// Kept as the user typed it, not as it was wrapped: the divider says what was
+				// asked for, and the framing around it is ours.
 				instruction: options.instruction?.trim() || undefined
 			}
 		},
@@ -169,18 +151,10 @@ export async function compactSession(
 	};
 }
 
-/**
- * The transcript a summariser is handed, from messages alone.
- *
- * Exported because a turn running server-side compacts too, and it must produce
- * the same text: a summary written from a different rendering of the same
- * conversation is a different summary, and which one you got would depend on
- * where the turn happened to run.
- */
+/** Exported because a turn running server-side compacts too and must produce the same text: a summary from a different rendering of the same conversation is a different summary. */
 export function compactTranscript(messages: Message[]): string {
 	const active = messagesInContext(messages);
 	if (!active.length) return '';
-	// An earlier summary is part of what gets summarised: compacting twice must
-	// carry the first summary's facts forward, not drop them for being old.
+	// An earlier summary is part of what gets summarised.
 	return active.map(transcribe).join('\n\n');
 }

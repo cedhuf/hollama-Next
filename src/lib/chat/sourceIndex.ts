@@ -1,21 +1,15 @@
 /**
  * What the conversation has already looked up.
  *
- * Search results are injected as a system block for one request and then dropped.
- * The turn after, the model reads its own answer citing `[1]` and `[3]` with no
- * `[1]` or `[3]` anywhere in front of it, and its own weights are the only thing
- * left to check the claim against. When the weights disagree (a niche game, a
- * product released after training, anything unfamiliar) it concludes it made the
- * whole thing up, apologises, and takes back an answer that was correct and
- * sourced. Watching that happen is what this module is for.
+ * Search results are injected for one request and then dropped, so the next turn
+ * the model reads its own answer citing `[1]` with no `[1]` in front of it. When
+ * its weights disagree it concludes it made the whole thing up and takes back an
+ * answer that was correct and sourced.
  *
- * The fix is deliberately not "replay the evidence". Snippets are bulky, they age,
- * and paying for them on every subsequent request to guard against a doubt that
- * usually never comes is the wrong trade. What survives here is the index: which
- * searches ran, and which sources the answers actually leaned on. Measured on a
- * real five-result search, that is about 80 tokens a turn against roughly 600 to
- * replay the snippets. The evidence itself stays one `<read>` away, paid for only
- * when the model asks: the same bargain `readProtocol.ts` already makes.
+ * The fix is deliberately not "replay the evidence": snippets are bulky and age,
+ * and paying for them on every request guards against a doubt that usually never
+ * comes. What survives is the index, about 80 tokens a turn against roughly 600.
+ * The evidence stays one `<read>` away, paid for when the model asks.
  */
 import type { Message, SearchSource } from '$lib/sessions';
 
@@ -32,14 +26,7 @@ export interface RecalledSearch {
 	sources: RecalledSource[];
 }
 
-/**
- * Ceilings, not expiry dates.
- *
- * An index entry is two lines and costs a few dozen tokens, so a conversation has
- * to be long before this is worth bounding at all, and when it is, the answer is
- * to shed the oldest, not to blank the lot on a timer. A three-turn window would
- * put us back where we started, one turn later.
- */
+/** Ceilings, not expiry dates. An entry is two lines, so a conversation has to be long before this binds at all, and then the answer is to shed the oldest. A three-turn window would put us back where we started. */
 const MAX_SOURCES_PER_SEARCH = 5;
 const MAX_SOURCES_TOTAL = 20;
 
@@ -54,13 +41,11 @@ function citedNumbers(content: string): number[] {
 }
 
 /**
- * The searches worth carrying forward, oldest first.
- *
- * Only the sources an answer cited: a result the model was shown and did not use
- * contributed nothing, and paying to remember it forever is paying for noise. An
- * answer that cited none of them is the exception (the model ignoring the
- * citation instruction, not a turn where nothing mattered) so those keep the
- * whole list rather than vanishing.
+ * The searches worth carrying forward, oldest first, and only the sources an
+ * answer cited: a result the model was shown and did not use contributed
+ * nothing. An answer that cited none keeps the whole list, since that is the
+ * model ignoring the citation instruction rather than a turn where nothing
+ * mattered.
  */
 export function recallSearches(messages: Message[]): RecalledSearch[] {
 	const searches: RecalledSearch[] = [];
@@ -108,13 +93,7 @@ export function formatSourceIndex(searches: RecalledSearch[]): string {
 		.join('\n\n');
 }
 
-/**
- * Every address the model may ask to reread.
- *
- * An allowlist, and the reason `<read>` takes a URL at all: the model addresses a
- * page the conversation has already been shown, never one it composed. Nothing it
- * writes can turn into a request to an arbitrary host.
- */
+/** An allowlist, and the reason `<read>` takes a URL at all: the model addresses a page the conversation has been shown, never one it composed. */
 export function recallableUrls(searches: RecalledSearch[]): Set<string> {
 	return new Set(searches.flatMap((search) => search.sources.map((source) => source.url)));
 }

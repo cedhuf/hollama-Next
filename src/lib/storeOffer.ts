@@ -1,20 +1,16 @@
 /**
  * What a store card offers, whatever the store is selling.
  *
- * The rule was written for the personas and is not about personas at all. A
- * card is about one of exactly two things:
+ * A card is about one of exactly two things:
  *
  * - a **package**, which the store publishes. You install it. It says
- *   `installed` only while you hold an untouched copy, because that is the only
- *   case where installing again would hand you what you already have.
- * - a **copy**, which is in your library. You wrote it, or you took a package and
- *   changed it. There is nothing to install; what it offers is to go back to
- *   what was published.
+ *   `installed` only while you hold an untouched copy, the one case where
+ *   installing again would hand you what you already have.
+ * - a **copy**, which is in your library. There is nothing to install; what it
+ *   offers is to go back to what was published.
  *
- * Every view is then a selection of those two, never a third behaviour. That is
- * what stopped the persona store showing personas that were not in the store and
- * telling people to install what they had written themselves, and it is why the
- * second store starts from the rule rather than from the page.
+ * Every view is a selection of those two, never a third behaviour. That is what
+ * stopped the persona store telling people to install what they had written.
  */
 
 import type { StoreKind } from './store';
@@ -24,13 +20,7 @@ export type OfferKind = 'package' | 'copy';
 /** What the one button on a card does. Computed once, when the card is built. */
 export type OfferAction = 'install' | 'installed' | 'restore' | 'update';
 
-/**
- * What you are looking at.
- *
- * Two for everyone: what you can install, and what is yours. A third for an
- * administrator, because only somebody who hands things out has a list of what
- * they hand out.
- */
+/** Two for everyone, what you can install and what is yours, and a third for an administrator, who has a list of what they hand out. */
 export type OfferView = 'store' | 'mine' | 'shared';
 
 /** How an installed copy stands against what the store publishes. */
@@ -39,14 +29,7 @@ export type InstalledState = 'own' | 'clean' | 'edited' | 'outdated' | 'edited-o
 export interface Offer {
 	key: string;
 	kind: OfferKind;
-	/**
-	 * Which catalogue it comes from.
-	 *
-	 * Not the same question as `kind`, which says whether the card is something on
-	 * offer or something of yours. This says what the thing *is*, and it is what
-	 * lets one storefront hold several catalogues: the shelf groups by it, the
-	 * filter narrows by it, and the installer is chosen by it.
-	 */
+	/** Not the same question as `kind`, which says whether the card is on offer or yours. This says what the thing *is*, and it is what lets one storefront hold several catalogues. */
 	family: StoreKind;
 	name: string;
 	/** The one line under the name: a tagline, a summary, whatever the kind calls it. */
@@ -59,10 +42,7 @@ export interface Offer {
 	edited: boolean;
 	shared: boolean;
 	toggleShare: () => Promise<void>;
-	/**
-	 * A quiet line under the rest: how long a procedure is, who wrote it, whatever
-	 * the kind has to add. The shell passes it to the card and never reads it.
-	 */
+	/** A quiet line under the rest: how long a procedure is, who wrote it, whatever the kind has to add. The shell passes it on and never reads it. */
 	meta?: string;
 }
 
@@ -70,18 +50,11 @@ export interface Offer {
 export const isEdited = (state: InstalledState): boolean =>
 	state === 'edited' || state === 'edited-outdated';
 
-/**
- * `installed` only while an untouched copy is held: with one you have edited,
- * installing again is the way to get the published one back alongside yours,
- * which is the whole reason both are allowed to exist.
- */
+/** `installed` only while an untouched copy is held: with one you have edited, installing again is how to get the published one back alongside yours. */
 export const packageAction = (hasUntouchedCopy: boolean): OfferAction =>
 	hasUntouchedCopy ? 'installed' : 'install';
 
-/**
- * Yours: nothing to install, so the button either states that it is yours or
- * offers to put the published version back.
- */
+/** Yours: nothing to install, so the button either states that or offers to put the published version back. */
 export const copyAction = (state: InstalledState): OfferAction =>
 	isEdited(state) ? 'restore' : state === 'outdated' ? 'update' : 'installed';
 

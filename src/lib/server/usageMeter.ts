@@ -9,26 +9,15 @@ import { countsInBody, resolveCost, type RunUsage } from '$lib/usageCounts';
 import { getModelPricing, getServer, type ServerRow } from './db/servers';
 import { addUsage, creditLimitFor, isOverLimit } from './db/usage';
 
-/**
- * Writing down what a turn consumed, as it goes past.
- *
- * The reading itself is in `$lib/usageCounts`, which has no database behind it
- * and can therefore be checked on its own. This half is the plumbing: split the
- * stream, drain one side, record what it said.
- */
+/** Writing down what a turn consumed as it goes past. The reading itself is in `$lib/usageCounts`, which has no database behind it; this half is the plumbing. */
 
 /**
  * Watch a response body on its way to the browser, and record what it says.
  *
- * A `TransformStream` rather than `tee()`, and the difference is not stylistic.
- * A tee has two consumers: one is the response, the other is a loop running in
- * the background with nobody waiting for it, and when the request ends the
- * second half can be cancelled before it has read the chunk that carries the
- * totals, which is the last one. Nothing was counted, and nothing said so.
- *
- * Here there is one consumer. Every chunk passes through on its way out, the
- * meter sees exactly what the browser sees, and the recording happens when the
- * stream closes because that is the same moment the answer finishes.
+ * A `TransformStream` rather than `tee()`: a tee has two consumers, and the
+ * background one can be cancelled when the request ends, before it has read the
+ * chunk carrying the totals, which is the last one. Here every chunk passes
+ * through and the recording happens when the stream closes.
  */
 export function meter(
 	body: ReadableStream<Uint8Array>,
@@ -43,29 +32,25 @@ export function meter(
 		transform(chunk, controller) {
 			controller.enqueue(chunk);
 			try {
-				// Only the tail is kept: holding a whole answer in memory to read its
-				// last line would be paying for the conversation twice. Sixty-four
-				// kilobytes because a body that is not streamed is one JSON object, and
-				// its `usage` is not guaranteed to be at the very end of it.
+				// Only the tail is kept: holding a whole answer to read its last line would pay
+				// for the conversation twice. Sixty-four kilobytes, because a body that is not
+				// streamed is one JSON object whose `usage` may not be at the very end.
 				seen = (seen + decoder.decode(chunk, { stream: true })).slice(-65536);
 			} catch {
-				// A body that is not text is a body with no counts in it.
+				// A body that is not text has no counts in it.
 			}
 		},
 		flush() {
 			try {
 				const counts = countsInBody(seen);
 				if (!counts) {
-					// Said out loud, because the alternative is a spend of zero that looks
-					// like a quiet month. A provider that reports nothing cannot be
-					// counted, and whoever runs the instance needs to know which one.
+					// Said out loud, or a provider that reports nothing looks like a quiet month.
 					console.warn(`[usage] ${model} reported no token counts; nothing recorded`);
 					return;
 				}
 
-				// What the provider said it cost, and the table only where it said
-				// nothing. An unpriced model with nothing reported is not counted at
-				// all: see `costOf`.
+				// What the provider said it cost, and the table only where it said nothing. An
+				// unpriced model with nothing reported is not counted at all: see `costOf`.
 				const cost = resolveCost(counts, priceFor(model));
 				if (cost === undefined) {
 					console.warn(`[usage] ${model} has no price on this connection; nothing recorded`);
@@ -88,17 +73,11 @@ export function meter(
 }
 
 /**
- * Watch a drawing on its way out, and record what it cost.
- *
- * The same passthrough as `meter`, reading nothing. There is nothing to read: an
- * image response carries no token counts, and the two things it is billed by are
- * both known without opening it: how many images were asked for, and how long
- * the provider took. The count comes from the request, which is the only place
- * it is stated before the answer exists, and the clock stops when the stream
- * closes rather than when the headers land, because generation is still running
- * while the body is on its way.
- *
- * A body that is several megabytes of base64 is therefore never buffered here.
+ * Watch a drawing on its way out, and record what it cost. The same passthrough
+ * as `meter`, reading nothing: an image response carries no token counts, and
+ * both things it is billed by are known without opening it. The count comes from
+ * the request, and the clock stops when the stream closes, since generation is
+ * still running while the body is on its way.
  */
 export function meterImages(
 	body: ReadableStream<Uint8Array>,
@@ -131,15 +110,12 @@ export function meterImages(
 }
 
 /**
- * Record what a server-side turn consumed.
+ * Record what a server-side turn consumed. The counts arrive as an event rather
+ * than as bytes, because here the server *is* the client. The pricing lookup is
+ * the relay's, so a model costs the same whichever road the turn took.
  *
- * The counts arrive as an event rather than as bytes on a stream, because on
- * this path the server *is* the client: it holds the provider connection, and
- * what it reports is already parsed. The pricing lookup is the same one the
- * relay does, so a model costs the same whichever road the turn took.
- *
- * The server a turn ran on is the one named in its input; a personal connection
- * is somebody's own key and own bill, so it is neither counted nor limited.
+ * A personal connection is somebody's own key and bill, so it is neither counted
+ * nor limited.
  */
 export function recordRunUsage(
 	userId: string,
@@ -173,31 +149,19 @@ export function recordRunUsage(
 	});
 }
 
-/**
- * Whether a call on this connection counts against an allowance at all.
- *
- * Only the instance's own connections. A personal server is somebody's own key
- * and their own bill, and neither counting it against an instance allowance nor
- * refusing it in the name of one would be defensible.
- */
+/** Only the instance's own connections: a personal server is somebody's own key and their own bill. */
 export function isMetered(server: ServerRow): boolean {
 	return server.owner_user_id === null;
 }
 
 /**
- * Why this account may not start another billable call, if it may not.
+ * Why this account may not start another billable call, if it may not. The same
+ * two questions the chat relay asks, in one place so the voice routes ask them
+ * the same way: both were unguarded, so somebody out of credit could still
+ * dictate and still be read to.
  *
- * The same two questions the chat relay asks, in one place so the voice routes
- * ask them the same way rather than approximately the same way. Both were
- * unguarded until now: somebody at the end of their credit could still dictate
- * and still be read to, indefinitely.
- *
- * The unpriced rule has an exception it did not used to need. Refusing an
- * unpriced model exists because uncounted means unlimited, and one forgotten
- * model would be an unlimited allowance for everybody. That reasoning stops
- * applying to a provider that reports what its calls cost: nothing there goes
- * uncounted, so nothing needs refusing, and insisting on a figure in the table
- * would block the one provider whose figures are exact.
+ * The unpriced rule exempts a provider that reports what its calls cost: nothing
+ * there goes uncounted, so nothing needs refusing.
  */
 export function refuseForCredit(
 	userId: string,
@@ -213,17 +177,12 @@ export function refuseForCredit(
 }
 
 /**
- * Record what one voice call consumed.
+ * Record what one voice call consumed. Its own entry point because
+ * `recordRunUsage` is about a turn: it re-reads the connection from an id and
+ * refuses a personal one, where here the connection is already in hand.
  *
- * Its own entry point rather than `recordRunUsage`, because that one is about a
- * turn: it re-reads the connection from an id it was given, and refuses a
- * personal one. Here the connection is already in hand and already checked, and
- * what is being recorded is a length of audio or a handful of tokens rather than
- * a conversation.
- *
- * Silent on failure, deliberately. Somebody has already been given their words
- * or their sound; a meter that threw at this point would turn a successful call
- * into an error after the fact.
+ * Silent on failure: somebody already has their words or their sound, and a
+ * meter that threw would turn a successful call into an error after the fact.
  */
 export function recordVoiceUsage(
 	userId: string,
@@ -233,11 +192,9 @@ export function recordVoiceUsage(
 ): void {
 	if (!isMetered(server)) return;
 
-	// Nothing reported and nothing to count against a price. It happens on a
-	// synthesis whose provider names no way to ask what it cost: the answer is
-	// sound, the characters that produced it are not a reading anybody bills on,
-	// and the app does not estimate in order to charge. Said out loud, because the
-	// alternative is a spend of zero that looks like a quiet month.
+	// Nothing reported and nothing to count against a price, which happens on a
+	// synthesis whose provider names no way to ask. The app does not estimate in
+	// order to charge. Said out loud, or it looks like a quiet month.
 	if (used.cost === undefined && !used.input && !used.output && !used.seconds) {
 		console.warn(`[usage] ${model} reported nothing countable; nothing recorded`);
 		return;
@@ -256,6 +213,6 @@ export function recordVoiceUsage(
 			cost
 		});
 	} catch {
-		// A meter must never be the reason a call that worked looks like a failure.
+		// A meter must never make a call that worked look like a failure.
 	}
 }

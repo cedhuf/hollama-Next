@@ -12,37 +12,26 @@ import type { RequestHandler } from './$types';
 
 /**
  * Authenticated LLM proxy for server mode. The client references a server by id
- * only. Never a URL or key. We verify the session and that the user may use
- * this server (system, or their own), then forward to the real endpoint with
- * the decrypted key injected. The key never reaches the browser.
+ * only, never a URL or key; this verifies the session and that the user may use
+ * that server, then forwards with the decrypted key injected.
  */
 const proxy: RequestHandler = async (event) => {
 	const user = await requireUser(event);
 	const server = requireServer(user.id, event.params.serverId);
 
-	/**
-	 * Whether this request is a turn, as opposed to asking what models exist.
-	 *
-	 * Only work is metered and only work is refused. Listing models when you
-	 * are over your allowance still works, because an app that cannot draw its own
-	 * settings page is broken rather than restrained.
-	 */
+	/** Only work is metered and only work is refused: listing models over your allowance still works, since an app that cannot draw its settings page is broken rather than restrained. */
 	const isCompletion = /(chat\/completions|\bapi\/chat|\bapi\/generate|\/completions)$/.test(
 		event.params.path ?? ''
 	);
 
 	/**
-	 * Whether this request draws something.
+	 * Whether this request draws something. Matched on the tail, because the prefix
+	 * is not ours to predict: OpenAI puts this under `/v1` and Infomaniak under
+	 * neither the same API version nor the same `/v1` as its chat endpoint. All of
+	 * them end in `images/<verb>`.
 	 *
-	 * Matched on the tail rather than on a whole path, because the prefix is not
-	 * ours to predict: OpenAI puts this under `/v1`, and Infomaniak puts it under
-	 * neither the same API version nor the same `/v1` as its own chat endpoint.
-	 * What every one of them ends in is `images/<verb>`.
-	 *
-	 * It is here because until now it matched nothing: a drawing went through this
-	 * relay unmetered, unlimited, and without anyone checking that its model had
-	 * ever been shared. That was not a decision, it was a regex written when the
-	 * only thing the app could ask for was a conversation.
+	 * Until now it matched nothing, so a drawing went through unmetered and without
+	 * anyone checking its model had been shared.
 	 */
 	const isImage = /images\/(generations(\/[a-z_]+)?|edits|variations)$/.test(
 		event.params.path ?? ''
@@ -52,13 +41,10 @@ const proxy: RequestHandler = async (event) => {
 	const isBillable = isCompletion || isImage;
 
 	/**
-	 * The root this request hangs off.
-	 *
-	 * Two, because one was an assumption: a provider may serve its image endpoints
-	 * from somewhere the chat base cannot reach by appending a path. Resolved here
-	 * and only here, so the browser keeps sending a plain relative path and never
-	 * learns either address, which is the whole point of this relay in server
-	 * mode.
+	 * The root this request hangs off. Two, because one was an assumption: a
+	 * provider may serve its image endpoints where the chat base cannot reach by
+	 * appending a path. Resolved here alone, so the browser never learns either
+	 * address.
 	 */
 	const base = (isImage && server.image_base_url) || server.base_url;
 	const path = event.params.path ? `/${event.params.path}` : '';
@@ -74,39 +60,28 @@ const proxy: RequestHandler = async (event) => {
 
 	let body = event.request.method === 'POST' ? await event.request.text() : undefined;
 
-	/**
-	 * Whether this account's spending is being watched at all.
-	 *
-	 * Only on the instance's own connections. A personal server is somebody's own
-	 * key and their own bill, and neither counting it against an instance
-	 * allowance nor refusing it in the name of one would be defensible.
-	 */
+	/** Only on the instance's own connections: a personal server is somebody's own key and their own bill. */
 	const metered = server.owner_user_id === null;
 	const limit = metered && isBillable ? creditLimitFor(user.id) : 0;
 
 	const model = modelIn(body);
 
 	if (limit > 0) {
-		// Asked before the turn starts, never during one: a conversation already
-		// under way always finishes. This is the only moment a limit is allowed to
-		// interrupt anything.
+		// Asked before the turn starts, never during one: a conversation already under
+		// way always finishes.
 		if (isOverLimit(user.id)) throw error(402, refusal('credit-limit'));
 
 		/**
-		 * A model with no price is refused while a limit is in force.
-		 *
-		 * Not counted would mean not limited, and an unpriced model is almost
-		 * always an oversight rather than a decision: one forgotten model is an
-		 * unlimited allowance for everybody, quietly, for as long as nobody
-		 * notices. The message names the cause so the user asks their
-		 * administrator rather than concluding the app is broken.
+		 * A model with no price is refused while a limit is in force: not counted would
+		 * mean not limited, and one forgotten model is an unlimited allowance for
+		 * everybody. The message names the cause, so the user asks their administrator
+		 * rather than concluding the app is broken.
 		 */
 		if (
 			model &&
 			!hasPriceFigure(getModelPricing(server.id)[model]) &&
-			// Unless the provider will say what the call cost. The rule exists because
-			// uncounted means unlimited; a provider that reports every call leaves
-			// nothing uncounted, and insisting on a figure in the table would refuse
+			// Unless the provider will say what the call cost: the rule exists because
+			// uncounted means unlimited, and insisting on a figure in the table would refuse
 			// the one provider whose figures are exact.
 			!reportsCost(server.connection_type as ConnectionType)
 		) {
@@ -114,18 +89,11 @@ const proxy: RequestHandler = async (event) => {
 		}
 	}
 
-	// Only a conversation reports token counts, and only a conversation is asked
-	// to. An image endpoint handed an unknown field answers 400.
+	// Only a conversation reports token counts, and only a conversation is asked to.
+	// An image endpoint handed an unknown field answers 400.
 	if (isCompletion) body = askForUsage(body);
 
-	/**
-	 * How many images this asks for, capped at what the request may say.
-	 *
-	 * Read before the call because it is the only place the number exists before
-	 * the answer does, and the answer is several megabytes of base64 that the
-	 * meter has no business opening. One when unstated, which is what every
-	 * provider defaults to.
-	 */
+	/** Read before the call, the only place the number exists before the answer does, and the answer is megabytes of base64 the meter has no business opening. One when unstated. */
 	const imageCount = isImage ? imagesAskedFor(body) : 0;
 
 	// The admin's rules are applied here rather than in the browser: this is the
@@ -137,13 +105,13 @@ const proxy: RequestHandler = async (event) => {
 		throw e;
 	}
 
-	// Started before the call because a model billed per minute is billed for the
-	// time this takes, and the only clock that can see it is this one.
+	// Started before the call: a model billed per minute is billed for the time this
+	// takes, and the only clock that can see it is this one.
 	const startedAt = Date.now();
 	const response = await fetch(url, { method: event.request.method, headers, body });
 
-	// Counted from what the provider reports, on the way past. The browser's half
-	// of the stream is untouched and waits for nothing.
+	// Counted from what the provider reports, on the way past. The browser's half of
+	// the stream is untouched and waits for nothing.
 	const countable = metered && response.ok && response.body && model;
 	let stream: ReadableStream<Uint8Array> | null = response.body;
 	if (countable && isCompletion) {
@@ -167,14 +135,7 @@ const proxy: RequestHandler = async (event) => {
 	});
 };
 
-/**
- * How many images a request asks for.
- *
- * Clamped rather than trusted: `n` is a number the browser sends, and a meter
- * that multiplies a price by it would be a meter anyone could set to zero. The
- * ceiling is the highest any provider the app talks to accepts, so a request
- * above it was going to be refused by the provider anyway.
- */
+/** Clamped rather than trusted: `n` comes from the browser, and a meter that multiplies a price by it is one anyone could set to zero. */
 function imagesAskedFor(body: string | undefined): number {
 	if (!body) return 1;
 	try {
@@ -201,19 +162,16 @@ function modelIn(body: string | undefined): string | undefined {
 /**
  * Ask an OpenAI-compatible provider to report usage on a streamed answer.
  *
- * Without `stream_options.include_usage` there is no `usage` block on a stream
- * at all, so every streamed turn (which is every turn) would go uncounted.
- * Ollama reports its counts unasked, and ignores the field.
+ * Without `stream_options.include_usage` a stream carries no `usage` block at
+ * all, so every streamed turn would go uncounted. Ollama reports unasked and
+ * ignores the field.
  *
- * It is also the whole of what a gateway needs to be asked. OpenRouter puts its
- * `cost` inside that same block, on a stream as much as off one, so a second
- * field asking for the cost specifically was written here and then deleted: it
- * changed nothing, and an extra body field is only ever another chance for a
- * provider to answer 400.
+ * It is also all a gateway needs: OpenRouter puts its `cost` in that same block,
+ * so a second field asking for the cost changed nothing and was deleted.
  *
- * Left alone if the body is not JSON or already says otherwise: this is a meter,
- * and a meter that rewrites a request it did not understand is a bug waiting for
- * the one provider that reads the field differently.
+ * Left alone if the body is not JSON or already says otherwise: a meter that
+ * rewrites a request it did not understand is a bug waiting for the one provider
+ * that reads the field differently.
  */
 function askForUsage(body: string | undefined): string | undefined {
 	if (!body) return body;

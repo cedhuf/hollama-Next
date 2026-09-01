@@ -12,30 +12,20 @@ import {
 /**
  * What the model is shown, and nothing more.
  *
- * Chatto pushes a pointer to one message. Everything around it is a request we
- * choose to make, so how much of the room reaches a model is settled here and
- * only here, from the account's own setting. `mention` is the floor and means
- * exactly what it says: one message, one request, nothing else read.
+ * Chatto pushes a pointer to one message; everything around it is a request we
+ * choose to make, settled here alone from the account's setting. `mention` is
+ * the floor: one message, one request, nothing else read.
  *
  * Speakers are named inside the text rather than mapped onto roles, because
- * there is no role for "somebody else in the room". A transcript of three
- * people flattened into `user` reads as one person contradicting themselves;
- * with names in front, a model handles it the way a person reading the room
- * would. The bot's own past messages do become `assistant`, which is the one
- * mapping that is true.
+ * there is no role for "somebody else in the room": three people flattened into
+ * `user` read as one person contradicting themselves. The bot's own past
+ * messages do become `assistant`, which is the one mapping that is true.
  */
 
 /** A ceiling on a thread read, so a long one cannot blow up a request. */
 const THREAD_LIMIT = 60;
 
-/**
- * How many images to carry, and how large one may be.
- *
- * Images are read from the end of the context backwards, because the useful
- * case is somebody posting a picture and asking about it in the next breath.
- * The caps are here because a room is not a form: nothing stops ten photographs
- * in a row, and each one is base64 in a request body.
- */
+/** Read from the end backwards, since the useful case is somebody posting a picture and asking about it next. Capped because a room is not a form: nothing stops ten photographs in a row. */
 const MAX_IMAGES = 4;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
@@ -53,8 +43,8 @@ async function authorsOf(
 	const authors = new Map<string, Author>();
 	if (!unique.length) return authors;
 
-	// The API takes a hundred at a time, and a context window will never hold
-	// that many distinct speakers, so one call is the whole of it.
+	// The API takes a hundred at a time, and a context window will never hold that
+	// many distinct speakers.
 	const { users } = await client.batchGetUsers(unique.slice(0, 100), signal);
 	for (const user of users ?? []) {
 		authors.set(user.id, { name: user.displayName?.trim() || user.login?.trim() || user.id });
@@ -79,14 +69,12 @@ function imageAttachments(message: ChattoMessage | undefined): ChattoAttachment[
 }
 
 /**
- * Bring the pictures down and hang them on the messages they came with.
+ * Bring the pictures down and hang them on the messages they came with: the
+ * model reads them as part of the message that carried them, which is the only
+ * reading that makes "what is this?" answerable.
  *
- * Newest first and capped, then written back in place: the model reads them as
- * part of the message that carried them, which is the only reading that makes
- * "what is this?" answerable.
- *
- * A download that fails is skipped rather than raised. An image nobody can
- * fetch is worth less than the answer, and the room asked a question either way.
+ * A download that fails is skipped: an image nobody can fetch is worth less than
+ * the answer.
  */
 async function attachImages(
 	client: ChattoClient,
@@ -110,7 +98,7 @@ async function attachImages(
 					filename: attachment.filename || attachment.id
 				});
 			} catch {
-				// A signed URL that has expired, or a store that is briefly away.
+				// A signed URL that has expired, or a store briefly away.
 			}
 		}
 
@@ -120,13 +108,7 @@ async function attachImages(
 	}
 }
 
-/**
- * The timeline as a transcript.
- *
- * Everything after the message that called the bot is dropped: a window centred
- * on an event carries what came after it too, and answering a question with the
- * replies to it already in hand is answering a different question.
- */
+/** Everything after the message that called the bot is dropped: a window centred on an event carries what came after it, and answering with the replies already in hand is answering a different question. */
 function visibleUpTo(history: ChattoMessage[], upToEventId: string): ChattoMessage[] {
 	const cut = history.findIndex((message) => message.id === upToEventId);
 	return cut === -1 ? history : history.slice(0, cut + 1);
@@ -154,8 +136,8 @@ export async function buildContext(
 	selfId: string,
 	signal: AbortSignal
 ): Promise<Message[]> {
-	// The message that called the bot, always. It is the request, and in the
-	// narrowest mode it is also the entire context.
+	// The message that called the bot, always: it is the request, and in the
+	// narrowest mode the entire context.
 	const { message: called } = await client.getMessage(reference.roomId, reference.eventId, signal);
 	if (!called?.body?.trim()) return [];
 
@@ -166,9 +148,8 @@ export async function buildContext(
 		return built;
 	}
 
-	// A thread is its own context, whichever of the two wider modes is set: what
-	// came before it in the room is a different conversation, and a thread read
-	// whole is one request rather than two.
+	// A thread is its own context in either wider mode: what came before it in the
+	// room is a different conversation, and a thread read whole is one request.
 	const root = reference.threadRootEventId || called.threadRootEventId;
 	let history: ChattoMessage[];
 
@@ -177,23 +158,23 @@ export async function buildContext(
 		const { page } = await client.getThreadEvents(reference.roomId, root, limit, signal);
 		history = messagesOf(page?.events);
 	} else {
-		// Called at room level. `thread` has no thread to read, so it falls back to
-		// the same window as `recent`: the alternative would be sending nothing but
-		// the mention while claiming to send the most context of the three.
+		// Called at room level. `thread` has no thread to read, so it falls back to the
+		// same window as `recent` rather than sending only the mention while claiming
+		// to send the most context of the three.
 		const limit = config.context === 'thread' ? THREAD_LIMIT : config.contextCount;
 		const { page } = await client.getRoomEventsAround(
 			reference.roomId,
 			reference.eventId,
-			// Asked for wider than needed and trimmed below: the window is centred on
-			// the anchor, so half of what comes back is the future.
+			// Asked for wider than needed and trimmed below: the window is centred on the
+			// anchor, so half of what comes back is the future.
 			limit * 2,
 			signal
 		);
 		history = messagesOf(page?.events);
 	}
 
-	// The call itself may not be in what came back, on a server that hides it or
-	// on a page boundary. Appending it is better than answering without it.
+	// The call itself may be missing on a server that hides it, or on a page
+	// boundary. Appending it beats answering without it.
 	if (!history.some((message) => message.id === called.id)) history.push(called);
 
 	const authors = await authorsOf(
@@ -204,13 +185,12 @@ export async function buildContext(
 	const visible = visibleUpTo(history, called.id);
 	const full = transcript(visible, selfId, authors);
 
-	// The cut is the last N of the conversation, not the first: the message that
-	// called the bot has to be in what is sent, and it is at the end.
+	// The last N, not the first: the message that called the bot has to be in what
+	// is sent, and it is at the end.
 	const keep = config.context === 'thread' ? full.length : config.contextCount;
 	const sent = full.slice(-keep);
 
-	// After the cut, so nothing is downloaded for a message that will not be
-	// sent, and so the budget is spent on what the model actually sees.
+	// After the cut, so nothing is downloaded for a message that will not be sent.
 	await attachImages(client, visible.slice(-keep), sent, signal);
 	return sent;
 }
