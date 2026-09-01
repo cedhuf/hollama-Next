@@ -238,30 +238,6 @@
 	text-transform: uppercase;
 }
 
-/* A tag, ahead of what it qualifies: a disclosure that arrives after the reader
-   has formed an opinion has not disclosed anything. */
-.tag {
-	display: inline-block;
-	width: fit-content;
-	padding: 0.25rem 0.7rem;
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 999px;
-	background: var(--sl-color-gray-6);
-	color: var(--sl-color-gray-2);
-	font-size: var(--sl-text-xs);
-	font-weight: 600;
-	letter-spacing: 0.02em;
-	line-height: 1.6;
-	white-space: nowrap;
-}
-
-/* In a band it sits beside the heading, not above it: two words on a line of
-   their own would carry more weight than a disclosure deserves. */
-.band > .tag {
-	float: right;
-	margin: 0.2rem 0 0.5rem 1rem;
-}
-
 /*
  * A screenshot. Every asset here is already a framed window on a transparent
  * ground, with its own shadow drawn in about 60px of margin around it, so the
@@ -507,17 +483,57 @@
 	margin-bottom: 0;
 }
 
-/* An aside rather than a section: no heading, quieter type, and enough padding
-   to sit apart without claiming a chapter of its own. */
-.band--note {
-	padding: 1.75rem clamp(1rem, 3vw, 2rem);
-	color: var(--sl-color-gray-3);
-	font-size: var(--sl-text-sm);
-	line-height: 1.7;
+/*
+ * The provider note: two lines of small print with a wordmark beside them.
+ *
+ * It was a full-width band with the disclaimer as a pill on a line of its own,
+ * which pushed the paragraph down and gave five lines of body copy the weight of
+ * a section. The mark carries the identification now, so the sentence no longer
+ * has to introduce anyone, and the disclaimer sits under the mark where it reads
+ * as a caption rather than a heading. The wordmark stays sharp and small: blurred
+ * into the background it is a blue smudge, and a logo nobody can read is not a
+ * credit.
+ */
+.nota {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1.25rem clamp(1.25rem, 3vw, 2rem);
+	margin: 3.5rem 0 1rem;
+	padding: 1rem clamp(1rem, 3vw, 1.5rem);
+	border: 1px solid var(--sl-color-gray-6);
+	border-radius: 0.75rem;
+	/* A trace of the mark's own blue, so the card belongs to what it is about. */
+	background: color-mix(in oklab, #0098ff 4%, transparent);
 }
 
-.band--note p:last-child {
-	margin-bottom: 0;
+.nota__mark {
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	gap: 0.4rem;
+	align-items: flex-start;
+}
+
+.nota__mark img {
+	display: block;
+	width: 8.5rem;
+	height: auto;
+}
+
+.nota__label {
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-xs);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.nota p {
+	flex: 1 1 18rem;
+	margin: 0;
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-sm);
+	line-height: 1.65;
 }
 
 /*
@@ -612,14 +628,23 @@
 }
 
 /* The palettes. Each style carries both of its ramps, and the mode rules below
-   choose which one is in play, for the preview and for the swatches at once. */
+   choose which one is in play, for the preview and for the swatches at once.
+
+   Every value below is the app's own, read off the `--hsl-*` blocks in
+   `src/app.pcss` and converted: canvas is `shade-2`, sidebar `shade-1`, accent
+   `primary`, text `text-shade-0`, muted `text-shade-2`, which is what the app
+   paints on those two surfaces. They used to be each palette's canonical hexes
+   copied from upstream, which is a different thing: close in light, wrong in
+   dark, and it put the sidebar on the wrong side of the canvas because the app's
+   ramp runs the other way there. A palette changed in `app.pcss` has to be
+   changed here too, and nothing checks that for us. */
 .themes:has(#ts-classic:checked) {
 	--l-bg: #ebebeb;
 	--l-side: #f5f5f5;
 	--l-accent: #eb6d47;
 	--l-text: #0d0d0d;
 	--l-muted: #808080;
-	--d-bg: #1a1a1a;
+	--d-bg: #2e2e2e;
 	--d-side: #242424;
 	--d-accent: #eb6d47;
 	--d-text: #f2f2f2;
@@ -627,68 +652,68 @@
 }
 
 .themes:has(#ts-dracula:checked) {
-	--l-bg: #f2f2ea;
-	--l-side: #fdfdf7;
-	--l-accent: #ff79c6;
-	--l-text: #282a36;
-	--l-muted: #6272a4;
-	--d-bg: #282a36;
-	--d-side: #1e1f29;
-	--d-accent: #ff79c6;
+	--l-bg: #edede3;
+	--l-side: #f5f5ef;
+	--l-accent: #ff7ac6;
+	--l-text: #272935;
+	--l-muted: #5f6881;
+	--d-bg: #353746;
+	--d-side: #2e303d;
+	--d-accent: #ff7ac6;
 	--d-text: #f8f8f2;
-	--d-muted: #6272a4;
+	--d-muted: #c1bfb3;
 }
 
 .themes:has(#ts-catppuccin:checked) {
-	--l-bg: #e6e9ef;
-	--l-side: #eff1f5;
-	--l-accent: #cba6f7;
-	--l-text: #4c4f69;
-	--l-muted: #7c7f93;
-	--d-bg: #1e1e2e;
-	--d-side: #181825;
-	--d-accent: #cba6f7;
+	--l-bg: #dadee7;
+	--l-side: #e3e6ed;
+	--l-accent: #caa6f7;
+	--l-text: #4b4e68;
+	--l-muted: #6b6e85;
+	--d-bg: #292938;
+	--d-side: #242433;
+	--d-accent: #caa6f7;
 	--d-text: #cdd6f4;
-	--d-muted: #6c7086;
+	--d-muted: #a6adc9;
 }
 
 .themes:has(#ts-gruvbox:checked) {
-	--l-bg: #f2e5bc;
-	--l-side: #fbf1c7;
-	--l-accent: #d65d0e;
-	--l-text: #282828;
-	--l-muted: #7c6f64;
-	--d-bg: #282828;
-	--d-side: #1d2021;
-	--d-accent: #fe8019;
-	--d-text: #ebdbb2;
-	--d-muted: #7c6f64;
+	--l-bg: #ebdbb2;
+	--l-side: #f2e5ba;
+	--l-accent: #d85f0e;
+	--l-text: #292929;
+	--l-muted: #7d6f64;
+	--d-bg: #3b3735;
+	--d-side: #32302f;
+	--d-accent: #fe811b;
+	--d-text: #fbf0c6;
+	--d-muted: #a89985;
 }
 
 .themes:has(#ts-nord:checked) {
-	--l-bg: #e5e9f0;
-	--l-side: #eceff4;
-	--l-accent: #5e81ac;
-	--l-text: #2e3440;
-	--l-muted: #4c566a;
-	--d-bg: #2e3440;
-	--d-side: #272c36;
-	--d-accent: #88c0d0;
-	--d-text: #d8dee9;
-	--d-muted: #4c566a;
+	--l-bg: #dee4ed;
+	--l-side: #e5e9f0;
+	--l-accent: #5d81ac;
+	--l-text: #2f3541;
+	--l-muted: #4d576a;
+	--d-bg: #3c4353;
+	--d-side: #333a47;
+	--d-accent: #87bfcf;
+	--d-text: #eceff4;
+	--d-muted: #8fa1b3;
 }
 
 .themes:has(#ts-solarized:checked) {
-	--l-bg: #eee8d5;
-	--l-side: #fdf6e3;
-	--l-accent: #268bd2;
-	--l-text: #073642;
-	--l-muted: #839496;
-	--d-bg: #002b36;
-	--d-side: #073642;
-	--d-accent: #268bd2;
-	--d-text: #93a1a1;
-	--d-muted: #586e75;
+	--l-bg: #ede7d4;
+	--l-side: #f7f1de;
+	--l-accent: #278bd3;
+	--l-text: #073541;
+	--l-muted: #839495;
+	--d-bg: #073541;
+	--d-side: #042f39;
+	--d-accent: #278bd3;
+	--d-text: #ede7d4;
+	--d-muted: #647a82;
 }
 
 /* Each swatch shows its own palette whichever one is selected, so it carries its
@@ -697,43 +722,43 @@
 .sw--classic {
 	--l-bg: #ebebeb;
 	--l-accent: #eb6d47;
-	--d-bg: #1a1a1a;
+	--d-bg: #2e2e2e;
 	--d-accent: #eb6d47;
 }
 
 .sw--dracula {
-	--l-bg: #f2f2ea;
-	--l-accent: #ff79c6;
-	--d-bg: #282a36;
-	--d-accent: #ff79c6;
+	--l-bg: #edede3;
+	--l-accent: #ff7ac6;
+	--d-bg: #353746;
+	--d-accent: #ff7ac6;
 }
 
 .sw--catppuccin {
-	--l-bg: #e6e9ef;
-	--l-accent: #cba6f7;
-	--d-bg: #1e1e2e;
-	--d-accent: #cba6f7;
+	--l-bg: #dadee7;
+	--l-accent: #caa6f7;
+	--d-bg: #292938;
+	--d-accent: #caa6f7;
 }
 
 .sw--gruvbox {
-	--l-bg: #f2e5bc;
-	--l-accent: #d65d0e;
-	--d-bg: #282828;
-	--d-accent: #fe8019;
+	--l-bg: #ebdbb2;
+	--l-accent: #d85f0e;
+	--d-bg: #3b3735;
+	--d-accent: #fe811b;
 }
 
 .sw--nord {
-	--l-bg: #e5e9f0;
-	--l-accent: #5e81ac;
-	--d-bg: #2e3440;
-	--d-accent: #88c0d0;
+	--l-bg: #dee4ed;
+	--l-accent: #5d81ac;
+	--d-bg: #3c4353;
+	--d-accent: #87bfcf;
 }
 
 .sw--solarized {
-	--l-bg: #eee8d5;
-	--l-accent: #268bd2;
-	--d-bg: #002b36;
-	--d-accent: #268bd2;
+	--l-bg: #ede7d4;
+	--l-accent: #278bd3;
+	--d-bg: #073541;
+	--d-accent: #278bd3;
 }
 
 /* Light or dark, resolved on the element that draws rather than on the group, so

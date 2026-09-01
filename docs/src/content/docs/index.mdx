@@ -27,6 +27,7 @@ import wallpaper from '../../assets/screenshots/desktop_wallpaper.png';
 import library from '../../assets/screenshots/desktop_library.png';
 import conversation from '../../assets/screenshots/desktop_conversation.png';
 import phone from '../../assets/screenshots/phone_home.png';
+import infomaniak from '../../assets/infomaniak.png';
 
 <section class="start">
 
@@ -167,16 +168,12 @@ Llooma is a small amount of glue around a lot of other people's work.
 
 <Credits />
 
-<section class="band band--note">
-
-<p class="tag">Not sponsored</p>
-
-Running Ollama on your own machine means no third party at all, and that is what I would recommend
-first. It needs a GPU though, and no phone has one. If someone else has to run the model, it is
-worth caring who: [Infomaniak](https://www.infomaniak.com/en/hosting/ai-tools) owns and runs its
-Swiss datacentres, serves open-weight models, does not log or train on prompts, and puts the GPU heat
-into warming homes nearby. Any other OpenAI-compatible provider works just as well here.
-
-</section>
+<aside class="nota">
+	<div class="nota__mark">
+		<Image src={infomaniak} alt="Infomaniak" widths={[160, 320]} sizes="10rem" />
+		<span class="nota__label">Not sponsored</span>
+	</div>
+	<p>No GPU of your own means someone else runs the model, and it is worth caring who. <a href="https://www.infomaniak.com/en/hosting/ai-tools">Infomaniak</a> owns its Swiss datacentres, serves open-weight models, does not log or train on prompts, and puts the GPU heat into homes nearby. Any other OpenAI-compatible provider works here too.</p>
+</aside>
 
 <p class="counted">Counted by a self-hosted <a href="https://umami.is">Umami</a>, which knows this page was opened and not by whom.</p>
