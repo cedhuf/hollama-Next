@@ -1,29 +1,21 @@
 /*
- * Site-specific styling, on top of Starlight's theme.
+ * Site-specific styling on top of Starlight's theme, kept small: every rule
+ * here is a deviation from a theme that is already consistent and accessible.
+ * Colours come from Starlight's own custom properties, except the theme picker
+ * near the foot of the home page, which shows the app's palettes and has to
+ * carry their values.
  *
- * Kept deliberately small: everything here is a deviation from a theme that is
- * already consistent and accessible, so each rule should earn its place.
- * Colours come from Starlight's own custom properties so both light and dark
- * ramps follow automatically. The exception is the theme picker near the foot of
- * the home page, which shows the app's palettes and therefore has to carry their
- * actual values.
- *
- * Starlight's own rules live in `@layer starlight.core`, and everything here is
- * unlayered, so these win without needing specificity tricks.
- *
- * Everything down to the changelog is used by the home page.
+ * Starlight's rules live in `@layer starlight.core` and everything here is
+ * unlayered, so these win without specificity tricks.
  */
 
 /*
- * The accent, taken from the app rather than left at Starlight's blue.
- *
- * `hsl(14 80% 60%)` is the Classic theme's primary, the orange on the New chat
- * button in every screenshot on this page. A documentation site wearing a
- * different colour from the product it documents reads as somebody else's site.
+ * The accent, taken from the app rather than left at Starlight's blue:
+ * `hsl(14 80% 60%)` is Classic's primary, the orange on the New chat button in
+ * every screenshot here.
  *
  * Starlight's dark ramp is the bare `:root`; the light one is on the attribute
- * it sets when the reader picks light. Lightness on the light ramp is chosen for
- * white text on the accent, which is what its buttons do.
+ * it sets. Lightness on the light ramp is chosen for white text on the accent.
  */
 :root {
 	--sl-color-accent-low: hsl(14 45% 18%);
@@ -37,11 +29,8 @@
 	--sl-color-accent-low: hsl(14 85% 92%);
 }
 
-/*
- * A visually hidden label, still read aloud and still focusable. Used for the
- * two fieldset legends in the theme picker, which say what a group of controls
- * is for to someone who cannot see that it is a row of swatches.
- */
+/* Visually hidden, still read aloud and still focusable. For the two fieldset
+   legends in the theme picker. */
 .sr-only {
 	position: absolute;
 	width: 1px;
@@ -52,12 +41,8 @@
 }
 
 /*
- * The hero.
- *
- * Two columns, the argument and the product. The art is a phone rather than the
- * desktop composite that used to open the page: at hero size a desktop
- * screenshot is a grey rectangle with unreadable text in it, where a phone is
- * recognisable at a glance and leaves room for the words beside it.
+ * The hero: the argument and the product. A phone rather than a desktop
+ * composite, which at hero size is a grey rectangle with unreadable text in it.
  */
 .hero {
 	position: relative;
@@ -138,10 +123,8 @@
 	}
 }
 
-/*
- * The art, lifted off the page rather than laid on it: a soft ground behind the
- * phone and a shadow under it, so the transparent PNG reads as an object.
- */
+/* The art lifted off the page: a soft ground behind the phone and a shadow
+   under it, so the transparent PNG reads as an object. */
 .hero__art {
 	position: relative;
 	display: flex;
@@ -155,12 +138,9 @@
 }
 
 /*
- * How finished this is, said once and above the title.
- *
- * It was a yellow caution box, then a grey pill sharing a line with the
- * attribution, where neither had any weight. Above the headline it is read
- * first, in a colour that means status rather than danger, and the dot is the
- * shape a status indicator already has everywhere else.
+ * How finished this is, said once and above the title. As a yellow caution box,
+ * then a grey pill on the attribution line, it had no weight. Above the headline
+ * it is read first, in a colour that means status rather than danger.
  */
 .badge {
 	display: inline-flex;
@@ -204,11 +184,9 @@
 }
 
 /*
- * What this is a fork of.
- *
- * Being a fork is not a footnote, so it is not set in footnote type on the end
- * of another line. Its own block, a rule in the accent colour beside it, and the
- * name at full size: the shape of an attribution rather than a disclaimer.
+ * What this is a fork of. Being a fork is not a footnote, so it gets its own
+ * block, a rule in the accent beside it, and the name at full size: the shape of
+ * an attribution rather than a disclaimer.
  */
 .lineage {
 	margin: 2.25rem 0 0;
@@ -249,10 +227,8 @@
 	color: var(--sl-color-gray-2);
 }
 
-/*
- * A small caps label. Ahead of a heading rather than under it: it says what
- * subject is about to start, which is only useful before the subject starts.
- */
+/* A small caps label, ahead of a heading rather than under it: it says what
+   subject is about to start. */
 .eyebrow {
 	margin: 0 0 0.35rem;
 	color: var(--sl-color-text-accent);
@@ -262,11 +238,8 @@
 	text-transform: uppercase;
 }
 
-/*
- * A tag. Small, and ahead of what it qualifies rather than buried under it: a
- * disclosure that arrives after the reader has formed an opinion has not
- * disclosed anything.
- */
+/* A tag, ahead of what it qualifies: a disclosure that arrives after the reader
+   has formed an opinion has not disclosed anything. */
 .tag {
 	display: inline-block;
 	width: fit-content;
@@ -290,12 +263,11 @@
 }
 
 /*
- * A screenshot, framed rather than dropped in.
- *
- * The frame is what stops it reading as an illustration someone pasted: a
- * border, a radius and a shadow make it a window onto the app instead. The glow
- * behind it picks up the accent colour, faintly, so the block belongs to the
- * page rather than sitting on top of it.
+ * A screenshot. Every asset here is already a framed window on a transparent
+ * ground, with its own shadow drawn in about 60px of margin around it, so the
+ * page adds nothing: a border and a radius would land on that empty margin
+ * rather than on the window, drawing a rectangle a long way outside the frame
+ * and cutting the shadow off against its edge. Only the glow behind stays.
  */
 .shot {
 	position: relative;
@@ -309,11 +281,6 @@
 	display: block;
 	width: 100%;
 	height: auto;
-	border: 1px solid var(--sl-color-gray-5);
-	border-radius: 0.75rem;
-	box-shadow:
-		0 1px 2px rgb(0 0 0 / 0.08),
-		0 12px 32px -12px rgb(0 0 0 / 0.35);
 }
 
 .shot::before {
@@ -346,16 +313,13 @@
 }
 
 /*
- * The big screenshot settles as it arrives.
+ * The big screenshot settles as it arrives. It used to open the page, where it
+ * pushed everything worth reading below the fold; lower down it has to earn a
+ * stop instead.
  *
- * It used to open the page, where it pushed everything worth reading below the
- * fold. Lower down it has to earn a stop instead, which is what the scroll does:
- * the image comes up from under, slightly small and dim, and lands as it enters.
- *
- * `animation-timeline` needs no JavaScript, no observer and no layout reads, so
- * there is nothing to run on a browser that does not have it. Both guards matter:
- * without support the image is simply there, and someone who has asked for less
- * motion gets exactly that.
+ * `animation-timeline` needs no JavaScript and no layout reads. Both guards
+ * matter: without support the image is simply there, and someone who asked for
+ * less motion gets exactly that.
  */
 @supports (animation-timeline: view()) {
 	@media (prefers-reduced-motion: no-preference) {
@@ -396,12 +360,9 @@
 }
 
 /*
- * Install, in the form anyone will actually meet it.
- *
- * The argument for a self-hosted app is how little it asks of the machine, and
- * that argument is the file itself rather than a sentence about the file. Two
- * columns so the prose and the compose file are read as one statement, stacked
- * below the width where the code would start wrapping.
+ * Install, in the form anyone will actually meet it: the argument for a
+ * self-hosted app is the file itself rather than a sentence about the file. Two
+ * columns, stacked below the width where the code would wrap.
  */
 .start {
 	display: grid;
@@ -430,11 +391,9 @@
 }
 
 /*
- * The feature panels.
- *
- * A claim and the screen it happens on, side by side, alternating so the eye has
- * somewhere to go down the page. This replaced four cards of text: a card can
- * hold a sentence about a feature, it cannot show one.
+ * The feature panels: a claim and the screen it happens on, alternating so the
+ * eye has somewhere to go. This replaced four cards of text, which can hold a
+ * sentence about a feature but cannot show one.
  */
 .panels {
 	display: flex;
@@ -482,25 +441,17 @@
 	display: block;
 	width: 100%;
 	height: auto;
-	border-radius: 0.75rem;
-	box-shadow:
-		0 1px 2px rgb(0 0 0 / 0.08),
-		0 16px 40px -16px rgb(0 0 0 / 0.4);
 }
 
-/* The phone shot is already a phone on a transparent ground, so a frame around
-   it would be a second device around the first. */
+/* The phone is taller than it is wide, so it needs a cap the desktop shots do
+   not: at full column width it would tower over the paragraph beside it. */
 .panel__shot--phone img {
 	width: min(100%, 17rem);
 	margin-inline: auto;
-	border-radius: 0;
-	box-shadow: none;
 }
 
-/*
- * The link that ends a panel, with a chevron drawn from two borders rather than
- * typed as an arrow character, which would be read out loud by a screen reader.
- */
+/* The link that ends a panel, with a chevron drawn from two borders rather than
+   typed as an arrow, which a screen reader would read out. */
 .more {
 	margin-top: 1.25rem;
 }
@@ -532,10 +483,8 @@
 	transform: rotate(45deg) translate(2px, -2px);
 }
 
-/*
- * A band: a section tinted enough to read as a change of subject, without a
- * rule across the page or a heading shouting about it.
- */
+/* A band: tinted enough to read as a change of subject, with no rule across the
+   page and no heading shouting about it. */
 .band {
 	margin: 4rem 0;
 	padding: 2.5rem clamp(1rem, 4vw, 3rem);
@@ -572,16 +521,14 @@
 }
 
 /*
- * The theme picker.
+ * The theme picker. This was a screenshot of twelve palettes, which is a lot of
+ * kilobytes to say something the reader cannot try. Real radio buttons and
+ * `:has()` do it with no JavaScript, so it works before hydration and keyboard
+ * first.
  *
- * This was a screenshot of twelve palettes, which is a lot of kilobytes to say
- * something the reader cannot try. Real radio buttons and `:has()` do it with no
- * JavaScript at all, which also means it works before hydration, keyboard first,
- * and with the tab order the browser already knows how to build.
- *
- * The twelve palettes below are the ones in `ThemePicker.svelte`, which mirrors
- * the `--hsl-*` blocks in the app's `app.pcss`. A palette added there has to be
- * added here too; nothing checks that for us.
+ * The twelve below are the ones in `ThemePicker.svelte`, mirroring the `--hsl-*`
+ * blocks in the app's `app.pcss`. A palette added there has to be added here
+ * too; nothing checks that for us.
  */
 .themes {
 	display: grid;
@@ -810,10 +757,9 @@
 }
 
 /*
- * The mock conversation the palettes are tried on.
- *
- * Built from the app's own arrangement, a sidebar and a thread, because a row of
- * coloured rectangles proves a palette exists and nothing about living in it.
+ * The mock conversation the palettes are tried on, built from the app's own
+ * arrangement: a row of coloured rectangles proves a palette exists and nothing
+ * about living in it.
  */
 .mock {
 	display: grid;
@@ -939,11 +885,8 @@
 }
 
 /*
- * The credits.
- *
- * Cards rather than a bulleted list: each entry has three things to say (what
- * it is, what it does here, what it is licensed under) and a list flattens them
- * into one long line nobody reads to the end of.
+ * The credits, as cards rather than a bulleted list: each entry has three things
+ * to say, and a list flattens them into a line nobody reads to the end of.
  */
 .credits {
 	display: grid;
@@ -1034,11 +977,8 @@
 }
 
 /*
- * The changelog, one section per release.
- *
- * The version and its date belong on the same line: the list underneath is what
- * the reader came for, and a date on a line of its own pushes it down for no
- * reason.
+ * The changelog, one section per release. The version and its date share a line:
+ * the list underneath is what the reader came for.
  */
 .release + .release {
 	margin-top: 2.5rem;
