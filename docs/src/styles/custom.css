@@ -239,16 +239,11 @@
 }
 
 /*
- * A screenshot. Every asset is a rounded window on a transparent ground, cropped
- * to the window itself, and the shadow under it is drawn here.
- *
- * Twice now it has been drawn the wrong way. A `box-shadow` and a border apply to
- * the element's box, which for a rounded shape on transparency is a rectangle
- * around it rather than under it. The assets then carried a baked shadow of their
- * own, in 60px of margin, but one that was still at 8% alpha where the file ended:
- * a hard line along the bottom, which is the square that would not go away. Hence
- * `drop-shadow`, which follows the alpha and fades to nothing, on an image with no
- * margin left to cut. The hero has always done it this way.
+ * A screenshot. Every asset here is already a framed window on a transparent
+ * ground, with its own shadow drawn in about 60px of margin around it, so the
+ * page adds nothing: a border and a radius would land on that empty margin
+ * rather than on the window, drawing a rectangle a long way outside the frame
+ * and cutting the shadow off against its edge. Only the glow behind stays.
  */
 .shot {
 	position: relative;
@@ -262,7 +257,6 @@
 	display: block;
 	width: 100%;
 	height: auto;
-	filter: drop-shadow(0 18px 34px rgb(0 0 0 / 0.32));
 }
 
 .shot::before {
@@ -423,7 +417,6 @@
 	display: block;
 	width: 100%;
 	height: auto;
-	filter: drop-shadow(0 16px 30px rgb(0 0 0 / 0.3));
 }
 
 /* The phone is taller than it is wide, so it needs a cap the desktop shots do
