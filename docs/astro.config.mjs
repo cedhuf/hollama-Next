@@ -46,7 +46,7 @@ export default defineConfig({
 					tag: 'script',
 					attrs: {
 						defer: true,
-						src: 'https://audience.thehuf.uk/t.js',
+						src: 'https://audience.thehuf.uk/script.js',
 						'data-website-id': '433cde08-4dd1-4834-a15e-a67432ba0da7'
 					}
 				}
