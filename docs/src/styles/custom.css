@@ -665,78 +665,102 @@
 .themes:has(#ts-classic:checked) {
 	--l-canvas: #ebebeb;
 	--l-panel: #f5f5f5;
+	--l-card: #ffffff;
 	--l-accent: #eb6d47;
-	--l-text: #0d0d0d;
+	--l-active: #0d0d0d;
+	--l-body: #404040;
 	--l-muted: #808080;
 	--d-canvas: #2e2e2e;
 	--d-panel: #242424;
+	--d-card: #1a1a1a;
 	--d-accent: #eb6d47;
-	--d-text: #f2f2f2;
+	--d-active: #f2f2f2;
+	--d-body: #d9d9d9;
 	--d-muted: #808080;
 }
 
 .themes:has(#ts-dracula:checked) {
 	--l-canvas: #edede3;
 	--l-panel: #f5f5ef;
+	--l-card: #fdfdfc;
 	--l-accent: #ff7ac6;
-	--l-text: #272935;
+	--l-active: #272935;
+	--l-body: #44475a;
 	--l-muted: #5f6881;
 	--d-canvas: #353746;
 	--d-panel: #2e303d;
+	--d-card: #272935;
 	--d-accent: #ff7ac6;
-	--d-text: #f8f8f2;
+	--d-active: #f8f8f2;
+	--d-body: #e6e6db;
 	--d-muted: #c1bfb3;
 }
 
 .themes:has(#ts-catppuccin:checked) {
 	--l-canvas: #dadee7;
 	--l-panel: #e3e6ed;
+	--l-card: #eff1f5;
 	--l-accent: #caa6f7;
-	--l-text: #4b4e68;
+	--l-active: #4b4e68;
+	--l-body: #5b5e76;
 	--l-muted: #6b6e85;
 	--d-canvas: #292938;
 	--d-panel: #242433;
+	--d-card: #1e1e2e;
 	--d-accent: #caa6f7;
-	--d-text: #cdd6f4;
+	--d-active: #cdd6f4;
+	--d-body: #bac2de;
 	--d-muted: #a6adc9;
 }
 
 .themes:has(#ts-gruvbox:checked) {
 	--l-canvas: #ebdbb2;
 	--l-panel: #f2e5ba;
+	--l-card: #fbf0c6;
 	--l-accent: #d85f0e;
-	--l-text: #292929;
+	--l-active: #292929;
+	--l-body: #4f4945;
 	--l-muted: #7d6f64;
 	--d-canvas: #3b3735;
 	--d-panel: #32302f;
+	--d-card: #292929;
 	--d-accent: #fe811b;
-	--d-text: #fbf0c6;
+	--d-active: #fbf0c6;
+	--d-body: #d4c3a0;
 	--d-muted: #a89985;
 }
 
 .themes:has(#ts-nord:checked) {
 	--l-canvas: #dee4ed;
 	--l-panel: #e5e9f0;
+	--l-card: #eceff4;
 	--l-accent: #5d81ac;
-	--l-text: #2f3541;
+	--l-active: #2f3541;
+	--l-body: #3c4353;
 	--l-muted: #4d576a;
 	--d-canvas: #3c4353;
 	--d-panel: #333a47;
+	--d-card: #2f3541;
 	--d-accent: #87bfcf;
-	--d-text: #eceff4;
+	--d-active: #eceff4;
+	--d-body: #d8dee9;
 	--d-muted: #8fa1b3;
 }
 
 .themes:has(#ts-solarized:checked) {
 	--l-canvas: #ede7d4;
 	--l-panel: #f7f1de;
+	--l-card: #fdf6e2;
 	--l-accent: #278bd3;
-	--l-text: #073541;
+	--l-active: #073541;
+	--l-body: #586e74;
 	--l-muted: #839495;
 	--d-canvas: #073541;
 	--d-panel: #042f39;
+	--d-card: #002d38;
 	--d-accent: #278bd3;
-	--d-text: #ede7d4;
+	--d-active: #ede7d4;
+	--d-body: #92a0a0;
 	--d-muted: #647a82;
 }
 
@@ -791,8 +815,10 @@
 .themes:has(#tm-light:checked) .sw {
 	--canvas: var(--l-canvas);
 	--panel: var(--l-panel);
+	--card: var(--l-card);
 	--accent: var(--l-accent);
-	--text: var(--l-text);
+	--active: var(--l-active);
+	--body: var(--l-body);
 	--muted: var(--l-muted);
 }
 
@@ -800,8 +826,10 @@
 .themes:has(#tm-dark:checked) .sw {
 	--canvas: var(--d-canvas);
 	--panel: var(--d-panel);
+	--card: var(--d-card);
 	--accent: var(--d-accent);
-	--text: var(--d-text);
+	--active: var(--d-active);
+	--body: var(--d-body);
 	--muted: var(--d-muted);
 }
 
@@ -846,20 +874,20 @@
 }
 
 .mock__brand {
-	color: var(--text);
+	color: var(--active);
 	font-weight: 700;
 }
 
-/* Tinted rather than filled with the accent, which the app can afford and this
-   cannot: twelve palettes means twelve contrast ratios, and a pale accent under
-   a light ramp (Catppuccin, Nord) leaves no readable colour for the label. A mix
-   with the surface behind it is legible in all twelve. */
+/* Filled with the accent and labelled in `shade-0`, which is what the app does:
+   white on the accent under a light ramp, near-black under a dark one. Measured
+   off the captures above rather than guessed, after a tinted version of this
+   button had the loudest colour on the page reading as washed out. */
 .mock__new {
 	margin-bottom: 0.25rem;
 	padding: 0.4rem 0.6rem;
 	border-radius: 0.45rem;
-	background: color-mix(in oklab, var(--accent) 32%, var(--panel));
-	color: var(--text);
+	background: var(--accent);
+	color: var(--card);
 	font-size: var(--sl-text-xs);
 	font-weight: 600;
 	text-align: center;
@@ -876,8 +904,8 @@
 .mock__row--on {
 	padding: 0.25rem 0.4rem;
 	border-radius: 0.35rem;
-	background: color-mix(in oklab, var(--text) 8%, transparent);
-	color: var(--text);
+	background: var(--card);
+	color: var(--active);
 	font-weight: 600;
 }
 
@@ -900,8 +928,8 @@
 	margin-left: auto;
 	padding: 0.5rem 0.75rem;
 	border-radius: 0.6rem;
-	background: color-mix(in oklab, var(--accent) 22%, var(--panel));
-	color: var(--text);
+	background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+	color: var(--body);
 }
 
 .mock__label {
@@ -913,7 +941,10 @@
 }
 
 .mock__said {
-	color: var(--text);
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.6rem;
+	background: color-mix(in srgb, var(--card) 50%, var(--panel));
+	color: var(--body);
 	line-height: 1.6;
 }
 
@@ -924,8 +955,9 @@
 	gap: 1rem;
 	margin-top: auto;
 	padding: 0.5rem 0.5rem 0.5rem 0.75rem;
-	border: 1px solid color-mix(in oklab, var(--muted) 40%, transparent);
+	border: 1px solid color-mix(in srgb, var(--muted) 40%, transparent);
 	border-radius: 0.6rem;
+	background: var(--card);
 	color: var(--muted);
 	font-size: var(--sl-text-xs);
 }
@@ -933,8 +965,10 @@
 .mock__run {
 	padding: 0.25rem 0.6rem;
 	border-radius: 0.4rem;
-	background: color-mix(in oklab, var(--accent) 20%, var(--panel));
-	color: var(--text);
+	/* Neutral, because the app's composer is: nothing in it carries the accent
+	   until there is something to send. */
+	background: color-mix(in srgb, var(--muted) 20%, transparent);
+	color: var(--body);
 	font-weight: 600;
 }
 
