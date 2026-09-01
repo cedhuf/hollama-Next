@@ -132,9 +132,9 @@
 }
 
 .hero__art img {
-	width: min(100%, 20rem);
+	width: min(100%, 16rem);
 	height: auto;
-	filter: drop-shadow(0 24px 45px rgb(0 0 0 / 0.45));
+	filter: drop-shadow(0 30px 70px rgb(0 0 0 / 0.4));
 }
 
 /*
@@ -239,11 +239,21 @@
 }
 
 /*
- * A screenshot. Every asset here is already a framed window on a transparent
- * ground, with its own shadow drawn in about 60px of margin around it, so the
- * page adds nothing: a border and a radius would land on that empty margin
- * rather than on the window, drawing a rectangle a long way outside the frame
- * and cutting the shadow off against its edge. Only the glow behind stays.
+ * A screenshot: a rounded window on a transparent ground, cropped in `docs/` to
+ * the window itself, with its shadow drawn here.
+ *
+ * `tests/screenshots.test.ts` frames the captures and paints the shadow into the
+ * file, in 60px of margin (`PAD`). A 64px blur does not fit in 60px, so the file
+ * ends while the shadow is still at 8% black: a hard line along the bottom edge,
+ * which is the square that would not go away. Cropping that margin off and using
+ * `drop-shadow` puts the same shadow back, following the alpha and fading out.
+ * `box-shadow` cannot: on a rounded shape over transparency it draws around the
+ * element's rectangle rather than under the window.
+ *
+ * The values below are the generator's own, so the picture is unchanged. The
+ * widths are too: the crop took 60px off each side of a 1560px asset, so a
+ * window at 92.31% of the figure occupies exactly what it did before, and the
+ * page does not move.
  */
 .shot {
 	position: relative;
@@ -255,8 +265,10 @@
 
 .shot img {
 	display: block;
-	width: 100%;
+	width: 92.31%;
 	height: auto;
+	margin-inline: auto;
+	filter: drop-shadow(0 2px 5px rgb(0 0 0 / 0.16)) drop-shadow(0 26px 64px rgb(0 0 0 / 0.3));
 }
 
 .shot::before {
@@ -415,15 +427,20 @@
 
 .panel__shot img {
 	display: block;
-	width: 100%;
+	width: 92.31%;
 	height: auto;
+	margin-inline: auto;
+	filter: drop-shadow(0 2px 5px rgb(0 0 0 / 0.16)) drop-shadow(0 26px 64px rgb(0 0 0 / 0.3));
 }
 
 /* The phone is taller than it is wide, so it needs a cap the desktop shots do
-   not: at full column width it would tower over the paragraph beside it. */
+   not: at full column width it would tower over the paragraph beside it. The cap
+   is 13.6rem rather than the 17rem it was, because 17rem of the old asset was
+   13.6rem of window and 3.4rem of margin. Its shadow is the generator's phone
+   shadow, which is deeper than the window's. */
 .panel__shot--phone img {
-	width: min(100%, 17rem);
-	margin-inline: auto;
+	width: min(100%, 13.6rem);
+	filter: drop-shadow(0 30px 70px rgb(0 0 0 / 0.35));
 }
 
 /* The link that ends a panel, with a chevron drawn from two borders rather than
