@@ -342,14 +342,37 @@ async function shootPhone(page: Page, name: string) {
 	await shoot(page, name);
 }
 
+/**
+ * The app's own faces, before anything is captured.
+ *
+ * Inter and JetBrains Mono are self-hosted and declared `font-display: swap`, so
+ * the first paint is the system stack and the swap lands whenever the woff2
+ * arrives. A fixed delay only hides that on a fast machine: every capture had to
+ * be lucky, and the ones that were not showed a different typeface from the app.
+ * `document.fonts.load` asks for the two families and resolves when they are
+ * usable, which is the fact the delay was standing in for.
+ */
+async function fontsReady(page: Page) {
+	await page.evaluate(async () => {
+		await Promise.all([
+			document.fonts.load('400 1rem Inter'),
+			document.fonts.load('700 1rem Inter'),
+			document.fonts.load('400 1rem "JetBrains Mono"')
+		]);
+		await document.fonts.ready;
+	});
+}
+
 async function shoot(page: Page, name: string) {
-	// Fonts and the wallpaper settle a frame or two after the route does.
+	await fontsReady(page);
+	// The wallpaper settles a frame or two after the route does.
 	await page.waitForTimeout(500);
 	await page.screenshot({ path: `${RAW}/${name}.png`, animations: 'disabled' });
 }
 
 /** One full screenshot, as a data URL, for the composites to layer. */
 async function capture(page: Page) {
+	await fontsReady(page);
 	const shot = await page.screenshot({ animations: 'disabled' });
 	return `data:image/png;base64,${shot.toString('base64')}`;
 }
@@ -431,7 +454,8 @@ const DOCS_FRAMES = new Set([
 	'desktop_conversation',
 	'desktop_library',
 	'desktop_wallpaper',
-	'phone_home'
+	'phone_home',
+	'phone_voice'
 ]);
 
 const docsCopy = (name: string) => (DOCS_FRAMES.has(name) ? `${DOCS_OUT}/${name}.png` : undefined);
@@ -901,9 +925,18 @@ test.describe('screenshots', () => {
 		await shoot(page, 'desktop_library');
 
 		// A wallpaper: the column translucent over it, the conversation opaque on top.
-		await configure(page, { backgroundImage: 'pack:ocean', surfaceTransparency: true });
+		// Dark, because this shot is the hero's window on both the README and the
+		// documentation home, and a picture behind glass reads at night. `configure`
+		// lays `BASE_SETTINGS` over what is stored, so the mode has to be said again
+		// here rather than carried over from the shot above.
+		await configure(page, {
+			backgroundImage: 'pack:ocean',
+			surfaceTransparency: true,
+			themeMode: 'dark'
+		});
 		await page.goto('/sessions/ab12cd');
 		await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'on');
+		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
 		await shoot(page, 'desktop_wallpaper');
 
 		await configure(page, { backgroundImage: '', themeMode: 'light' });
