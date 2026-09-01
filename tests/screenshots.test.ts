@@ -425,8 +425,38 @@ async function composeRows(
  */
 const FRAMED_OUT = `${OUT}/framed`;
 
-/** Room around a frame for its shadow to fall into. */
-const PAD = 60;
+/** The frames the documentation site imports. Astro's image pipeline reads its
+    own folder, and a frame copied there by hand is a frame that drifts. */
+const DOCS_FRAMES = new Set([
+	'desktop_conversation',
+	'desktop_library',
+	'desktop_wallpaper',
+	'phone_home'
+]);
+
+const docsCopy = (name: string) => (DOCS_FRAMES.has(name) ? `${DOCS_OUT}/${name}.png` : undefined);
+
+/*
+ * A frame is written with no room around it: the shadow it used to carry is
+ * drawn by whoever displays it now.
+ *
+ * It was baked in, into `PAD` pixels of margin, and a 64px blur does not fit in
+ * 60 of them: every file ended while its shadow was still at 8% black, which is
+ * a hard line along the bottom edge of all thirteen. The documentation site puts
+ * the shadow back in CSS, where it can fade out properly; the README shows the
+ * frames flat, which on GitHub's plain background is no loss.
+ *
+ * The hero is the exception, since a phone leaning on a window has to cast onto
+ * it to read as leaning. It keeps its shadows, and the room they need.
+ */
+const PAD = 0;
+
+/** The hero's shadows are deep, and they fall inside the file. */
+const HERO_PAD = 160;
+
+/** The side buttons sit on the chassis edge and stand 2px off it, so a phone
+    written with no margin at all would have them shaved off. */
+const BUTTON = 2;
 
 /** The Mac window's title bar: tall enough for three lights and nothing else. */
 const TITLE_BAR = 30;
@@ -509,7 +539,9 @@ const FRAME_CSS = `
 		border-radius: 11px;
 		overflow: hidden;
 		background: var(--bar);
-		box-shadow: 0 2px 5px rgba(0, 0, 0, .16), 0 26px 64px rgba(0, 0, 0, .3), 0 0 0 1px var(--ring);
+		/* The ring is the chassis; the drop is the composite's business, and off by
+		   default. Transparent rather than none, which cannot sit in a list. */
+		box-shadow: var(--drop, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 1px var(--ring);
 		transform-origin: top left;
 	}
 	.window .bar {
@@ -536,7 +568,7 @@ const FRAME_CSS = `
 		box-sizing: border-box;
 		border-radius: var(--corner);
 		background: linear-gradient(145deg, #7c7c82 0%, #33333a 22%, #1c1c1f 52%, #5e5e66 78%, #232327 100%);
-		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 30px 70px rgba(0, 0, 0, .35);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), var(--drop, 0 0 0 rgba(0, 0, 0, 0));
 		transform-origin: top left;
 	}
 	.phone .screen {
@@ -632,7 +664,7 @@ function chassis(screenW: number, screenH: number, shotH: number, bezel: number,
 }
 
 /** The bars sit above and below the shot: the app is captured with a nought safe area, so an island on top would cover its header. */
-function phoneHtml(src: string, e: Edges, place = `top:${PAD}px;left:${PAD}px`) {
+function phoneHtml(src: string, e: Edges, place = `top:${PAD + BUTTON}px;left:${PAD + BUTTON}px`) {
 	const ink = e.darkTop ? '#fff' : '#000';
 	const inkHome = e.darkBottom ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)';
 
@@ -712,7 +744,8 @@ async function frameWindow(page: Page, name: string) {
 		width: WINDOW_SIZE.width + PAD * 2,
 		height: WINDOW_SIZE.height + PAD * 2,
 		body: windowHtml(src, e),
-		out: `${FRAMED_OUT}/${name}.png`
+		out: `${FRAMED_OUT}/${name}.png`,
+		alsoOut: docsCopy(name)
 	});
 }
 
@@ -722,10 +755,11 @@ async function framePhone(page: Page, name: string) {
 	const e = await edges(page, src);
 
 	await draw(page, {
-		width: PHONE_SIZE.width + PAD * 2,
-		height: PHONE_SIZE.height + PAD * 2,
+		width: PHONE_SIZE.width + (PAD + BUTTON) * 2,
+		height: PHONE_SIZE.height + (PAD + BUTTON) * 2,
 		body: phoneHtml(src, e),
-		out: `${FRAMED_OUT}/${name}.png`
+		out: `${FRAMED_OUT}/${name}.png`,
+		alsoOut: docsCopy(name)
 	});
 }
 
@@ -754,20 +788,25 @@ async function composeHero(page: Page) {
 
 	const phoneWidth = PHONE_SIZE.width * HERO.scale;
 	const phoneHeight = PHONE_SIZE.height * HERO.scale;
-	const phoneLeft = PAD + WINDOW_SIZE.width + HERO.overhangX - phoneWidth;
-	const phoneTop = PAD + WINDOW_SIZE.height + HERO.overhangY - phoneHeight;
+	const phoneLeft = HERO_PAD + WINDOW_SIZE.width + HERO.overhangX - phoneWidth;
+	const phoneTop = HERO_PAD + WINDOW_SIZE.height + HERO.overhangY - phoneHeight;
 
 	await draw(page, {
-		width: WINDOW_SIZE.width + HERO.overhangX + PAD * 2,
-		height: WINDOW_SIZE.height + HERO.overhangY + PAD * 2,
+		width: WINDOW_SIZE.width + HERO.overhangX + HERO_PAD * 2,
+		height: WINDOW_SIZE.height + HERO.overhangY + HERO_PAD * 2,
 		body:
-			windowHtml(windowSrc, windowEdges) +
+			windowHtml(
+				windowSrc,
+				windowEdges,
+				`top:${HERO_PAD}px;left:${HERO_PAD}px;` +
+					`--drop:0 2px 5px rgba(0,0,0,.16), 0 26px 64px rgba(0,0,0,.3)`
+			) +
 			phoneHtml(
 				phoneSrc,
 				phoneEdges,
-				// Darker and wider than the frame's own shadow, or the two look pasted.
+				// Darker and wider than the window's, or the two look pasted.
 				`top:${phoneTop}px;left:${phoneLeft}px;transform:scale(${HERO.scale});` +
-					`box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 40px 90px rgba(0,0,0,.45)`
+					`--drop:0 40px 90px rgba(0,0,0,.45)`
 			),
 		out: `${OUT}/hero.png`,
 		// Astro's image pipeline reads from its own folder rather than from `static/`.

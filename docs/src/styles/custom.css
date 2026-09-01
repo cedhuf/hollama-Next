@@ -239,21 +239,21 @@
 }
 
 /*
- * A screenshot: a rounded window on a transparent ground, cropped in `docs/` to
- * the window itself, with its shadow drawn here.
+ * A screenshot: a rounded window on a transparent ground, edge to edge, with its
+ * shadow drawn here.
  *
- * `tests/screenshots.test.ts` frames the captures and paints the shadow into the
- * file, in 60px of margin (`PAD`). A 64px blur does not fit in 60px, so the file
- * ends while the shadow is still at 8% black: a hard line along the bottom edge,
- * which is the square that would not go away. Cropping that margin off and using
- * `drop-shadow` puts the same shadow back, following the alpha and fading out.
- * `box-shadow` cannot: on a rounded shape over transparency it draws around the
- * element's rectangle rather than under the window.
+ * `tests/screenshots.test.ts` used to paint the shadow into the file, in 60px of
+ * margin. A 64px blur does not fit in 60px, so every frame ended while its shadow
+ * was still at 8% black: a hard line along the bottom edge, on the README as much
+ * as here, and no CSS reaches the README. The generator writes them flat now, and
+ * the shadow is CSS wherever there is CSS to have.
  *
- * The values below are the generator's own, so the picture is unchanged. The
- * widths are too: the crop took 60px off each side of a 1560px asset, so a
- * window at 92.31% of the figure occupies exactly what it did before, and the
- * page does not move.
+ * `drop-shadow` rather than `box-shadow`, which on a rounded shape over
+ * transparency draws around the element's rectangle instead of under the window.
+ * The values are the generator's own, so the picture is the one it always was,
+ * and the widths hold the old footprint: the frames lost 60px a side off a 1560px
+ * asset, so a window at 92.31% of the figure sits exactly where it sat, with the
+ * room the shadow needs.
  */
 .shot {
 	position: relative;
