@@ -3,15 +3,13 @@
 	import type { Snippet } from 'svelte';
 
 	/**
-	 * Dropdown menu of *actions* (the value-picking counterpart is `Select`).
+	 * Dropdown menu of actions; the value-picking counterpart is `Select`.
 	 *
-	 * Built on bits-ui so every instance gets flipping, collision detection, focus
-	 * handling, Escape/outside-click and ARIA for free, and, because the content is
-	 * portalled, it is never clipped by an `overflow-hidden` ancestor (the session
-	 * card is one).
+	 * Built on bits-ui, so every instance gets flipping, collision detection, focus
+	 * handling, Escape and ARIA, and the portalled content is never clipped by an
+	 * `overflow-hidden` ancestor.
 	 *
-	 * The trigger stays the caller's own markup: `trigger` receives the props to
-	 * spread onto whatever button it already renders.
+	 * The trigger stays the caller's own markup.
 	 */
 	interface Props {
 		/** Receives the props to spread onto the caller's own trigger element. */

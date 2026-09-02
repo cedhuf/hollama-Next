@@ -1,12 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	/**
-	 * A single key, as printed on a keyboard.
-	 *
-	 * Shared so the shortcut list and the search dialog's footer can't drift into
-	 * two different-looking keycaps.
-	 */
+	/** A single key as printed on a keyboard. Shared, so the shortcut list and the search dialog's footer cannot drift into two different keycaps. */
 	let { children }: { children: Snippet } = $props();
 </script>
 

@@ -11,15 +11,13 @@
 	 * The way around, floating over the content at thumb height.
 	 *
 	 * The voice key is separate, on the left, in the accent, because it is not a
-	 * destination: putting it in the row would make talking one option among four.
-	 * Only the current destination carries its name, which is what lets four fit at
-	 * this width. The label slides open rather than appearing, so moving between two
-	 * reads as one object travelling.
+	 * destination: in the row it would make talking one option among four. Only the
+	 * current destination carries its name, which is what lets four fit, and the
+	 * label slides open so moving between two reads as one object travelling.
 	 *
-	 * The pill under the current tab is `shade-3` rather than `shade-2`, which is
-	 * the colour of the page this floats over: the fill landed within two points of
-	 * lightness of the bar around it, so only the label opening marked the current
-	 * destination.
+	 * The pill under the current tab is `shade-3` rather than `shade-2`, the colour
+	 * of the page this floats over: at `shade-2` the fill landed within two points
+	 * of lightness of the bar around it.
 	 */
 	const tabs = $derived([
 		{ href: '/m' as const, icon: House, label: $LL.mobileTabHome() },
@@ -92,24 +90,19 @@
 
 <style lang="postcss">
 	/*
-	 * Glass, the way the platform draws it. Three things together: a heavy blur, so
-	 * what passes behind is texture rather than content; a push on saturation,
-	 * because blurring alone drains colour and the result reads as a dirty window;
-	 * and a hairline of light along the top edge.
+	 * Glass, the way the platform draws it: a heavy blur so what passes behind is
+	 * texture rather than content, a push on saturation because blurring alone
+	 * drains colour, and a hairline of light along the top edge.
 	 *
-	 * The tint is as low as it can be and still hold an icon. Lower fails over a
-	 * photograph, where a blurred image keeps its light and dark patches and an icon
-	 * disappears into the bright half.
+	 * The tint is as low as it can be and still hold an icon: lower fails over a
+	 * photograph, where an icon disappears into the bright half.
 	 */
 	/*
-	 * A note for whoever adds page transitions, because it has been tried and undone.
-	 *
+	 * For whoever adds page transitions, because it has been tried and undone.
 	 * `backdrop-filter` and the View Transitions API do not coexist: during a
 	 * transition the document is replaced by snapshots, so this bar went clear for
-	 * every navigation. A `view-transition-name` is worse, since a named element is
-	 * its own stacking context and on iOS the glass then vanished permanently.
-	 *
-	 * Either the transitions go, which is what happened, or this stops being glass.
+	 * every navigation, and a `view-transition-name` made the glass vanish
+	 * permanently on iOS.
 	 */
 	.glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 42%, transparent);

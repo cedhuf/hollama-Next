@@ -1,12 +1,6 @@
 import type { RunEvent, RunInput, RunSummary } from './types';
 
-/**
- * Talking to a turn that is not in this page.
- *
- * Three verbs and no state: start one, follow one, stop one. What the events
- * mean is the reducer's business, and where they came from is nobody's, which is
- * what lets the page treat a run in the server exactly like a run in the tab.
- */
+/** Three verbs and no state: start one, follow one, stop one. What the events mean is the reducer's business, and where they came from is nobody's. */
 
 /** Hand a turn over to the server. Returns as soon as it has an id, not an answer. */
 export async function startRun(input: RunInput): Promise<RunSummary> {
@@ -30,53 +24,32 @@ export async function runForSession(sessionId: string): Promise<RunSummary | nul
 	return (await response.json()) as RunSummary | null;
 }
 
-/**
- * Allow or refuse one MCP call the turn is stopped on.
- *
- * Best effort by design: the question may already have been answered in another
- * tab, or have run out of time, and the turn carries on either way. What the
- * page does about it comes from the run's own `approvalResolved` event, never
- * from this call's answer, so two tabs pressing at once cannot disagree.
- */
+/** Best effort by design: the question may already have been answered in another tab, and the turn carries on either way. What the page does comes from the run's own `approvalResolved` event. */
 export async function decideApproval(runId: string, callId: string, allow: boolean): Promise<void> {
 	await fetch(`/api/runs/${runId}/approve`, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({ callId, allow })
 	}).catch(() => {
-		// A run that cannot be reached is a run that has ended, and an unanswered
-		// question is a refused one. Nothing to say here that the stream will not.
+		// A run that cannot be reached has ended, and an unanswered question is a
+		// refused one.
 	});
 }
 
 export async function cancelRun(runId: string): Promise<void> {
 	await fetch(`/api/runs/${runId}/cancel`, { method: 'POST' }).catch(() => {
-		// A run that cannot be reached is a run that is already over as far as this
-		// page is concerned. The stop button has done its job either way.
+		// A run that cannot be reached is already over as far as this page is concerned.
 	});
 }
 
 export interface FollowOptions {
-	/**
-	 * The last event that had already happened when the client asked.
-	 *
-	 * Everything up to and including it is history and is handed over marked as
-	 * such; everything after it is the turn still being written. The number comes
-	 * from the run's own summary, so the boundary is the server's, not a guess made
-	 * from how fast the events arrive.
-	 */
+	/** Everything up to and including it is history and is handed over marked as such. The number comes from the run's own summary, so the boundary is the server's. */
 	replayThrough?: number;
 	/** Called once the backlog has been delivered, and only if there was one. */
 	onCaughtUp?: () => void;
 }
 
-/**
- * Follow a run until it ends.
- *
- * Resolves when the turn is over, whichever way it ended, so a caller can await
- * it exactly as it awaited the local one. `from` is where to resume: zero
- * replays the whole log, which is what a page that has just loaded wants.
- */
+/** Resolves when the turn is over, whichever way, so a caller awaits it exactly as it awaited the local one. `from` is where to resume; zero replays the whole log. */
 export function followRun(
 	runId: string,
 	from: number,
@@ -115,9 +88,8 @@ export function followRun(
 	};
 
 	source.onerror = () => {
-		// EventSource reconnects on its own, carrying `Last-Event-ID`, so a dropped
-		// connection is not an ending. Only a closed one is: that is the server
-		// having finished and hung up, or the run having gone.
+		// EventSource reconnects on its own carrying `Last-Event-ID`, so a dropped
+		// connection is not an ending. Only a closed one is.
 		if (source.readyState === EventSource.CLOSED) close();
 	};
 

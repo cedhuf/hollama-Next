@@ -18,14 +18,7 @@
 	import SettingsSection from './SettingsSection.svelte';
 	import SettingsSlider from './SettingsSlider.svelte';
 
-	/**
-	 * The MCP servers this account calls out to.
-	 *
-	 * A list of cards and a folded form to add one, like the bots tab and the
-	 * connections tab, because it is the same shape of thing: an address, a
-	 * credential, and a switch. What differs is that testing one answers a
-	 * question worth showing, so the tool names come back and stay on the card.
-	 */
+	/** A list of cards and a folded form to add one, like the bots and connections tabs: it is the same shape of thing. What differs is that testing one answers a question worth showing. */
 
 	let servers = $state<McpServerView[]>([]);
 	let loading = $state(true);
@@ -83,8 +76,8 @@
 
 			servers = (await api<McpServerView[]>('/api/mcp', 'GET')) ?? [];
 		} catch {
-			// `api()` has already said what went wrong. An empty list is the honest
-			// thing to show when the instance would not answer.
+			// `api()` has already said what went wrong. An empty list is the honest thing
+			// to show when the instance would not answer.
 		} finally {
 			loading = false;
 		}
@@ -108,9 +101,8 @@
 					...(secret ? { secret } : {})
 				});
 				if (!saved) return;
-				// The slug is the server's answer, not the form's: renaming can land on
-				// a name already taken and come back suffixed, and the card has to show
-				// what the tools are actually called.
+				// The slug is the server's answer, not the form's: renaming can land on a name
+				// already taken and come back suffixed.
 				servers = servers.map((entry) => (entry.id === saved.id ? saved : entry));
 				if (secret) secrets = { ...secrets, [server.id]: '' };
 			} catch {
@@ -123,8 +115,8 @@
 		if (!draft.url.trim()) return;
 		creating = true;
 		try {
-			// Tested before it is stored, like a connection and like a bot: nobody
-			// should have to save a wrong address to find out it is wrong.
+			// Tested before it is stored, like a connection and like a bot: nobody should
+			// have to save a wrong address to find out it is wrong.
 			const verdict = await api<Verdict>('/api/mcp/verify', 'POST', {
 				url: draft.url,
 				...(draft.secret ? { secret: draft.secret } : {})
@@ -170,8 +162,8 @@
 	{#if loading}
 		<Skeleton />
 	{:else if !canManage && !servers.length}
-		<!-- Stated rather than hidden, like a locked web-fetch: a feature that is
-		     simply absent reads as one that does not exist. -->
+		<!-- Stated rather than hidden, like a locked web-fetch: a feature that is simply
+		     absent reads as one that does not exist. -->
 		<SettingsHint>{$LL.mcpNotAllowed()}</SettingsHint>
 	{:else}
 		{#if !servers.length}
@@ -180,10 +172,8 @@
 			</div>
 		{/if}
 
-		<!-- Off by default, unlike the web toggles: sending the catalogues is what
-		     makes a call possible at all, so a conversation that has not asked for
-		     them cannot produce one. Reaching for the switch when there is something
-		     to do with it is cheaper and narrower than leaving it open all day. -->
+		<!-- Off by default, unlike the web toggles: sending the catalogues is what makes
+		     a call possible, so a conversation that has not asked cannot produce one. -->
 		<FieldCheckbox label={$LL.mcpByDefault()} bind:checked={$settingsStore.mcpByDefault} />
 
 		<!-- One number for every server together, because what costs is the size of a
@@ -199,10 +189,9 @@
 			/>
 		</SettingsField>
 
-		<!-- Experimental, and the badge is not decoration: what it trades is a smaller
-		     request against an extra round and a missed prompt cache, and which side
-		     wins depends on the catalogue, the habits and the provider's prices. It is
-		     here to be measured on a real conversation. -->
+		<!-- Experimental, and the badge is not decoration: it trades a smaller request
+		     against an extra round and a missed prompt cache, and which wins depends on
+		     the catalogue, the habits and the provider's prices. -->
 		<FieldCheckbox label={$LL.mcpProgressive()} bind:checked={$settingsStore.mcpProgressive}>
 			{#snippet badge()}
 				<SettingsBadge>{$LL.experimental()}</SettingsBadge>
@@ -210,12 +199,9 @@
 		</FieldCheckbox>
 		<SettingsHint>{$LL.mcpProgressiveHint()}</SettingsHint>
 
-		<!-- The same warning box the Users tab uses for a limit somebody is about to
-		     regret, rather than a red sentence laid under the field: a caution that
-		     looks like a caption reads as one. Not a refusal either, which is why it
-		     is the warning colour and not the negative one: a catalogue this size is a
-		     legitimate thing to want, and it is also paid for on every round of every
-		     turn. -->
+		<!-- The same warning box the Users tab uses, rather than a red sentence under
+		     the field. Not a refusal either, hence the warning colour: a catalogue this
+		     size is legitimate, and it is also paid for on every round of every turn. -->
 		{#if ceiling > MCP_LIMITS.warnAboveTools}
 			<div class="border-warning/40 bg-warning/10 flex flex-col gap-1 rounded-lg border p-3">
 				<span class="text-active flex items-center gap-1.5 text-sm font-medium">

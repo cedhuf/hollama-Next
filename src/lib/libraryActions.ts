@@ -16,35 +16,19 @@ import { generateRandomId } from '$lib/utils';
 /**
  * The two things a library does that are not drawing a list.
  *
- * Here rather than in a page because there are two pages now: the full interface
- * has its Library and the phone has its own, and both of them import files and
- * both of them take a published persona back. Neither is a variation on the
- * other; they are the same act reached from two shapes, and the day one of them
- * learned a new format alone would be the day they stopped agreeing about what a
- * library holds.
- *
- * What stays in the pages is everything that is a layout. What comes here is what
- * would otherwise have been copied.
+ * Here rather than in a page because there are two pages: the full interface's
+ * Library and the phone's. They are the same act reached from two shapes, and
+ * the day one of them learned a new format alone would be the day they stopped
+ * agreeing about what a library holds.
  */
 
 /**
- * One Import, which reads the files rather than asking what is in them.
+ * One Import, which reads the files rather than asking what is in them. Three
+ * menu entries opened the same picker and then failed on the wrong kind, which
+ * is a quiz about a format nobody memorises.
  *
- * Three menu entries all opened the same picker and then failed if you chose the
- * wrong kind, which is a quiz about a format nobody memorises. Every one of these
- * announces itself: a bundle says `llooma.persona` or `llooma.playbook`, an
- * OpenWebUI export has its own shape, a knowledge file is a name and some text,
- * so the file is asked instead.
- *
- * Anything that is not JSON at all is a document: a Markdown note dropped here
- * becomes knowledge under its own file name, which is what somebody handing a
- * `.md` to a library means by it. Guessing would be shaky over formats that had
- * to be inferred; these say what they are, and what was shaky was the version
- * where the right answer depended on having picked the right menu item first.
- *
- * It reports for itself, and that is deliberate: the summary is the same sentence
- * whichever interface asked, so leaving it to the caller would be leaving two
- * copies of it.
+ * Anything that is not JSON is a document. It reports for itself, so the summary
+ * is the same sentence whichever interface asked.
  */
 export async function importLibraryFiles(files: File[]): Promise<void> {
 	if (!files.length) return;
@@ -86,8 +70,8 @@ export async function importLibraryFiles(files: File[]): Promise<void> {
 				continue;
 			}
 
-			// Native and OpenWebUI personas, recognised by their fields rather than by
-			// a format line.
+			// Native and OpenWebUI personas, recognised by their fields rather than by a
+			// format line.
 			const native = parsePersonasImport(item);
 			if (native.length) {
 				for (const persona of native) savePersona(persona);
@@ -132,15 +116,12 @@ function parseJson(text: string): unknown {
 /**
  * Take the published version back, over a copy that has been changed.
  *
- * Reachable from wherever the persona is drawn, and not only from the store: a
- * user who is not an administrator has no "my personas" view, so a card in their
- * own library is the only place their copy exists. An action that lives on an
- * object has to be reachable wherever that object is.
+ * Reachable wherever the persona is drawn, not only from the store: a user who
+ * is not an administrator has no "my personas" view, so a card in their own
+ * library is the only place their copy exists.
  *
- * The confirmation is asked only when there is something to lose. A copy that is
- * merely out of date is being brought forward, which is what its badge invited;
- * a copy that has been edited is being overwritten, which is a different question
- * and gets asked out loud.
+ * The confirmation is asked only when there is something to lose: a copy merely
+ * out of date is being brought forward, which is what its badge invited.
  */
 export async function restorePersonaFromStore(
 	persona: Persona,

@@ -18,9 +18,8 @@ import {
 import { getAllPersonaMemory, replacePersonaMemory } from '$lib/server/db/personaMemory';
 import type { Settings } from '$lib/settings';
 
-// Backups are keyed by StorageKey so files stay portable between local and
-// server mode. Servers are admin-managed in server mode (step 5) and excluded
-// here for now.
+// Backups are keyed by StorageKey, so files stay portable between local and
+// server mode. Servers are admin-managed in server mode and excluded here.
 
 export async function GET(event) {
 	const user = await requireUser(event);
@@ -47,7 +46,7 @@ export async function POST(event) {
 	const settings = backup[StorageKey.Preferences] as Settings | undefined;
 
 	// An exported file never ages out: one written before notes became a single
-	// field is converted on the way in, not left for the reader to trip over.
+	// field is converted on the way in.
 	if (Array.isArray(sessions)) {
 		adoptLegacyNotes(sessions);
 		replaceSessions(user.id, sessions);

@@ -10,10 +10,9 @@ import { copyAction, isEdited, packageAction, type Offer } from '$lib/storeOffer
  * What the store has on its shelves, built from what a catalogue lists and what
  * a library holds.
  *
- * Plain functions over plain arguments: no stores read here, no components, no
- * runes. The browser passes in what it has and hands back the actions, which is
- * what makes these two the only place that knows the difference between a
- * persona and a playbook once a card is drawn.
+ * Plain functions over plain arguments: no stores, no components, no runes. The
+ * browser passes in what it has and hands back the actions, which makes these
+ * the only place that knows a persona from a playbook once a card is drawn.
  */
 
 /** A card that carries a face. */
@@ -41,14 +40,7 @@ export interface PersonaInput {
 	avatarOf: (entry: CatalogEntry) => PersonaOffer['avatar'];
 }
 
-/**
- * The catalogue row a persona answers to, by provenance or, failing that, by name.
- *
- * The name is what rescues the personas the app used to write into every library
- * at boot: they carry no provenance at all, so nothing links them to the store,
- * and without this they read as written from scratch while the store
- * simultaneously calls them installed.
- */
+/** By provenance or, failing that, by name. The name rescues the personas the app used to write into every library at boot: they carry no provenance, so nothing links them to the store. */
 function entryFor(persona: Persona, entries: CatalogEntry[]): CatalogEntry | undefined {
 	const from = personaOrigin(persona);
 	if (from) return entries.find((entry) => entry.id === from);
@@ -117,13 +109,7 @@ export function personaOffers(input: PersonaInput, actions: PersonaActions) {
 		};
 	};
 
-	/**
-	 * The personas an administrator shares that are not in the catalogue.
-	 *
-	 * Theirs, so what a user gets is a copy of it. Left out of your own store when
-	 * it is already in your library, which for the administrator who shared it is
-	 * always: the store is what you can add, and you cannot add what you wrote.
-	 */
+	/** Theirs, so a user gets a copy. Left out of your own store when it is already in your library, which for the administrator who shared it is always: you cannot add what you wrote. */
 	const fromAdmin = input.shared
 		.filter((persona) => !library.some((own) => own.id === persona.id))
 		.map((persona): PersonaOffer => ({
@@ -240,13 +226,7 @@ export function playbookOffers(input: PlaybookInput, actions: PlaybookActions) {
 		};
 	};
 
-	/**
-	 * The playbooks an administrator shares that are not in the catalogue.
-	 *
-	 * Theirs, so what a user gets is a copy of it. Left out of your own store when
-	 * it is already in your library, which for the administrator who shared it is
-	 * always: the store is what you can add, and you cannot add what you wrote.
-	 */
+	/** Theirs, so a user gets a copy. Left out of your own store when it is already in your library, which for the administrator who shared it is always. */
 	const fromAdmin = input.shared
 		.filter((playbook) => !library.some((own) => own.id === playbook.id))
 		.map((playbook): Offer => {

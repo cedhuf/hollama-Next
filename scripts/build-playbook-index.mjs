@@ -2,32 +2,28 @@
 /**
  * Build the playbook store's index from the bundles beside it.
  *
- * The twin of `build-persona-index.mjs`, and deliberately its own file rather
- * than a flag on it. The two stores share a shape but not a schema: a persona
- * has an avatar and a model, a playbook has a summary and a procedure, and the
- * validation worth having is the validation that knows which one it is reading.
- * What is shared is the part that must not diverge — the digest — and that is
- * imported, not copied.
+ * The twin of `build-persona-index.mjs`, and its own file rather than a flag on
+ * it: the two stores share a shape but not a schema, and the validation worth
+ * having is the one that knows which it is reading. What is shared is the
+ * digest, and that is imported rather than copied.
  */
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The application's own digest, not a copy of it: written twice it would drift
-// once, and every installed playbook would be reported as modified that day. The
-// mapping from a playbook's fields onto it lives here rather than in a module
-// the browser also loads, because a module importing a `.ts` path is fine for
-// Node and not for the type checker — and the mapping is three lines, where the
-// hash is the part that must not diverge.
+// The application's own digest, not a copy: written twice it would drift once.
+// The mapping from a playbook's fields onto it lives here rather than in a
+// module the browser also loads, because importing a `.ts` path is fine for Node
+// and not for the type checker.
 import { contentDigest } from '../src/lib/personaDigest.ts';
 
 const playbookDigest = (playbook) =>
 	contentDigest({
 		name: playbook.name,
 		tagline: playbook.summary,
-		// A playbook has no avatar. The slot stays because the shared hash walks a
-		// fixed list of fields, and leaving it empty is what keeps that list fixed.
+		// A playbook has no avatar. The slot stays because the shared hash walks a fixed
+		// list of fields.
 		avatar: {},
 		systemPrompt: playbook.instructions,
 		tags: playbook.tags
@@ -65,8 +61,8 @@ for (const file of readdirSync(BUNDLES)
 	if (!bundle.playbook?.name) problems.push(`${file}: missing "playbook.name"`);
 	if (!bundle.playbook?.summary) problems.push(`${file}: missing "playbook.summary"`);
 	if (!bundle.playbook?.instructions) problems.push(`${file}: missing "playbook.instructions"`);
-	// The id is what says "this is the playbook you already have" across
-	// revisions, so it has to be the file's name too.
+	// The id is what says "this is the playbook you already have" across revisions,
+	// so it has to be the file's name too.
 	if (bundle.id && `${bundle.id}.json` !== file) {
 		problems.push(`${file}: id "${bundle.id}" does not match the file name`);
 	}
@@ -81,8 +77,7 @@ for (const file of readdirSync(BUNDLES)
 		origin: ORIGIN,
 		path: `bundles/${file}`,
 		// The whole procedure is not in the listing, on purpose: it is the bulk of a
-		// playbook and only whoever installs one needs it. What is here is enough to
-		// draw a card and to say how long the procedure is.
+		// playbook and only whoever installs one needs it.
 		steps: (bundle.playbook?.instructions?.match(/^#{1,6}\s+\S/gm) ?? []).length,
 		integrity: `sha256-${createHash('sha256').update(raw).digest('base64')}`,
 		contentDigest: playbookDigest(bundle.playbook)

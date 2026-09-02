@@ -159,15 +159,11 @@ const EMBEDDING_HINTS = [
 
 /**
  * Sound, in the two directions it runs: the words the industry uses, not a list
- * of models.
+ * of models. Speaking is checked first, and the order is load-bearing:
+ * `mistralai/voxtral-mini-tts-2603` names a transcription family and is a voice.
  *
- * Speaking is checked first, and the order is load-bearing:
- * `mistralai/voxtral-mini-tts-2603` carries the name of a transcription family
- * and is a voice.
- *
- * Deliberately not exhaustive: `fish-audio/transcribe-1` listens and
- * `fish-audio/s1` talks, and no substring tells them apart. A provider that will
- * answer outright is asked instead, see `catalogues` in the descriptors.
+ * Not exhaustive: `fish-audio/transcribe-1` listens and `fish-audio/s1` talks. A
+ * provider that will answer outright is asked instead, see `catalogues`.
  */
 const SPEECH_HINTS = ['tts', 'kokoro', 'orpheus', 'text-to-speech'];
 

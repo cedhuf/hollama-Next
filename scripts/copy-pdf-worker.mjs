@@ -2,14 +2,12 @@
 /**
  * Put the pdf.js worker where the app can serve it itself.
  *
- * Left alone, the document parser loads this worker from a public CDN the first
- * time someone attaches a PDF. That is a request to a third party from an app
- * whose whole point is that your data stays where you put it, and it breaks
- * outright on an instance with no internet access. Copying it into `static/`
- * means it is served from the same origin as everything else.
+ * Left alone, the document parser loads it from a public CDN the first time
+ * somebody attaches a PDF: a third-party request from an app whose point is that
+ * your data stays where you put it, and it breaks outright with no internet.
  *
- * Runs from `prepare`, so a fresh clone and every install has it. The copy is
- * gitignored: it is a build artifact of a pinned dependency, not source.
+ * Runs from `prepare`, so a fresh clone has it. The copy is gitignored: a build
+ * artifact of a pinned dependency, not source.
  */
 import { copyFileSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -26,6 +24,6 @@ try {
 	copyFileSync(source, join(target, 'pdf.worker.min.mjs'));
 } catch (error) {
 	// Not fatal: the app builds and runs without it, and says so when a PDF is
-	// attached. Failing the install over an optional asset would be worse.
+	// attached.
 	console.warn(`[pdf worker] not copied: ${error.message}`);
 }

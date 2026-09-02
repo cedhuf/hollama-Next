@@ -5,18 +5,14 @@
 	import { slide, type TransitionConfig } from 'svelte/transition';
 
 	/**
-	 * How a note is drawn: a rule across the conversation, a pill on it, and what
-	 * it has to say folded underneath.
+	 * How a note is drawn: a rule across the conversation, a pill on it, and what it
+	 * has to say folded underneath. A rule rather than a bubble, because a note
+	 * marks something that happened to the conversation.
 	 *
-	 * A rule rather than a bubble, because a note marks something that happened to
-	 * the conversation and is not a turn in it. The shape was written twice, once
-	 * for compaction and once for clearing, and the two had already drifted in the
-	 * padding of their panels. A third kind would have made three.
-	 *
-	 * So the pill is built from props here, and every kind gets the same one. The
-	 * `pill` snippet is the way out for the one case that cannot use it: the
-	 * compaction that is still being written has no note yet, no panel to unfold,
-	 * and a cancel button where the chevron goes.
+	 * The shape was written twice, for compaction and for clearing, and the two had
+	 * already drifted. So the pill is built from props here and every kind gets the
+	 * same one. The `pill` snippet is the way out for the compaction still being
+	 * written, which has no note yet and a cancel button where the chevron goes.
 	 */
 	interface Props {
 		icon: Component;
@@ -31,13 +27,7 @@
 		pending?: boolean;
 		/** Replaces the built-in pill entirely. */
 		pill?: Snippet;
-		/**
-		 * How the built-in pill arrives.
-		 *
-		 * One prop rather than a key to plumb through: compaction pairs this pill
-		 * with the one that waited in its place, and that pairing is compaction's
-		 * business, not the shell's. Everything else takes the default and appears.
-		 */
+		/** One prop rather than a key to plumb through: compaction pairs this pill with the one that waited in its place, and that pairing is compaction's business. */
 		pillIn?: (node: Element) => TransitionConfig | (() => TransitionConfig);
 		/** What unfolds. Without it the pill is a label rather than a button. */
 		panel?: Snippet;
@@ -55,8 +45,8 @@
 		panel
 	}: Props = $props();
 
-	// Deliberately the initial value: a note that opens itself does it once, when
-	// it appears, and folding it afterwards is the reader's business.
+	// Deliberately the initial value: a note that opens itself does it once, and
+	// folding it afterwards is the reader's business.
 	// svelte-ignore state_referenced_locally
 	let expanded = $state(open);
 </script>
@@ -109,9 +99,9 @@
 		background-color: var(--color-shade-3);
 	}
 
-	/* While something is being written, the rules carry a highlight that travels
-	   outwards from the pill. Slow and low-contrast on purpose: it says "still
-	   working" from the corner of the eye without competing with the text above. */
+	/* While something is being written, the rules carry a highlight travelling
+	   outwards from the pill. Slow and low-contrast: it says "still working" from
+	   the corner of the eye. */
 	.rule--pending {
 		background-image: linear-gradient(
 			90deg,
@@ -126,7 +116,7 @@
 	}
 
 	/* The rule on the left runs the other way, so the highlight leaves the pill in
-	   both directions rather than crossing the whole row like a progress bar. */
+	   both directions rather than crossing the row like a progress bar. */
 	.rule--reverse {
 		animation-direction: reverse;
 	}

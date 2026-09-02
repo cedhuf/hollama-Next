@@ -12,14 +12,12 @@
 	 * Where this persona was called away, and what it said there.
 	 *
 	 * Folded by default, unlike the context report: it is an aside about somewhere
-	 * else, and a conversation with twenty of these unfolded would be twenty other
-	 * conversations pasted into this one. The pill says who wanted it and when,
-	 * which is enough to decide whether to look.
+	 * else, and twenty of these unfolded would be twenty other conversations pasted
+	 * into this one.
 	 *
-	 * The exchange sits behind a wall of quotation on purpose. It is not a turn in
-	 * this conversation and the model has not read it, so it must not be dressed up
-	 * as one of the bubbles around it. Adding it is a deliberate act, and once it
-	 * is done the offer is replaced by a sentence saying so.
+	 * The exchange sits behind a wall of quotation: it is not a turn in this
+	 * conversation and the model has not read it, so it must not be dressed as one
+	 * of the bubbles around it.
 	 */
 	interface Props {
 		note: MentionNote;

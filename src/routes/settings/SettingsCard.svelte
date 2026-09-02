@@ -6,33 +6,21 @@
 	/**
 	 * One configured thing, as a card that stays quiet until you open it.
 	 *
-	 * A connection, a bot and an MCP server are the same object seen three times:
-	 * a name you can change, a state you want to read and flip at a glance, and a
-	 * form you only want when you are editing it. They were written three times,
-	 * and the copies had already drifted: two of them slid open and one snapped,
-	 * two dimmed their border and one did not, and only two let you rename the
-	 * thing from its own heading.
+	 * A connection, a bot and an MCP server are the same object seen three times: a
+	 * name you can change, a state you flip at a glance, and a form you only want
+	 * while editing. The shape lives here and the contents arrive as snippets.
 	 *
-	 * So the shape lives here and the contents arrive as snippets. What each card
-	 * is about stays in its own file; how a card behaves stops being an answer
-	 * given three times.
-	 *
-	 * The one structural decision worth stating: the row's opening target is laid
-	 * *under* the header rather than wrapped around it. A heading you can rename is
-	 * a text field, and a text field cannot live inside a button. Everything on the
-	 * row that is interactive claims its clicks back with `pointer-events-auto`.
+	 * The row's opening target is laid *under* the header rather than wrapped
+	 * around it, because a heading you can rename is a text field and a text field
+	 * cannot live inside a button. Everything interactive claims its clicks back
+	 * with `pointer-events-auto`.
 	 */
 	interface Props {
 		/** Whether the body is showing. Bindable, for a card that opens on arrival. */
 		open?: boolean;
 		/** What the opening target is called, for a screen reader. */
 		label: string;
-		/**
-		 * The switch on the row, when there is one.
-		 *
-		 * Left undefined, no switch is drawn: not every card has one state that
-		 * matters more than the others, and an empty toggle is worse than none.
-		 */
+		/** Left undefined, no switch is drawn: not every card has one state that matters more than the others, and an empty toggle is worse than none. */
 		enabled?: boolean;
 		/** What the switch means, for its tooltip and its accessible name. */
 		enabledLabel?: string;
@@ -118,8 +106,8 @@
 			{/if}
 		</span>
 
-		<!-- On the row rather than inside the form: it is the state you want to see
-		     and change without opening anything. -->
+		<!-- On the row rather than inside the form: it is the state you want to see and
+		     change without opening anything. -->
 		{#if enabled !== undefined}
 			<label
 				class="pointer-events-auto relative flex shrink-0 cursor-pointer items-center"

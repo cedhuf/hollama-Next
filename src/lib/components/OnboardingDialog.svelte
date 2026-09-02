@@ -3,12 +3,7 @@
 	import { Dialog } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 
-	/**
-	 * The shared shell for every onboarding flow: the modal, the step indicator and
-	 * the dismiss affordance. Flows supply their own step content and footer, so the
-	 * chrome stays identical between the local first-run wizard and the server-mode
-	 * welcome tour.
-	 */
+	/** The shared shell for every onboarding flow: the modal, the step indicator and the dismiss. Flows supply their own step content and footer. */
 	interface Props {
 		open: boolean;
 		/** Current step index (0-based). */
@@ -23,25 +18,12 @@
 	let { open, step, totalSteps, onDismiss, children, footer }: Props = $props();
 
 	/**
-	 * The dialog grows and shrinks between steps, and does it smoothly.
+	 * The dialog grows and shrinks between steps smoothly, since each step is a
+	 * different amount of content. A fixed height would be the tallest step's.
 	 *
-	 * Each step is a different amount of content, so the box used to jump on every
-	 * Next: a profile form, then a list of servers, then three bubbles. A fixed
-	 * height would have been the other answer and is worse, because it is the
-	 * tallest step's height on every step, leaving the short ones stranded in a
-	 * half-empty box.
-	 *
-	 * The measurement drives a height on the outer box only. Nothing reads it back:
-	 * the inner box is in normal flow and its natural height does not depend on
-	 * what the outer one is set to, so there is no loop here, only a value copied
-	 * one way. Before the first measurement the height is left alone, so the first
-	 * paint is the content's own size rather than zero.
-	 *
-	 * Not `flex-1`, which was here before: it sets `flex-basis: 0%`, and a basis is
-	 * what a column flex container sizes from, so the height below would have been
-	 * measured, written, and then ignored. Left to shrink instead, the height is
-	 * what it is until the dialog hits its ceiling, at which point the box gives
-	 * way and scrolls.
+	 * The measurement drives the outer box only and nothing reads it back, so there
+	 * is no loop. Not `flex-1`, which sets `flex-basis: 0%`: a column flex container
+	 * sizes from the basis, so the height would be measured and then ignored.
 	 */
 	let contentHeight = $state(0);
 </script>

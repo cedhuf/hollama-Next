@@ -5,11 +5,7 @@ import type { Role } from './db/users';
 import { isModelShared, PolicyError, reachableServer } from './llmPolicy';
 import { sessionUser } from './session';
 
-/**
- * Guard for the API: it answers to a user, never to nobody. On an instance with
- * no accounts that user is its implicit owner, which is settled in `sessionUser`
- * and is not this layer's business. Returns the current user's id and role.
- */
+/** The API answers to a user, never to nobody. On an instance with no accounts that user is its implicit owner, which is settled in `sessionUser`. */
 export async function requireUser(event: RequestEvent): Promise<{ id: string; role: Role }> {
 	const user = await sessionUser(event);
 	if (!user) throw error(401, 'Unauthorized');
@@ -25,13 +21,10 @@ export async function requireAdmin(event: RequestEvent): Promise<{ id: string; r
 }
 
 /**
- * The model, which is the other half of the same question.
- *
- * Separate from `requireServer` because not every caller names one: the relay
- * finds the model in a body it is about to forward, and polices it there. Every
- * caller that *does* name one up front should ask this, and until now reading
- * aloud and transcription did not, which is how a model an administrator had
- * chosen not to share could be reached by anybody willing to name it.
+ * Separate from `requireServer` because not every caller names a model: the
+ * relay finds it in a body it is about to forward. Every caller that does name
+ * one should ask this, and reading aloud and transcription did not, which is how
+ * a model an administrator chose not to share could be reached by naming it.
  */
 export function requireSharedModel(server: ServerRow, isAdmin: boolean, model: string): void {
 	if (!isModelShared(server, isAdmin, model)) {
@@ -42,12 +35,9 @@ export function requireSharedModel(server: ServerRow, isAdmin: boolean, model: s
 /**
  * The connection a request names, once it has earned the right to name it.
  *
- * Beside `requireUser` on purpose. A route that has established who is knocking
- * has done half the work, and the other half is which connection they may reach.
- * Answering the first and inventing the second is how a check drifts: four
- * copies is four chances for one of them to forget that a disabled server is
- * still a row in the table. The rule itself lives in `llmPolicy`, because a
- * request is not the only thing that asks any more.
+ * Beside `requireUser` on purpose: a route that has established who is knocking
+ * has done half the work. Four copies is four chances to forget that a disabled
+ * server is still a row in the table. The rule itself lives in `llmPolicy`.
  */
 export function requireServer(userId: string, serverId: unknown): ServerRow {
 	try {

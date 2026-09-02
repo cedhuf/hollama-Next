@@ -8,14 +8,13 @@ import { connectMcp, listMcpTools, McpError } from '$lib/server/mcp/client';
 /**
  * Does this reach a server, and what does it offer.
  *
- * Asked before anything is saved, like the connections tab and the bots tab:
- * nobody should have to store a token to find out that it is the wrong one. An
- * `id` may be sent instead of a token, to re-test what is already stored without
- * typing it again.
+ * Asked before anything is saved, like the connections and bots tabs: nobody
+ * should have to store a token to find out it is the wrong one. An `id` may be
+ * sent instead, to re-test what is stored.
  *
- * The tool names come back because they are the answer to the question people
- * actually have. "Connected" says the address is right; the list says whether it
- * is the server they meant.
+ * The tool names come back because they are the answer people actually want:
+ * "connected" says the address is right, the list says it is the server they
+ * meant.
  */
 export async function POST(event) {
 	const user = await requireUser(event);
@@ -37,10 +36,9 @@ export async function POST(event) {
 	try {
 		client = await connectMcp(url, secret || null);
 		const tools = await listMcpTools(client);
-		// The whole catalogue, uncut. What a turn actually sends depends on every
-		// other server switched on and on the ceiling this account set, which is a
-		// question about the account rather than about this address: the settings
-		// answer it beside the field that holds the number.
+		// The whole catalogue, uncut. What a turn actually sends depends on every other
+		// server switched on and on this account's ceiling, which the settings answer
+		// beside the field that holds the number.
 		return json({ ok: true, tools: tools.map((tool) => tool.name), total: tools.length });
 	} catch (cause) {
 		return json({ ok: false, error: message(cause) });

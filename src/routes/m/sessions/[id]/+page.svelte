@@ -19,15 +19,12 @@
 	 * One conversation, on a phone.
 	 *
 	 * The engine is the app's own, unchanged: `Conversation` holds the turn, the
-	 * tools, the streaming and the picking back up after a reload, and it was
-	 * lifted out of the desktop page precisely so a second interface could drive it
-	 * without any of that being written twice.
+	 * tools and the picking back up, and it was lifted out of the desktop page
+	 * precisely so a second interface could drive it.
 	 *
-	 * The messages are the app's own too. `Messages` renders markdown, reasoning,
-	 * tool calls, sources, generated images and every divider, and none of that is
-	 * worth a second implementation to make bubbles out of. What this file adds is
-	 * the arrangement: a header, a composer built for one thumb, and the stylesheet
-	 * at the foot that turns those articles into a phone conversation.
+	 * The messages are the app's own too. What this file adds is the arrangement: a
+	 * header, a composer built for one thumb, and the stylesheet at the foot that
+	 * turns those articles into a phone conversation.
 	 */
 	let { data } = $props();
 
@@ -52,10 +49,9 @@
 <Head {title} />
 
 <div class="flex h-full flex-col">
-	<!-- The controls stand on the page, not on the conversation: the way back, what
-	     is answering, and a fresh start. Reading a thread is one thing and steering
-	     it is another, and giving the second its own strip is what lets the first
-	     be a surface of its own. -->
+	<!-- The controls stand on the page, not on the conversation. Reading a thread is
+	     one thing and steering it is another, and giving the second its own strip is
+	     what lets the first be a surface of its own. -->
 	<header class="flex shrink-0 items-center gap-2 px-4 py-3">
 		<button
 			type="button"
@@ -82,10 +78,9 @@
 		</button>
 	</header>
 
-	<!-- The conversation is a sheet, risen from the foot of the screen and stopping
-	     short of the top. What it buys is the thing the controls above need: they
-	     are on the page, it is over the page, and the two never have to share a
-	     background or argue about which one the eye reads first. -->
+	<!-- The conversation is a sheet, risen from the foot and stopping short of the
+	     top: the controls are on the page and it is over the page, so the two never
+	     argue about which one the eye reads first. -->
 	<div class="sheet flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[1.75rem]">
 		<div class="thread min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-2">
 			<Messages
@@ -103,8 +98,8 @@
 			<div bind:this={bottom}></div>
 		</div>
 
-		<!-- Inside the sheet, above the tab bar, in the flow: it reserves its own
-		     room, so the thread scrolls to a foot it can actually reach. -->
+		<!-- Inside the sheet, above the tab bar, in the flow: it reserves its own room,
+		     so the thread scrolls to a foot it can reach. -->
 		<div class="shrink-0 px-3 pb-[calc(var(--safe-bottom)+5.5rem)]">
 			<Composer
 				bind:editor={chat.editor}
@@ -117,8 +112,7 @@
 
 <style lang="postcss">
 	/* The sheet: the page's own darkest surface, so the glow behind shows around it
-	   and not through it, with a hairline along the top edge where it meets the
-	   controls. */
+	   and not through it, with a hairline where it meets the controls. */
 	.sheet {
 		background-color: var(--color-shade-0);
 		box-shadow:
@@ -133,24 +127,21 @@
 		box-shadow: inset 0 1px 0 color-mix(in srgb, white 45%, transparent);
 	}
 
-	/* Dark themes take a fainter highlight: the same 45% of white along the top
-	   edge reads as a chrome strip against a dark backdrop. */
+	/* Dark themes take a fainter highlight: the same 45% of white along the top edge
+	   reads as a chrome strip against a dark backdrop. */
 	:global([data-color-theme='dark']) .glass {
 		background-color: color-mix(in srgb, var(--color-shade-1) 48%, transparent);
 		box-shadow: inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
 	}
 
 	/*
-	 * The mobile skin.
-	 *
-	 * Not a second renderer: the articles are the app's own, and these rules
-	 * rearrange them. Which is possible at all because the desktop already draws
-	 * your own turns as a bubble on the right; what is left to say is that on a
-	 * phone it should be filled rather than tinted, and that the role badges are
+	 * The mobile skin. Not a second renderer: the articles are the app's own, and
+	 * these rules rearrange them. Which is possible because the desktop already
+	 * draws your own turns as a bubble on the right; what is left to say is that on
+	 * a phone it should be filled rather than tinted, and that the role badges are
 	 * not worth a line each when the side already says who spoke.
 	 *
-	 * The hooks are classes `Article` puts on itself. If one moves, it shows here,
-	 * and here is twenty lines.
+	 * The hooks are classes `Article` puts on itself.
 	 */
 	.thread :global(.article) {
 		max-width: 100%;

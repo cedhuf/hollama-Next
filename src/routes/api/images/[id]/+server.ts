@@ -19,13 +19,7 @@ export async function PATCH(event) {
 	return new Response(null, { status: 204 });
 }
 
-/**
- * Forget one picture, bytes and all.
- *
- * The row goes first: it is what makes an image exist, so a file that outlives a
- * failed unlink is wasted disk rather than a picture somebody thought they had
- * deleted. The other order would be the one that lies.
- */
+/** The row goes first: a file that outlives a failed unlink is wasted disk, where the other order would leave a picture somebody thought they had deleted. */
 export async function DELETE(event) {
 	const user = await requireUser(event);
 

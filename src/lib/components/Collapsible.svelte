@@ -9,14 +9,11 @@
 	 * A settings block that is folded until somebody asks for it.
 	 *
 	 * On `bits-ui`'s primitive rather than a hand-rolled `{#if}`: it owns the
-	 * `aria-expanded` / `aria-controls` pair, the keyboard behaviour and the id
-	 * plumbing between the two halves, and those are exactly the parts that get
-	 * left out when a disclosure is written again in a hurry.
+	 * `aria-expanded` and `aria-controls` pair, the keyboard behaviour and the id
+	 * plumbing, which are the parts left out when a disclosure is written in a hurry.
 	 *
-	 * The summary is the point of the pattern. A folded block that says only its
-	 * title asks somebody to open it to find out whether they needed to; one that
-	 * says "no limit" or "3 of 12 priced" answers the question while closed, and
-	 * opening it is then a decision rather than a search.
+	 * The summary is the point: a folded block saying only its title asks you to
+	 * open it to find out whether you needed to.
 	 */
 	interface Props {
 		title: string;

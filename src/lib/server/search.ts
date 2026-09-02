@@ -11,11 +11,7 @@ export interface SearchTarget {
 	token?: string;
 }
 
-/**
- * Query a search backend and return normalized results. Supports degoog
- * (`/api/search`, default) and SearXNG (`/search?format=json`); both return a
- * `results` array, so we just map the snippet field.
- */
+/** Supports degoog (`/api/search`, default) and SearXNG (`/search?format=json`); both return a `results` array, so only the snippet field is mapped. */
 export async function webSearch(
 	query: string,
 	target: SearchTarget,

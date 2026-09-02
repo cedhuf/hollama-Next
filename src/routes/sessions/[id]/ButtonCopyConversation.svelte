@@ -9,10 +9,7 @@
 	import { serializeSession, type ExportFormat } from '$lib/sessionExport';
 	import type { Session } from '$lib/sessions';
 
-	/**
-	 * Copy the whole conversation, in the format the user picks: the stored JSON
-	 * (for tooling / re-import) or a readable Markdown transcript.
-	 */
+	/** The whole conversation, in the format the user picks: the stored JSON, or a readable Markdown transcript. */
 	interface Props {
 		session: Session;
 		/** Persona name, used as the assistant's speaker label in Markdown. */

@@ -11,15 +11,7 @@ export async function GET(event) {
 	return json({ images: listImages(user.id) });
 }
 
-/**
- * Draw something.
- *
- * Long, and deliberately not a job queue. The work happens here, in the server,
- * and what it produces is written to the gallery before this answers, so a tab
- * that closes halfway through loses the response and nothing else. The picture
- * is on the next page load. A queue would buy a progress bar, and cost a whole
- * second lifecycle to keep correct.
- */
+/** Long, and deliberately not a job queue: the work happens here and what it produces is written to the gallery before this answers, so a tab that closes loses the response and nothing else. */
 export async function POST(event) {
 	const user = await requireUser(event);
 
@@ -42,9 +34,8 @@ export async function POST(event) {
 			quality: IMAGE_QUALITIES.includes(body.quality) ? body.quality : undefined,
 			style: typeof body.style === 'string' ? body.style : undefined,
 			n: Number(body.n) || 1,
-			// Data URLs, kept as strings here: whether they are pictures at all is
-			// read from their bytes further in, which is the only place that answer
-			// can be trusted.
+			// Data URLs, kept as strings here: whether they are pictures at all is read from
+			// their bytes further in, which is the only place that answer can be trusted.
 			references: Array.isArray(body.references)
 				? body.references.filter((item: unknown): item is string => typeof item === 'string')
 				: undefined

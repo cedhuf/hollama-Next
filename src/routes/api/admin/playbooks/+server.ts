@@ -5,12 +5,9 @@ import { requireAdmin } from '$lib/server/api';
 import { setSharedPlaybooks } from '$lib/server/db/sharedPlaybooks';
 
 /**
- * The playbooks an admin wrote and offers to their users, snapshotted whole.
- *
- * A replacement is the right operation here, unlike everywhere else, because the
- * body is the answer to "which of my playbooks are flagged shared" and that is a
- * complete answer by construction. The ones relayed from the store are not in
- * this list at all, so nothing of theirs is at stake.
+ * The playbooks an admin wrote and offers, snapshotted whole. A replacement is
+ * right here because the body answers "which of mine are flagged shared", which
+ * is complete by construction. The relayed ones are not in this list.
  */
 export async function PUT(event) {
 	await requireAdmin(event);

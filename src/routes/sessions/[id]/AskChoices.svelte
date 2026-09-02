@@ -14,9 +14,9 @@
 		disabled?: boolean;
 	} = $props();
 
-	// Local working state while the user is still picking. Once answered we read
-	// the locked-in selection off the message instead. The question set is fixed
-	// for a given message, so capturing it once here is correct.
+	// Local working state while the user is still picking; once answered the
+	// locked-in selection is read off the message. The question set is fixed for a
+	// given message, so capturing it once here is correct.
 	// svelte-ignore state_referenced_locally
 	let picks = $state<string[][]>(choices.questions.map(() => []));
 	// svelte-ignore state_referenced_locally
@@ -26,26 +26,26 @@
 
 	const answered = $derived(!!choices.answered);
 
-	/** The effective answer(s) for a question: picked options + a non-empty custom value. */
+	/** The effective answers for a question: picked options plus a non-empty custom value. */
 	function effective(qi: number): string[] {
 		const base = picks[qi] ?? [];
 		const extra = customOpen[qi] && customText[qi].trim() ? [customText[qi].trim()] : [];
 		return [...base, ...extra];
 	}
 
-	/** Values to render as selected: the locked answer when answered, else the live pick. */
+	/** What to render as selected: the locked answer when answered, else the live pick. */
 	function selectedValues(qi: number): string[] {
 		return answered ? (choices.selected?.[qi] ?? []) : effective(qi);
 	}
 
-	/** Locked-in answers that aren't one of the offered options, i.e. free-text answers. */
+	/** Locked-in answers that are not one of the offered options. */
 	function customAnswers(qi: number): string[] {
 		const opts = choices.questions[qi].options;
 		return (choices.selected?.[qi] ?? []).filter((v) => !opts.includes(v));
 	}
 
 	const allPicked = $derived(choices.questions.every((_, i) => effective(i).length > 0));
-	// Auto-submit only the trivial case: a single single-select question with no custom input open.
+	// Auto-submit only the trivial case: one single-select question, no custom input.
 	const autoSubmit = $derived(
 		choices.questions.length === 1 &&
 			choices.questions[0].type === 'single_select' &&
@@ -125,7 +125,7 @@
 					</button>
 				{/each}
 
-				<!-- Locked-in free-text answers (answered state). -->
+				<!-- Locked-in free-text answers. -->
 				{#if answered}
 					{#each customAnswers(qi) as value (value)}
 						<span

@@ -3,20 +3,16 @@ import { hasPriceFigure, priceUnit, type ModelPrice } from '$lib/connections';
 /**
  * Reading what a turn consumed, out of what the provider said.
  *
- * Pure and in its own module, because this is the arithmetic that decides
- * whether somebody is over their limit and it has to be checkable without a
- * database. The half that writes it down is `server/usageMeter`.
+ * Pure and in its own module, because this arithmetic decides whether somebody
+ * is over their limit and has to be checkable without a database. The half that
+ * writes it down is `server/usageMeter`.
  *
- * Never our own estimate: `estimateTokens` divides characters by 3.7 and exists
- * to colour a ring. The provider reports, or nothing is counted.
+ * Never our own estimate: the provider reports, or nothing is counted. Where it
+ * reports the *cost* rather than the counts, that wins: a price stored against a
+ * connection assumes one model has one price there, which on a gateway is false.
  *
- * Where the provider reports the *cost* rather than the counts, that wins. A
- * price stored against a connection assumes one model has one price there, and
- * on a gateway that is false: OpenRouter routes to whichever upstream it likes.
- *
- * Two shapes cover every endpoint: OpenAI-compatible `usage.prompt_tokens` /
- * `completion_tokens`, and Ollama's `prompt_eval_count` / `eval_count`. Anything
- * else goes uncounted, which is the honest failure.
+ * Two shapes cover every endpoint: OpenAI's `usage.prompt_tokens` and Ollama's
+ * `prompt_eval_count`. Anything else goes uncounted, which is the honest failure.
  */
 
 export interface TokenCount {
@@ -118,16 +114,12 @@ export function costOf(used: RunUsage, price: ModelPrice | undefined): number | 
 /**
  * What to charge for one call: your figure if you set one, otherwise theirs.
  *
- * A price entered against a model wins outright. That is what entering one
- * means: a decision to bill this model at your own rate whatever they say.
- * Nobody types a number for a case that never happens.
- *
- * Where nothing was entered, the provider's figure is used, and on a gateway it
- * is the only one that can be right. A reported zero is a figure like any other:
- * free models exist and cost zero.
+ * A price entered against a model wins outright, since that is what entering one
+ * means. Where nothing was entered the provider's figure is used, and on a
+ * gateway it is the only one that can be right. A reported zero is a figure.
  *
  * Nothing from either side means the call goes uncounted, which is a real hole:
- * an uncounted call is one an allowance never sees. Entering a price closes it.
+ * an uncounted call is one an allowance never sees.
  */
 export function resolveCost(used: RunUsage, price: ModelPrice | undefined): number | undefined {
 	return costOf(used, price) ?? used.cost;

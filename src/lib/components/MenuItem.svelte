@@ -2,10 +2,7 @@
 	import { DropdownMenu } from 'bits-ui';
 	import type { Component, Snippet } from 'svelte';
 
-	/**
-	 * A single action inside `Menu`. Keeps the row styling in one place so every
-	 * menu in the app looks and behaves identically.
-	 */
+	/** A single action inside `Menu`, keeping the row styling in one place. */
 	interface Props {
 		onclick: () => void;
 		children: Snippet;

@@ -1,11 +1,6 @@
 import type { ProviderDescriptor } from './types';
 
-/**
- * Claude.
- *
- * Reads pictures, does not draw them, so `imageGeneration` stays off: there is
- * no image endpoint to point the gallery at.
- */
+/** Claude. Reads pictures and does not draw them, so `imageGeneration` stays off: there is no image endpoint to point the gallery at. */
 export const anthropic: ProviderDescriptor = {
 	id: 'anthropic',
 	name: 'Claude',

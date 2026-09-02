@@ -345,12 +345,10 @@ async function shootPhone(page: Page, name: string) {
 /**
  * The app's own faces, before anything is captured.
  *
- * Inter and JetBrains Mono are self-hosted and declared `font-display: swap`, so
- * the first paint is the system stack and the swap lands whenever the woff2
- * arrives. A fixed delay only hides that on a fast machine: every capture had to
- * be lucky, and the ones that were not showed a different typeface from the app.
- * `document.fonts.load` asks for the two families and resolves when they are
- * usable, which is the fact the delay was standing in for.
+ * Inter and JetBrains Mono are self-hosted with `font-display: swap`, so the
+ * first paint is the system stack. A fixed delay only hid that on a fast
+ * machine. `document.fonts.load` resolves when the two families are usable,
+ * which is the fact the delay was standing in for.
  */
 async function fontsReady(page: Page) {
 	await page.evaluate(async () => {
@@ -461,17 +459,15 @@ const DOCS_FRAMES = new Set([
 const docsCopy = (name: string) => (DOCS_FRAMES.has(name) ? `${DOCS_OUT}/${name}.png` : undefined);
 
 /*
- * A frame is written with no room around it: the shadow it used to carry is
- * drawn by whoever displays it now.
+ * A frame is written with no room around it: the shadow is drawn by whoever
+ * displays it now.
  *
- * It was baked in, into `PAD` pixels of margin, and a 64px blur does not fit in
- * 60 of them: every file ended while its shadow was still at 8% black, which is
- * a hard line along the bottom edge of all thirteen. The documentation site puts
- * the shadow back in CSS, where it can fade out properly; the README shows the
- * frames flat, which on GitHub's plain background is no loss.
+ * Baked in, it went into `PAD` pixels of margin, and a 64px blur does not fit in
+ * 60: every file ended while its shadow was still at 8% black. The docs site
+ * puts it back in CSS, and the README shows the frames flat.
  *
- * The hero is the exception, since a phone leaning on a window has to cast onto
- * it to read as leaning. It keeps its shadows, and the room they need.
+ * The hero is the exception: a phone leaning on a window has to cast onto it to
+ * read as leaning, so it keeps its shadows and the room they need.
  */
 const PAD = 0;
 
@@ -925,10 +921,9 @@ test.describe('screenshots', () => {
 		await shoot(page, 'desktop_library');
 
 		// A wallpaper: the column translucent over it, the conversation opaque on top.
-		// Dark, because this shot is the hero's window on both the README and the
-		// documentation home, and a picture behind glass reads at night. `configure`
-		// lays `BASE_SETTINGS` over what is stored, so the mode has to be said again
-		// here rather than carried over from the shot above.
+		// Dark, because this is the hero's window on the README and the docs home.
+		// `configure` lays `BASE_SETTINGS` over what is stored, so the mode has to be
+		// said again rather than carried over from the shot above.
 		await configure(page, {
 			backgroundImage: 'pack:ocean',
 			surfaceTransparency: true,

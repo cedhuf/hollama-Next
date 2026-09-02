@@ -27,13 +27,11 @@
 	const samplingCfg = $derived($chatDefaultsConfig.sampling);
 	/**
 	 * Nothing to clear once the administrator has locked the values, and nothing
-	 * to clear when every field is already empty.
+	 * when every field is already empty.
 	 *
 	 * The control says "clear" rather than "reset to the defaults" because that is
-	 * what it does: `SYSTEM_SAMPLING_DEFAULTS` is empty on purpose, so the app has
-	 * no numbers of its own to go back to, and emptying the fields is what hands
-	 * each provider back to its own. A button promising defaults that do not exist
-	 * is one nobody dares press.
+	 * what it does: `SYSTEM_SAMPLING_DEFAULTS` is empty on purpose, so emptying the
+	 * fields is what hands each provider back to its own.
 	 */
 	const canResetSampling = $derived(
 		samplingCfg.editable && !isSystemDefault($settingsStore.sampling)
@@ -43,11 +41,7 @@
 		$settingsStore.sampling = { ...SYSTEM_SAMPLING_DEFAULTS };
 	}
 
-	/**
-	 * A threshold below a few thousand tokens would compact after every other
-	 * message, so the field refuses it rather than accepting a value that makes
-	 * the conversation unusable.
-	 */
+	/** A threshold below a few thousand tokens would compact after every other message, so the field refuses it rather than accepting a value that makes the conversation unusable. */
 	function setThreshold(raw: string) {
 		const value = Number(raw);
 		if (!Number.isFinite(value) || value < 4000) return;
@@ -88,9 +82,9 @@
 					/>
 				</SettingsField>
 
-				<!-- The first title is written before anything has been answered, so it
-				     names the question rather than the conversation. Once, and never over
-				     a name you typed yourself. -->
+				<!-- The first title is written before anything has been answered, so it names
+				     the question rather than the conversation. Once, and never over a name you
+				     typed yourself. -->
 				<FieldCheckbox
 					label={$LL.regenerateTitle()}
 					bind:checked={$settingsStore.regenerateTitle}
@@ -121,12 +115,9 @@
 				/>
 			</SettingsField>
 		{/if}
-		<!-- Stated as switching it off, because it is on by default on a phone now.
-		     Nobody turns on the thing they were going to get anyway, and a checkbox
-		     that is ticked from the start reads as a feature somebody else enabled.
-
-		     The stored setting still means what it always did. Only the question does
-		     the inverting, which keeps every account that had already chosen. -->
+		<!-- Stated as switching it off, because it is on by default on a phone now:
+		     nobody turns on the thing they were going to get anyway. The stored setting
+		     still means what it always did, so every account that had chosen keeps it. -->
 		<FieldCheckbox
 			label={$LL.classicMobileUI()}
 			checked={!$settingsStore.simplifiedMobileUI}
@@ -146,9 +137,8 @@
 	</SettingsSection>
 
 	<!-- Sampling: the account's own set, which every new conversation starts from.
-	     Its own section rather than a row in Defaults above: nineteen fields under
-	     a heading that also holds the default model would bury the two settings
-	     people actually come here for. -->
+	     Its own section rather than a row in Defaults: nineteen fields under a
+	     heading that also holds the default model would bury what people come for. -->
 	<SettingsSection title={$LL.sampling()} description={$LL.samplingDescription()} card>
 		{#snippet badge()}
 			{#if !samplingCfg.editable}
@@ -156,8 +146,8 @@
 			{/if}
 		{/snippet}
 
-		<!-- Same control, same words and same corner as the reset on an Ollama
-		     connection: both put a panel of fields back to Auto. -->
+		<!-- The same control, words and corner as the reset on an Ollama connection:
+		     both put a panel of fields back to Auto. -->
 		{#snippet action()}
 			{#if samplingCfg.editable}
 				<button
@@ -172,8 +162,8 @@
 			{/if}
 		{/snippet}
 
-		<!-- Two branches rather than one, because a locked panel shows the published
-		     set and must not be able to write to it: there is nothing to bind to. -->
+		<!-- Two branches, because a locked panel shows the published set and must not be
+		     able to write to it: there is nothing to bind to. -->
 		{#if samplingCfg.editable}
 			<SamplingFields bind:values={$settingsStore.sampling} ollama={true} />
 		{:else}

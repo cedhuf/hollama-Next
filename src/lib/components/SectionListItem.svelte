@@ -32,14 +32,7 @@
 
 	const isSession = $derived(sitemap === Sitemap.SESSIONS);
 
-	/**
-	 * Removing the record this row stands for.
-	 *
-	 * It lives here rather than inside the button: a button that reaches into the
-	 * stores can only ever delete the two kinds somebody remembered to write into
-	 * its switch, which is exactly what the old one did. The row already knows what
-	 * it is listing.
-	 */
+	/** Here rather than inside the button: a button that reaches into the stores can only delete the kinds somebody remembered to write into its switch. The row already knows what it is listing. */
 	function remove() {
 		if (sitemap === Sitemap.KNOWLEDGE) {
 			knowledgeStore.remove(id);
@@ -51,18 +44,11 @@
 	}
 	const isActive = $derived(page.url.pathname.includes(id));
 
-	/**
-	 * The buttons that sit on the row itself, off by default.
-	 *
-	 * Everything they do is in the right-click menu, which does not hover over the
-	 * title, does not truncate it further on a narrow sidebar, and does not put
-	 * delete one slip away from the conversation you meant to open. Turned on for
-	 * anyone who would rather have them one click closer.
-	 */
+	/** Everything they do is in the right-click menu, which does not hover over the title, does not truncate it further, and does not put delete one slip away from the conversation you meant to open. */
 	const showQuickActions = $derived($settingsStore.showListQuickActions === true);
 </script>
 
-<!-- Need to use `#key id` to re-render the delete nav after deletion -->
+<!-- `#key id` re-renders the delete nav after a deletion. -->
 {#key id}
 	<ContextMenu>
 		{#snippet trigger({ props })}
@@ -86,15 +72,10 @@
 
 				<!-- In the flow rather than over the title.
 
-				     Overlaying them meant painting a plate underneath so the title did
-				     not read through the icons, and that plate is every complaint at
-				     once: a rectangle in a different colour from the row it sits on, a
-				     left padding that put the lone pin off centre inside it, and the
-				     look of a button where an icon was wanted. Here the row makes room
-				     for them instead, so there is nothing to mask and nothing to draw.
-
-				     They keep their room while invisible, so a title does not change
-				     length under the pointer. -->
+				     Overlaying them meant painting a plate underneath so the title did not read
+				     through the icons, and that plate was a rectangle in a different colour from
+				     its row, with a padding that put the lone pin off centre. Here the row makes
+				     room instead, so there is nothing to mask. -->
 				{#if isSession && !isDeleting && (pinned || showQuickActions)}
 					<button
 						type="button"
@@ -109,10 +90,9 @@
 					</button>
 				{/if}
 
-				<!-- Shown while a deletion is waiting to be confirmed whatever the
-				     setting says: the confirmation has to appear where the row is,
-				     including when the deletion was asked for from the right-click
-				     menu. -->
+				<!-- Shown while a deletion waits to be confirmed whatever the setting says: the
+				     confirmation has to appear where the row is, including when it was asked for
+				     from the right-click menu. -->
 				{#if showQuickActions || isDeleting}
 					<div
 						class="flex shrink-0 items-center {isDeleting
@@ -133,8 +113,8 @@
 		{#if isSession}
 			<SessionMenu {id} {pinned} onDelete={() => (isDeleting = true)} />
 		{:else}
-			<!-- Asks rather than does: the confirmation appears on the row, in the same
-			     place it appears when the quick buttons are on. -->
+			<!-- Asks rather than does: the confirmation appears on the row, where it appears
+			     when the quick buttons are on. -->
 			<MenuItem icon={Trash2} danger onclick={() => (isDeleting = true)}>
 				{$LL.deleteKnowledge()}
 			</MenuItem>
@@ -144,10 +124,9 @@
 
 <style>
 	/* iOS answers a long press on a link with its own preview sheet, and on text
-	   with the selection magnifier. Either one swallows the press before the
-	   context menu can open, which is why the menu worked everywhere except the
-	   installed app. Both properties inherit, so the row covers its title and its
-	   link at once. Nothing is lost: a sidebar row is a target, not a passage. */
+	   with the selection magnifier, and either swallows the press before the context
+	   menu opens. Both properties inherit, so the row covers its title and its link
+	   at once: a sidebar row is a target, not a passage. */
 	.section-list-item {
 		-webkit-touch-callout: none;
 		-webkit-user-select: none;

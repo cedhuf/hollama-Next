@@ -1,17 +1,13 @@
 import type { Persona } from '$lib/personas';
 
 /**
- * Calling a persona into a conversation with `@`.
+ * Calling a persona into a conversation with `@`. A mention names who the
+ * message is addressed to, and the default assistant does not answer alongside
+ * them.
  *
- * A mention names who the message is addressed to. The default assistant does
- * not answer alongside them: naming someone is choosing them, not adding them.
- *
- * Matching is done against the personas that exist, longest name first, rather
- * than by a pattern over the text. A pattern has to decide what a name looks
- * like, and it always decides wrongly: `@Chef Robert` is one persona, and any
- * rule that stops at the space makes it unreachable. Trying the known names
- * removes the question, and has the pleasant side effect that an `@` followed by
- * anything else is simply text, with no error to report.
+ * Matched against the personas that exist, longest name first, rather than by a
+ * pattern: any rule that stops at a space makes `@Chef Robert` unreachable.
+ * Trying the known names also makes an `@` followed by anything else plain text.
  */
 
 export interface Mention {
@@ -34,13 +30,7 @@ function closesWord(text: string, at: number): boolean {
 	return !/[\p{L}\p{N}_-]/u.test(text[at]);
 }
 
-/**
- * Every mention in a message, in the order they appear.
- *
- * Overlaps are impossible by construction: a match consumes its span, and the
- * next search starts after it. Which is what makes `@Chef Robert` win over a
- * persona called `Chef` without either of them having to know about the other.
- */
+/** Overlaps are impossible by construction: a match consumes its span. Which is what makes `@Chef Robert` win over a persona called `Chef`. */
 export function findMentions(text: string, personas: Persona[]): Mention[] {
 	const named = personas
 		.filter((persona) => persona.name.trim())
@@ -78,13 +68,7 @@ export function findMentions(text: string, personas: Persona[]): Mention[] {
 	return found;
 }
 
-/**
- * Who answers this message, in the order they were named.
- *
- * Deduplicated: naming someone twice in one message is emphasis, not a request
- * for two answers. Empty means the conversation's own assistant, which is what
- * every message was before this existed.
- */
+/** Deduplicated: naming someone twice in one message is emphasis, not a request for two answers. Empty means the conversation's own assistant. */
 export function mentionedPersonas(text: string, personas: Persona[]): Persona[] {
 	const seen = new Set<string>();
 	const speakers: Persona[] = [];
@@ -98,13 +82,7 @@ export function mentionedPersonas(text: string, personas: Persona[]): Persona[] 
 	return speakers;
 }
 
-/**
- * The text cut into plain runs and mentions, for drawing them as labels.
- *
- * Segments rather than markup, for the reason the search excerpts give: message
- * content that came back as HTML would hand any conversation containing markup a
- * way into the page.
- */
+/** Segments rather than markup, for the reason the search excerpts give: content returned as HTML would hand any conversation containing markup a way into the page. */
 export type MentionSegment =
 	{ kind: 'text'; text: string } | { kind: 'mention'; persona: Persona; text: string };
 
@@ -132,16 +110,12 @@ export function splitMentions(text: string, personas: Persona[]): MentionSegment
 }
 
 /**
- * What is being typed after an `@`, for the autocomplete, or `null`.
- *
- * The mirror of `commandPrefix` for slash commands, and it stops at the same
- * place: the caret has to be inside the word the `@` opened, so a mention
- * already written and moved past does not reopen the menu.
+ * What is being typed after an `@`, for the autocomplete, or `null`. The mirror
+ * of `commandPrefix`, stopping at the same place: the caret has to be inside the
+ * word the `@` opened.
  *
  * A space does not close it, unlike a command: persona names have spaces in
- * them, and refusing to look past the first one would make half of them
- * unfindable. What closes it is a newline, or a run long enough that it is
- * plainly prose rather than a name being typed.
+ * them. A newline does, or a run long enough to be plainly prose.
  */
 const MAX_MENTION_QUERY = 40;
 

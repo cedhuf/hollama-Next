@@ -2,13 +2,7 @@ import { derived, writable } from 'svelte/store';
 
 import { MCP_LIMITS } from '$lib/mcp';
 
-/**
- * What this account has and may do with MCP servers, as the instance answers it.
- *
- * Read at boot like the other governance answers, because the composer's tool
- * menu is drawn from it: a switch that appears a moment after the page, or one
- * that appears for a feature nobody here has set up, is worse than its absence.
- */
+/** Read at boot like the other governance answers, because the composer's tool menu is drawn from it: a switch that appears a moment after the page is worse than its absence. */
 export interface McpConfig {
 	/** Whether this account may add servers of its own. */
 	canManage: boolean;

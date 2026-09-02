@@ -11,10 +11,5 @@ export interface CurrentUser {
 /** The current user, or null when signed out. */
 export const currentUser = writable<CurrentUser | null>(null);
 
-/**
- * The effective role: the session's. This is the real, non-editable role.
- *
- * An instance with no accounts still has one, because it still has a user: its
- * implicit owner, who is an admin. Nothing here has to know the difference.
- */
+/** An instance with no accounts still has a role, because it still has a user: its implicit owner, who is an admin. */
 export const currentRole = derived(currentUser, (user): 'admin' | 'user' => user?.role ?? 'user');

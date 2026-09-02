@@ -12,31 +12,23 @@ import {
 } from '$lib/server/db/usage';
 import { createUser, getUserByEmail, listUsers } from '$lib/server/db/users';
 
-/**
- * Every account, with what it has spent this period and what it is allowed.
- *
- * The spend is joined here rather than fetched per row: a list of twenty
- * accounts should be one query, not twenty, and the figure is only ever read
- * alongside the account it belongs to.
- */
+/** The spend is joined here rather than fetched per row: a list of twenty accounts should be one query, and the figure is only read alongside its account. */
 export async function GET(event) {
 	await requireAdmin(event);
 
 	const period = creditPeriod();
 	// Each account is summed over its own period, since it may not be the
-	// instance's; the shared query would otherwise report a month of spend against
-	// somebody's daily allowance.
+	// instance's: the shared query would report a month of spend against somebody's
+	// daily allowance.
 	const from = periodStart(period);
 	const spend = spendForAll(from);
 	const fallback = instanceCreditLimit();
 
 	/**
-	 * Shared models with no price, but only when a limit is actually in force.
-	 *
-	 * With no limit anywhere, an unpriced model is simply uncounted and nothing is
-	 * wrong. The moment one account has an allowance, the same model becomes a way
-	 * around it, and the relay refuses it, so this list is also the list of what
-	 * has stopped working and why.
+	 * Shared models with no price, but only when a limit is in force. With no limit
+	 * anywhere, an unpriced model is uncounted and nothing is wrong; the moment one
+	 * account has an allowance it becomes a way around it, and the relay refuses it,
+	 * so this list is also what has stopped working and why.
 	 */
 	const users = listUsers();
 	const limited = fallback > 0 || users.some((user) => (user.credit_limit ?? 0) > 0);
@@ -49,8 +41,8 @@ export async function GET(event) {
 		unpriced,
 		users: users.map((user) => ({
 			...user,
-			// `null` is "whatever the instance says", which is a different answer from
-			// a limit that happens to equal it, and the field has to say which.
+			// `null` is "whatever the instance says", which differs from a limit that
+			// happens to equal it, and the field has to say which.
 			effectiveLimit: user.credit_limit ?? fallback,
 			effectivePeriod: (user.credit_period ?? period) as typeof period,
 			spend: user.credit_period

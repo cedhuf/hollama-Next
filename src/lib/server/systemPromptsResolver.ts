@@ -32,11 +32,7 @@ function adminSnapshot(): SystemPrompts {
 
 const hasContent = (p: SystemPrompts) => !!p.global.trim() || Object.keys(p.perModel).length > 0;
 
-/**
- * The system prompt a user actually gets, under the instance's sharing mode.
- * The three modes are `sharing.ts`; this only says what a system prompt is.
- * Per-group prompts are deferred.
- */
+/** The three modes are in `sharing.ts`; this only says what a system prompt is. */
 export function resolveSystemPrompts(
 	userSettings: Settings | null,
 	isAdmin: boolean

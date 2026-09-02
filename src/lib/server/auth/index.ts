@@ -45,12 +45,7 @@ function profileFromClaims(profile: Claims) {
 	};
 }
 
-/**
- * Find-or-create the local user backing an OIDC login. The IdP is the gate:
- * when auto-provisioning is on (default) a new user is created on first login;
- * otherwise an unknown subject is rejected. Role follows ADMIN_EMAIL / the
- * configured claim, and the name/avatar are captured into the user's profile.
- */
+/** The IdP is the gate: with auto-provisioning on, a new user is created on first login, otherwise an unknown subject is rejected. */
 function provisionOidcUser(profile: Claims): UserRow | null {
 	const email = String(profile?.email ?? '')
 		.trim()
@@ -69,9 +64,9 @@ function provisionOidcUser(profile: Claims): UserRow | null {
 		user = { ...user, role };
 	}
 
-	// Seed the user's settings profile from OIDC so the UI shows their name and
-	// avatar. Covers the bootstrapped admin (created without a settings row) and
-	// doesn't clobber a profile the user has already filled in themselves.
+	// Seed the settings profile from OIDC so the interface shows their name and
+	// avatar. Covers the bootstrapped admin, and does not clobber a profile the user
+	// has already filled in.
 	const settings = getSettings(user.id);
 	const hasProfile = !!(
 		settings?.profileFirstName ||
@@ -135,28 +130,17 @@ function buildProviders(): Provider[] {
 			clientId: env.OIDC_CLIENT_ID,
 			clientSecret: env.OIDC_CLIENT_SECRET,
 			/**
-			 * PKCE *and* `state`, because Auth.js sends neither by default here.
+			 * PKCE *and* `state`, because Auth.js sends neither by default here: its default
+			 * is `["pkce"]` alone, and not every identity provider agrees that PKCE covers
+			 * what `state` was for. PocketID refuses an authorization request without it.
 			 *
-			 * Its default for a provider that does not say otherwise is `["pkce"]`
-			 * alone, and OAuth 2.1 agrees that PKCE covers what `state` was for. Not
-			 * every identity provider does: PocketID refuses an authorization request
-			 * without it, answering on the callback with
-			 * `error=invalid_state&error_description=The state is missing`.
-			 *
-			 * That failure was unreadable from this side for three weeks. The callback
-			 * error surfaces as `Configuration` in Auth.js v5, which reads like "the
-			 * provider could not be built", and `oauth4webapi` validated the missing
-			 * `iss` parameter before looking at `error`, so the log complained about
-			 * `iss` and never mentioned the state. The provider's side of that is a
-			 * genuine RFC 9207 violation; ours is that we were not sending a parameter
-			 * every server is entitled to require.
-			 *
-			 * Sending it costs one more short-lived cookie, on a path the PKCE cookie
-			 * already proves works.
+			 * That failure was unreadable for three weeks: the callback error surfaces as
+			 * `Configuration`, and `oauth4webapi` validated the missing `iss` before looking
+			 * at `error`. Sending it costs one more short-lived cookie.
 			 */
 			checks: ['pkce', 'state'],
-			// Request profile + email by default; add e.g. "groups" to expose the
-			// role claim (OIDC_ROLE_CLAIM). Override fully via OIDC_SCOPE.
+			// Profile and email by default; add "groups" to expose the role claim
+			// (OIDC_ROLE_CLAIM), or override fully via OIDC_SCOPE.
 			authorization: { params: { scope: env.OIDC_SCOPE?.trim() || 'openid profile email' } }
 		} as Provider);
 	}
@@ -197,7 +181,7 @@ const config: SvelteKitAuthConfig = {
 			return token;
 		},
 		session({ session, token }) {
-			// token carries custom keys set in the jwt callback (untyped JWT bag).
+			// `token` carries custom keys set in the jwt callback (untyped JWT bag).
 			if (token.userId) {
 				session.user.id = token.userId as string;
 				session.user.role = (token.role as 'admin' | 'user') ?? 'user';
@@ -212,9 +196,7 @@ const config: SvelteKitAuthConfig = {
 /** Build the Auth.js request handle. Only called when the instance has accounts. */
 export function createAuthHandle() {
 	bootstrapAdmin();
-	// The secret is folded in here rather than into the literal above, because it
-	// is read from the database: importing this module must not open one. An admin
-	// who turns on a login method therefore gets working sessions without having
-	// to think about key material at all.
+	// The secret is folded in here rather than into the literal above, because it is
+	// read from the database and importing this module must not open one.
 	return SvelteKitAuth({ ...config, secret: instanceSecret() }).handle;
 }

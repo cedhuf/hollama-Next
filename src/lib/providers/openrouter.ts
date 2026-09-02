@@ -1,20 +1,16 @@
 import type { ProviderDescriptor } from './types';
 
 /**
- * OpenRouter: one key, one address, and several hundred models from every vendor
- * behind it. The OpenAI wire format throughout, audio routes included.
+ * OpenRouter: one key, one address, several hundred models behind it, in the
+ * OpenAI wire format throughout.
  *
- * No `modelFilter`, unlike OpenAI's entry: no prefix means anything across a
- * catalogue this wide, and the form has a filter field for whoever wants one.
+ * No `modelFilter`: no prefix means anything across a catalogue this wide, and
+ * the form has a filter field. No `imageGeneration` either: they serve image
+ * models through their own chat-shaped route.
  *
- * No `imageGeneration` either: they serve image models through their own
- * chat-shaped route rather than `/images/generations`, so claiming the
- * capability would offer a page that fails on every press.
- *
- * Sound needs telling twice. `/audio/transcriptions` is the ordinary route, but
- * the models that answer it are invisible from the main catalogue, and reading
- * aloud is a route the app has no default for. Both catalogues come back saying
- * what they hold, so nothing here rests on reading a name.
+ * Sound needs telling twice. The models answering `/audio/transcriptions` are
+ * invisible from the main catalogue, and reading aloud has no default. Both
+ * catalogues say what they hold, so nothing rests on reading a name.
  */
 export const openrouter: ProviderDescriptor = {
 	id: 'openrouter',

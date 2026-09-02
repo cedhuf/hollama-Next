@@ -195,16 +195,14 @@ export interface Settings {
 	/** A name the provider knows, required by every endpoint that does this, so an empty one fails rather than picking something. */
 	speechVoice: string;
 	/**
-	 * How long a silence ends the recording on the voice screen, in milliseconds.
-	 * A setting because the right value is a fact about the person and the room. The
+	 * How long a silence ends the recording on the voice screen, in milliseconds. A
+	 * setting because the right value is a fact about the person and the room. The
 	 * composer's microphone ignores it: it stops when you say so.
 	 */
 	/**
-	 * The spoken language, ISO 639-1. Empty means let it work out.
-	 *
-	 * Dictation only. Reading aloud has nowhere to put it: on Kokoro, Aura and
-	 * Voxtral the language is part of the voice's name, and on Gemini and Grok the
-	 * voices are timbres, with the language taken from the text.
+	 * The spoken language, ISO 639-1. Empty means let it work out. Dictation only:
+	 * on Kokoro, Aura and Voxtral the language is part of the voice's name, and on
+	 * Gemini and Grok the voices are timbres.
 	 */
 	voiceLanguage: string;
 	/**

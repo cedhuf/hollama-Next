@@ -1,15 +1,13 @@
 /**
- * What a persona remembers about you, between conversations.
+ * What a persona remembers about you, between conversations. Not a summary: a
+ * small set of things it decided were worth keeping, written by calling a tool
+ * and readable by you.
  *
- * Not a summary of what was said: a small set of things the persona decided were
- * worth keeping, written by calling a tool and readable by you at any time. It
- * belongs to the pair (persona, person): a persona an admin shares is one object
- * read by everybody, so a memory living on it would be everybody's.
+ * It belongs to the pair (persona, person): a persona an admin shares is one
+ * object read by everybody, so a memory on it would be everybody's.
  *
- * Two tiers. The **profile** is one block always in the context: what is true
- * most of the time. The **notes** are everything else, and only their index goes
- * into the context, the body being read on demand. That is what keeps the cost
- * of remembering a hundred things equal to listing a hundred titles.
+ * Two tiers. The **profile** is always in the context; the **notes** put only
+ * their index there, the body being read on demand.
  */
 
 export interface MemoryNote {

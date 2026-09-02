@@ -6,31 +6,13 @@
 	import PersonaAvatar from './PersonaAvatar.svelte';
 
 	/**
-	 * One thing in the library, drawn the same way wherever it is shown.
+	 * One thing in the library, drawn the same way wherever it is shown. A persona
+	 * wears a face and a playbook does not, which is the whole difference.
 	 *
-	 * The Library and the store had a card each, written weeks apart, and the two
-	 * had already drifted. Then the playbooks arrived with a card of their own,
-	 * bigger, in a grid of its own, and the page stopped reading as one library.
-	 *
-	 * So there is one card. A persona wears a face; a playbook does not, and that
-	 * is the whole of the difference between them here. Everything else (the size,
-	 * the clamped description, the tags, the footer, the two layouts) is the same
-	 * because there was never a reason for it not to be.
-	 *
-	 * Three rules, each of them a fault this replaced:
-	 *
-	 * **Nothing hides.** The edit control used to appear on hover, and the badges
-	 * faded out to make room for it, so the card said different things depending on
-	 * where the pointer was and said nothing at all on a phone, which has no hover.
-	 * Every control is drawn, always, in the footer.
-	 *
-	 * **Nothing is pushed out.** The body is a fixed set of rows and the tagline is
-	 * clamped with its room reserved, so a long description cannot squeeze the tags
-	 * off the card and two cards side by side line up.
-	 *
-	 * **The body does one thing.** Clicking it is a single, stated action and the
-	 * others are buttons. A card that opened a conversation when it looked like it
-	 * opened a record was answering a question nobody had asked.
+	 * Three rules, each a fault this replaced. **Nothing hides**: the edit control
+	 * appeared on hover, so the card said different things depending on the pointer.
+	 * **Nothing is pushed out**: the body is fixed rows with the tagline clamped.
+	 * **The body does one thing**: clicking it is one stated action.
 	 */
 	interface Props {
 		name: string;
@@ -97,9 +79,8 @@
 	{/if}
 {/snippet}
 
-<!-- `h-full` so the card fills the row it is in. The grids below give every row
-     the same height; without this the border would stop at the content and the
-     equal rows would be invisible. -->
+<!-- `h-full` so the card fills its row: the grids give every row the same
+     height, and without this the border would stop at the content. -->
 <article
 	class="section-tint bg-shade-0 hover:border-shade-4 relative flex h-full overflow-hidden rounded-xl border transition-colors
 		{list ? 'items-stretch' : 'flex-col'}"
@@ -143,12 +124,10 @@
 	{/if}
 
 	{#if !list && badges}
-		<!-- Over the corner rather than on a line of its own.
-		     A row of labels between the name and the tags took the space the
-		     description needed and made a card of three short fields look like a
-		     card of five. Floated, it annotates the card instead of being part of
-		     what the card says. `pointer-events-none` so it never intercepts the
-		     click the body is there to receive. -->
+		<!-- Over the corner rather than on a line of its own: a row of labels between
+		     the name and the tags took the space the description needed. Floated, it
+		     annotates the card rather than being part of what it says.
+		     `pointer-events-none` so it never intercepts the body's click. -->
 		<div class="pointer-events-none absolute top-2 right-2 flex flex-wrap justify-end gap-1">
 			{@render badges()}
 		</div>
@@ -170,9 +149,8 @@
 			{/if}
 		</div>
 	{:else if actions}
-		<!-- A footer with its own edge, rather than buttons floating at the bottom of
-		     the body: it is what makes the card read as a card, and it keeps the
-		     controls in the same place on every one of them. -->
+		<!-- A footer with its own edge rather than buttons floating at the bottom of the
+		     body: it is what makes the card read as a card. -->
 		<div class="border-shade-2 mt-auto flex items-stretch gap-1 border-t p-1.5">
 			{@render actions()}
 		</div>

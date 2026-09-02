@@ -3,13 +3,7 @@ import type { ResolvedPathname } from '$app/types';
 import { Sitemap } from '$lib/sitemap';
 import { generateRandomId } from '$lib/utils';
 
-/**
- * Where a record lives.
- *
- * A knowledge collection no longer has an address of its own: it is written in a
- * dialog, from wherever you happen to be. The Library is where they are listed,
- * so that is what this answers with.
- */
+/** A knowledge collection has no address of its own: it is written in a dialog, from wherever you are. The Library is where they are listed. */
 export function generateNewUrl(sitemap: Sitemap, id?: string): ResolvedPathname {
 	const newId = id ?? generateRandomId();
 	switch (sitemap) {

@@ -12,12 +12,11 @@ let db: DatabaseSync | null = null;
 const DB_FILE = `${APP_SLUG}.db`;
 
 /**
- * Lazily opens the SQLite database and applies migrations on first use, so
- * merely importing this module (e.g. during build/prerender) never touches the
- * filesystem. Only called from server endpoints in `server` mode.
+ * Opens SQLite lazily and migrates on first use, so importing this module
+ * during a build never touches the filesystem.
  *
- * All mutable state lives under a single `DATA_DIR` so the whole config can be
- * bind-mounted (Docker/Nix). Defaults to `./data`.
+ * All mutable state lives under one `DATA_DIR`, so the whole config can be
+ * bind-mounted. Defaults to `./data`.
  */
 export function getDb(): DatabaseSync {
 	if (db) return db;

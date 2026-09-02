@@ -4,13 +4,11 @@
 
 	/**
 	 * Shared between the pending divider and the real one, so the pill that waits
-	 * turns into the pill that reports instead of one blinking out and another
-	 * blinking in. Both sit at the same place in the list (the marker is appended
-	 * last), so what the eye sees is a single element filling in.
+	 * turns into the pill that reports. Both sit at the same place in the list, so
+	 * the eye sees one element filling in.
 	 *
-	 * The fallback is deliberately instant: with no counterpart to pair with, this
-	 * is either a session being opened (every past divider would fade in for no
-	 * reason) or a compaction that was cancelled, and neither wants an animation.
+	 * The fallback is instant: with no counterpart, this is either a session being
+	 * opened or a compaction that was cancelled, and neither wants an animation.
 	 */
 	const [send, receive] = crossfade({
 		duration: 260,
@@ -33,18 +31,12 @@
 
 	/**
 	 * Where a compaction happened: everything above is still on screen, but the
-	 * model now reads the summary instead.
+	 * model now reads the summary instead. Foldable because it is normally not what
+	 * you came to read, and undoable because compaction only moves a boundary.
 	 *
-	 * The summary is foldable because it is normally not what you came to read,
-	 * and undoable because compaction only moves a boundary: dropping the note
-	 * hands the model the full history back.
-	 *
-	 * The same component draws the wait: while the summary is being written the
-	 * pill is already there, at the exact spot it will end up, saying so. A toast
-	 * put the news in a corner of the screen, away from the thing it was about.
-	 * That one pill is why this supplies its own rather than taking the shell's:
-	 * there is no note yet, nothing to unfold, and a way out where the chevron
-	 * goes.
+	 * The same component draws the wait, at the exact spot the pill will end up. A
+	 * toast put the news in a corner, away from the thing it was about. That pill is
+	 * why this supplies its own shell: there is no note yet and nothing to unfold.
 	 */
 	interface Props {
 		note?: CompactionNote;
@@ -97,14 +89,11 @@
 {/snippet}
 
 {#snippet panel()}
-	<!-- `markdown--aside` steps the summary down to the size reasoning is shown
-	     at: it is background to the conversation, not a turn in it, and it was
-	     reading as loudly as the answers around it. -->
+	<!-- `markdown--aside` steps the summary down to the size reasoning is shown at:
+	     it is background to the conversation, not a turn in it. -->
 	<div class="markdown--aside border-shade-3 bg-shade-1 rounded-lg border px-3 py-2.5">
-		<!-- Three things that each want the full width on a phone: what happened,
-		     what it saved, and the way back. Side by side they truncated the first
-		     one down to nothing, so below `sm` they stack and the figures sit on
-		     their own line under the sentence they belong to. -->
+		<!-- Three things that each want the full width on a phone. Side by side they
+		     truncated the first to nothing, so below `sm` they stack. -->
 		<div class="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
 			<span class="text-muted min-w-0 truncate text-xs">
 				{note?.automatic ? $LL.compactedAutomatically() : $LL.compactedManually()}
@@ -113,10 +102,9 @@
 
 			<div class="flex items-center gap-2 sm:ml-auto">
 				{#if savings && savings.saved > 0}
-					<!-- The point of the whole operation, on the right of its own header: a
-					     figure to glance at, not a banner across the summary it introduces.
-					     Estimated like every token figure in the app, hence the tilde, with
-					     the before and after on hover rather than spelled out here. -->
+					<!-- The point of the whole operation, on the right of its own header: a figure
+					     to glance at, not a banner. Estimated like every token figure, hence the
+					     tilde, with the before and after on hover. -->
 					<span
 						class="border-shade-3 bg-shade-0 text-positive flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium shadow-sm"
 						title="{$LL.tokensFreedDetail({
@@ -147,10 +135,9 @@
 		</div>
 
 		{#if note?.instruction}
-			<!-- What was asked for, above what it produced, in the words it was asked
-			     in. A summary written to an instruction is not the same object as one
-			     written to the default rules, and reading it without knowing that is
-			     how you conclude the summariser lost the plot. -->
+			<!-- What was asked for, above what it produced: a summary written to an
+			     instruction is not the same object as one written to the default rules, and
+			     reading it without knowing that is how you conclude it lost the plot. -->
 			<p class="border-shade-3 text-muted mb-2 border-l-2 pl-2.5 text-xs leading-relaxed italic">
 				{note.instruction}
 			</p>

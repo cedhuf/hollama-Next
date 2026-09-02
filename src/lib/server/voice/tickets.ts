@@ -6,26 +6,16 @@ import type { VoiceConfig } from './config';
  * Proof, handed over once, that this socket may hold this conversation.
  *
  * A WebSocket upgrade never passes through SvelteKit's `handle`, so
- * `locals.auth()` does not exist on it and `sessionUser` cannot be called. The
- * alternatives were both bad: decode the Auth.js cookie by hand, which welds us
- * to their internals for as long as we both live, or trust whatever the socket
- * claims about itself, which is not a scheme.
+ * `sessionUser` cannot be called. Decoding the Auth.js cookie by hand would weld
+ * us to their internals, and trusting what the socket claims is not a scheme.
  *
- * So the browser asks an ordinary authenticated route first. That route knows
- * who is knocking because every other route does, it settles which connections
- * and models the conversation may reach, and it leaves the answer here under a
- * name nobody can guess. The socket then presents the name and gets the answer.
+ * So the browser asks an ordinary authenticated route first, which settles what
+ * the conversation may reach and leaves the answer here under a name nobody can
+ * guess. Thirty seconds and one use, so a ticket read out of a log is not a
+ * second way in.
  *
- * Thirty seconds and one use. It is handed straight from a fetch to a socket
- * opened in the same breath, so a minute would be generous; and having spent it,
- * it is gone, which is what stops a ticket read out of a log from being a second
- * way in.
- *
- * In memory on purpose, like `runs`. A restart loses tickets that were in flight,
- * which costs somebody one press of a button, and a second replica behind a load
- * balancer would need the socket to land on the process that issued the ticket.
- * Both are real limits and both are fixed the same way on the day llooma runs at
- * that scale; paying for it now would buy nothing.
+ * In memory, like `runs`: a restart costs one press of a button, and a second
+ * replica would need the socket to land on the issuing process.
  */
 
 /** Long enough to open a socket, short enough not to be worth stealing. */
@@ -66,13 +56,7 @@ export function issueTicket(grant: VoiceGrant): { ticket: string; expiresIn: num
 	return { ticket, expiresIn: TTL_MS };
 }
 
-/**
- * Read a ticket, and spend it.
- *
- * Deleted whether or not it was still valid: a name that has been presented once
- * is finished either way, and leaving an expired one in the map only gives the
- * sweep something to do later.
- */
+/** Deleted whether or not it was still valid: a name presented once is finished either way, and leaving an expired one only gives the sweep something to do. */
 export function claimTicket(ticket: unknown): VoiceGrant | null {
 	if (typeof ticket !== 'string' || !ticket) return null;
 

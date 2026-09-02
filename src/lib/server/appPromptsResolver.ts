@@ -8,11 +8,7 @@ export type ResolvedAppPrompts = AppPromptsView;
 
 const EMPTY: PromptOverrides = {};
 
-/**
- * Only keys the app still knows about. A prompt that has since been removed
- * would otherwise sit in the config forever, and reappear in the UI the day a
- * new prompt happened to reuse its name.
- */
+/** Only keys the app still knows about: a removed prompt would otherwise sit in the config forever and reappear the day a new one reused its name. */
 function clean(raw: unknown): PromptOverrides {
 	if (!raw || typeof raw !== 'object') return {};
 	const source = raw as Record<string, unknown>;
@@ -41,13 +37,7 @@ export function setAdminAppPrompts(overrides: unknown): void {
 	setConfig('appPrompts', JSON.stringify(clean(overrides)));
 }
 
-/**
- * The rewrites that apply to a given person.
- *
- * Merged rather than replaced when the mode is overridable: an admin who
- * rewrote the search router and a user who rewrote the compaction prompt should
- * each get what they wrote, not whichever of them wrote last.
- */
+/** Merged rather than replaced when the mode is overridable: an admin who rewrote the search router and a user who rewrote the compaction prompt should each get what they wrote. */
 export function resolveAppPrompts(
 	userSettings: Settings | null,
 	isAdmin: boolean
@@ -63,8 +53,8 @@ export function resolveAppPrompts(
  *
  * A run carries them in its body so an edit made a second ago is already in
  * force, which means the body is also where somebody would send rewrites an
- * admin has locked. Passing it through here rather than trusting it is the whole
- * difference between a locked prompt and a suggestion.
+ * admin has locked. Passing it through here is the difference between a locked
+ * prompt and a suggestion.
  */
 export function resolveClaimedAppPrompts(claimed: unknown, isAdmin: boolean): ResolvedAppPrompts {
 	const shared = resolveShared<PromptOverrides>({

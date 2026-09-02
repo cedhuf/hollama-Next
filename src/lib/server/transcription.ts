@@ -4,15 +4,13 @@ import type { RunUsage } from '$lib/usageCounts';
 
 /**
  * Turning what somebody said into what they meant to type. Server-side because
- * the key lives here: the browser records, hands over the sound, and gets words
- * back.
+ * the key lives here.
  *
- * OpenAI-compatible only. Ollama serves language models, not speech ones, so a
- * connection that cannot do this simply has no audio model to choose.
+ * OpenAI-compatible only: Ollama serves language models, not speech ones.
  *
  * Where a provider says more than the contract does, its own file carries it.
- * What stays here is every defence rather than any address: what may be
- * uploaded, how large, how long this waits, and how often it asks.
+ * What stays here is every defence: what may be uploaded, how large, how long
+ * this waits, and how often it asks.
  */
 
 export class TranscriptionError extends Error {

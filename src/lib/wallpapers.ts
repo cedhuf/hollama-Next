@@ -1,16 +1,12 @@
 /**
  * The wallpapers the app ships with.
  *
- * Two kinds, on purpose. The photographs are what most people actually want
- * behind an application; the gradients are there because they cost a dozen bytes
- * to store, never look soft on a large display, and cannot be got wrong at any
- * size.
+ * Two kinds: the photographs are what most people want behind an application,
+ * and the gradients cost a dozen bytes, never look soft on a large display and
+ * cannot be got wrong at any size.
  *
- * Both are handed over as a CSS `background-image`, so the layer that paints the
- * wallpaper never learns which kind it was given.
- *
- * The names are proper nouns, the way the theme styles are, so they stay put in
- * every language.
+ * Both are handed over as a CSS `background-image`, so the layer that paints one
+ * never learns which kind it was given. The names are proper nouns.
  */
 export interface Wallpaper {
 	/** Stored as `pack:<id>`, so the setting stays a handful of bytes. */
@@ -18,35 +14,22 @@ export interface Wallpaper {
 	name: string;
 	/** A CSS `background-image` value. */
 	image: string;
-	/**
-	 * What the picker draws instead, where the full-size one would be a waste.
-	 *
-	 * A tile is eighty pixels wide. Opening the settings should not fetch a
-	 * megabyte of photographs to fill a row of stamps.
-	 */
+	/** A tile is eighty pixels wide: opening the settings should not fetch a megabyte of photographs to fill a row of stamps. */
 	thumb?: string;
 }
 
 /** Marks a stored value as one of ours. Anything else is the user's own file. */
 export const PACK_PREFIX = 'pack:';
 
-/**
- * The ceiling on an imported picture.
- *
- * Settings travel, and an import is kept as a data URL, which is the encoding
- * tax on top: three megabytes of JPEG land as four of base64 in a store that is
- * synchronised whole. The limit is on the file rather than on its dimensions
- * because that is the number the user can see before choosing.
- */
+/** Settings travel, and an import is kept as a data URL: three megabytes of JPEG land as four of base64 in a store synchronised whole. On the file rather than the dimensions, since that is the number the user can see. */
 export const CUSTOM_MAX_BYTES = 3 * 1024 * 1024;
 
 /**
  * Pixabay, under their Content License, which asks for no attribution. Credited
  * in `static/wallpapers/CREDITS.md` regardless.
  *
- * Encoded at 1600px and no wider, which is generous rather than tight: the
- * picture is blurred before it is ever shown, so what a larger file would carry
- * is detail that gets destroyed on the way to the screen.
+ * Encoded at 1600px and no wider: the picture is blurred before it is shown, so
+ * a larger file would carry detail that gets destroyed on the way to the screen.
  */
 function photo(id: string, name: string): Wallpaper {
 	return {
@@ -148,13 +131,7 @@ export const WALLPAPERS: Wallpaper[] = [
 	}
 ];
 
-/**
- * What the setting means, as a `background-image`.
- *
- * Empty for no wallpaper, and empty too for a pack entry that no longer exists,
- * so that a setting written by a later version degrades into no picture instead
- * of into a blank one drawn as though there were.
- */
+/** Empty for no wallpaper, and for a pack entry that no longer exists, so a setting written by a later version degrades into no picture rather than a blank one. */
 export function wallpaperImage(value: string): string {
 	if (!value) return '';
 	if (!value.startsWith(PACK_PREFIX)) return `url(${value})`;
@@ -162,9 +139,7 @@ export function wallpaperImage(value: string): string {
 	return WALLPAPERS.find((wallpaper) => wallpaper.id === id)?.image ?? '';
 }
 
-/**
- * What the picker draws for a value, which is a lighter file where there is one.
- */
+/** What the picker draws for a value, which is a lighter file where there is one. */
 export function wallpaperThumb(value: string): string {
 	if (!value) return '';
 	if (!value.startsWith(PACK_PREFIX)) return `url(${value})`;

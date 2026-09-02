@@ -4,14 +4,12 @@
 	import Kbd from '$lib/components/Kbd.svelte';
 
 	/**
-	 * Autocomplete for slash commands, docked above the composer.
-	 *
-	 * Shown only while the prompt is a bare `/word`: the moment a space or a
-	 * second line is typed, the caller stops rendering it, because from then on
-	 * the user is writing a message, not naming a command.
+	 * Autocomplete for slash commands, docked above the composer. Shown only while
+	 * the prompt is a bare `/word`: after a space or a second line the user is
+	 * writing a message, not naming a command.
 	 *
 	 * Keyboard handling lives in the composer's `onkeydown`, next to the Enter
-	 * handling it has to win against; this component owns the list and the mouse.
+	 * handling it has to win against; this owns the list and the mouse.
 	 */
 	interface Props {
 		commands: SlashCommand[];
@@ -31,7 +29,7 @@
 >
 	{#each commands as command, i (command.name)}
 		<!-- A command that cannot run right now stays on the list, dimmed and saying
-		     why. Hiding it would read as the feature being missing or broken. -->
+		     why: hiding it would read as the feature being missing. -->
 		<button
 			type="button"
 			role="option"
@@ -47,9 +45,7 @@
 			<span class="shrink-0 font-mono text-sm {command.available ? 'text-active' : 'text-muted'}">
 				/{command.name}
 				{#if command.argsHint}
-					<!-- What may follow the name, in the place it would be typed. A command
-					     with something optional to say about itself says it here rather than
-					     in a paragraph nobody reads. -->
+					<!-- What may follow the name, in the place it would be typed. -->
 					<span class="text-muted opacity-70">{command.argsHint}</span>
 				{/if}
 			</span>

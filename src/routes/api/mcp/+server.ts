@@ -11,13 +11,7 @@ import {
 } from '$lib/server/db/mcpServers';
 import { refreshMcpTools } from '$lib/server/mcp/session';
 
-/**
- * An account's own MCP servers. Never anybody else's, and never the token.
- *
- * Ownership is the whole access rule, as it is for bots: the tools a server
- * offers are spent inside this account's turns, under this account's policy, so
- * the server belongs to it the way a personal provider connection does.
- */
+/** Ownership is the whole access rule, as it is for bots: the tools a server offers are spent inside this account's turns, under its policy. */
 export async function GET(event) {
 	const user = await requireUser(event);
 	return json(listMcpServers(user.id).map(toMcpServerView));
@@ -45,10 +39,9 @@ export async function POST(event) {
 		enabled: body?.enabled ?? true
 	});
 
-	// Asked once, here, so the card arrives with its catalogue rather than an empty
+	// Asked once here, so the card arrives with its catalogue rather than an empty
 	// list and a button. A server that cannot be reached is still created: the
-	// address may be right and the machine merely down, and a creation that fails
-	// on that would lose the token the person just typed.
+	// address may be right and the machine down, and failing would lose the token.
 	await refreshMcpTools(record).catch(() => {});
 
 	return json(toMcpServerView(getMcpServer(record.id) ?? record), { status: 201 });

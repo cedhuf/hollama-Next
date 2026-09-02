@@ -53,11 +53,9 @@ export interface ModelRule {
  * endpoint answers `images.0 must be a file`.
  */
 /**
- * How a provider turns speech into words.
- *
- * Absent, the OpenAI contract is assumed: multipart to `/audio/transcriptions`
- * on the connection's own root. Present, a provider departs from it: a different
- * root, an asynchronous route, or an extra field.
+ * How a provider turns speech into words. Absent, the OpenAI contract is
+ * assumed: multipart to `/audio/transcriptions` on the connection's own root.
+ * Present, a provider departs from it.
  *
  * Deliberately not here: size ceilings, accepted types, and how long the app
  * waits. Those are defences, and they are the app's.
@@ -181,11 +179,9 @@ export interface ProviderDescriptor {
 	 * Says what each call cost, in the answer's `usage` block. Nothing is asked for
 	 * it and reading it needs no declaration.
 	 *
-	 * The flag is for what the app decides *before* a call: no price form in Models
-	 * and prices, and an exemption from the rule refusing an unpriced model under an
-	 * allowance, since that rule exists because uncounted means unlimited.
+	 * The flag is for what the app decides *before* a call: no price form, and an
+	 * exemption from the rule refusing an unpriced model under an allowance.
 	 *
-	 * It matters most on a gateway, where one model genuinely has several prices.
 	 * The currency is not decoration: with no price table there is nowhere else to
 	 * learn what an allowance of `20` is counted in.
 	 */
@@ -218,16 +214,13 @@ export interface ProviderDescriptor {
 	 */
 	extraModels?: string[];
 	/**
-	 * Further catalogues to ask for, when one list is not the whole list.
-	 *
+	 * Further catalogues to ask for, when one list is not the whole list:
 	 * OpenRouter's `/models` returns four hundred entries with no transcription
-	 * model among them; the nineteen come back only from
-	 * `?output_modalities=transcription`. A URL each rather than a list of names, so
-	 * the answer stays the provider's and cannot go stale.
+	 * model among them.
 	 *
-	 * Read exactly like the main one and merged into it. Unlike the main one, a
-	 * question this narrow says what it holds, and that beats the name: no reading
-	 * of `fish-audio/s1` will reveal that it talks.
+	 * A URL each rather than a list of names, so the answer stays the provider's.
+	 * Read like the main one and merged into it, but a question this narrow says
+	 * what it holds, and that beats the name.
 	 */
 	catalogues?: (roots: { baseUrl: string }) => Catalogue[];
 	/** Refinements for the model families that disagree with the line above. */

@@ -14,13 +14,7 @@
 
 	interface Props {
 		personas: Persona[];
-		/**
-		 * Two presentations of one list, never both at once: a named grid, or the row
-		 * of avatars the compact header asks for. Both hold the same place above the
-		 * conversations, and both answer the same way: the avatar lifts and takes a
-		 * ring, rather than a filled rectangle appearing behind it. What a launcher
-		 * does, and what makes it look active, is written once either way.
-		 */
+		/** Two presentations of one list, never both at once: a named grid, or the row of avatars the compact header asks for. What a launcher does, and what makes it look active, is written once either way. */
 		shape: 'grid' | 'strip';
 		/** Grid only. A search is running, so the section opens whatever the toggle last said. */
 		forceOpen?: boolean;
@@ -35,15 +29,7 @@
 	const isActive = (persona: Persona) =>
 		!!persona.sessionId && pathname.includes(persona.sessionId);
 
-	/**
-	 * Five to a row, always, and the last row centred on whatever is left.
-	 *
-	 * The cell is therefore the same width whether there are two personas or
-	 * twenty, which is what makes the block read as a grid rather than as a
-	 * different arrangement each time one is added. Rows used to be balanced
-	 * instead, six going to three and three rather than five and one, and the
-	 * avatars changed size as the list grew.
-	 */
+	/** Five to a row, always, with the last row centred: the cell is the same width whether there are two personas or twenty. Balanced rows changed the avatars' size as the list grew. */
 	const COLUMNS = 5;
 
 	async function launch(persona: Persona) {
@@ -52,16 +38,11 @@
 	}
 
 	/**
-	 * A launcher is a conversation, so it answers a right-click like one.
+	 * A launcher is a conversation, so it answers a right-click like one, plus the
+	 * one thing only a persona has: ending it. That is not deletion and must not
+	 * read as it, so they are separate entries with the destructive one last.
 	 *
-	 * Everything a conversation offers, plus the one thing only a persona has:
-	 * ending it. That is not deletion and must not read as it, which is why they
-	 * are separate entries with the destructive one last. Ending puts the persona
-	 * back to unstarted and leaves the transcript in the list as an ordinary
-	 * conversation; deleting is what loses it.
-	 *
-	 * The menu is only drawn once the persona has a conversation. Before that there
-	 * is nothing to pin, export, end or delete.
+	 * Drawn only once the persona has a conversation.
 	 */
 	const sessionOf = (persona: Persona) =>
 		persona.sessionId
@@ -93,7 +74,7 @@
 				<ChevronDown class="h-3.5 w-3.5 transition-transform {open ? '' : '-rotate-90'}" />
 			</button>
 			{#if open}
-				<!-- iOS Messages-style grid: five to a row, a partial row centred. -->
+				<!-- Five to a row, a partial row centred. -->
 				<div class="flex flex-wrap justify-center gap-1 pt-1 pb-1">
 					{#each personas as persona (persona.id)}
 						{@const session = sessionOf(persona)}
@@ -141,15 +122,11 @@
 			{/if}
 		</div>
 	{:else}
-		<!-- Spread rather than stacked to the left: four avatars bunched in a corner
-		     read as a leftover, the same four spaced across the width read as a row.
-		     `justify-evenly` gives way to scrolling once they no longer fit, which is
-		     the point at which even spacing stops being possible.
+		<!-- Spread rather than stacked left: four avatars bunched in a corner read as a
+		     leftover. `justify-evenly` gives way to scrolling once they no longer fit.
+
 		     The vertical padding is not decoration: asking for horizontal overflow clips
-		     the vertical one too, and the avatars reach past their own box on both
-		     counts. The ring is drawn 4px outside, and the lift then scales that whole
-		     circle by a twentieth, which puts the far edge at just under 5px. Eight
-		     leaves the room, and the same on each side so nothing sits off-centre. -->
+		     the vertical one too, and the ring is drawn 4px outside the avatar. -->
 		<div class="flex justify-evenly gap-1.5 overflow-x-auto px-3 py-2">
 			{#each personas as persona (persona.id)}
 				{@const session = sessionOf(persona)}

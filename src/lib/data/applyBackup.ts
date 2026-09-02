@@ -11,11 +11,7 @@ import {
 import { StorageKey } from './keys';
 import type { Backup } from './repository';
 
-/**
- * Apply one category of imported/restored data to its store. Assigning the
- * store persists it automatically through the active repository: no direct
- * storage access needed in components.
- */
+/** Assigning the store persists it through the active repository, so components need no direct storage access. */
 export function applyToStore(storageKey: StorageKey, data: unknown) {
 	switch (storageKey) {
 		case StorageKey.Preferences:
@@ -24,11 +20,11 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 		case StorageKey.Servers:
 			serversStore.set(data as Parameters<typeof serversStore.set>[0]);
 			break;
-		// Restoring really does mean "this is now the whole collection": the one
-		// place the wholesale write is the correct operation.
+		// Restoring really does mean "this is now the whole collection": the one place
+		// the wholesale write is correct.
 		//
-		// An exported file never ages out, so a backup written before notes became
-		// one field is converted here rather than assumed away.
+		// An exported file never ages out, so a backup written before notes became one
+		// field is converted here.
 		case StorageKey.Sessions:
 			if (Array.isArray(data)) adoptLegacyNotes(data);
 			sessionsStore.replaceAll(data as Parameters<typeof sessionsStore.replaceAll>[0]);
@@ -45,9 +41,7 @@ export function applyToStore(storageKey: StorageKey, data: unknown) {
 	}
 }
 
-/**
- * Apply a full backup, skipping categories the file doesn't contain.
- */
+/** Apply a full backup, skipping categories the file does not contain. */
 export function applyBackupToStores(backup: Backup) {
 	for (const storageKey of Object.values(StorageKey)) {
 		const data = backup[storageKey];

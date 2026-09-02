@@ -29,10 +29,8 @@
 	/**
 	 * One provider connection, as a card that stays quiet until you open it.
 	 *
-	 * Collapsed it answers the only questions worth asking at a glance: is it
-	 * live, and how many models does it bring? Everything editable lives inside,
-	 * on the same `SettingsField` / `settings-field` grid as the other settings
-	 * tabs, so this stops being the one screen with its own look.
+	 * Collapsed it says whether it is live and how many models it brings.
+	 * Everything editable lives inside, on the same grid as the other settings tabs.
 	 */
 	interface Props {
 		/** The server to edit (mutated in place via bindings). */
@@ -43,11 +41,7 @@
 		onDelete: () => void;
 		/** Start with the card open (e.g. a freshly-added server). */
 		startEditing?: boolean;
-		/**
-		 * Server mode never sends keys back to the browser, so `server.apiKey` is
-		 * blank even when one is stored. This says whether to show "Key saved"
-		 * instead of an empty field that reads as "no key".
-		 */
+		/** Server mode never sends keys back, so `server.apiKey` is blank even when one is stored. This says whether to show "Key saved" rather than an empty field. */
 		hasApiKey?: boolean;
 		/** Called after a successful sync, so the parent can refresh the catalogue. */
 		onSynced?: () => Promise<void> | void;
@@ -102,11 +96,7 @@
 		onChange();
 	}
 
-	/**
-	 * One action for the whole round-trip: check the endpoint answers, stamp the
-	 * verified date (persisted by the parent) and pull this provider's models in.
-	 * There is no separate "verify" and "refresh": syncing is what both meant.
-	 */
+	/** One action for the whole round-trip: check the endpoint answers, stamp the verified date, and pull the models in. Syncing is what "verify" and "refresh" both meant. */
 	async function syncServer() {
 		isLoading = true;
 		const toastId = toast.loading($LL.connecting());
@@ -144,21 +134,19 @@
 	iconStyle="background-color: {badge.color}1f; color: {badge.color}"
 >
 	{#snippet icon()}
-		<!-- The connection's colour, doing real work: it's the same accent its
-		     models wear in every picker. -->
+		<!-- The connection's colour, doing real work: the same accent its models wear in
+		     every picker. -->
 		{initials}
 	{/snippet}
 
 	{#snippet title()}
 		<span class="flex max-w-full items-center gap-1.5">
-			<!-- The name is the heading and the field at once, as it already is on a
-			     bot: renaming something is editing what is on screen, and the box further
+			<!-- The name is the heading and the field at once, as on a bot: the box further
 			     down that used to ask the same question was a second question.
 
-			     `shrink-0` is what makes it exactly as wide as its text. It shares this
-			     line with the provider badge, which does not shrink, so without it the
-			     field is the one that gives way and the name is cut off at a width that
-			     has nothing to do with the name. -->
+			     `shrink-0` is what makes it exactly as wide as its text: it shares the line
+			     with a badge that does not shrink, so without it the field gives way and the
+			     name is cut off at a width that has nothing to do with the name. -->
 			<input
 				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 box-content field-sizing-content max-w-full shrink-0 rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
 				size={name.length + 1}
@@ -167,8 +155,8 @@
 				placeholder={provider.name}
 				aria-label={$LL.label()}
 			/>
-			<!-- Only when the label is something other than the provider's own name,
-			     so a connection called "Ollama" doesn't say Ollama twice. -->
+			<!-- Only when the label differs from the provider's own name, so a connection
+			     called "Ollama" does not say Ollama twice. -->
 			{#if name !== provider.name}
 				<span class="badge shrink-0">{provider.name}</span>
 			{/if}
@@ -201,8 +189,8 @@
 	{/snippet}
 
 	<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-		<!-- User-defined endpoints expose the Base URL directly; identified
-				     providers keep their preset one under Advanced. -->
+		<!-- User-defined endpoints expose the base URL directly; identified providers
+		     keep their preset one under Advanced. -->
 		{#if !provider.identified}
 			<SettingsField label={$LL.baseUrl()}>
 				<input
@@ -214,15 +202,9 @@
 			</SettingsField>
 		{/if}
 
-		<!-- Some providers' endpoints differ only by one value in their path, so
-				     that is what the form asks for and the URL is derived from it. An empty
-				     value leaves it empty, which is what stops the connection being synced
-				     before it can work.
-
-				     Both URLs from the one field, because a provider whose images are not
-				     under its chat endpoint would otherwise have to ask twice for the same
-				     value, which is asking the reader to know why. Which providers work
-				     this way, and how, is in their own file. -->
+		<!-- Some providers' endpoints differ only by one value in their path, so that is
+		     what the form asks for. An empty value leaves the URL empty, which is what
+		     stops the connection being synced before it can work. -->
 		{#if urlField}
 			<SettingsField label={$LL[urlField.label as 'productId']()}>
 				<input
@@ -241,8 +223,8 @@
 		{#if isOpenAiFamily}
 			<SettingsField label={$LL.apiKey()}>
 				{#if keyIsStored}
-					<!-- A stored key is never returned by the API. Showing the empty
-							     password field would read as "no key configured". -->
+					<!-- A stored key is never returned, and an empty password field would read as
+					     "no key configured". -->
 					<div
 						class="border-shade-3 bg-shade-1 flex items-center gap-2 rounded-md border px-2.5 py-1.5"
 					>
@@ -279,8 +261,8 @@
 					</div>
 				{/if}
 				{#if provider.apiKeyHelpUrl && !keyIsStored}
-					<!-- Kept next to the field it answers: "where do I get this?" only
-							     ever comes up while the field is empty. -->
+					<!-- Next to the field it answers: "where do I get this?" only comes up while the
+					     field is empty. -->
 					<Button
 						variant="link"
 						href={provider.apiKeyHelpUrl}
@@ -303,9 +285,8 @@
 		</SettingsField>
 	</div>
 
-	<!-- The accent this connection's models wear in every picker. Assigned at
-			     creation from whatever the other connections aren't using; changing it
-			     is just picking another swatch. -->
+	<!-- The accent this connection's models wear in every picker, assigned at
+	     creation from whatever the others are not using. -->
 	<div class="flex flex-wrap items-center gap-2">
 		<span class="text-active mr-1 text-sm font-medium">{$LL.color()}</span>
 		{#each SERVER_COLORS as swatch (swatch)}
@@ -326,9 +307,8 @@
 		{/each}
 	</div>
 
-	<!-- Kept where the other help text went: this one is not a description of a
-			     field, it is the fix for the CORS failure that stops Ollama connecting,
-			     and it only shows while the connection is still unverified. -->
+	<!-- Not a description of a field but the fix for the CORS failure that stops
+	     Ollama connecting, so it only shows while the connection is unverified. -->
 	{#if isOllamaFamily}
 		<OllamaBaseURLHelp {server} />
 	{/if}
@@ -345,10 +325,9 @@
 			</SettingsField>
 		{/if}
 
-		<!-- Empty means "wherever chat is", which is true of every provider that
-				     serves both from one root, so this stays a field nobody has to think
-				     about until their provider makes them. The placeholder shows what it
-				     falls back to rather than a fictional example. -->
+		<!-- Empty means "wherever chat is", true of every provider serving both from one
+		     root, so this is a field nobody thinks about until their provider makes
+		     them. The placeholder shows the fallback rather than a fictional example. -->
 		{#if canDraw}
 			<SettingsField label={$LL.imageEndpoint()} hint={$LL.imageEndpointHelp()}>
 				<input
@@ -365,22 +344,20 @@
 		<PullModel {server} />
 	{/if}
 
-	<!-- How the model is loaded, which is a fact about this machine and not
-			     about any one conversation. Under Advanced because a working Ollama
-			     needs none of it: every field left blank is Ollama deciding, which is
-			     the right answer until somebody has a reason it is not.
+	<!-- How the model is loaded, which is a fact about this machine rather than any
+	     one conversation. Under Advanced because a working Ollama needs none of it:
+	     every field left blank is Ollama deciding.
 
-			     Below the pull field rather than above it, following the order of the
-			     work: you fetch a model first, and only then wonder how the machine
-			     should load it. -->
+	     Below the pull field, following the order of the work: you fetch a model
+	     first, and only then wonder how the machine should load it. -->
 	{#if showAdvanced && isOllamaFamily}
 		<div class="border-shade-3 border-t pt-3">
 			<ConnectionLoadOptions bind:server onChange={persist} />
 		</div>
 	{/if}
 
-	<!-- Footer: the occasional actions, kept out of the way of the fields.
-			     Delete confirms in place rather than through a dialog. -->
+	<!-- The occasional actions, out of the way of the fields. Delete confirms in
+	     place rather than through a dialog. -->
 	<div class="border-shade-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
 		{#if onRenameModels}
 			<button

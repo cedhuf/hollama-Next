@@ -5,25 +5,16 @@ import { getConfig, setConfig } from './config';
 /**
  * What an instance offers its users, which is two lists and not one.
  *
- * An admin shares in two different senses, and collapsing them was a mistake
- * worth spelling out. Sharing **their** persona means handing out a thing they
- * wrote: it lives in their library, they edit it, and what users get is a copy of
- * that. Sharing one **from the store** means saying "this instance also offers
- * Maïté", which is not a thing they wrote at all.
+ * Sharing **their** persona hands out a thing they wrote, and users get a copy.
+ * Sharing one **from the store** says "this instance also offers Maite", which
+ * is not a thing they wrote. As one list, the second became a copy sitting
+ * beside the store's own, and a copy freezes.
  *
- * Made into one list, the second became a copy of the store's persona sitting
- * beside the store's persona: the same face twice in the catalogue, one badged
- * official and one badged shared. And a copy freezes, so the store's next
- * revision never reached the people who took the admin's.
+ * So a relay is a reference: `sharedPersonas` holds what an admin wrote,
+ * `sharedCatalogIds` the store ids they relay.
  *
- * So a relay is a reference. `sharedPersonas` holds the personas an admin
- * actually wrote; `sharedCatalogIds` holds the store ids they have chosen to
- * relay. Which also means an admin can install Maïté, rewrite half of her, and
- * share that as their own, with the store's original still listed beside it.
- *
- * Note what a shared persona does not carry: attached knowledge. The documents
- * live in the library it was shared from, and their ids mean nothing in anyone
- * else's. A relay has no such problem, since what users install is the bundle.
+ * A shared persona does not carry its attached knowledge: the ids mean nothing
+ * elsewhere. A relay has no such problem, since users install the bundle.
  */
 const PERSONAS = 'sharedPersonas';
 const CATALOG_IDS = 'sharedCatalogIds';
@@ -39,18 +30,13 @@ export function sharedPersonas(): Persona[] {
 }
 
 /**
- * The fields an admin actually shares, and no others.
+ * An allowlist rather than the object as it arrives: this is the one place where
+ * one account's persona is handed to every other, so anything not named here
+ * would have been broadcast by accident. It used to send the whole object, so
+ * the admin's conversation id travelled with it.
  *
- * An allowlist rather than the object as it arrives, on the same principle the
- * export bundle already follows: this is the one place where one account's
- * persona is handed to every other, so anything that lands on `Persona` and is
- * not named here is a thing that would have been broadcast by accident. It used
- * to send the whole object, which meant the admin's conversation id travelled
- * with it.
- *
- * Memory is not on this list and could not be: it is not on the persona at all,
- * it is keyed on the pair of persona and account precisely so that sharing a
- * persona cannot share what it remembers.
+ * Memory is not on this list and could not be: it is keyed on the pair of
+ * persona and account precisely so sharing cannot share what it remembers.
  */
 function shareable(persona: Persona): Persona {
 	return {

@@ -36,13 +36,7 @@ export async function GET(event) {
 	}
 }
 
-/**
- * Replace a whole collection.
- *
- * Restoring a backup, and nothing else: ordinary saves go through the per-item
- * routes, which don't make the cost of a write grow with the history and don't
- * let a client with a stale list delete what it never knew about.
- */
+/** Restoring a backup, and nothing else: ordinary saves go through the per-item routes, which do not make a write's cost grow with the history. */
 export async function PUT(event) {
 	const user = await requireUser(event);
 	const body = await event.request.json();

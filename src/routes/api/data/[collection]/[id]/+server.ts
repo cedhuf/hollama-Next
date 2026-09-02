@@ -8,23 +8,15 @@ import {
 	savePersonaMemory
 } from '$lib/server/db/personaMemory';
 
-/**
- * One item of a collection.
- *
- * The collection-level PUT next door replaces everything the user has; these
- * write and delete a single row, which is what a save and a delete actually are.
- * Both are scoped to the signed-in user, so an id from elsewhere reaches nothing.
- */
+/** The collection-level PUT next door replaces everything the user has; these write and delete a single row. Both are scoped to the signed-in user. */
 const TABLES = ['sessions', 'knowledge', 'personas', 'playbooks'] as const;
 type Table = (typeof TABLES)[number];
 
 /**
- * Persona memory is handled apart rather than added to `TABLES`.
- *
- * The generic helpers key on a globally unique `id`; a memory is keyed on the
- * pair (persona, account), because the same persona is remembered separately by
- * everyone who uses it. Squeezing it into the shared path would have meant
- * loosening that key, and the key is the feature.
+ * Persona memory is handled apart rather than added to `TABLES`: the generic
+ * helpers key on a globally unique `id`, and a memory is keyed on the pair
+ * (persona, account), because the same persona is remembered separately by
+ * everyone who uses it. That key is the feature.
  */
 const MEMORY = 'persona-memory';
 

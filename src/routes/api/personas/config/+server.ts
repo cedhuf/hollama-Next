@@ -17,17 +17,16 @@ export async function GET(event) {
 
 	const isAdmin = user.role === 'admin';
 
-	// The store's address is shown to everyone and editable by an admin: it is the
-	// instance's, and a user who cannot change it should still be able to see where
-	// their personas are coming from.
+	// The store's address is shown to everyone and editable by an admin: a user who
+	// cannot change it should still see where their personas come from.
 	const relayed = sharedCatalogIds();
 
 	return json({
 		shared: sharedPersonas(),
 		sharedFromStore: relayed,
 		canCreate: isAdmin || allowUserPersonas(),
-		// An admin always sees the whole catalogue: it is the source they choose
-		// from. What the mode decides is what everyone else's store contains.
+		// An admin always sees the whole catalogue: it is the source they choose from.
+		// What the mode decides is what everyone else's store contains.
 		storeMode: isAdmin ? 'open' : personaStoreMode(),
 		canShare: isAdmin,
 		autoUpdateForced: personaAutoUpdateForced(),

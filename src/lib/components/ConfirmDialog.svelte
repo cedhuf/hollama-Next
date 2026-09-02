@@ -14,18 +14,12 @@
 	let pending = $state<Request | null>(null);
 
 	/**
-	 * Ask before doing something there is no button to ask beside.
+	 * Ask before doing something there is no button to ask beside: leaving a page
+	 * with an unsent message, an import that overwrites everything. Most actions
+	 * confirm in place, on the control that started them (`ButtonConfirm`).
 	 *
-	 * Most destructive actions in the app confirm themselves in place, on the
-	 * control that started them (`ButtonConfirm`). This is for the rest: leaving a
-	 * page with an unsent message, an import that overwrites everything, a store
-	 * update that replaces what somebody has edited. There is no row to arm there,
-	 * and until now they all borrowed the browser's own box, which is the one
-	 * dialog in the app that does not look like the app and blocks the thread while
-	 * it is open.
-	 *
-	 * One at a time, on purpose: a second question arriving over the first is a
-	 * sign the caller is asking too much, not a case to design for.
+	 * One at a time: a second question over the first means the caller is asking too
+	 * much, not a case to design for.
 	 */
 	export function confirmAction(request: Omit<Request, 'settle'>): Promise<boolean> {
 		if (pending) pending.settle(false);
@@ -49,8 +43,8 @@
 <AlertDialog.Root
 	open={!!pending}
 	onOpenChange={(next) => {
-		// Escape, the overlay, anything that is not the action button: all of them
-		// mean no, which is what a question about something irreversible defaults to.
+		// Escape, the overlay, anything that is not the action button: all of them mean
+		// no, which is what a question about something irreversible defaults to.
 		if (!next) answer(false);
 	}}
 >

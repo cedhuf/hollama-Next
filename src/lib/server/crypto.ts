@@ -3,14 +3,11 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:
 import { instanceSecret } from './secret';
 
 /**
- * Server-side encryption for provider API keys, so they're never stored in
- * plaintext and never leave the server. AES-256-GCM with a key derived from the
- * instance secret (the same one Auth.js signs with). Format: `iv.tag.ciphertext`,
- * all base64.
+ * Server-side encryption for provider API keys. AES-256-GCM with a key derived
+ * from the instance secret. Format: `iv.tag.ciphertext`, all base64.
  *
- * Encryption is not conditional on there being accounts to sign into: an
- * instance with a single implicit owner holds exactly the same provider keys as
- * a shared one, so it gets exactly the same treatment.
+ * Not conditional on there being accounts: an instance with a single implicit
+ * owner holds the same provider keys as a shared one.
  */
 function encryptionKey(): Buffer {
 	return createHash('sha256').update(instanceSecret()).digest();

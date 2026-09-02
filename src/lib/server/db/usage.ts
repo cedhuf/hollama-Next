@@ -4,14 +4,12 @@ import { getDb } from './index';
 /**
  * What each account has spent, and what it is allowed to.
  *
- * A guardrail, not an accounting system. It exists so an instance run for a
- * handful of people catches the runaway loop and the forgotten tab, not so
- * anybody can be invoiced: the figures are as good as what the providers report
- * and what somebody typed into the price fields, and a model nobody priced is
- * not counted at all.
+ * A guardrail, not an accounting system: it catches the runaway loop and the
+ * forgotten tab. The figures are as good as what the providers report and what
+ * somebody typed into the price fields, and an unpriced model is not counted.
  *
- * Which is why nothing here ever interrupts anything. A turn already under way
- * always finishes; the limit is asked about before the next one starts.
+ * Nothing here ever interrupts anything: a turn under way always finishes, and
+ * the limit is asked about before the next one starts.
  */
 
 export type CreditPeriod = 'month' | 'week' | 'day';
@@ -52,11 +50,10 @@ export function setCreditPeriod(period: CreditPeriod): void {
 }
 
 /**
- * The first day of the period a moment falls in, as `YYYY-MM-DD`.
- *
- * Calendar months, ISO weeks (Monday) and plain days, in UTC. UTC because the rows are
- * written in UTC and a boundary that moves with the reader is a boundary two
- * people disagree about; for a monthly guardrail the hours of drift are noise.
+ * The first day of the period a moment falls in, as `YYYY-MM-DD`. Calendar
+ * months, ISO weeks (Monday) and plain days, in UTC: the rows are written in
+ * UTC, and a boundary that moves with the reader is one two people disagree
+ * about.
  */
 export function periodStart(period: CreditPeriod, at = new Date()): string {
 	const date = new Date(Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate()));
@@ -76,14 +73,7 @@ export const today = (at = new Date()): string => at.toISOString().slice(0, 10);
 export interface Spend {
 	inputTokens: number;
 	outputTokens: number;
-	/**
-	 * Images returned, and the seconds they took.
-	 *
-	 * Beside the tokens rather than folded into them, because a drawing consumes
-	 * neither: a month whose whole cost came from images would otherwise show a
-	 * figure with nothing behind it, which reads as a bug rather than as a month
-	 * spent drawing.
-	 */
+	/** Beside the tokens rather than folded in, because a drawing consumes neither: a month whose whole cost came from images would otherwise show a figure with nothing behind it. */
 	images: number;
 	seconds: number;
 	cost: number;
@@ -152,13 +142,7 @@ export function spendForAll(from: string): Record<string, Spend> {
 	);
 }
 
-/**
- * What was spent each day since a date, oldest first, days with nothing included.
- *
- * The gaps matter: a chart drawn only from the days that have rows says nothing
- * about the days somebody did not use it, which is half of what "is this person
- * running away with it" is asking.
- */
+/** The gaps matter: a chart drawn only from the days that have rows says nothing about the days somebody did not use it. */
 export function dailySpend(userId: string, from: string): { day: string; cost: number }[] {
 	const rows = getDb()
 		.prepare(
@@ -231,13 +215,7 @@ export function setCreditLimit(userId: string, limit: number | null): void {
 		.run(limit == null ? null : Math.max(0, limit), userId);
 }
 
-/**
- * Whether this account has already spent its allowance.
- *
- * Asked before a turn starts and never during one. `false` whenever there is no
- * limit, which is the default, so an instance nobody has configured behaves
- * exactly as it did before any of this existed.
- */
+/** Asked before a turn starts and never during one. `false` whenever there is no limit, which is the default, so an unconfigured instance behaves as it always did. */
 export function isOverLimit(userId: string): boolean {
 	const limit = creditLimitFor(userId);
 	if (!limit) return false;

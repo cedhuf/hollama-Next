@@ -7,16 +7,13 @@ import { toast } from '$lib/toast';
 import { generateRandomId } from '$lib/utils';
 
 /**
- * Pictures coming *into* the app, from wherever the user got them.
+ * Pictures coming *into* the app: the file picker, a paste, and a drop.
  *
- * Three ways in, one meaning: the file picker, a paste, and a drop. They were
- * two copies of the same forty lines, in two files, which is how they came to
- * disagree about the wording of their own warning while agreeing about
- * everything that mattered. One place now, so a fourth way in is a call rather
- * than a third copy.
+ * Two copies of the same forty lines, in two files, which is how they came to
+ * disagree about the wording of their own warning. One place now, so a fourth
+ * way in is a call rather than a third copy.
  *
- * Nothing here talks to a provider or to the server. It turns files into
- * attachments the interface can show, and refuses the ones it will not carry.
+ * Nothing here talks to a provider or to the server.
  */
 
 /** The `accept` attribute for a file input, matching `IMAGE_INPUT_TYPES`. */
@@ -41,13 +38,7 @@ function pastedName(type: string, index: number): string {
 	return `pasted-image-${timestamp}-${index + 1}.${type === 'image/png' ? 'png' : 'jpg'}`;
 }
 
-/**
- * Read what was handed over, and say what was left out.
- *
- * The refused ones are counted rather than listed: someone dropping a folder on
- * the composer wants to know that not all of it came through, not to read
- * fourteen filenames in a toast.
- */
+/** The refused ones are counted rather than listed: somebody dropping a folder on the composer wants to know some of it did not come through, not to read fourteen filenames. */
 export async function readImageFiles(
 	files: File[],
 	{ named }: { named?: (file: File, index: number) => string } = {}
@@ -100,13 +91,7 @@ export function pickImageFiles(): Promise<{ images: ImageAttachment[]; rejected:
 	});
 }
 
-/**
- * Say that some of it did not come through.
- *
- * Called by whoever asked, rather than from inside the reading, because the same
- * reading serves a composer that can warn and a drop zone that may prefer to say
- * it in place.
- */
+/** Called by whoever asked rather than from inside the reading, because the same reading serves a composer that can warn and a drop zone that may prefer to say it in place. */
 export function warnRejected(rejected: number): void {
 	if (rejected > 0) toast.warning(get(LL).imagesIgnored({ count: rejected }));
 }

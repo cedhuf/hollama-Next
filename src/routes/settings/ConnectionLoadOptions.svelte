@@ -10,13 +10,11 @@
 	/**
 	 * How this Ollama loads a model, configured once on the connection.
 	 *
-	 * These used to be on the conversation, which is where they did damage: the
-	 * old panel bound its switches straight to it, so merely opening the panel
-	 * wrote `false` into six fields that were then sent on every turn. Nothing
-	 * here is ever written unless somebody changes it, which is why the switches
-	 * take a value and a callback rather than a two-way binding: a checkbox bound
-	 * to `undefined` reports itself as `false` the moment it is rendered, and that
-	 * is the whole of the original bug.
+	 * These used to be on the conversation, where the panel bound its switches
+	 * straight to it, so merely opening it wrote `false` into six fields. Nothing
+	 * here is written unless somebody changes it, which is why the switches take a
+	 * value and a callback rather than a binding: a checkbox bound to `undefined`
+	 * reports itself as `false` the moment it is rendered.
 	 */
 	interface Props {
 		server: Server;
@@ -45,10 +43,7 @@
 		use_mlock: $LL.useMlock()
 	});
 
-	/**
-	 * A blank field means "let Ollama decide", which is not the same answer as any
-	 * number, so it removes the key instead of storing a zero.
-	 */
+	/** A blank field means "let Ollama decide", which is not the same answer as any number, so it removes the key instead of storing a zero. */
 	function setNumber(key: (typeof LOAD_NUMBER_KEYS)[number], raw: string) {
 		const next: LoadOptions = { ...options };
 		const value = Number(raw);
@@ -58,12 +53,7 @@
 		onChange();
 	}
 
-	/**
-	 * Three positions, not two, for the same reason the number fields have a blank
-	 * one: `false` and "unset" are different answers. `use_mmap` is on by default in
-	 * Ollama, so a switch that could only say true or false left no way back once it
-	 * had been touched, and wrote a preference nobody expressed.
-	 */
+	/** Three positions, not two: `false` and "unset" are different answers. `use_mmap` is on by default, so a two-way switch left no way back once touched. */
 	const switchOptions = $derived([
 		{ value: 'auto', label: $LL.automatic() },
 		{ value: 'on', label: $LL.on() },
@@ -87,9 +77,8 @@
 
 <div class="flex flex-col gap-3">
 	<!-- The heading carries the reset, which greys out instead of disappearing: a
-	     control you only see once you have already changed something is one nobody
-	     knows they can fall back on. What these fields do belongs in the
-	     documentation, not in a paragraph above a grid somebody opened on purpose. -->
+	     control you only see once you have changed something is one nobody knows
+	     they can fall back on. -->
 	<div class="flex items-center justify-between gap-4">
 		<span class="text-active text-sm font-medium">{$LL.loadOptions()}</span>
 		<button
@@ -103,10 +92,9 @@
 		</button>
 	</div>
 
-	<!-- Label on the left, control on the right, two to a row. Ten settings nobody
-	     touches on a working Ollama do not deserve ten full-width rows: stacked the
-	     old way they pushed the pull-a-model field off the bottom of the panel. The
-	     labels are short enough to sit beside their field. -->
+	<!-- Label left, control right, two to a row. Ten settings nobody touches on a
+	     working Ollama do not deserve ten full-width rows: stacked, they pushed the
+	     pull-a-model field off the bottom of the panel. -->
 	<div class="grid gap-x-6 gap-y-2 sm:grid-cols-2">
 		{#each LOAD_NUMBER_KEYS as key (key)}
 			<label class="flex items-center justify-between gap-3">

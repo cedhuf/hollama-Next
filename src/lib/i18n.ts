@@ -2,18 +2,14 @@ import type { Locales } from '$i18n/i18n-types';
 import { locales } from '$i18n/i18n-util';
 
 /**
- * Native label per locale, used by the language picker.
+ * Native label per locale, for the language picker.
  *
- * Adding a language is two steps and nothing else:
- *   1. create `src/i18n/<locale>/index.ts` exporting
- *      `extendDictionary(en, { …the keys you translated… })`
- *   2. add its label below
+ * Adding a language is two steps: create `src/i18n/<locale>/index.ts` exporting
+ * `extendDictionary(en, {...})`, and add its label below. `typesafe-i18n` picks
+ * the folder up and regenerates `locales`, so the picker and the detection
+ * follow. Untranslated keys fall back to English.
  *
- * `typesafe-i18n` picks the folder up and regenerates `locales`, so the picker
- * and the browser-language detection follow automatically. Untranslated keys
- * fall back to English, so a partial translation is always safe to ship.
- *
- * Labels for locales that aren't installed are simply ignored.
+ * Labels for locales that are not installed are ignored.
  */
 export const LANGUAGE_LABELS: Record<string, string> = {
 	en: 'English',

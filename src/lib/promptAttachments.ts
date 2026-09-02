@@ -1,14 +1,7 @@
 import type { Knowledge } from '$lib/knowledge';
 import type { Message } from '$lib/sessions';
 
-/**
- * Context attached to the next message.
- *
- * Every kind carries an `id` under the same name, so the composer can key,
- * render and remove them without asking what they are first. New kinds (a PDF,
- * a document) are meant to be added here and picked up by the pill row as they
- * are, rather than growing another branch in the composer.
- */
+/** Every kind carries an `id` under the same name, so the composer can key, render and remove them without asking what they are. A new kind is picked up by the pill row as it is. */
 export type KnowledgeAttachment = {
 	type: 'knowledge';
 	id: string;
@@ -22,11 +15,7 @@ export type ImageAttachment = {
 	dataUrl: string;
 };
 
-/**
- * A file read into Markdown in the browser. The file itself is never kept: what
- * is attached is the text it turned out to hold, which is also all that is ever
- * sent.
- */
+/** A file read into Markdown in the browser. The file itself is never kept: what is attached is the text it turned out to hold. */
 export type DocumentAttachment = {
 	type: 'document';
 	id: string;
@@ -55,13 +44,11 @@ export function imagesPayload(attachments: Attachment[]): { filename: string; da
 
 /**
  * The messages that carry attached context, in the order they were attached.
- *
  * One place rather than one per composer: the home screen and a conversation
- * both attach the same things, and they used to each know how to unpack them,
- * which meant a new kind had to be added to both to work in both.
+ * both attach the same things and each knew how to unpack them.
  *
- * Images are not here: they ride on the message itself rather than as messages
- * of their own, because that is how every provider takes them.
+ * Images are not here: they ride on the message itself, because that is how
+ * every provider takes them.
  */
 export function contextMessages(attachments: Attachment[]): Message[] {
 	return attachments.flatMap((attachment) => {
@@ -85,14 +72,7 @@ export function knowledgeContextMessage(knowledge: Knowledge): Message {
 	};
 }
 
-/**
- * A user message carrying an attached document.
- *
- * The same envelope knowledge uses, so a model that has learned to read one has
- * learned to read the other, and so the two look alike in an exported
- * conversation. The file name goes in because "the document" is how people refer
- * to it, and the model needs to know which name that maps to.
- */
+/** The same envelope knowledge uses, so a model that reads one reads the other. The file name goes in because "the document" is how people refer to it. */
 export function documentContextMessage(document: DocumentAttachment): Message {
 	return {
 		role: 'user',

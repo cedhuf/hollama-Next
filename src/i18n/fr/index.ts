@@ -703,7 +703,7 @@ const fr = extendDictionary(en, {
 	expandPrompt: 'Agrandir la zone de saisie',
 	collapsePrompt: 'Réduire la zone de saisie',
 
-	// --- Paramètres › Chat -----------------------------------------------------
+	// --- Paramètres > Chat -----------------------------------------------------
 	defaults: 'Valeurs par défaut',
 	setByAdmin: "défini par l'administrateur",
 	sharedByAdminBadge: "partagé par l'administrateur",
@@ -727,7 +727,7 @@ const fr = extendDictionary(en, {
 	on: 'Activé',
 	off: 'Désactivé',
 
-	// --- Paramètres › Outils ---------------------------------------------------
+	// --- Paramètres > Outils ---------------------------------------------------
 	webSearch: 'Recherche web',
 	webSearchBackendUrl: 'URL du moteur (degoog / SearXNG)',
 	webSearchBackend: 'Moteur',
@@ -876,7 +876,7 @@ const fr = extendDictionary(en, {
 	personaMemoryAllowHelp:
 		"Un persona peut garder quelques notes entre les conversations, écrites par lui-même et lisibles par la personne concernée. Chaque mémoire appartient à un seul compte et n'est jamais partagée, même quand le persona l'est. Désactiver retire la capacité sans effacer ce qui a déjà été écrit.",
 
-	// --- Paramètres › Invites --------------------------------------------------
+	// --- Paramètres > Invites --------------------------------------------------
 	promptsTab: 'Invites',
 	promptsTitle: 'Ce que {app} dit au modèle',
 	promptsDescription:
@@ -898,7 +898,7 @@ const fr = extendDictionary(en, {
 	shareAppPrompts: 'Partager mes invites réécrites',
 	noAppPromptsRewritten: "Vous n'avez encore réécrit aucune invite, il n'y a donc rien à partager.",
 
-	// --- Paramètres › Données --------------------------------------------------
+	// --- Paramètres > Données --------------------------------------------------
 	backupAndRestore: 'Sauvegarde et restauration',
 	backupAndRestoreDescription:
 		'Exportez ou importez tout (sessions, connaissances, serveurs, préférences) dans un seul fichier.',
@@ -984,7 +984,7 @@ const fr = extendDictionary(en, {
 	confirmResetEverything: 'Êtes-vous sûr ? Cette action est irréversible.',
 	yesDeleteEverything: 'Oui, tout supprimer',
 
-	// --- Paramètres › Serveurs -------------------------------------------------
+	// --- Paramètres > Serveurs -------------------------------------------------
 	systemServers: 'Serveurs système',
 	yourServers: 'Vos serveurs',
 	providersManagedByAdmin: 'Les fournisseurs sont gérés par votre administrateur.',
@@ -996,7 +996,7 @@ const fr = extendDictionary(en, {
 	baseUrlRequired: "L'URL de base est requise",
 	connectionFailed: 'Échec de la connexion',
 
-	// --- Paramètres › Interface ------------------------------------------------
+	// --- Paramètres > Interface ------------------------------------------------
 	appearance: 'Apparence',
 	homeScreen: "Écran d'accueil",
 	showGreetingHeader: "Afficher l'en-tête de bienvenue",
@@ -1029,14 +1029,14 @@ const fr = extendDictionary(en, {
 	compactSidebarHeaderHelp:
 		'Nouvelle discussion passe sur la ligne de recherche, et les personas deviennent une rangée d’avatars. Plus de place pour la liste, moins de libellés.',
 
-	// --- Paramètres › À propos -------------------------------------------------
+	// --- Paramètres > À propos -------------------------------------------------
 	source: 'Source',
 	documentation: 'Documentation',
 	buyMeACoffee: 'Offrez-moi un café',
 	madeWithLoveBy: 'Fait avec',
 	byAuthor: 'par cedhuf',
 
-	// --- Paramètres › Admin ----------------------------------------------------
+	// --- Paramètres > Admin ----------------------------------------------------
 	userPermissions: 'Permissions des utilisateurs',
 	userPermissionsDescription: 'Ce que les utilisateurs connectés ont le droit de faire ici.',
 	allowUserProviders: 'Autoriser les utilisateurs à ajouter leurs propres connexions',
@@ -1225,7 +1225,7 @@ const fr = extendDictionary(en, {
 	shortcutCommandsNote:
 		'Tapez / au début d’un message vide pour voir les commandes. Un message qui commence vraiment par une barre oblique s’écrit //, et tout le reste (un chemin, une date) part tel quel.',
 
-	// Réglages → Discussion → Compaction
+	// Réglages > Discussion > Compaction
 	compaction: 'Compaction',
 	compactionDescription:
 		'Résume le début d’une conversation pour qu’elle continue de tenir dans la fenêtre de contexte. Rien n’est supprimé : le résumé ne remplace ces messages que dans ce qui est envoyé, et reste annulable.',

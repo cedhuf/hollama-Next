@@ -1,15 +1,12 @@
 /**
  * The avatars the app can draw itself.
  *
- * A picture is tens of kilobytes of base64 carried in every bundle, fixed at the
- * size it was encoded. A glyph is its name and a colour: thirty bytes, sharp at
- * any size, drawn with the app's own ink so it belongs to the theme.
+ * A picture is tens of kilobytes of base64 in every bundle, fixed at the size it
+ * was encoded. A glyph is a name and a colour: thirty bytes, sharp at any size,
+ * drawn in the app's own ink.
  *
- * They used to be data URIs inside `defaultPersonas`, which is the same drawing
- * written as a string nobody could reuse.
- *
- * The markup is drawn over the disc in a 64x64 box. Two colours: `currentColor`
- * is the ink, and `var(--persona-glyph-cut)` is the disc showing back through.
+ * The markup is drawn over the disc in a 64x64 box. `currentColor` is the ink,
+ * `var(--persona-glyph-cut)` is the disc showing back through.
  */
 export interface PersonaGlyph {
 	/** Stored in the persona and named in a bundle, so it never changes. */

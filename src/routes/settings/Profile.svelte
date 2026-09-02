@@ -51,18 +51,17 @@
 	);
 
 	// An account email is the account's, so it is read back from the session. With
-	// no accounts there is no such thing, and the address goes back to being a
-	// field of the profile like any other.
+	// no accounts there is no such thing, and the address goes back to being a field
+	// of the profile.
 	const email = $derived($hasAccounts ? ($currentUser?.email ?? '') : $settingsStore.profileEmail);
 
 	// An OIDC-provisioned identity is owned by the provider: name and avatar are
 	// re-read from its claims, so editing them here would silently diverge. The
-	// panel stays visible: the fields simply become read-only.
+	// fields become read-only rather than the panel disappearing.
 	const oidcManaged = $derived(!!$currentUser?.oidc);
 </script>
 
 <SettingsPanel>
-	<!-- Identity card -->
 	<div class="border-shade-3 bg-shade-0 flex items-center gap-4 rounded-xl border p-4">
 		<AvatarEditor
 			image={$settingsStore.profileAvatar}
@@ -85,18 +84,13 @@
 	</div>
 
 	<!-- What this account has spent, between who you are and what you may change:
-	     it is a fact about you rather than a setting of yours. Drawn whether or not
-	     there is a limit: the question is the same either way, what did this cost.
-
-	     Not in the welcome tour, where the account is minutes old: every figure is
-	     zero, the thirty-day chart is a flat line, and it takes a third of the
-	     dialog to say so. The tour shows the allowance instead, which is the part
-	     that is actually news on the first day. -->
+	     a fact about you rather than a setting of yours. Drawn whether or not there
+	     is a limit. Not in the welcome tour, where the account is minutes old and
+	     every figure is zero. -->
 	{#if showUsage}
 		<UsageCard />
 	{/if}
 
-	<!-- Identity -->
 	<SettingsSection title={$LL.profile()} card>
 		<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
 			<SettingsField
@@ -129,8 +123,8 @@
 			</SettingsField>
 		</div>
 
-		<!-- Email: the account's when there are accounts, owned by the IdP or the
-		     admin and read-only; the person's own field otherwise. -->
+		<!-- The account's when there are accounts, owned by the IdP or the admin and
+		     read-only; the person's own field otherwise. -->
 		{#if $hasAccounts}
 			<SettingsField
 				label="Email"

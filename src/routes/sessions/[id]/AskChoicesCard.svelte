@@ -19,8 +19,8 @@
 
 	const questions = $derived(choices.questions);
 
-	// One question at a time. Answers for earlier questions accumulate here (parallel
-	// to `questions`); `picks`/`customText` hold the live state for the one on screen.
+	// One question at a time. Answers for earlier questions accumulate in `answers`;
+	// `picks` and `customText` hold the live state for the one on screen.
 	let current = $state(0);
 	let answers = $state<string[][]>([]);
 	let picks = $state<string[]>([]);
@@ -30,7 +30,7 @@
 	const multi = $derived(question.type === 'multi_select');
 	const isLast = $derived(current === questions.length - 1);
 
-	/** The effective answer for the current question: picked options + a non-empty custom value. */
+	/** The effective answer for the current question: picked options plus a non-empty custom value. */
 	function effective(): string[] {
 		const extra = customText.trim() ? [customText.trim()] : [];
 		return [...picks, ...extra];
@@ -80,7 +80,7 @@
 <div
 	class="ask-card surface-floating border-shade-3 flex max-h-[min(55vh,30rem)] w-full flex-col overflow-hidden rounded-2xl border shadow-lg"
 >
-	<!-- Header: the current question, a counter when there are several, and dismiss. -->
+	<!-- The current question, a counter when there are several, and dismiss. -->
 	<div class="flex items-start justify-between gap-3 px-4 pt-4 pb-3">
 		<div class="flex min-w-0 flex-col gap-0.5">
 			{#if questions.length > 1}
@@ -103,7 +103,7 @@
 		{/if}
 	</div>
 
-	<!-- Scrollable numbered list of options, plus a free-text row as the final entry. -->
+	<!-- The options, plus a free-text row as the final entry. -->
 	<div class="min-h-0 flex-1 overflow-y-auto" style="overscroll-behavior: contain">
 		{#each question.options as option, oi (option)}
 			{@const selected = picks.includes(option)}

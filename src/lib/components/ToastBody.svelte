@@ -13,9 +13,9 @@
 	import { copyText } from '$lib/clipboard';
 	import type { ToastSeverity } from '$lib/toast';
 
-	// The inside of every notification. The library draws the card, the entrance
-	// and the swipe; this draws what is written on it, so that the copy button has
-	// somewhere to live: the library's own action slot only takes a label.
+	// The inside of every notification: the library draws the card, the entrance and
+	// the swipe. This draws what is written on it, so the copy button has somewhere
+	// to live, the library's action slot taking only a label.
 
 	let {
 		severity,
@@ -76,9 +76,8 @@
 			<button class="text-accent font-medium hover:underline" onclick={run}>{action.label}</button>
 		{/if}
 		{#if copyable}
-			<!-- An error is what gets pasted into an issue, and retyping it from a
-			     message that is about to disappear is the kind of small misery
-			     nobody reports. -->
+			<!-- An error is what gets pasted into an issue, and retyping it from a message
+			     about to disappear is a small misery nobody reports. -->
 			<button
 				class="text-muted hover:text-active hover:bg-shade-2 rounded p-1"
 				title={$LL.copy()}

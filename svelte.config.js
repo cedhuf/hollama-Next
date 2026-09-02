@@ -8,11 +8,11 @@ const config = {
 	preprocess: [vitePreprocess({})],
 
 	kit: {
-		// Node server output — works for self-hosting (Docker) and Tauri.
+		// Node server output: works for self-hosting (Docker) and Tauri.
 		adapter: adapterNode(),
 		version: {
 			name: process.env.npm_package_version,
-			// A self-hosted instance updates under its clients — a PWA or a tab left
+			// A self-hosted instance updates under its clients: a PWA or a tab left
 			// open for days otherwise keeps running the build it started with, and
 			// nothing tells the user. Polling makes `updated` flip on its own; the
 			// layout also checks on demand when the app comes back to the foreground.

@@ -1,14 +1,13 @@
 /**
  * Talking to a Chatto server as a bot.
  *
- * Chatto's public API is ConnectRPC, whose unary calls are a plain POST of JSON
- * to a path built from the service and method names. So this is a fetch wrapper
- * and five typed methods rather than a generated client: adding a sixth is four
- * lines, where generating from the `.proto` files costs a build step and a
- * vendored copy of an API explicitly allowed to break in the 0.x line.
+ * Its public API is ConnectRPC, whose unary calls are a plain POST of JSON to a
+ * path built from the service and method names. So this is a fetch wrapper and
+ * five typed methods: adding a sixth is four lines, where generating from the
+ * `.proto` files costs a build step and a vendored copy of an API allowed to
+ * break in the 0.x line.
  *
- * The types describe only the fields this integration reads. Protobuf JSON is
- * lowerCamelCase and unknown fields are ignored on both sides.
+ * The types describe only the fields this integration reads.
  */
 
 export interface ChattoUser {

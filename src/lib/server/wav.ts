@@ -2,13 +2,11 @@
  * Raw samples, wrapped in the smallest container a recogniser will accept.
  *
  * The socket carries bare 16-bit samples, because that is what a microphone
- * worklet produces and anything else would mean encoding on a phone. The
- * transcription endpoints take a file, and refuse a payload with no format to
- * read it by, so a header goes on before the upload. Forty-four bytes.
+ * worklet produces. The transcription endpoints take a file and refuse a payload
+ * with no format to read it by, so a forty-four byte header goes on.
  *
- * WAV rather than anything better, and there is nothing to gain from better
- * here: the upload is one utterance, a few seconds, over a connection that has
- * just carried the same samples uncompressed anyway.
+ * WAV rather than anything better: the upload is one utterance over a connection
+ * that has just carried the same samples uncompressed.
  */
 
 const HEADER_BYTES = 44;

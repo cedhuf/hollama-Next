@@ -24,13 +24,7 @@ export function setServerSystemPrompts(resolved: SystemPromptsView | null): void
 	serverConfig.set(resolved);
 }
 
-/**
- * Both kinds of prompt, in one request.
- *
- * The system prompt and the app's own instructions are two screens' worth of
- * one question (what does this instance let you say to the model) and they are
- * resolved by the same rules, so they arrive together rather than racing.
- */
+/** Two screens' worth of one question (what does this instance let you say to the model), resolved by the same rules, so they arrive together rather than racing. */
 export async function loadServerPrompts(): Promise<void> {
 	try {
 		const response = await fetch('/api/prompts/config');
@@ -60,8 +54,8 @@ export const systemPromptsConfig = derived(
 		// Locked: the admin's prompts, read-only.
 		if (!$server.editable) return $server;
 
-		// Editable (off / overridable / admin): use the live user settings, falling
-		// back to the admin default when the user hasn't set anything of their own.
+		// Editable (off / overridable / admin): the live user settings, falling back to
+		// the admin default when the user has set nothing of their own.
 		const own = $settings.systemPrompts;
 		const usingOwn = hasContent(own);
 		return {
@@ -74,12 +68,5 @@ export const systemPromptsConfig = derived(
 	}
 );
 
-/**
- * Re-exported from where the type it reads lives.
- *
- * It moved because it is a pure function and this module is not: everything
- * else here is a store, and a turn running in the Node process needs the
- * function without the browser plumbing around it. The call sites that already
- * import it from here keep working.
- */
+/** It moved because it is a pure function and this module is not: everything else here is a store, and a turn in the Node process needs it without the browser plumbing. */
 export { effectiveSystemPrompt } from './settings';

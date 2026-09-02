@@ -7,43 +7,20 @@
 	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { type Model } from '$lib/settings';
 
-	/**
-	 * The single model chooser for the whole app.
-	 *
-	 * One list everywhere: recently used first, then the rest, each row carrying its
-	 * parameter size and a provider badge. Only the trigger changes between contexts;
-	 * the panel, grouping, search and keyboard handling are always identical.
-	 */
+	/** The single model chooser for the whole app: recently used first, then the rest. Only the trigger changes between contexts. */
 	interface Props {
 		value?: string;
 		/**
-		 * `hero`: wide home-screen field.
-		 * `default`: standard form field, filling its `SettingsField`.
-		 * `attached`: left half of a joined control: it draws no outer border of its
-		 *   own (the wrapper owns it, so focus rings the whole group), only a divider
-		 *   towards its neighbour. Its width is fluid so it borrows whatever room the
-		 *   header has to spare.
-		 * `ghost`: the name on its own, no box at all, for a corner of a surface that
-		 *   already has edges. It is as wide as what it says and no wider, so it can
-		 *   be tucked against a right margin without reserving a column.
+		 * `hero`: wide home-screen field. `default`: standard form field.
+		 * `attached`: left half of a joined control, drawing only a divider so the
+		 *   wrapper owns the border and the focus ring. Fluid width.
+		 * `ghost`: the name alone, no box, for a corner of a surface that already has
+		 *   edges. As wide as what it says, so it needs no column reserved.
 		 */
 		variant?: 'default' | 'hero' | 'attached' | 'ghost';
-		/**
-		 * The label for choosing no model at all.
-		 *
-		 * A persona that names none is not misconfigured: it runs on whatever the
-		 * reader's default is, which is the sane thing for one that travels between
-		 * installs. Without an entry saying so, an empty field reads as unfinished.
-		 */
+		/** A persona that names no model is not misconfigured: it runs on the reader's default. Without an entry saying so, an empty field reads as unfinished. */
 		emptyLabel?: string;
-		/**
-		 * Which kinds of model this picker is choosing between.
-		 *
-		 * Text alone by default, which is what every existing caller means: an
-		 * embedding model in the chat picker is not clutter, it is a 400 with no
-		 * explanation attached, and it is exactly what somebody hit. The page that
-		 * draws asks for images instead, and neither has to know about the other.
-		 */
+		/** Text alone by default, which is what every existing caller means: an embedding model in the chat picker is a 400 with no explanation. The drawing page asks for images instead. */
 		kinds?: ModelKind[];
 		onSelect?: (name: string) => void;
 	}
@@ -75,14 +52,7 @@
 		};
 	}
 
-	/**
-	 * The catalogue, cut down to what this picker is for.
-	 *
-	 * A model already chosen stays in the list whatever its kind. Filtering it out
-	 * would empty the field of a conversation that has been running for weeks, and
-	 * a picker that silently forgets the answer it is showing is worse than one
-	 * offering a model somebody has mis-sorted.
-	 */
+	/** A model already chosen stays in the list whatever its kind: filtering it out would empty the field of a conversation running for weeks. */
 	const models = $derived(
 		($settingsStore.models ?? []).filter((model) => {
 			if (model.name === value) return true;
@@ -114,13 +84,12 @@
 	onChange={(option) => onSelect?.(option.value)}
 >
 	{#snippet trigger({ props, label, hasValue })}
-		<!-- Same bordered control everywhere, only the scale changes, so it reads as
-		     one component whether it anchors the home screen or sits in a header row. -->
+		<!-- The same bordered control everywhere, only the scale changing, so it reads
+		     as one component wherever it sits. -->
 		{#if variant === 'ghost'}
-			<!-- Nothing but the word and a chevron. The surface it sits in supplies the
-			     border, the background and the focus ring, so drawing another set here
-			     would be a control inside a control. It lights up on hover and on focus,
-			     which is the whole of the affordance and enough of it. -->
+			<!-- Nothing but the word and a chevron: the surface it sits in supplies the
+			     border, the background and the focus ring. It lights up on hover and on
+			     focus, which is the whole of the affordance. -->
 			<button
 				{...props}
 				type="button"

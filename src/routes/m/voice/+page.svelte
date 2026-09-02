@@ -25,14 +25,12 @@
 	 *
 	 * A conversation rather than a form, because the microphone stays open: you
 	 * speak, it hears you stop, the answer is read back, and you cut it off by
-	 * talking. Nothing is tapped between one question and the next.
+	 * talking.
 	 *
 	 * `VoiceSession` holds the socket, the worklets and the microphone; this file
-	 * only draws. The turn runs on the server through the same orchestrator a typed
-	 * message uses.
+	 * only draws, and the turn runs on the server through the same orchestrator.
 	 *
-	 * Two visuals for two speakers: the orb is the voice answering, the bars at the
-	 * foot are yours. Which one moves says whose turn it is from across a room.
+	 * Two visuals for two speakers: the orb answering, the bars at the foot yours.
 	 */
 	const voice = new VoiceSession();
 

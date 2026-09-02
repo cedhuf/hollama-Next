@@ -5,10 +5,9 @@ import type { Settings } from '$lib/settings';
  * Which tools a user may use, and with what limits.
  *
  * Enforced where it is decided: the run resolves the tools it may offer through
- * here, so turning a tool off is a real boundary rather than a hidden button. The
- * browser is never asked, and never believed.
- * The shared models and the locked prompt are policed the same way, in
- * `llmPolicy`.
+ * here, so turning one off is a real boundary rather than a hidden button. The
+ * browser is never asked and never believed. The shared models and the locked
+ * prompt are policed the same way, in `llmPolicy`.
  */
 
 export type ToolsSharing = 'off' | 'locked' | 'overridable';
@@ -33,8 +32,8 @@ function clamp(value: number | undefined, fallback: number, ceiling: number): nu
 
 function adminTools(): { enabled: boolean; maxPages: number; maxChars: number } {
 	return {
-		// The admin's own switch, snapshotted when they shared it: "locked" means
-		// their configuration exactly, including having the tool off.
+		// The admin's own switch, snapshotted when they shared it: "locked" means their
+		// configuration exactly, including having the tool off.
 		enabled: getConfig('webFetchEnabled') !== 'false',
 		maxPages: clamp(
 			Number(getConfig('webFetchMaxPages')),
@@ -49,13 +48,7 @@ function adminTools(): { enabled: boolean; maxPages: number; maxChars: number } 
 	};
 }
 
-/**
- * The effective tool policy for one user (server mode).
- *
- * Admins answer to their own settings: sharing is a separate decision, made in
- * the Admin tab, and locking themselves out of a tool they administer would be
- * absurd.
- */
+/** Admins answer to their own settings: sharing is a separate decision, and locking themselves out of a tool they administer would be absurd. */
 export function resolveTools(userSettings: Settings | null, isAdmin: boolean): ResolvedTools {
 	const own = {
 		webFetch: userSettings?.webFetchEnabled !== false,
@@ -88,8 +81,8 @@ export function resolveTools(userSettings: Settings | null, isAdmin: boolean): R
 		};
 	}
 
-	// Overridable: the admin decides whether the tool exists at all, the user
-	// tunes it below the ceiling the admin set.
+	// Overridable: the admin decides whether the tool exists at all, the user tunes
+	// it below the ceiling the admin set.
 	return {
 		webFetch: admin.enabled && own.webFetch,
 		maxPages: Math.min(own.maxPages, admin.maxPages),

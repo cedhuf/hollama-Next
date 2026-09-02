@@ -12,19 +12,17 @@
 	/**
 	 * Where a conversation was set aside.
 	 *
-	 * The sibling of the compaction divider, and it says the opposite thing:
-	 * compaction hands the model a summary of what came before, clearing hands it
-	 * nothing at all. Both are boundaries rather than deletions, so both fold back.
+	 * The sibling of the compaction divider, saying the opposite: compaction hands
+	 * the model a summary, clearing hands it nothing. Both are boundaries rather
+	 * than deletions, so both fold back.
 	 *
-	 * Unlike compaction, what is above this does not stay on screen. A
-	 * conversation you have deliberately finished with is not something to scroll
-	 * past to reach the one you are having, so it lives in here.
+	 * Unlike compaction, what is above this does not stay on screen: a conversation
+	 * you have finished with is not something to scroll past to reach the one you
+	 * are having.
 	 *
-	 * Which makes the unfolded state the whole design problem: two hundred
-	 * messages poured out in sequence is not "readable again", it is the wall you
-	 * cleared them to get away from. So this shows an index, not a transcript: one
-	 * line per message, in a box of its own with its own scrollbar, and any single
-	 * one opens where it sits.
+	 * Which makes the unfolded state the design problem, since two hundred messages
+	 * poured out is the wall you cleared them to get away from. So this shows an
+	 * index: one line per message, in its own scrollport, each opening where it sits.
 	 */
 	interface Props {
 		note: ClearedNote;
@@ -37,13 +35,7 @@
 
 	/** Which rows are open, by their index in `cleared`. */
 	const opened = new SvelteSet<number>();
-	/**
-	 * How many rows are drawn before the "show all".
-	 *
-	 * A ceiling rather than a scrollbar alone: a hundred rows all rendered is a
-	 * hundred rows the browser lays out for a panel most people open, glance at,
-	 * and shut.
-	 */
+	/** A ceiling rather than a scrollbar alone: a hundred rows all rendered is a hundred the browser lays out for a panel most people open, glance at, and shut. */
 	const PAGE = 20;
 	let showAll = $state(false);
 
@@ -87,9 +79,8 @@
 			{/if}
 		</div>
 
-		<!-- Its own scrollport, and a short one: this is an index you glance down,
-		     not a place to read a conversation. The conversation is what the page
-		     itself is for, and restoring puts it back there. -->
+		<!-- Its own scrollport, and a short one: an index you glance down, not a place
+		     to read a conversation. Restoring puts it back in the page. -->
 		<div class="border-shade-2 bg-shade-0 max-h-[45vh] overflow-y-auto rounded-md border">
 			{#if !showAll && cleared.length > PAGE}
 				<button

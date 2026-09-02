@@ -36,13 +36,7 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
-	/**
-	 * How each category is emptied by "delete all of this".
-	 *
-	 * The collections take `replaceAll` rather than `set`: wiping a category here
-	 * is a deliberate instruction, unlike the accidental wholesale writes their
-	 * per-item persistence now rules out.
-	 */
+	/** The collections take `replaceAll` rather than `set`: wiping a category here is a deliberate instruction, unlike the accidental wholesale writes their per-item persistence now rules out. */
 	const replaceStore: Record<StorageKey, (value: unknown) => void> = {
 		[StorageKey.Preferences]: (value) => settingsStore.set(value as Settings),
 		[StorageKey.Servers]: (value) => serversStore.set(value as Server[]),
@@ -53,7 +47,6 @@
 		[StorageKey.PersonaMemory]: (value) => personaMemoryStore.replaceAll(value as PersonaMemory[])
 	};
 
-	// Triggers a browser download of `data` as a JSON file.
 	function download(data: string, fileName: string) {
 		const blob = new Blob([data], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
@@ -73,7 +66,7 @@
 		description: string;
 	}
 
-	// Reactive (labels come from $LL): one source of truth for the per-category rows.
+	// Reactive, since the labels come from $LL: one source of truth for the rows.
 	const dataSources = $derived<DataSource[]>([
 		{
 			storageKey: StorageKey.Servers,
@@ -133,13 +126,7 @@
 		[StorageKey.PersonaMemory]: []
 	};
 
-	/**
-	 * Exported from storage, not from the store.
-	 *
-	 * The conversation store holds summaries (titles and dates, no messages) so
-	 * reading it here would have written a backup file that looked complete and
-	 * restored empty conversations.
-	 */
+	/** Exported from storage, not from the store: the conversation store holds summaries, so reading it here wrote a backup that looked complete and restored empty conversations. */
 	async function exportData(storageKey: StorageKey, fileName: string) {
 		const backup = await repository.exportBackup();
 		download(JSON.stringify(backup[storageKey] ?? defaults[storageKey]), fileName);
@@ -175,7 +162,6 @@
 		reader.readAsText(file);
 	}
 
-	// Exports every data source into a single backup file.
 	async function exportBackup() {
 		const backup = await repository.exportBackup();
 		download(
@@ -184,7 +170,6 @@
 		);
 	}
 
-	// Restores every data source from a single backup file.
 	async function importBackup(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (!input.files || input.files.length === 0) return;
@@ -238,7 +223,7 @@
 
 	let confirmReset = $state(false);
 
-	// Wipes every data source and reloads into a fresh app (re-triggers onboarding).
+	// Wipes every source and reloads into a fresh app, which re-triggers onboarding.
 	async function resetEverything() {
 		if (!confirmReset) {
 			confirmReset = true;
@@ -262,8 +247,7 @@
 		description={$LL.backupAndRestoreDescription()}
 		card
 	>
-		<!-- Two equal halves: neither action is the primary one, so neither should
-		     look bigger than the other. -->
+		<!-- Two equal halves: neither action is the primary one. -->
 		<nav class="grid grid-cols-2 gap-2" data-testid="data-management-backup">
 			<Button variant="outline" class="w-full justify-center" onclick={exportBackup}>
 				<Archive class="base-icon" />
@@ -329,8 +313,8 @@
 		{/each}
 	</SettingsSection>
 
-	<!-- Danger zone: a card like the others, but outlined in the negative colour so
-	     it never gets skimmed past as just another section. -->
+	<!-- Danger zone: a card like the others, outlined in the negative colour so it
+	     is never skimmed past as just another section. -->
 	<section
 		class="border-negative/40 bg-shade-0 flex flex-col gap-2.5 rounded-xl border p-4"
 		data-testid="data-management-reset"
@@ -344,8 +328,8 @@
 			<div class="border-negative/30 bg-shade-1 flex flex-col gap-2 rounded-md border p-3">
 				<span class="text-negative text-sm font-medium">{$LL.confirmResetEverything()}</span>
 				<div class="flex gap-2">
-					<!-- Tailwind 4 puts the important modifier at the end; the old `!bg-…`
-					     form silently compiled to nothing, so this button was never red. -->
+					<!-- Tailwind 4 puts the important modifier at the end; the old `!bg-…` form
+					     silently compiled to nothing, so this button was never red. -->
 					<Button variant="default" class="bg-negative! border-negative!" onclick={resetEverything}>
 						<TriangleAlert class="base-icon" />
 						{$LL.yesDeleteEverything()}

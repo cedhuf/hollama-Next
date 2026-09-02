@@ -18,12 +18,11 @@
 	export type SelectOptionOrGroup = SelectOption | SelectGroup;
 
 	/**
-	 * Picks *one value from a list* (the action counterpart is `Menu`).
+	 * Picks one value from a list; the action counterpart is `Menu`.
 	 *
-	 * Built on bits-ui, so it is portalled (never clipped by an `overflow-hidden`
-	 * ancestor), flips when there is no room below, matches the trigger's width and
-	 * supports keyboard typeahead. None of which a hand-rolled panel or a raw
-	 * `<select>` gave us consistently.
+	 * Built on bits-ui, so it is portalled, flips when there is no room below,
+	 * matches the trigger's width and supports keyboard typeahead. None of which a
+	 * hand-rolled panel or a raw `<select>` gave us consistently.
 	 */
 	interface Props {
 		value?: string;
@@ -98,11 +97,11 @@
 		class="select-item text-active data-[highlighted]:bg-shade-1 flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors select-none focus-visible:outline-none"
 	>
 		{#snippet children({ selected: isSelected })}
-			<!-- The check cell is always rendered so labels never reflow between states. -->
+			<!-- The check cell is always rendered, so labels never reflow between states. -->
 			<span class="flex h-4 w-4 shrink-0 items-center justify-center">
 				{#if isSelected}<Check class="h-4 w-4" />{/if}
 			</span>
-			<!-- When a label hides the underlying id (renamed models), the tooltip shows it. -->
+			<!-- Where a label hides the underlying id, the tooltip shows it. -->
 			<span
 				class="min-w-0 flex-1 truncate"
 				title={option.value && option.value !== option.label ? option.value : option.label}
@@ -114,9 +113,8 @@
 					{#each Array.isArray(option.badge) ? option.badge : [option.badge] as badge (badge)}
 						{#if badge}
 							{#if option.badgeColor}
-								<!-- Provider pill in the connection's own colour. It is always shown:
-								     the panel width is copied from the trigger, so there is no varying
-								     "available space" a responsive rule could react to. -->
+								<!-- Provider pill in the connection's own colour, always shown: the panel width
+								     is copied from the trigger, so there is no varying space to react to. -->
 								<span
 									class="shrink-0 rounded-full border px-2 py-0.5 text-[11px]"
 									style="border-color: {option.badgeColor}; color: {option.badgeColor}"
@@ -163,7 +161,7 @@
 			</span>
 			<span class="flex shrink-0 items-center gap-1">
 				{#if allowClear && selected}
-					<!-- Inside the trigger, so it needs to swallow the click that would open it. -->
+					<!-- Inside the trigger, so it swallows the click that would open it. -->
 					<span
 						role="button"
 						tabindex="0"
@@ -195,8 +193,8 @@
 			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] min-w-[max(var(--bits-select-anchor-width),16rem)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none"
 		>
 			{#if searchable}
-				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal
-				     them from this input and jump around the list instead. -->
+				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal them
+				     from this input and jump around the list. -->
 				<div class="border-shade-2 mb-1 flex items-center gap-2 border-b px-2 pb-2">
 					<Search class="text-muted h-4 w-4 shrink-0" />
 					<input

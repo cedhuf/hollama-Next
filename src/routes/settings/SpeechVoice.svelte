@@ -7,14 +7,12 @@
 	 * Which voice reads.
 	 *
 	 * A list where the provider publishes one, a text field where it does not, and
-	 * the same binding either way. Two controls rather than one because the two
-	 * situations are genuinely different: OpenRouter names Kokoro's fifty-four
-	 * voices in its own catalogue, and a self-hosted endpoint names nothing at all,
-	 * where the honest control is somewhere to type what its documentation says.
+	 * the same binding either way: OpenRouter names Kokoro's fifty-four voices, and
+	 * a self-hosted endpoint names nothing at all.
 	 *
 	 * Asked per model, because the answer is per model: Kokoro's names mean nothing
-	 * to Deepgram's. Changing the model therefore clears the voice rather than
-	 * carrying it over, which would leave a name behind that the new model refuses.
+	 * to Deepgram's, so changing the model clears the voice rather than leaving one
+	 * behind that the new model refuses.
 	 */
 	interface Props {
 		/** The chosen speech model, or nothing while none is chosen. */
@@ -53,7 +51,7 @@
 				voices = Array.isArray(body?.voices) ? body.voices : [];
 			} catch {
 				// No list is a real answer here, not a failure: the field asks for a name
-				// instead, which is what a connection that publishes nothing needs anyway.
+				// instead, which is what a connection that publishes nothing needs.
 				if (asked === `${server}/${name}`) voices = [];
 			}
 		})();

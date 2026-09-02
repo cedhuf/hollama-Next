@@ -14,10 +14,7 @@ function speaker(message: Message, assistantLabel?: string): string {
 	return assistantLabel || 'Assistant';
 }
 
-/**
- * A readable transcript: one heading per turn, with the extras that carry meaning
- * on their own (attachments, sources, reasoning) kept but folded out of the way.
- */
+/** One heading per turn, with the extras that carry meaning on their own (attachments, sources, reasoning) kept but folded out of the way. */
 export function sessionToMarkdown(session: Session, assistantLabel?: string): string {
 	const parts: string[] = [];
 
@@ -26,8 +23,8 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 	if (session.updatedAt) parts.push(`_${new Date(session.updatedAt).toLocaleString()}_`);
 
 	for (const message of session.messages) {
-		// A knowledge attachment is a document, not a turn: name it rather than
-		// dumping its full body into the transcript.
+		// A knowledge attachment is a document, not a turn: name it rather than dumping
+		// its full body into the transcript.
 		if (message.knowledge) {
 			parts.push(`## ${speaker(message, assistantLabel)}`, `📎 **${message.knowledge.name}**`);
 			continue;
@@ -64,8 +61,8 @@ export function sessionToMarkdown(session: Session, assistantLabel?: string): st
 		}
 
 		if (message.reasoning?.trim()) {
-			// <details> keeps long chains of thought collapsed wherever the markdown
-			// is rendered, while staying plain text everywhere else.
+			// <details> keeps long chains of thought collapsed wherever the markdown is
+			// rendered, while staying plain text everywhere else.
 			parts.push(
 				[
 					'<details>',
@@ -102,16 +99,12 @@ export function serializeSession(
 }
 
 /**
- * A conversation, ready to become a knowledge collection.
+ * A conversation, ready to become a knowledge collection: what was worked out in
+ * one is often what you want to hand to the next.
  *
- * What was worked out in a conversation is often what you want to hand to the
- * next one, and copying the transcript by hand was the only way to do it. Same
- * transcript as the Markdown export, so there is one idea of what a conversation
- * reads like.
- *
- * A draft rather than a saved collection: it opens in the editor to be named and
- * trimmed first. The conversation is untouched either way, and the copy does not
- * follow it if it continues.
+ * The same transcript as the Markdown export, so there is one idea of what a
+ * conversation reads like. A draft rather than a saved collection: it opens in
+ * the editor to be named and trimmed first.
  */
 export async function sessionAsKnowledgeDraft(
 	id: string

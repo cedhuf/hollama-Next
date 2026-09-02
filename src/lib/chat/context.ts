@@ -156,7 +156,7 @@ export function contextUsage(
 	};
 }
 
-/** `12 400` → `12.4k`. Compact enough to sit next to the icon without wrapping. */
+/** `12 400` becomes `12.4k`. Compact enough to sit next to the icon without wrapping. */
 export function formatTokens(tokens: number): string {
 	if (tokens < 1000) return String(tokens);
 	if (tokens < 10_000) return `${(tokens / 1000).toFixed(1)}k`;

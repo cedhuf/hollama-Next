@@ -1,21 +1,18 @@
 <script lang="ts">
 	/**
-	 * Shown while the model is generating but hasn't emitted any text yet.
+	 * Shown while the model is generating but has emitted no text yet.
 	 *
-	 * Three dots riding a wave: the same idiom as a typing indicator, so it reads as
-	 * "something is coming" rather than as content. Pure CSS: bits-ui has no
-	 * indeterminate loader (its Progress/Meter are determinate), and Tailwind's
-	 * built-ins (pulse/bounce/ping) can't stagger across siblings.
+	 * Three dots riding a wave, the same idiom as a typing indicator. Pure CSS:
+	 * bits-ui has no indeterminate loader, and Tailwind's built-ins cannot stagger
+	 * across siblings.
 	 */
 	let { label = 'Generating a reply' }: { label?: string } = $props();
 
 	/**
-	 * Elapsed seconds, shown only once the wait is long enough to worry about.
-	 * A reasoning model can spend half a minute before its first token, and three
-	 * bouncing dots say nothing about whether anything is still happening.
-	 *
-	 * The component mounts exactly when the wait starts and unmounts on the first
-	 * token, so mount time is the right origin.
+	 * Elapsed seconds, shown once the wait is long enough to worry about: a
+	 * reasoning model can spend half a minute before its first token. The component
+	 * mounts when the wait starts and unmounts on the first token, so mount time is
+	 * the right origin.
 	 */
 	const SHOW_AFTER_SECONDS = 3;
 	let seconds = $state(0);
@@ -41,8 +38,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.3rem;
-		/* Match a line of body text, so the bubble doesn't jump when the first
-		   token replaces the indicator. */
+		/* Match a line of body text, so the bubble does not jump when the first token
+				   replaces the indicator. */
 		height: 1.5rem;
 	}
 

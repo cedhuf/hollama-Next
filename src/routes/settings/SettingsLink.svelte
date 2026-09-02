@@ -1,12 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	/**
-	 * A small inline action inside a settings panel: "Restore server default",
-	 * "Reset to default", "Model names". Deliberately not a `Button`: these sit in
-	 * the flow of a section as an afterthought, and a bordered control would give
-	 * them more weight than the setting they act on.
-	 */
+	/** A small inline action inside a settings panel. Not a `Button`: these sit in the flow of a section, and a bordered control would outweigh the setting they act on. */
 	interface Props {
 		onclick: () => void;
 		/** Push the action to the right of its row. */

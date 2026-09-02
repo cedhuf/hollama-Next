@@ -41,14 +41,7 @@ export interface ResolvedChatDefaults {
 			compactThreshold: number;
 		};
 	};
-	/**
-	 * The image defaults, shared the same three ways as everything else here.
-	 *
-	 * In this resolver rather than one of its own because the question is the same
-	 * question: which model does this account use for a job it did not choose a
-	 * model for, and who gets to decide. That it happens to draw rather than talk
-	 * does not make it a different mechanism.
-	 */
+	/** In this resolver rather than one of its own: the question is the same one, which model an account uses for a job it did not choose a model for, and who decides. */
 	images: {
 		defaultImageModel: string;
 		imagePromptWriter: boolean;
@@ -57,15 +50,7 @@ export interface ResolvedChatDefaults {
 		source: 'admin' | 'user';
 		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
 	};
-	/**
-	 * Speaking instead of typing, and what transcribes it.
-	 *
-	 * Here rather than in a corner of its own for the reason the images group is:
-	 * the question is which model an account uses for a job, and who gets to
-	 * decide. An administrator who has set up a transcription model is usually the
-	 * only person on the instance who could have, so sharing it is the difference
-	 * between a feature that works for everybody and one that works for them.
-	 */
+	/** Same reason as the images group. An administrator who has set up a transcription model is usually the only person who could have, so sharing it is the difference between a feature everybody has and one only they have. */
 	voice: {
 		voiceInput: boolean;
 		voiceModel: string;
@@ -74,15 +59,11 @@ export interface ResolvedChatDefaults {
 		admin: { voiceInput: boolean; voiceModel: string };
 	};
 	/**
-	 * The sampling settings every conversation on this account starts from.
+	 * The sampling every conversation on this account starts from, shared the same
+	 * three ways as everything else here.
 	 *
-	 * Shared the same three ways as everything else here, and for the same reason
-	 * it is here at all: the question is which numbers an account starts from and
-	 * who gets to decide, which is the question this whole resolver answers.
-	 *
-	 * The values themselves are only ever typed in Settings, by everyone including
-	 * the administrator. What the Admin tab holds is the sharing choice, and the
-	 * snapshot below is the administrator's own set as it stood when they made it.
+	 * The values are only ever typed in Settings; the Admin tab holds the sharing
+	 * choice, and the snapshot is the administrator's own set as it stood then.
 	 * Nothing is published by merely existing: `off` keeps their numbers personal.
 	 */
 	sampling: {
@@ -93,11 +74,7 @@ export interface ResolvedChatDefaults {
 	};
 }
 
-/**
- * Resolve the admin-shared chat defaults (default model + title generation) for
- * a user. Each is independently off / locked / overridable. The admin's values
- * are a snapshot kept in app_config; admins always see their own (editable).
- */
+/** Each of these is independently off / locked / overridable. The admin's values are a snapshot in app_config; admins always see their own, editable. */
 export function resolveChatDefaults(
 	userSettings: Settings | null,
 	isAdmin: boolean
@@ -169,7 +146,7 @@ export function resolveChatDefaults(
 	} else if (titleSharing === 'locked') {
 		title = { ...adminTitle, editable: false, source: 'admin', admin: adminTitle };
 	} else {
-		// overridable: the user's own once they've turned it on for themselves
+		// overridable: the user's own once they have turned it on for themselves
 		title = ownTitle.titleModel
 			? { ...ownTitle, editable: true, source: 'user', admin: adminTitle }
 			: { ...adminTitle, editable: true, source: 'admin', admin: adminTitle };
@@ -228,8 +205,8 @@ export function resolveChatDefaults(
 	} else if (voiceSharing === 'locked') {
 		voice = { ...adminVoice, editable: false, source: 'admin', admin: adminVoice };
 	} else {
-		// The sentinel is the model, as everywhere else: an account that has chosen
-		// one has an opinion, one that has not takes the instance's.
+		// The sentinel is the model, as everywhere else: an account that has chosen one
+		// has an opinion, one that has not takes the instance's.
 		voice = ownVoice.voiceModel
 			? { ...ownVoice, editable: true, source: 'user', admin: adminVoice }
 			: { ...adminVoice, editable: true, source: 'admin', admin: adminVoice };
@@ -237,11 +214,10 @@ export function resolveChatDefaults(
 
 	// --- sampling ---
 	//
-	// The same three states as the groups above, with the same sentinel: an
-	// account that has set nothing of its own takes the shared set, and the first
-	// number it types makes the whole set its own. Not a merge, deliberately: half
-	// a temperature from one place and half a top-k from another is a combination
-	// nobody chose and nobody could reason about.
+	// The same three states and the same sentinel: an account that has set nothing
+	// takes the shared set, and the first number it types makes the whole set its
+	// own. Not a merge, deliberately: half a temperature from one place and half a
+	// top-k from another is a combination nobody chose.
 	const adminSampling = parseSamplingOptions(getConfig('sampling'));
 	const ownSampling = parseSamplingOptions(userSettings?.sampling);
 	const samplingSharing = (getConfig('samplingSharing') as Sharing) || 'off';

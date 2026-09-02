@@ -103,15 +103,12 @@ async function withThinkingField<T>(
 
 /**
  * The sampling a conversation carries, in this API's words. Stored under
- * Ollama's names, which is the vocabulary the app grew up with, and used to
- * reach Ollama alone: a temperature set on a conversation did nothing the moment
- * the model was not local.
+ * Ollama's names, and used to reach Ollama alone, so a temperature set on a
+ * conversation did nothing once the model was not local.
  *
- * Only what this API defines. `top_k`, `min_p` and the mirostat trio are
+ * Only what this API defines: `top_k`, `min_p` and the mirostat trio are
  * llama.cpp's, and an endpoint that does not know a field answers 400.
- *
- * `undefined` is the only absent value: zero is a real temperature and a real
- * seed, so nothing here may be tested for truthiness.
+ * `undefined` is the only absent value, since zero is a real temperature.
  */
 function samplingFrom(options: Partial<OllamaOptions> | undefined) {
 	if (!options) return {};

@@ -1,18 +1,11 @@
 #!/usr/bin/env node
 /**
- * Fill a development database with something to look at.
+ * Fill a development database with something to look at: every feature about a
+ * conversation having a history needs one to be looked at at all.
  *
- * A dev instance is worth nothing empty: every feature that is about a
- * conversation having a history — compaction, clearing, the context report, a
- * persona called in from elsewhere — needs a conversation with a history to be
- * looked at at all. Recreating that by hand costs half an hour each time, which
- * is how people end up treating a dev database as precious. It is not, and this
- * is what makes that true.
- *
- * Writes straight into SQLite, in server mode, for the account given (or the
- * only one there is). Existing rows for that user are left alone: everything
- * here carries its own ids, so running it twice replaces its own seed and
- * nothing else.
+ * Writes straight into SQLite, in server mode, for the account given or the only
+ * one there is. Everything carries its own ids, so a second run replaces its own
+ * seed and nothing else.
  *
  *   DATA_DIR=./_local/hollama-dev node scripts/seed-dev.mjs [email]
  */
@@ -78,7 +71,7 @@ const playbooks = bundles('playbooks').map((bundle, i) => ({
 }));
 
 // One of each edited, so the "edited" badge and the "put the published text
-// back" button have something to be about without editing anything by hand.
+// back" button have something to be about.
 if (playbooks[0]) {
 	playbooks[0].instructions += '\n\n## My own addition\n\nAlways answer in metric units.';
 	playbooks[0].summary += ' (my version)';
@@ -289,19 +282,16 @@ const sessions = [
 ];
 
 // Nova's conversation is the one she is bound to, which is what puts her in the
-// sidebar under the conversations she has actually had.
+// sidebar under the conversations she has had.
 const nova = personas.find((p) => p.id === 'seed-persona-nova');
 if (nova) nova.sessionId = 'seed-session-nova';
 
 // --- a model everything can actually run on --------------------------------
 //
-// Seeded conversations used to arrive with no model at all, which looks fine in
-// a list and is a dead end the moment you try to answer in one: the composer has
-// nothing to send to. So one is picked from what this instance really offers,
-// rather than hard-coded to a name that only exists on the machine this script
-// was written on.
-//
-// Shared models first, since in server mode those are the ones a user may pick.
+// Seeded conversations used to arrive with no model, which looks fine in a list
+// and is a dead end the moment you answer in one. So one is picked from what
+// this instance really offers, shared models first, since in server mode those
+// are the ones a user may pick.
 const pickModel = () => {
 	const shared = db
 		.prepare(
@@ -321,7 +311,7 @@ const model = pickModel();
 if (model?.name) {
 	for (const session of sessions) session.model = model;
 	// A persona with no model of its own falls back to yours, which is what these
-	// are meant to demonstrate. Only the ones naming a model get one that exists.
+	// are meant to demonstrate.
 	for (const persona of personas) if (persona.modelName) persona.modelName = model.name;
 } else {
 	console.warn(
@@ -351,8 +341,7 @@ try {
 }
 
 // The index and the marker table are derived from the conversations, and the app
-// fills them as it writes. Seeding behind its back means filling them here, or
-// search would answer for a database that no longer exists.
+// fills them as it writes. Seeding behind its back means filling them here.
 for (const session of sessions) {
 	db.prepare('DELETE FROM sessions_fts WHERE session_id = ?').run(session.id);
 	db.prepare('DELETE FROM session_markers WHERE session_id = ?').run(session.id);

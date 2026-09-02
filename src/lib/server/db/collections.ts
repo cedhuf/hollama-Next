@@ -11,12 +11,9 @@ import { dropSessionFromIndex, reindexAllSessions, reindexSession } from './sear
 type CollectionTable = 'sessions' | 'knowledge' | 'personas' | 'playbooks';
 
 /**
- * Write one row, leaving every other row alone.
- *
- * This is what a save actually is. Replacing the whole collection made the cost
- * of writing a message grow with the entire history, and let any client holding
- * a stale list delete what the others had added: the wholesale path below is
- * now reserved for restoring a backup.
+ * Write one row, leaving every other alone. Replacing the whole collection made
+ * the cost of writing a message grow with the history, and let a client holding
+ * a stale list delete what the others had added.
  */
 export function upsertItem(
 	table: CollectionTable,
@@ -24,9 +21,8 @@ export function upsertItem(
 	item: { id: string; updatedAt?: string }
 ): void {
 	// `id` is a global primary key, not scoped per user, so the conflict clause has
-	// to check the owner: without it, writing a guessed id would overwrite another
-	// user's row. A mismatch updates nothing rather than raising: the caller has
-	// no business knowing whether that id exists elsewhere.
+	// to check the owner, or writing a guessed id would overwrite another user's
+	// row. A mismatch updates nothing rather than raising.
 	getDb()
 		.prepare(
 			`INSERT INTO ${table} (id, user_id, data, updated_at) VALUES (?, ?, ?, ?)
@@ -66,8 +62,8 @@ function replaceCollection(
 		throw error;
 	}
 
-	// Restoring a backup swaps out every conversation at once; the index has to
-	// follow, or search would keep answering with what was there before.
+	// Restoring a backup swaps out every conversation at once, and the index has to
+	// follow, or search keeps answering with what was there before.
 	if (table === 'sessions') reindexAllSessions(userId);
 }
 
@@ -79,13 +75,7 @@ export function getItem<T>(table: CollectionTable, userId: string, id: string): 
 	return row ? (JSON.parse(row.data) as T) : null;
 }
 
-/**
- * The conversation list, without the conversations.
- *
- * Every field the sidebar and the home page read, and none of the messages,
- * which is the whole point: this response used to carry the entire history on
- * every boot and every return to the foreground.
- */
+/** Every field the sidebar and the home page read, and none of the messages: this response used to carry the entire history on every boot. */
 export function getSessionSummaries(userId: string): SessionSummary[] {
 	return readCollection<Session>('sessions', userId).map(summarizeSession);
 }

@@ -684,7 +684,7 @@ const en = {
 	autoExpandReasoningBlocksHelp:
 		'Unfolds the steps as they happen and folds them away when the answer starts. Off, they stay folded under a single line.',
 
-	// --- Settings › Chat -------------------------------------------------------
+	// --- Settings > Chat -------------------------------------------------------
 	defaults: 'Defaults',
 	setByAdmin: 'set by admin',
 	sharedByAdminBadge: 'shared by admin',
@@ -708,7 +708,7 @@ const en = {
 	on: 'On',
 	off: 'Off',
 
-	// --- Settings › Tools ------------------------------------------------------
+	// --- Settings > Tools ------------------------------------------------------
 	webSearch: 'Web search',
 	webSearchBackendUrl: 'Backend URL (degoog / SearXNG)',
 	webSearchBackend: 'Backend',
@@ -851,7 +851,7 @@ const en = {
 	personaMemoryAllowHelp:
 		'A persona can keep a few notes between conversations, written by itself and readable by whoever it is about. Each memory belongs to one account and is never shared, not even when the persona is. Turning this off takes the ability away without erasing what was already written.',
 
-	// --- Settings › Prompts ----------------------------------------------------
+	// --- Settings > Prompts ----------------------------------------------------
 	promptsTab: 'Prompts',
 	promptsTitle: 'What {app:string} tells the model',
 	promptsDescription:
@@ -873,7 +873,7 @@ const en = {
 	shareAppPrompts: 'Share my prompt rewrites',
 	noAppPromptsRewritten: 'You have not rewritten any prompt yet, so there is nothing to share.',
 
-	// --- Settings › Data -------------------------------------------------------
+	// --- Settings > Data -------------------------------------------------------
 	backupAndRestore: 'Backup & restore',
 	backupAndRestoreDescription:
 		'Export or import everything (sessions, knowledge, servers, preferences) in a single file.',
@@ -957,7 +957,7 @@ const en = {
 	confirmResetEverything: 'Are you sure? This cannot be undone.',
 	yesDeleteEverything: 'Yes, delete everything',
 
-	// --- Settings › Servers ----------------------------------------------------
+	// --- Settings > Servers ----------------------------------------------------
 	systemServers: 'System servers',
 	yourServers: 'Your servers',
 	providersManagedByAdmin: 'Providers are managed by your administrator.',
@@ -969,7 +969,7 @@ const en = {
 	baseUrlRequired: 'Base URL is required',
 	connectionFailed: 'Connection failed',
 
-	// --- Settings › Interface --------------------------------------------------
+	// --- Settings > Interface --------------------------------------------------
 	appearance: 'Appearance',
 	homeScreen: 'Home screen',
 	showGreetingHeader: 'Show greeting header',
@@ -1002,13 +1002,13 @@ const en = {
 	compactSidebarHeaderHelp:
 		'New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.',
 
-	// --- Settings › About ------------------------------------------------------
+	// --- Settings > About ------------------------------------------------------
 	source: 'Source',
 	documentation: 'Documentation',
 	buyMeACoffee: 'Buy me a coffee',
 	madeWithLoveBy: 'Made with',
 	byAuthor: 'by cedhuf',
-	// --- Settings › Admin ------------------------------------------------------
+	// --- Settings > Admin ------------------------------------------------------
 	userPermissions: 'User permissions',
 	userPermissionsDescription: 'What signed-in users are allowed to do on this instance.',
 	allowUserProviders: 'Allow users to add their own provider connections',
@@ -1195,7 +1195,7 @@ const en = {
 	shortcutCommandsNote:
 		'Type / at the start of an empty message to see the commands. A message that really starts with a slash is written //, and anything else (a path, a date) is sent as typed.',
 
-	// Settings → Chat → Compaction
+	// Settings > Chat > Compaction
 	compaction: 'Compaction',
 	compactionDescription:
 		'Summarise the earlier part of a conversation so it keeps fitting in the context window. Nothing is deleted: the summary replaces those messages only in what is sent, and can be undone.',

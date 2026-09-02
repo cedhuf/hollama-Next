@@ -54,19 +54,17 @@
 			{ id: 'profile', label: $LL.profile(), icon: User },
 			{ id: 'servers', label: $LL.servers(), icon: Server },
 			{ id: 'admin', label: 'Admin', icon: Shield, visible: isAdmin },
-			// Beside Admin and gated the same way, because it is the other half of
-			// running an instance: Admin is how it behaves, this is who is on it.
-			// Unlike Admin, this one goes away where nobody signs in: a list of
-			// accounts on an instance that has none is a page about nothing.
+			// Beside Admin and gated the same way, because it is the other half of running
+			// an instance: Admin is how it behaves, this is who is on it. Unlike Admin, it
+			// goes away where nobody signs in.
 			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: $hasAccounts && isAdmin },
 			{ id: 'chat', label: 'Chat', icon: MessageSquare },
 			{ id: 'tools', label: 'Tools', icon: Wrench },
-			// Beside Tools rather than inside it: a bot answering on another server is
-			// not a capability of a conversation here, it is a place this instance
-			// answers from, and it is configured once and then left alone.
-			// Only where the instance has granted it. A bot answers on its own and
-			// spends on every message it is sent, so an account that may not run one
-			// is not shown a tab explaining what it cannot have.
+			// Beside Tools rather than inside it: a bot answering on another server is not a
+			// capability of a conversation, it is a place this instance answers from.
+			//
+			// Only where the instance has granted it: a bot answers on its own and spends on
+			// every message it is sent.
 			{
 				id: 'bots',
 				label: $LL.botIntegrations(),
@@ -74,12 +72,11 @@
 				visible: $integrationsConfig.canManage
 			},
 			// Its own tab for the same reason Prompts has one: two models, each with a
-			// switch and a voice, the language and the per-provider parameters still to
-			// come, and the loop's own behaviour underneath. It had already outgrown
-			// being a corner of a tab about sampling.
+			// switch and a voice, the language and the parameters still to come, and the
+			// loop's own behaviour underneath.
 			{ id: 'voice', label: $LL.voiceTab(), icon: Mic },
-			// Its own tab rather than a section of Tools: twenty prompts folded into
-			// one dropdown at the bottom of a long scroll is a feature nobody finds.
+			// Its own tab rather than a section of Tools: twenty prompts folded into one
+			// dropdown at the bottom of a long scroll is a feature nobody finds.
 			{ id: 'prompts', label: $LL.promptsTab(), icon: MessageSquareQuote },
 			{ id: 'interface', label: $LL.interface(), icon: Settings2 },
 			{ id: 'data', label: 'Data', icon: Database },
@@ -108,7 +105,7 @@
 		<div
 			class="border-shade-2 bg-shade-0 flex shrink-0 flex-col border-b sm:w-48 sm:border-r sm:border-b-0"
 		>
-			<!-- Sidebar header: title at left, same height as the panel header on the right. -->
+			<!-- Title at left, the same height as the panel header on the right. -->
 			<div
 				class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-3"
 			>
@@ -116,7 +113,7 @@
 					<Settings2 class="h-4 w-4" />
 					{$LL.settings()}
 				</div>
-				<!-- The panel-side close (X) is desktop-only, so the mobile close lives here. -->
+				<!-- The panel-side close is desktop-only, so the mobile close lives here. -->
 				<button
 					type="button"
 					onclick={() => ($settingsModalOpen = false)}
@@ -168,13 +165,13 @@
 			</div>
 		</div>
 
-		<!-- Panel: matching-height header carrying the close (X), aligned with the sidebar title. -->
-		<!-- min-h-0 so the flex-1 panel stays bounded in the mobile column layout, letting
-		     the inner content scroll instead of overflowing (desktop is a row, unaffected). -->
+		<!-- Matching-height header carrying the close, aligned with the sidebar title.
+		     `min-h-0` so the flex-1 panel stays bounded in the mobile column layout,
+		     letting the inner content scroll instead of overflowing. -->
 		<div class="flex min-h-0 min-w-0 flex-1 flex-col">
 			<!-- Empty on desktop but for the close button, which is why it is hidden on
-			     mobile. A sub-view publishing a way back gives it something to hold, so
-			     it appears at every width rather than stranding a phone in the sub-view. -->
+			     mobile. A sub-view publishing a way back gives it something to hold, so it
+			     appears at every width rather than stranding a phone in the sub-view. -->
 			<div
 				class="border-shade-2 h-12 shrink-0 items-center justify-between border-b px-3 {$settingsBack
 					? 'flex'
@@ -193,8 +190,8 @@
 					<span></span>
 				{/if}
 
-				<!-- Mobile already has a close in the sidebar header; a second one here
-				     would sit a thumb's width from the back button. -->
+				<!-- Mobile already has a close in the sidebar header; a second one here would
+				     sit a thumb's width from the back button. -->
 				<button
 					type="button"
 					onclick={() => ($settingsModalOpen = false)}

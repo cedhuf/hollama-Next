@@ -11,18 +11,16 @@
 	import { VoiceRecorder } from '$lib/voice.svelte';
 
 	/**
-	 * Drawing, on a phone.
+	 * Drawing, on a phone: a field, a key, and everything that came before
+	 * underneath.
 	 *
-	 * A field, a key, and everything that came before underneath. The desktop page
-	 * carries the shapes, the quality, the count, the negative prompt, the rewriter
-	 * and reference pictures, and every one of those is worth having on a screen
-	 * that can hold them beside the result. None of them is what somebody standing
-	 * on a pavement is doing.
+	 * The desktop page carries the shapes, the quality, the count, the negative
+	 * prompt, the rewriter and reference pictures, all worth having on a screen that
+	 * holds them beside the result, and none of them what somebody on a pavement is
+	 * doing.
 	 *
-	 * What is left out is left out, not reimplemented: the request goes through the
-	 * same `generateImages`, the pictures land in the same gallery, and opening one
-	 * opens the app's own viewer. A picture made here is indistinguishable from a
-	 * picture made there.
+	 * What is left out is left out, not reimplemented: the same `generateImages`,
+	 * the same gallery, the same viewer.
 	 */
 	let prompt = $state('');
 	let busy = $state(false);
@@ -68,9 +66,9 @@
 <div class="flex flex-col gap-4 px-5 pt-6 pb-32">
 	<h1 class="text-active text-2xl font-semibold tracking-tight">{$LL.images()}</h1>
 
-	<!-- The field and the key, at the top rather than at the foot: this page is not
-	     a conversation, it is a request followed by a wait, and the thing you came
-	     to type should not be behind the thing you made last week. -->
+	<!-- The field and the key at the top rather than the foot: this page is a
+	     request followed by a wait, and what you came to type should not be behind
+	     what you made last week. -->
 	<div class="border-shade-3 bg-shade-0 flex flex-col gap-3 rounded-2xl border p-3">
 		<textarea
 			bind:value={prompt}
@@ -118,9 +116,8 @@
 	</div>
 
 	{#if $imagesStore.length}
-		<!-- Two columns, square crops, newest first. A phone gallery is for
-		     recognising a picture, not for judging it: that is what opening it is
-		     for. -->
+		<!-- Two columns, square crops, newest first. A phone gallery is for recognising
+		     a picture, not for judging it. -->
 		<div class="grid grid-cols-2 gap-2">
 			{#each $imagesStore as image (image.id)}
 				<button

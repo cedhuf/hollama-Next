@@ -10,12 +10,9 @@ import type { Model, Settings } from '$lib/settings';
  * listen: finding out by trying is how somebody speaks a whole sentence to a
  * microphone that was never going to be heard.
  *
- * Resolved here rather than in the browser, which is the point of the file. A
- * socket is opened once and then trusted for a whole conversation, so what it
- * may do is settled before it exists, on the only side that can settle it.
- *
- * A snapshot, deliberately: somebody who changes their voice halfway through
- * finishes in the voice it started in.
+ * Resolved here rather than in the browser: a socket is opened once and trusted
+ * for a whole conversation, so what it may do is settled before it exists. A
+ * snapshot, so a voice changed halfway through finishes as it started.
  */
 
 /** A model, and the connection that serves it. Everything downstream needs both. */

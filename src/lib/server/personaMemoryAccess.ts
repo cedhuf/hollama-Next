@@ -15,14 +15,12 @@ import { generateRandomId } from '$lib/utils';
 /**
  * The server's half of a persona's memory.
  *
- * Takes the account from the run's principal and never from its body. A client
- * that names a persona is naming one of its own; a client that could name whose
- * memory to read would be naming somebody else's, which for this collection is
- * the only failure that really matters.
+ * Takes the account from the run's principal and never from its body: a client
+ * that could name whose memory to read would be naming somebody else's.
  *
  * Read once per turn and written through on each call, rather than held and
- * flushed at the end: a turn that is cancelled mid-way has still remembered what
- * it decided to remember, and two turns cannot end by overwriting each other.
+ * flushed at the end: a cancelled turn has still remembered what it decided to,
+ * and two turns cannot end by overwriting each other.
  */
 export function serverMemory(
 	userId: string | null,

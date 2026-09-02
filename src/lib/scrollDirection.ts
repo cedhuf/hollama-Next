@@ -1,15 +1,13 @@
 /**
  * Which way a list is being scrolled, said out loud only when it is sure.
  *
- * Three things say "up" without anyone having asked. Safari lets a list be
- * pulled past its own range and springs it back, reported as a scroll. A flick's
- * momentum overshoots and settles, reversing the sign for a frame or two. And
- * after a flip the header changes height, so the browser trims the scroll
- * position, which is what turns a fold into a loop.
+ * Three things say "up" without anyone asking: Safari's rubber-banding, a
+ * flick's momentum overshooting, and the browser trimming the scroll position
+ * after a flip changes the header's height.
  *
- * So: positions outside the range are dropped; travel is accumulated while the
- * direction holds and thrown away when it reverses; and the moment after a flip
- * is not read at all. What is left is one arrow, and a single arrow cannot loop.
+ * So positions outside the range are dropped, travel is accumulated while the
+ * direction holds and thrown away when it reverses, and the moment after a flip
+ * is not read at all.
  */
 export interface ScrollDirectionOptions {
 	/** How far a gesture has to travel down before it counts as one. */

@@ -9,14 +9,12 @@
 	/**
 	 * How full the conversation's context is: a ring that fills as it grows.
 	 *
-	 * Discreet by design, at rest it is a quiet outline nobody has to read. It
-	 * only earns attention as it fills: the colour warms past 60%, and the token
-	 * count appears next to it past that, because by then the number is the point.
+	 * Discreet by design. It earns attention as it fills: the colour warms past 60%
+	 * and the token count appears past that, because by then the number is the point.
 	 *
 	 * Clicking it opens the figures, nothing more. It used to put `/compact` in the
-	 * composer, which meant the one way to read the numbers on a phone was to also
-	 * be handed a command you had not asked for. There is no hover on a touch
-	 * screen, so the tap has to be what opens the panel.
+	 * composer, so the one way to read the numbers on a phone was to also be handed
+	 * a command nobody asked for.
 	 */
 	interface Props {
 		session: Session;
@@ -27,10 +25,10 @@
 
 	let tipOpen = $state(false);
 
-	// The ceiling can come from the account's settings rather than from this
-	// conversation, so the meter has to measure against the same options the turn
-	// will be sent with. Reading only the conversation's own would show the
-	// fallback threshold to everybody who set `num_ctx` once, globally.
+	// The ceiling can come from the account's settings rather than this
+	// conversation, so the meter measures against the options the turn will be sent
+	// with. Reading only the conversation's own would show the fallback threshold to
+	// everybody who set `num_ctx` once, globally.
 	const usage = $derived<ContextUsage>(
 		contextUsage(
 			session,
@@ -40,8 +38,7 @@
 	);
 	const percent = $derived(Math.round(usage.ratio * 100));
 
-	// Geometry for the ring. 16×16 to sit on the same baseline as the lucide icons
-	// in the composer strip, which are all `base-icon`.
+	// 16x16, to sit on the same baseline as the lucide icons in the composer strip.
 	const RADIUS = 6;
 	const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 	const dash = $derived(usage.ratio * CIRCUMFERENCE);
@@ -104,9 +101,8 @@
 		})}
 	</p>
 	{#if usage.limitSource === 'model'}
-		<!-- Only worth a line when the ceiling is the model's real window: the
-		     threshold is the user's own setting, and naming it back at them on every
-		     hover is noise. -->
+		<!-- Only worth a line when the ceiling is the model's real window: the threshold
+		     is the user's own setting, and naming it back at them is noise. -->
 		<p class="text-muted">{$LL.contextLimitFromModel()}</p>
 	{/if}
 	<p class="text-muted mt-1">{$LL.contextMessagesInContext({ count: usage.messageCount })}</p>

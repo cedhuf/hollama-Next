@@ -7,27 +7,13 @@ import { getSessionHeaders, searchSessions, sessionBoundaries } from '$lib/serve
 /** Conversations to return at most; each still carries all of its matches. */
 const MAX_CONVERSATIONS = 30;
 
-/**
- * Search the signed-in user's conversations by content.
- *
- * Its own route rather than a member of `/api/data/[collection]`, which would
- * read `search` as an item id. Results are grouped per conversation in the order
- * FTS5 ranked them, so the best match decides where its conversation appears
- * while every other hit inside it stays reachable.
- */
+/** Its own route rather than a member of `/api/data/[collection]`, which would read `search` as an item id. Results are grouped per conversation in the order FTS5 ranked them. */
 export async function GET(event) {
 	const user = await requireUser(event);
 	const query = event.url.searchParams.get('q')?.trim() ?? '';
 	if (!query) return json([] satisfies ConversationResult[]);
 
-	/**
-	 * Whether to answer from the whole transcript or only from what is live.
-	 *
-	 * Off by default, and that is the useful default: a summary repeats what is
-	 * already said elsewhere, so it doubles every result, and a conversation you
-	 * cleared is one you deliberately set aside. Neither is what you are looking
-	 * for when you search, until it is, which is what the switch is for.
-	 */
+	/** Off by default: a summary repeats what is said elsewhere, so it doubles every result, and a conversation you cleared is one you set aside. Until it is what you are looking for. */
 	const everything = event.url.searchParams.get('all') === '1';
 
 	const hits = searchSessions(user.id, query);

@@ -71,12 +71,7 @@
 		input.click();
 	}
 
-	/**
-	 * Read each file and attach what came out.
-	 *
-	 * One at a time on purpose: parsing a PDF is the heaviest thing this tab will
-	 * do, and three of them at once on a phone is how a browser kills a page.
-	 */
+	/** One at a time on purpose: parsing a PDF is the heaviest thing this tab will do, and three at once on a phone is how a browser kills a page. */
 	async function readDocuments(files: File[]) {
 		for (const file of files) {
 			reading = [...reading, file.name];
@@ -102,8 +97,8 @@
 						pages: result.pages
 					}
 				];
-				// Warnings are not failures: the document is attached, and this says
-				// which parts of it the parser struggled with.
+				// Warnings are not failures: the document is attached, and this says which
+				// parts of it the parser struggled with.
 				if (result.warnings.length) {
 					toast.warning(file.name, { description: result.warnings.slice(0, 3).join('\n') });
 				}
@@ -119,10 +114,9 @@
 	/**
 	 * Nothing readable came out, which for a PDF almost always means a scan.
 	 *
-	 * Rather than attach an empty document, offer the way that works without an
-	 * OCR engine: the pages as pictures, read by a vision model. Offered, not
-	 * done, because it costs far more context than text and only pays off if the
-	 * conversation's model can see.
+	 * Rather than attach an empty document, offer the way that works without an OCR
+	 * engine: the pages as pictures, read by a vision model. Offered, not done,
+	 * because it costs far more context and only pays off if the model can see.
 	 */
 	function offerPageImages(file: File, hadSomeText: boolean) {
 		const isPdf = file.name.toLowerCase().endsWith('.pdf');
@@ -169,17 +163,15 @@
 </script>
 
 {#if attachments.length || reading.length}
-	<!-- One row of pills, wrapping, whatever the kinds. It used to be one full-width
-	     control per attachment stacked in a scroller, which made two images look like
-	     a form to fill in. -->
+	<!-- One row of pills, wrapping, whatever the kinds. One full-width control per
+	     attachment stacked in a scroller made two images look like a form. -->
 	<div class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto px-3 pb-2">
 		{#each attachments as attachment (attachment.id)}
 			<AttachmentPill {attachment} onRemove={() => removeAttachment(attachment.id)} />
 		{/each}
 		{#each reading as name (name)}
-			<!-- The pill exists before its contents do, in the shape it will take: a
-			     large PDF takes a few seconds, and nothing happening looks like nothing
-			     working. -->
+			<!-- The pill exists before its contents do, in the shape it will take: a large
+			     PDF takes a few seconds, and nothing happening looks like nothing working. -->
 			<span
 				class="border-shade-3 text-muted flex max-w-full items-center gap-1.5 rounded-full border border-dashed py-1 pr-2.5 pl-1.5 text-xs"
 			>
@@ -194,8 +186,8 @@
 
 <div class="flex items-center justify-between px-2 pt-0.5 pb-2">
 	<div class="flex items-center gap-x-0.5">
-		<!-- One way in for every kind of context, and the picking happens inside it
-		     rather than in a select that appeared in the composer. -->
+		<!-- One way in for every kind of context, with the picking inside it rather than
+		     in a select that appeared in the composer. -->
 		<AddContextMenu
 			knowledge={availableKnowledge}
 			{documentsAvailable}
@@ -206,7 +198,7 @@
 
 		{#if tools.length}
 			<!-- Toggles, not one-shot actions: the rows stay plain checkboxes so the menu
-			     survives each click, but the panel itself is the shared portalled one. -->
+			     survives each click, but the panel is the shared portalled one. -->
 			<Menu side="top" align="start" class="w-60">
 				{#snippet trigger({ props })}
 					<button

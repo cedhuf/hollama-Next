@@ -7,14 +7,13 @@ import { getRun, subscribe } from '$lib/server/runs';
 /**
  * Watch a run, from wherever the client left off.
  *
- * Server-sent events rather than a socket: the traffic only goes one way, it
- * survives any reverse proxy that can already carry a streamed response, and
- * resumption is part of the protocol rather than something we invent. A client
- * that reconnects sends `Last-Event-ID`, and gets exactly what it missed.
+ * Server-sent events rather than a socket: the traffic goes one way, it survives
+ * any reverse proxy that can carry a streamed response, and resumption is part
+ * of the protocol rather than something we invent.
  *
- * A finished run still answers. Its whole log is replayed and the stream closes,
- * which is what makes a reload that lands after the model finished collect the
- * answer instead of finding an empty conversation.
+ * A finished run still answers: its whole log is replayed and the stream closes,
+ * which is what makes a reload landing after the model finished collect the
+ * answer instead of an empty conversation.
  */
 export async function GET(event) {
 	const userId = (await requireUser(event)).id;
@@ -22,9 +21,9 @@ export async function GET(event) {
 	const run = getRun(event.params.id, userId);
 	if (!run) throw error(404, 'No such run');
 
-	// The header is the browser's own resumption; the query parameter is for a
-	// first connection that already knows where it stands, which is the case
-	// after a reload that read the run's summary before subscribing.
+	// The header is the browser's own resumption; the query parameter is for a first
+	// connection that already knows where it stands, after a reload that read the
+	// run's summary before subscribing.
 	const header = Number(event.request.headers.get('last-event-id'));
 	const asked = Number(event.url.searchParams.get('from'));
 	const from = Math.max(Number.isFinite(header) ? header : 0, Number.isFinite(asked) ? asked : 0);
@@ -47,9 +46,8 @@ export async function GET(event) {
 				}
 			};
 
-			// One subscription does both jobs: `subscribe` replays what came before
-			// the join and then feeds the live ones through the same listener, so
-			// catching up and following are the same code path here as well.
+			// One subscription does both jobs: `subscribe` replays what came before the join
+			// and then feeds the live ones through the same listener.
 			unsubscribe = subscribe(run, from, (sequenced: SequencedRunEvent) => {
 				if (closed) return;
 				try {
@@ -61,9 +59,8 @@ export async function GET(event) {
 					close();
 					return;
 				}
-				// The last event a client needs is one of these two, and both come
-				// through here, so the run's ending is what closes the stream rather
-				// than a timer guessing at it.
+				// The last event a client needs is one of these two, so the run's ending is what
+				// closes the stream rather than a timer guessing at it.
 				if (sequenced.event.type === 'done' || sequenced.event.type === 'error') close();
 			});
 
@@ -72,8 +69,8 @@ export async function GET(event) {
 		},
 
 		cancel() {
-			// The client navigated away or reloaded. Unhooking is all that happens:
-			// the run keeps going, which is the entire reason it lives on the server.
+			// The client navigated away or reloaded. Unhooking is all that happens: the run
+			// keeps going, which is the reason it lives on the server.
 			unsubscribe();
 		}
 	});
@@ -83,8 +80,8 @@ export async function GET(event) {
 			'content-type': 'text/event-stream',
 			'cache-control': 'no-cache, no-transform',
 			connection: 'keep-alive',
-			// Nginx buffers streamed responses by default, which turns a live answer
-			// into one that arrives all at once when it is already finished.
+			// Nginx buffers streamed responses by default, which turns a live answer into
+			// one that arrives all at once when it is already finished.
 			'x-accel-buffering': 'no'
 		}
 	});

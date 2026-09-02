@@ -7,12 +7,11 @@ import { setSharedPersonas } from '$lib/server/db/sharedPersonas';
 /**
  * The personas an admin wrote and offers to their users, snapshotted whole.
  *
- * A replacement is the right operation here, unlike everywhere else, because the
- * body is the answer to "which of my personas are flagged shared" and that is a
- * complete answer by construction. The personas relayed from the store are not
- * in this list at all, so nothing of theirs is at stake.
+ * A replacement is right here, unlike everywhere else, because the body answers
+ * "which of my personas are flagged shared", which is complete by construction.
+ * The personas relayed from the store are not in this list at all.
  *
- * UI curation, not a security boundary (see the roadmap on server-side enforcement).
+ * UI curation, not a security boundary.
  */
 export async function PUT(event) {
 	await requireAdmin(event);

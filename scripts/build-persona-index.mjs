@@ -2,23 +2,22 @@
 /**
  * Build the persona store's index from the bundles beside it.
  *
- * The app fetches this one file to fill the browser, and only fetches a bundle
- * when someone installs it. That split is the whole reason the index exists: a
- * thousand personas listed is a few dozen kilobytes, a thousand personas
+ * The app fetches this one file to fill the browser and only fetches a bundle on
+ * install: a thousand personas listed is a few dozen kilobytes, a thousand
  * downloaded whole is not something anyone should pay for scrolling a page.
  *
- * Written by hand it would drift from the bundles within a week, so it is
- * generated and checked in. `pnpm personas:index`, and the CI check below fails
- * the build if it was forgotten.
+ * Generated and checked in, since by hand it would drift within a week.
+ * `pnpm personas:index`, and the CI check below fails the build if it was
+ * forgotten.
  */
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The application's own digest, not a copy of it. Written twice it would drift
-// once, and the day it drifted every installed persona would be reported as
-// modified. Node reads TypeScript directly, so importing it costs nothing.
+// The application's own digest, not a copy: written twice it would drift once,
+// and every installed persona would be reported as modified. Node reads
+// TypeScript directly, so importing it costs nothing.
 import { bundleAuthored, contentDigest } from '../src/lib/personaDigest.ts';
 
 const ROOT = fileURLToPath(new URL('../store/personas/', import.meta.url));
@@ -28,14 +27,7 @@ const INDEX = join(ROOT, 'index.json');
 /** Everything in this folder is ours. A community store sets its own. */
 const ORIGIN = 'official';
 
-/**
- * The ceiling on an avatar carried in the index rather than in the bundle.
- *
- * A glyph is thirty bytes and belongs here. An uploaded picture is tens of
- * kilobytes of base64, and a hundred of those is an index nobody can load on a
- * phone. Past the limit the listing falls back to initials, and the picture is
- * still in the bundle, so it appears the moment the persona is installed.
- */
+/** A glyph is thirty bytes and belongs here; an uploaded picture is tens of kilobytes of base64, and a hundred of those is an index nobody can load on a phone. Past the limit the listing falls back to initials. */
 const MAX_INLINE_AVATAR = 4096;
 
 function indexAvatar(avatar) {
@@ -49,15 +41,12 @@ function indexAvatar(avatar) {
  * Two digests, two jobs, and conflating them would break both.
  *
  * `integrity` is SHA-256 over the file's bytes and answers "is this the bundle
- * the store published". It lives here rather than inside the file for the obvious
- * reason: a hash of a file cannot be written into that file. Putting it in the
- * listing is what npm does with a package's integrity, and it means whoever
- * contributes a persona writes plain JSON and never has to know the algorithm.
+ * the store published". It lives in the listing rather than in the file, since a
+ * hash of a file cannot be written into that file.
  *
- * `contentDigest` is over the authored fields only, and answers "is this persona
- * still the one that was published". That is a different question, asked against
- * a persona in someone's library rather than against a file, which is why it
- * cannot be a hash of the bytes.
+ * `contentDigest` is over the authored fields and answers "is this persona still
+ * the one that was published", asked against a persona in someone's library
+ * rather than against a file.
  */
 const entries = [];
 const problems = [];
@@ -84,7 +73,7 @@ for (const file of readdirSync(BUNDLES)
 	if (!bundle.persona?.name) problems.push(`${file}: missing "persona.name"`);
 	if (!bundle.persona?.avatar) problems.push(`${file}: missing "persona.avatar"`);
 	// The id is what says "this is the Pixel you already have" across revisions, so
-	// it has to be the file's name too: two ids in one place is one too many.
+	// it has to be the file's name too.
 	if (bundle.id && `${bundle.id}.json` !== file) {
 		problems.push(`${file}: id "${bundle.id}" does not match the file name`);
 	}

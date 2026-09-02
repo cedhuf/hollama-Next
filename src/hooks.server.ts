@@ -3,18 +3,15 @@ import { sequence } from '@sveltejs/kit/hooks';
 
 /**
  * Auth.js guards an instance that has accounts. One that configures no way to
- * sign in gets a pass-through instead: there are no credentials to check, so
- * there is nothing for Auth.js to do, and its config is never even constructed.
+ * sign in gets a pass-through: there are no credentials to check, and its config
+ * is never even constructed.
  *
  * Such an instance still has its database, its encrypted keys and its owner (see
  * `$lib/server/session`); it just never asks who is knocking.
  */
 const passthrough: Handle = ({ event, resolve }) => resolve(event);
 
-/**
- * Redirect unauthenticated visitors to /login. API and auth routes handle their
- * own responses (401/redirects), so they're left alone.
- */
+/** API and auth routes handle their own responses, so they are left alone. */
 const guard: Handle = async ({ event, resolve }) => {
 	const { pathname } = event.url;
 	const isExempt =
@@ -30,14 +27,7 @@ const guard: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-/**
- * Bots on other chat servers start with the process, not with a page.
- *
- * Here rather than at import time because this module is loaded during the
- * build as well, and a build has no business opening the database and polling
- * somebody's chat server. The first request is the earliest moment this
- * instance is certainly running, and the supervisor only acts once.
- */
+/** Here rather than at import time, because this module is loaded during the build too, and a build has no business polling somebody's chat server. The first request is the earliest moment the instance is certainly running. */
 const bootIntegrations: Handle = async ({ event, resolve }) => {
 	const { ensureIntegrationsStarted } = await import('$lib/server/integrations/supervisor');
 	ensureIntegrationsStarted();

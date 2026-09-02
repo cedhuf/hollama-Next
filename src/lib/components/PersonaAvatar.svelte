@@ -12,12 +12,11 @@
 	const glyph = $derived(personaGlyph(persona.avatarGlyph));
 </script>
 
-<!-- Three faces, in the order they win: an uploaded picture, a glyph the app draws,
-     the initials. The picture goes first because someone chose it on purpose.
+<!-- Three faces, in the order they win: an uploaded picture, a glyph the app
+     draws, the initials. The picture goes first because someone chose it.
 
-     `{@html}` is safe here for a reason worth stating: what it renders is never the
-     stored value, it is the entry `personaGlyph` found under that name in our own
-     table. A persona arriving from a catalogue can pick one of ours or none. -->
+     `{@html}` is safe here: what it renders is never the stored value, it is the
+     entry `personaGlyph` found under that name in our own table. -->
 <div
 	class="text-shade-0 flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold"
 	style="width:{size}px;height:{size}px;background-color:{persona.avatarColor};font-size:{Math.round(
@@ -33,9 +32,8 @@
 			style="--persona-glyph-cut:{persona.avatarColor}"
 			role="presentation"
 		>
-			<!-- Never the stored value: `personaGlyph` returns an entry of our own
-			     table or nothing, so a catalogue can pick among our glyphs and has no
-			     way to supply markup of its own. -->
+			<!-- Never the stored value: `personaGlyph` returns an entry of our own table or
+			     nothing, so a catalogue has no way to supply markup of its own. -->
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html glyph.body}
 		</svg>

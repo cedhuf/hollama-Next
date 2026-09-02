@@ -8,11 +8,10 @@ import { getDb } from './index';
 /**
  * The MCP servers an account has configured.
  *
- * The same shape the integrations table already uses, for the same reasons: the
- * owner's switch and the administrator's suspension are two columns because they
- * answer two questions, and the credential lives encrypted and is fetched by the
- * one function that needs it, so a record can be logged or handed to a browser
- * without any risk of carrying a token somewhere tokens should not be.
+ * The same shape the integrations table uses, for the same reasons: the owner's
+ * switch and the administrator's suspension are two columns because they answer
+ * two questions, and the credential lives encrypted and is fetched by the one
+ * function that needs it.
  */
 
 export interface McpServerRow {
@@ -123,14 +122,7 @@ export function getMcpServerSecret(id: string): string | null {
 	return row?.secret_enc ? decrypt(row.secret_enc) : null;
 }
 
-/**
- * A slug this owner is not already using.
- *
- * Suffixed rather than refused: the label is the user's to choose, including
- * choosing the same one twice, and a form that rejects "Mail" because another
- * server slugged to `mail` would be explaining an implementation detail. The
- * suffix is visible in the tools tab, which is where it means something.
- */
+/** Suffixed rather than refused: the label is the user's to choose, including twice, and rejecting "Mail" because another server slugged to `mail` would explain an implementation detail. */
 function freeSlug(ownerUserId: string, label: string, exceptId?: string): string {
 	const base = slugify(label);
 	const taken = new Set(
@@ -177,14 +169,7 @@ export function createMcpServer(input: {
 	return getMcpServer(id)!;
 }
 
-/**
- * Save an edit. An absent field is left as it was.
- *
- * The token follows the rule the provider keys and the integration credentials
- * already follow: omit it to keep the stored one, send an empty string to clear
- * it. A form that cannot read a secret back has no other way to say "leave it
- * alone".
- */
+/** The token follows the rule the provider keys follow: omit it to keep the stored one, send an empty string to clear it. */
 export function updateMcpServer(
 	id: string,
 	input: {
@@ -232,25 +217,14 @@ export function updateMcpServer(
 	return getMcpServer(id);
 }
 
-/**
- * Suspend one, or lift the suspension. An administrator's verb, and only theirs.
- *
- * Its own function rather than a field on `updateMcpServer`, so that the route an
- * owner reaches cannot set it by accident or by a crafted body.
- */
+/** Its own function rather than a field on `updateMcpServer`, so the route an owner reaches cannot set it by accident or by a crafted body. */
 export function setMcpServerBlocked(id: string, blocked: boolean): void {
 	getDb()
 		.prepare('UPDATE mcp_servers SET blocked = ? WHERE id = ?')
 		.run(blocked ? 1 : 0, id);
 }
 
-/**
- * Write down what a server just answered with.
- *
- * Names only, and replaced wholesale rather than merged: a tool that has gone
- * from the catalogue has to disappear from ours too, and a union of every list
- * ever seen would keep it forever.
- */
+/** Names only, replaced wholesale rather than merged: a tool that has gone from the catalogue has to disappear from ours, and a union of every list ever seen keeps it forever. */
 export function setMcpServerTools(id: string, tools: string[]): void {
 	getDb()
 		.prepare('UPDATE mcp_servers SET tools = ?, tools_at = ? WHERE id = ?')

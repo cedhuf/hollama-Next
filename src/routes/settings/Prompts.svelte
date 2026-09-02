@@ -20,19 +20,17 @@
 	/**
 	 * Everything anybody says to a model before the conversation starts.
 	 *
-	 * Two kinds, and they were in two places. The system prompt sat in Chat among
-	 * the model defaults; the app's own instructions sat in a dropdown at the foot
-	 * of Tools, which meant twenty prompts behind a control that showed one and
-	 * advertised none. Neither was where somebody looking for "what is being said
-	 * on my behalf" would think to look, so both are here.
+	 * Two kinds, and they were in two places: the system prompt among the model
+	 * defaults, and the app's own instructions behind a dropdown that showed one of
+	 * twenty and advertised none. Neither was where somebody looking for "what is
+	 * being said on my behalf" would think to look.
 	 *
-	 * What is deliberately NOT here: a persona's prompt and a playbook's
-	 * instructions. Those belong to a thing you wrote and stay with it, in the
-	 * library. These belong to the instance.
+	 * Deliberately not here: a persona's prompt and a playbook's instructions, which
+	 * belong to a thing you wrote and stay with it in the library.
 	 *
-	 * Everyone sees the whole screen, including on an instance that shares its
-	 * prompts and forbids changing them: a read-only field says what is being sent
-	 * for you, where a hidden one only says that something is.
+	 * Everyone sees the whole screen, including where the instance forbids changing
+	 * it: a read-only field says what is being sent for you, where a hidden one only
+	 * says that something is.
 	 */
 
 	// --- The system prompt ----------------------------------------------------
@@ -98,9 +96,8 @@
 
 	function setOverride(key: PromptKey, value: string) {
 		const next = { ...$settingsStore.promptOverrides };
-		// Blanking a prompt means "give me the wording back", not "send nothing":
-		// an empty instruction quietly removes a behaviour the rest of the app
-		// still assumes is there.
+		// Blanking a prompt means "give me the wording back", not "send nothing": an
+		// empty instruction quietly removes a behaviour the rest of the app assumes.
 		const baseline = fromAdmin[key] ?? DEFAULT_PROMPTS[key].default;
 		if (!value.trim() || value === baseline) delete next[key];
 		else next[key] = value;
@@ -151,8 +148,8 @@
 						: $LL.globalPromptPlaceholder()}></textarea>
 			</SettingsField>
 
-			<!-- Heading and picker stacked: side by side, the model names in the picker
-			     wrapped onto a second line as soon as they got long. -->
+			<!-- Heading and picker stacked: side by side, the model names wrapped onto a
+			     second line as soon as they got long. -->
 			<div class="mt-2 flex flex-col gap-1.5">
 				<span class="text-sm font-medium">{$LL.perModelPrompts()}</span>
 				{#if availableToAdd.length}

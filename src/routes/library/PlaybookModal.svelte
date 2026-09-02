@@ -8,15 +8,7 @@
 	import SettingsField from '../settings/SettingsField.svelte';
 	import SettingsSection from '../settings/SettingsSection.svelte';
 
-	/**
-	 * Writing a procedure.
-	 *
-	 * Shaped around what a playbook is, which is one long piece of text plus the
-	 * few things needed to find it again. So the editor is mostly the text: the
-	 * identity fields are a strip at the top rather than a section of their own,
-	 * and the instructions get the rest of the height. A persona's editor is the
-	 * opposite shape because a persona is mostly settings.
-	 */
+	/** Shaped around what a playbook is, one long piece of text plus the few things needed to find it again: the identity fields are a strip at the top and the instructions get the rest of the height. A persona's editor is the opposite shape. */
 	interface Props {
 		open: boolean;
 		playbook: Playbook;
@@ -25,15 +17,9 @@
 	let { open = $bindable(false), playbook = $bindable() }: Props = $props();
 
 	/**
-	 * A shared playbook that has been edited has to be republished.
-	 *
-	 * What users are offered is a snapshot taken when it was shared. Without this
-	 * it was only ever retaken when the share switch itself moved, so rewriting a
-	 * step changed nothing for anybody: the instance went on handing out the old
-	 * text, and the card comparing the two still found them identical because the
-	 * snapshot was still the original.
-	 *
-	 * Debounced, since this runs on every keystroke.
+	 * A shared playbook that has been edited has to be republished. The snapshot
+	 * users are offered was only retaken when the share switch moved, so rewriting a
+	 * step changed nothing for anybody. Debounced: this runs on every keystroke.
 	 */
 	let publishTimer: ReturnType<typeof setTimeout> | undefined;
 	function schedulePublish() {
@@ -48,12 +34,7 @@
 		if (playbook.shared) schedulePublish();
 	}
 
-	/**
-	 * What leaves is a bundle, not the stored record.
-	 *
-	 * The same file the store serves, so a playbook exported here installs
-	 * anywhere: no id, no provenance, no trace of the library it came out of.
-	 */
+	/** The same file the store serves, so a playbook exported here installs anywhere: no id, no provenance, no trace of the library it came out of. */
 	function exportThis() {
 		const bundle = {
 			format: 'llooma.playbook',

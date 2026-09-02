@@ -5,14 +5,12 @@ import { listAllIntegrations, toIntegrationView } from '$lib/server/db/integrati
 import { getUserById } from '$lib/server/db/users';
 
 /**
- * Every bot on the instance, with who owns it.
+ * Every bot on the instance, with who owns it. The counterpart of letting people
+ * run their own: granting that with no way to see or stop what it produced is
+ * clearly wrong.
  *
- * The counterpart of letting people run their own: granting that without any
- * way to see or stop what it produced is the one arrangement that is clearly
- * wrong. Deliberately a roster and not a second editor. An administrator here
- * answers two questions, what is running and on whose account, and has two
- * actions, switch it off and remove it. Everything about how a bot behaves
- * stays with the person who configured it.
+ * A roster and not a second editor: two questions answered, two actions.
+ * Everything about how a bot behaves stays with whoever configured it.
  */
 export async function GET(event) {
 	await requireAdmin(event);

@@ -7,11 +7,11 @@ import { APP_NAME } from '$lib/brand';
 /**
  * Reads a web page server-side and returns its text.
  *
- * The URL comes from the client, so this runs inside the server's network: left
- * unguarded it is a Server-Side Request Forgery hole, letting anyone who can
- * reach the instance probe its private network or read a cloud provider's
- * metadata endpoint. Every address is therefore resolved and checked before a
- * request goes out, on the initial URL *and* on every redirect it is sent to.
+ * The URL comes from the client and this runs inside the server's network, so
+ * unguarded it is an SSRF hole: anyone reaching the instance could probe its
+ * private network or read a cloud metadata endpoint. Every address is resolved
+ * and checked before a request goes out, on the initial URL and on every
+ * redirect.
  */
 
 const MAX_REDIRECTS = 3;
@@ -52,13 +52,7 @@ function isBlockedAddress(address: string): boolean {
 	return a >= 224;
 }
 
-/**
- * Throws unless the URL is http(s) and every address its host resolves to is public.
- *
- * Exported because page reading is no longer the only thing this instance opens
- * on somebody's say-so: an MCP server is an address a user typed into a form
- * too, and a guard each caller reimplements is a guard one of them gets wrong.
- */
+/** Exported because page reading is no longer the only thing this instance opens on somebody's say-so: an MCP server is an address a user typed into a form too, and a guard each caller reimplements is one somebody gets wrong. */
 export async function assertReachable(url: URL, allowedOrigins: string[]): Promise<void> {
 	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
 		throw new FetchPageError(`Unsupported protocol: ${url.protocol}`);
@@ -81,7 +75,7 @@ export async function assertReachable(url: URL, allowedOrigins: string[]): Promi
 		throw new FetchPageError(`Cannot resolve ${url.hostname}`);
 	}
 	// Every answer has to be public: one private address in the set is enough for
-	// the request to land somewhere it shouldn't.
+	// the request to land somewhere it should not.
 	if (addresses.some(({ address }) => isBlockedAddress(address))) {
 		throw new FetchPageError('Address is not routable');
 	}
@@ -108,8 +102,8 @@ function htmlToText(html: string): { title: string; text: string } {
 		.replace(/<(script|style|noscript|svg|template)\b[\s\S]*?<\/\1>/gi, ' ')
 		.replace(/<(nav|header|footer|aside)\b[\s\S]*?<\/\1>/gi, ' ');
 
-	// Prefer the article container when the page marks one: it drops menus,
-	// cookie banners and comment threads without needing to score anything.
+	// Prefer the article container when the page marks one: it drops menus, cookie
+	// banners and comment threads without needing to score anything.
 	const main = body.match(/<(article|main)\b[^>]*>([\s\S]*?)<\/\1>/i);
 	if (main) body = main[2];
 
@@ -158,17 +152,14 @@ async function readCapped(response: Response): Promise<string> {
 
 /**
  * Fetches one page and returns its readable text, capped at `maxChars`.
- *
- * Redirects are followed by hand so each hop can be checked: `redirect: 'follow'`
- * would let a public host bounce the request to a private one.
+ * Redirects are followed by hand so each hop can be checked: `redirect:
+ * 'follow'` would let a public host bounce the request to a private one.
  */
 /**
- * The hosts this instance will fetch, or none named and therefore any public one.
- *
- * Read here rather than by each caller, because it is a security control and a
- * control applied by whoever remembers to pass it is not a control. It used to
- * live in the browser-facing route, which meant the setting was honoured on the
- * one path nothing used and ignored on the path that actually reads pages.
+ * The hosts this instance will fetch, or none named and therefore any public
+ * one. Read here rather than by each caller, because a security control applied
+ * by whoever remembers to pass it is not a control: it used to live in the
+ * browser-facing route, honoured on the path nothing used.
  */
 export function allowedFetchOrigins(): string[] {
 	return (env.FETCH_ALLOWED_ORIGINS ?? '')

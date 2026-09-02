@@ -7,17 +7,13 @@
 	import { toast } from '$lib/toast';
 
 	/**
-	 * Every MCP server on the instance, with whose it is.
+	 * Every MCP server on the instance, with whose it is. The counterpart of the
+	 * permission it sits under: granting the right to open outbound connections with
+	 * no way to see or stop what was opened is clearly wrong.
 	 *
-	 * The counterpart of the permission it sits under: granting people the right to
-	 * open outbound connections without any way to see or stop what they opened is
-	 * the one arrangement that is clearly wrong.
-	 *
-	 * Deliberately a roster and not a second editor. Two questions answered, what
-	 * is configured and on whose account, and two actions, suspend it and remove
-	 * it. An administrator who could rewrite somebody's address or token would be
-	 * pointing their tools at a machine of their own choosing, which is a worse
-	 * power than switching them off.
+	 * A roster and not a second editor: two questions answered, two actions. An
+	 * administrator who could rewrite somebody's address or token would be pointing
+	 * their tools at a machine of their own choosing.
 	 */
 	let servers = $state<(McpServerView & { owner: string })[]>([]);
 
@@ -26,21 +22,14 @@
 			const response = await fetch('/api/admin/mcp');
 			if (response.ok) servers = await response.json();
 		} catch {
-			// A roster that will not load is not worth an error over the permission
-			// above it, which works.
+			// A roster that will not load is not worth an error over the permission above
+			// it, which works.
 		}
 	}
 
 	onMount(load);
 
-	/**
-	 * Suspend one, or lift the suspension.
-	 *
-	 * The switch reads as "allowed", so it is on when nothing is blocking it. What
-	 * it writes is the instance's decision, never the owner's: their own switch
-	 * stays exactly where they left it, and they keep being told why it changes
-	 * nothing for now.
-	 */
+	/** The switch reads as "allowed", so it is on when nothing is blocking it. What it writes is the instance's decision, never the owner's. */
 	async function setAllowed(server: McpServerView, allowed: boolean) {
 		const response = await fetch(`/api/admin/mcp/${server.id}`, {
 			method: 'PUT',

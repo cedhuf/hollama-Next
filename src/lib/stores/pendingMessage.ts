@@ -9,10 +9,7 @@ export interface PendingMessage {
 	webSearch: boolean;
 	webFetch: boolean;
 	attachments: Attachment[];
-	/**
-	 * Composer tool switches carried over from the home page. Optional so older
-	 * hand-offs (and code paths that don't set them) fall back to session defaults.
-	 */
+	/** Carried over from the home page. Optional, so older hand-offs fall back to the session defaults. */
 	thinking?: boolean;
 	interactiveChoices?: boolean;
 	sendCurrentDate?: boolean;

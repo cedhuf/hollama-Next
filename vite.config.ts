@@ -9,13 +9,9 @@ import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
  * `http://192.168.x.x:5173` has no microphone at all and the app reports it as
  * a refused permission.
  *
- * The certificate is self-signed, which Safari objects to once and which a
- * service worker refuses outright. That costs nothing in development, where the
- * worker is not registered, but it does mean the installed PWA is not what this
- * lets you test; `mkcert` is the next step up.
- *
- * Off by default because it costs a warning to click through on the desktop too,
- * where `localhost` was already secure.
+ * The certificate is self-signed, which Safari objects to once and a service
+ * worker refuses outright, so the installed PWA is not what this lets you test.
+ * Off by default: on the desktop `localhost` was already secure.
  */
 const httpsRequested = process.env.HTTPS === '1';
 

@@ -45,17 +45,14 @@ async function readCatalogue(
  * Models a stored server offers, using its decrypted key. Best-effort: `[]` on
  * any failure.
  *
- * Both of its roots, when it has two. A provider serving images from another
- * base usually lists them there too, and asking only the chat root returns a
- * catalogue with no image model in it. Each list is fetched on its own, so a
- * root that is down costs nothing but itself.
+ * Both of its roots, when it has two: a provider serving images from another
+ * base usually lists them there too. Each list is fetched on its own, so a root
+ * that is down costs nothing but itself.
  *
- * Nothing is classified by which root it came from: that root lists
- * transcription and embedding models too, so the name still decides.
- *
- * The kinds beside the names are the one exception: a catalogue fetched by
- * asking "what speaks" has answered outright, and an answer beats a guess. Still
- * not the last word, since Models and prices overrides it.
+ * Nothing is classified by which root it came from, since that root lists
+ * transcription and embedding models too. The kinds are the exception: a
+ * catalogue asked "what speaks" has answered outright, though Models and prices
+ * still overrides it.
  */
 export async function listProviderModels(
 	server: ServerRow

@@ -11,14 +11,7 @@ import {
 	type CreditPeriod
 } from '$lib/server/db/usage';
 
-/**
- * What this account has spent, and what it is allowed.
- *
- * Its own, and only its own: an administrator reading everybody's goes through
- * the admin route. Shown in Profile because that is where somebody looks for
- * facts about themselves, and because a limit nobody can see is a limit that
- * arrives as a surprise.
- */
+/** Its own, and only its own: an administrator reading everybody's goes through the admin route. In Profile, because a limit nobody can see is one that arrives as a surprise. */
 export async function GET(event) {
 	const user = await requireUser(event);
 
@@ -31,11 +24,11 @@ export async function GET(event) {
 		resetsAt: nextPeriodStart(period, from),
 		limit: creditLimitFor(user.id),
 		spend: spendSince(user.id, from),
-		// One currency can label a figure; several have to be admitted to, since
-		// nothing is converted anywhere.
+		// One currency can label a figure; several have to be admitted to, since nothing
+		// is converted anywhere.
 		currencies: spendCurrencies(),
-		// Always the last thirty days, whatever the period: a month of history
-		// beside a weekly allowance is what says whether this week is unusual.
+		// Always the last thirty days, whatever the period: a month of history beside a
+		// weekly allowance is what says whether this week is unusual.
 		history: dailySpend(user.id, daysAgo(29))
 	});
 }

@@ -1,18 +1,6 @@
-/**
- * The shape of a conversation search result, and the marking of matches inside
- * it.
- *
- * Shared rather than owned by either side: SQLite's full-text index produces
- * these, and the modal renders them, so the vocabulary lives between the two.
- */
+/** Shared rather than owned by either side: SQLite's full-text index produces these, and the modal renders them. */
 
-/**
- * How a match is marked inside an excerpt.
- *
- * Private-use code points rather than `<mark>`: an excerpt is message content,
- * so building HTML out of it would give any conversation containing markup a way
- * into the page. `splitExcerpt` turns these back into plain text segments.
- */
+/** Private-use code points rather than `<mark>`: an excerpt is message content, so building HTML out of it would give any conversation containing markup a way into the page. */
 export const MATCH_OPEN = '\uE000';
 export const MATCH_CLOSE = '\uE001';
 

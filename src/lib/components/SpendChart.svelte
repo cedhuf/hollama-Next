@@ -2,17 +2,13 @@
 	import LL from '$i18n/i18n-svelte';
 
 	/**
-	 * What was spent, day by day.
+	 * What was spent, day by day. A total says how much, not whether it happened
+	 * yesterday or has been happening all month, which is the difference between a
+	 * mistake and a habit.
 	 *
-	 * A total says how much; it does not say whether it happened yesterday or has
-	 * been happening all month, and that is the difference between a mistake and a
-	 * habit. The data is stored per day already, so the chart costs nothing but
-	 * the drawing.
-	 *
-	 * Bars rather than a line: these are separate days, not a continuous quantity,
-	 * and a line between Tuesday and Thursday invents a Wednesday. Drawn as plain
-	 * elements rather than SVG, because a bar chart is a row of rectangles and a
-	 * `<div>` already knows how to be one, in the theme, at any width.
+	 * Bars rather than a line: these are separate days, and a line between Tuesday
+	 * and Thursday invents a Wednesday. Plain elements rather than SVG, because a
+	 * `<div>` already knows how to be a rectangle, in the theme, at any width.
 	 */
 	interface Props {
 		days: { day: string; cost: number }[];
@@ -24,13 +20,7 @@
 
 	let { days, limit = 0, format }: Props = $props();
 
-	/**
-	 * The top of the chart.
-	 *
-	 * The busiest day, or the limit when it is higher: scaled to the busiest day
-	 * alone, a quiet month looks exactly like a runaway one, which is the single
-	 * thing this is for.
-	 */
+	/** The busiest day, or the limit when it is higher: scaled to the busiest day alone, a quiet month looks exactly like a runaway one. */
 	const peak = $derived(Math.max(limit, ...days.map((d) => d.cost), 0));
 
 	/** Thirty empty columns say nothing. One sentence says it. */
@@ -63,8 +53,8 @@
 
 			{#each days as entry (entry.day)}
 				{@const height = peak > 0 ? (entry.cost / peak) * 100 : 0}
-				<!-- A day with nothing spent keeps its column: the gaps are half of what
-				     a month of spending says. -->
+				<!-- A day with nothing spent keeps its column: the gaps are half of what a month
+				     of spending says. -->
 				<div
 					class="group relative flex flex-1 items-end"
 					title="{label(entry.day)} · {format(entry.cost)}"

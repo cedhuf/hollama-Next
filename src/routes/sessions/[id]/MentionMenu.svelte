@@ -7,10 +7,9 @@
 	/**
 	 * Autocomplete for `@`, docked above the composer.
 	 *
-	 * The sibling of the slash menu, and deliberately its twin: same place, same
-	 * keys, same shape. What is being chosen differs, so the row carries a face and
-	 * a tagline rather than a name and a description, and that is the whole of the
-	 * difference.
+	 * The twin of the slash menu: same place, same keys, same shape. What is being
+	 * chosen differs, so the row carries a face and a tagline rather than a name and
+	 * a description.
 	 *
 	 * Keyboard handling lives in the composer's `onkeydown`, next to the Enter
 	 * handling it has to win against; this owns the list and the mouse.

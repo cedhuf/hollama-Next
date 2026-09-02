@@ -2,11 +2,7 @@ import type { GeneratedImage } from '$lib/generatedImages';
 
 import { getDb } from './index';
 
-/**
- * The gallery's index. Every function takes the account, and none of them offers
- * a way to reach a row without one: an id is not a permission, and a gallery is
- * about as personal as this app gets.
- */
+/** Every function takes the account, and none offers a way to reach a row without one: an id is not a permission. */
 
 export function listImages(userId: string): GeneratedImage[] {
 	const rows = getDb()
@@ -32,13 +28,7 @@ export function insertImage(userId: string, image: GeneratedImage): void {
 		.run(image.id, userId, JSON.stringify(image), image.bytes, image.createdAt);
 }
 
-/**
- * Name one picture, after it was drawn.
- *
- * A patch rather than part of the insert, because the title is written by a
- * second model once the picture exists: making the generation wait on it would
- * add a round trip to a request that already takes half a minute, to set a label.
- */
+/** A patch rather than part of the insert, because the title is written by a second model once the picture exists: making the generation wait would add a round trip to set a label. */
 export function setImageTitle(userId: string, id: string, title: string): void {
 	const image = getImage(userId, id);
 	if (!image) return;
@@ -56,13 +46,7 @@ export function deleteImage(userId: string, id: string): boolean {
 	return Number(result.changes) > 0;
 }
 
-/**
- * What this account is holding, in bytes.
- *
- * Summed from the column rather than from the rows, so the answer costs the same
- * whether somebody has ten images or ten thousand. Asked before a generation,
- * never during one.
- */
+/** Summed from the column rather than the rows, so the answer costs the same at ten images or ten thousand. Asked before a generation, never during one. */
 export function bytesHeld(userId: string): number {
 	const row = getDb()
 		.prepare('SELECT COALESCE(SUM(bytes), 0) AS total FROM generated_images WHERE user_id = ?')

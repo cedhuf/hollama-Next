@@ -5,21 +5,12 @@
 	import LL from '$i18n/i18n-svelte';
 
 	/**
-	 * The app's one destructive button.
+	 * The app's one destructive button. Two clicks, in place: no modal, since these
+	 * live in a hovered row or a toolbar.
 	 *
-	 * Four mechanisms used to answer the same question: the browser's own
-	 * `confirm()`, a trash icon that swapped itself for a check and a cross, an
-	 * in-place red button written again in four files, and nothing at all. They
-	 * looked different, they read differently, and one of them stayed armed after
-	 * the dialog holding it had been closed and reopened.
-	 *
-	 * Two clicks, in place. No modal, because these live in a hovered row or a
-	 * toolbar where there is room for an icon and not for a paragraph, and a dialog
-	 * over a picture to ask about that picture is a lot of ceremony for one press.
-	 *
-	 * The armed state disarms itself: after a few seconds, on Escape, and on a
-	 * click anywhere else. That is what makes two clicks safe, and it is precisely
-	 * what the hand-written copies forgot.
+	 * The armed state disarms itself after a few seconds, on Escape, and on a click
+	 * anywhere else. That is what makes two clicks safe, and what the four
+	 * hand-written copies forgot.
 	 */
 	interface Props {
 		/** Run when the second click lands. */
@@ -33,12 +24,7 @@
 		disabled?: boolean;
 		/** Shown beside the icon where the width allows it. */
 		text?: string;
-		/**
-		 * Whether it is waiting for its second click.
-		 *
-		 * Bindable, for a row that has to keep its buttons on screen while the
-		 * question stands, or that arms it from a context menu.
-		 */
+		/** Bindable, for a row that has to keep its buttons on screen while the question stands, or that arms it from a context menu. */
 		armed?: boolean;
 	}
 
@@ -63,8 +49,8 @@
 	}
 
 	function press(event: MouseEvent) {
-		// A row is often clickable itself, and arming a button is not opening what
-		// it sits on.
+		// A row is often clickable itself, and arming a button is not opening what it
+		// sits on.
 		event.stopPropagation();
 		if (armed) {
 			disarm();

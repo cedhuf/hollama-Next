@@ -1,21 +1,16 @@
 import type { Message } from '$lib/sessions';
 
 /**
- * The messages that are not turns in the conversation.
+ * The messages that are not turns in the conversation, but things that happened
+ * *to* it. The kind is data rather than a field name, so "does the model read
+ * this?" is answered here instead of in four places and three languages.
  *
- * A conversation carries two sorts of thing: what was said, and what happened
- * *to* it. The second are notes, and they had been growing one hardcoded field
- * each, with "does the model read this?" answered in four places and three
- * languages. So the kind is data now, and everything else asks this module.
+ * **Boundary.** Compaction and clearing move where the sent conversation starts;
+ * a context report moves nothing. `NOTE_KINDS` is the only place that knows.
  *
- * **Boundary.** Compaction and clearing move where the sent conversation
- * starts; a report of what the context holds moves nothing. `NOTE_KINDS` is the
- * only place that knows which.
- *
- * **Content.** A note's `content` is what the model reads *in its place*: the
- * summary for a compaction, nothing for the rest. An empty note is therefore
- * invisible to search without anyone arranging it, since the FTS index only
- * takes rows with content.
+ * **Content.** A note's `content` is what the model reads *in its place*, which
+ * is why an empty note is invisible to search: the FTS index only takes rows
+ * with content.
  */
 
 export type NoteKind = 'compaction' | 'cleared' | 'context' | 'mention' | 'playbooks';
@@ -82,14 +77,9 @@ export interface ContextNote extends NoteBase {
 /**
  * A persona was called into somebody else's conversation and answered there.
  *
- * Written into the persona's own conversation, which is where a relationship
- * with it is kept: otherwise it would have no idea, next time you opened it,
- * that the exchange had happened.
- *
- * The question and the answer, and nothing else. Every mention would otherwise
- * copy a whole conversation into another one, and this exchange can be *added*
- * to the persona's context, where more would spend somebody's context window on
- * a thread they were not part of.
+ * Written into the persona's own conversation, or it would have no idea next
+ * time you opened it. The question and the answer, and nothing else: every
+ * mention would otherwise copy a whole conversation into another one.
  *
  * The model reads none of it until it is added.
  */

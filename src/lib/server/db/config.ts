@@ -95,16 +95,12 @@ export function setAllowUserPersonas(value: boolean): void {
 }
 
 /**
- * What a user's persona store contains (default: the public one).
- *
- * Not a permission but a composition: the store is the door people know, and the
- * instance decides what is behind it.
+ * What a user's persona store contains. Not a permission but a composition: the
+ * store is the door people know, and the instance decides what is behind it.
  *
  * `open`: the public catalogue plus whatever the admin offers. `curated`: only
- * what the admin offers, the public catalogue staying the admin's own source.
- *
- * A boolean said nothing useful: "may install from the store" left the reader
- * unable to tell everything public from only what had been handed to them.
+ * what the admin offers. A boolean left the reader unable to tell everything
+ * public from only what had been handed to them.
  */
 export type PersonaStoreMode = 'open' | 'curated';
 

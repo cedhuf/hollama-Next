@@ -25,16 +25,13 @@
 	const TRANSITION_MS = 300;
 
 	/**
-	 * The header gives its room back on the way down, and takes it back the moment
-	 * you go up, wherever you happen to be. A phone's does the same.
+	 * The header gives its room back on the way down and takes it back the moment
+	 * you go up, wherever you are. Direction rather than position, which is what
+	 * makes it feel answered rather than triggered.
 	 *
-	 * Direction rather than position, which is what makes it feel answered rather
-	 * than triggered: you do not have to return to the top to get the controls back.
-	 *
-	 * And it is safe here in a way it was not before, because there is no longer a
-	 * circuit to close. The actions are a neighbour of the list, not a layer over it,
-	 * so no padding stands in for them, nothing measures their height, and nothing
-	 * writes the scroll position.
+	 * Safe here in a way it was not before: the actions are a neighbour of the list
+	 * rather than a layer over it, so no padding stands in for them, nothing
+	 * measures their height, and nothing writes the scroll position.
 	 */
 	let scrolledAway = $state(false);
 	const onListScroll = watchScrollDirection((away) => (scrolledAway = away), {
@@ -44,8 +41,8 @@
 	/** The header's shape: the setting, or the way you are going through the list. */
 	const compact = $derived($settingsStore.compactSidebarHeader || scrolledAway);
 
-	// Personas you've talked to, surfaced above the list unless disabled in
-	// settings. Their raw session row is dropped to avoid showing them twice.
+	// Personas you have talked to, above the list unless disabled. Their raw session
+	// row is dropped to avoid showing them twice.
 	const personaLaunchers = $derived(
 		$settingsStore.showPinnedPersonas ? conversedPersonas($personasStore, $sessionsStore ?? []) : []
 	);
@@ -58,16 +55,16 @@
 	const filteredPersonas = $derived(
 		q ? personaLaunchers.filter((p) => p.name.toLowerCase().includes(q)) : personaLaunchers
 	);
-	// A persona's conversation is not obviously one when its launcher is turned
-	// off: it lands among the others with nothing to tell it apart. Its avatar is
-	// the thing that says so.
+	// A persona's conversation is not obviously one when its launcher is off: it
+	// lands among the others with nothing to tell it apart, and its avatar is what
+	// says so.
 	const personaById = $derived(
 		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
 	);
 
-	// Mobile drawer open/close is transient (sidebar store, starts closed); desktop
-	// rail/full is the persisted sidebarExpanded preference. Kept separate so the
-	// drawer never persists and the two modes don't fight over one boolean.
+	// The mobile drawer is transient and starts closed; the desktop rail is the
+	// persisted `sidebarExpanded`. Separate, so the drawer never persists and the
+	// two modes do not fight over one boolean.
 	let isMobile = $state(false);
 	$effect(() => {
 		if (!browser) return;
@@ -93,58 +90,44 @@
 	}
 </script>
 
-<!-- The drawer is pinned to the viewport, so it spans the display top to bottom like
-     the card beside it. Only the side is its own business here, in landscape, where
-     the sensor housing eats into one edge; the top and the bottom belong to the brand
-     and to the footer, being the two blocks that touch them.
+<!-- The drawer is pinned to the viewport, so it spans the display top to bottom.
+     Only the side is its own business, in landscape where the sensor housing eats
+     into one edge; the top and bottom belong to the brand and the footer.
 
-     Four blocks, in the order they are read: the brand, the actions, the list, the
-     footer. Four neighbours in a column, not layers over one another, which is what
-     makes the rest of it fall away: only the list scrolls, so the scrollbar is the
-     list's own; nothing passes under anything, so no height has to be measured and
-     no padding has to stand in for a pane. Each block carries its own material, and
-     what shows through them is whatever the column is standing on.
+     Four blocks in the order they are read, as neighbours in a column rather
+     than layers, so what shows through them is whatever the column stands on.
 
-     The column paints nothing and blurs everything, on purpose. A colour here would
-     be the one thing standing between the materials and the wallpaper; and the blur
-     has to be here rather than on each block, because two stacked surfaces filter
-     their own share of the backdrop and leave a seam where they meet.
+     The column paints nothing and blurs everything: a colour here would stand
+     between the materials and the wallpaper, and the blur has to be here rather
+     than on each block, or two stacked surfaces filter their own share of the
+     backdrop and leave a seam.
 
-     Mobile: a fixed, stationary drawer pinned under the page (iOS reveal), where
-     the page slides aside to uncover it and the sidebar itself never moves.
-     Desktop: an in-flow rail/full column driven by the persisted sidebarExpanded. -->
+     Mobile: a fixed drawer pinned under the page, which the page slides aside to
+     uncover. Desktop: an in-flow rail or full column. -->
 <nav
 	class="fixed inset-y-0 left-0 h-full w-full shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:mr-4 lg:max-w-none lg:translate-x-0
 		{$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
-	<!-- The column proper, and the only thing that clips. It is a box of its own so
-	     that the handle below can sit astride its edge: rounding a corner means
-	     cutting off whatever crosses it, and a handle that straddles the edge is
-	     exactly that.
+	<!-- The column proper, and the only thing that clips. Its own box so the handle
+	     below can sit astride its edge: rounding a corner cuts off whatever crosses
+	     it.
 
-	     It carries the column's material as well as its frame, which matters for one
-	     third of a second and looks broken without it. The blocks inside are laid out
-	     at the width the column is going to, not the one it is passing through, so
-	     while it narrows there is a strip between them and the border. Painted, that
-	     strip is the column still closing. Left bare, it was a lit window in a shrinking
-	     frame, showing the wallpaper straight through. -->
+	     It carries the column's material as well as its frame. The blocks inside are
+	     laid out at the width the column is going to, so while it narrows there is a
+	     strip between them and the border: painted, that strip is the column still
+	     closing; bare, it was a lit window showing the wallpaper straight through. -->
 	<div class="app-panel flex h-full overflow-hidden lg:rounded-xl lg:border">
-		<!-- The blocks fill this, and each one holds its own contents at the width the
-		     column is going to.
+		<!-- The blocks fill this, each holding its contents at the width the column is
+		     going to.
 
-		     The split is theirs rather than this box's, and it took three attempts to
-		     see why. Pin a whole column at its target width and the frame keeps
-		     animating around it, leaving a strip that nothing paints: a lit window on
-		     the wallpaper, and no single material can fill it, since the right one at
-		     any height is whichever block is there. Let the column follow the frame
-		     instead and everything inside re-wraps sixty times a second, which is what
-		     made this look like boiling rather than opening.
-
-		     Separated, each block paints out to the edge at every frame while its
-		     contents stay put. Nothing moves, nothing is left bare, and no third layer
-		     was needed to hide either. -->
+		     The split is theirs rather than this box's. Pin a whole column at its target
+		     width and the frame keeps animating around it, leaving a strip nothing
+		     paints. Let the column follow the frame instead and everything inside
+		     re-wraps sixty times a second, which looked like boiling rather than
+		     opening. Separated, each block paints out to the edge at every frame while
+		     its contents stay put. -->
 		<div class="flex h-full w-full flex-col">
 			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} />
 
@@ -165,11 +148,9 @@
 		</div>
 	</div>
 
-	<!-- Astride the edge, level with the brand. Half of it belongs to the column and
-	     half to what is beside it, which is the whole of what it does: it is the seam
-	     between the two, not a button the column happens to carry. Hence its position
-	     from the header's own height rather than from a number that would have to be
-	     kept in step with it. -->
+	<!-- Astride the edge, level with the brand: half belongs to the column and half
+	     to what is beside it, which is the whole of what it does. Its position comes
+	     from the header's own height rather than a number kept in step with it. -->
 	{#if showRail}
 		<button
 			onclick={expandSidebar}

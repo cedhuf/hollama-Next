@@ -19,13 +19,11 @@ import { recordRunUsage } from './usageMeter';
  * One question, one answer, nothing kept.
  *
  * `/api/runs` is the other way to run a turn and the right one for a
- * conversation: it registers the run and writes what comes out into the stored
- * transcript. A bot on another chat server has neither, so this path returns the
- * text and skips both.
+ * conversation: it registers the run and writes what comes out. A bot on another
+ * chat server has neither, so this returns the text and skips both.
  *
- * Everything else is shared, deliberately: the same orchestrator and the same
- * `serverDeps`, so the instance's policy applies exactly as it does to a person
- * typing.
+ * Everything else is shared: the same orchestrator and `serverDeps`, so the
+ * instance's policy applies as it does to a person typing.
  */
 export interface TurnRequest {
 	/** The account this runs as. Its connections, its settings, its policy. */

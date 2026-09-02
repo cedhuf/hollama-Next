@@ -7,15 +7,13 @@
 	import { personaGlyph, type PersonaGlyph } from '$lib/personaGlyphs';
 
 	/**
-	 * Circular avatar that opens its own edit menu: colour swatches while there is
-	 * no picture, replace/remove once there is one. Shared by the user profile and
-	 * the persona editor, which had grown identical copies of it.
+	 * A circular avatar that opens its own edit menu: colour swatches while there is
+	 * no picture, replace and remove once there is one. Shared by the user profile
+	 * and the persona editor, which had grown identical copies of it.
 	 *
-	 * It also draws a glyph, and had to: the faces the app ships were readable
-	 * everywhere a persona appeared *except* in the editor, which fell back to
-	 * initials. Opening the one persona whose face you recognised showed you two
-	 * letters instead, which reads as having lost it. Callers that have no glyphs
-	 * to offer pass none, and the section is not there.
+	 * It also draws a glyph, and had to: the faces were readable everywhere a
+	 * persona appeared *except* in the editor, which fell back to initials. Callers
+	 * with no glyphs to offer pass none, and the section is not there.
 	 */
 	interface Props {
 		/** Image data URI (or URL). Empty means "show initials on `color`". */
@@ -70,12 +68,11 @@
 	}
 </script>
 
-<!-- Three faces, in the order they win, and the same order `PersonaAvatar` uses:
-     an uploaded picture, a glyph the app draws, the initials.
+<!-- Three faces, in the order they win, and the order `PersonaAvatar` uses: an
+     uploaded picture, a glyph the app draws, the initials.
 
      `{@html}` is safe here for the reason it is safe there: what it renders is
-     never a stored value, it is the body of the entry `personaGlyph` found under
-     that name in our own table. -->
+     never a stored value, it is the body of an entry in our own table. -->
 {#snippet face()}
 	{#if image}
 		<img src={image} alt={label} class="h-full w-full object-cover" />
@@ -95,7 +92,7 @@
 {/snippet}
 
 <!-- One tile of the face grid, drawn on the avatar's own colour so the choice is
-     made against the disc it will actually sit on. -->
+     made against the disc it will sit on. -->
 {#snippet tile(body: string | undefined, id: string | undefined, name: string)}
 	<button
 		type="button"
@@ -154,7 +151,7 @@
 			<MenuItem icon={ImagePlus} onclick={uploadImage}>Replace picture</MenuItem>
 			<MenuItem icon={Trash2} onclick={() => onImageRemove?.()}>Remove picture</MenuItem>
 		{:else}
-			<!-- Swatches are a grid, not menu rows: kept out of the roving-focus list so
+			<!-- Swatches are a grid, not menu rows: kept out of the roving-focus list so the
 			     arrow keys still walk the actions below. -->
 			<div class="grid grid-cols-4 gap-2 p-1">
 				{#each colors as swatch (swatch)}
@@ -172,9 +169,8 @@
 			</div>
 			{#if glyphs.length}
 				<DropdownMenu.Separator class="border-shade-2 my-1 border-t" />
-				<!-- Scrolls rather than growing the menu: the table of faces is meant to
-				     get longer, and a menu as tall as the window is a menu you cannot
-				     reach the bottom of. -->
+				<!-- Scrolls rather than growing the menu: the table of faces is meant to get
+				     longer, and a menu as tall as the window has a bottom you cannot reach. -->
 				<div class="grid max-h-36 grid-cols-4 gap-2 overflow-y-auto p-1">
 					{@render tile(undefined, undefined, 'Initials')}
 					{#each glyphs as option (option.id)}

@@ -10,18 +10,8 @@
 	 * Editing one thing in the library: a title, a scrolling body, and the two
 	 * actions that must never scroll away.
 	 *
-	 * Written once because it was written twice and immediately drifted. The
-	 * persona editor pinned Export and Delete to a footer; the playbook editor,
-	 * three days younger, put a delete button at the bottom of the body where it
-	 * scrolled out of reach, and had no export at all. Neither of those was a
-	 * decision. They are what happens when the same dialog is built again from
-	 * memory.
-	 *
-	 * The two actions live in the title bar, next to the close, rather than in a
-	 * footer of their own. A pinned footer costs a full band of height on every
-	 * editor to hold two buttons, and the bar that carries the close is already
-	 * there, already pinned, and is where the other dialogs in the app keep their
-	 * controls. Same reasoning as the store's header.
+	 * They live in the title bar next to the close rather than a footer, which would
+	 * cost a band of height on every editor to hold two buttons.
 	 */
 	interface Props {
 		open: boolean;
@@ -31,16 +21,12 @@
 		placeholder: string;
 		children: Snippet;
 		/**
-		 * The body fills the dialog instead of scrolling in it.
+		 * The body fills the dialog instead of scrolling in it, for an editor that is
+		 * one field taking the whole height.
 		 *
-		 * For an editor that is one field taking the whole height rather than a form
-		 * of sections. The dialog is 600px tall whatever is in it, so a body that
-		 * scrolls and a field with a floor of its own fight over those pixels: the
-		 * knowledge editor overflowed by about thirty of them with nothing typed.
-		 *
-		 * The flag exists because the two are genuinely different shapes, and it
-		 * earns its place by leaving exactly one scrollable area on screen either
-		 * way. What it must never become is a second way of saying "and also".
+		 * The dialog is 600px tall whatever is in it, so a body that scrolls and a field
+		 * with a floor of its own fight over those pixels. The flag earns its place by
+		 * leaving exactly one scrollable area on screen either way.
 		 */
 		fill?: boolean;
 		onExport?: () => void;
@@ -76,14 +62,14 @@
 					</button>
 				{/if}
 				{#if onDelete}
-					<!-- Asks here rather than through the browser: the three editors behind
-					     this header each put up their own `confirm()`, which is the one
-					     dialog in the app that does not look like the app. -->
+					<!-- Asks here rather than through the browser: the three editors behind this
+					     header each put up their own `confirm()`, which is the one dialog in the app
+					     that does not look like the app. -->
 					<ButtonConfirm onConfirm={onDelete} />
 				{/if}
 
-				<!-- A rule between what the dialog does and what closes it: destructive
-				     controls should not sit flush against the one everybody aims for. -->
+				<!-- A rule between what the dialog does and what closes it: destructive controls
+				     should not sit flush against the one everybody aims for. -->
 				{#if onExport || onDelete}
 					<span class="bg-shade-3 mx-1 h-5 w-px"></span>
 				{/if}

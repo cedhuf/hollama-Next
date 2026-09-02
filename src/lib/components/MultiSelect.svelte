@@ -2,21 +2,10 @@
 	import { Check, ChevronsUpDown, Search, TriangleAlert } from '@lucide/svelte';
 	import { Select } from 'bits-ui';
 
-	/**
-	 * Picks *several values from a list*: the multiple counterpart of `Select`.
-	 *
-	 * bits-ui keeps the panel open while entries are toggled, so this replaces the
-	 * scrolling checkbox lists we used to hand-roll, and inherits the same
-	 * portalling, flipping and keyboard behaviour as every other dropdown.
-	 */
+	/** Picks several values from a list, the counterpart of `Select`. bits-ui keeps the panel open while entries are toggled, and inherits the same portalling and keyboard behaviour as every other dropdown. */
 	interface Props {
 		value?: string[];
-		/**
-		 * `danger` marks an entry whose consequence is not the same kind as its
-		 * neighbours': it is drawn in the warning colour and carries `hint` as its
-		 * tooltip. A row that behaves differently from the four beside it has to say
-		 * so where it is picked, not in the documentation.
-		 */
+		/** `danger` marks an entry whose consequence is not the same kind as its neighbours': drawn in the warning colour, carrying `hint` as its tooltip. A row that behaves differently has to say so where it is picked. */
 		options: { value: string; label: string; danger?: boolean; hint?: string }[];
 		placeholder?: string;
 		disabled?: boolean;
@@ -75,9 +64,8 @@
 		<span class="min-w-0 truncate text-left {value.length ? 'text-active' : 'text-muted'}">
 			{summary}
 		</span>
-		<!-- Visible without opening the list: something picked here does not behave
-		     like the rest, and the summary line is where anybody looking at this
-		     integration afterwards will be looking. -->
+		<!-- Visible without opening the list: something picked here does not behave like
+		     the rest, and the summary line is where anybody looking afterwards looks. -->
 		{#if warning}
 			<TriangleAlert
 				class="text-negative ml-auto h-4 w-4 shrink-0"
@@ -94,8 +82,8 @@
 			class="border-shade-3 bg-shade-0 z-50 max-h-[min(60dvh,20rem)] w-[var(--bits-select-anchor-width)] max-w-[calc(100vw-1.5rem)] min-w-[var(--bits-select-anchor-width)] overflow-y-auto rounded-xl border p-1.5 shadow-lg focus-visible:outline-none"
 		>
 			{#if searchable}
-				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal
-				     them from this input and jump around the list instead. -->
+				<!-- Printable keys must not reach bits-ui's typeahead, or it would steal them
+				     from this input and jump around the list. -->
 				<div class="border-shade-2 mb-1 flex items-center gap-2 border-b px-2 pb-2">
 					<Search class="text-muted h-4 w-4 shrink-0" />
 					<input

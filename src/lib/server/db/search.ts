@@ -17,16 +17,13 @@ export interface SearchHit {
 
 /**
  * Rebuild a conversation's entries in the index, reading back from the row just
- * written rather than the object in hand, so the extraction lives in one place
- * and cannot drift from what is stored.
+ * written rather than the object in hand, so the extraction lives in one place.
  */
 /**
  * The markers a conversation carries, from the same walk. Written beside the
- * index rather than derived at search time, so the statement that says where a
- * boundary is and the one that says where a word is cannot fall out of step.
- *
- * The kinds come from the registry rather than a `CASE` naming one field each,
- * so a new kind reaches the database by existing.
+ * index rather than derived at search time, so where a boundary is and where a
+ * word is cannot fall out of step. The kinds come from the registry rather than
+ * a `CASE`, so a new kind reaches the database by existing.
  */
 const MARKERS_SELECT = `
 	SELECT s.id, s.user_id, m.key, json_extract(m.value, '$.note.kind')

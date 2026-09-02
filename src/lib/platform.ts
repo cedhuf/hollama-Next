@@ -1,15 +1,12 @@
 import { browser } from '$app/environment';
 
 /**
- * Which modifier key this keyboard prints.
+ * Which modifier key this keyboard prints. Shared, because the shortcut list,
+ * the search hint and anything else showing a key have to agree.
  *
- * Shared because the shortcut list, the search field's hint and anything else
- * that shows a key have to agree: a ⌘ next to a Ctrl in the same window is the
- * kind of detail that reads as a bug.
- *
- * `userAgentData` where it exists, since `navigator.platform` is deprecated;
- * the user agent string is the fallback. Off the browser it answers Ctrl, the
- * safer guess for a first paint that hydration corrects a moment later.
+ * `userAgentData` where it exists, since `navigator.platform` is deprecated,
+ * with the user agent string as fallback. Off the browser it answers Ctrl, which
+ * hydration corrects a moment later.
  */
 export function isApplePlatform(): boolean {
 	if (!browser) return false;

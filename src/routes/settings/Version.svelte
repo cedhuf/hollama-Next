@@ -30,27 +30,20 @@
 	const UPSTREAM_URL = 'https://github.com/fmaclen/hollama';
 	const KOFI_URL = 'https://ko-fi.com/cedric52222';
 
-	/**
-	 * The newest version we know of, whether this session checked or a previous
-	 * one did. The store is in memory, so after a reload only the persisted answer
-	 * is left, and reporting nothing beside "checked an hour ago" would be worse
-	 * than reporting what that check found.
-	 */
+	/** Whether this session checked or a previous one did. The store is in memory, so after a reload only the persisted answer is left, and reporting nothing beside "checked an hour ago" would be worse. */
 	const knownLatest = $derived(
 		$updateStatusStore.latestVersion || $settingsStore.lastKnownVersion || ''
 	);
 	const hasEverChecked = $derived(!!$settingsStore.lastUpdateCheck || !!knownLatest);
 	// Semver, not string equality: a development build is `0.6.0-dev`, which is not
-	// literally `0.6.0` and would otherwise announce itself as out of date.
+	// literally `0.6.0` and would announce itself as out of date.
 	const isOutdated = $derived(!!knownLatest && isNewerVersion(knownLatest, version));
 
 	/**
-	 * One state, so the label, its dot and its link cannot disagree.
-	 *
-	 * Deliberately not a "checking" state: a status that swaps to a long sentence
-	 * mid-check and back is what made this row jump between one and two lines. The
-	 * last known answer stays put, and the button carries the spinner instead,
-	 * the same split macOS uses in Software Update.
+	 * One state, so the label, its dot and its link cannot disagree. Deliberately no
+	 * "checking" state: a status that swaps to a long sentence mid-check and back is
+	 * what made this row jump between one and two lines. The button carries the
+	 * spinner instead.
 	 */
 	const status = $derived.by<{
 		label: string;
@@ -67,8 +60,7 @@
 			return { label: $LL.neverChecked(), dot: 'bg-shade-5', href: undefined };
 		}
 		if (isOutdated) {
-			// The version is the message: "0.7.0 available" says more than "outdated",
-			// and it is the thing worth clicking through to.
+			// The version is the message: "0.7.0 available" says more than "outdated".
 			return {
 				label: $LL.versionAvailable({ version: knownLatest }),
 				dot: 'bg-warning',
@@ -78,11 +70,7 @@
 		return { label: $LL.upToDate(), dot: 'bg-positive', href: undefined };
 	});
 
-	/**
-	 * Relative, because "3 days ago" is the question being asked, not the date.
-	 * Empty when no check has ever run: the status already says so, and repeating
-	 * it below reads like two different facts.
-	 */
+	/** Relative, because "3 days ago" is the question being asked. Empty when no check has ever run: the status already says so. */
 	const lastCheckedText = $derived(
 		$settingsStore.lastUpdateCheck
 			? $LL.lastChecked({
@@ -106,15 +94,13 @@
 		<Logo class="h-20 w-20 shrink-0" />
 		<div class="flex flex-col items-start gap-1.5">
 			<!-- Name, how to say it, and which build: one line, because they are one
-			     thought. The pronunciation is a phonemic transcription (IPA), muted so
-			     it reads as a gloss on the name rather than part of it. -->
+			     thought. The pronunciation is IPA, muted so it reads as a gloss. -->
 			<div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
 				<h1 class="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
 				<span class="text-muted text-sm" lang="en">{APP_PRONUNCIATION}</span>
-				<!-- The badge carries the link to its own release notes, so the section
-				     below does not have to repeat the number just to have something to
-				     hang that link on. A badge does not read as clickable on its own,
-				     so the tooltip is what says where it goes. -->
+				<!-- The badge carries the link to its own release notes, so the section below
+				     does not repeat the number just to hang that link on. A badge does not read
+				     as clickable on its own, so the tooltip says where it goes. -->
 				<Tooltip side="bottom">
 					{#snippet trigger({ props })}
 						<a
@@ -129,9 +115,8 @@
 					{$LL.releaseNotes()}
 				</Tooltip>
 			</div>
-			<!-- Tucked into the identity block rather than added as a third card: the
-			     logo is taller than the lines beside it, so this fills whitespace that
-			     already existed and the panel keeps its height. -->
+			<!-- Tucked into the identity block rather than a third card: the logo is taller
+			     than the lines beside it, so this fills whitespace that already existed. -->
 			<a
 				href={DOCS_URL}
 				target="_blank"
@@ -145,9 +130,8 @@
 	</div>
 
 	<SettingsSection title={$LL.version()} card>
-		<!-- Status on the left, its action on the right, one row that cannot wrap:
-		     the left column takes the slack and truncates, the button never moves.
-		     Nothing here changes size when a check runs. -->
+		<!-- Status on the left, its action on the right, one row that cannot wrap: the
+		     left column truncates and the button never moves. -->
 		<div class="flex items-center justify-between gap-3">
 			<div class="flex min-w-0 flex-col gap-0.5">
 				<span class="flex min-w-0 items-center gap-2 text-sm font-medium">
@@ -187,10 +171,8 @@
 			label={$LL.automaticallyCheckForUpdates()}
 			bind:checked={$settingsStore.autoCheckForUpdates}
 		/>
-		<!-- One line, and only where it can lead anywhere: an app already on the home
-		     screen has nothing to offer here, and a browser that cannot install has
-		     nothing to say. The offer itself comes and goes on its own; this is simply
-		     where someone would think to look for it again. -->
+		<!-- Only where it can lead anywhere: an app already on the home screen has
+		     nothing to offer, and a browser that cannot install has nothing to say. -->
 		{#if browser && !isInstalled()}
 			<SettingsLink onclick={openInstallDialog}>{$LL.installApp()}</SettingsLink>
 		{/if}
@@ -223,7 +205,7 @@
 		</div>
 
 		<!-- Ko-fi keeps its own brand colour so it reads as the button people know,
-		     while sharing the shape and rhythm of the cards above. -->
+		     while sharing the shape of the cards above. -->
 		<a
 			href={KOFI_URL}
 			target="_blank"

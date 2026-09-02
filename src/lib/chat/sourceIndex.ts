@@ -1,15 +1,13 @@
 /**
  * What the conversation has already looked up.
  *
- * Search results are injected for one request and then dropped, so the next turn
- * the model reads its own answer citing `[1]` with no `[1]` in front of it. When
- * its weights disagree it concludes it made the whole thing up and takes back an
- * answer that was correct and sourced.
+ * Search results are injected for one request and dropped, so the next turn the
+ * model reads its own answer citing `[1]` with no `[1]` in front of it, and when
+ * its weights disagree it takes back an answer that was correct and sourced.
  *
- * The fix is deliberately not "replay the evidence": snippets are bulky and age,
- * and paying for them on every request guards against a doubt that usually never
- * comes. What survives is the index, about 80 tokens a turn against roughly 600.
- * The evidence stays one `<read>` away, paid for when the model asks.
+ * Not "replay the evidence": snippets are bulky and age. What survives is the
+ * index, about 80 tokens a turn against roughly 600, and the evidence stays one
+ * `<read>` away.
  */
 import type { Message, SearchSource } from '$lib/sessions';
 

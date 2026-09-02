@@ -24,15 +24,15 @@
 	let langValue: string = $derived($settingsStore.userLanguage ?? 'en');
 
 	const background = $derived($settingsStore.backgroundImage);
-	// Anything that is not one of ours is a file the user brought, and it is the
-	// only case with a thumbnail of its own to draw.
+	// Anything that is not one of ours is a file the user brought, and the only case
+	// with a thumbnail of its own to draw.
 	const custom = $derived(!!background && !background.startsWith(PACK_PREFIX));
 
 	let tooLarge = $state(false);
 
-	// Kept as a data URL, the way the profile avatar already is, so it survives a
-	// reload without anything new to store it in. Which is also why it is measured
-	// first: this one goes into settings that travel.
+	// Kept as a data URL, the way the profile avatar is, so it survives a reload
+	// without anything new to store it in. Which is why it is measured first: this
+	// goes into settings that travel.
 	function pickBackground(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
 		const file = input.files?.[0];
@@ -89,9 +89,8 @@
 				bind:checked={$settingsStore.surfaceTransparency}
 			/>
 		</div>
-		<!-- The ends say what the track does, the way iOS does it: the same two
-		     stacked shapes, see-through on the left and filled on the right. A word
-		     at each end would need translating and would still say less. -->
+		<!-- The ends say what the track does, the way iOS does it: the same two stacked
+		     shapes, see-through on the left and filled on the right. -->
 		<div class="flex items-center gap-3 {$settingsStore.surfaceTransparency ? '' : 'opacity-40'}">
 			<Copy class="text-muted h-4 w-4 shrink-0" />
 			<div class="min-w-0 flex-1">
@@ -111,15 +110,12 @@
 	</SettingsSection>
 
 	<SettingsSection title={$LL.background()} card>
-		<!-- The thumbnails are the setting: a name says nothing about a picture, and
-		     what this changes is entirely how the app looks. They scroll sideways
-		     rather than wrapping, so the section keeps its height whatever the pack
-		     grows to.
+		<!-- The thumbnails are the setting: a name says nothing about a picture. They
+		     scroll sideways rather than wrapping, so the section keeps its height
+		     whatever the pack grows to.
 
 		     Padded rather than flush, because the ring marking the chosen one is drawn
-		     outside its tile, and a scroll container clips both its axes: without the
-		     room, the top of the ring is simply cut off. The negative margin gives it
-		     back, so the row still lines up with the rest of the panel. -->
+		     outside its tile and a scroll container clips both its axes. -->
 		<div class="-m-1 flex gap-2 overflow-x-auto p-1" style="scrollbar-width: thin">
 			<button
 				type="button"
@@ -132,9 +128,8 @@
 				{$LL.noBackground()}
 			</button>
 
-			<!-- The user's own picture sits with the others rather than off at the end:
-			     it is a choice among them, and the one they went to the most trouble
-			     for. -->
+			<!-- The user's own picture sits with the others rather than off at the end: it
+			     is a choice among them, and the one they went to most trouble for. -->
 			{#if custom}
 				<button
 					type="button"
@@ -161,11 +156,9 @@
 			{/each}
 		</div>
 
-		<!-- Under the row rather than in it. Bringing your own picture is a different
+		<!-- Under the row rather than in it: bringing your own picture is a different
 		     act from picking one, it opens a dialog, and it is the one thing here that
-		     can be refused, so it says what it is in words. The limit is given before
-		     the file dialog opens: learning it afterwards means having chosen for
-		     nothing. -->
+		     can be refused. The limit is given before the file dialog opens. -->
 		<div class="flex flex-wrap items-center gap-2">
 			<Tooltip side="top">
 				{#snippet trigger({ props })}
@@ -196,11 +189,9 @@
 			<p class="text-negative text-xs">{$LL.imageTooLarge()}</p>
 		{/if}
 
-		<!-- The same two ends as the transparency track, and the same shape twice
-		     rather than two words: sharp on the left, softened on the right, which is
-		     literally what the slider does to the picture. Idle without a wallpaper,
-		     shown rather than hidden, so the setting does not appear out of nowhere
-		     the moment one is chosen. -->
+		<!-- The same two ends as the transparency track, and the same shape twice rather
+		     than two words: sharp on the left, softened on the right. Idle without a
+		     wallpaper, shown rather than hidden, so it does not appear out of nowhere. -->
 		<div class="flex items-center gap-3 {background ? '' : 'opacity-40'}">
 			<ImageIcon class="text-muted h-4 w-4 shrink-0" />
 			<div class="min-w-0 flex-1">
@@ -221,9 +212,9 @@
 		<SettingsHint>{$LL.backgroundImageHelp()}</SettingsHint>
 	</SettingsSection>
 
-	<!-- The way to be left alone about it. The offer itself is a dialogue the app
-	     does not own, so the opt-out cannot live inside it; it lives here, beside
-	     everything else that decides what the app is allowed to do unprompted. -->
+	<!-- The way to be left alone about it. The offer is a dialogue the app does not
+	     own, so the opt-out lives here, beside everything else that decides what the
+	     app may do unprompted. -->
 	<SettingsSection title={$LL.installApp()} card>
 		<FieldCheckbox label={$LL.offerInstall()} bind:checked={$settingsStore.offerInstall} />
 		<SettingsHint>{$LL.offerInstallHelp()}</SettingsHint>

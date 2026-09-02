@@ -93,8 +93,8 @@ export async function PUT(event) {
 	if (Number.isFinite(body?.botRepliesPerHour))
 		setBotRepliesPerHour(Number(body.botRepliesPerHour));
 
-	// The allowance everybody gets unless their own account says otherwise. Zero
-	// is no limit, and is what an instance nobody has configured has.
+	// The allowance everybody gets unless their own account says otherwise. Zero is
+	// no limit, and is what an unconfigured instance has.
 	if (typeof body?.creditLimit === 'number') setInstanceCreditLimit(body.creditLimit);
 	if (['month', 'week', 'day'].includes(body?.creditPeriod)) setCreditPeriod(body.creditPeriod);
 	if (typeof body?.allowUserPersonas === 'boolean') setAllowUserPersonas(body.allowUserPersonas);
@@ -102,9 +102,8 @@ export async function PUT(event) {
 		setPersonaStoreMode(body.personaStoreMode);
 	}
 
-	// The admin shares their own look, exactly as they share their search engine
-	// and their prompts: the panel decides who gets it, the values come from the
-	// account that is sharing.
+	// The admin shares their own look, as they share their search engine and their
+	// prompts: the panel decides who gets it, the values come from the account.
 	if (['off', 'locked', 'overridable'].includes(body?.themeSharing)) {
 		setConfig('themeSharing', body.themeSharing);
 	}
@@ -112,7 +111,7 @@ export async function PUT(event) {
 	if (typeof body?.themeStyle === 'string') setConfig('themeStyle', body.themeStyle);
 
 	// A stamp, so every browser can tell on its next load whether it has already
-	// acknowledged this one. Nothing here has to know who has seen what.
+	// acknowledged this one.
 	if (body?.resetOnboarding === true) resetOnboarding();
 	if (typeof body?.personaAutoUpdateForced === 'boolean') {
 		setPersonaAutoUpdateForced(body.personaAutoUpdateForced);
@@ -158,12 +157,10 @@ export async function PUT(event) {
 	if (['off', 'locked', 'overridable'].includes(body?.compactSharing)) {
 		setConfig('compactSharing', body.compactSharing);
 	}
-	// Sampling: the sharing choice, plus a snapshot of the administrator's own
-	// Chat settings taken when they made it. The values are never typed here, the
-	// same way the compaction model above is not: one set of fields, in Settings,
-	// and this tab decides who else gets them. Stored as JSON rather than a column
-	// apiece because nothing queries them and the list of knobs is llama.cpp's to
-	// change, not this app's.
+	// Sampling: the sharing choice, plus a snapshot of the administrator's own Chat
+	// settings taken when they made it. The values are never typed here. Stored as
+	// JSON rather than a column apiece, because nothing queries them and the list of
+	// knobs is llama.cpp's to change.
 	if (['off', 'locked', 'overridable'].includes(body?.samplingSharing)) {
 		setConfig('samplingSharing', body.samplingSharing);
 	}
@@ -192,8 +189,7 @@ export async function PUT(event) {
 		setConfig('imagePromptModel', body.imagePromptModel);
 	}
 
-	// Web fetch: the admin shares their own configuration, exactly as they share
-	// their search engine. Admin only decides who else gets it.
+	// Web fetch: the admin shares their own configuration, and decides who gets it.
 	if (['off', 'locked', 'overridable'].includes(body?.webFetchSharing)) {
 		setConfig('webFetchSharing', body.webFetchSharing);
 	}
@@ -220,9 +216,9 @@ export async function PUT(event) {
 	}
 	if (typeof body?.titleServerId === 'string') setConfig('titleServerId', body.titleServerId);
 
-	// Compaction: the admin shares the model that writes the summaries, plus the
-	// automatic trigger and its ceiling: the ceiling matters most for providers
-	// that never announce their context window, where it is the only limit there is.
+	// Compaction: the model that writes the summaries, plus the automatic trigger
+	// and its ceiling, which matters most for providers that never announce their
+	// context window.
 	if (typeof body?.compactModel === 'string') setConfig('compactModel', body.compactModel);
 	if (typeof body?.compactServerId === 'string') {
 		setConfig('compactServerId', body.compactServerId);

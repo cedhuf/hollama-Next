@@ -137,14 +137,16 @@ export const chatDefaultsConfig = derived(
 
 		if (!$srv) return own;
 
-		// Default model: locked → admin's; editable → live own, falling back to the admin default.
+		// Default model: locked is the admin's; editable is the live own, falling back
+		// to the admin default.
 		const dm = !$srv.defaultModel.editable
 			? $srv.defaultModel
 			: $s.defaultModel
 				? { ...$srv.defaultModel, value: $s.defaultModel, source: 'user' as const }
 				: { ...$srv.defaultModel, value: $srv.defaultModel.adminValue };
 
-		// Title: locked → admin's; editable → live own once the user picked a title model.
+		// Title: locked is the admin's; editable is the live own, once the user picked
+		// a title model.
 		const t = !$srv.title.editable
 			? $srv.title
 			: $s.titleModel

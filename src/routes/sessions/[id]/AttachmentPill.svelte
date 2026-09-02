@@ -7,24 +7,18 @@
 	/**
 	 * One piece of context waiting to be sent, as a pill.
 	 *
-	 * Every kind gets the same shape, so a row of them reads as one list rather
-	 * than as a stack of unrelated widgets: a mark on the left saying what it is,
-	 * its name, and the way to take it back off. What differs between kinds is
-	 * only that mark, which is the one thing worth telling apart at a glance.
+	 * Every kind gets the same shape, so a row of them reads as one list: a mark on
+	 * the left saying what it is, its name, and the way to take it back off. What
+	 * differs is only that mark.
 	 *
-	 * An image shows itself there instead of an icon. It is the most useful
-	 * possible thumbnail, and it costs nothing: the data URL is already loaded.
+	 * An image shows itself there instead of an icon: the most useful possible
+	 * thumbnail, and the data URL is already loaded.
 	 */
 	interface Props {
 		attachment: Attachment;
 		/** Absent on a message already sent: there is nothing left to take back. */
 		onRemove?: () => void;
-		/**
-		 * Offered on a document already sent: keep its text in the Library, where it
-		 * can be attached to another conversation or to a persona. Absent everywhere
-		 * else, since a file still sitting in the composer has not been read into
-		 * anything yet.
-		 */
+		/** Offered on a document already sent: keep its text in the Library. Absent elsewhere, since a file still in the composer has not been read into anything. */
 		onSave?: () => void;
 	}
 
@@ -58,8 +52,8 @@
 	<span class="truncate" data-testid="attachment-name">{attachmentLabel(attachment)}</span>
 
 	{#if attachment.type === 'document' && attachment.pages}
-		<!-- The one number worth carrying: how much of the context this will take is
-		     the question people actually have about an attached document. -->
+		<!-- How much of the context this will take is the question people actually have
+		     about an attached document. -->
 		<span class="text-muted shrink-0 tabular-nums">
 			{$LL.pageCount({ count: attachment.pages })}
 		</span>

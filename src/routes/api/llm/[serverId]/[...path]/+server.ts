@@ -162,16 +162,13 @@ function modelIn(body: string | undefined): string | undefined {
 /**
  * Ask an OpenAI-compatible provider to report usage on a streamed answer.
  *
- * Without `stream_options.include_usage` a stream carries no `usage` block at
- * all, so every streamed turn would go uncounted. Ollama reports unasked and
- * ignores the field.
- *
- * It is also all a gateway needs: OpenRouter puts its `cost` in that same block,
- * so a second field asking for the cost changed nothing and was deleted.
+ * Without `stream_options.include_usage` a stream carries no `usage` block, so
+ * every streamed turn would go uncounted. Ollama reports unasked and ignores the
+ * field. It is also all a gateway needs: OpenRouter puts its `cost` in that
+ * same block.
  *
  * Left alone if the body is not JSON or already says otherwise: a meter that
- * rewrites a request it did not understand is a bug waiting for the one provider
- * that reads the field differently.
+ * rewrites a request it did not understand is a bug waiting to happen.
  */
 function askForUsage(body: string | undefined): string | undefined {
 	if (!body) return body;

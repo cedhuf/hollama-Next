@@ -1,18 +1,6 @@
-/**
- * The cleaning up after a title.
- *
- * Its own module so the browser and the server tidy the answer the same way, and
- * neither has to import the other's world to do it. The wording that asks for the
- * title lives in `defaultPrompts` with every other instruction the app injects,
- * because it is one the user is entitled to change.
- */
+/** Its own module, so the browser and the server tidy the answer the same way. The wording that asks for the title lives in `defaultPrompts`, being one the user may change. */
 
-/**
- * Session titles render as plain text, so any markdown the model returns despite
- * the instruction (e.g. `**Bold**`, `# Heading`, `` `code` ``) would show as raw
- * markup. Strip the common inline/block markers while keeping the text, then tidy
- * surrounding quotes, trailing punctuation and whitespace.
- */
+/** Titles render as plain text, so any markdown the model returns despite the instruction would show as raw markup. Strips the common markers, then tidies quotes, trailing punctuation and whitespace. */
 export function stripTitleMarkdown(raw: string): string {
 	return raw
 		.trim()

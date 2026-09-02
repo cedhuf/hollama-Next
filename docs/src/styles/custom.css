@@ -1,21 +1,17 @@
 /*
- * Site-specific styling on top of Starlight's theme, kept small: every rule
- * here is a deviation from a theme that is already consistent and accessible.
- * Colours come from Starlight's own custom properties, except the theme picker
- * near the foot of the home page, which shows the app's palettes and has to
- * carry their values.
+ * Site-specific styling on top of Starlight's theme, kept small: every rule is
+ * a deviation from a theme that is already consistent and accessible. Colours
+ * come from Starlight's own properties, except the theme picker at the foot of
+ * the home page, which shows the app's palettes and carries their values.
  *
  * Starlight's rules live in `@layer starlight.core` and everything here is
  * unlayered, so these win without specificity tricks.
  */
 
 /*
- * The accent, taken from the app rather than left at Starlight's blue:
- * `hsl(14 80% 60%)` is Classic's primary, the orange on the New chat button in
- * every screenshot here.
- *
- * Starlight's dark ramp is the bare `:root`; the light one is on the attribute
- * it sets. Lightness on the light ramp is chosen for white text on the accent.
+ * The accent, taken from the app rather than Starlight's blue: `hsl(14 80% 60%)`
+ * is Classic's primary. Starlight's dark ramp is the bare `:root` and the light
+ * one is on the attribute it sets; lightness there is chosen for white text.
  */
 :root {
 	--sl-color-accent-low: hsl(14 45% 18%);
@@ -29,7 +25,7 @@
 	--sl-color-accent-low: hsl(14 85% 92%);
 }
 
-/* Visually hidden, still read aloud and still focusable. For the two fieldset
+/* Visually hidden, still read aloud and still focusable, for the two fieldset
    legends in the theme picker. */
 .sr-only {
 	position: absolute;
@@ -40,10 +36,8 @@
 	white-space: nowrap;
 }
 
-/*
- * The hero: the argument and the product. A phone rather than a desktop
- * composite, which at hero size is a grey rectangle with unreadable text in it.
- */
+/* The hero: a phone rather than a desktop composite, which at hero size is a
+   grey rectangle with unreadable text in it. */
 .hero {
 	position: relative;
 	isolation: isolate;
@@ -53,8 +47,8 @@
 	padding-block: 2rem 1rem;
 }
 
-/* The light behind it all. Two tints, the accent and the violet the phone shot
-   is wearing, far enough apart to read as a room rather than a gradient. */
+/* Two tints, the accent and the violet the phone shot wears, far enough apart to
+   read as a room rather than a gradient. */
 .hero::before {
 	content: '';
 	position: absolute;
@@ -123,8 +117,8 @@
 	}
 }
 
-/* The art lifted off the page: a soft ground behind the phone and a shadow
-   under it, so the transparent PNG reads as an object. */
+/* A soft ground behind the phone and a shadow under it, so the transparent PNG
+   reads as an object. */
 .hero__art {
 	position: relative;
 	display: flex;
@@ -137,11 +131,9 @@
 	filter: drop-shadow(0 30px 70px rgb(0 0 0 / 0.4));
 }
 
-/*
- * How finished this is, said once and above the title. As a yellow caution box,
- * then a grey pill on the attribution line, it had no weight. Above the headline
- * it is read first, in a colour that means status rather than danger.
- */
+/* How finished this is, said once and above the title: as a yellow caution box
+   it had no weight. Above the headline it is read first, in a colour that means
+   status rather than danger. */
 .badge {
 	display: inline-flex;
 	align-items: center;
@@ -183,11 +175,9 @@
 	}
 }
 
-/*
- * What this is a fork of. Being a fork is not a footnote, so it gets its own
- * block, a rule in the accent beside it, and the name at full size: the shape of
- * an attribution rather than a disclaimer.
- */
+/* What this is a fork of. Being a fork is not a footnote, so it gets its own
+   block and the name at full size: the shape of an attribution rather than a
+   disclaimer. */
 .lineage {
 	margin: 2.25rem 0 0;
 	padding: 0.35rem 0 0.35rem 0.9rem;
@@ -227,8 +217,7 @@
 	color: var(--sl-color-gray-2);
 }
 
-/* A small caps label, ahead of a heading rather than under it: it says what
-   subject is about to start. */
+/* A small caps label, ahead of a heading rather than under it. */
 .eyebrow {
 	margin: 0 0 0.35rem;
 	color: var(--sl-color-text-accent);
@@ -239,26 +228,18 @@
 }
 
 /*
- * A screenshot: a rounded window on a transparent ground, edge to edge, with its
- * shadow drawn here.
- *
- * `tests/screenshots.test.ts` used to paint the shadow into the file, in 60px of
- * margin. A 64px blur does not fit in 60px, so every frame ended while its shadow
- * was still at 8% black: a hard line along the bottom edge, on the README as much
- * as here, and no CSS reaches the README. The generator writes them flat now, and
- * the shadow is CSS wherever there is CSS to have.
+ * A screenshot: a rounded window on a transparent ground, with its shadow drawn
+ * here rather than painted into the file, where a 64px blur did not fit in 60px
+ * of margin and left a hard line along the bottom edge.
  *
  * `drop-shadow` rather than `box-shadow`, which on a rounded shape over
- * transparency draws around the element's rectangle instead of under the window.
- * The values are the generator's own, so the picture is the one it always was,
- * and the widths hold the old footprint: the frames lost 60px a side off a 1560px
- * asset, so a window at 92.31% of the figure sits exactly where it sat, with the
- * room the shadow needs.
+ * transparency draws around the element's rectangle. A window at 92.31% holds
+ * the old footprint: the frames lost 60px a side off a 1560px asset.
  */
 .shot {
 	position: relative;
 	/* The glow sits at a negative z-index, which without this would put it behind
-	   the page background rather than behind the image. */
+		   the page background rather than behind the image. */
 	isolation: isolate;
 	margin: 2rem 0 4rem;
 }
@@ -290,9 +271,9 @@
 	text-wrap: balance;
 }
 
-/* The opening shot is the argument, so it is allowed past the text column on a
-   wide screen. Clamped, because a screenshot stretched to a 27 inch display
-   stops being readable at exactly the point it stops being useful. */
+/* The opening shot is the argument, so it is allowed past the text column.
+   Clamped: a screenshot stretched to a 27 inch display stops being readable at
+   exactly the point it stops being useful. */
 @media (min-width: 72rem) {
 	.shot--bleed {
 		width: min(76rem, 100vw - 6rem);
@@ -301,9 +282,8 @@
 }
 
 /*
- * The big screenshot settles as it arrives. It used to open the page, where it
- * pushed everything worth reading below the fold; lower down it has to earn a
- * stop instead.
+ * The big screenshot settles as it arrives: opening the page it pushed
+ * everything worth reading below the fold, and lower down it has to earn a stop.
  *
  * `animation-timeline` needs no JavaScript and no layout reads. Both guards
  * matter: without support the image is simply there, and someone who asked for
@@ -347,11 +327,9 @@
 	}
 }
 
-/*
- * Install, in the form anyone will actually meet it: the argument for a
- * self-hosted app is the file itself rather than a sentence about the file. Two
- * columns, stacked below the width where the code would wrap.
- */
+/* Install, in the form anyone will meet it: the argument for a self-hosted app
+   is the file itself rather than a sentence about it. Two columns, stacked below
+   the width where the code would wrap. */
 .start {
 	display: grid;
 	gap: 1.5rem 3rem;
@@ -378,11 +356,9 @@
 	margin: 0;
 }
 
-/*
- * The feature panels: a claim and the screen it happens on, alternating so the
- * eye has somewhere to go. This replaced four cards of text, which can hold a
- * sentence about a feature but cannot show one.
- */
+/* The feature panels: a claim and the screen it happens on, alternating so the
+   eye has somewhere to go. This replaced four cards of text, which can hold a
+   sentence about a feature but cannot show one. */
 .panels {
 	display: flex;
 	flex-direction: column;
@@ -402,7 +378,7 @@
 	}
 
 	/* Every other one reads right to left. The figure is second in the markup
-	   either way, so the reading order stays the same for a screen reader. */
+		   either way, so the reading order stays the same for a screen reader. */
 	.panel:nth-child(even) .panel__shot {
 		order: -1;
 	}
@@ -434,10 +410,8 @@
 }
 
 /* The phone is taller than it is wide, so it needs a cap the desktop shots do
-   not: at full column width it would tower over the paragraph beside it. The cap
-   is 13.6rem rather than the 17rem it was, because 17rem of the old asset was
-   13.6rem of window and 3.4rem of margin. Its shadow is the generator's phone
-   shadow, which is deeper than the window's. */
+   not. 13.6rem rather than 17rem, because 17rem of the old asset was 13.6rem of
+   window and 3.4rem of margin. Its shadow is deeper than the window's. */
 .panel__shot--phone img {
 	width: min(100%, 13.6rem);
 	filter: drop-shadow(0 30px 70px rgb(0 0 0 / 0.35));
@@ -476,8 +450,8 @@
 	transform: rotate(45deg) translate(2px, -2px);
 }
 
-/* A band: tinted enough to read as a change of subject, with no rule across the
-   page and no heading shouting about it. */
+/* Tinted enough to read as a change of subject, with no rule across the page and
+   no heading shouting about it. */
 .band {
 	margin: 4rem 0;
 	padding: 2.5rem clamp(1rem, 4vw, 3rem);
@@ -503,13 +477,11 @@
 /*
  * The provider note: two lines of small print with a wordmark beside them.
  *
- * It was a full-width band with the disclaimer as a pill on a line of its own,
- * which pushed the paragraph down and gave five lines of body copy the weight of
- * a section. The mark carries the identification now, so the sentence no longer
- * has to introduce anyone, and the disclaimer sits under the mark where it reads
- * as a caption rather than a heading. The wordmark stays sharp and small: blurred
- * into the background it is a blue smudge, and a logo nobody can read is not a
- * credit.
+ * As a full-width band with the disclaimer on a line of its own it gave five
+ * lines of body copy the weight of a section. The mark carries the
+ * identification now, and the disclaimer sits under it as a caption. The
+ * wordmark stays sharp and small: blurred into the background it is a blue
+ * smudge, and a logo nobody can read is not a credit.
  */
 .nota {
 	display: flex;
@@ -521,7 +493,6 @@
 	border: 1px solid var(--sl-color-gray-6);
 	border-radius: 0.75rem;
 	/* A trace of the mark's own blue, so the card belongs to what it is about. */
-	background: color-mix(in oklab, #0098ff 4%, transparent);
 }
 
 .nota__mark {
@@ -558,14 +529,12 @@
 }
 
 /*
- * The theme picker. This was a screenshot of twelve palettes, which is a lot of
+ * The theme picker. It was a screenshot of twelve palettes, which is a lot of
  * kilobytes to say something the reader cannot try. Real radio buttons and
- * `:has()` do it with no JavaScript, so it works before hydration and keyboard
- * first.
+ * `:has()` do it with no JavaScript, so it works before hydration.
  *
- * The twelve below are the ones in `ThemePicker.svelte`, mirroring the `--hsl-*`
- * blocks in the app's `app.pcss`. A palette added there has to be added here
- * too; nothing checks that for us.
+ * The twelve below mirror `ThemePicker.svelte` and the `--hsl-*` blocks in
+ * `app.pcss`. A palette added there has to be added here too; nothing checks it.
  */
 .themes {
 	display: grid;
@@ -648,26 +617,18 @@
 	padding-inline: 1rem;
 }
 
-/* The palettes. Each style carries both of its ramps, and the mode rules below
-   choose which one is in play, for the preview and for the swatches at once.
-
-   Every value below is the app's own, read off the `--hsl-*` blocks in
-   `src/app.pcss` and named after the Tailwind tokens they feed: canvas is
-   `shade-2`, panel `shade-1`, card `shade-0`, accent `primary`, active
-   `text-shade-0`, body `text-shade-1`, muted `text-shade-2`.
-
-   What each one is used for was settled by sampling the captures above rather
-   than by reading the markup, after two passes that looked right and were not.
-   The sidebar and the thread share one `shade-1`, side by side on a `shade-2`
-   ground that shows between them. Rows, bubbles and the composer are `shade-0`
-   on top of that. Running text is `text-shade-1`; `shade-0` is reserved for what
-   is active. And the New chat button is the accent, whole, labelled in `shade-0`,
-   which is white under a light ramp and near-black under a dark one.
-
-   Before all that the values were each palette's canonical hexes copied from
-   upstream, a different mistake again: close in light, wrong in dark. A palette
-   changed in `app.pcss` has to be changed here too, and nothing checks that for
-   us. */
+/*
+ * The palettes. Each style carries both ramps, and the mode rules below choose
+ * which is in play.
+ *
+ * Every value is the app's own, read off the `--hsl-*` blocks in `src/app.pcss`
+ * and named after the tokens they feed: canvas is `shade-2`, panel `shade-1`,
+ * card `shade-0`, accent `primary`, active `text-shade-0`, body `text-shade-1`,
+ * muted `text-shade-2`. What each is used for was settled by sampling the
+ * captures above rather than by reading the markup.
+ *
+ * A palette changed in `app.pcss` has to be changed here too, unchecked.
+ */
 .themes:has(#ts-classic:checked) {
 	--l-canvas: #ebebeb;
 	--l-panel: #f5f5f5;
@@ -770,9 +731,8 @@
 	--d-muted: #647a82;
 }
 
-/* Each swatch shows its own palette whichever one is selected, so it carries its
-   two ramps itself. The mode rules underneath then apply to it exactly as they
-   apply to the preview. */
+/* Each swatch shows its own palette whichever is selected, so it carries its two
+   ramps itself. The mode rules underneath then apply to it as to the preview. */
 .sw--classic {
 	--l-canvas: #ebebeb;
 	--l-accent: #eb6d47;
@@ -839,11 +799,9 @@
 	--muted: var(--d-muted);
 }
 
-/*
- * The mock conversation the palettes are tried on, built from the app's own
- * arrangement: a row of coloured rectangles proves a palette exists and nothing
- * about living in it.
- */
+/* The mock conversation the palettes are tried on, built from the app's own
+   arrangement: a row of coloured rectangles proves a palette exists and nothing
+   about living in it. */
 .mock {
 	display: grid;
 	grid-template-columns: 11rem 1fr;
@@ -858,8 +816,8 @@
 }
 
 @media (max-width: 34rem) {
-	/* Below this the sidebar and the thread are both too narrow to say anything,
-	   and the thread is the half worth keeping. */
+	/* Below this the sidebar and the thread are both too narrow to say anything, and
+		   the thread is the half worth keeping. */
 	.mock {
 		grid-template-columns: 1fr;
 	}
@@ -885,9 +843,8 @@
 }
 
 /* Filled with the accent and labelled in `shade-0`, which is what the app does:
-   white on the accent under a light ramp, near-black under a dark one. Measured
-   off the captures above rather than guessed, after a tinted version of this
-   button had the loudest colour on the page reading as washed out. */
+   white under a light ramp, near-black under a dark one. Measured off the
+   captures rather than guessed. */
 .mock__new {
 	margin-bottom: 0.25rem;
 	padding: 0.4rem 0.6rem;
@@ -971,17 +928,15 @@
 .mock__run {
 	padding: 0.25rem 0.6rem;
 	border-radius: 0.4rem;
-	/* Neutral, because the app's composer is: nothing in it carries the accent
-	   until there is something to send. */
+	/* Neutral, because the app's composer is: nothing in it carries the accent until
+	   there is something to send. */
 	background: color-mix(in srgb, var(--muted) 20%, transparent);
 	color: var(--body);
 	font-weight: 600;
 }
 
-/*
- * The credits, as cards rather than a bulleted list: each entry has three things
- * to say, and a list flattens them into a line nobody reads to the end of.
- */
+/* The credits, as cards rather than a bulleted list: each entry has three things
+   to say, and a list flattens them into a line nobody reads to the end of. */
 .credits {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
@@ -1015,8 +970,8 @@
 	text-decoration: none;
 }
 
-/* The whole card is the target: the link is the only thing in it worth clicking,
-   and a name three words long is a small target on a phone. */
+/* The whole card is the target: the link is the only thing worth clicking, and a
+   name three words long is a small target on a phone. */
 .credit__link::after {
 	content: '';
 	position: absolute;
@@ -1070,10 +1025,8 @@
 	}
 }
 
-/*
- * The changelog, one section per release. The version and its date share a line:
- * the list underneath is what the reader came for.
- */
+/* The changelog, one section per release. The version and its date share a line:
+   the list underneath is what the reader came for. */
 .release + .release {
 	margin-top: 2.5rem;
 	padding-top: 2.5rem;
@@ -1107,8 +1060,8 @@
 	color: var(--sl-color-gray-3);
 }
 
-/* The analytics note, last line of the home page. Small, grey, and out of the
-   way: it is a disclosure, not a paragraph anyone came here to read. */
+/* The analytics note, last line of the home page: a disclosure, not a paragraph
+   anyone came here to read. */
 .counted {
 	margin-top: 3rem;
 	color: var(--sl-color-gray-4);

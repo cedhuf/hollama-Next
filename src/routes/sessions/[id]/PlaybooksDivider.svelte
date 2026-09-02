@@ -10,14 +10,12 @@
 	/**
 	 * The switches for this conversation, drawn where they were asked for.
 	 *
-	 * Open by default like the context report, and for the same reason: the panel
-	 * is the answer to the command. Unlike every other note it reads live (the
-	 * library and the conversation are the truth, this only shows them) because a
-	 * frozen list of switches is a photograph of a switchboard.
+	 * Open by default like the context report: the panel is the answer to the
+	 * command. Unlike every other note it reads live, because a frozen list of
+	 * switches is a photograph of a switchboard.
 	 *
-	 * Rows rather than the library's cards: here you are flipping something on or
-	 * off, not choosing among thirty, so the name, the line that says when it
-	 * applies, and a tick are the whole of what is needed.
+	 * Rows rather than the library's cards: here you flip something on or off, so
+	 * the name, when it applies, and a tick are the whole of what is needed.
 	 */
 	interface Props {
 		/** The ids switched on for this conversation. */

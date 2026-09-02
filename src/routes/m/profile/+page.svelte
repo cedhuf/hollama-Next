@@ -13,16 +13,13 @@
 	import { settingsModalOpen } from '$lib/stores/modal';
 
 	/**
-	 * You, at a glance.
+	 * You, at a glance. Not a second Settings: the app's own dialog is one tap away
+	 * and holds every field, and a phone-shaped copy would be a second place to
+	 * change the same thing.
 	 *
-	 * Not a second Settings. The app's own settings dialog is one tap away from the
-	 * tab bar and holds every field there is; a phone-shaped copy of it would be a
-	 * second place to change the same thing, and the two would disagree the first
-	 * time somebody edited one of them.
-	 *
-	 * What belongs here is what a phone actually wants to see: who you are signed
-	 * in as, how much room this instance gives you, the look of the thing, and the
-	 * two or three places worth reaching without going through a dialog.
+	 * What belongs here is who you are signed in as, how much room this instance
+	 * gives you, the look of the thing, and the two or three places worth reaching
+	 * without a dialog.
 	 */
 	const displayName = $derived(
 		[$settingsStore.profileFirstName, $settingsStore.profileLastName]
@@ -89,9 +86,8 @@
 			<ChevronRight class="text-muted h-4 w-4 shrink-0" />
 		</button>
 
-		<!-- The other interface, one tap away and clearly labelled: somebody who
-		     wants the sidebar back should not have to find a checkbox in a dialog to
-		     get it. -->
+		<!-- The other interface, one tap away and clearly labelled: somebody who wants
+		     the sidebar back should not have to find a checkbox in a dialog. -->
 		<button
 			type="button"
 			onclick={() => ($settingsStore.simplifiedMobileUI = false)}

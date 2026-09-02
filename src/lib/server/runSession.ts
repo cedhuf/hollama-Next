@@ -7,36 +7,27 @@ import { getItem, getPersonas, upsertItem } from './db/collections';
 /**
  * The conversation, written by whoever is producing it.
  *
- * A turn runs here and the browser only watches, so this is where its result has
- * to land. It used to land in the page: the events went out over the stream, a
- * tab reduced them into the conversation and saved it back. Which meant an
- * answer was durable only while somebody had it open, and it meant that anybody
- * writing another client had to reimplement the reduction exactly or corrupt a
- * conversation by following it.
+ * A turn runs here and the browser only watches. In the page it meant an answer
+ * was durable only while somebody had it open, and that another client had to
+ * reimplement the reduction exactly or corrupt a conversation by following it.
  *
- * Only the events that change the stored conversation are handled. The rest of
- * the log describes a turn in progress (fragments of text, what is being looked
- * up, which round it is on), which is worth drawing and not worth storing.
- *
- * Read and written back per event rather than held open for the length of the
- * turn: a conversation is edited from the page while its turn runs, notes get
- * appended, a playbook is switched on, and a copy loaded when the turn started
- * would put all of that back the way it was. There are a handful of these events
- * per turn, not one per token, so the cost is a JSON round trip a few times a
- * minute.
+ * Only the events that change the stored conversation are handled. Read and
+ * written back per event rather than held open for the turn: a conversation is
+ * edited from the page while its turn runs, and a copy loaded at the start would
+ * put all of that back.
  */
 export function sessionWriter(userId: string, sessionId: string): (event: RunEvent) => void {
 	const change = (apply: (session: Session) => Session | null): void => {
 		try {
 			const session = getItem<Session>('sessions', userId, sessionId);
 			// The conversation has been deleted while its turn was running, which is a
-			// thing people do. Nothing to write it into, and nothing to complain about.
+			// thing people do.
 			if (!session) return;
 			const next = apply(session);
 			if (next) upsertItem('sessions', userId, next);
 		} catch (error) {
-			// A failed write must not take the turn down with it: what the model is
-			// saying still reaches whoever is watching, and the ending still arrives.
+			// A failed write must not take the turn down: what the model is saying still
+			// reaches whoever is watching.
 			console.error(`Could not write conversation ${sessionId}:`, error);
 		}
 	};
@@ -45,11 +36,9 @@ export function sessionWriter(userId: string, sessionId: string): (event: RunEve
 		switch (event.type) {
 			case 'message':
 				change((session) => {
-					// A persona that was called in leaves a record in its own
-					// conversation, so opening it later is not like nothing happened.
-					// Here rather than in the page for the same reason as everything else
-					// in this file: a persona answering into a tab nobody had open was
-					// remembering nowhere.
+					// A persona called in leaves a record in its own conversation, so opening it
+					// later is not like nothing happened. Here rather than in the page: a persona
+					// answering into a tab nobody had open was remembering nowhere.
 					if (event.message.personaId) recordMention(userId, session, event.message);
 					return {
 						...session,
@@ -69,10 +58,9 @@ export function sessionWriter(userId: string, sessionId: string): (event: RunEve
 
 			case 'title':
 				change((session) => {
-					// Never over a name someone typed, and never a third time. The run
-					// cannot know either: it was asked for a title before the turn went
-					// out, and the conversation may have been renamed while it was being
-					// written. Which is exactly why the row is read again here.
+					// Never over a name someone typed, and never a third time. The run cannot know
+					// either: it was asked before the turn went out, and the conversation may have
+					// been renamed since, which is why the row is read again here.
 					if (session.titleEdited) return null;
 					return {
 						...session,
@@ -89,20 +77,12 @@ export function sessionWriter(userId: string, sessionId: string): (event: RunEve
 	};
 }
 
-/**
- * Write the record, unless there is nowhere to write it.
- *
- * A persona nobody has opened yet has no conversation of its own, and this does
- * not create one: a conversation appearing in the sidebar because you mentioned
- * somebody once is a conversation you did not start. The record is skipped, and
- * the exchange still lives where it happened.
- */
+/** A persona nobody has opened has no conversation, and this does not create one: a conversation appearing in the sidebar because you mentioned somebody once is one you did not start. */
 function recordMention(userId: string, source: Session, reply: Message): void {
 	const persona = getPersonas(userId).find((p) => p.id === reply.personaId);
 	if (!persona?.sessionId) return;
 	// Mentioning a persona inside its own conversation is not being called away:
-	// the exchange is already right there, and a record of it would be the same
-	// two messages a second time.
+	// the exchange is already there, and a record would be the same two messages.
 	if (persona.sessionId === source.id) return;
 
 	const note = buildMentionNote(source, reply);

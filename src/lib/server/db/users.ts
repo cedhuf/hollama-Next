@@ -13,13 +13,7 @@ export interface UserRow {
 	created_at: string;
 	/** Last request this account made, to the minute it was written. Null: never seen. */
 	last_seen_at: string | null;
-	/**
-	 * This account's own allowance for the current period.
-	 *
-	 * Null means "whatever the instance says", which is a different answer from a
-	 * figure that happens to equal it: raising the instance's allowance should
-	 * raise theirs, and it cannot if inheriting was recorded as a number.
-	 */
+	/** Null means "whatever the instance says", which differs from a figure that happens to equal it: raising the instance's allowance should raise theirs. */
 	credit_limit: number | null;
 	/** This account's own period, or null to follow the instance's. */
 	credit_period: string | null;
@@ -79,24 +73,13 @@ export function listUsers(): UserSummary[] {
 }
 
 /**
- * Note that an account is around, at most once every few minutes.
+ * Note that an account is around, at most once every few minutes. Called from
+ * the one place that answers "who is this", so it cannot be forgotten on a
+ * route, which also means every authenticated request.
  *
- * Called from the one place that answers "who is this", so it cannot be
- * forgotten on a route. It is therefore called on every authenticated request,
- * and a conversation makes several a second: a write each time, to store a value
- * that is only ever read to the hour, would be the most expensive thing on the
- * page.
- *
- * So it is throttled twice, and the two do different jobs.
- *
- * In memory, which is the fast path: the common request does not reach SQLite at
- * all. It is per process and per user, which is why it is not the whole answer.
- *
- * And in the statement itself, which is the correct one: the row is only written
- * when what it holds is genuinely older than the window. That makes a restart
- * cost nothing rather than one spurious write per user, and it makes two
- * processes agree without knowing about each other, which the map cannot do.
- * A no-op update touches no page.
+ * Throttled twice. In memory is the fast path, but per process. In the statement
+ * itself is the correct one: the row is written only when what it holds is
+ * older than the window, so two processes agree without knowing about each other.
  */
 const TOUCH_EVERY_MS = 5 * 60 * 1000;
 const touched = new Map<string, number>();
@@ -118,25 +101,12 @@ export function deleteUser(id: string): void {
 	getDb().prepare('DELETE FROM users WHERE id = ?').run(id);
 }
 
-/**
- * An address for "ask your administrator".
- *
- * The first admin by creation date, which on every instance is the one it was
- * bootstrapped with. One address rather than all of them: this is a person to
- * write to, not a list to publish, and it is shown to every signed-in user.
- */
+/** The first admin by creation date, which is the account an instance was bootstrapped with. One address rather than all of them: a person to write to, not a list to publish. */
 export function adminContact(): string | null {
 	return getFirstAdmin()?.email ?? null;
 }
 
-/**
- * The account an instance was bootstrapped with, by creation date.
- *
- * Also the account an instance with no accounts runs as, which is why it is a
- * whole row here rather than the address `adminContact` needs: turning a login
- * method off has to hand the owner their own data back, not open an empty
- * account beside it.
- */
+/** Also the account an instance with no accounts runs as, which is why it is a whole row: turning a login method off has to hand the owner their own data back. */
 export function getFirstAdmin(): UserRow | undefined {
 	return getDb()
 		.prepare("SELECT * FROM users WHERE role = 'admin' ORDER BY created_at LIMIT 1")

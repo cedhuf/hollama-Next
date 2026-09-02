@@ -19,36 +19,20 @@
 
 	import MenuItem from './MenuItem.svelte';
 
-	/**
-	 * What a conversation offers, wherever it is shown.
-	 *
-	 * The full-width list and the collapsed rail draw a conversation very
-	 * differently, but the same things can be done to it, and they were written
-	 * twice for exactly as long as it took someone to notice they had drifted.
-	 */
+	/** The full-width list and the collapsed rail draw a conversation differently, but the same things can be done to it, and they were written twice until somebody noticed they had drifted. */
 	interface Props {
 		id: string;
 		pinned?: boolean;
 		archived?: boolean;
 		/** Offered only where a persona's conversation is shown as the persona itself. */
 		onClose?: () => void;
-		/**
-		 * Where deletion is offered, since it is the one entry that needs room the
-		 * caller may not have: it asks before it acts, on the row itself.
-		 */
+		/** Where deletion is offered, since it is the one entry that needs room the caller may not have: it asks before it acts, on the row itself. */
 		onDelete?: () => void;
 	}
 
 	let { id, pinned = false, archived = false, onClose, onDelete }: Props = $props();
 
-	/**
-	 * Offer the transcript, don't file it.
-	 *
-	 * The editor opens with the conversation already in it, so the collection can
-	 * be named and trimmed before it exists. Writing it straight to the library
-	 * left people with an item called after the conversation, holding everything
-	 * that was ever said in it, which is rarely what they wanted to keep.
-	 */
+	/** The editor opens with the conversation in it, so the collection can be named and trimmed before it exists. Written straight to the library it left an item holding everything ever said. */
 	async function saveAsKnowledge() {
 		const draft = await sessionAsKnowledgeDraft(id);
 		if (draft) openKnowledge(draft);
@@ -87,9 +71,8 @@
 	<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
 	<!-- Ends the conversation without ending anything else: the persona goes back to
-	     being unstarted and the transcript stays where it was, as an ordinary
-	     conversation in the list. Deleting is the entry below, and it is the only one
-	     that loses anything. -->
+	     unstarted and the transcript stays in the list. Deleting is the entry below,
+	     and it is the only one that loses anything. -->
 	<MenuItem icon={ArchiveRestore} onclick={onClose}>
 		{$LL.closePersonaConversation()}
 	</MenuItem>
@@ -98,8 +81,8 @@
 {#if onDelete}
 	<div class="bg-shade-3 my-1 h-px" role="none"></div>
 
-	<!-- Asks rather than does: the confirmation appears on the row, in the same
-	     place it appears when the quick buttons are on. -->
+	<!-- Asks rather than does: the confirmation appears on the row, where it appears
+	     when the quick buttons are on. -->
 	<MenuItem icon={Trash2} danger onclick={onDelete}>
 		{$LL.deleteSession()}
 	</MenuItem>

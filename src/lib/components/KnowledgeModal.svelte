@@ -14,19 +14,12 @@
 	import EditorModal from './EditorModal.svelte';
 
 	/**
-	 * Writing down a piece of knowledge, wherever you happen to be.
+	 * Writing down a piece of knowledge, wherever you happen to be. One editor for
+	 * both cases, opening prefilled, which is how a conversation becomes knowledge
+	 * without a round trip through the clipboard.
 	 *
-	 * One editor for both cases: a new one and an existing one differ by whether
-	 * the fields start empty, which is not enough to justify a second screen. It
-	 * opens prefilled too, which is how a conversation becomes knowledge without a
-	 * round trip through the clipboard.
-	 *
-	 * It writes as you type, like every other editor in the app, and that is a
-	 * repair rather than a preference. It used to hold a draft behind a Save
-	 * button, which meant the cross, Escape and a click on the backdrop all threw
-	 * the work away without a word: three of the four ways out of a dialog. A
-	 * draft model has to guard every exit to be worth anything, and this one
-	 * guarded none.
+	 * It writes as you type: behind a Save button, the cross, Escape and a click on
+	 * the backdrop all threw the work away without a word.
 	 */
 	let id = $state('');
 	let name = $state('');
@@ -38,24 +31,19 @@
 	/** Kept across openings: whoever wants the code view usually wants it every time. */
 	let view = $state<'text' | 'code'>('text');
 
-	/**
-	 * The collection is chosen rather than typed, so nothing fires an input event
-	 * on it. Watched instead, and only once there is a record to move: without the
-	 * guard, opening the dialog would write an empty document before a key is
-	 * pressed.
-	 */
+	/** The collection is chosen rather than typed, so nothing fires an input event. Watched instead, and only once there is a record to move. */
 	$effect(() => {
 		void collectionId;
 		if (updatedAt) persist();
 	});
 
 	const isNew = $derived(!updatedAt);
-	// Same estimate the context meter uses, so its weight is stated in
-	// the units the rest of the app talks about.
+	// The same estimate the context meter uses, so its weight is stated in the units
+	// the rest of the app talks about.
 	const tokens = $derived(Math.ceil(content.length / 3.7));
 
-	// Opening loads the draft; closing forgets it, so the next open is never last
-	// time's text. Focus lands on the field with nothing in it.
+	// Opening loads the draft, closing forgets it, so the next open is never last
+	// time's text.
 	$effect(() => {
 		if (!$knowledgeModalOpen) return;
 		const draft = $knowledgeDraft;
@@ -72,13 +60,7 @@
 		});
 	});
 
-	/**
-	 * Write it down, as it is written.
-	 *
-	 * Nothing is stored until there is something to store: an empty document
-	 * created by opening the dialog and closing it again would be a row nobody
-	 * asked for, in a list nobody wants to tidy.
-	 */
+	/** Nothing is stored until there is something to store: a document created by opening the dialog and closing it again would be a row nobody asked for. */
 	function persist() {
 		if (!name.trim() && !content.trim()) return;
 		saveKnowledge({
@@ -91,13 +73,7 @@
 		updatedAt = getUpdatedAtDate();
 	}
 
-	/**
-	 * A document, as a file the import reads back.
-	 *
-	 * The plain `{ name, content }` shape `parseKnowledgeImport` accepts, so what
-	 * leaves here goes into any library, including someone else's. No id and no
-	 * collection: both mean something only where they came from.
-	 */
+	/** The plain `{ name, content }` shape `parseKnowledgeImport` accepts, so it goes into any library. No id and no collection: both mean something only where they came from. */
 	function exportThis() {
 		const data = JSON.stringify({ name, content }, null, 2);
 		const blob = new Blob([data], { type: 'application/json' });
@@ -126,11 +102,9 @@
 	onExport={isNew ? undefined : exportThis}
 	onDelete={isNew ? undefined : remove}
 >
-	<!-- The name reads as the title of the thing rather than as a form field. It
-	     still has to look typeable, though: a heading with a border only on hover
-	     says nothing on a phone, and says nothing to anyone who does not happen to
-	     pass over it. A pencil and a dotted underline are there at rest, and firm
-	     up into a real field on hover and focus. -->
+	<!-- The name reads as the title of the thing rather than a form field, and still
+	     has to look typeable: a border only on hover says nothing on a phone. A
+	     pencil and a dotted underline at rest, firming up on hover and focus. -->
 	<div class="group relative">
 		<input
 			bind:this={nameInput}
@@ -148,15 +122,12 @@
 	</div>
 
 	<div class="flex items-center justify-between gap-3">
-		<!-- Always there, including when no collection exists yet: the way to make
-		     the first one is inside it, so hiding it until one exists would hide the
-		     only door to it. -->
+		<!-- Always there, including when no collection exists yet: the way to make the
+		     first one is inside it. -->
 		<CollectionSelect bind:value={collectionId} class="max-w-48" />
 
-		<!-- Two ways to write the same field. Plain text is the default because most
-		     knowledge is prose; the code view is for the ones that are a schema or a
-		     config, where line numbers and a monospace grid are the difference
-		     between readable and not. -->
+		<!-- Plain text is the default because most knowledge is prose; the code view is
+		     for the ones that are a schema or a config. -->
 		<div class="bg-shade-2 flex rounded-lg p-0.5 text-xs">
 			{#each [{ id: 'text', label: $LL.editorPlain(), icon: Type }, { id: 'code', label: $LL.editorCode(), icon: Code }] as tab (tab.id)}
 				{@const Icon = tab.icon}

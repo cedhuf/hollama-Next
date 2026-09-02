@@ -284,16 +284,12 @@ export function getModelKinds(serverId: string): Record<string, ModelKind> {
 
 /**
  * Keep what a provider said about its own models, without touching what a person
- * said about them.
+ * said about them. Nothing about `fish-audio/s1` reveals that it talks, yet the
+ * provider will say so when asked.
  *
- * Nothing about `fish-audio/s1` reveals that it talks, yet the provider will say
- * so outright when asked, and that answer should survive the request that
- * learned it.
- *
- * Written on read, the one place it can be. Two rules keep it honest: a row that
- * already exists is never touched, so a correction in Models and prices always
- * wins, and a declaration the guess would have reached anyway is not written, so
- * the table stays a list of what is *not* obvious.
+ * Written on read, the one place it can be. A row that already exists is never
+ * touched, so a correction in Models and prices always wins, and a declaration
+ * the guess would have reached anyway is not written.
  */
 export function rememberModelKinds(serverId: string, kinds: Record<string, ModelKind>): void {
 	const entries = Object.entries(kinds).filter(
@@ -365,16 +361,13 @@ export function unpricedSharedModels(): { serverId: string; label: string; model
 
 /**
  * The currencies this instance's spending can be counted in. One is a label,
- * several has to be admitted to since nothing is converted, and empty means
- * there is nothing to label.
+ * several has to be admitted to since nothing is converted, empty means there is
+ * nothing to label.
  *
- * Two sources, because there are two ways a call gets a cost. A connection that
- * reports its own costs needs no prices at all, so an instance whose only
- * connection is one of those has an empty table by design: reading the table
- * alone would render a twenty pound ceiling as a bare `20`.
- *
- * Only enabled system connections count for the second source. A disabled one
- * bills nothing, and a personal one is somebody's own bill.
+ * Two sources, because there are two ways a call gets a cost: a connection that
+ * reports its own needs no prices, so reading the table alone would render a
+ * twenty pound ceiling as a bare `20`. Only enabled system connections count for
+ * the second.
  */
 export function spendCurrencies(): string[] {
 	const db = getDb();

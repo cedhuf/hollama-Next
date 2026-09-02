@@ -4,13 +4,7 @@ import { requireAdmin } from '$lib/server/api';
 import { setCreditLimit, setCreditPeriodFor, type CreditPeriod } from '$lib/server/db/usage';
 import { deleteUser, getUserById } from '$lib/server/db/users';
 
-/**
- * One account's own allowance.
- *
- * `null` puts it back on the instance's, which is not the same as setting it to
- * the same number: the instance's can change afterwards, and an account that
- * inherits follows it.
- */
+/** `null` puts it back on the instance's, which differs from setting it to the same number: the instance's can change afterwards, and an account that inherits follows it. */
 export async function PUT(event) {
 	await requireAdmin(event);
 	if (!getUserById(event.params.id)) throw error(404, 'User not found');

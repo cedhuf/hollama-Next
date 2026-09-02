@@ -4,14 +4,12 @@
 	import LL from '$i18n/i18n-svelte';
 
 	/**
-	 * A timeline step, clamped to a few lines with a way to see the rest.
-	 *
-	 * A round of thinking runs to several screens on some models, and a turn can
-	 * hold three of them: unfolded whole, the timeline buries the answer it was
-	 * supposed to introduce. Clamped, each step stays a glance.
+	 * A timeline step, clamped to a few lines with a way to see the rest: a round of
+	 * thinking runs to several screens on some models, and unfolded whole the
+	 * timeline buries the answer it introduces.
 	 *
 	 * The fade is a mask rather than a gradient overlay, so it works over whatever
-	 * the message happens to sit on instead of having to guess a background colour.
+	 * the message sits on instead of guessing a background colour.
 	 */
 
 	let {
@@ -30,8 +28,8 @@
 	let overflows = $state(false);
 	let inner: HTMLDivElement | undefined = $state();
 
-	// Content arrives token by token, so this is a standing measurement rather than
-	// a one-off: the step crosses the threshold long after it first renders.
+	// Content arrives token by token, so this is a standing measurement: the step
+	// crosses the threshold long after it first renders.
 	$effect(() => {
 		const element = inner;
 		if (!element) return;

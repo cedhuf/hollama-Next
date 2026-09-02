@@ -9,20 +9,17 @@
 	/**
 	 * The turn has stopped, and it is asking.
 	 *
-	 * Every MCP call passes through here before it is made. Not the ones that look
-	 * dangerous: judging that would mean us ruling on tools we have never seen,
-	 * described by the very servers whose calls are in question. So the person who
-	 * added the server answers, every time, with the exact arguments in front of
-	 * them.
+	 * Every MCP call passes through here, not the ones that look dangerous: judging
+	 * that would mean ruling on tools we have never seen, described by the servers
+	 * whose calls are in question. The person who added the server answers.
 	 *
-	 * Which is why the arguments are the body of the card rather than something
-	 * behind a disclosure. A confirmation that shows only a tool name teaches
-	 * people to press yes without reading, and a prompt nobody reads is worse than
-	 * no prompt: it moves the responsibility without moving the decision.
+	 * Which is why the arguments are the body of the card rather than behind a
+	 * disclosure: a confirmation showing only a tool name teaches people to press
+	 * yes without reading, and that moves the responsibility without moving the
+	 * decision.
 	 *
-	 * One component for every surface. It is rendered at the foot of the thread,
-	 * which on a phone and on a desktop is the same place: just above the composer,
-	 * where the eye already is.
+	 * One component for every surface, at the foot of the thread, just above the
+	 * composer where the eye already is.
 	 */
 	let {
 		request,
@@ -38,10 +35,9 @@
 	let answered = $state<boolean | null>(null);
 
 	// Nothing resets this, because nothing has to: the card is mounted inside a
-	// `{#key request.id}`, so a second question is a second component rather than
-	// this one wearing new text. Which is the behaviour to want anyway: the
-	// arrival animation plays again, and a card that changed under a finger that
-	// was already moving is exactly what a security prompt must never do.
+	// `{#key request.id}`, so a second question is a second component. Which is the
+	// behaviour to want: a card that changed under a finger already moving is
+	// exactly what a security prompt must never do.
 
 	function decide(allow: boolean) {
 		if (disabled || answered !== null) return;
@@ -72,7 +68,7 @@
 		</div>
 	</div>
 
-	<!-- What the tool says it does, then what it would be called with. The two
+	<!-- What the tool says it does, then what it would be called with: the two
 	     questions a person actually has, in that order. -->
 	{#if request.purpose}
 		<p class="text-muted text-xs leading-snug">{request.purpose}</p>
@@ -106,16 +102,15 @@
 		</button>
 	</div>
 
-	<!-- Said plainly, because it is the part that makes waiting acceptable: the
-	     question does not stand forever, and running out counts as no. -->
+	<!-- Said plainly, because it is what makes waiting acceptable: the question does
+	     not stand forever, and running out counts as no. -->
 	<p class="text-muted text-[11px]">{$LL.mcpApprovalTimeoutHint()}</p>
 </div>
 
 <style lang="postcss">
 	/* A ring that fades once, on arrival: enough to pull the eye to a card that
-	   appeared while the answer was being written, and then out of the way. It is
-	   not a pulse. Something that keeps moving under a decision is pressure, and
-	   this is a question, not an alarm. */
+	   appeared while the answer was being written, and then out of the way. Not a
+	   pulse: something that keeps moving under a decision is pressure. */
 	.approval {
 		animation: approval-arrive 900ms ease-out 1;
 	}

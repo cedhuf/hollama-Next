@@ -5,11 +5,11 @@ import { build, files, version } from '$service-worker';
 
 import { APP_SLUG } from '$lib/brand';
 
-// `self` is the worker global; cast it so we get the worker-scoped API.
+// `self` is the worker global; cast it for the worker-scoped API.
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
 const CACHE = `${APP_SLUG}-cache-${version}`;
-// Immutable, hashed build output + everything under static/.
+// Immutable, hashed build output plus everything under static/.
 const ASSETS = [...build, ...files];
 
 sw.addEventListener('install', (event) => {
@@ -39,7 +39,7 @@ sw.addEventListener('fetch', (event) => {
 
 	const url = new URL(request.url);
 	if (url.origin !== sw.location.origin) return;
-	// Dynamic + auth endpoints must always hit the network.
+	// Dynamic and auth endpoints must always hit the network.
 	if (url.pathname.startsWith('/api') || url.pathname.startsWith('/auth')) return;
 
 	// Hashed build assets and static files never change: serve them from cache.
@@ -48,8 +48,8 @@ sw.addEventListener('fetch', (event) => {
 		return;
 	}
 
-	// Page navigations: network-first (always fresh when online), cache a copy so
-	// previously-visited pages still open offline.
+	// Page navigations: network first, caching a copy so previously visited pages
+	// still open offline.
 	if (request.mode === 'navigate') {
 		event.respondWith(
 			(async () => {

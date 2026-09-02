@@ -1,22 +1,15 @@
 <script lang="ts">
 	/**
-	 * A placeholder for content still being fetched, but only once the wait is
-	 * long enough to be worth acknowledging.
+	 * A placeholder for content still being fetched, once the wait is long enough
+	 * to be worth acknowledging.
 	 *
-	 * A skeleton that appears and vanishes inside 100ms is worse than no skeleton
-	 * at all: the eye registers the flicker, not the information. So this paints
-	 * nothing for `delay` milliseconds; if the data lands first the component
-	 * unmounts having drawn nothing, and the content simply appears. Past the
-	 * threshold it fades in, which also keeps a near-miss from snapping into view.
-	 *
-	 * Callers stay simple: `{#if loading}<Skeleton … />{/if}`, with no timers of
-	 * their own.
+	 * A skeleton that appears and vanishes inside 100ms is worse than none: the eye
+	 * registers the flicker, not the information. So this paints nothing for `delay`
+	 * milliseconds, and past the threshold it fades in, which keeps a near-miss from
+	 * snapping into view.
 	 */
 	interface Props {
-		/**
-		 * `card`, a connection-card row: tile, two lines, trailing control.
-		 * `row`: a single bordered line, for lists of compact rows.
-		 */
+		/** `card`, a connection-card row: tile, two lines, trailing control. `row`: a single bordered line. */
 		variant?: 'card' | 'row';
 		count?: number;
 		/** How long to stay invisible before admitting there's a wait. */

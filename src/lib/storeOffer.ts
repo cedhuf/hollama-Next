@@ -1,16 +1,13 @@
 /**
- * What a store card offers, whatever the store is selling.
+ * What a store card offers, whatever the store is selling. A card is about one
+ * of exactly two things:
  *
- * A card is about one of exactly two things:
+ * - a **package**, which the store publishes and you install. It says
+ *   `installed` only while you hold an untouched copy.
+ * - a **copy**, which is in your library. What it offers is to go back to what
+ *   was published.
  *
- * - a **package**, which the store publishes. You install it. It says
- *   `installed` only while you hold an untouched copy, the one case where
- *   installing again would hand you what you already have.
- * - a **copy**, which is in your library. There is nothing to install; what it
- *   offers is to go back to what was published.
- *
- * Every view is a selection of those two, never a third behaviour. That is what
- * stopped the persona store telling people to install what they had written.
+ * Every view is a selection of those two, never a third behaviour.
  */
 
 import type { StoreKind } from './store';

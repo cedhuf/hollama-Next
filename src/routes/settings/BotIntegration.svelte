@@ -26,13 +26,9 @@
 	/**
 	 * One configured bot: a line, and its options underneath when asked for.
 	 *
-	 * Folded the way a connection is folded, and for the same reason: what a
-	 * reader wants from a list of them is which one this is and whether it runs.
-	 * Ten fields unrolled for each is a list nobody can scan.
-	 *
-	 * Everything is saved as it is typed, debounced by the parent. The key is the
-	 * exception, because it is never read back: an untouched field means "keep
-	 * what is stored", and only a typed value replaces it.
+	 * Folded the way a connection is, for the same reason: ten fields unrolled for
+	 * each is a list nobody can scan. Everything is saved as it is typed, debounced
+	 * by the parent. The key is the exception, being never read back.
 	 */
 	interface Props {
 		integration: IntegrationView;
@@ -74,10 +70,9 @@
 		BOT_TOOLS.map((tool) => ({
 			value: tool,
 			label: toolLabels($LL)[tool],
-			// MCP is the one entry here whose consequence is not like the others':
-			// everywhere else in the app a call is put to a person first, and a bot
-			// has nobody to ask. Marked in the list itself, because that is where the
-			// choice is made.
+			// MCP is the one entry whose consequence is not like the others': everywhere
+			// else a call is put to a person first, and a bot has nobody to ask. Marked in
+			// the list itself, because that is where the choice is made.
 			danger: tool === 'mcp',
 			hint: tool === 'mcp' ? $LL.botMcpWarning() : undefined
 		}))
@@ -94,12 +89,7 @@
 			.join(' · ')
 	);
 
-	/**
-	 * A model is chosen by name, and a name alone does not say where it is served.
-	 *
-	 * The same lookup the composer does: the catalogue knows which connection each
-	 * model came from, and the run needs the connection, not the name.
-	 */
+	/** The same lookup the composer does: the catalogue knows which connection each model came from, and the run needs the connection, not the name. */
 	function pickModel(name: string) {
 		const known = $settingsStore.models.find((entry) => entry.name === name);
 		integration.config.model = name;
@@ -107,12 +97,7 @@
 		onChange();
 	}
 
-	/**
-	 * Forget the last answer when the question changes.
-	 *
-	 * A green button beside an address or a key that has since been edited is a
-	 * button claiming something was verified that never was.
-	 */
+	/** A green button beside an address that has since been edited is a button claiming something was verified that never was. */
 	function invalidate() {
 		verdict = null;
 	}
@@ -142,20 +127,17 @@
 	{/snippet}
 
 	{#snippet title()}
-		<!-- The name is the heading and the field at once, as it is when a connection
-		     is added: renaming something is editing what is already on screen, and a
-		     second box further down asking the same question is a second question.
+		<!-- The name is the heading and the field at once, as when a connection is
+		     added: a second box further down asking the same question is a second
+		     question.
 
-		     `field-sizing: content` is the whole trick: the field measures its own
-		     text and is exactly that wide. `size` stays as the fallback for a browser
-		     that does not know the property yet, and it counts in the width of a zero,
-		     which is wider than an average letter: that slack on the right is what the
-		     property removes.
+		     `field-sizing: content` measures the text and is exactly that wide. `size`
+		     is the fallback where the property is unknown, and it counts in the width of
+		     a zero, which is wider than an average letter.
 
-		     `box-content` is what makes either of them honest. Both measure the text and
-		     then hand that figure to `width`, and under Tailwind's `border-box` the
-		     padding is taken out of it rather than added to it: the field ends up two
-		     characters short of its own name, and the last of them are cut off. -->
+		     `box-content` is what makes either honest: under Tailwind's `border-box` the
+		     padding is taken out of the measured width rather than added, so the field
+		     ends two characters short of its own name. -->
 		<input
 			class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-1 pointer-events-auto relative -mx-2 box-content field-sizing-content max-w-full rounded-md border border-transparent px-2 py-0.5 text-sm font-medium outline-none"
 			size={(integration.label || 'Chatto').length + 1}
@@ -170,10 +152,10 @@
 		<span class="truncate">{summary}</span>
 	{/snippet}
 
-	<!-- The key and the button that proves it, on one line: "is this right?"
-			     is a question about the field it sits next to. -->
+	<!-- The key and the button that proves it, on one line: "is this right?" is a
+	     question about the field beside it. -->
 	<!-- No hint here, unlike the form that adds one: where to find the key is
-			     something you need once, and a bot that already answers has answered it. -->
+	     something you need once. -->
 	<SettingsField label={$LL.botApiKey()}>
 		<div class="flex items-center gap-2">
 			{#if keyIsStored}
@@ -213,11 +195,9 @@
 					</button>
 				{/if}
 			{/if}
-			<!-- The answer lands in the button that asked the question: a result
-					     placed away from its cause is one somebody has to go looking for.
-					     The hover colours are forced, because the outline variant paints its
-					     own on top otherwise and a green button turned black under the
-					     pointer reads as an answer that expired. -->
+			<!-- The answer lands in the button that asked the question. The hover colours
+			     are forced, or the outline variant paints its own on top and a green button
+			     turning black under the pointer reads as an answer that expired. -->
 			<Button
 				variant="outline"
 				onclick={verify}
@@ -238,10 +218,9 @@
 				{:else}
 					<Plug class="base-icon" />
 				{/if}
-				<!-- The three wordings stacked in one cell, all laid out and only one
-						     shown: the button is then as wide as the longest of them in
-						     whatever language it is read in, and changing state cannot move
-						     the field beside it. -->
+				<!-- The three wordings stacked in one cell, all laid out and only one shown: the
+				     button is then as wide as the longest of them in whatever language, and
+				     changing state cannot move the field beside it. -->
 				<span class="grid text-center">
 					<span class="col-start-1 row-start-1 {verdict?.ok ? '' : 'invisible'}">
 						{$LL.connected()}
@@ -255,8 +234,7 @@
 				</span>
 			</Button>
 		</div>
-		<!-- Failures keep their own line: a server says why in a sentence, and a
-				     sentence does not fit in a button. -->
+		<!-- Failures keep their own line: a server says why in a sentence. -->
 		{#if verdict && !verdict.ok}
 			<span class="text-negative text-xs">{verdict.error}</span>
 		{/if}
@@ -266,8 +244,8 @@
 		<ModelSelect value={integration.config.model} onSelect={pickModel} />
 	</SettingsField>
 
-	<!-- Who the bot is. Three sources, and only one at a time: the account's
-			     usual instructions, a persona's prompt, or what is written here. -->
+	<!-- Who the bot is. Three sources, one at a time: the account's usual
+	     instructions, a persona's prompt, or what is written here. -->
 	<SettingsField
 		label={$LL.whoTheBotIs()}
 		hint={integration.config.instructionsMode === 'persona'
@@ -312,9 +290,8 @@
 		</SettingsField>
 	{/if}
 
-	<!-- How much, and how many, on one line: the number is not a second
-			     question, it is the rest of the answer to this one. It appears only for
-			     the mode that has a number to give. -->
+	<!-- How much and how many on one line: the number is not a second question, it
+	     is the rest of the answer to this one. Only for the mode that has one. -->
 	<SettingsField label={$LL.contextSent()} hint={$LL.contextSentHint()}>
 		<div class="flex items-center gap-2">
 			<Select
@@ -331,9 +308,8 @@
 				}}
 			/>
 			{#if integration.config.context === 'recent'}
-				<!-- The field draws itself full-width, so the width is set here, on a
-						     wrapper that refuses to grow: two digits and two steppers need a
-						     fixed corner, not half the row. -->
+				<!-- The field draws itself full-width, so the width is set on a wrapper that
+				     refuses to grow: two digits and two steppers need a fixed corner. -->
 				<div class="w-24 shrink-0">
 					<NumberField
 						class="text-right"
@@ -378,17 +354,15 @@
 		/>
 	</SettingsField>
 
-	<!-- Said where it is decided, not in the documentation. MCP behaves
-			     differently here than anywhere else in the app, and somebody ticking
-			     it in a list of five ordinary tools has no way to know that. -->
+	<!-- Said where it is decided: MCP behaves differently here than anywhere else,
+	     and somebody ticking it in a list of five ordinary tools cannot know that. -->
 	{#if integration.config.tools.includes('mcp')}
 		<p class="text-muted text-xs leading-snug">{$LL.botMcpWarning()}</p>
 	{/if}
 
-	<!-- Enabled and running are not the same thing, and the difference is
-			     invisible otherwise. Two reasons a switched-on bot stays quiet, and
-			     the suspension comes first because it is the one the owner cannot fix
-			     and would otherwise spend the afternoon trying to. -->
+	<!-- Enabled and running are not the same thing. Two reasons a switched-on bot
+	     stays quiet, and the suspension comes first, being the one the owner cannot
+	     fix and would otherwise spend the afternoon trying to. -->
 	{#if integration.blocked}
 		<span class="text-negative border-shade-3 border-t pt-3 text-xs">
 			{$LL.botBlockedByAdmin()}
@@ -399,9 +373,9 @@
 		</span>
 	{/if}
 
-	<!-- The address is answered once, when the bot is added, and is then a
-			     thing you change after moving a server. It belongs here rather than at
-			     the top of a form somebody opens to change a model. -->
+	<!-- Answered once when the bot is added, and then a thing you change after
+	     moving a server: it belongs here rather than at the top of a form somebody
+	     opens to change a model. -->
 	{#if showAdvanced}
 		<div class="border-shade-3 flex flex-col gap-3 border-t pt-3">
 			<SettingsField label={$LL.chattoServer()} hint={$LL.chattoServerHint()}>
@@ -430,8 +404,8 @@
 		</div>
 	{/if}
 
-	<!-- Footer: the occasional actions, kept out of the way of the fields.
-			     Delete confirms in place rather than through a dialog. -->
+	<!-- The occasional actions, out of the way of the fields. Delete confirms in
+	     place rather than through a dialog. -->
 	<div class="border-shade-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
 		<button
 			type="button"

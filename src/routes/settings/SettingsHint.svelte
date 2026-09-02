@@ -1,12 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	/**
-	 * Explanatory text under a control that isn't wrapped in a `SettingsField`,
-	 * a checkbox, say. Same typography as `SettingsField`'s `hint` and
-	 * `SettingsSection`'s description, so all help text reads at one level
-	 * whichever of the three it happens to hang off.
-	 */
+	/** Explanatory text under a control that is not wrapped in a `SettingsField`. Same typography as that hint and as a section description, so all help text reads at one level. */
 	let { children }: { children: Snippet } = $props();
 </script>
 

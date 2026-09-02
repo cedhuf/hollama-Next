@@ -12,45 +12,35 @@ import { awaitApproval, createRun, emitTo, findRunForSession, summarise } from '
 import { sessionWriter } from '$lib/server/runSession';
 import { recordRunUsage } from '$lib/server/usageMeter';
 
-/**
- * Start a turn, and answer immediately with the run it became.
- *
- * The request does not wait for the answer, on purpose: the point of running a
- * turn here is that it no longer belongs to whoever asked for it. The client
- * takes the id and opens the event stream, and if it never comes back the turn
- * finishes anyway.
- */
+/** The request does not wait for the answer, on purpose: the turn no longer belongs to whoever asked for it. The client takes the id and opens the stream; if it never comes back the turn finishes anyway. */
 export async function POST(event) {
 	const principal = await principalFor(event);
 	const input = (await event.request.json().catch(() => null)) as RunInput | null;
 	if (!input?.sessionId || !input.model) throw error(400, 'Expected a run to start');
 
-	// The instance's answer about who may rewrite which instruction, applied to
-	// what the request claims. Here rather than deeper down because this is where
-	// the client's word arrives, and a rule enforced past that point is a rule
-	// somebody can reach around by calling the API directly.
+	// The instance's answer about who may rewrite which instruction, applied to what
+	// the request claims. Here because this is where the client's word arrives, and
+	// a rule enforced past that point is one somebody reaches around via the API.
 	input.promptOverrides = resolveClaimedAppPrompts(
 		input.promptOverrides,
 		principal.isAdmin
 	).overrides;
 
 	// The question has to exist before the answer does. The page saves the message
-	// it just sent before handing the turn over, so a conversation that is not
-	// there is a client that skipped that step, and starting anyway would produce
-	// an answer with nowhere to go.
+	// before handing the turn over, so a missing conversation is a client that
+	// skipped that step, and starting anyway produces an answer with nowhere to go.
 	if (!getItem('sessions', principal.userId, input.sessionId)) {
 		throw error(404, 'No such conversation');
 	}
 
-	// One at a time per conversation. Two turns writing into the same transcript
-	// is not a race the transcript can win, and a second tab hitting send is the
-	// ordinary way it would happen.
+	// One at a time per conversation: two turns writing into the same transcript is
+	// not a race the transcript can win, and a second tab hitting send is the
+	// ordinary way it happens.
 	const existing = findRunForSession(input.sessionId, principal.userId);
 	if (existing?.status === 'running') return json(summarise(existing), { status: 409 });
 
-	// Resolved once here so a policy refusal is a 4xx on the request that caused it
-	// rather than an error event on a run that should never have started. The
-	// per-pass resolution below is the same call, for the speakers that follow.
+	// Resolved once here, so a policy refusal is a 4xx on the request that caused it
+	// rather than an error event on a run that should never have started.
 	try {
 		serverDeps(input, principal);
 	} catch (e) {
@@ -60,17 +50,17 @@ export async function POST(event) {
 
 	const run = createRun(input.sessionId, principal.userId);
 
-	// What the turn produces is written down here, as it is produced, and only
-	// then handed to whoever is watching. That order is the point: a client that
-	// reads a message and reloads on the spot finds it stored.
+	// What the turn produces is written down as it is produced, and only then handed
+	// to whoever is watching. That order is the point: a client that reads a message
+	// and reloads on the spot finds it stored.
 	const write = sessionWriter(principal.userId, input.sessionId);
 
-	// Deliberately not awaited: this is the handover. Failures inside become
-	// `error` events on the run, which is where a client will look for them.
-	// The turn asks, the person answers, and the answer comes back on
-	// `/api/runs/{id}/approve`. Bound to this run because that is the name both
-	// sides have: the tab that started it may be gone by the time the question is
-	// asked, and any tab of this account's may be the one that answers.
+	// Deliberately not awaited: this is the handover, and failures inside become
+	// `error` events on the run.
+	//
+	// The approval comes back on `/api/runs/{id}/approve`, bound to this run because
+	// that is the name both sides have: the tab that started it may be gone, and any
+	// tab of this account's may answer.
 	const approve = (request: McpApprovalRequest) =>
 		awaitApproval(run, request.id, MCP_LIMITS.approvalTimeoutMs);
 
@@ -78,16 +68,13 @@ export async function POST(event) {
 		input,
 		(pass) => serverDeps(pass, principal, { approve }),
 		(ev) => {
-			// Counted here, where the turn actually happens.
+			// Counted here, where the turn actually happens. The relay in `/api/llm` meters
+			// what the browser sends through it, and in server mode the browser sends
+			// nothing: `runDeps` talks to the provider itself, so every server-side turn
+			// went uncounted while the meter watched a road nobody was on.
 			//
-			// The relay in `/api/llm` meters what the browser sends through it, and in
-			// server mode the browser sends nothing through it: `runDeps` builds a
-			// direct strategy and talks to the provider itself. So every server-side
-			// turn went uncounted while the meter watched a road nobody was on.
-			//
-			// The counts come from the run's own `usage` event, which both strategies
-			// fill from what the provider reported, so this path and the browser's
-			// agree by construction.
+			// The counts come from the run's own `usage` event, which both strategies fill
+			// from what the provider reported.
 			if (ev.type === 'usage' && principal.userId) {
 				recordRunUsage(principal.userId, ev.serverId, ev.model, ev.used);
 			}

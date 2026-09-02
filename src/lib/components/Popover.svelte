@@ -3,15 +3,12 @@
 	import type { Snippet } from 'svelte';
 
 	/**
-	 * A floating panel anchored to its trigger, for content rather than for a list
-	 * of actions (that is `Menu`).
+	 * A floating panel anchored to its trigger, for content rather than a list of
+	 * actions, which is `Menu`.
 	 *
-	 * The distinction matters: a menu owns the keyboard, which is right for rows
-	 * you arrow through and wrong the moment the panel contains a text field. A
-	 * popover leaves the keyboard to whatever is inside it, so a search box behaves
-	 * like a search box.
-	 *
-	 * Same panel treatment as `Menu` on purpose, so the two read as one family.
+	 * A menu owns the keyboard, which is right for rows you arrow through and wrong
+	 * the moment the panel contains a text field. A popover leaves the keyboard to
+	 * whatever is inside it. Same panel treatment as `Menu`, so the two read alike.
 	 */
 	interface Props {
 		/** Receives the props to spread onto the caller's own trigger element. */

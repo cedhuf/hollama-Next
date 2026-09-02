@@ -41,16 +41,12 @@
 	);
 
 	/**
-	 * What this persona has remembered about you, shown so it can be corrected.
+	 * What this persona has remembered about you, shown so it can be corrected. The
+	 * real guardrail against a memory going wrong is not a cap, it is that you can
+	 * read it.
 	 *
-	 * The real guardrail against a memory going wrong is not a cap, it is that you
-	 * can read it. A note nobody can see is a note nobody can fix, and a persona
-	 * quietly working from something untrue about you is the failure this panel
-	 * exists to make impossible.
-	 *
-	 * Never leaves with the persona: it is not in the bundle, not in the digest,
-	 * and not in what an admin shares. It belongs to this pairing of persona and
-	 * account, and to nothing else.
+	 * Never leaves with the persona: not in the bundle, not in the digest, not in
+	 * what an admin shares. It belongs to this pairing and to nothing else.
 	 */
 	const memory = $derived<PersonaMemory>(
 		$personaMemoryStore.find((m) => m.id === persona.id) ?? emptyMemory(persona.id)
@@ -75,16 +71,10 @@
 	}
 
 	/**
-	 * A shared persona that has been edited has to be republished.
-	 *
-	 * What users are offered is a snapshot taken when it was shared, and it was
-	 * only ever retaken when the share switch itself moved. So renaming a shared
-	 * persona, or rewriting its prompt, changed nothing for anybody: the store went
-	 * on offering the old name and the old text, and the card comparing it with the
-	 * store's original still found them identical, because the snapshot was still
-	 * the original.
-	 *
-	 * Debounced, since this runs on every keystroke in every field.
+	 * A shared persona that has been edited has to be republished. The snapshot
+	 * users are offered was only retaken when the share switch moved, so renaming
+	 * one changed nothing for anybody and the card still found it identical to the
+	 * store's original. Debounced: this runs on every keystroke.
 	 */
 	let publishTimer: ReturnType<typeof setTimeout> | undefined;
 	function schedulePublish() {
@@ -105,14 +95,7 @@
 		persist();
 	}
 
-	/**
-	 * What leaves is a bundle, not the stored record.
-	 *
-	 * The two used to be the same thing, which meant handing over an id, a
-	 * conversation binding and a list of knowledge ids pointing at documents the
-	 * recipient does not have. A bundle carries what was written, with its
-	 * documents in it, and is the same file the store serves.
-	 */
+	/** A bundle, not the stored record: that used to hand over an id, a conversation binding and knowledge ids pointing at documents the recipient does not have. */
 	function exportThis() {
 		const data = JSON.stringify(personaToBundle(persona), null, 2);
 		const blob = new Blob([data], { type: 'application/json' });
@@ -191,10 +174,9 @@
 
 	<SettingsSection title="Behaviour" card>
 		<SettingsField label="Model">
-			<!-- Naming no model is a legitimate answer, and the common one for a
-						     persona that travels: it runs on whatever the reader's default is.
-						     Said in the list rather than left as an empty field, which reads as
-						     unfinished. -->
+			<!-- Naming no model is a legitimate answer, and the common one for a persona
+			     that travels. Said in the list rather than left as an empty field, which
+			     reads as unfinished. -->
 			<ModelSelect
 				bind:value={persona.modelName}
 				emptyLabel={$LL.personaDefaultModel()}
@@ -203,9 +185,9 @@
 		</SettingsField>
 
 		<SettingsField label={$LL.personaLanguageLabel()} hint={$LL.personaLanguageHint()}>
-			<!-- Free text, not the list of locales the interface is translated into:
-						     those are two different things. Empty follows the interface, and the
-						     placeholder shows what that currently resolves to. -->
+			<!-- Free text, not the list of locales the interface is translated into: two
+			     different things. Empty follows the interface, and the placeholder shows
+			     what that resolves to. -->
 			<input
 				class="settings-field"
 				bind:value={persona.language}
@@ -235,11 +217,10 @@
 		</SettingsField>
 
 		<FieldCheckbox label="Allow web search" bind:checked={persona.webSearch} onChange={persist} />
-		<!-- No share switch here any more. Offering a persona to an instance is
-					     done in the store, in one place, beside the button that offers the
-					     store's own and beside the list of what is currently offered. A
-					     checkbox buried in an editor meant an admin had to remember which of
-					     their personas they had ticked, with nowhere to go and look. -->
+		<!-- No share switch here: offering a persona to an instance is done in the
+		     store, beside the button that offers the store's own and the list of what is
+		     currently offered. A checkbox buried in an editor meant an admin had to
+		     remember which they had ticked, with nowhere to go and look. -->
 	</SettingsSection>
 
 	{#if memoryOn}
@@ -280,8 +261,8 @@
 						</div>
 					{/each}
 				</div>
-				<!-- Same two-click answer as everywhere else, rather than the browser's
-				     own box: forgetting every note is a deletion like the others. -->
+				<!-- The same two-click answer as everywhere else rather than the browser's box:
+				     forgetting every note is a deletion like the others. -->
 				<ButtonConfirm
 					onConfirm={forgetEverything}
 					icon={Eraser}

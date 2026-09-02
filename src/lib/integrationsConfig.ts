@@ -2,13 +2,7 @@ import { derived, writable } from 'svelte/store';
 
 import { DEFAULT_BOTS_PER_USER } from '$lib/integrations';
 
-/**
- * What this account may do with bots, as the instance answers it.
- *
- * Read at boot rather than when the settings window opens, so the tab is either
- * there or not from the first render. A tab that appears a moment later, or one
- * that appears and then says it is not for you, is worse than its absence.
- */
+/** Read at boot rather than when the settings window opens, so the tab is either there or not from the first render. */
 export interface IntegrationsConfig {
 	/** Whether this account may run bots at all. */
 	canManage: boolean;

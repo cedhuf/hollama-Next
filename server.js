@@ -1,33 +1,17 @@
 /**
  * The production entry, which is the ordinary one plus five lines.
  *
- * `adapter-node` keeps every responsibility it already had: the port, the host,
- * `ORIGIN`, `BODY_SIZE_LIMIT`, graceful shutdown, keep-alive timeouts, socket
- * activation. Importing its entry starts the server exactly as `node
- * build/index.js` would. All this adds is publishing the HTTP server where the
- * app's own code can find it, so the voice socket can attach to it from inside
- * the bundle (see `src/lib/server/voice/socket.ts` for why it has to be that way
- * round).
+ * `adapter-node` keeps every responsibility it had. All this adds is publishing
+ * the HTTP server where the app's own code can find it, so the voice socket can
+ * attach from inside the bundle (see `src/lib/server/voice/socket.ts`).
  *
- * The alternative the documentation offers is to start from `build/handler.js`
- * and write the listening and shutdown logic by hand, which means reimplementing
- * what adapter-node already does and then drifting from it at every release.
- *
- * The export read below is real but undocumented, so it is checked rather than
- * assumed: if a future adapter stops exporting it, this refuses to start and
- * says what to do, which is a great deal better than a voice mode that silently
- * never connects on somebody else's instance.
+ * The export read below is real but undocumented, so it is checked: a future
+ * adapter that stops exporting it makes this refuse to start rather than a voice
+ * mode that silently never connects.
  */
 import { server } from './build/index.js';
 
-/**
- * The meeting point, named the same way on both sides.
- *
- * `Symbol.for` reads from the global registry, so this and the bundled app agree
- * on one symbol without importing anything from each other, which is the whole
- * reason it is a registered symbol rather than an exported constant: the app is
- * bundled and its internal paths are not addressable from out here.
- */
+/** `Symbol.for` reads from the global registry, so this and the bundled app agree on one symbol without importing anything from each other: the app is bundled and its internal paths are not addressable from out here. */
 const HTTP_SERVER = Symbol.for('llooma.httpServer');
 
 const http = server?.server;

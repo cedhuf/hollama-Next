@@ -160,16 +160,12 @@ export function parseMcpToolName(
 /**
  * The tools of one catalogue, gathered into the servers they came from.
  *
- * A gateway's catalogue arrives flat, with nothing saying which three tools are
- * the mail. What it carries is a naming habit, since a hub has to keep its own
- * names apart: `Chatto-post_message`, `home-assistant-HassTurnOn`.
+ * A gateway's catalogue arrives flat, but carries a naming habit
+ * (`Chatto-post_message`, `home-assistant-HassTurnOn`), so the grouping is the
+ * longest prefix ending in `-` that another tool shares. Hyphen only, or
+ * `mail_list_emails` would become a group of its own.
  *
- * So the grouping is the longest prefix ending in `-` that another tool shares.
- * Longest, because `home-` and `home-assistant-` are both shared. Hyphen only,
- * or `mail_list_emails` would become a group of its own.
- *
- * A reading habit, not a fact: it arranges a list and nothing else. No call, no
- * permission and no limit is ever decided from it.
+ * A reading habit, not a fact: no call or limit is ever decided from it.
  */
 export function groupMcpTools(names: string[]): { group: string; tools: string[] }[] {
 	const candidates = new Map<string, number>();

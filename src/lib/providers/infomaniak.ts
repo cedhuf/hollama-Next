@@ -4,16 +4,13 @@ import type { ProviderDescriptor } from './types';
  * Infomaniak AI Tools, the provider that forced most of this file's shape.
  *
  * Its endpoint is fixed except for the product id in the path, so the form asks
- * for that one value and builds the URL. It starts blank rather than carrying
- * the template: an address with `{productId}` still in it is not an address.
+ * for that value and builds the URL, starting blank rather than carrying a
+ * template with `{productId}` still in it.
  *
- * Its images are not under its chat endpoint. Chat is API version 2 under
- * `/openai/v1`; images are on version 1 under `/openai`, with no `/v1` at all,
- * which is why a connection can carry two roots.
- *
- * Chat stays on version 2 deliberately: version 1's chat route is deprecated in
- * their own specification, and version 2 documents function calling and
- * multimodal input, both of which this app uses.
+ * Its images are not under its chat endpoint: chat is API version 2 under
+ * `/openai/v1`, images are version 1 under `/openai`, which is why a connection
+ * can carry two roots. Chat stays on version 2, where function calling and
+ * multimodal input are documented.
  */
 
 /** Everything but the product id, which the connection form asks for. */

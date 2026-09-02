@@ -5,14 +5,7 @@ import { requireUser } from '$lib/server/api';
 import { getIntegration, getIntegrationSecret } from '$lib/server/db/integrations';
 import { providerFor } from '$lib/server/integrations/registry';
 
-/**
- * Does this reach anything, and as whom.
- *
- * Asked before anything is saved, which is the same order the connections tab
- * uses: nobody should have to store a credential to find out that it is the
- * wrong one. An `id` may be sent instead of a key, to re-test what is already
- * stored without typing it again.
- */
+/** Asked before anything is saved, the order the connections tab uses: nobody should have to store a credential to find out it is the wrong one. An `id` may be sent instead, to re-test what is stored. */
 export async function POST(event) {
 	const user = await requireUser(event);
 	const body = await event.request.json().catch(() => null);
@@ -31,9 +24,9 @@ export async function POST(event) {
 	const config = normaliseConfig(kind, body.config);
 	if (!config.baseUrl) return json({ ok: false, error: 'No server address given' });
 
-	// A record that exists only for the length of this call. The provider is
-	// handed its credential rather than looking one up, so a draft tests exactly
-	// as a stored integration does.
+	// A record that exists only for the length of this call. The provider is handed
+	// its credential rather than looking one up, so a draft tests exactly as a
+	// stored integration does.
 	const draft = {
 		id: body.id ?? 'draft',
 		ownerUserId: user.id,

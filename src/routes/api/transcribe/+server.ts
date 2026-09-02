@@ -5,14 +5,7 @@ import { requireServer, requireSharedModel, requireUser } from '$lib/server/api'
 import { transcribe, TranscriptionError } from '$lib/server/transcription';
 import { recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
 
-/**
- * What was just said, as words.
- *
- * Multipart in, one line of text out. Nothing is kept: the recording exists for
- * the length of this request and the text goes into a composer the person then
- * reads before sending it. A dictation that quietly stored the sound would be a
- * microphone in somebody's room with an archive attached.
- */
+/** Multipart in, one line of text out, and nothing kept: the recording exists for the length of this request. A dictation that stored the sound would be a microphone in somebody's room with an archive attached. */
 export async function POST(event) {
 	const user = await requireUser(event);
 
@@ -30,15 +23,14 @@ export async function POST(event) {
 	requireSharedModel(server, user.role === 'admin', model);
 
 	// The same two questions the chat relay asks before a billable call: is this
-	// account within its allowance, and can this call be counted at all. Neither
-	// was asked here until reading and speaking were metered.
+	// account within its allowance, and can this call be counted at all.
 	const refused = refuseForCredit(user.id, server, model);
 	if (refused) throw error(402, refusal(refused, model));
 
 	try {
 		// A code, or nothing. Validated to the shape rather than to a list: there are
-		// ninety-nine of them, they are the provider's business, and a list here would
-		// be one more thing to be out of date about.
+		// ninety-nine of them, and a list here would be one more thing to be out of date
+		// about.
 		const spoken = typeof language === 'string' && /^[a-z]{2}$/i.test(language) ? language : '';
 		const { text, used } = await transcribe(server, model, audio, spoken);
 		recordVoiceUsage(user.id, server, model, used);

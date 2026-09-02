@@ -3,36 +3,19 @@ import { error } from '@sveltejs/kit';
 import { isSafeCatalogPath } from '$lib/store';
 
 /**
- * A store, read by the instance rather than by each browser.
+ * A store, read by the instance rather than by each browser: one machine holds
+ * the listing for everyone, an instance whose browsers have no way out can still
+ * be given a store, and the address is the administrator's.
  *
- * Three things this buys, and none of them are available to a `fetch` from the
- * page. One machine holds the listing for everyone on the instance, so a hundred
- * users cost one request rather than a hundred. An instance whose browsers have
- * no way out can still be given a store, because only the server has to reach
- * it. And the address is the administrator's, set in the admin panel or in the
- * environment, rather than a preference each person would have to know about.
- *
- * A pass-through, deliberately: no parsing, no rewriting. The listing and the
- * bundles are validated where they are used, which is the client, and doing it
- * twice would mean two shapes to keep in step.
- *
- * Its own module rather than the body of the route, so the route is the address
- * and nothing else. The path check that keeps this from being an open proxy, the
- * held copy and the fallback to a stale one when the store is unreachable are
- * all here.
+ * A pass-through: the listing and the bundles are validated where they are used,
+ * and doing it twice would mean two shapes to keep in step.
  */
 
-/**
- * How long a fetched file is held.
- *
- * A store changes when someone lands a pull request against it, so minutes-old
- * is fine and an hour is not noticeable. What this really protects against is a
- * page that re-reads the listing every time it opens.
- */
+/** A store changes when someone lands a pull request against it, so minutes-old is fine. What this protects against is a page that re-reads the listing every time it opens. */
 const TTL_MS = 15 * 60 * 1000;
 
-// Keyed by the full address, not the path: pointing the instance at another store
-// otherwise keeps serving the previous one's files until the entries expire.
+// Keyed by the full address, not the path: pointing the instance at another
+// store otherwise keeps serving the previous one's files until the entries expire.
 const cache = new Map<string, { body: string; type: string; at: number }>();
 
 export async function serveFromStore(options: {
@@ -61,8 +44,8 @@ export async function serveFromStore(options: {
 	try {
 		response = await fetch(url, { headers: { accept: 'application/json' } });
 	} catch {
-		// The store is somewhere else and may simply be unreachable. A held copy,
-		// however old, beats an error: the alternative is an empty library.
+		// The store is somewhere else and may be unreachable. A held copy, however old,
+		// beats an error: the alternative is an empty library.
 		if (hit) return new Response(hit.body, { headers: { 'content-type': hit.type } });
 		throw error(502, `The ${label} could not be reached`);
 	}

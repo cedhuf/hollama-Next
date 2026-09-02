@@ -9,15 +9,13 @@ import {
 } from '$lib/server/db/mcpServers';
 
 /**
- * Suspend somebody else's MCP server, or lift the suspension. Or remove it.
+ * Suspend somebody else's MCP server, lift the suspension, or remove it. Only
+ * those: an administrator who could rewrite the address or token of a server
+ * they do not own would be redirecting somebody else's tools at a machine of
+ * their choosing.
  *
- * Only those. An administrator who could rewrite the address or the token of a
- * server they do not own would be redirecting somebody else's tools at a machine
- * of their choosing, which is a worse power than switching it off.
- *
- * And a suspension, not the owner's switch: turning that off would be a decision
- * the owner undoes by turning it back on, without ever being told that somebody
- * had asked them not to.
+ * And a suspension, not the owner's switch, which they would undo by turning it
+ * back on without ever being told somebody had asked them not to.
  */
 export async function PUT(event) {
 	await requireAdmin(event);

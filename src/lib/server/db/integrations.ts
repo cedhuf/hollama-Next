@@ -22,13 +22,7 @@ export interface IntegrationRow {
 	created_at: string;
 }
 
-/**
- * An integration with its settings parsed and its credential left alone.
- *
- * What the runtime works with. The secret is fetched separately, by the one
- * function that needs it, so a record can be logged or compared without any
- * risk of carrying a key into a place keys should not be.
- */
+/** What the runtime works with. The secret is fetched separately, by the one function that needs it, so a record can be logged or compared without carrying a key. */
 export interface IntegrationRecord {
 	id: string;
 	ownerUserId: string;
@@ -38,14 +32,7 @@ export interface IntegrationRecord {
 	hasSecret: boolean;
 	/** What the owner wants. */
 	enabled: boolean;
-	/**
-	 * What the instance allows, which is not the same question.
-	 *
-	 * An administrator suspends a bot here rather than by turning the owner's
-	 * switch off, because a switch the owner can turn back on is not a decision,
-	 * it is a suggestion. The owner keeps their own switch and keeps being told
-	 * why it changes nothing for now.
-	 */
+	/** An administrator suspends a bot here rather than by turning the owner's switch off: a switch the owner can turn back on is a suggestion, not a decision. */
 	blocked: boolean;
 	createdAt: string;
 }
@@ -56,8 +43,8 @@ function toRecord(row: IntegrationRow): IntegrationRecord {
 	try {
 		raw = JSON.parse(row.config);
 	} catch {
-		// A row whose JSON cannot be read is a row that will be normalised into
-		// defaults, which is inert: nothing runs without an address and a key.
+		// A row whose JSON cannot be read is normalised into defaults, which is inert:
+		// nothing runs without an address and a key.
 	}
 	return {
 		id: row.id,
@@ -141,13 +128,7 @@ export function createIntegration(input: {
 	return getIntegration(id)!;
 }
 
-/**
- * Save an edit. An absent field is left as it was.
- *
- * The credential follows the rule the provider keys already follow: omit it to
- * keep the stored one, send an empty string to clear it. A form that cannot
- * read a key back has no other way to say "leave it alone".
- */
+/** The credential follows the rule the provider keys follow: omit it to keep the stored one, send an empty string to clear it. */
 export function updateIntegration(
 	id: string,
 	input: {
@@ -187,12 +168,7 @@ export function updateIntegration(
 	return getIntegration(id);
 }
 
-/**
- * Suspend one, or lift the suspension. An administrator's verb, and only theirs.
- *
- * Its own function rather than a field on `updateIntegration`, so that the route
- * an owner reaches cannot set it by accident or by a crafted body.
- */
+/** Its own function rather than a field on `updateIntegration`, so the route an owner reaches cannot set it by accident or by a crafted body. */
 export function setIntegrationBlocked(id: string, blocked: boolean): void {
 	getDb()
 		.prepare('UPDATE integrations SET blocked = ? WHERE id = ?')
@@ -206,13 +182,7 @@ export function deleteIntegration(id: string): void {
 /** How long a handled activation is remembered. Comfortably past the server's own retention. */
 const SEEN_RETENTION_DAYS = 7;
 
-/**
- * Claim an activation, once.
- *
- * Returns true the first time and false forever after, and it is the insert
- * itself that decides: two workers, or a worker and its own restarted twin,
- * race on a primary key rather than on a check followed by a write.
- */
+/** True the first time and false forever after, decided by the insert itself: two workers race on a primary key rather than on a check followed by a write. */
 export function claimSeen(integrationId: string, key: string): boolean {
 	const result = getDb()
 		.prepare(
@@ -222,13 +192,7 @@ export function claimSeen(integrationId: string, key: string): boolean {
 	return result.changes > 0;
 }
 
-/**
- * Whether an activation has already been dealt with, without claiming it.
- *
- * The read-only half of `claimSeen`, and the difference matters: this is asked
- * first, of everything the list hands back, so that work already done is passed
- * over in silence. Claiming decides who acts; this decides whether to look.
- */
+/** The read-only half of `claimSeen`, asked first of everything the list hands back, so work already done is passed over in silence. */
 export function hasSeen(integrationId: string, key: string): boolean {
 	const row = getDb()
 		.prepare('SELECT 1 AS present FROM integration_seen WHERE integration_id = ? AND key = ?')

@@ -3,14 +3,9 @@ import type { Editor, Message, Session } from '$lib/sessions';
 import type { RunEvent } from './types';
 
 /**
- * What a run's events do to what is on screen. Only to what is on screen.
- *
- * This used to be where the conversation was written down, so the answer only
- * reached the database if a browser was still there to put it there. The run
- * writes as it produces now, leaving the live picture of a turn happening.
- *
- * Nothing here persists anything, which is worth keeping: a second interface,
- * or a third-party client, can follow a run without being trusted to store it.
+ * What a run's events do to what is on screen. Only to what is on screen: the
+ * run writes as it produces, so nothing here persists anything, and a second
+ * interface can follow a run without being trusted to store it.
  *
  * Everything is additive and order-dependent, which makes a replay land where
  * having watched it live does.

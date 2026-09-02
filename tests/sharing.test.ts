@@ -2,15 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { openSettings } from './utils';
 
-/**
- * What an administrator publishes reaches the people on the instance.
- *
- * Every group of defaults on the Admin tab answers the same three-state question
- * (off, locked, overridable) through one resolver, so exercising one of them
- * exercises the mechanism. Sampling is the one chosen because it is the only
- * group whose values are typed in Settings and published from Admin, which is
- * the arrangement that took the longest to get right.
- */
+/** Every group of defaults on the Admin tab answers the same three-state question through one resolver, so exercising one exercises the mechanism. Sampling, because its values are typed in Settings and published from Admin. */
 test('publishes the instance sampling settings', async ({ page }) => {
 	await page.goto('/sessions');
 
@@ -22,9 +14,8 @@ test('publishes the instance sampling settings', async ({ page }) => {
 
 	// Published from the Admin tab, which holds the decision and not the numbers.
 	await page.getByRole('tab', { name: 'Admin', exact: true }).click();
-	// The label, not the input: the app's switches are a visually hidden checkbox
-	// behind a drawn track, so there is nothing at the input's own coordinates and
-	// the label is what a finger lands on anyway.
+	// The label, not the input: the switches are a visually hidden checkbox behind a
+	// drawn track, so there is nothing at the input's own coordinates.
 	const share = page.getByText(/share your sampling settings/i);
 	await share.scrollIntoViewIfNeeded();
 	await share.click();

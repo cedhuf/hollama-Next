@@ -8,15 +8,12 @@
 	/**
 	 * When the instance refuses a turn, rather than the provider failing one.
 	 *
-	 * A toast is right for "the server did not answer": it is transient, it is
-	 * nobody's decision, and trying again is a reasonable next move. A refusal is
-	 * neither of those. Somebody decided this, trying again will do the same
-	 * thing, and what the person needs is who to ask, so it stops the page and
-	 * says so, with the address.
+	 * A toast is right for "the server did not answer": transient, nobody's
+	 * decision, and trying again is reasonable. A refusal is none of those, so it
+	 * stops the page and says who to ask, with the address.
 	 *
-	 * `AlertDialog` rather than `Dialog`, because that is what it is: a message
-	 * with one way out, focus trapped on it, and the escape hatch is
-	 * acknowledging it.
+	 * `AlertDialog` rather than `Dialog`: a message with one way out, focus trapped
+	 * on it, and acknowledging it is the escape hatch.
 	 */
 	interface Props {
 		open: boolean;
@@ -52,8 +49,7 @@
 
 			{#if detail}
 				<!-- The server's own words, quoted rather than paraphrased: one of the two
-				     refusals names the model that has no price, and that is the fact whoever
-				     reads this has to pass on. -->
+				     refusals names the model that has no price. -->
 				<p class="border-shade-3 bg-shade-0 text-muted rounded-md border px-3 py-2 text-xs">
 					{detail}
 				</p>

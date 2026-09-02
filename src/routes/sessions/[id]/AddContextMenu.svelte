@@ -22,16 +22,13 @@
 	/**
 	 * The one way to attach context to the next message.
 	 *
-	 * Two steps rather than one long list: a collection of knowledge can run to
-	 * hundreds of entries, and a dropdown that tries to show them all is a wall.
-	 * The first view names the kinds, the second one searches within a kind. It is
-	 * the pattern behind every command palette people already know, and it is what
-	 * lets a new kind (a PDF, a document) become one more row up front instead of
-	 * another list stapled to the same panel.
+	 * Two steps rather than one long list: a collection can run to hundreds of
+	 * entries, and a dropdown showing them all is a wall. The first view names the
+	 * kinds, the second searches within one, which is what lets a new kind become a
+	 * row up front instead of another list stapled to the same panel.
 	 *
-	 * A popover, not a menu: a menu captures the keyboard for its own typeahead,
-	 * which makes a search field inside one behave strangely. `Command` supplies
-	 * the filtering, the arrow keys and Enter.
+	 * A popover, not a menu: a menu captures the keyboard for its own typeahead.
+	 * `Command` supplies the filtering, the arrow keys and Enter.
 	 */
 	interface Props {
 		/** Knowledge not already attached. */
@@ -181,9 +178,8 @@
 						{knowledge.length ? $LL.searchEmpty() : $LL.emptyKnowledge()}
 					</Command.Empty>
 
-					<!-- A collection attaches as one gesture, which is what grouping was
-					     for. Its pieces stay separate pills afterwards, so any one of them
-					     can be taken back off. -->
+					<!-- A collection attaches as one gesture, which is what grouping was for. Its
+					     pieces stay separate pills, so any one can be taken back off. -->
 					{#each collections as collection (collection.id)}
 						{@const items = knowledge.filter((item) => item.collectionId === collection.id)}
 						{#if items.length}
@@ -211,8 +207,8 @@
 							<Brain class="text-muted h-4 w-4 shrink-0" />
 							<span class="min-w-0 flex-1 truncate">{item.name}</span>
 							{#if collection}
-								<!-- Which folder it came out of, so two similarly named pieces of
-								     knowledge are told apart without opening either. -->
+								<!-- Which folder it came out of, so two similarly named pieces of knowledge are
+								     told apart without opening either. -->
 								<span class="text-muted shrink-0 truncate text-[11px]">{collection.name}</span>
 							{/if}
 						</Command.Item>

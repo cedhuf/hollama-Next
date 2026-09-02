@@ -3,22 +3,13 @@ import type { Playbook } from '$lib/playbooks';
 import { getConfig, setConfig } from './config';
 
 /**
- * What an instance offers its users, which is two lists and not one.
+ * What an instance offers its users, which is two lists and not one. The
+ * personas' arrangement, for the same reason: sharing **their** playbook hands
+ * out something they wrote, sharing one **from the store** does not.
  *
- * The personas' arrangement, for the same reason it exists there. An admin
- * shares in two different senses: sharing **their** playbook means handing out
- * something they wrote, which lives in their library and which users get a copy
- * of; sharing one **from the store** means saying "this instance also offers
- * Meals for the week", which is not something they wrote at all.
- *
- * Collapsed into one list, the second became a copy of the store's playbook
- * sitting beside the store's playbook, and a copy freezes: the store's next
- * revision never reached the people who took the admin's.
- *
- * So a relay is a reference. `sharedPlaybooks` holds what an admin wrote;
- * `sharedCatalogPlaybookIds` holds the store ids they relay. Which also means an
- * admin can install one, rewrite half of it, and share that as their own, with
- * the store's original still listed beside it.
+ * As one list, the second became a copy sitting beside the store's own, and a
+ * copy freezes. So `sharedPlaybooks` holds what an admin wrote, and
+ * `sharedCatalogPlaybookIds` the store ids they relay.
  */
 const PLAYBOOKS = 'sharedPlaybooks';
 const CATALOG_IDS = 'sharedCatalogPlaybookIds';

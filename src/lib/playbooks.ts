@@ -6,16 +6,12 @@ import { generateRandomId } from '$lib/utils';
 /**
  * A way of doing something, written once and reused in any conversation.
  *
- * The other half of what a persona is, and deliberately not the same object: a
- * persona is *who* is answering, a playbook is *how* a job gets done. You do not
- * talk to a playbook, you switch one on.
+ * The other half of what a persona is, and not the same object: a persona is
+ * *who* is answering, a playbook is *how* a job gets done. Which is why it has
+ * no face: that space goes to the sentence saying when to use it.
  *
- * Which is why it has no face: the space a portrait would take is given to the
- * sentence saying when to use it.
- *
- * The instructions are Markdown and are the whole of it. No templating, no
- * variables, no steps the app interprets: what makes a playbook reusable is that
- * it is text a model reads.
+ * The instructions are Markdown and are the whole of it. No templating and no
+ * steps the app interprets: what makes one reusable is that it is text.
  */
 export interface Playbook {
 	id: string;

@@ -13,8 +13,8 @@
 	const CODE_SNIPPET_ID = 'code-snippet';
 
 	function normalizeMarkdown(content: string) {
-		// Some models cite with <cite id="3, 5">…</cite> instead of [3, 5]; normalise to
-		// brackets so the raw tag never leaks and the citation linkifier can handle them.
+		// Some models cite with <cite id="3, 5"> instead of [3, 5]: normalise, so the
+		// raw tag never leaks and the citation linkifier can handle them.
 		content = content.replace(
 			/<cite\b[^>]*?\bid=["']?([\d\s,]+?)["']?[^>]*>.*?<\/cite>/gis,
 			'[$1]'
@@ -27,8 +27,7 @@
 		content = content.replace(/\n\\\[/g, '\n\n\\[');
 		content = content.replace(/\\]\n/g, '\\]\n\n');
 
-		// Split on all math delimiters: \[...\], \(...\), and $...$
-		// Using [\s\S] instead of . to match across lines
+		// Split on every math delimiter. `[\s\S]` rather than `.`, to match across lines.
 		const parts = content.split(/(\$[^$]+\$|\\[([^)]+\\]|\\[\s\S]+?\\])/g);
 		content = parts
 			.map((part) => {
@@ -36,7 +35,7 @@
 				if (part.startsWith('$') || part.startsWith('\\[') || part.startsWith('\\(')) {
 					return part;
 				}
-				// Otherwise, wrap any \boxed commands in inline math
+				// Otherwise wrap any \boxed command in inline math.
 				return part.replace(/\\boxed\{((?:[^{}]|\{[^{}]*\})*)\}/g, '\\(\\boxed{$1}\\)');
 			})
 			.join('');
@@ -66,27 +65,16 @@
 		}
 	});
 
-	// Only turn explicit http(s) URLs into links. Fuzzy matching would linkify any
-	// `word.tld`, and plenty of prose about `main.py` or `config.sh` would become
-	// links to Paraguay.
+	// Only explicit http(s) URLs. Fuzzy matching would linkify any `word.tld`, and
+	// prose about `main.py` or `config.sh` would become links to Paraguay.
 	md.linkify.set({ fuzzyLink: false, fuzzyEmail: false, fuzzyIP: false });
 
-	// Indented code blocks off: in Markdown four leading spaces mean "code", and
-	// models indent constantly: nested bullets, sub-points, reasoning outlines.
-	// Prose was landing in a code block, which by design never wraps, so a
-	// paragraph became as wide as its longest line and had to be scrolled
-	// sideways to read. Fenced blocks (```) are unaffected, and they are how a
-	// model actually marks up code.
+	// Indented code blocks off: four leading spaces mean "code", and models indent
+	// constantly. Prose was landing in a code block, which never wraps, so a
+	// paragraph became as wide as its longest line. Fenced blocks are unaffected.
 	md.disable('code');
 
-	/**
-	 * A readable stand-in for a URL that is its own link text.
-	 *
-	 * A raw URL is often longer than a phone's column, so it wrapped across two or
-	 * three lines and buried the sentence around it. The host plus the last path
-	 * segment is what actually identifies a page; the rest is noise the `title`
-	 * (and the link itself) still carries.
-	 */
+	/** A raw URL is often longer than a phone's column and buried the sentence around it. The host plus the last path segment identifies the page; the `title` still carries the rest. */
 	function shortenUrl(url: string, max = 44): string {
 		try {
 			const parsed = new URL(url);
@@ -103,8 +91,7 @@
 		}
 	}
 
-	// Shorten the visible text of links that are just their own URL. Links with
-	// authored text are left alone: the author chose those words.
+	// Only links that are their own URL. Links with authored text are left alone.
 	md.core.ruler.push('shorten-urls', (state) => {
 		for (const block of state.tokens) {
 			if (block.type !== 'inline' || !block.children) continue;
@@ -127,9 +114,8 @@
 		delimiters: ['dollars', 'brackets', 'doxygen', 'gitlab', 'julia', 'kramdown', 'beg_end']
 	});
 
-	// Turn inline `[n]` (and `[n, m]` lists) into clickable citation links pointing at
-	// the n-th web source. Runs on already-tokenized text, so code spans and fenced
-	// blocks (which are separate token types) are never touched.
+	// Turn inline `[n]` into links to the n-th web source. Runs on already-tokenized
+	// text, so code spans and fenced blocks are never touched.
 	const CITE = /\[\s*\d{1,3}(?:\s*,\s*\d{1,3})*\s*\]/; // guard (non-global)
 	md.core.ruler.push('citations', (state) => {
 		if (!citations || citations.length === 0) return;
@@ -147,7 +133,7 @@
 				let linkified = false;
 				let match: RegExpExecArray | null;
 				while ((match = re.exec(text))) {
-					// Resolve each number in the bracket; skip ones we have no source for.
+					// Skip the numbers we have no source for.
 					const nums = match[1].split(',').map((n) => Number(n.trim()));
 					const resolved = nums.filter((n) => citations[n - 1]);
 					if (resolved.length === 0) continue; // leave the whole [..] as plain text
@@ -194,8 +180,8 @@
 
 <div class="markdown">
 	<!--
-		HACK: `{#if markdown}` is needed to prevent the `eslint-disable` comment from
-		getting formatted on auto-formatting.
+		HACK: `{#if markdown}` stops the `eslint-disable` comment being moved by the
+		auto-formatter.
 	-->
 	{#if markdown}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -206,9 +192,8 @@
 <style lang="postcss">
 	@reference "../../app.pcss";
 
-	/* As a flex child (of the message bubble), allow shrinking below content width
-	   so a long code line / table / URL scrolls or wraps instead of widening (and
-	   ultimately horizontally scrolling) the whole chat panel on mobile. */
+	/* As a flex child, allow shrinking below content width, so a long code line,
+	   table or URL scrolls or wraps rather than widening the whole chat panel. */
 	.markdown {
 		min-width: 0;
 		max-width: 100%;
@@ -222,9 +207,8 @@
 		@apply mb-0;
 	}
 
-	/* Headings: a restrained, monotonic scale tuned for chat answers (close to
-	   ChatGPT/Claude): strong colour, tight tracking, more space above than below
-	   so a heading hugs the text it introduces. No width cap (it forced odd wraps). */
+	/* A restrained, monotonic scale for chat answers: strong colour, tight tracking,
+	   more space above than below, so a heading hugs the text it introduces. */
 	.markdown :global(h1),
 	.markdown :global(h2),
 	.markdown :global(h3),
@@ -270,15 +254,11 @@
 		overflow-wrap: break-word;
 	}
 
-	/* Reasoning is an aside, not the answer, and has to read as one at a glance.
-	   The rules above set an absolute size, so the container's `text-xs` was
-	   overridden and the two ended up identical in size and weight: the left rule
-	   alone wasn't carrying the hierarchy. Stepped down a size and desaturated
-	   here, where the specificity is enough to win. */
+	/* Reasoning is an aside and has to read as one. The rules above set an absolute
+	   size, so the container's `text-xs` was overridden and the two ended up
+	   identical: the left rule alone was not carrying the hierarchy. */
 	/* `.markdown--aside` is the same treatment under a name that does not claim to
-	   be about reasoning: a compaction summary is an aside for the same reason and
-	   wants the same size. The reasoning class stays because it is what the
-	   existing markup and the test suite reach for. */
+	   be about reasoning: a compaction summary wants the same size. */
 	:global(.article--reasoning) .markdown :global(p),
 	:global(.article--reasoning) .markdown :global(li),
 	:global(.article--reasoning) .markdown :global(strong),
@@ -306,8 +286,8 @@
 		@apply text-muted mt-3 mb-0.5 text-xs font-medium;
 	}
 
-	/* Lists: indent with left padding (so markers sit in the gutter and nested
-	   lists step in cleanly) rather than symmetric margins. */
+	/* Indent with left padding, so markers sit in the gutter and nested lists step
+	   in cleanly. */
 	.markdown :global(ul),
 	.markdown :global(ol) {
 		@apply my-3 list-outside pl-6;
@@ -357,8 +337,8 @@
 
 	.markdown :global(a) {
 		@apply text-link;
-		/* Belt and braces for the links we don't shorten (authored text, or a URL
-		   still long after eliding): break inside rather than push the bubble wide. */
+		/* For the links we do not shorten: break inside rather than push the bubble
+				   wide. */
 		overflow-wrap: anywhere;
 	}
 
@@ -372,10 +352,9 @@
 		@apply bg-accent/20;
 	}
 
-	/* Wide tables scroll inside their own block instead of stretching the bubble and
-	   pushing the whole chat panel into a horizontal scroll (GitHub/ChatGPT pattern).
-	   `display: block` + `width: max-content` lets the table size to its content, while
-	   `max-width: 100%` caps it to the bubble and turns on the internal scrollbar. */
+	/* Wide tables scroll inside their own block rather than pushing the whole chat
+	   panel sideways. `display: block` plus `width: max-content` sizes the table to
+	   its content, `max-width: 100%` caps it and turns on the scrollbar. */
 	.markdown :global(table) {
 		@apply overflow-scrollbar my-4 border-separate border-spacing-0 rounded-md text-sm;
 		display: block;
@@ -383,8 +362,7 @@
 		max-width: 100%;
 	}
 
-	/* Long display-math equations scroll inside their own block instead of
-	   overflowing the bubble (same rationale as wide code/tables). */
+	/* Long display maths scrolls inside its own block, like wide code and tables. */
 	.markdown :global(.katex-display) {
 		@apply overflow-scrollbar;
 		max-width: 100%;
@@ -439,8 +417,8 @@
 		overflow-wrap: anywhere;
 	}
 
-	/* Code block: readable default colour (highlight.js token spans override per
-	   token, set in app.pcss); keep lines intact so they scroll, never wrap. */
+	/* Readable default colour; highlight.js token spans override per token in
+	   app.pcss. Lines stay intact so they scroll rather than wrap. */
 	.markdown :global(pre code) {
 		@apply bg-shade-0/50 block p-4 pr-12 text-xs;
 		@apply md:text-sm;
@@ -461,8 +439,8 @@
 		@apply bg-shade-1 absolute top-2 right-2 rounded-md;
 	}
 
-	/* Fading it out until hover only makes sense where hovering exists. On touch it
-	   stays put: otherwise a code block or shell command can never be copied. */
+	/* Fading it out until hover only makes sense where hovering exists: on touch a
+	   code block could never be copied. */
 	@media (hover: hover) {
 		.markdown :global(pre > .copy-button) {
 			@apply opacity-0 transition-opacity;

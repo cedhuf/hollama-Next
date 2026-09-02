@@ -33,11 +33,10 @@
 
 	let { sessions, q, personaById, hasPersonaMatches, onScroll }: Props = $props();
 
-	// Collapsing the column takes this list with it, and expanding builds another
-	// one, at the top. The watcher outlives both, so it is told here, where the new
-	// scroller appears, that nothing it remembers describes this one. Otherwise the
-	// column comes back folded over a list nobody has scrolled, and the fold has to
-	// be undone by hand, down and back up.
+	// Collapsing the column takes this list with it, and expanding builds another at
+	// the top. The watcher outlives both, so it is told here that nothing it
+	// remembers describes this scroller. Otherwise the column comes back folded over
+	// a list nobody has scrolled.
 	$effect(() => {
 		onScroll?.reset();
 	});
@@ -81,11 +80,9 @@
 	}
 </script>
 
-<!-- Between the panes rather than under them, which is the whole of it: nothing
-     passes beneath anything, so no clearance has to be measured, no padding stands
-     in for a pane, and the scrollbar belongs to this box alone instead of running
-     the height of the column. What the translucency reveals is the wallpaper, which
-     is the only thing behind the column worth revealing. -->
+<!-- Between the panes rather than under them: nothing passes beneath anything,
+     so no clearance is measured, no padding stands in for a pane, and the
+     scrollbar belongs to this box rather than the height of the column. -->
 <div
 	bind:this={el}
 	onscroll={handleScroll}
@@ -94,16 +91,15 @@
 >
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`.
 	     Sideways overflow is hidden rather than scrolled, since while the column
-	     narrows this box is wider than what holds it and a scrollbar would appear for
-	     the length of the animation. -->
+	     narrows this box is wider than what holds it. -->
 	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-96">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
 				<p class="text-muted px-2 py-1 text-[11px] font-semibold tracking-wider uppercase">
 					{groupLabel(group.key)}
 				</p>
-				<!-- A hair of space between rows: hovering the neighbour of the active
-			     session used to butt two rounded highlights against each other. -->
+				<!-- A hair of space between rows: hovering the neighbour of the active session
+				     used to butt two rounded highlights against each other. -->
 				<div class="flex flex-col gap-0.5">
 					{#each group.sessions as session (session.id)}
 						{@const persona = session.personaId ? personaById[session.personaId] : undefined}
@@ -129,10 +125,9 @@
 			<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
 		{/if}
 
-		<!-- At the foot of the list, because that is where you are once you have
-		     scrolled past everything you actually have. Quiet, and absent entirely
-		     when there is nothing in it: a permanent link to an empty room is a
-		     control that teaches nothing. -->
+		<!-- At the foot of the list, where you are once you have scrolled past
+		     everything. Absent entirely when there is nothing in it: a permanent link to
+		     an empty room teaches nothing. -->
 		{#if archivedCount > 0 && !q}
 			<button
 				type="button"

@@ -23,7 +23,7 @@
 
 	const imagesCfg = $derived($chatDefaultsConfig.images);
 
-	// Show the section unless we're a server user with nothing configured yet.
+	// Shown unless this is a server user with nothing configured yet.
 	const showSearch = $derived($searchConfig.editable || $searchConfig.available);
 	const canOverride = $derived(
 		$searchConfig.editable && $searchConfig.source === 'user' && !!$searchConfig.adminUrl
@@ -33,12 +33,7 @@
 		$settingsStore.searchUrl = '';
 	}
 
-	/**
-	 * The persona store's address, which belongs to whoever owns the instance.
-	 *
-	 * The instance's rather than each person's, fetched by the server, so it is
-	 * shown to everyone and writable only by an admin.
-	 */
+	/** The instance's rather than each person's, fetched by the server, so it is shown to everyone and writable only by an admin. */
 	const storeEditable = $derived($personasConfig.canEditStore);
 	const storeValue = $derived($personasConfig.storeUrl);
 
@@ -155,9 +150,8 @@
 				</SettingsField>
 			{/if}
 		{:else}
-			<!-- Locked by the admin: the run applies the same policy when it resolves
-			     its tools, so this is a statement of fact rather than a disabled
-			     control. -->
+			<!-- Locked by the admin: the run applies the same policy when it resolves its
+			     tools, so this is a statement of fact rather than a disabled control. -->
 			<div class="flex items-center gap-2">
 				<SettingsBadge>{$LL.sharedByAdminBadge()}</SettingsBadge>
 				<span class="text-muted text-xs">
@@ -171,8 +165,7 @@
 	</SettingsSection>
 
 	<!-- Tools that are not ours, after the ones that are. They are configured the
-	     way a connection is, so the section brings its own cards rather than
-	     living inside this file's list of switches. -->
+	     way a connection is, so the section brings its own cards. -->
 	<McpServers />
 
 	<!-- The store, once: one address serves every catalogue under it, so mirroring
@@ -198,8 +191,8 @@
 	</SettingsSection>
 
 	<SettingsSection title={$LL.personas()} description={$LL.personaStoreDescription()} card>
-		<!-- Forced by the instance: shown as on and not offered, rather than hidden,
-		     so the behaviour is explained rather than merely happening. -->
+		<!-- Forced by the instance: shown as on and not offered, rather than hidden, so
+		     the behaviour is explained rather than merely happening. -->
 		<FieldCheckbox
 			label={$LL.personaAutoUpdate()}
 			checked={$personasConfig.autoUpdateForced || $settingsStore.personaAutoUpdate}
@@ -213,7 +206,7 @@
 		</SettingsHint>
 
 		<!-- Only about several in one message: calling one persona is unaffected, and
-		     calling them in separate messages was always sequential by definition. -->
+		     calling them in separate messages was always sequential. -->
 		<FieldCheckbox
 			label={$LL.mentionsSequential()}
 			bind:checked={$settingsStore.mentionsSequential}
@@ -239,9 +232,9 @@
 
 			{#if $settingsStore.documentsEnabled}
 				<FieldCheckbox label={$LL.documentOcrToggle()} bind:checked={$settingsStore.documentOcr} />
-				<!-- The disclaimer is the point of this block: OCR is the one part of
-				     document reading that is slow, approximate, and, unless the instance
-				     hosts the engine itself, fetched from elsewhere on first use. -->
+				<!-- The disclaimer is the point of this block: OCR is the one part of document
+				     reading that is slow, approximate, and, unless the instance hosts the engine,
+				     fetched from elsewhere on first use. -->
 				<SettingsHint>{$LL.documentOcrHelp()}</SettingsHint>
 
 				{#if $settingsStore.documentOcr}
@@ -258,9 +251,8 @@
 		</SettingsSection>
 	{/if}
 
-	<!-- Only where drawing is possible at all. The gallery already hides itself on
-	     the same three conditions; a settings section for a feature with no page
-	     behind it would be the one place it still looked available. -->
+	<!-- Only where drawing is possible at all: a settings section for a feature with
+	     no page behind it would be the one place it still looked available. -->
 	{#if $canDrawImages}
 		<SettingsSection title={$LL.images()} description={$LL.imagesSettingsDescription()} card>
 			{#snippet badge()}
@@ -279,18 +271,17 @@
 					/>
 				</SettingsField>
 
-				<!-- A switch turns it off, and the field below says which model does it.
-				     Blank there means the model you normally use, like every other model
-				     field in the app. -->
+				<!-- A switch turns it off, and the field below says which model does it. Blank
+				     there means the model you normally use, like every other model field. -->
 				<FieldCheckbox
 					label={$LL.imagePromptWriter()}
 					bind:checked={$settingsStore.imagePromptWriter}
 				/>
 				<SettingsHint>{$LL.imagePromptWriterHelp()}</SettingsHint>
 
-				<!-- On by default, unlike the writer above it, and the two are not the same
-				     trade: a rewrite changes what gets drawn, a title changes nothing and
-				     costs a dozen tokens beside a request billed by the minute. -->
+				<!-- On by default, unlike the writer above it: a rewrite changes what gets
+				     drawn, a title changes nothing and costs a dozen tokens beside a request
+				     billed by the minute. -->
 				<FieldCheckbox label={$LL.imageAutoTitle()} bind:checked={$settingsStore.imageAutoTitle} />
 				<SettingsHint>{$LL.imageAutoTitleHelp()}</SettingsHint>
 
@@ -325,8 +316,7 @@
 	{/if}
 
 	<!-- No description: the title names the thing and the switch says what it does.
-	     A third sentence explaining why a model needs telling the date is a page of
-	     the documentation, not a line of this one. -->
+	     Why a model needs telling the date is a page of the documentation. -->
 	<SettingsSection title={$LL.currentDateTitle()} card>
 		<FieldCheckbox label={$LL.currentDateToggle()} bind:checked={$settingsStore.sendCurrentDate} />
 	</SettingsSection>

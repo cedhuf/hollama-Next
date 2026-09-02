@@ -10,7 +10,7 @@ export const load = async ({ url, locals }) => {
 
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
-	// Already signed in → go straight to the target. Asked of the database, like
+	// Already signed in: go straight to the target. Asked of the database, like
 	// the guard that sent us here: a session whose user is gone has to read as
 	// signed out on both sides, or the two bounce the browser between them.
 	const { sessionUser } = await import('$lib/server/session');

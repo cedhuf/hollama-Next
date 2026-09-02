@@ -8,14 +8,7 @@
 	import { resolveSessionTitle } from '$lib/sessions';
 	import { formatTimestampToNow } from '$lib/utils';
 
-	/**
-	 * Every conversation, newest first.
-	 *
-	 * A list and nothing else. The home screen shows the last few because that is
-	 * what somebody opening the app wants; this is where they come when the one
-	 * they want is not among them, and the only thing it owes them is to be
-	 * complete and quick to scan.
-	 */
+	/** A list and nothing else: the home screen shows the last few, and this is where somebody comes when the one they want is not among them. */
 	const sessions = $derived($sessionsStore ?? []);
 </script>
 

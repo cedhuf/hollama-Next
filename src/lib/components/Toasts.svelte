@@ -3,12 +3,10 @@
 	import { Toaster } from 'svelte-sonner';
 
 	// The app's only toast surface. One position, one card: the severity shows in
-	// the icon rather than in a full-width coloured banner, so a success and a
-	// failure sit in the same place and read the same way. What is written inside
-	// the card is `ToastBody.svelte`.
+	// the icon rather than a full-width banner. What is written inside the card is
+	// `ToastBody.svelte`.
 	//
-	// Nothing else in the app should mount a `Toaster` or reach for its options.
-	// Raise notifications through `$lib/toast`.
+	// Nothing else should mount a `Toaster`. Raise notifications through `$lib/toast`.
 </script>
 
 <Toaster

@@ -6,8 +6,8 @@ import { readApiRoutes } from './api-routes.mjs';
 /**
  * Fails when the API and its OpenAPI spec have drifted apart.
  *
- * This checks the *surface* — which endpoints exist and which methods they
- * answer — not the shape of what they send back. It cannot tell you a response
+ * This checks the *surface*, which endpoints exist and which methods they
+ * answer, not the shape of what they send back. It cannot tell you a response
  * field was renamed. What it does catch is the failure that actually happens:
  * an endpoint added, moved or deleted, and nobody updated the spec.
  *

@@ -5,12 +5,9 @@
 		title: string;
 		description?: string;
 		/**
-		 * Render as a bordered card.
-		 *
-		 * The rule, so it stays consistent: set it when the section holds plain
-		 * controls: the frame is what groups them. Leave it off when the section
-		 * hosts its own bordered children (connection cards, per-model prompts, the
-		 * data rows): a box inside a box flattens the hierarchy instead of showing it.
+		 * Render as a bordered card. Set it when the section holds plain controls, since
+		 * the frame is what groups them. Leave it off when the section hosts its own
+		 * bordered children: a box inside a box flattens the hierarchy.
 		 */
 		card?: boolean;
 		/** Optional content beside the title (e.g. a status badge). */

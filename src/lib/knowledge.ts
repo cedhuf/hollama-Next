@@ -13,29 +13,21 @@ export interface Knowledge {
 }
 
 /**
- * A named group of knowledge.
+ * A named group of knowledge. The two words were being used for the same thing:
+ * a *knowledge* is one body of text, a *collection* is a set of them, and
+ * attaching a collection attaches everything in it.
  *
- * The two words were being used for the same thing, which made both of them
- * mean nothing: a *knowledge* is one body of text, a *collection* is a set of
- * them. Attaching a collection attaches everything in it, which is the whole
- * point of grouping them in the first place.
- *
- * Collections live in the user's settings rather than in a store of their own.
- * They are three fields and a name, they belong to whoever owns the knowledge,
- * and keeping them there means no new table, no new endpoint and no migration,
- * in either running mode. An empty collection survives, which a folder implied
- * by its contents could not.
+ * They live in the user's settings rather than a store of their own: three
+ * fields and a name, belonging to whoever owns the knowledge, so no new table,
+ * endpoint or migration. An empty collection survives, which a folder implied by
+ * its contents could not.
  */
 export interface KnowledgeCollection {
 	id: string;
 	name: string;
 }
 
-/**
- * Parse an imported JSON file into knowledge items. Accepts a single object or
- * an array, and tolerates a few common field names (name/title, content/text)
- * so files from elsewhere still import.
- */
+/** Accepts a single object or an array, and tolerates a few common field names (name/title, content/text), so files from elsewhere still import. */
 export function parseKnowledgeImport(data: unknown): Knowledge[] {
 	const items = Array.isArray(data) ? data : [data];
 	const out: Knowledge[] = [];
@@ -59,17 +51,14 @@ export function parseKnowledgeImport(data: unknown): Knowledge[] {
 export const loadKnowledge = (id: string): Knowledge => {
 	let knowledge: Knowledge | null = null;
 
-	// Retrieve the current knowledges
 	const currentKnowledges = get(knowledgeStore);
 
-	// Find the knowledge with the given id
 	if (currentKnowledges) {
 		const existingKnowledge = currentKnowledges.find((s) => s.id === id);
 		if (existingKnowledge) knowledge = existingKnowledge;
 	}
 
 	if (!knowledge) {
-		// Create a new knowledge
 		knowledge = { id, name: '', content: '', updatedAt: new Date().toISOString() };
 	}
 
@@ -100,13 +89,7 @@ export function renameCollection(id: string, name: string): void {
 	}));
 }
 
-/**
- * Remove a collection, keeping everything that was in it.
- *
- * A collection is a way of arranging knowledge, not a container that owns it.
- * Deleting the arrangement and taking the contents with it is the kind of
- * surprise nobody forgives, so its knowledge simply becomes loose again.
- */
+/** A collection arranges knowledge, it does not own it: deleting the arrangement and taking the contents with it is the kind of surprise nobody forgives, so its knowledge becomes loose again. */
 export function deleteCollection(id: string): void {
 	settingsStore.update((settings) => ({
 		...settings,

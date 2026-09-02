@@ -12,13 +12,11 @@
 	 * What the conversation was carrying when someone asked.
 	 *
 	 * Open on arrival, and open again whenever it is read: unlike the other two
-	 * notes, the panel *is* the note. A compaction pill says what happened and
-	 * hides the summary because the summary is not why you are here; this one has
-	 * nothing to say from the outside except a total, and folding it by default
-	 * would mean the command answers with a closed box.
+	 * notes, the panel *is* the note, so folding it would mean the command answers
+	 * with a closed box.
 	 *
-	 * Every figure is an estimate, which the footer says once rather than a tilde
-	 * on each line.
+	 * Every figure is an estimate, which the footer says once rather than a tilde on
+	 * each line.
 	 */
 	interface Props {
 		note: ContextNote;
@@ -76,9 +74,8 @@
 				</span>
 			</div>
 
-			<!-- One bar for the whole request, cut into what it is made of. The three
-			     shares are of the limit, not of each other, so the empty end of the bar
-			     is the room left. -->
+			<!-- One bar for the whole request, cut into what it is made of. The three shares
+			     are of the limit, not of each other, so the empty end is the room left. -->
 			<div class="bg-shade-3 flex h-1.5 overflow-hidden rounded-full">
 				{#each parts as part (part.key)}
 					<div
@@ -105,9 +102,8 @@
 				<p class="truncate">{note.model}</p>
 			{/if}
 			{#if note.heaviest}
-				<!-- The one message that weighs the most, because a context that filled
-				     up unexpectedly is nearly always one file somebody pasted, and a
-				     total alone gives no way to find it. -->
+				<!-- The one message that weighs the most: a context that filled up unexpectedly
+				     is nearly always one file somebody pasted. -->
 				<p class="flex items-baseline gap-2">
 					<span class="min-w-0 flex-1 truncate">
 						{$LL.contextHeaviest()}

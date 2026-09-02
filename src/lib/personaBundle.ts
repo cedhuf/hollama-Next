@@ -14,16 +14,12 @@ import {
 import { generateRandomId } from '$lib/utils';
 
 /**
- * What a persona looks like when it travels.
- *
- * Deliberately not a `Persona`: the stored record is an account of one install,
- * which means nothing to whoever receives it, and its `knowledgeIds` pointed at
- * documents the recipient did not have. A bundle carries what was written, its
- * documents included, by content.
+ * What a persona looks like when it travels. Not a `Persona`: the stored record
+ * is an account of one install, and its `knowledgeIds` pointed at documents the
+ * recipient did not have. A bundle carries what was written, by content.
  *
  * `modelName` is absent on purpose: a model named in a bundle is wrong for
- * almost everyone who reads it and stale for the rest. Installing uses your
- * default.
+ * almost everyone who reads it. Installing uses your default.
  */
 export const PERSONA_BUNDLE_FORMAT = 'llooma.persona';
 export const PERSONA_BUNDLE_VERSION = 1;

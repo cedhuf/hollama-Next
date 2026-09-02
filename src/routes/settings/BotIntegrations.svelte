@@ -26,14 +26,7 @@
 	import SettingsPanel from './SettingsPanel.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
-	/**
-	 * Bots that answer somewhere else.
-	 *
-	 * Built the way the connections tab is built, on purpose: a list of cards and
-	 * a folded form to add one. Adding is two steps, which service and then what
-	 * it needs, so the day there is a second service the picker grows a row and
-	 * nothing else here changes.
-	 */
+	/** Built the way the connections tab is: a list of cards and a folded form. Adding is two steps, so the day there is a second service the picker grows a row and nothing else changes. */
 
 	/** What each kind is called, and what it wants before it can be saved. */
 	const KINDS: Record<IntegrationKind, { name: string; placeholder: string }> = {
@@ -43,21 +36,10 @@
 	let integrations = $state<IntegrationView[]>([]);
 	let loading = $state(true);
 
-	/**
-	 * Everybody's bots, for an administrator, and only as a roster.
-	 *
-	 * The counterpart of letting people run their own: two questions answered,
-	 * what is running and on whose account, and two actions, switch it off and
-	 * remove it. Not a second editor, because how a bot answers belongs to the
-	 * person who configured it.
-	 */
+	/** The counterpart of letting people run their own: what is running and on whose account, with two actions. Not a second editor, because how a bot answers belongs to whoever configured it. */
 	let allBots = $state<(IntegrationView & { owner: string })[]>([]);
 
-	/**
-	 * The instance's ceilings, which an administrator sets here rather than in
-	 * Admin: they are not a permission. They apply to every account including the
-	 * one reading them, and what they protect is the machine and the bill.
-	 */
+	/** The instance's ceilings, set here rather than in Admin because they are not a permission: they apply to every account including the one reading them. */
 	let botsPerUser = $state(DEFAULT_BOTS_PER_USER);
 	let botRepliesPerHour = $state(DEFAULT_BOT_REPLIES_PER_HOUR);
 
@@ -110,8 +92,7 @@
 
 	async function saveLimits() {
 		await api('/api/admin/config', 'PUT', { botsPerUser, botRepliesPerHour });
-		// The add form appears and disappears on this figure, and it is read from
-		// the boot-time answer rather than from here.
+		// The add form appears on this figure, read from the boot-time answer.
 		await loadIntegrationsConfig();
 	}
 
@@ -120,23 +101,16 @@
 			const response = await fetch('/api/admin/integrations');
 			if (response.ok) allBots = await response.json();
 		} catch {
-			// A roster that will not load is not worth an error over the tab that
-			// works: the administrator's own bots above are unaffected.
+			// A roster that will not load is not worth an error over the tab that works.
 		}
 	}
 
-	/**
-	 * Suspend a bot, or lift the suspension.
-	 *
-	 * The switch reads as "allowed", so it is on when nothing is blocking it.
-	 * What it writes is the instance's decision, never the owner's: their own
-	 * switch stays exactly where they left it.
-	 */
+	/** The switch reads as "allowed", so it is on when nothing is blocking it. What it writes is the instance's decision, never the owner's. */
 	async function setBotAllowed(bot: IntegrationView, allowed: boolean) {
 		await api(`/api/admin/integrations/${bot.id}`, 'PUT', { blocked: !allowed });
 		await loadAllBots();
-		// An administrator's own bot appears in both lists, and the card above
-		// would otherwise keep showing a state it no longer reflects.
+		// An administrator's own bot appears in both lists, and the card above would
+		// otherwise keep showing a state it no longer reflects.
 		integrations = integrations.map((own) =>
 			own.id === bot.id ? { ...own, blocked: !allowed } : own
 		);
@@ -160,8 +134,8 @@
 		if (!chosen || !draft.baseUrl.trim() || !draft.secret.trim()) return;
 		creating = true;
 		try {
-			// Checked before it is stored, so a wrong key is a message rather than a
-			// card that sits there failing quietly in a log nobody is reading.
+			// Checked before it is stored, so a wrong key is a message rather than a card
+			// failing quietly in a log nobody reads.
 			const verdict = await api<{ ok: boolean; detail?: string; error?: string }>(
 				'/api/integrations/verify',
 				'POST',
@@ -179,9 +153,8 @@
 			const created = await api<IntegrationView>('/api/integrations', 'POST', {
 				kind: chosen,
 				label: draft.label.trim() || KINDS[chosen].name,
-				// On, because somebody who has just proved a connection wants the bot,
-				// not a second switch to find. It still does not run until a model is
-				// chosen, and the card says so where the switch is.
+				// On, because somebody who has just proved a connection wants the bot. It still
+				// does not run until a model is chosen, and the card says so.
 				enabled: true,
 				secret: draft.secret,
 				config: { ...defaultConfig(chosen), baseUrl: draft.baseUrl }
@@ -282,8 +255,8 @@
 			{:else}
 				<div class="border-shade-4 flex flex-col gap-3 rounded-xl border border-dashed p-4">
 					{#if !chosen}
-						<!-- One row today. It is a list because the second service is the
-						     reason this whole layer exists, not because one needs choosing. -->
+						<!-- One row today. It is a list because the second service is the reason this
+						     layer exists, not because one needs choosing. -->
 						<div class="flex flex-col gap-2">
 							{#each INTEGRATION_KINDS as kind (kind)}
 								<button
@@ -326,8 +299,8 @@
 							</button>
 						</div>
 
-						<!-- Only what it takes to prove the connection. Everything else is on
-						     the card, which opens as soon as this succeeds. -->
+						<!-- Only what it takes to prove the connection. Everything else is on the card,
+						     which opens as soon as this succeeds. -->
 						<SettingsField label={$LL.chattoServer()}>
 							<input
 								class="settings-field font-mono text-xs"
@@ -369,8 +342,8 @@
 		<p class="text-muted text-xs">{$LL.botLimitReached()}</p>
 	{/if}
 
-	<!-- The rest of the tab is an administrator's, and it is two things: what
-	     everybody may have, and what everybody is running. -->
+	<!-- The rest of the tab is an administrator's: what everybody may have, and what
+	     everybody is running. -->
 	{#if !loading && $integrationsConfig.isAdmin}
 		<SettingsSection title={$LL.botLimits()} description={$LL.botLimitsHint()} card>
 			<div class="flex flex-wrap items-end gap-3">

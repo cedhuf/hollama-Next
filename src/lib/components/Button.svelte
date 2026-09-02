@@ -11,7 +11,7 @@
 		class?: string;
 		onclick?: (event: MouseEvent) => void;
 		children?: Snippet;
-		/** Pass-through attributes (title, disabled, data-testid, aria-*, …). */
+		/** Pass-through attributes: title, disabled, data-testid, aria-*, and the rest. */
 		[key: string]: unknown;
 	}
 

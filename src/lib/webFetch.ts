@@ -1,12 +1,6 @@
 import { writable } from 'svelte/store';
 
-/**
- * Reading the pages a message links to.
- *
- * Web search hands the model titles and snippets (a sentence or two, sometimes
- * marketing copy) and asks it to write a factual answer from that. This closes
- * the gap: when the user names a URL, the model gets the page.
- */
+/** Web search hands the model a sentence or two per result and asks for a factual answer. This closes the gap: when the user names a URL, the model gets the page. */
 
 export interface WebFetchConfig {
 	available: boolean;

@@ -28,12 +28,7 @@ export function toAdminView(row: ServerRow) {
 	};
 }
 
-/**
- * The custom display names for the models a caller is actually allowed to see.
- *
- * Labels are keyed by model id, so handing over the whole map would disclose the
- * ids of models a user isn't offered: hence the filter through the visible list.
- */
+/** Labels are keyed by model id, so handing over the whole map would disclose the ids of models a user is not offered. */
 export function pickModelLabels(serverId: string, models: string[]): Record<string, string> {
 	const all = getModelLabels(serverId);
 	const visible: Record<string, string> = {};
@@ -41,11 +36,7 @@ export function pickModelLabels(serverId: string, models: string[]): Record<stri
 	return visible;
 }
 
-/**
- * The kinds of the models a caller may see, filtered for the same reason the
- * labels are: the map is keyed by model id, and handing it over whole would name
- * models this account was never offered.
- */
+/** Filtered for the same reason the labels are: the map is keyed by model id, and handing it over whole would name models this account was never offered. */
 export function pickModelKinds(serverId: string, models: string[]) {
 	const all = getModelKinds(serverId);
 	const visible: Record<string, (typeof all)[string]> = {};
@@ -53,11 +44,7 @@ export function pickModelKinds(serverId: string, models: string[]) {
 	return visible;
 }
 
-/**
- * User-facing view of a usable provider. System servers expose only the
- * admin-curated shared models and hide their endpoint; personal servers show
- * their own config (still never the key).
- */
+/** System servers expose only the admin-curated shared models and hide their endpoint; personal servers show their own config, still never the key. */
 export function toProviderView(row: ServerRow) {
 	if (row.owner_user_id === null) {
 		return {
@@ -69,11 +56,9 @@ export function toProviderView(row: ServerRow) {
 			verifiedAt: row.verified_at,
 			color: row.color,
 			models: getSharedModels(row.id),
-			// Not a secret, unlike the endpoint and the key: these say how the machine
-			// loads a model, and a client-side helper call (a summary, a title) has to
-			// build the same request the server would. Withholding them would mean the
-			// same connection loaded two different ways depending on which side of the
-			// app happened to ask.
+			// Not a secret, unlike the endpoint and the key: these say how the machine loads
+			// a model, and a client-side helper call has to build the same request the
+			// server would. Withholding them would load one connection two different ways.
 			loadOptions: parseLoadOptions(row.load_options)
 		};
 	}

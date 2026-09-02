@@ -9,15 +9,13 @@
 	import { VoiceRecorder } from '$lib/voice.svelte';
 
 	/**
-	 * The composer, for a phone.
+	 * The composer, for a phone: a field, a microphone and a send key.
 	 *
-	 * A field, a microphone and a send key. Not the desktop one, which carries
-	 * slash commands, mentions, attachments, the tool switches and an expanding
-	 * editor: every one of those earns its place on a screen with room for them,
-	 * and none of them is what somebody standing at a bus stop is doing.
+	 * Not the desktop one, which carries slash commands, mentions, attachments, the
+	 * tool switches and an expanding editor. Every one of those earns its place on a
+	 * screen with room for them, and none is what somebody at a bus stop is doing.
 	 *
-	 * It drives the same conversation object as the desktop composer. Nothing about
-	 * a turn is decided here.
+	 * It drives the same conversation object. Nothing about a turn is decided here.
 	 */
 	interface Props {
 		editor: Editor;
@@ -42,11 +40,7 @@
 		});
 	}
 
-	/**
-	 * Enter sends, because there is no Enter on a phone keyboard that means
-	 * anything else: the return key on a single-line field is the send key, and a
-	 * new paragraph is what the dictation and the desktop are for.
-	 */
+	/** Enter sends, because there is no Enter on a phone keyboard that means anything else: a new paragraph is what the dictation and the desktop are for. */
 	function onKeyDown(event: KeyboardEvent) {
 		if (event.key !== 'Enter' || event.shiftKey) return;
 		event.preventDefault();
@@ -56,8 +50,7 @@
 
 <div class="glass flex items-end gap-2 rounded-3xl p-2">
 	<!-- Everything that is not typing, behind one key: attachments, the camera and
-	     the rest land here as they are built, rather than each taking a corner of a
-	     bar this narrow. -->
+	     the rest land here as they are built. -->
 	<button
 		type="button"
 		onclick={() => goto(resolve('/m/voice'))}
@@ -94,9 +87,8 @@
 			{/if}
 		</button>
 	{:else}
-		<!-- The send key takes the microphone's place once there is something to
-		     send: two keys side by side, one of them always inert, is a choice
-		     nobody asked to make. -->
+		<!-- The send key takes the microphone's place once there is something to send:
+		     two keys side by side, one always inert, is a choice nobody asked to make. -->
 		<button
 			type="button"
 			onclick={onSubmit}

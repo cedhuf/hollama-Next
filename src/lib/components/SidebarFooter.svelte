@@ -13,9 +13,8 @@
 
 	let { rail }: Props = $props();
 
-	// A connection that is enabled and has answered at least once. The providers an
-	// instance hands out arrive already verified, so this reads as "is there
-	// anything to talk to" rather than "did you finish setting one up".
+	// A connection that is enabled and has answered once. The providers an instance
+	// hands out arrive verified, so this reads as "is there anything to talk to".
 	const connected = $derived($serversStore.some((s) => s.isEnabled && s.isVerified));
 	const hasName = $derived(!!($settingsStore.profileFirstName || $settingsStore.profileLastName));
 
@@ -26,11 +25,10 @@
 	}
 </script>
 
-<!-- The same 2rem the mark occupies at the other end of the column, and not by
-     coincidence. The rail centres what it holds; the open column starts it at the
-     gutter. An element only sits in the same place under both rules when its width
-     matches the gutter on either side of it, which is why the mark never moved and
-     why the avatar, four pixels wider, did. -->
+<!-- The same 2rem the mark occupies at the other end of the column. The rail
+     centres what it holds and the open column starts it at the gutter, so an
+     element only lands in the same place under both when its width matches that
+     gutter: the mark never moved, the avatar, four pixels wider, did. -->
 {#snippet avatar()}
 	{#if hasName}
 		<div
@@ -63,11 +61,10 @@
 	></span>
 {/snippet}
 
-<!-- The dot hangs off the avatar's corner, so it is the avatar that has to be the
-     positioning context. Given to the surrounding button instead, it would sit in
-     the corner of whatever that button happens to measure, which is not the same
-     box in the rail as it is in the open column. Hence one snippet for the pair
-     rather than two places that have to agree. -->
+<!-- The dot hangs off the avatar's corner, so the avatar has to be the
+     positioning context: given to the surrounding button it would sit in the
+     corner of whatever that button measures, which differs between the rail and
+     the open column. Hence one snippet for the pair. -->
 {#snippet identity()}
 	<span class="relative shrink-0">
 		{@render avatar()}
@@ -95,9 +92,8 @@
 				</button>
 			</div>
 		{:else}
-			<!-- Labelled explicitly: otherwise the accessible name is whatever its
-		     children happen to concatenate to ("No server connected Settings
-		     Administrator"), which announces badly and is unusable as a handle. -->
+			<!-- Labelled explicitly, or the accessible name is whatever its children happen
+			     to concatenate to, which announces badly and is unusable as a handle. -->
 			<button
 				onclick={() => ($settingsModalOpen = true)}
 				aria-label={$LL.settings()}

@@ -5,13 +5,7 @@
 
 	import SettingsSection from './SettingsSection.svelte';
 
-	/**
-	 * The shortcuts the app actually listens for.
-	 *
-	 * Read-only for now, and written from the handlers rather than from memory,
-	 * a shortcut list that drifts from the code is worse than none, because it
-	 * teaches the wrong thing. Each group below names where its keys are handled.
-	 */
+	/** Read-only, and written from the handlers rather than from memory: a shortcut list that drifts from the code teaches the wrong thing. Each group names where its keys are handled. */
 
 	const mod = $derived(modKey());
 
@@ -77,8 +71,8 @@
 				<h4 class="text-muted text-xs font-medium tracking-wide uppercase">{group.title}</h4>
 
 				{#each group.shortcuts as shortcut (shortcut.label)}
-					<!-- Label left, keys right: the eye scans the actions, and only stops on
-					     the keys for the one it wants. -->
+					<!-- Label left, keys right: the eye scans the actions, and only stops on the
+					     keys for the one it wants. -->
 					<div class="flex items-baseline gap-3 text-sm">
 						<span class="min-w-0 flex-1 truncate">{shortcut.label}</span>
 						<span class="flex shrink-0 items-center gap-1">

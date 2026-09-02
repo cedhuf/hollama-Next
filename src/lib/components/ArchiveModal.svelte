@@ -16,14 +16,7 @@
 
 	import Modal from './Modal.svelte';
 
-	/**
-	 * Everything that was put out of the way, and the two things you can do to it.
-	 *
-	 * A dialog rather than a page: the archive is somewhere you visit, decide one
-	 * thing and leave, not somewhere you work. It opens from a link at the foot of
-	 * the conversation list, which is where you end up when you have scrolled past
-	 * everything you actually have.
-	 */
+	/** A dialog rather than a page: the archive is somewhere you visit, decide one thing and leave. It opens from a link at the foot of the conversation list. */
 	interface Props {
 		open: boolean;
 	}
@@ -42,8 +35,8 @@
 	}
 
 	async function restoreAll() {
-		// Sequential rather than parallel: each one reads its conversation and writes
-		// it back, and the store is not something to have several writers in at once.
+		// Sequential rather than parallel: each one reads its conversation and writes it
+		// back, and the store is not something to have several writers in at once.
 		for (const session of [...archived]) await toggleSessionArchive(session.id);
 	}
 
@@ -73,8 +66,8 @@
 			<div class="flex shrink-0 items-center gap-1">
 				{#if archived.length > 0}
 					{#if confirmingAll}
-						<!-- Asks where it acts, the way a single row does, rather than in a
-						     dialog stacked on this one. -->
+						<!-- Asks where it acts, the way a single row does, rather than in a dialog
+						     stacked on this one. -->
 						<button
 							type="button"
 							onclick={removeAll}
@@ -137,8 +130,7 @@
 							</div>
 
 							{#if confirming === session.id}
-								<!-- Asks on the row, the way the list does, rather than in a dialog
-								     stacked on a dialog. -->
+								<!-- Asks on the row, the way the list does, rather than in a dialog on a dialog. -->
 								<button
 									type="button"
 									onclick={() => remove(session)}

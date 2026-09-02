@@ -2,11 +2,8 @@ import type { BundleAvatar } from '$lib/personaBundle';
 import { isSafeCatalogPath } from '$lib/store';
 
 /**
- * The shape of the persona catalogue's listing.
- *
- * Its own module because both sides of the app read it. The address it used to
- * carry now lives in `store`, which is the one place a store is addressed from,
- * whatever it holds.
+ * The shape of the persona catalogue's listing. Its own module because both
+ * sides of the app read it; the address lives in `store`.
  *
  * Nothing here touches a store or the browser, so it is safe to import anywhere.
  */
@@ -15,12 +12,9 @@ import { isSafeCatalogPath } from '$lib/store';
 export type CatalogOrigin = 'official' | 'community';
 
 /**
- * One row of the listing: enough to draw a card and to filter on, and no more.
- *
- * The prompt, the greeting and any attached documents are deliberately absent.
- * They are the bulk of a persona and are wanted only by whoever installs it,
- * which is one at a time rather than all at once. A listing has to stay cheap
- * with a thousand entries in it; a listing carrying a thousand prompts does not.
+ * One row: enough to draw a card and filter on. The prompt, the greeting and any
+ * attached documents are absent, being the bulk of a persona and wanted only by
+ * whoever installs it. A listing has to stay cheap with a thousand entries.
  */
 export interface CatalogEntry {
 	id: string;
@@ -34,22 +28,14 @@ export interface CatalogEntry {
 	/** Relative to the store's address. */
 	path: string;
 	/**
-	 * `sha256-<base64>` over the bundle's bytes, as npm records a package's.
-	 *
-	 * Not inside the bundle, because a file cannot contain its own hash, and not a
-	 * defence against the store itself: whoever can serve a bad bundle can serve a
-	 * bad listing over the same connection. What it catches is a mirror that has
-	 * drifted, a cache that has rotted, and a bundle edited without the listing
-	 * being rebuilt.
+	 * `sha256-<base64>` over the bundle's bytes, as npm records a package's. Not
+	 * inside the bundle, since a file cannot contain its own hash, and not a defence
+	 * against the store: whoever can serve a bad bundle can serve a bad listing. It
+	 * catches a drifted mirror, a rotted cache, and a bundle edited without the
+	 * listing being rebuilt.
 	 */
 	integrity?: string;
-	/**
-	 * The fingerprint of what the persona says, from `personaDigest`.
-	 *
-	 * Here as well as in the bundle's own fields so the "you have edited this" and
-	 * "the store's version has moved on" states can be read from the listing alone,
-	 * without downloading anything.
-	 */
+	/** Here as well as in the bundle's fields, so "you have edited this" and "the store has moved on" can be read from the listing without downloading anything. */
 	contentDigest?: string;
 }
 

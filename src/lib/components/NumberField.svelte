@@ -2,12 +2,9 @@
 	import { Minus, Plus } from '@lucide/svelte';
 
 	/**
-	 * A number field with our own two steppers instead of the browser's.
-	 *
-	 * The platform draws its spinner itself: white in a dark theme, a different
-	 * shape in every engine, and sized for nobody. This is the same control in the
-	 * app's own vocabulary, and it stays a plain `type="number"` underneath, so
-	 * typing, the arrow keys and form validation keep working as they did.
+	 * A number field with our own two steppers instead of the browser's, which
+	 * draws its spinner white in a dark theme, differently in every engine, and
+	 * sized for nobody. Still a plain `type="number"` underneath.
 	 *
 	 * An empty field means "unset" everywhere it is used, which is why the value
 	 * goes out as a string: `''` is an answer, and `0` is a different one.
@@ -24,14 +21,7 @@
 		class?: string;
 		/** Accessible name, where the visible label is an icon or lives elsewhere. */
 		label?: string;
-		/**
-		 * Accept a comma as the decimal separator.
-		 *
-		 * `type="number"` reports an empty value for "0,2", which is what half of
-		 * Europe types, so a field that has to take one is a text field with a
-		 * decimal keypad. The steppers work the same either way: they read the
-		 * figure, not the box.
-		 */
+		/** `type="number"` reports an empty value for "0,2", which is what half of Europe types, so a field that has to take one is a text field with a decimal keypad. The steppers read the figure, not the box. */
 		decimal?: boolean;
 		onChange: (raw: string) => void;
 	}
@@ -59,8 +49,8 @@
 	const atMax = $derived(hasValue && max !== undefined && current >= max);
 
 	function nudge(direction: 1 | -1) {
-		// From empty, the first press lands on the floor rather than one step above
-		// it: the smallest accepted value is what somebody is reaching for.
+		// From empty, the first press lands on the floor rather than one step above it:
+		// the smallest accepted value is what somebody is reaching for.
 		const next = hasValue ? current + direction * step : (min ?? 0);
 		const clamped = Math.min(max ?? Infinity, Math.max(min ?? -Infinity, next));
 		onChange(clamped.toFixed(decimals));

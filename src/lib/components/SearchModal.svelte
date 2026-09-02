@@ -11,14 +11,7 @@
 	import { repository } from '$lib/data';
 	import { formatTimestampToNow } from '$lib/utils';
 
-	/**
-	 * Searching the content of every conversation.
-	 *
-	 * Distinct from the sidebar field, which filters the visible list by title:
-	 * this queries the whole corpus and answers with the passages themselves. A
-	 * conversation that mentions a term eight times shows eight ways in, so the
-	 * result is somewhere to read, not just somewhere to click.
-	 */
+	/** Distinct from the sidebar field, which filters the visible list by title: this queries the whole corpus and answers with the passages, so a result is somewhere to read. */
 	interface Props {
 		open: boolean;
 		/** Seeded from the sidebar when arriving through "search everywhere". */
@@ -37,19 +30,15 @@
 	let input = $state<HTMLInputElement>();
 	let list = $state<HTMLDivElement>();
 
-	/**
-	 * Every match as one flat sequence, so the arrow keys move between passages
-	 * rather than between conversations: the conversation heading is a grouping,
-	 * not a stop.
-	 */
+	/** Every match as one flat sequence, so the arrows move between passages rather than conversations: the heading is a grouping, not a stop. */
 	const rows = $derived(
 		results.flatMap((result, resultIndex) =>
 			result.matches.map((match, matchIndex) => ({ result, match, resultIndex, matchIndex }))
 		)
 	);
 
-	// Opening seeds from the sidebar and focuses; closing forgets, so the next
-	// open is a fresh search rather than a stale answer.
+	// Opening seeds from the sidebar and focuses; closing forgets, so the next open
+	// is a fresh search rather than a stale answer.
 	$effect(() => {
 		if (!open) return;
 		query = initialQuery;
@@ -65,14 +54,7 @@
 		}
 	});
 
-	/**
-	 * Whether to answer from the whole transcript or only from what is live.
-	 *
-	 * Off by default. A compaction summary repeats what is said elsewhere, so it
-	 * doubles every result it touches, and a conversation you cleared is one you
-	 * deliberately set aside. Neither is what you are looking for, until it is,
-	 * which is what this is for rather than a reason to search everything always.
-	 */
+	/** Off by default: a compaction summary doubles every result it touches, and a conversation you cleared is one you set aside. Until it is what you are looking for. */
 	let everything = $state(false);
 
 	let timer: ReturnType<typeof setTimeout>;
@@ -119,15 +101,15 @@
 		const row = rows[index];
 		if (!row) return;
 		open = false;
-		// The message index rides in the URL so the conversation can scroll to the
-		// passage that was actually chosen, not just to the conversation.
+		// The message index rides in the URL, so the conversation scrolls to the passage
+		// that was chosen rather than to the conversation.
 		const target = new URL(
 			resolve('/sessions/[id]', { id: row.result.sessionId }),
 			window.location.origin
 		);
 		target.searchParams.set('m', String(row.match.messageIndex));
-		// The route itself is resolved above; the rule only knows how to see that in a
-		// literal argument, and cannot follow a URL carrying a query parameter.
+		// The route is resolved above; the rule only sees that in a literal argument and
+		// cannot follow a URL carrying a query parameter.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		void goto(target);
 	}
@@ -148,8 +130,8 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<!-- The field is the title: a search dialog that opens with anything else at
-		     the top makes you look for where to type. -->
+		<!-- The field is the title: a search dialog opening with anything else at the
+		     top makes you look for where to type. -->
 		<div class="border-shade-3 flex items-center gap-3 border-b px-4 py-3">
 			<Search class="text-muted h-4 w-4 shrink-0" />
 			<input
@@ -169,9 +151,8 @@
 				></div>
 			{/if}
 
-			<!-- Beside the field rather than under the results: it changes what is
-			     being searched, so it belongs with the question and not with the
-			     answer. -->
+			<!-- Beside the field rather than under the results: it changes what is being
+			     searched, so it belongs with the question. -->
 			<button
 				type="button"
 				onclick={() => (everything = !everything)}
@@ -184,11 +165,8 @@
 				<Layers class="h-3.5 w-3.5" />
 			</button>
 
-			<!-- The way out, and it has to be here rather than in the dialog's own
-			     corner: this content fills the frame from the top edge, so the built-in
-			     close would land on the field. It was simply left off, which cost
-			     nothing on a desktop where Escape is a key somebody's hand is already
-			     near, and left a phone with no way out of a full-screen dialog at all. -->
+			<!-- The way out, here rather than in the dialog's own corner: this content fills
+			     the frame from the top edge, so the built-in close would land on the field. -->
 			<button
 				type="button"
 				onclick={() => (open = false)}
@@ -208,9 +186,8 @@
 				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.searchEmpty()}</p>
 			{:else}
 				{#each results as result, resultIndex (result.sessionId)}
-					<!-- Heading, then its passages: title and date on one line so the
-					     "which conversation, and when" question is answered before the eye
-					     reaches the excerpts. -->
+					<!-- Heading, then its passages: title and date on one line, so "which
+					     conversation, and when" is answered before the eye reaches the excerpts. -->
 					<div class="mt-3 mb-1 flex items-baseline gap-3 px-3 first:mt-0">
 						<span class="truncate text-sm font-semibold">
 							{result.title || $LL.untitled()}
@@ -243,8 +220,8 @@
 								{match.role === 'user' ? $LL.you() : $LL.assistant()}
 							</span>
 							<span class="text-muted line-clamp-2 min-w-0 flex-1">
-								<!-- The excerpt is message content, so it is only ever text nodes;
-								     the marks come from the split, never from parsed markup. -->
+								<!-- The excerpt is message content, so it is only ever text nodes; the marks
+								     come from the split, never from parsed markup. -->
 								{#each splitExcerpt(match.excerpt) as segment, segmentIndex (segmentIndex)}
 									{#if segment.match}
 										<mark class="text-active rounded-sm bg-yellow-400/30">{segment.text}</mark>

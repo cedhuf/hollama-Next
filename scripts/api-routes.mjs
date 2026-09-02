@@ -6,7 +6,7 @@ import { join, relative, sep } from 'node:path';
  *
  * Shared by `check-api-docs.mjs` and by the seeding of `docs/openapi.yaml`, so
  * the documented surface and the checked surface can never be derived
- * differently — a checker that disagrees with the generator is worse than none.
+ * differently: a checker that disagrees with the generator is worse than none.
  */
 
 const API_ROOT = 'src/routes/api';
@@ -15,7 +15,7 @@ const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 /**
  * SvelteKit's parameter syntax to OpenAPI's.
  *
- * `[id]` is a path parameter. `[...path]` is a catch-all — OpenAPI has no
+ * `[id]` is a path parameter. `[...path]` is a catch-all, and OpenAPI has no
  * wildcard, so it becomes a single `{path}` parameter documented as possibly
  * containing slashes. That is a lossy but honest mapping: the alternative is
  * leaving the two proxy routes out of the spec entirely.

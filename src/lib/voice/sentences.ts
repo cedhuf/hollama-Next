@@ -1,41 +1,27 @@
 /**
  * A written answer, turned into things a voice can say.
  *
- * Lifted out of `speech.svelte.ts` when the server started needing it too: the
- * browser used to be the only place that cut an answer into pieces, and the
- * voice pipeline cuts it exactly the same way, for exactly the same reason. Two
- * copies of a splitter is two answers to "where does a sentence end", and the
- * seams would be in different places depending on who was reading.
+ * Lifted out of `speech.svelte.ts` when the server needed it too: two copies of
+ * a splitter is two answers to "where does a sentence end", and the seams would
+ * be in different places depending on who was reading.
  *
- * No runtime of its own, no imports. It is string work, and it runs on both
+ * No runtime of its own and no imports. It is string work, and it runs on both
  * sides.
  */
 
-/**
- * The ceiling the server enforces, repeated here so a sentence is cut before it
- * is sent rather than refused after.
- */
+/** The ceiling the server enforces, repeated here so a sentence is cut before it is sent rather than refused after. */
 const CHUNK_LIMIT = 2_000;
 
-/**
- * Small enough to start fast, large enough not to chop a thought in half.
- *
- * The first piece is deliberately shorter than the rest: it is the only one whose
- * wait anybody experiences, since every other piece is made while the one before
- * it is still playing.
- */
+/** The first piece is shorter than the rest: it is the only one whose wait anybody experiences, since every other is made while the one before it plays. */
 const FIRST_CHUNK = 240;
 const CHUNK = 700;
 
 /**
- * What a reply sounds like once the typography is taken out of it.
+ * What a reply sounds like once the typography is taken out of it: read
+ * literally, a heading becomes "hash hash Results" and a code block a minute of
+ * punctuation. It goes before anything is sent, so it is not paid for either.
  *
- * Markdown is written to be looked at. Read literally, a heading becomes "hash
- * hash Results", a bold word becomes "star star important star star", and a code
- * block becomes a minute of punctuation. None of that is what was said, so it
- * goes before anything is sent, which also means it is not paid for.
- *
- * Fenced code goes entirely rather than being flattened. Nobody wants a shell
+ * Fenced code goes entirely rather than being flattened: nobody wants a shell
  * script read to them, and the screen still has it.
  */
 export function spoken(text: string): string {
@@ -56,14 +42,7 @@ export function spoken(text: string): string {
 	);
 }
 
-/**
- * The text in pieces, cut where a reader would pause.
- *
- * Sentence ends first, then any line break, then a space, and only if none of
- * those turns up within the budget does it cut mid-word. That last case is a
- * wall of text with no punctuation in it, where any cut is arbitrary and the
- * alternative is not reading it at all.
- */
+/** Sentence ends first, then any line break, then a space, and only failing all three does it cut mid-word: a wall of text with no punctuation, where any cut is arbitrary. */
 export function split(text: string): string[] {
 	const pieces: string[] = [];
 	let rest = text;
@@ -77,8 +56,7 @@ export function split(text: string): string[] {
 
 		const window = rest.slice(0, Math.min(budget, CHUNK_LIMIT));
 		// In order of how much a listener would notice the seam. `lastIndexOf` answers
-		// -1 rather than nothing, so it is compared rather than coalesced: a `??`
-		// chain here would take -1 for a perfectly good position.
+		// -1 rather than nothing, so it is compared rather than coalesced.
 		const sentence = lastOf(window, /[.!?…](?=\s|$)/g);
 		const line = window.lastIndexOf('\n');
 		const space = window.lastIndexOf(' ');

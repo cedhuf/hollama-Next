@@ -2,14 +2,7 @@ import { emptyMemory, type PersonaMemory } from '$lib/personaMemory';
 
 import { getDb } from './index';
 
-/**
- * One person's memory of one persona.
- *
- * Every function here takes the pair. There is deliberately no "get the memory
- * for this persona" overload: the missing argument would have to default to
- * something, and every plausible default is a way of showing one account another
- * account's memory.
- */
+/** Every function here takes the pair. There is deliberately no "get the memory for this persona" overload: the missing argument would have to default to something, and every plausible default shows one account another's memory. */
 export function getPersonaMemory(userId: string, personaId: string): PersonaMemory | null {
 	const row = getDb()
 		.prepare('SELECT data FROM persona_memory WHERE id = ? AND user_id = ?')

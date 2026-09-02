@@ -10,15 +10,12 @@ import {
 import { reconcile } from '$lib/server/integrations/supervisor';
 
 /**
- * Suspend somebody else's bot, or lift the suspension. Or remove it.
+ * Suspend somebody else's bot, lift the suspension, or remove it. Only those: an
+ * administrator who could rewrite the model or the instructions of a bot they do
+ * not own would be answering in somebody else's name.
  *
- * Only those. An administrator who could rewrite the model or the instructions
- * of a bot they do not own would be answering in somebody else's name, on
- * somebody else's chat server.
- *
- * And a suspension, not their switch: turning the owner's own switch off would
- * be a decision the owner undoes by turning it back on, without ever being told
- * that somebody had asked them not to.
+ * And a suspension, not the owner's switch, which they would undo by turning it
+ * back on without ever being told somebody had asked them not to.
  */
 export async function PUT(event) {
 	await requireAdmin(event);

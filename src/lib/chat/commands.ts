@@ -1,23 +1,15 @@
 /**
  * Slash commands typed in the composer.
  *
- * Deliberately not a framework: a small registry and one regex. A command is
- * recognised only when the whole prompt is a single line starting with `/` and
- * naming a known command, so a message that merely begins with a slash (a path,
- * a regex, a date) is sent as text, and an unknown `/word` is too rather than
- * being swallowed with an error. `//` at the start escapes to a literal `/`.
+ * A small registry and one regex. A command is recognised only when the whole
+ * prompt is a single line naming a known one, so a message that merely begins
+ * with a slash is sent as text, and so is an unknown `/word`. `//` escapes to a
+ * literal `/`.
  */
 
 export type CommandName = 'compact' | 'clear' | 'context' | 'playbooks';
 
-/**
- * What the parser needs to know about a command: its name, and whether anything
- * may follow it.
- *
- * The distinction is not decoration. A command that takes no arguments only
- * matches when it is given none, so `/clear the air before we start` is the
- * sentence it looks like rather than a conversation quietly folded away.
- */
+/** The distinction is not decoration: a command that takes no arguments only matches when it is given none, so `/clear the air before we start` is the sentence it looks like. */
 export interface CommandSpec {
 	name: CommandName;
 	/** Free text after the name means something to this command. */
@@ -31,12 +23,7 @@ export interface SlashCommand extends CommandSpec {
 	description: string;
 	/** False when the command cannot run right now. */
 	available: boolean;
-	/**
-	 * Why it cannot run, shown in place of the description.
-	 *
-	 * An unavailable command stays listed and says why: dropping it from the menu
-	 * entirely reads as the feature being broken, not as it having nothing to do.
-	 */
+	/** An unavailable command stays listed and says why: dropping it from the menu reads as the feature being broken rather than as it having nothing to do. */
 	unavailableReason?: string;
 }
 
@@ -47,12 +34,7 @@ export interface ParsedCommand {
 	args: string;
 }
 
-/**
- * The command a prompt invokes, or `null` when it is an ordinary message.
- *
- * `known` is passed in rather than hard-coded so the caller decides what exists,
- * and so a prompt naming an unknown command still goes out as a message.
- */
+/** `known` is passed in rather than hard-coded, so the caller decides what exists and a prompt naming an unknown command still goes out as a message. */
 export function parseSlashCommand(prompt: string, known: CommandSpec[]): ParsedCommand | null {
 	const trimmed = prompt.trim();
 	if (!trimmed.startsWith('/') || trimmed.startsWith('//')) return null;
@@ -69,7 +51,7 @@ export function parseSlashCommand(prompt: string, known: CommandSpec[]): ParsedC
 
 	const args = (match[2] ?? '').trim();
 	// Text after a command that has no use for it is not an argument, it is a
-	// sentence that happens to start with a word we recognise.
+	// sentence starting with a word we recognise.
 	if (args && !spec.takesArgs) return null;
 
 	return { name, args };
@@ -80,11 +62,7 @@ export function unescapeSlash(prompt: string): string {
 	return prompt.startsWith('//') ? prompt.slice(1) : prompt;
 }
 
-/**
- * The prefix being typed, for the autocomplete. `null` unless the caret sits in
- * a lone `/word` on the first and only line. Returned lowercased and without the
- * slash, so `/Comp` matches `compact`.
- */
+/** `null` unless the caret sits in a lone `/word` on the first and only line. Lowercased and without the slash, so `/Comp` matches `compact`. */
 export function commandPrefix(prompt: string): string | null {
 	if (!prompt.startsWith('/') || prompt.startsWith('//')) return null;
 	if (prompt.includes('\n') || prompt.includes(' ')) return null;

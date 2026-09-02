@@ -16,11 +16,7 @@
 	import SettingsField from '../../settings/SettingsField.svelte';
 	import SettingsHint from '../../settings/SettingsHint.svelte';
 
-	/**
-	 * Per-conversation settings. Same shell as the persona editor and the settings
-	 * dialog (title bar with a close button, then a scrollable body of
-	 * `SettingsSection`s) so the three read as one family.
-	 */
+	/** The same shell as the persona editor and the settings dialog, so the three read as one family. */
 	interface Props {
 		open: boolean;
 		session: Session;
@@ -34,12 +30,7 @@
 		!!session.systemPromptEdited && resolvedDefault !== session.systemPrompt.content
 	);
 
-	/**
-	 * A title typed here is yours, and is marked as such.
-	 *
-	 * Which is what stops the app naming the conversation again over the top of it.
-	 * Nothing else distinguished a name the model wrote from a name a person chose.
-	 */
+	/** Which is what stops the app naming the conversation over the top of it: nothing else distinguished a name the model wrote from a name a person chose. */
 	function onTitleInput() {
 		session.titleEdited = true;
 		saveSession(session);
@@ -61,13 +52,7 @@
 	const samplingCfg = $derived($chatDefaultsConfig.sampling);
 	const overrideCount = $derived(Object.keys(session.options ?? {}).length);
 
-	/**
-	 * Whether the second group of fields will actually reach anything.
-	 *
-	 * Read from the connection the chosen model sits on rather than from the
-	 * conversation's stored model, so switching model in the picker above relabels
-	 * the panel straight away instead of at the next reload.
-	 */
+	/** Read from the connection the chosen model sits on rather than from the conversation's stored model, so switching model relabels the panel straight away. */
 	const isOllama = $derived.by(() => {
 		const serverId =
 			$settingsStore.models?.find((model) => model.name === modelName)?.serverId ??
@@ -95,10 +80,8 @@
 
 <Modal bind:open closeButton={false}>
 	<div class="flex h-full w-full flex-col">
-		<!-- The bar is the title field. It used to print the name and then ask for it
-		     again in the first card below, which is one question twice: naming a
-		     conversation is renaming what is already on screen. Ghost input, as
-		     everywhere else a name is edited in place. -->
+		<!-- The bar is the title field: it used to print the name and then ask for it
+		     again in the card below, which is one question twice. -->
 		<div class="border-shade-2 flex h-12 shrink-0 items-center gap-2 border-b px-4">
 			<input
 				class="text-active placeholder:text-active hover:border-shade-3 focus:border-shade-3 focus:bg-shade-0 min-w-0 flex-1 rounded-md border border-transparent px-2 py-1 text-sm font-semibold outline-none"
@@ -117,19 +100,16 @@
 			</button>
 		</div>
 
-		<!-- Body: the model, then two folded rows. Everything a conversation can be
-		     told, in a dialog that fits without scrolling, each row already saying
-		     what it holds. -->
+		<!-- The model, then two folded rows: everything a conversation can be told, in a
+		     dialog that fits without scrolling. -->
 		<div class="min-h-0 flex-1 overflow-auto p-4">
 			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-3">
 				<SettingsField label={$LL.model()}>
 					<ModelSelect bind:value={modelName} />
 				</SettingsField>
 
-				<!-- The biggest block in the dialog, for the thing changed least often.
-				     Folded, its summary says whether this conversation departs from the
-				     prompts in Settings, which is the question that used to require
-				     reading seven lines of textarea to answer. -->
+				<!-- The biggest block, for the thing changed least often. Folded, its summary
+				     says whether this conversation departs from the prompts in Settings. -->
 				<Collapsible
 					title={$LL.systemPrompt()}
 					summary={isOverridden ? $LL.overridden() : $LL.fromMySettings()}
@@ -156,12 +136,10 @@
 					</div>
 				</Collapsible>
 
-				<!-- One level of folding, not two: the sampling groups fold themselves,
-				     so wrapping them in a fold of their own buried the two fields anybody
-				     actually reaches for. -->
-				<!-- Open on arrival, unlike the prompt above it: it is what people come
-				     to this dialog for, and the two fields at the top of it are the two
-				     they reach for. The groups underneath stay folded. -->
+				<!-- One level of folding, not two: the sampling groups fold themselves, so
+				     wrapping them buried the two fields anybody actually reaches for. -->
+				<!-- Open on arrival, unlike the prompt above it: it is what people come to this
+				     dialog for. The groups underneath stay folded. -->
 				<Collapsible title={$LL.sampling()} summary={samplingSummary} open>
 					<div class="flex flex-col gap-2">
 						<SettingsHint>{$LL.samplingSessionDescription()}</SettingsHint>
@@ -184,9 +162,8 @@
 								</button>
 							{/if}
 						{:else}
-							<!-- Locked means locked everywhere, not only in Settings: a
-							     conversation that could still override would be the same policy
-							     with a hole in it. -->
+							<!-- Locked means locked everywhere, not only in Settings: a conversation that
+							     could still override would be the same policy with a hole in it. -->
 							<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
 							<SamplingFields values={samplingCfg.value} ollama={isOllama} disabled />
 						{/if}

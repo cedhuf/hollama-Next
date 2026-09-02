@@ -4,17 +4,13 @@
 	/**
 	 * The app's voice, given a body.
 	 *
-	 * Nothing is drawn. A handful of blurred lumps blend on top of each other and
-	 * the browser composites them; the only per-frame work is writing six custom
-	 * properties, which is the whole argument for this over a canvas or a shader on
-	 * a phone that is already holding a microphone open, a socket and a synthesiser.
+	 * Nothing is drawn: blurred lumps blend on top of each other and the browser
+	 * composites them, so the per-frame work is writing six custom properties.
 	 *
-	 * The silhouette is made by the lumps themselves and never by a mask. That is
-	 * the load-bearing decision: a radial mask gives a geometrically perfect ring,
-	 * which reads as a machined part, and it was tried. Here `--open` pushes the
-	 * lumps away from the centre. Held close they merge into a solid body; pushed
-	 * out they form a crown that the blur and the contrast weld back into a ring —
-	 * one that is never quite round, because it is made of uneven lumps that drift.
+	 * The silhouette is made by the lumps and never by a mask, which is the
+	 * load-bearing decision: a radial mask gives a perfect ring that reads as a
+	 * machined part. `--open` pushes the lumps out instead, and the blur welds them
+	 * back into a ring that is never quite round.
 	 *
 	 * So the four states are positions on one axis rather than four shapes:
 	 *
@@ -23,9 +19,8 @@
 	 *   thinking   drawn back in, hue turned, crossed by an arc
 	 *   speaking   barely open, beating on the voice
 	 *
-	 * Shape rather than speed, because a blur this wide destroys exactly the detail
-	 * that would carry a gesture. A very soft object can be bigger, brighter or
-	 * faster and that is all; a form is read before a movement.
+	 * Shape rather than speed: a blur this wide destroys the detail that would
+	 * carry a gesture, and a form is read before a movement.
 	 */
 
 	interface Props {

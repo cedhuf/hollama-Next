@@ -8,15 +8,12 @@
 	/**
 	 * Which provider a new connection talks to.
 	 *
-	 * A card each rather than a row of chips, and everything on the card comes out
-	 * of the descriptor: the colour, the name, and the one line saying what it will
-	 * ask for. Nothing here names a provider, so a file added under
-	 * `$lib/providers` shows up with its identity already drawn.
+	 * A card each rather than a row of chips, and everything on it comes out of the
+	 * descriptor, so a file added under `$lib/providers` shows up with its identity
+	 * already drawn.
 	 *
-	 * That is the part that has to scale. Five chips read as a row; twenty-five
-	 * read as a wall, in no order, with nothing to tell them apart and no way to
-	 * find one. The search box turns up on its own once the list is long enough to
-	 * need it.
+	 * That is the part that has to scale: five chips read as a row, twenty-five as a
+	 * wall. The search box turns up on its own once the list needs it.
 	 */
 	interface Props {
 		onSelect: (type: ConnectionType) => void;
@@ -79,9 +76,8 @@
 				? 'border-shade-4 border-dashed'
 				: 'border-shade-3'}"
 		>
-			<!-- The connection's own colour, the same one its models wear in every
-			     picker, so the card and the connection it creates are recognisably the
-			     same thing. -->
+			<!-- The connection's own colour, the same its models wear in every picker, so
+			     the card and the connection it creates are recognisably the same thing. -->
 			<span
 				class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-medium"
 				style="background-color: color-mix(in srgb, {entry.color} 16%, transparent); color: {entry.color}"

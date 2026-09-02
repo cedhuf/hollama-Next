@@ -6,22 +6,11 @@ interface Migration {
 	version: number;
 	/** Schema changes, which is what almost all of them are. */
 	up?: string;
-	/**
-	 * A migration that has to read and rewrite stored JSON.
-	 *
-	 * SQLite can do it, with `json_group_array` over `json_each` and a `CASE` per
-	 * field, and the result is a statement nobody can check by reading. These run
-	 * inside the same transaction as `up`, so the choice costs nothing but
-	 * legibility, and legibility is the whole reason to prefer it.
-	 */
+	/** A migration that has to read and rewrite stored JSON. SQLite can, with `json_group_array` over `json_each` and a `CASE` per field, and the result is a statement nobody can check by reading. Same transaction as `up`. */
 	run?: (db: DatabaseSync) => void;
 }
 
-/**
- * Ordered, append-only list of schema migrations. Never edit a past migration:
- * add a new one. Applied inside a transaction and recorded in
- * `schema_migrations`.
- */
+/** Ordered and append-only: never edit a past migration, add a new one. Applied inside a transaction and recorded in `schema_migrations`. */
 const migrations: Migration[] = [
 	{
 		version: 1,
@@ -197,13 +186,13 @@ const migrations: Migration[] = [
 	},
 	{
 		version: 9,
-		// Two fields become one, with the kind inside it. See `chat/notes` for why,
-		// and `chat/legacyNotes` for the conversion itself, which is shared with the
-		// browser's own storage so both sides cannot read the old shape differently.
+		// Two fields become one, with the kind inside it. See `chat/notes` for why, and
+		// `chat/legacyNotes` for the conversion, shared with the browser's own storage
+		// so both sides cannot read the old shape differently.
 		//
-		// The markers table is rebuilt afterwards rather than migrated: it is derived
-		// data, the expression that fills it has just changed, and re-deriving it is
-		// both shorter and impossible to get subtly wrong.
+		// The markers table is rebuilt rather than migrated: it is derived data, the
+		// expression that fills it has just changed, and re-deriving it is impossible to
+		// get subtly wrong.
 		run: (db) => {
 			const rows = db.prepare('SELECT id, data FROM sessions').all() as {
 				id: string;
@@ -333,16 +322,13 @@ const migrations: Migration[] = [
 	{
 		version: 15,
 		/**
-		 * Repair `persona_memory` on the databases that got the first draft of 14.
+		 * Repair `persona_memory` on the databases that got the first draft of 14: its
+		 * key column was renamed while 14 was being written, and a migration that has
+		 * run never runs again, so a database created in between has the old column.
 		 *
-		 * Its key column was renamed from `persona_id` to `id` while 14 was still
-		 * being written, and a migration that has already run never runs again: a
-		 * database created in between has the old column and every read of it fails.
-		 * Nothing is lost by rebuilding, because nothing could ever have been
-		 * written through a column the code does not name.
-		 *
-		 * A no-op on a database that got 14 in its finished form, which is why it
-		 * checks the shape rather than assuming it.
+		 * Nothing is lost by rebuilding, since nothing could have been written through a
+		 * column the code does not name. A no-op on a database that got 14 finished,
+		 * which is why it checks the shape.
 		 */
 		run: (db) => {
 			const columns = db.prepare('PRAGMA table_info(persona_memory)').all() as {

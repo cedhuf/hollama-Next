@@ -5,15 +5,11 @@
 	/**
 	 * Right-click menu on a row.
 	 *
-	 * The counterpart to `Menu`: same panel, same rows, opened by the gesture
-	 * people already use on a list. It exists so a row's actions do not have to
-	 * live permanently on top of the row itself, where they cover the title on
-	 * narrow screens and put a delete button one slip away from the thing you
-	 * meant to click.
+	 * The counterpart to `Menu`, so a row's actions do not have to live permanently
+	 * on top of the row, where they cover the title and put delete one slip away.
 	 *
-	 * `trigger` receives the props to spread onto whatever the caller already
-	 * renders, so the whole row becomes the target rather than some handle inside
-	 * it. On touch, a long press opens it.
+	 * `trigger` receives the props to spread onto whatever the caller renders, so
+	 * the whole row is the target. On touch, a long press opens it.
 	 */
 	interface Props {
 		/** Receives the props to spread onto the caller's own row element. */

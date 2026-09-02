@@ -59,14 +59,12 @@ export const searchConfig = derived(serverSearch, ($server): SearchView => {
 });
 
 /**
- * What the router came back with.
+ * What the router came back with. Three outcomes, not two: `none` is the router
+ * declining, `unreadable` is the router failing to answer.
  *
- * Three outcomes, not two. `none` is the router doing its job and declining;
- * `unreadable` is the router failing to answer the question it was asked. They
- * used to be the same value, and the caller could only treat both as "don't
- * search", which meant a model whose reply we couldn't parse silently disabled
- * web search for that message, and then got told it had chosen not to look
- * anything up. Keeping them apart lets the caller fall back instead.
+ * As one value the caller could only treat both as "don't search", so a reply we
+ * could not parse silently disabled web search for that message and then told
+ * the model it had chosen not to look anything up.
  */
 export type RouterDecision =
 	{ kind: 'query'; query: string } | { kind: 'none' } | { kind: 'unreadable' };
@@ -74,20 +72,15 @@ export type RouterDecision =
 /**
  * Read the router's reply.
  *
- * The router is the chat model itself, told to answer with a query or with NONE.
- * A small model handed the recent turns sometimes forgets the job and simply
- * carries on the conversation, and its reply was being searched verbatim: an
- * instance of this turned "Excellent choix ! C'est un plat complet…" into a web
- * search. So anything that reads as prose is refused rather than searched: a
- * search on prose is worse than no search at all, it feeds the model five
- * irrelevant results and invites it to use them.
- *
- * Refused is not the same as declined, though, which is what `unreadable` is for.
+ * The router is the chat model itself, told to answer with a query or NONE. A
+ * small model handed the recent turns sometimes carries the conversation on
+ * instead, and its reply was being searched verbatim. So anything that reads as
+ * prose is refused: it feeds the model five irrelevant results and invites it to
+ * use them.
  */
 export function parseRouterDecision(raw: string | undefined): RouterDecision {
-	// Only the first line: a model that explains itself does so underneath. Its
-	// reasoning, which used to land here and read as prose, is stripped upstream by
-	// `complete()`.
+	// Only the first line: a model that explains itself does so underneath, and its
+	// reasoning is stripped upstream by `complete()`.
 	const first = (raw ?? '')
 		.split('\n')[0]
 		.trim()

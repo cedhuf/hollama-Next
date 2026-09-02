@@ -14,10 +14,7 @@
 	// The landing page is frameless (like Library); a conversation sits in a card.
 	const isHome = $derived(page.route.id === '/sessions');
 
-	/**
-	 * The models on offer, from `/api/providers`: the admin's shared list, plus
-	 * whatever a personal connection answers when the server asks it.
-	 */
+	/** The admin's shared list, plus whatever a personal connection answers when the server asks it. */
 	async function listModels(): Promise<Model[]> {
 		const { servers } = await fetchProviders();
 		return providerModels(servers).sort((a, b) =>

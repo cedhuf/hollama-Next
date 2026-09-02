@@ -4,23 +4,14 @@
 	import LL from '$i18n/i18n-svelte';
 	import { settingsStore } from '$lib/localStorage';
 
-	/**
-	 * Theme mode + style picker. Writes straight to the settings store, so every
-	 * change applies live and persists on its own: shared by the Interface settings
-	 * panel and the welcome tour.
-	 */
+	/** Writes straight to the settings store, so every change applies live and persists on its own. Shared by the Interface panel and the welcome tour. */
 	const themeModes = [
 		{ value: 'system', label: 'System', icon: Monitor },
 		{ value: 'light', label: 'Light', icon: Sun },
 		{ value: 'dark', label: 'Dark', icon: Moon }
 	] as const;
 
-	/**
-	 * Each style carries both of its ramps, and the preview shows the one the app is
-	 * actually wearing. Hardcoding a single set meant the cards advertised a mix of
-	 * light and dark palettes regardless of the mode chosen just above them.
-	 * Values mirror the `--hsl-*` blocks in `app.pcss`.
-	 */
+	/** Each style carries both ramps, and the preview shows the one the app is wearing: hardcoding a single set advertised a mix of light and dark palettes whatever the mode. Values mirror the `--hsl-*` blocks in `app.pcss`. */
 	const themeStyles = [
 		{
 			value: 'classic',
@@ -132,8 +123,8 @@
 		}
 	] as const;
 
-	// `system` follows the OS, so the previews have to follow it too: including
-	// when it flips while the panel is open.
+	// `system` follows the OS, so the previews follow it too, including when it
+	// flips while the panel is open.
 	let systemPrefersDark = $state(false);
 
 	$effect(() => {
@@ -146,14 +137,7 @@
 
 	const mode = $derived($settingsStore.themeMode || 'system');
 
-	/**
-	 * Touching either control settles the question for good.
-	 *
-	 * An instance can hand out a starting theme without fixing it, and that offer
-	 * has to stop the moment someone makes a choice of their own: including the
-	 * choice of what the instance happened to be giving them. Guessing from the
-	 * stored values cannot tell "never chose" from "chose the default".
-	 */
+	/** An instance can hand out a starting theme without fixing it, and that offer stops the moment someone chooses for themselves, including choosing what they were being given. */
 	function chooseMode(value: (typeof themeModes)[number]['value']) {
 		$settingsStore.themeMode = value;
 		$settingsStore.themeChosen = true;
@@ -188,8 +172,7 @@
 <!-- Theme style: mini-preview cards -->
 <div class="flex flex-col gap-1.5">
 	<span class="text-sm font-medium">{$LL.themeStyle()}</span>
-	<!-- Three per row at most, so the preview cards keep a usable size; further
-	     themes wrap onto a second line rather than squeezing the row. -->
+	<!-- Three per row at most, so the preview cards keep a usable size. -->
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 		{#each themeStyles as style (style.value)}
 			{@const swatch = isDark ? style.dark : style.light}

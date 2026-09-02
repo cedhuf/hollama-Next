@@ -5,17 +5,12 @@
 	import LL from '$i18n/i18n-svelte';
 
 	/**
-	 * What this instance lets you spend, and how much of it is gone.
+	 * What this instance lets you spend, and how much is gone. The ceiling stays the
+	 * subject: the spend qualifies it rather than replacing it, or the card reads as
+	 * a bill.
 	 *
-	 * The ceiling is the subject and stays the subject: the spend qualifies it
-	 * rather than replacing it, or the card reads as a bill.
-	 *
-	 * `spend` off is the ceiling alone, for the welcome tour where every figure
-	 * would be zero. On adds the bar and the two facts, which is Profile.
-	 *
-	 * One animation drives everything: a single eased value climbs to one on
-	 * arrival and both the figure and the bar are read off it, so they land
-	 * together.
+	 * `spend` off is the ceiling alone, for the welcome tour where every figure is
+	 * zero. One eased value drives the figure and the bar, so they land together.
 	 */
 	interface Props {
 		/** Show what has been spent against the ceiling, not only the ceiling. */

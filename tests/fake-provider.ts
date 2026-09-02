@@ -3,15 +3,11 @@ import { createServer, type Server } from 'node:http';
 /**
  * A provider, for the length of one test file.
  *
- * The turn runs in our server now, not in the browser, which is what makes
- * `page.route()` useless for this: the request the app makes never passes
- * through the page. So the tests give the app a real endpoint to talk to, and it
- * answers the way an OpenAI-compatible one does.
+ * The turn runs in our server, so the request never passes through the page and
+ * `page.route()` is useless for this. The tests give the app a real endpoint,
+ * answering the way an OpenAI-compatible one does.
  *
- * It is deliberately dumb. What is being tested is the app's half of the
- * conversation: that a connection can be made, that a model is offered, that a
- * turn is sent and that what streams back arrives on screen. A provider that
- * did anything clever would be a second thing under test.
+ * Deliberately dumb: what is under test is the app's half of the conversation.
  */
 export interface FakeProvider {
 	url: string;
@@ -46,8 +42,8 @@ export async function startFakeProvider(
 					requests.push(body);
 				}
 
-				// Server-sent events, one word at a time, because streaming is the path
-				// the app actually takes and a single blob would not exercise it.
+				// Server-sent events, one word at a time, because streaming is the path the app
+				// actually takes and a single blob would not exercise it.
 				response.writeHead(200, {
 					'content-type': 'text/event-stream',
 					'cache-control': 'no-cache'

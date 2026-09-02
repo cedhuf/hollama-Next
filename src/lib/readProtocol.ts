@@ -1,26 +1,16 @@
 /**
  * The `<read>` protocol.
  *
- * Web search hands the model a title, a URL and a snippet per result (a sentence
- * or two, sometimes marketing copy) and asks it to write a factual answer from
- * that. It fills the gaps, which is a polite word for inventing.
+ * Web search hands the model a sentence or two per result and asks for a factual
+ * answer, so it fills the gaps. Instead it may say it needs more:
+ * `<read>1,3</read>` asks for the full text, fetched and handed back for a
+ * second pass, and the cost is paid only when it asks.
  *
- * So the model is allowed to say it needs more: answering with `<read>1,3</read>`
- * asks for the full text of results 1 and 3, which is fetched and handed back for
- * a second, informed pass. The cost is paid only when it asks: a question the
- * snippets already answer costs nothing extra.
+ * A result number only means something within its own turn, so a page from an
+ * earlier one is addressed by URL. The caller resolves those against what the
+ * conversation was shown, so a fabricated address fetches nothing.
  *
- * A result number only means something within the turn that was given that list,
- * so a page from an earlier turn can also be addressed by its URL:
- * `<read>https://example.com/page</read>`. That is what lets the model check a
- * claim it made three messages ago instead of taking the claim back. Which URLs
- * are allowed is not decided here: the caller resolves them against the sources
- * the conversation was actually shown (see `sourceIndex.ts`), so a fabricated
- * address fetches nothing.
- *
- * A text protocol rather than native tool calling, for the same reason as `<ask>`:
- * it works on every provider the app talks to, including the ones with no function
- * calling at all.
+ * A text protocol, like `<ask>`: it works on every provider.
  */
 
 /** What the model asked to read: result numbers, addresses, or a mix of both. */
@@ -55,12 +45,7 @@ export function parseReadBlock(raw: string): ReadRequest {
 	return { indices: [...indices], urls: [...urls] };
 }
 
-/**
- * The answer without the request block.
- *
- * Used when the model asks again on the second pass, or asks for something that
- * can't be read: the raw markup must never reach the conversation.
- */
+/** Used when the model asks again on the second pass, or asks for something that cannot be read: the raw markup must never reach the conversation. */
 export function stripReadBlock(raw: string): string {
 	return raw.replace(/<read>[\s\S]*?<\/read>/gi, '').trim();
 }

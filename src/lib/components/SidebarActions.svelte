@@ -15,14 +15,7 @@
 	interface Props {
 		query: string;
 		personas: Persona[];
-		/**
-		 * The compact header, chosen in settings and nowhere else.
-		 *
-		 * One shape or the other, decided once: New chat sits on the search row
-		 * rather than above it, and the personas are a row of avatars rather than a
-		 * named grid. Nothing here reacts to the scroll, so this pane keeps the same
-		 * height for as long as the setting does.
-		 */
+		/** One shape or the other, decided once: New chat on the search row rather than above it, the personas a row of avatars. Nothing here reacts to the scroll, so this pane keeps its height. */
 		compact: boolean;
 		onNewChat: () => void;
 	}
@@ -37,25 +30,19 @@
 </script>
 
 <!-- Sits above the list rather than over it. Nothing scrolls underneath, so this
-     pane has no height anyone needs to know and the list needs no clearance: they
-     are neighbours in a column, and the column does the arithmetic. -->
+     pane has no height anyone needs to know and the list needs no clearance. -->
 <div class="border-shade-3/40 surface-column shrink-0 border-b">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-96">
 		<div class="flex flex-col px-3 py-3">
-			<!-- Two New chat blocks rather than one that moves: a single button would have
-		     to cross a flex line break, and a line break is the one thing CSS cannot
-		     interpolate, so it happens on a frame, which is the jump. Here the tall one
-		     closes on its height while the compact one opens on its width, both
-		     continuous, and only ever one of them is reachable.
+			<!-- Two New chat blocks rather than one that moves: a single button would cross
+			     a flex line break, and a line break is the one thing CSS cannot interpolate.
+			     Here the tall one closes on its height while the compact one opens on its
+			     width, and only ever one is reachable.
 
-		     Each is a split control: starting a conversation and drawing a picture are
-		     both "make something new", and they share one shape for the same reason the
-		     Library's own header buttons share theirs. Two halves of one filled block,
-		     divided by a hairline of its own foreground, so it reads as one object with
-		     two ends rather than as two buttons that happen to touch. No dropdown: a
-		     menu would put a click in front of something used occasionally, which is
-		     exactly when a click is most expensive. -->
+			     Each is a split control: two halves of one filled block, divided by a
+			     hairline of its own foreground, so it reads as one object with two ends. No
+			     dropdown: a menu puts a click in front of something used occasionally. -->
 			<div
 				class="bg-accent text-shade-0 flex w-full items-stretch overflow-hidden rounded-lg text-sm font-medium transition-[height,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
 					? 'pointer-events-none mb-0 h-0 opacity-0'
@@ -95,18 +82,16 @@
 						placeholder={$LL.searchChatsPersonas()}
 						class="border-shade-3 bg-shade-0 placeholder:text-muted focus:border-accent w-full rounded-lg border py-2 pr-12 pl-8 text-sm outline-none"
 					/>
-					<!-- The shortcut opens the full-text dialog, which is a different thing
-				     from this field. Shown as a hint, not a button: it is the keyboard's
-				     way in, and the line below is the pointer's. -->
+					<!-- The shortcut opens the full-text dialog, which is a different thing from
+					     this field. A hint, not a button: it is the keyboard's way in. -->
 					<span
 						class="pointer-events-none absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-0.5"
 					>
 						<Kbd>{mod}</Kbd><Kbd>K</Kbd>
 					</span>
 				</div>
-				<!-- The same control, folded onto the search row. It opens on its width, so
-				     the pair is one box whose width is the sum of its halves: 36 alone, 72
-				     with the second. -->
+				<!-- The same control, folded onto the search row. It opens on its width, so the
+				     pair is one box whose width is the sum of its halves. -->
 				<div
 					aria-hidden={!compact}
 					class="bg-accent text-shade-0 flex h-9 shrink-0 items-stretch overflow-hidden rounded-lg transition-[width,opacity,margin] duration-300 ease-out motion-reduce:transition-none {compact
@@ -139,9 +124,9 @@
 				</div>
 			</div>
 
-			<!-- The field above filters titles; this is the way out to the content of
-		     every conversation. Offered rather than configured: the choice belongs to
-		     the moment, not to a setting. -->
+			<!-- The field above filters titles; this is the way out to the content of every
+			     conversation. Offered rather than configured: the choice belongs to the
+			     moment, not to a setting. -->
 			{#if q}
 				<button
 					type="button"
@@ -177,15 +162,12 @@
 			</div>
 		</div>
 
-		<!-- Pinned means pinned. Whatever shape the header is in, the launchers hold
-	     their place above the list and are never scrolled out of reach; only their
-	     size changes.
+		<!-- Pinned means pinned: whatever shape the header is in, the launchers hold
+		     their place above the list. Only their size changes.
 
-	     Both shapes are drawn, each folding on its own axis, because a swap cannot be
-	     animated and an unannounced hundred-pixel jump in the list is worse than
-	     seeing them overlap for a fifth of a second. The grid folds on grid rows,
-	     which needs no height to be known; the strip opens on a height it has by
-	     construction. -->
+		     Both shapes are drawn, each folding on its own axis, because a swap cannot be
+		     animated. The grid folds on grid rows, which needs no height to be known;
+		     the strip opens on a height it has by construction. -->
 		<div
 			class="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none {compact
 				? 'grid-rows-[0fr] opacity-0'

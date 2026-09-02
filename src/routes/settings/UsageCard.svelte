@@ -8,15 +8,12 @@
 	/**
 	 * What you have spent this period, and what you are allowed.
 	 *
-	 * In Profile, under who you are and above what you can edit, because it is a
-	 * fact about you rather than a setting of yours: the allowance is the
-	 * instance's decision and the card says so. A limit nobody can see is a limit
-	 * that arrives as a surprise the day it stops you.
+	 * In Profile, under who you are, because it is a fact about you rather than a
+	 * setting of yours: a limit nobody can see is one that arrives as a surprise the
+	 * day it stops you.
 	 *
-	 * Shown whether or not there is a limit, and to administrators as much as to
-	 * anyone: somebody who can raise their own ceiling still wants to know what
-	 * they are spending under it. Without a limit there is no bar, because a bar
-	 * needs two numbers: the figure alone is the whole answer.
+	 * Shown whether or not there is a limit, and to administrators too. Without a
+	 * limit there is no bar, since a bar needs two numbers.
 	 */
 	interface Usage {
 		period: 'month' | 'week' | 'day';
@@ -36,17 +33,11 @@
 			const response = await fetch('/api/usage');
 			if (response.ok) usage = await response.json();
 		} catch {
-			// Nothing to show is better than an error about a figure nobody asked for.
+			// Nothing to show beats an error about a figure nobody asked for.
 		}
 	});
 
-	/**
-	 * A figure with its unit, when there is one unit to give it.
-	 *
-	 * With prices in a single currency the amount can carry it. With several, it
-	 * cannot: nothing is converted, so the total is a sum of different things and
-	 * labelling it with one of them would be the lie. It says so instead.
-	 */
+	/** With prices in one currency the amount can carry it. With several it cannot: nothing is converted, so the total is a sum of different things. It says so instead. */
 	const money = (value: number) => {
 		const amount = value.toLocaleString(undefined, {
 			maximumFractionDigits: value < 1 ? 3 : 2
@@ -57,14 +48,7 @@
 
 	const mixed = $derived((usage?.currencies.length ?? 0) > 1);
 
-	/**
-	 * The tokens behind the figure.
-	 *
-	 * At a fifth of a euro per million, a week of real use rounds to a thousandth
-	 * and the amount alone says almost nothing. The token count is the same fact
-	 * at a scale somebody can feel, and it is the one the provider actually
-	 * reported: the money is our arithmetic on top of it.
-	 */
+	/** At a fifth of a euro per million, a week of real use rounds to a thousandth. The token count is the same fact at a scale somebody can feel, and it is the one the provider reported. */
 	const tokens = $derived(usage ? usage.spend.inputTokens + usage.spend.outputTokens : 0);
 
 	const compact = (value: number) =>

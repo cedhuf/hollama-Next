@@ -6,14 +6,13 @@
 	/**
 	 * A code editor, loaded only if someone asks for one.
 	 *
-	 * CodeMirror is 124 kB compressed, which is a lot to hand every visitor for a
-	 * field most of them will write prose in. So it is imported on mount, and this
-	 * component is only ever mounted by the tab that wants it: the plain textarea
-	 * beside it costs nothing and covers the common case.
+	 * CodeMirror is 124 kB compressed, a lot to hand every visitor for a field most
+	 * of them will write prose in, so it is imported on mount and this component is
+	 * only mounted by the tab that wants it.
 	 *
 	 * Line numbers, bracket matching and a monospace grid earn their keep when the
-	 * collection holds a schema, a config file or a snippet, which is exactly when
-	 * a soft-wrapped textarea stops being readable.
+	 * collection holds a schema or a snippet, which is when a soft-wrapped textarea
+	 * stops being readable.
 	 */
 	interface Props {
 		value: string;
@@ -49,8 +48,8 @@
 			);
 			if (cancelled || !container) return;
 
-			// Colours come from the app's own tokens rather than from a packaged theme,
-			// so the editor follows whichever of the twelve ramps is on.
+			// Colours come from the app's own tokens rather than a packaged theme, so the
+			// editor follows whichever of the twelve ramps is on.
 			const styles = getComputedStyle(document.documentElement);
 			const token = (name: string) => styles.getPropertyValue(name).trim();
 			const theme = createTheme({
@@ -75,8 +74,8 @@
 					EditorView.updateListener.of((update) => {
 						if (update.docChanged) value = update.state.doc.toString();
 					}),
-					// Wins over CodeMirror's own binding, which would otherwise insert a
-					// newline and swallow the dialog's save shortcut.
+					// Wins over CodeMirror's own binding, which would insert a newline and swallow
+					// the dialog's save shortcut.
 					Prec.highest(
 						keymap.of([
 							{

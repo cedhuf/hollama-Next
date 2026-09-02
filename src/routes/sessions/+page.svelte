@@ -45,27 +45,20 @@
 	let webFetch = $state($webFetchConfig.available && $settingsStore.webFetchByDefault);
 	let interactiveChoices = $state($settingsStore.interactiveChoices);
 	// Off unless this account says otherwise, like a conversation's own switch: the
-	// catalogues are what make a call possible, so a message that has not asked for
-	// them cannot produce one.
+	// catalogues are what make a call possible.
 	let mcp = $state($settingsStore.mcpByDefault);
 	let sendCurrentDate = $state($settingsStore.sendCurrentDate);
 	let thinking = $state(true);
 	let attachments = $state<Attachment[]>([]);
 	let openCategory = $state<string | null>(null);
-	/**
-	 * The category the panel is drawn from, which lags `openCategory` by one close.
-	 *
-	 * The panel folds shut on a transition, and a transition needs something left to
-	 * animate: unmounting its contents the moment the category is cleared would make
-	 * it vanish rather than close. So this keeps the last one, and is never cleared.
-	 */
+	/** Lags `openCategory` by one close: the panel folds shut on a transition, and unmounting its contents the moment the category is cleared would make it vanish rather than close. */
 	let shownCategory = $state<string | null>(null);
 	$effect(() => {
 		if (openCategory) shownCategory = openCategory;
 	});
 
-	// Reasoning is only offered for backends that actually support it (Ollama's
-	// native `think`, or OpenAI-compatible/Infomaniak `enable_thinking`).
+	// Only for backends that support it: Ollama's native `think`, or
+	// `enable_thinking` on OpenAI-compatible and Infomaniak.
 	const supportsReasoning = $derived.by(() => {
 		const model = $settingsStore.models.find((m) => m.name === selectedModel);
 		const ct = model && $serversStore.find((s) => s.id === model.serverId)?.connectionType;
@@ -142,14 +135,7 @@
 		shownCategory ? suggestionsByCategory[shownCategory] || [] : []
 	);
 
-	/**
-	 * All of them, newest first.
-	 *
-	 * The strip used to stop at a number set by a slider, which meant the row was
-	 * a sample of the gallery rather than the gallery. It scrolls sideways and
-	 * every thumbnail loads lazily, so the count costs a row of `<img>` tags that
-	 * fetch nothing until they are scrolled into view.
-	 */
+	/** The strip used to stop at a number set by a slider, which made it a sample of the gallery rather than the gallery. It scrolls sideways and every thumbnail loads lazily. */
 	const recentImages = $derived($imagesStore);
 
 	/** The picture the strip has open, in the viewer the gallery uses. */
@@ -265,10 +251,9 @@
 						{/each}
 					</div>
 
-					<!-- Folds on grid rows rather than on a height, so nothing has to be
-					     measured and the panel opens from whatever its content happens to be.
-					     The margin rides the same transition, otherwise the gap above it would
-					     appear on a frame while the panel was still opening. -->
+					<!-- Folds on grid rows rather than on a height, so nothing has to be measured.
+					     The margin rides the same transition, or the gap above would appear on a
+					     frame while the panel was still opening. -->
 					<div
 						class="grid transition-[grid-template-rows,opacity,margin] duration-200 ease-out motion-reduce:transition-none {openCategory
 							? 'mt-3 grid-rows-[1fr] opacity-100'
@@ -330,13 +315,12 @@
 
 			<!-- The latest pictures, after the personas and before the conversations.
 
-			     A strip rather than a grid: this is a glance at what you last made and a
-			     way back to the page that makes more, not a gallery. Thumbnails are small
-			     on purpose, and the row scrolls sideways instead of wrapping, so the
-			     section keeps one height whatever it holds.
+			     A strip rather than a grid: a glance at what you last made and a way back to
+			     the page that makes more, not a gallery. The row scrolls sideways instead of
+			     wrapping, so the section keeps one height whatever it holds.
 
-			     Shown even with nothing in it, unlike the sections around it, because an
-			     empty gallery is the one state where a way in is worth the most. -->
+			     Shown even with nothing in it, because an empty gallery is the one state
+			     where a way in is worth the most. -->
 			{#if $settingsStore.homeShowRecentImages && $canDrawImages}
 				<div class="mt-10 w-full">
 					<h2 class="text-muted mb-3 text-xs font-semibold tracking-wider uppercase">
@@ -344,40 +328,32 @@
 					</h2>
 
 					{#if recentImages.length > 0}
-						<!-- The button floats over the strip rather than taking a column beside
-						     it. Reserving 36 pixels for it left a block of plain background
-						     interrupting the row, which read as a hole in the pictures rather
-						     than as a control's neighbourhood. -->
+						<!-- The button floats over the strip rather than taking a column beside it:
+						     reserving 36 pixels left a block of plain background interrupting the row. -->
 						<div class="relative flex items-center">
-							<!-- `min-w-0` so the strip can be narrower than its content, which is
-							     what lets it scroll rather than push the button off the row.
+							<!-- `min-w-0` so the strip can be narrower than its content, which is what lets
+							     it scroll rather than push the button off the row.
 
-							     Quiet rather than the app's usual scroller: a styled bar never fades
-							     out, and under a row of 64px thumbnails it is a grey line drawn
-							     permanently across the section. A thumbnail cut off at the edge
-							     already says there is more to the right. -->
-							<!-- The last stretch dissolves instead of stopping at an edge, which
-							     gives the button something quiet to sit on and says the row goes on.
-							     A mask rather than a gradient in the page's colour: it fades to
-							     nothing, so it is right over a wallpaper as well as over a plain
-							     background. -->
+							     Quiet rather than the app's usual scroller: a styled bar never fades out, and
+							     under a row of 64px thumbnails it is a grey line drawn permanently across the
+							     section. A thumbnail cut off at the edge already says there is more. -->
+							<!-- The last stretch dissolves instead of stopping at an edge, which gives the
+							     button something quiet to sit on. A mask rather than a gradient in the page's
+							     colour: it fades to nothing, so it is right over a wallpaper too. -->
 							<div
 								class="overflow-quiet min-w-0 flex-1 overflow-y-hidden [mask-image:linear-gradient(to_right,black_calc(100%-4.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-4.5rem),transparent)]"
 							>
-								<!-- Room at the end so the last thumbnail can be scrolled clear of
-								     the button instead of stopping under it. -->
+								<!-- Room at the end so the last thumbnail can be scrolled clear of the button. -->
 								<div class="flex w-max gap-2 pr-16">
 									{#each recentImages as image (image.id)}
-										<!-- The app's own tooltip rather than the browser's: a strip of
-										     thumbnails is unreadable without one, and a `title` attribute
-										     waits a second, cannot be reached by keyboard, and is drawn by
-										     the operating system instead of by the app. -->
+										<!-- The app's own tooltip rather than the browser's: a strip of thumbnails is
+										     unreadable without one, and a `title` waits a second, cannot be reached by
+										     keyboard, and is drawn by the operating system. -->
 										<Tooltip side="bottom">
 											{#snippet trigger({ props })}
-												<!-- Opens the picture here, over the home page. Sending people to
-												     the gallery to see what they had already clicked would make the
-												     button at the end of the strip pointless, and that button is the
-												     way to the page. -->
+												<!-- Opens the picture here, over the home page: sending people to the gallery to
+												     see what they had already clicked would make the button at the end of the
+												     strip pointless. -->
 												<button
 													{...props}
 													type="button"
@@ -398,14 +374,11 @@
 								</div>
 							</div>
 
-							<!-- The way to the page, at the end of the strip: you arrive at it
-							     having looked along what is already there.
+							<!-- The way to the page, at the end of the strip: you arrive at it having looked
+							     along what is there.
 
-							     Round and small, not a bordered 64px square. Matching the thumbnails
-							     made it read as one more tile, an empty one, which is the wrong thing
-							     for the only control in the row. A disc the size of the app's other
-							     round controls reads as a control, and being shorter than the strip it
-							     centres against it instead of squaring up to it. -->
+							     Round and small, not a bordered 64px square: matching the thumbnails made it
+							     read as one more tile, an empty one. -->
 							<a
 								href={resolve('/images')}
 								title={$LL.images()}

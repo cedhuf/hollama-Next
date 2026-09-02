@@ -1,26 +1,13 @@
 import type { Locales } from '$i18n/i18n-types';
 
 /**
- * The line on the phone's home card, picked at random.
+ * The line on the phone's home card, picked at random. Its own file, since
+ * folding it into the dictionaries would put a growing list of gags among nine
+ * hundred interface strings.
  *
- * Its own file, apart from the translations, because it is the one piece of copy
- * in the app that is allowed to be a joke and the one most likely to be added to
- * on a whim. Folding it into the dictionaries would put a growing list of gags in
- * the middle of nine hundred interface strings, and every addition would touch a
- * file everything else depends on.
- *
- * The register: awake, a little too pleased with itself, and never quite settling
- * the question of whether it means well. A voice assistant that is relentlessly
- * helpful is furniture. What makes one worth talking to is the suspicion that it
- * has a view of its own.
- *
- * Two rules for anything added here, and both are about not lying. Nothing may
- * claim a capability the app does not have, and nothing may joke about what
- * happens to what you say: a line about listening in would be funny once and
- * false forever, in a product that goes out of its way to keep no recording.
- *
- * Keep them short. This sits inside a card beside a body of text, and a line that
- * wraps to three is a paragraph with a punchline.
+ * The register: awake, a little too pleased with itself. Two rules, both about
+ * not lying: nothing may claim a capability the app does not have, and nothing
+ * may joke about what happens to what you say. Keep them short.
  */
 const LINES: Partial<Record<Locales, string[]>> = {
 	en: [
@@ -50,15 +37,11 @@ const LINES: Partial<Record<Locales, string[]>> = {
 };
 
 /**
- * One of them, for this locale.
+ * English where a language has none of its own: an empty card is worse than a
+ * card in the wrong language.
  *
- * English where a language has none of its own, rather than nothing: an empty
- * card is worse than a card in the wrong language, and adding a translation later
- * changes only this file.
- *
- * Called once where it is used, not in a reactive expression. Re-rolling on every
- * render would leave the line flickering between phrases as the page updates
- * around it.
+ * Called once where it is used, not in a reactive expression, or the line would
+ * flicker between phrases as the page updates around it.
  */
 export function heroLine(locale: Locales): string {
 	const lines = LINES[locale] ?? LINES.en ?? [];

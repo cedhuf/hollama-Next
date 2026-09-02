@@ -3,11 +3,9 @@ import type { TranslationFunctions } from '$i18n/i18n-types';
 /**
  * The switches behind the composer's lightning button.
  *
- * Both composers (the home screen and a conversation) show the same menu, but
- * each used to build its own list from its own state. The two drifted: a tool
- * added to one was simply missing from the other, and the labels were hardcoded
- * in English in both. The list is defined once here; the callers supply the
- * values, the setters and the wording.
+ * Both composers show the same menu, and each used to build its own list from
+ * its own state: the two drifted, and the labels were hardcoded in English in
+ * both. Defined once here; the callers supply the values, setters and wording.
  */
 
 export interface ChatToolValues {
@@ -31,10 +29,7 @@ export interface ChatToolAvailability {
 
 export type ChatToolLabels = Record<keyof ChatToolValues, string>;
 
-/**
- * The menu wording, from the keys the Tools settings already use, so a tool is
- * named the same wherever it appears, and translated rather than hardcoded.
- */
+/** From the keys the Tools settings already use, so a tool is named the same wherever it appears, and translated rather than hardcoded. */
 export function toolLabels(LL: TranslationFunctions): ChatToolLabels {
 	return {
 		webSearch: LL.webSearch(),
@@ -52,11 +47,7 @@ export interface ChatToolToggle {
 	onChange: (value: boolean) => void;
 }
 
-/**
- * `set` takes the key and the new value rather than each caller passing five
- * closures: the session composer writes into `editor`, the home screen into its
- * own `$state`, and neither shape has to leak in here.
- */
+/** `set` takes the key and the new value rather than each caller passing five closures: the session composer writes into `editor`, the home screen into its own `$state`. */
 export function buildChatTools(
 	values: ChatToolValues,
 	set: (key: keyof ChatToolValues, value: boolean) => void,
@@ -76,9 +67,8 @@ export function buildChatTools(
 		toggle('sendCurrentDate'),
 		// On = auto: Ollama only enables thinking when the model supports it.
 		...(available.reasoning ? [toggle('thinking')] : []),
-		// One switch for the lot, not one per server. What this decides is whether
-		// the catalogues are sent at all; which of them may run is decided call by
-		// call, when the call is about to be made.
+		// One switch for the lot, not one per server: this decides whether the
+		// catalogues are sent at all, and which may run is decided call by call.
 		...(available.mcp ? [toggle('mcp')] : [])
 	];
 }

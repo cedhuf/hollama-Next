@@ -10,16 +10,13 @@ import {
 } from './client';
 
 /**
- * What the model is shown, and nothing more.
- *
- * Chatto pushes a pointer to one message; everything around it is a request we
- * choose to make, settled here alone from the account's setting. `mention` is
- * the floor: one message, one request, nothing else read.
+ * What the model is shown, and nothing more. Chatto pushes a pointer to one
+ * message; everything around it is a request we choose to make. `mention` is the
+ * floor: one message, one request.
  *
  * Speakers are named inside the text rather than mapped onto roles, because
  * there is no role for "somebody else in the room": three people flattened into
- * `user` read as one person contradicting themselves. The bot's own past
- * messages do become `assistant`, which is the one mapping that is true.
+ * `user` read as one person contradicting themselves.
  */
 
 /** A ceiling on a thread read, so a long one cannot blow up a request. */

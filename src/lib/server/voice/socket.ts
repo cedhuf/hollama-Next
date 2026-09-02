@@ -10,18 +10,16 @@ import { claimTicket, type VoiceGrant } from './tickets';
 /**
  * Where the microphone arrives.
  *
- * SvelteKit has no WebSocket of its own. The fact that is easy to miss: this
+ * SvelteKit has no WebSocket of its own, and the fact easy to miss is that this
  * file, the ticket route and the pipeline have to be **the same module
- * instances**, or a separately bundled socket holds its own ticket map and never
- * recognises a ticket the route issued.
+ * instances**, or a separately bundled socket holds its own ticket map.
  *
- * So the direction is inverted. The process that owns the HTTP server publishes
+ * So the direction is inverted: the process that owns the HTTP server publishes
  * it under a global symbol (`server.js` in production, the dev plugin in
- * `vite.config.ts`), and this file, inside the app's own bundle, picks it up.
+ * `vite.config.ts`), and this file picks it up from inside the bundle.
  *
- * Attaching is triggered from the ticket route rather than from a hook, which
- * makes the ordering provable: a socket needs a ticket, and a ticket comes only
- * from that route.
+ * Attaching is triggered from the ticket route rather than a hook, which makes
+ * the ordering provable: a ticket comes only from that route.
  */
 
 /** A registered symbol rather than a string key: it cannot collide, and it will not turn up in an enumeration of a global. */
@@ -75,13 +73,12 @@ async function attach(http: Attached): Promise<boolean> {
 	 * `ws` without its native accelerators, loaded only once voice is used.
 	 *
 	 * `bufferutil` and `utf-8-validate` are optional C++ addons `ws` picks up with a
-	 * `require` inside a `try`. Bundled, that `require` resolves at build time
-	 * instead of failing at run time, so the wrappers call into a stub and throw
-	 * `bufferUtil.unmask is not a function` on the first frame. These flags are the
-	 * library's documented way of asking for the JavaScript implementation.
+	 * `require` inside a `try`. Bundled, it resolves at build time instead of
+	 * failing at run time, so the wrappers call into a stub and throw
+	 * `bufferUtil.unmask is not a function` on the first frame.
 	 *
-	 * Hence the dynamic import, which is the only reason for it: a static one is
-	 * hoisted above the module body, so the flags would be set after `ws` read them.
+	 * Hence the dynamic import: a static one is hoisted above the module body, so
+	 * the flags would be set after `ws` read them.
 	 */
 	process.env.WS_NO_BUFFER_UTIL = '1';
 	process.env.WS_NO_UTF_8_VALIDATE = '1';

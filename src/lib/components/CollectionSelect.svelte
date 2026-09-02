@@ -13,12 +13,11 @@
 	 * Which collection a piece of knowledge belongs to.
 	 *
 	 * The same panel the composer uses to pick knowledge, turned on collections:
-	 * one search field, arrow keys, Enter. Picking where something is filed and
-	 * picking what to attach are the same gesture, so they should not be two
-	 * different widgets.
+	 * filing something and attaching something are the same gesture, so they should
+	 * not be two widgets.
 	 *
 	 * Typing a name that does not exist offers to create it, which is how a
-	 * collection gets made without a second dialog opening on top of the first.
+	 * collection gets made without a second dialog over the first.
 	 */
 	interface Props {
 		value: string;
@@ -44,8 +43,7 @@
 	);
 
 	// Focus follows the panel opening rather than a click handler on the trigger:
-	// the trigger's own click is what opens it, and putting ours there replaced it,
-	// which is why the button did nothing at all.
+	// the trigger's own click is what opens it, and putting ours there replaced it.
 	$effect(() => {
 		if (!open) {
 			search = '';
@@ -96,9 +94,8 @@
 
 		<Command.List class="mt-1 max-h-52 overflow-y-auto">
 			<Command.Viewport>
-				<!-- No empty state: the create row below covers it, and an empty list
-				     that says "nothing found" over a "create it then" is one line too
-				     many. -->
+				<!-- No empty state: the create row below covers it, and "nothing found" over a
+				     "create it then" is one line too many. -->
 				<Command.Item
 					value={$LL.noCollection()}
 					onSelect={() => choose('')}

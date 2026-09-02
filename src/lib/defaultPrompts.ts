@@ -1,9 +1,8 @@
 // The behind-the-scenes instructions Llooma injects into a request, in one place.
 //
-// Each has a built-in default (the single source of truth) and can be overridden by
-// the user in Settings → Tools → System instructions. Dynamic bits are filled in at
-// send time via {placeholder} tokens, so an override keeps working as long as it
-// preserves the token it needs.
+// Each has a built-in default and can be overridden in Settings, Tools, System
+// instructions. Dynamic bits are filled in at send time via {placeholder}
+// tokens, so an override keeps working as long as it preserves the ones it needs.
 
 export type PromptKey =
 	| 'currentDate'
@@ -347,13 +346,7 @@ Write in the language of the conversation. Be concise but never lossy: prefer a 
 	}
 };
 
-/**
- * The prompts, grouped the way the Settings screen shows them.
- *
- * The grouping is the ordering: a flat list of twenty-odd prompts reads as a
- * wall, and the question anyone actually arrives with is "where is the one that
- * decides X". Sections answer that; a dropdown did not.
- */
+/** The grouping is the ordering: a flat list of twenty-odd prompts reads as a wall, and the question anyone arrives with is "where is the one that decides X". */
 export interface PromptGroup {
 	id: string;
 	/** Short title for the section. */
@@ -423,11 +416,7 @@ export const PROMPT_GROUPS = [
 	}
 ] as const satisfies readonly PromptGroup[];
 
-/**
- * A prompt in no group is a prompt nobody can find, which is exactly how the
- * old dropdown hid every one of them. Caught here rather than in review: adding
- * a key to `PromptKey` without listing it above stops compiling.
- */
+/** A prompt in no group is a prompt nobody can find. Caught here rather than in review: adding a key to `PromptKey` without listing it above stops compiling. */
 type UngroupedKey = Exclude<PromptKey, (typeof PROMPT_GROUPS)[number]['keys'][number]>;
 const _everyPromptIsGrouped: [UngroupedKey] extends [never] ? true : never = true;
 void _everyPromptIsGrouped;
@@ -435,10 +424,7 @@ void _everyPromptIsGrouped;
 /** Every prompt, in the order the groups list them. */
 export const PROMPT_KEYS: PromptKey[] = PROMPT_GROUPS.flatMap((group) => [...group.keys]);
 
-/**
- * The effective text for a prompt: a non-empty user override, else the built-in
- * default. Any {token} present in `vars` is substituted in.
- */
+/** A non-empty user override, else the built-in default. Any {token} present in `vars` is substituted in. */
 export function resolvePrompt(
 	key: PromptKey,
 	overrides: Partial<Record<PromptKey, string>> | undefined,
@@ -447,8 +433,8 @@ export function resolvePrompt(
 	const override = overrides?.[key]?.trim();
 	let text = override || DEFAULT_PROMPTS[key].default;
 	if (vars) {
-		// split/join rather than replace(All): the value (e.g. search results) can
-		// contain `$&`, `$'` and the like, which string replacement would interpret specially.
+		// split/join rather than replaceAll: a value can contain `$&` or `$'`, which
+		// string replacement would interpret specially.
 		for (const [token, value] of Object.entries(vars)) {
 			text = text.split(`{${token}}`).join(value);
 		}

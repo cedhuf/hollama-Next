@@ -344,6 +344,8 @@
 			color-mix(in srgb, var(--color-accent) 6%, transparent) 55%,
 			color-mix(in srgb, var(--color-accent) 14%, transparent)
 		);
+	}
+
 	/*
 	 * The light the orb sits in, on this card and nowhere else.
 	 *
@@ -354,8 +356,6 @@
 	 * One colour throughout: the orb's own colour is what says which state the app
 	 * is in. Brightest at the middle and fading the whole way out, so the light
 	 * passes through the translucent orb and the two read as one mass.
-	 */
-	 * and the two read as one luminous mass.
 	 */
 	.halo {
 		position: absolute;

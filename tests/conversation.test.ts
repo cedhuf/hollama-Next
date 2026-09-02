@@ -2,14 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { connectFakeProvider, FAKE_MODEL, startFakeProvider, type FakeProvider } from './utils';
 
-/**
- * The one thing this application is for.
- *
- * A connection, a model, a question, an answer on screen. If this passes, the
- * composer, the run in the server, the streaming back to the browser and the
- * message list all did their part; if it fails, one of them did not, which is
- * worth knowing before anything else.
- */
+/** A connection, a model, a question, an answer on screen. If this passes, the composer, the run in the server, the streaming and the message list all did their part. */
 let provider: FakeProvider;
 
 test.beforeEach(async ({ page }) => {
@@ -57,8 +50,7 @@ test('keeps the conversation after a reload', async ({ page }) => {
 	await expect(page.getByText('The fake provider answers.')).toBeVisible({ timeout: 15_000 });
 
 	// Written by the server as it goes, so it is there without the tab that asked.
-	// Scoped to the thread: the words are also in the sidebar and in the header,
-	// which is how a conversation gets its name and not what this is checking.
+	// Scoped to the thread: the words are also in the sidebar and in the header.
 	await page.reload();
 	const thread = page.locator('#message-0');
 	await expect(thread.getByText('Remember this.')).toBeVisible();

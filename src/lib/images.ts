@@ -5,12 +5,7 @@ import type { GeneratedImage } from '$lib/generatedImages';
 import { writeImageTitle } from '$lib/imagePrompt';
 import { serversStore, settingsStore } from '$lib/localStorage';
 
-/**
- * The gallery, on the browser's side.
- *
- * Its own store rather than a collection in the repository: a picture is bytes
- * the server holds and hands out by id, not a document the repository syncs.
- */
+/** Its own store rather than a collection in the repository: a picture is bytes the server hands out by id, not a document the repository syncs. */
 
 export const imagesStore = writable<GeneratedImage[]>([]);
 export const imagesLoaded = writable(false);
@@ -41,23 +36,11 @@ export interface GenerateInput {
 	ratio?: ImageRatio;
 	quality?: ImageQuality;
 	n?: number;
-	/**
-	 * Pictures to work from, as data URLs, for a model that takes them.
-	 *
-	 * They go up with the request and are never stored: what comes back is kept,
-	 * what went in is not. Which also means a picture cannot be redrawn from the
-	 * gallery alone, and that is the trade the documentation states plainly.
-	 */
+	/** They go up with the request and are never stored, so a picture cannot be redrawn from the gallery alone. The documentation says so plainly. */
 	references?: string[];
 }
 
-/**
- * Ask for a picture, and put what comes back at the front of the gallery.
- *
- * Long, and nothing is done to hide that. What it is not is fragile: the server
- * writes what it made before answering, so a tab closed mid-request loses the
- * response and not the picture.
- */
+/** Long, and nothing hides that. Not fragile, though: the server writes what it made before answering, so a tab closed mid-request loses the response and not the picture. */
 export async function generateImages(input: GenerateInput): Promise<GeneratedImage[]> {
 	const response = await fetch('/api/images', {
 		method: 'POST',
@@ -76,15 +59,11 @@ export async function generateImages(input: GenerateInput): Promise<GeneratedIma
 }
 
 /**
- * Name the pictures a request just produced, once they exist.
+ * Name the pictures a request just produced, after the fact and never awaited:
+ * they are already stored and on screen. A failure is silent by design, since
+ * everything that reads a title falls back to the prompt.
  *
- * After the fact and never awaited by the caller: the pictures are already
- * stored and already on screen, and a label arriving a second later is a label
- * arriving a second later. A failure is silent by design: everything that reads
- * a title falls back to the prompt, which is what it did before titles existed.
- *
- * One call for the batch, because four pictures from one request share one
- * prompt and would otherwise be given four goes at naming the same thing.
+ * One call for the batch: four pictures from one request share one prompt.
  */
 export async function titleImages(images: GeneratedImage[], prompt: string): Promise<void> {
 	if (!images.length) return;
@@ -123,14 +102,10 @@ export const imageModels = derived([settingsStore, serversStore], ([$settings, $
 );
 
 /**
- * Whether the app should offer drawing at all: the right mode, and a model that
- * can do it.
- *
- * The second half is the whole permission now. There is no separate instance
- * switch: a model only counts as one that draws once somebody has marked it so
- * under Models and pricing, and on a system connection it only reaches anyone
- * once it is shared. An administrator who does not want this offers no image
- * model, which is the same decision expressed where the models already are.
+ * Whether the app should offer drawing at all. The second half is the whole
+ * permission: a model only counts as one that draws once somebody has marked it
+ * so under Models and pricing, and on a system connection only once it is
+ * shared. An administrator who does not want this offers no image model.
  */
 export const canDrawImages = derived(imageModels, ($models) => $models.length > 0);
 

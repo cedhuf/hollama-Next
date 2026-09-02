@@ -8,21 +8,18 @@ import svelteConfig from './svelte.config.js'; // Assuming this file exists, as 
 
 export default ts.config(
 	{
-		// Global ignores translated from .eslintignore
 		ignores: [
 			'**/node_modules/**',
-			// The docs site is a separate project with its own toolchain and its own
-			// conventions (Astro components, MDX); linting it with the app's rules
-			// reports on code this config was never written for.
+			// The docs site is a separate project with its own toolchain and conventions;
+			// linting it with the app's rules reports on code this config never covered.
 			'docs/**',
-			// Gitignored scratch space — throwaway scripts and reports, not source.
+			// Gitignored scratch space: throwaway scripts and reports, not source.
 			'_local/**',
 			'build/**',
 			'.svelte-kit/**',
 			// pdf.js, copied out of node_modules by `prepare`. A minified third-party
 			// bundle judged by the rules of hand-written code reports about seventeen
-			// hundred style errors, which is enough to bury every real one and is the
-			// reason `pnpm lint` had been failing for months without anybody reading it.
+			// hundred style errors, which buries every real one.
 			'static/vendor/**',
 			'package/**',
 			'**/.DS_Store',
@@ -39,13 +36,12 @@ export default ts.config(
 	js.configs.recommended, // General JS recommendations from @eslint/js
 	...ts.configs.recommended, // TypeScript recommendations from typescript-eslint
 
-	// Svelte configurations
-	// Apply base Svelte recommendations. This typically sets up svelte-eslint-parser for .svelte files.
+	// Svelte: the base recommendations, which set up svelte-eslint-parser.
 	...svelte.configs.recommended,
 
 	{
-		// Specific configuration for Svelte files to correctly parse <script lang="ts">
-		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'], // Files this config applies to
+		// Parse <script lang="ts"> in .svelte files.
+		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		languageOptions: {
 			parserOptions: {
 				parser: ts.parser, // Tell svelte-eslint-parser to use ts.parser for script content
@@ -57,12 +53,10 @@ export default ts.config(
 	},
 
 	{
-		// Global language options for all relevant files (JS, TS, Svelte)
 		languageOptions: {
-			ecmaVersion: 'latest', // Use the latest ECMAScript version
-			sourceType: 'module', // Standard for modern JavaScript
+			ecmaVersion: 'latest',
+			sourceType: 'module',
 			globals: {
-				// Define global variables available in your environments
 				...globals.browser,
 				...globals.node
 			}
@@ -73,12 +67,10 @@ export default ts.config(
 		/**
 		 * The audio worklets, which run in a realm of their own.
 		 *
-		 * Plain JavaScript in `static/` because an `AudioWorklet` is fetched by URL
-		 * into a separate global scope: it never passes through the bundle, so there
-		 * is nothing to compile and no import it could resolve. That scope has its
-		 * own globals, which is what this block is for, and it has none of the DOM,
-		 * which is why `globals.browser` would be the wrong answer rather than a
-		 * generous one.
+		 * Plain JavaScript in `static/` because an `AudioWorklet` is fetched by URL into
+		 * a separate global scope: nothing to compile, no import to resolve. That scope
+		 * has its own globals, which is what this block is for, and none of the DOM,
+		 * which is why `globals.browser` would be wrong rather than generous.
 		 */
 		files: ['static/worklets/*.js'],
 		languageOptions: {
@@ -92,7 +84,7 @@ export default ts.config(
 		}
 	},
 
-	// Prettier configuration (must be last to override other ESLint formatting rules)
-	prettier, // Disables ESLint rules that would conflict with Prettier
-	...svelte.configs.prettier // Applies Svelte-specific Prettier overrides from eslint-plugin-svelte
+	// Prettier last, so it overrides the formatting rules above.
+	prettier,
+	...svelte.configs.prettier
 );

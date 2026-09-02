@@ -3,21 +3,14 @@ import type { ProviderDescriptor } from './types';
 /**
  * OpenAI.
  *
- * The one provider here that serves two image models with different answers, and
- * the reason model rules exist at all: a portrait is 1024x1536 on `gpt-image-1`
- * and 1024x1792 on `dall-e-3`, and their quality words are not the same words
- * either. `low`/`medium`/`high` against `standard`/`hd`.
+ * The one provider serving two image models with different answers, and the
+ * reason model rules exist: a portrait is 1024x1536 on `gpt-image-1` and
+ * 1024x1792 on `dall-e-3`.
  *
- * `dall-e-2` is absent on purpose, though its edit endpoint exists. It takes one
- * square PNG under 4 MB and an optional mask, and none of those three conditions
- * can be said in a descriptor, so claiming it would offer a control that fails
- * on most pictures. Left out, it simply takes no reference, which is a missing
- * convenience rather than a broken one.
- *
- * No provider-level `images` block, deliberately. Anything that is neither of
- * those two is a model this file has not been told about, and the honest answer
- * for it is to send no size and no quality rather than one model's answer for
- * another's.
+ * `dall-e-2` is absent: its edit endpoint takes one square PNG under 4 MB and an
+ * optional mask, none of which a descriptor can say. And no provider-level
+ * `images` block, so a model this file has not been told about gets no size and
+ * no quality.
  */
 export const openai: ProviderDescriptor = {
 	id: 'openai',

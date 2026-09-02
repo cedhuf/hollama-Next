@@ -3,12 +3,12 @@
  * Translation coverage report.
  *
  * `en/` is the source of truth: every key lives there. Other locales extend it
- * via `extendDictionary`, so a missing key is never an error — it just renders in
+ * via `extendDictionary`, so a missing key is never an error: it just renders in
  * English. That keeps adding a key cheap (touch `en/` only), but it also makes
  * gaps invisible, which is what this script surfaces.
  *
  * Exits non-zero only when a locale declares a key that no longer exists in `en/`
- * (a stale override, usually a rename left behind) — that one is a real bug.
+ * (a stale override, usually a rename left behind), and that one is a real bug.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';

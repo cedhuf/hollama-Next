@@ -13,13 +13,8 @@
 	/**
 	 * One configured MCP server: a line, and its settings underneath when asked for.
 	 *
-	 * The card itself is `SettingsCard`, the same one a connection and a bot use.
-	 * What is left here is what an MCP server is about: an address, a token, and
-	 * the catalogue that comes back when you test it.
-	 *
 	 * Everything is saved as it is typed, debounced by the parent. The token is the
-	 * exception, because it is never read back: an untouched field means "keep what
-	 * is stored", and only a typed value replaces it.
+	 * exception, being never read back: an untouched field keeps what is stored.
 	 */
 	interface Props {
 		server: McpServerView;
@@ -54,14 +49,7 @@
 	/** Whether a turn can actually reach it, which needs both switches to agree. */
 	const runs = $derived(server.enabled && !server.blocked);
 
-	/**
-	 * The one line under the name.
-	 *
-	 * What it says depends on what there is to say, in the order somebody would
-	 * want to hear it: a suspension first, since nothing else matters while it
-	 * stands, then the size of its catalogue, which is the question the card exists
-	 * to answer, and the address while nobody has asked yet.
-	 */
+	/** In the order somebody would want to hear it: a suspension first, since nothing else matters while it stands, then the size of its catalogue, then the address. */
 	const summary = $derived.by(() => {
 		if (server.blocked) return $LL.mcpBlockedByAdmin();
 		if (server.toolsAt) return $LL.mcpToolsFound({ count: enabledCount });
@@ -84,13 +72,7 @@
 		groups.reduce((total, { group, tools }) => total + (isOn(group) ? tools.length : 0), 0)
 	);
 
-	/**
-	 * Switch a whole group on or off.
-	 *
-	 * The group is the unit, because behind a gateway a group is a server: all of
-	 * the house or none of it is the choice people make, and thirty checkboxes to
-	 * say it is a worse way of saying the same thing.
-	 */
+	/** The group is the unit, because behind a gateway a group is a server: all of the house or none of it is the choice people make. */
 	function setGroup(group: string, on: boolean) {
 		server.disabledGroups = on
 			? server.disabledGroups.filter((name) => name !== group)
@@ -98,13 +80,7 @@
 		onChange();
 	}
 
-	/**
-	 * Ask the server what it offers now.
-	 *
-	 * The same button whether it is the first time or the tenth: a gateway gains
-	 * and loses tools without telling anybody, so "does this work" and "what does
-	 * it have today" are the same question asked twice.
-	 */
+	/** The same button whether it is the first time or the tenth: a gateway gains and loses tools without telling anybody. */
 	async function refresh() {
 		refreshing = true;
 		failure = null;
@@ -154,7 +130,6 @@
 			oninput={() => {
 				// Only the last failure: the stored catalogue is still the last thing this
 				// server actually answered, and typing an address does not make it untrue.
-				// What retakes the snapshot is the button below.
 				failure = null;
 				onChange();
 			}}
@@ -164,7 +139,7 @@
 	</SettingsField>
 
 	<!-- The token and the button that proves it, on one line: "is this right?" is a
-	     question about the field it sits next to. -->
+	     question about the field beside it. -->
 	<SettingsField label={$LL.mcpToken()}>
 		<div class="flex items-center gap-2">
 			{#if keyIsStored}
@@ -204,10 +179,8 @@
 				{/if}
 			{/if}
 
-			<!-- One button for two questions that are the same question: does this
-			     answer, and what does it have today. A gateway gains and loses tools
-			     without telling anybody, so this is pressed again long after the first
-			     time. -->
+			<!-- One button for two questions that are the same question: does this answer,
+			     and what does it have today. -->
 			<Button variant="outline" onclick={refresh} disabled={refreshing || !server.url}>
 				{#if refreshing}
 					<LoaderCircle class="base-icon animate-spin" />
@@ -228,14 +201,13 @@
 		<span class="text-muted text-xs leading-snug">{$LL.mcpBlockedByAdmin()}</span>
 	{/if}
 
-	<!-- Behind the same disclosure a connection and a bot put their rarer settings
-	     behind, in the same place and with the same wording: what is on a card by
-	     default should be what you came for, and thirty tool names is not that. The
-	     count itself is already on the closed card.
+	<!-- Behind the same disclosure a connection and a bot put their rarer settings:
+	     what is on a card by default should be what you came for, and thirty tool
+	     names is not that.
 
 	     Grouped by the prefix a gateway puts on its tools, which is the only thing
-	     saying that these three came from the mail and those thirty from the house.
-	     A reading habit, not a fact: it arranges the list and carries the switch. -->
+	     saying these three came from the mail and those thirty from the house. A
+	     reading habit, not a fact: it arranges the list and carries the switch. -->
 	{#if showAdvanced && server.toolsAt}
 		<div
 			class="border-shade-3 flex flex-col gap-3 border-t pt-3"
@@ -260,9 +232,8 @@
 						></span>
 					</label>
 
-					<!-- The names, for reading rather than for choosing: what the switch
-					     above actually covers. Faded when it is off, since none of them is
-					     being offered to anything. -->
+					<!-- The names, for reading rather than choosing: what the switch above covers.
+					     Faded when it is off, since none of them is being offered to anything. -->
 					<div class="flex flex-wrap gap-1.5 {isOn(group) ? '' : 'opacity-40'}">
 						{#each tools as tool (tool)}
 							<span

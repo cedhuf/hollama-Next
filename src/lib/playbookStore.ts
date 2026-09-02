@@ -1,21 +1,8 @@
-/**
- * The shape of the playbook catalogue's listing.
- *
- * Its own module because both sides of the app read it, the same reason
- * `personaStore` exists. The address is not here: there is one store, addressed
- * from `store`, and this is one of the catalogues under it.
- */
+/** Its own module because both sides of the app read it, the same reason `personaStore` exists. The address is not here: there is one store, addressed from `store`. */
 
 export type CatalogOrigin = 'official' | 'community';
 
-/**
- * One row of the listing: enough to draw a card and to filter on, and no more.
- *
- * The procedure itself is deliberately absent. It is the bulk of a playbook and
- * is wanted only by whoever installs it, which is one at a time rather than all
- * at once. What stands in for it is `steps`, so a card can say how big a thing
- * is about to be switched on without downloading it.
- */
+/** Enough to draw a card and filter on. The procedure is absent, being the bulk of a playbook and wanted only by whoever installs it; `steps` stands in, so a card can say how big a thing is about to be switched on. */
 export interface PlaybookCatalogEntry {
 	id: string;
 	name: string;
