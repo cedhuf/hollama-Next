@@ -15,8 +15,7 @@
 	import { resolveSessionTitle } from '$lib/sessions';
 	import { searchModalOpen, settingsModalOpen } from '$lib/stores/modal';
 	import { generateRandomId } from '$lib/utils';
-
-	import Orb from './Orb.svelte';
+	import Bloom from '$lib/voice/Bloom.svelte';
 
 	/**
 	 * The first screen: four bands, in the order somebody actually asks them. Who
@@ -159,7 +158,10 @@
 
 			     The rim is halved rather than removed. At nothing the shape dissolved into
 			     the card; at full it is a circle drawn round a disc. -->
-			<Orb class="text-accent relative h-32 w-32 shrink-0" edge={0.45} />
+			<!-- Listening, always: the card invites you to speak, so the shape it shows
+			     should be the one that answers. Deaf, since nothing here holds a
+			     microphone, so it simply breathes. -->
+			<Bloom class="relative h-32 w-32 shrink-0" phase="listening" />
 		</span>
 	</button>
 
@@ -342,19 +344,17 @@
 			color-mix(in srgb, var(--color-accent) 6%, transparent) 55%,
 			color-mix(in srgb, var(--color-accent) 14%, transparent)
 		);
-	}
-
 	/*
 	 * The light the orb sits in, on this card and nowhere else.
 	 *
 	 * Its own element behind the shape rather than a change to the shape, so the orb
 	 * is the same object here as on the voice screen. The card already clips, so it
-	 * reaches the edges and is cut by the rounding, which makes it read as light in
-	 * the card rather than a circle drawn on it.
+	 * reaches the edges and reads as light in the card rather than a circle on it.
 	 *
-	 * One colour throughout: it swells and dims, never shifts hue, since the orb's
-	 * own colour is what says which state the app is in. Brightest at the middle
-	 * and fading the whole way out, so the light passes through the translucent orb
+	 * One colour throughout: the orb's own colour is what says which state the app
+	 * is in. Brightest at the middle and fading the whole way out, so the light
+	 * passes through the translucent orb and the two read as one mass.
+	 */
 	 * and the two read as one luminous mass.
 	 */
 	.halo {

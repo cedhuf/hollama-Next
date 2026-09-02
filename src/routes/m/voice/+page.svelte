@@ -13,10 +13,9 @@
 	import { personasStore, settingsStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
 	import { settingsModalOpen } from '$lib/stores/modal';
+	import Bloom from '$lib/voice/Bloom.svelte';
 	import { VoiceSession } from '$lib/voice/session.svelte';
 	import VoiceBars from '$lib/voice/VoiceBars.svelte';
-
-	import Orb from '../Orb.svelte';
 
 	/**
 	 * Talking to it, rather than typing at it.
@@ -77,22 +76,6 @@
 								: $LL.voiceReady()
 	);
 
-	/**
-	 * A hue turned right round for speaking, so listening and answering are two
-	 * colours rather than two shades, which is the only difference legible from
-	 * across a room. Turned rather than picked, so it holds whatever accent somebody
-	 * set. Thinking keeps the hue and loses its chroma: working is not a third voice.
-	 */
-	const tint = $derived(
-		!voice.live
-			? 'var(--color-muted)'
-			: voice.talking
-				? 'var(--color-accent)'
-				: voice.state === 'speaking'
-					? 'oklch(from var(--color-accent) l c calc(h + 150))'
-					: 'oklch(from var(--color-accent) l calc(c * 0.3) h)'
-	);
-
 	/** Transcribing is a wait with nothing to hear, exactly like thinking. What somebody watching a shape wants to know is whether it is their turn. */
 	const shape = $derived<'idle' | 'listening' | 'thinking' | 'speaking'>(
 		!voice.live
@@ -106,12 +89,30 @@
 						: 'thinking'
 	);
 
+	/**
+	 * The status dot's colour, which is the shape's own state colour.
+	 *
+	 * The same rules `Bloom` applies to itself, repeated here because a dot six
+	 * pixels across cannot inherit from a body it sits nowhere near. If one of them
+	 * moves, both move: the whole point of the dot is that it agrees with the shape
+	 * from across a room.
+	 */
+	const tint = $derived(
+		!voice.live
+			? 'var(--color-muted)'
+			: shape === 'idle'
+				? 'oklch(from var(--color-accent) l calc(c * 0.22) h)'
+				: shape === 'thinking'
+					? 'oklch(from var(--color-accent) l calc(c * 0.85) calc(h + 150))'
+					: 'var(--color-accent)'
+	);
+
 	/** The only thing the status dot animates on: a screen holding the floor open is still, one doing something breathes. Two states is all a dot two pixels across can carry. */
 	const busy = $derived(
 		voice.live && (voice.talking || (voice.state !== 'idle' && voice.state !== 'listening'))
 	);
 
-	/** The orb draws the answer, so it reads the answer. Silence otherwise. */
+	/** The shape draws the answer, so it reads the answer. Silence otherwise. */
 	const sample = $derived(() => (voice.state === 'speaking' ? voice.voiceReading() : SILENCE));
 
 	/**
@@ -248,9 +249,8 @@
 			disabled={!ready}
 			class="group relative flex items-center justify-center rounded-full outline-none"
 		>
-			<Orb
-				class="aspect-square w-[min(78vw,22rem)] transition-[color,transform] duration-300 group-active:scale-95"
-				style="color: {tint}"
+			<Bloom
+				class="aspect-square w-[min(78vw,22rem)] transition-transform duration-300 group-active:scale-95"
 				phase={shape}
 				{sample}
 			/>
